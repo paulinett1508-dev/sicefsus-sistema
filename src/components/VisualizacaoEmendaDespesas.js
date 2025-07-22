@@ -240,7 +240,7 @@ const VisualizacaoEmendaDespesas = ({
         <div style={styles.headerContent}>
           <div style={styles.headerInfo}>
             <h1 style={styles.headerTitle}>
-              {emenda.numero} - {emenda.parlamentar}
+              Emenda: {emenda.numero} - {emenda.parlamentar}
             </h1>
             <p style={styles.headerSubtitle}>
               {emenda.objetoProposta || "Sem descrição"}
