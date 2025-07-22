@@ -302,8 +302,6 @@ export default function DespesasList({
         </div>
       )}
 
-
-
       {/* ✅ Componente de Filtros */}
       <DespesasFilters
         despesas={despesas}
@@ -685,3 +683,4 @@ if (typeof document !== "undefined") {
   style.textContent = additionalCSS;
   document.head.appendChild(style);
 }
+```
