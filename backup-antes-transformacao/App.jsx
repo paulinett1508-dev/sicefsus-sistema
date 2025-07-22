@@ -1,4 +1,4 @@
-// App.jsx - Versão Corrigida v5.4 (Integração Enterprise)
+// App.jsx - Versão Corrigida v5.3 (Banner inteligente REMOVIDO para evitar conflito)
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -6,7 +6,7 @@ import {
   Route,
   useNavigate,
   useLocation,
-  Navigate, // ✅ ADICIONADO para redirecionamento
+  Navigate,
 } from "react-router-dom";
 import { ToastProvider } from "./components/Toast";
 import Sidebar from "./components/Sidebar";
@@ -15,14 +15,13 @@ import Login from "./components/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Emendas from "./components/Emendas";
-import Despesas from "./components/Despesas";
+import Lancamentos from "./components/Lancamentos";
 import { auth, db } from "./firebase/firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
-import Sobre from "./components/Sobre";
-import Administracao from "./components/Administracao"; // ✅ ADICIONADO componente enterprise
+import Sobre from "./components/Sobre"; // ✅ IMPORTAÇÃO CORRIGIDA
 
 // ✨ Context para proteção de navegação (MANTIDO)
 const NavigationProtectionContext = React.createContext({
@@ -427,11 +426,11 @@ function AppContent() {
                 }
               />
               <Route
-                path="/despesas"
+                path="/lancamentos"
                 element={
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
-                      <Despesas usuario={usuario} />
+                      <Lancamentos usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -447,7 +446,7 @@ function AppContent() {
                 }
               />
               <Route
-                path="/emendas/:emendaId/fluxo/:despesaId?"
+                path="/emendas/:emendaId/fluxo/:lancamentoId?"
                 element={
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
@@ -469,18 +468,18 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTAS ADMINISTRATIVAS ENTERPRISE - ATUALIZADAS */}
+              {/* Rotas administrativas (PRESERVADAS) */}
               <Route
                 path="/admin"
-                element={<Navigate to="/administracao" replace />}
-              />
-
-              <Route
-                path="/administracao"
                 element={
                   <PrivateRoute usuario={usuario} requiredRole="admin">
                     <ProtectedRouteWrapper usuario={usuario}>
-                      <Administracao />
+                      <div style={styles.adminPlaceholder}>
+                        <h2>Painel Administrativo</h2>
+                        <p>
+                          Funcionalidades administrativas em desenvolvimento...
+                        </p>
+                      </div>
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }

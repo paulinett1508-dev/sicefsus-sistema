@@ -1,0 +1,33 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+Emendas.jsx:32 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+Emendas.jsx:32 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+Emendas.jsx:32 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+Emendas.jsx:32 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+Emendas.jsx:38 ✅ Emendas carregadas via hook: 2
+Emendas.jsx:84 🗑️ Deletar emenda ID: emenda_1752863980614
+Emendas.jsx:47 👁️ Visualizando emenda: EMD001
+EmendaForm.jsx:84 📝 Carregando dados para edição: Object
+EmendaForm.jsx:84 📝 Carregando dados para edição: Object
+despesas:1  Access to XMLHttpRequest at 'https://firebasestorage.googleapis.com/v0/b/emendas-parlamentares-60dbd.appspot.com/o?name=despesas%2F1753143077071_BASE%20RECURSO%20DE%20EMENDAS_SISTEMA%20(1).xlsx' from origin 'https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+DespesaForm.jsx:471   POST https://firebasestorage.googleapis.com/v0/b/emendas-parlamentares-60dbd.appspot.com/o?name=despesas%2F1753143077071_BASE%20RECURSO%20DE%20EMENDAS_SISTEMA%20(1).xlsx net::ERRFAILED
+send @ connection.ts:86
+doTheRequest @ request.ts:115
+(anônimo) @ backoff.ts:74
+setTimeout
+callWithDelay @ backoff.ts:72
+start @ backoff.ts:136
+start @ request.ts:191
+(anônimo) @ request.ts:80
+NetworkRequest @ request.ts:77
+makeRequest @ request.ts:281
+_makeRequest @ service.ts:330
+makeRequestWithTokens @ service.ts:361
+await in makeRequestWithTokens
+uploadBytes$1 @ reference.ts:266
+uploadBytes @ api.ts:122
+handleSubmit @ DespesaForm.jsx:471
+despesas:1  Access to XMLHttpRequest at 'https://firebasestorage.googleapis.com/v0/b/emendas-parlamentares-60dbd.appspot.com/o?name=despesas%2F1753143077071_BASE%20RECURSO%20DE%20EMENDAS_SISTEMA%20(1).xlsx' from origin 'https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status.
+connection.ts:86   POST https://firebasestorage.googleapis.com/v0/b/emendas-parlamentares-60dbd.appspot.com/o?name=despesas%2F1753143077071_BASE%20RECURSO%20DE%20EMENDAS_SISTEMA%20(1).xlsx net::ERR_FAILED
+send @ connection.ts:86
+doTheRequest @ request.ts:115
+(anônimo) @ backoff.ts:74

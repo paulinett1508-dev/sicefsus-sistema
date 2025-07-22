@@ -151,7 +151,7 @@ tr:last-child td {
 }
 
 /* ADICIONAR AO FINAL DO App.css EXISTENTE */
-/* Classes para EmendaForm e DespesaForm */
+/* Classes para EmendaForm e LancamentoForm */
 
 /* Container */
 .container {
@@ -162,7 +162,7 @@ tr:last-child td {
 
 /* Formulários */
 .form-emenda,
-.form-despesa {
+.form-lancamento {
   background: white;
   padding: 30px;
   border-radius: 12px;
@@ -171,7 +171,7 @@ tr:last-child td {
 }
 
 .form-emenda h2,
-.form-despesa h2 {
+.form-lancamento h2 {
   color: #154360;
   margin-bottom: 30px;
   font-size: 24px;
@@ -404,7 +404,7 @@ textarea.form-control {
   }
 
   .form-emenda,
-  .form-despesa {
+  .form-lancamento {
     padding: 20px;
     margin-bottom: 20px;
   }
@@ -440,7 +440,7 @@ textarea.form-control {
 
 @media (max-width: 480px) {
   .form-emenda h2,
-  .form-despesa h2 {
+  .form-lancamento h2 {
     font-size: 20px;
   }
 
