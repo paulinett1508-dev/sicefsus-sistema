@@ -134,36 +134,9 @@ export default function DespesasTable({
     if (onView) onView(despesa);
   }
 
-  // ✅ Calcular totais
-  const valorTotal = despesas.reduce((acc, d) => acc + (d.valor || 0), 0);
-
-  // ✅ Funções para labels contextuais
+  // ✅ Função para identificar emendas únicas
   function getEmendasUnicas() {
     return [...new Set(despesas.map(d => d.emendaId))];
-  }
-
-  function getResumoLabel() {
-    const emendasUnicas = getEmendasUnicas();
-    if (emendasUnicas.length === 1) {
-      return "Despesas da Emenda";
-    }
-    return "Total de Despesas";
-  }
-
-  function getValorTotalLabel() {
-    const emendasUnicas = getEmendasUnicas();
-    if (emendasUnicas.length === 1) {
-      return "Valor Executado";
-    }
-    return "Valor Consolidado";
-  }
-
-  function getValorMedioLabel() {
-    const emendasUnicas = getEmendasUnicas();
-    if (emendasUnicas.length === 1) {
-      return "Valor Médio por Despesa";
-    }
-    return "Valor Médio Geral";
   }
 
   return (
@@ -310,39 +283,17 @@ export default function DespesasTable({
         )}
       </div>
 
-      {/* ✅ Resumo Financeiro Contextual */}
+      {/* ✅ Resumo Simplificado */}
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>
-              {getResumoLabel()}:
-            </span>
+            <span style={styles.summaryLabel}>Total de Despesas:</span>
             <span style={styles.summaryValue}>{despesas.length}</span>
             {despesas.length !== totalDespesas && totalDespesas > 0 && (
               <span style={styles.summarySubtext}>
                 (de {totalDespesas} total)
               </span>
             )}
-          </div>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>
-              {getValorTotalLabel()}:
-            </span>
-            <span style={styles.summaryValueMoney}>
-              R${" "}
-              {valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </span>
-          </div>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>
-              {getValorMedioLabel()}:
-            </span>
-            <span style={styles.summaryValueMoney}>
-              R${" "}
-              {(valorTotal / despesas.length).toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}
-            </span>
           </div>
           {getEmendasUnicas().length > 1 && (
             <div style={styles.summaryCard}>
