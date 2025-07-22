@@ -302,7 +302,7 @@ export default function DespesasList({
         </div>
       )}
 
-      
+
 
       {/* ✅ Componente de Filtros */}
       <DespesasFilters
@@ -638,7 +638,7 @@ const additionalCSS = `
   transform: translateY(-1px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px}) {
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
