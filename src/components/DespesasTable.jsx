@@ -137,6 +137,35 @@ export default function DespesasTable({
   // ✅ Calcular totais
   const valorTotal = despesas.reduce((acc, d) => acc + (d.valor || 0), 0);
 
+  // ✅ Funções para labels contextuais
+  function getEmendasUnicas() {
+    return [...new Set(despesas.map(d => d.emendaId))];
+  }
+
+  function getResumoLabel() {
+    const emendasUnicas = getEmendasUnicas();
+    if (emendasUnicas.length === 1) {
+      return "Despesas da Emenda";
+    }
+    return "Total de Despesas";
+  }
+
+  function getValorTotalLabel() {
+    const emendasUnicas = getEmendasUnicas();
+    if (emendasUnicas.length === 1) {
+      return "Valor Executado";
+    }
+    return "Valor Consolidado";
+  }
+
+  function getValorMedioLabel() {
+    const emendasUnicas = getEmendasUnicas();
+    if (emendasUnicas.length === 1) {
+      return "Valor Médio por Despesa";
+    }
+    return "Valor Médio Geral";
+  }
+
   return (
     <div style={styles.container}>
       {/* ✅ Header da Tabela (mesmo padrão do Emendas) */}
@@ -281,11 +310,13 @@ export default function DespesasTable({
         )}
       </div>
 
-      {/* ✅ Resumo Financeiro (mesmo padrão do Emendas) */}
+      {/* ✅ Resumo Financeiro Contextual */}
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Total de Despesas:</span>
+            <span style={styles.summaryLabel}>
+              {getResumoLabel()}:
+            </span>
             <span style={styles.summaryValue}>{despesas.length}</span>
             {despesas.length !== totalDespesas && totalDespesas > 0 && (
               <span style={styles.summarySubtext}>
@@ -294,14 +325,18 @@ export default function DespesasTable({
             )}
           </div>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Valor Total:</span>
+            <span style={styles.summaryLabel}>
+              {getValorTotalLabel()}:
+            </span>
             <span style={styles.summaryValueMoney}>
               R${" "}
               {valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
             </span>
           </div>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Valor Médio:</span>
+            <span style={styles.summaryLabel}>
+              {getValorMedioLabel()}:
+            </span>
             <span style={styles.summaryValueMoney}>
               R${" "}
               {(valorTotal / despesas.length).toLocaleString("pt-BR", {
@@ -309,6 +344,13 @@ export default function DespesasTable({
               })}
             </span>
           </div>
+          {getEmendasUnicas().length > 1 && (
+            <div style={styles.summaryCard}>
+              <span style={styles.summaryLabel}>Emendas Envolvidas:</span>
+              <span style={styles.summaryValue}>{getEmendasUnicas().length}</span>
+              <span style={styles.summarySubtext}>diferentes</span>
+            </div>
+          )}
         </div>
       )}
 

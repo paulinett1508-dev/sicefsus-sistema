@@ -270,7 +270,7 @@ export default function DespesasList({
         <div style={styles.emptyContainer}>
           <div style={styles.emptyIcon}>💰</div>
           <h2 style={styles.emptyTitle}>Nenhuma despesa registrada</h2>
-          <p style={styles.emptyText}>
+          <p style={styles.emptyText          }>
             Clique em "Nova Despesa" para começar a registrar suas despesas
             financeiras.
           </p>
