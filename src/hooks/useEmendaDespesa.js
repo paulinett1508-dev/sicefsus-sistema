@@ -379,8 +379,31 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
 
   // ✅ EFEITO: Carregar dados iniciais
   useEffect(() => {
-    recarregar();
-  }, [recarregar]);
+    const carregarDadosIniciais = async () => {
+      setError(null);
+
+      if (emendaId) {
+        const [emendaData, despesasData] = await Promise.all([
+          carregarEmenda(emendaId),
+          carregarDespesasEmenda(emendaId),
+        ]);
+
+        if (emendaData && incluirEstatisticas) {
+          const metricasCalculadas = calcularMetricasEmenda(
+            emendaData,
+            despesasData,
+          );
+          setMetricas(metricasCalculadas);
+        }
+      }
+
+      if (carregarTodasEmendas) {
+        await carregarTodasEmendasComMetricas();
+      }
+    };
+
+    carregarDadosIniciais();
+  }, [emendaId, incluirEstatisticas, carregarTodasEmendas]);
 
   // ✅ EFEITO: Listener em tempo real (se autoRefresh ativado)
   useEffect(() => {
