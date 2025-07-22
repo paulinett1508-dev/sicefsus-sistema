@@ -14,8 +14,7 @@ import {
   getDocs,
   serverTimestamp,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase/firebaseConfig";
+import { db } from "../firebase/firebaseConfig";
 import { useNavigationProtection } from "../App";
 import { useToast } from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
@@ -88,8 +87,6 @@ const DespesaForm = ({
   const [hasChanges, setHasChanges] = useState(false);
   const [initialFormData, setInitialFormData] = useState(null);
   const [isFormInitialized, setIsFormInitialized] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
   const [errors, setErrors] = useState({});
 
   // ✅ NOVO: Estados para controle pós-salvamento
@@ -278,60 +275,8 @@ const DespesaForm = ({
     setHasChanges(true);
   };
 
-  // ✅ Upload de arquivo
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) processarArquivo(file);
-  };
-
-  const processarArquivo = (file) => {
-    const tiposPermitidos = [
-      "application/pdf",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain",
-      "image/png",
-      "image/jpeg",
-      "application/xml",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ];
-    const tamanhoMaximo = 5 * 1024 * 1024; // 5MB
-
-    if (!tiposPermitidos.includes(file.type)) {
-      error(
-        "❌ Tipo de arquivo não permitido. Use: PDF, DOCX, TXT, PNG, JPEG, XML, XLSX",
-      );
-      return;
-    }
-
-    if (file.size > tamanhoMaximo) {
-      error("❌ Arquivo muito grande. Tamanho máximo: 5MB");
-      return;
-    }
-
-    setUploadedFile(file);
-    success("✅ Arquivo selecionado com sucesso!");
-    setHasChanges(true);
-  };
-
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processarArquivo(e.dataTransfer.files[0]);
-    }
-  };
+  // ✅ Upload de arquivo - REMOVIDO TEMPORARIAMENTE
+  // TODO: Implementar upload de arquivos com configuração CORS correta do Firebase Storage
 
   // ✅ NOVA: Validação rigorosa do formulário
   const validarFormulario = async () => {
@@ -459,26 +404,7 @@ const DespesaForm = ({
     setLoading(true);
 
     try {
-      let attachmentUrl = null;
-      let attachmentData = null;
-
-      // Upload do arquivo se existir
-      if (uploadedFile) {
-        const storageRef = ref(
-          storage,
-          `despesas/${Date.now()}_${uploadedFile.name}`,
-        );
-        const snapshot = await uploadBytes(storageRef, uploadedFile);
-        attachmentUrl = await getDownloadURL(snapshot.ref);
-
-        attachmentData = {
-          url: attachmentUrl,
-          name: uploadedFile.name,
-          size: uploadedFile.size,
-          type: uploadedFile.type,
-        };
-      }
-
+      // ✅ Upload de arquivos removido temporariamente devido a problemas de CORS
       const valorNumerico = parseValue(formData.valor);
 
       // Dados para salvar
@@ -513,10 +439,6 @@ const DespesaForm = ({
         userId: usuario.uid,
         updatedAt: serverTimestamp(),
       };
-
-      if (attachmentData) {
-        dadosParaSalvar.attachment = attachmentData;
-      }
 
       let despesaId;
       if (despesa) {
@@ -607,7 +529,6 @@ const DespesaForm = ({
     setInitialFormData(novoFormData);
     setModoOperacao("criar");
     setErrors({});
-    setUploadedFile(null);
     setHasChanges(false);
 
     success("Formulário resetado para nova despesa da mesma emenda");
@@ -1363,52 +1284,8 @@ const DespesaForm = ({
           </fieldset>
         )}
 
-        {/* ✅ Seção: Upload de Arquivos */}
-        {!readOnly && (
-          <fieldset style={styles.fieldset}>
-            <legend style={styles.legend}>
-              <span style={styles.legendIcon}>📎</span>
-              Anexos
-            </legend>
-
-            <div
-              style={{
-                ...styles.uploadArea,
-                backgroundColor: dragActive ? "#e3f2fd" : "#f8f9fa",
-              }}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById("fileInput").click()}
-            >
-              <input
-                id="fileInput"
-                type="file"
-                style={{ display: "none" }}
-                onChange={handleFileChange}
-                accept=".pdf,.docx,.txt,.png,.jpeg,.jpg,.xml,.xlsx"
-              />
-
-              <div style={styles.uploadIcon}>📎</div>
-              <div style={styles.uploadText}>
-                {uploadedFile ? (
-                  <span style={{ color: "#27AE60", fontWeight: "600" }}>
-                    ✅ {uploadedFile.name}
-                  </span>
-                ) : (
-                  <>
-                    Arraste um arquivo aqui ou clique para selecionar
-                    <br />
-                    <small>
-                      PDF, DOCX, TXT, PNG, JPEG, XML, XLSX (máx. 5MB)
-                    </small>
-                  </>
-                )}
-              </div>
-            </div>
-          </fieldset>
-        )}
+        {/* ✅ Seção: Upload de Arquivos - REMOVIDA TEMPORARIAMENTE */}
+        {/* TODO: Implementar upload de arquivos após configurar CORS no Firebase Storage */}
 
         {/* ✅ Informações do Sistema */}
         <div style={styles.systemInfo}>
@@ -1731,25 +1608,7 @@ const styles = {
     color: "#27AE60",
     fontFamily: "monospace",
   },
-  uploadArea: {
-    border: "2px dashed #4A90E2",
-    borderRadius: "12px",
-    padding: "32px",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    background: "#f8f9fa",
-  },
-  uploadIcon: {
-    fontSize: "48px",
-    marginBottom: "16px",
-    opacity: 0.7,
-  },
-  uploadText: {
-    color: "#666",
-    fontSize: "16px",
-    lineHeight: "1.5",
-  },
+  // ✅ Estilos de upload removidos - será reimplementado no futuro
   systemInfo: {
     marginTop: "24px",
     padding: "16px",
@@ -1950,10 +1809,7 @@ const additionalCSS = `
   transform: scale(1.1);
 }
 
-.upload-area:hover {
-  background-color: #e3f2fd;
-  border-color: #2196f3;
-}
+/* Upload área removida temporariamente */
 
 .input:focus,
 .select:focus,
