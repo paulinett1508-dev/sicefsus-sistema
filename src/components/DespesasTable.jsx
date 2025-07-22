@@ -592,19 +592,19 @@ const styles = {
 
   summarySection: {
     display: "flex",
-    justifyContent: "space-between",
-    padding: "20px 24px",
+    justifyContent: "flex-start",
+    padding: "16px 24px",
     borderTop: "2px solid #f0f0f0",
     backgroundColor: "#f8f9fa",
     flexWrap: "wrap",
-    gap: 16,
+    gap: 24,
   },
 
   summaryCard: {
     display: "flex",
     flexDirection: "column",
     gap: 4,
-    minWidth: "150px",
+    minWidth: "140px",
   },
 
   summaryLabel: {
