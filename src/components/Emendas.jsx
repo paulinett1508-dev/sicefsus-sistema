@@ -32,10 +32,11 @@ const Emendas = () => {
     console.log("🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado");
   }, []); // ✅ Array vazio = só roda uma vez
 
-  // ✅ Log separado para dados (só quando realmente mudam)
+  // ✅ Log separado para dados (só quando realmente mudam) - OTIMIZADO
   useEffect(() => {
-    if (emendas?.length > 0) {
-      console.log("✅ Emendas carregadas via hook:", emendas.length);
+    const emendasLength = emendas?.length || 0;
+    if (emendasLength > 0) {
+      console.log("✅ Emendas carregadas via hook:", emendasLength);
     }
     if (error) {
       console.error("❌ Erro no hook:", error);

@@ -345,39 +345,39 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     [emendas],
   );
 
-  // ✅ FUNÇÃO: Recarregar dados
+  // ✅ FUNÇÃO: Recarregar dados - OTIMIZADA
   const recarregar = useCallback(async () => {
-    setError(null);
+    try {
+      setError(null);
+      setLoading(true);
 
-    if (emendaId) {
-      const [emendaData, despesasData] = await Promise.all([
-        carregarEmenda(emendaId),
-        carregarDespesasEmenda(emendaId),
-      ]);
+      if (emendaId) {
+        const [emendaData, despesasData] = await Promise.all([
+          carregarEmenda(emendaId),
+          carregarDespesasEmenda(emendaId),
+        ]);
 
-      if (emendaData && incluirEstatisticas) {
-        const metricasCalculadas = calcularMetricasEmenda(
-          emendaData,
-          despesasData,
-        );
-        setMetricas(metricasCalculadas);
+        if (emendaData && incluirEstatisticas) {
+          const metricasCalculadas = calcularMetricasEmenda(
+            emendaData,
+            despesasData,
+          );
+          setMetricas(metricasCalculadas);
+        }
       }
-    }
 
-    if (carregarTodasEmendas) {
-      await carregarTodasEmendasComMetricas();
+      if (carregarTodasEmendas) {
+        await carregarTodasEmendasComMetricas();
+      }
+    } catch (err) {
+      console.error("Erro ao recarregar dados:", err);
+      setError("Erro ao recarregar dados");
+    } finally {
+      setLoading(false);
     }
-  }, [
-    emendaId,
-    incluirEstatisticas,
-    carregarTodasEmendas,
-    carregarEmenda,
-    carregarDespesasEmenda,
-    calcularMetricasEmenda,
-    carregarTodasEmendasComMetricas,
-  ]);
+  }, [emendaId, incluirEstatisticas, carregarTodasEmendas]);
 
-  // ✅ EFEITO: Carregar dados iniciais
+  // ✅ EFEITO: Carregar dados iniciais - OTIMIZADO
   useEffect(() => {
     const carregarDadosIniciais = async () => {
       setError(null);
@@ -403,7 +403,7 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     };
 
     carregarDadosIniciais();
-  }, [emendaId, incluirEstatisticas, carregarTodasEmendas]);
+  }, [emendaId, incluirEstatisticas, carregarTodasEmendas, carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda, carregarTodasEmendasComMetricas]);
 
   // ✅ EFEITO: Listener em tempo real (se autoRefresh ativado)
   useEffect(() => {
