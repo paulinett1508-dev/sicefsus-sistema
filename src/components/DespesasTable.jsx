@@ -30,15 +30,45 @@ export default function DespesasTable({
   // ✅ Função para formatar datas do Firestore (mesmo padrão)
   function formatarDataFirestore(data) {
     if (!data) return "";
-    if (typeof data === "string") return data;
-    if (data.seconds) {
-      const d = new Date(data.seconds * 1000);
-      return d.toLocaleDateString("pt-BR");
+    
+    try {
+      let date;
+      
+      // Se for timestamp do Firestore
+      if (data.seconds) {
+        date = new Date(data.seconds * 1000);
+      }
+      // Se for string ISO ou timestamp
+      else if (typeof data === "string") {
+        date = new Date(data);
+      }
+      // Se já for Date
+      else if (data instanceof Date) {
+        date = data;
+      }
+      // Se for timestamp numérico
+      else if (typeof data === "number") {
+        date = new Date(data);
+      }
+      else {
+        return "";
+      }
+      
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        return "";
+      }
+      
+      // Formatar para padrão brasileiro
+      return date.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit", 
+        year: "numeric"
+      });
+    } catch (error) {
+      console.error("Erro ao formatar data:", error, data);
+      return "";
     }
-    if (data instanceof Date) {
-      return data.toLocaleDateString("pt-BR");
-    }
-    return "";
   }
 
   // ✅ Helper para buscar dados da emenda
