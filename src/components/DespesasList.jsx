@@ -683,4 +683,3 @@ if (typeof document !== "undefined") {
   style.textContent = additionalCSS;
   document.head.appendChild(style);
 }
-```
