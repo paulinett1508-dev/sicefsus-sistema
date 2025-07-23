@@ -148,15 +148,15 @@ export default function Dashboard({ usuario }) {
     };
   }, [usuarioValidated, userRole, userMunicipio, userUf]);
 
-  // ✅ MEMOIZAÇÃO DAS OPÇÕES DO HOOK
+  // ✅ MEMOIZAÇÃO DAS OPÇÕES DO HOOK - SÓ RECRIAR QUANDO NECESSÁRIO
   const hookOptions = useMemo(() => ({
     carregarTodasEmendas: userRole !== null,
     incluirEstatisticas: true,
-    autoRefresh: isStable, // Só auto-refresh se estável
+    autoRefresh: true, // ✅ Sempre true, throttle é feito no hook
     filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
     filtroUf: userRole !== "admin" ? userUf : null,
     userRole: userRole,
-  }), [userRole, userMunicipio, userUf, isStable]);
+  }), [userRole, userMunicipio, userUf]); // ✅ Removido isStable da dependência
 
   const {
     emendas = [], // ✅ Default para array vazio
@@ -314,27 +314,15 @@ export default function Dashboard({ usuario }) {
     topMunicipios: [],
   });
 
-  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
+  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - OTIMIZADO
   useEffect(() => {
-    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
     if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
       console.log("📊 Calculando estatísticas do Dashboard...");
-      console.log("📋 Emendas disponíveis:", emendas.length);
-      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
-
+      
       const stats = obterEstatisticasGerais() || calcularEstatisticasLocais();
       setEstatisticas(stats);
-
-      console.log("✅ Estatísticas calculadas:", stats);
-    } else {
-      console.log("⏳ Aguardando dados:", {
-        loading,
-        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
-        emendasTipo: typeof emendas,
-        emendasLength: emendas?.length,
-      });
     }
-  }, [emendas, despesas, loading]);
+  }, [emendas.length, despesas.length, loading]); // ✅ SÓ LENGTH para evitar loops
 
   // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
   const calcularEstatisticasLocais = useCallback(() => {

@@ -1,8 +1,8 @@
-// src/hooks/useEmendaDespesa.js - CORREÇÃO CRÍTICA IMPLEMENTADA
+// src/hooks/useEmendaDespesa.js - CORREÇÃO CRÍTICA DO LOOP INFINITO
 // HOOK CUSTOMIZADO - RELACIONAMENTO EMENDA-DESPESA
 // ✅ Gerencia relacionamento crítico + cálculos automáticos + validações
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   collection,
   doc,
@@ -19,12 +19,14 @@ import { db } from "../firebase/firebaseConfig";
 
 /**
  * Hook customizado para gerenciar relacionamento Emenda-Despesa
- * @param {Object} usuario - Dados completos do usuário (CORREÇÃO: era string emendaId)
+ * @param {Object} usuario - Dados completos do usuário
  * @param {Object} options - Opções de configuração
  * @returns {Object} - Dados e funções para gerenciar relacionamento
  */
 const useEmendaDespesa = (usuario = null, options = {}) => {
-  // Debug logs removidos para melhorar performance
+  // ✅ REF PARA EVITAR LOOPS
+  const mountedRef = useRef(true);
+  const lastLoadRef = useRef(0);
 
   // ✅ ESTADOS PRINCIPAIS
   const [emenda, setEmenda] = useState(null);
@@ -52,24 +54,56 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     despesasRejeitadas: 0,
   });
 
-  // ✅ CONFIGURAÇÕES DO HOOK
-  const {
-    autoRefresh = true,
-    incluirEstatisticas = true,
-    carregarTodasEmendas = false,
-    filtroStatus = null,
-    filtroMunicipio = null,
-    filtroUf = null,
-    userRole = null,
-    emendaId = null,
-  } = options;
+  // ✅ MEMOIZAÇÃO DAS CONFIGURAÇÕES PARA EVITAR RECRIAÇÃO
+  const configMemo = useMemo(() => {
+    const {
+      autoRefresh = true,
+      incluirEstatisticas = true,
+      carregarTodasEmendas = false,
+      filtroStatus = null,
+      filtroMunicipio = null,
+      filtroUf = null,
+      userRole = null,
+      emendaId = null,
+    } = options;
 
-  // ✅ CORREÇÃO PRINCIPAL: FUNÇÃO determinarPermissoes (linha ~65)
+    return {
+      autoRefresh,
+      incluirEstatisticas,
+      carregarTodasEmendas,
+      filtroStatus,
+      filtroMunicipio,
+      filtroUf,
+      userRole,
+      emendaId,
+    };
+  }, [
+    options.autoRefresh,
+    options.incluirEstatisticas,
+    options.carregarTodasEmendas,
+    options.filtroStatus,
+    options.filtroMunicipio,
+    options.filtroUf,
+    options.userRole,
+    options.emendaId,
+  ]);
+
+  // ✅ MEMOIZAÇÃO DO USUÁRIO PARA EVITAR RECÁLCULOS
+  const usuarioMemo = useMemo(() => {
+    if (!usuario) return null;
+
+    return {
+      uid: usuario.uid,
+      email: usuario.email,
+      role: usuario.role,
+      municipio: usuario.municipio,
+      uf: usuario.uf,
+    };
+  }, [usuario?.uid, usuario?.email, usuario?.role, usuario?.municipio, usuario?.uf]);
+
+  // ✅ FUNÇÃO determinarPermissoes ESTÁVEL
   const determinarPermissoes = useCallback((user) => {
-    console.log("🎯 INICIANDO determinarPermissoes com:", user);
-
     if (!user) {
-      console.log("❌ Usuário não fornecido");
       return {
         podeEditar: false,
         podeVisualizar: false,
@@ -81,21 +115,14 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       };
     }
 
-    // ✅ VERIFICAÇÃO ROBUSTA DE ADMIN
     const role = user.role;
-    console.log("🔍 Role extraída:", role, "| Tipo:", typeof role);
-
-    // Verificação múltipla para garantir detecção de admin
     const isAdmin =
       role === "admin" ||
       role === "Admin" ||
       role === "ADMIN" ||
       (typeof role === "string" && role.toLowerCase() === "admin");
 
-    console.log("👑 isAdmin calculado:", isAdmin);
-
     if (isAdmin) {
-      console.log("✅ ADMIN DETECTADO - Liberando todas as permissões");
       return {
         podeEditar: true,
         podeVisualizar: true,
@@ -107,8 +134,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       };
     }
 
-    // Para usuários não-admin
-    console.log("👤 Usuário comum - permissões limitadas");
     return {
       podeEditar: false,
       podeVisualizar: true,
@@ -121,84 +146,88 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
           ? `Visualizando dados de ${user.municipio}/${user.uf}`
           : "Município/UF não configurado",
     };
-  }, []);
+  }, []); // ✅ SEM DEPENDÊNCIAS - função pura
 
-  // ✅ EFEITO: Calcular permissões quando usuário muda
+  // ✅ EFEITO PARA CALCULAR PERMISSÕES - SÓ QUANDO USUÁRIO MUDAR
   useEffect(() => {
-    console.log("🔄 useEffect disparado - recalculando permissões");
-    const novasPermissoes = determinarPermissoes(usuario);
-    console.log("📋 Novas permissões calculadas:", novasPermissoes);
+    if (!mountedRef.current) return;
+
+    const novasPermissoes = determinarPermissoes(usuarioMemo);
     setPermissoes(novasPermissoes);
-  }, [usuario, determinarPermissoes]);
+  }, [usuarioMemo, determinarPermissoes]);
 
-  // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
-  const calcularMetricasEmenda = useCallback(
-    (emendaData, despesasData) => {
-      if (!emendaData) return metricas;
-
-      const valorTotal = emendaData.valorTotal || emendaData.valorRecurso || 0;
-      const despesasValidas = despesasData.filter(
-        (d) => d.emendaId === emendaData.id,
-      );
-
-      const valorExecutado = despesasValidas.reduce(
-        (sum, d) => sum + (d.valor || 0),
-        0,
-      );
-      const saldoDisponivel = valorTotal - valorExecutado;
-      const percentualExecutado =
-        valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
-
-      // ✅ ESTATÍSTICAS POR STATUS (se disponível)
-      const despesasPorStatus = despesasValidas.reduce((acc, d) => {
-        const status = d.status || "pendente";
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      }, {});
-
+  // ✅ FUNÇÃO PARA CALCULAR MÉTRICAS - ESTÁVEL
+  const calcularMetricasEmenda = useCallback((emendaData, despesasData) => {
+    if (!emendaData) {
       return {
-        valorTotal,
-        valorExecutado,
-        saldoDisponivel,
-        percentualExecutado,
-        totalDespesas: despesasValidas.length,
-        despesasPendentes: despesasPorStatus.pendente || 0,
-        despesasAprovadas: despesasPorStatus.aprovada || 0,
-        despesasPagas: despesasPorStatus.paga || 0,
-        despesasRejeitadas: despesasPorStatus.rejeitada || 0,
+        valorTotal: 0,
+        valorExecutado: 0,
+        saldoDisponivel: 0,
+        percentualExecutado: 0,
+        totalDespesas: 0,
+        despesasPendentes: 0,
+        despesasAprovadas: 0,
+        despesasPagas: 0,
+        despesasRejeitadas: 0,
       };
-    },
-    [metricas],
-  );
+    }
 
-  // ✅ FUNÇÃO: Carregar emenda específica
+    const valorTotal = emendaData.valorTotal || emendaData.valorRecurso || 0;
+    const despesasValidas = despesasData.filter(
+      (d) => d.emendaId === emendaData.id,
+    );
+
+    const valorExecutado = despesasValidas.reduce(
+      (sum, d) => sum + (d.valor || 0),
+      0,
+    );
+    const saldoDisponivel = valorTotal - valorExecutado;
+    const percentualExecutado =
+      valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+
+    const despesasPorStatus = despesasValidas.reduce((acc, d) => {
+      const status = d.status || "pendente";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      valorTotal,
+      valorExecutado,
+      saldoDisponivel,
+      percentualExecutado,
+      totalDespesas: despesasValidas.length,
+      despesasPendentes: despesasPorStatus.pendente || 0,
+      despesasAprovadas: despesasPorStatus.aprovada || 0,
+      despesasPagas: despesasPorStatus.paga || 0,
+      despesasRejeitadas: despesasPorStatus.rejeitada || 0,
+    };
+  }, []); // ✅ SEM DEPENDÊNCIAS - função pura
+
+  // ✅ FUNÇÃO PARA CARREGAR EMENDA - ESTÁVEL
   const carregarEmenda = useCallback(async (id) => {
-    if (!id) return null;
+    if (!id || !mountedRef.current) return null;
 
     try {
-      setLoading(true);
       const emendaDoc = await getDoc(doc(db, "emendas", id));
-
-      if (emendaDoc.exists()) {
+      if (emendaDoc.exists() && mountedRef.current) {
         const emendaData = { id: emendaDoc.id, ...emendaDoc.data() };
         setEmenda(emendaData);
         return emendaData;
       } else {
-        setError("Emenda não encontrada");
+        if (mountedRef.current) setError("Emenda não encontrada");
         return null;
       }
     } catch (err) {
       console.error("Erro ao carregar emenda:", err);
-      setError("Erro ao carregar emenda");
+      if (mountedRef.current) setError("Erro ao carregar emenda");
       return null;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, []); // ✅ SEM DEPENDÊNCIAS
 
-  // ✅ FUNÇÃO: Carregar despesas de uma emenda
+  // ✅ FUNÇÃO PARA CARREGAR DESPESAS - ESTÁVEL
   const carregarDespesasEmenda = useCallback(async (id) => {
-    if (!id) return [];
+    if (!id || !mountedRef.current) return [];
 
     try {
       const q = query(
@@ -213,33 +242,42 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         ...doc.data(),
       }));
 
-      setDespesasEmenda(despesasData);
+      if (mountedRef.current) setDespesasEmenda(despesasData);
       return despesasData;
     } catch (err) {
       console.error("Erro ao carregar despesas da emenda:", err);
-      setError("Erro ao carregar despesas");
+      if (mountedRef.current) setError("Erro ao carregar despesas");
       return [];
     }
-  }, []);
+  }, []); // ✅ SEM DEPENDÊNCIAS
 
-  // ✅ FUNÇÃO: Carregar todas as emendas com métricas - COM FILTROS DE PERMISSÃO
+  // ✅ FUNÇÃO PRINCIPAL PARA CARREGAR DADOS - COM THROTTLE
   const carregarTodasEmendasComMetricas = useCallback(async () => {
+    if (!mountedRef.current) return [];
+
+    // ✅ THROTTLE - evitar chamadas muito frequentes
+    const now = Date.now();
+    if (now - lastLoadRef.current < 1000) { // 1 segundo de throttle
+      console.log("🚫 Carregamento throttled - muito frequente");
+      return emendas;
+    }
+    lastLoadRef.current = now;
+
     try {
       setLoading(true);
+      setError(null);
 
-      // ✅ Query base
       let emendasQuery = query(
         collection(db, "emendas"),
         orderBy("numero", "asc"),
       );
 
       // ✅ Aplicar filtros baseados nas permissões
-      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
-        console.log("🔍 Aplicando filtros:", { filtroMunicipio, filtroUf });
+      if (permissoes.filtroAplicado && configMemo.filtroMunicipio && configMemo.filtroUf) {
         emendasQuery = query(
           collection(db, "emendas"),
-          where("municipio", "==", filtroMunicipio),
-          where("uf", "==", filtroUf),
+          where("municipio", "==", configMemo.filtroMunicipio),
+          where("uf", "==", configMemo.filtroUf),
           orderBy("numero", "asc"),
         );
       }
@@ -248,6 +286,8 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         getDocs(emendasQuery),
         getDocs(collection(db, "despesas")),
       ]);
+
+      if (!mountedRef.current) return [];
 
       const emendasData = emendasSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -268,90 +308,83 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         };
       });
 
-      console.log("📊 Emendas carregadas:", emendasComMetricas.length);
-      setEmendas(emendasComMetricas);
-      setDespesas(despesasData);
+      if (mountedRef.current) {
+        setEmendas(emendasComMetricas);
+        setDespesas(despesasData);
+      }
 
       return emendasComMetricas;
     } catch (err) {
       console.error("Erro ao carregar emendas:", err);
-      setError("Erro ao carregar dados");
+      if (mountedRef.current) setError("Erro ao carregar dados");
       return [];
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, [
-    calcularMetricasEmenda,
+    emendas,
     permissoes.filtroAplicado,
-    filtroMunicipio,
-    filtroUf,
+    configMemo.filtroMunicipio,
+    configMemo.filtroUf,
+    calcularMetricasEmenda,
   ]);
 
-  // ✅ FUNÇÃO: Validar nova despesa contra saldo da emenda
-  const validarNovaDespesa = useCallback(
-    async (emendaId, valorDespesa) => {
-      if (!emendaId || !valorDespesa) {
-        return { valida: false, erro: "Emenda e valor são obrigatórios" };
+  // ✅ OUTRAS FUNÇÕES ESTÁVEIS
+  const validarNovaDespesa = useCallback(async (emendaId, valorDespesa) => {
+    if (!emendaId || !valorDespesa || !mountedRef.current) {
+      return { valida: false, erro: "Emenda e valor são obrigatórios" };
+    }
+
+    try {
+      const emendaData = await carregarEmenda(emendaId);
+      if (!emendaData) {
+        return { valida: false, erro: "Emenda não encontrada" };
       }
 
-      try {
-        const emendaData = await carregarEmenda(emendaId);
-        if (!emendaData) {
-          return { valida: false, erro: "Emenda não encontrada" };
-        }
+      const despesasData = await carregarDespesasEmenda(emendaId);
+      const metricas = calcularMetricasEmenda(emendaData, despesasData);
 
-        const despesasData = await carregarDespesasEmenda(emendaId);
-        const metricas = calcularMetricasEmenda(emendaData, despesasData);
-
-        if (valorDespesa > metricas.saldoDisponivel) {
-          return {
-            valida: false,
-            erro: `Valor excede saldo disponível. Saldo: R$ ${metricas.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
-            saldoDisponivel: metricas.saldoDisponivel,
-          };
-        }
-
-        return { valida: true, saldoDisponivel: metricas.saldoDisponivel };
-      } catch (err) {
-        console.error("Erro na validação:", err);
-        return { valida: false, erro: "Erro ao validar despesa" };
-      }
-    },
-    [carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda],
-  );
-
-  // ✅ FUNÇÃO: Atualizar saldo da emenda no Firestore
-  const atualizarSaldoEmenda = useCallback(
-    async (emendaId) => {
-      if (!emendaId) return false;
-
-      try {
-        const emendaData = await carregarEmenda(emendaId);
-        const despesasData = await carregarDespesasEmenda(emendaId);
-
-        if (!emendaData) return false;
-
-        const metricas = calcularMetricasEmenda(emendaData, despesasData);
-
-        // ✅ Atualizar documento da emenda no Firestore
-        await updateDoc(doc(db, "emendas", emendaId), {
-          valorExecutado: metricas.valorExecutado,
+      if (valorDespesa > metricas.saldoDisponivel) {
+        return {
+          valida: false,
+          erro: `Valor excede saldo disponível. Saldo: R$ ${metricas.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
           saldoDisponivel: metricas.saldoDisponivel,
-          percentualExecutado: metricas.percentualExecutado,
-          totalDespesas: metricas.totalDespesas,
-          updatedAt: serverTimestamp(),
-        });
-
-        return true;
-      } catch (err) {
-        console.error("Erro ao atualizar saldo:", err);
-        return false;
+        };
       }
-    },
-    [carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda],
-  );
 
-  // ✅ FUNÇÃO: Obter estatísticas gerais
+      return { valida: true, saldoDisponivel: metricas.saldoDisponivel };
+    } catch (err) {
+      console.error("Erro na validação:", err);
+      return { valida: false, erro: "Erro ao validar despesa" };
+    }
+  }, [carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda]);
+
+  const atualizarSaldoEmenda = useCallback(async (emendaId) => {
+    if (!emendaId || !mountedRef.current) return false;
+
+    try {
+      const emendaData = await carregarEmenda(emendaId);
+      const despesasData = await carregarDespesasEmenda(emendaId);
+
+      if (!emendaData) return false;
+
+      const metricas = calcularMetricasEmenda(emendaData, despesasData);
+
+      await updateDoc(doc(db, "emendas", emendaId), {
+        valorExecutado: metricas.valorExecutado,
+        saldoDisponivel: metricas.saldoDisponivel,
+        percentualExecutado: metricas.percentualExecutado,
+        totalDespesas: metricas.totalDespesas,
+        updatedAt: serverTimestamp(),
+      });
+
+      return true;
+    } catch (err) {
+      console.error("Erro ao atualizar saldo:", err);
+      return false;
+    }
+  }, [carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda]);
+
   const obterEstatisticasGerais = useCallback(() => {
     if (!emendas.length) return null;
 
@@ -366,22 +399,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     );
     const saldoDisponivelGeral = valorTotalGeral - valorExecutadoGeral;
 
-    const emendasComSaldo = emendas.filter(
-      (e) => (e.saldoDisponivel || 0) > 0,
-    ).length;
-    const emendasEsgotadas = emendas.filter(
-      (e) => (e.saldoDisponivel || 0) <= 0,
-    ).length;
-    const emendasSemDespesas = emendas.filter(
-      (e) => (e.totalDespesas || 0) === 0,
-    ).length;
-
-    const mediaExecucao =
-      totalEmendas > 0
-        ? emendas.reduce((sum, e) => sum + (e.percentualExecutado || 0), 0) /
-          totalEmendas
-        : 0;
-
     return {
       totalEmendas,
       valorTotalGeral,
@@ -389,248 +406,107 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       saldoDisponivelGeral,
       percentualGeralExecutado:
         valorTotalGeral > 0 ? (valorExecutadoGeral / valorTotalGeral) * 100 : 0,
-      emendasComSaldo,
-      emendasEsgotadas,
-      emendasSemDespesas,
-      mediaExecucao,
       totalDespesas: despesas.length,
     };
   }, [emendas, despesas]);
 
-  // ✅ FUNÇÃO: Filtrar emendas por critérios
-  const filtrarEmendas = useCallback(
-    (filtros = {}) => {
-      let emendasFiltradas = [...emendas];
+  const filtrarEmendas = useCallback((filtros = {}) => {
+    let emendasFiltradas = [...emendas];
 
-      // Filtro por texto
-      if (filtros.busca) {
-        const busca = filtros.busca.toLowerCase();
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) =>
-            e.parlamentar?.toLowerCase().includes(busca) ||
-            e.numero?.toLowerCase().includes(busca) ||
-            e.municipio?.toLowerCase().includes(busca) ||
-            e.objetoProposta?.toLowerCase().includes(busca),
-        );
-      }
+    if (filtros.busca) {
+      const busca = filtros.busca.toLowerCase();
+      emendasFiltradas = emendasFiltradas.filter(
+        (e) =>
+          e.parlamentar?.toLowerCase().includes(busca) ||
+          e.numero?.toLowerCase().includes(busca) ||
+          e.municipio?.toLowerCase().includes(busca) ||
+          e.objetoProposta?.toLowerCase().includes(busca),
+      );
+    }
 
-      // Filtro por parlamentar
-      if (filtros.parlamentar) {
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) => e.parlamentar === filtros.parlamentar,
-        );
-      }
+    return emendasFiltradas;
+  }, [emendas]);
 
-      // Filtro por tipo
-      if (filtros.tipo) {
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) => e.tipo === filtros.tipo,
-        );
-      }
-
-      // Filtro por status financeiro
-      if (filtros.statusFinanceiro === "com-saldo") {
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) => (e.saldoDisponivel || 0) > 0,
-        );
-      } else if (filtros.statusFinanceiro === "esgotadas") {
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) => (e.saldoDisponivel || 0) <= 0,
-        );
-      } else if (filtros.statusFinanceiro === "sem-despesas") {
-        emendasFiltradas = emendasFiltradas.filter(
-          (e) => (e.totalDespesas || 0) === 0,
-        );
-      }
-
-      return emendasFiltradas;
-    },
-    [emendas],
-  );
-
-  // ✅ FUNÇÃO: Recarregar dados - OTIMIZADA
   const recarregar = useCallback(async () => {
+    if (!mountedRef.current) return;
+
     try {
       setError(null);
-      setLoading(true);
 
-      // Se há uma emenda específica, carregá-la
-      if (emendaId) {
+      if (configMemo.emendaId) {
         const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(emendaId),
-          carregarDespesasEmenda(emendaId),
+          carregarEmenda(configMemo.emendaId),
+          carregarDespesasEmenda(configMemo.emendaId),
         ]);
 
-        if (emendaData && incluirEstatisticas) {
-          const metricasCalculadas = calcularMetricasEmenda(
-            emendaData,
-            despesasData,
-          );
+        if (emendaData && configMemo.incluirEstatisticas && mountedRef.current) {
+          const metricasCalculadas = calcularMetricasEmenda(emendaData, despesasData);
           setMetricas(metricasCalculadas);
         }
       }
 
-      if (carregarTodasEmendas) {
+      if (configMemo.carregarTodasEmendas) {
         await carregarTodasEmendasComMetricas();
       }
     } catch (err) {
       console.error("Erro ao recarregar dados:", err);
-      setError("Erro ao recarregar dados");
-    } finally {
-      setLoading(false);
+      if (mountedRef.current) setError("Erro ao recarregar dados");
     }
   }, [
-    emendaId,
-    incluirEstatisticas,
-    carregarTodasEmendas,
+    configMemo.emendaId,
+    configMemo.incluirEstatisticas,
+    configMemo.carregarTodasEmendas,
     carregarEmenda,
     carregarDespesasEmenda,
     calcularMetricasEmenda,
     carregarTodasEmendasComMetricas,
   ]);
 
-  // ✅ EFEITO: Carregar dados iniciais - OTIMIZADO
+  // ✅ EFEITO PRINCIPAL - SÓ EXECUTA QUANDO NECESSÁRIO
   useEffect(() => {
-    const carregarDadosIniciais = async () => {
-      // ✅ Só carregar se usuário estiver disponível OU se for carregamento total
-      if (!usuario && carregarTodasEmendas && userRole === null) {
-        console.log("⏳ Aguardando dados do usuário antes de carregar...");
-        return;
-      }
+    if (!usuarioMemo && configMemo.carregarTodasEmendas) {
+      console.log("⏳ Aguardando dados do usuário...");
+      return;
+    }
 
-      setError(null);
+    if (!configMemo.carregarTodasEmendas && !configMemo.emendaId) {
+      setLoading(false);
+      return;
+    }
 
-      if (emendaId) {
-        const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(emendaId),
-          carregarDespesasEmenda(emendaId),
-        ]);
-
-        if (emendaData && incluirEstatisticas) {
-          const metricasCalculadas = calcularMetricasEmenda(
-            emendaData,
-            despesasData,
-          );
-          setMetricas(metricasCalculadas);
-        }
-      }
-
-      if (carregarTodasEmendas && userRole !== null) {
-        console.log("📊 Carregando todas as emendas...");
+    const carregarDados = async () => {
+      if (configMemo.carregarTodasEmendas && configMemo.userRole !== null) {
         await carregarTodasEmendasComMetricas();
       }
-    };
 
-    carregarDadosIniciais();
-  }, [
-    usuario,
-    userRole,
-    carregarTodasEmendas,
-    emendaId,
-    incluirEstatisticas,
-    carregarEmenda,
-    carregarDespesasEmenda,
-    calcularMetricasEmenda,
-    carregarTodasEmendasComMetricas,
-  ]);
+      if (configMemo.emendaId) {
+        const [emendaData, despesasData] = await Promise.all([
+          carregarEmenda(configMemo.emendaId),
+          carregarDespesasEmenda(configMemo.emendaId),
+        ]);
 
-  // ✅ EFEITO: Listener em tempo real (se autoRefresh ativado)
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    let unsubscribeEmendas;
-    let unsubscribeDespesas;
-
-    // Listener para emendas
-    if (carregarTodasEmendas && userRole !== null) {
-      let emendasQuery = query(
-        collection(db, "emendas"),
-        orderBy("numero", "asc"),
-      );
-
-      // Aplicar filtros se necessário
-      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
-        emendasQuery = query(
-          collection(db, "emendas"),
-          where("municipio", "==", filtroMunicipio),
-          where("uf", "==", filtroUf),
-          orderBy("numero", "asc"),
-        );
-      }
-
-      unsubscribeEmendas = onSnapshot(
-        emendasQuery,
-        (snapshot) => {
-          const emendasData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setEmendas(emendasData);
-        },
-        (error) => {
-          console.error("Erro no listener de emendas:", error);
-          setError("Erro ao acompanhar mudanças nas emendas");
-        },
-      );
-    }
-
-    // Listener para despesas
-    const despesasQuery = emendaId
-      ? query(
-          collection(db, "despesas"),
-          where("emendaId", "==", emendaId),
-          orderBy("data", "desc"),
-        )
-      : query(collection(db, "despesas"), orderBy("data", "desc"));
-
-    unsubscribeDespesas = onSnapshot(
-      despesasQuery,
-      (snapshot) => {
-        const despesasData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        if (emendaId) {
-          setDespesasEmenda(despesasData);
-        } else {
-          setDespesas(despesasData);
-        }
-
-        // Recalcular métricas se necessário
-        if (emenda && incluirEstatisticas) {
-          const metricasCalculadas = calcularMetricasEmenda(
-            emenda,
-            despesasData,
-          );
+        if (emendaData && configMemo.incluirEstatisticas && mountedRef.current) {
+          const metricasCalculadas = calcularMetricasEmenda(emendaData, despesasData);
           setMetricas(metricasCalculadas);
         }
-      },
-      (error) => {
-        console.error("Erro no listener de despesas:", error);
-        setError("Erro ao acompanhar mudanças nas despesas");
-      },
-    );
-
-    return () => {
-      if (unsubscribeEmendas) unsubscribeEmendas();
-      if (unsubscribeDespesas) unsubscribeDespesas();
+      }
     };
-  }, [
-    autoRefresh,
-    carregarTodasEmendas,
-    userRole,
-    emendaId,
-    emenda,
-    incluirEstatisticas,
-    calcularMetricasEmenda,
-    permissoes.filtroAplicado,
-    filtroMunicipio,
-    filtroUf,
-  ]);
 
-  // ✅ Log final das permissões
-  console.log("🏁 PERMISSÕES FINAIS DO HOOK:", permissoes);
+    carregarDados();
+  }, [
+    usuarioMemo?.uid, // ✅ SÓ UID para evitar loops
+    configMemo.carregarTodasEmendas,
+    configMemo.userRole,
+    configMemo.emendaId,
+    configMemo.incluirEstatisticas,
+  ]); // ✅ DEPENDÊNCIAS MÍNIMAS E ESTÁVEIS
+
+  // ✅ CLEANUP AO DESMONTAR
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // ✅ RETORNO DO HOOK
   return {
@@ -645,41 +521,28 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     loading,
     error,
 
-    // ✅ PERMISSÕES ADICIONADAS
+    // Permissões
     permissoes,
-    ...permissoes, // Espalha podeEditar, podeVisualizar, isAdmin
+    ...permissoes,
 
-    // Funções de carregamento
+    // Funções estáveis
     carregarEmenda,
     carregarDespesasEmenda,
     carregarTodasEmendasComMetricas,
     recarregar,
-
-    // Funções de validação e cálculo
     validarNovaDespesa,
     atualizarSaldoEmenda,
     calcularMetricasEmenda,
-
-    // Funções de análise
     obterEstatisticasGerais,
     filtrarEmendas,
 
-    // ✅ MÉTODOS AUXILIARES PARA COMPATIBILIDADE
-    podeEditarCampo: (campo) => {
-      const pode = permissoes.isAdmin || permissoes.podeEditar;
-      console.log(`🔐 podeEditarCampo(${campo}): ${pode}`);
-      return pode;
-    },
-
-    podeVisualizarCampo: (campo) => {
-      const pode = permissoes.isAdmin || permissoes.podeVisualizar;
-      console.log(`👁️ podeVisualizarCampo(${campo}): ${pode}`);
-      return pode;
-    },
+    // Métodos auxiliares
+    podeEditarCampo: (campo) => permissoes.isAdmin || permissoes.podeEditar,
+    podeVisualizarCampo: (campo) => permissoes.isAdmin || permissoes.podeVisualizar,
 
     // Utilitários
-    setError: (msg) => setError(msg),
-    limparError: () => setError(null),
+    setError: (msg) => mountedRef.current && setError(msg),
+    limparError: () => mountedRef.current && setError(null),
   };
 };
 
