@@ -1,13 +1,6 @@
+// Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
 import React, { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-} from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import {
   BarChart,
   Bar,
@@ -24,902 +17,818 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#4A90E2", "#27AE60", "#F5A623", "#D0021B", "#9013FE"];
-const PRIMARY = "#154360";
-const ACCENT = "#4A90E2";
-const SUCCESS = "#27AE60";
-const WARNING = "#F39C12";
-const ERROR = "#E74C3C";
-const WHITE = "#fff";
-const GRAY = "#6B7280";
+const CHART_COLORS = [
+  "#154360", // var(--primary)
+  "#4A90E2", // var(--accent)
+  "#27AE60", // var(--success)
+  "#F39C12", // var(--warning)
+  "#E74C3C", // var(--error)
+  "#9013FE", // var(--purple)
+];
 
 export default function Dashboard({ usuario }) {
-  const [emendas, setEmendas] = useState([]);
-  const [despesas, setDespesas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeCard, setActiveCard] = useState(null);
+  console.log("🏠 Dashboard iniciado");
+  console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
 
+  // ✅ CORREÇÃO 2: DASHBOARD.JSX - Linhas 38-65
+  const [userRole, setUserRole] = useState(null);
+  const [userMunicipio, setUserMunicipio] = useState(null);
+  const [userUf, setUserUf] = useState(null);
+
+  // ✅ Carregar dados do usuário primeiro
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const [emendasSnap, despesasSnap] = await Promise.all([
-          getDocs(collection(db, "emendas")),
-          getDocs(query(collection(db, "despesas"), orderBy("data", "desc"))),
-        ]);
-
-        setEmendas(emendasSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
-        setDespesas(despesasSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-      }
-      setLoading(false);
+    if (usuario) {
+      setUserRole(usuario.role);
+      setUserMunicipio(usuario.municipio);
+      setUserUf(usuario.uf);
     }
-    fetchData();
-  }, []);
+  }, [usuario]);
 
-  // ✅ NOVOS CÁLCULOS ENTERPRISE - FASE 1
-  const calcularMetricasIntegradas = () => {
-    // Calcular valor executado por emenda
-    const emendasComExecucao = emendas.map((emenda) => {
-      const despesasEmenda = despesas.filter((d) => d.emendaId === emenda.id);
-      const valorExecutado = despesasEmenda.reduce(
-        (sum, d) => sum + (d.valor || 0),
-        0,
-      );
-      const valorTotal = emenda.valorTotal || emenda.valorRecurso || 0;
-      const saldoDisponivel = valorTotal - valorExecutado;
-      const percentualExecutado =
-        valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+  // ✅ Construir objeto usuário completo para o hook
+  const usuarioParaHook = userRole
+    ? {
+        uid: usuario?.uid,
+        email: usuario?.email,
+        role: userRole,
+        municipio: userMunicipio,
+        uf: userUf,
+      }
+    : null;
 
-      return {
-        ...emenda,
-        valorExecutado,
-        saldoDisponivel,
-        percentualExecutado,
-        despesasCount: despesasEmenda.length,
-      };
+  const {
+    emendas = [], // ✅ Default para array vazio
+    despesas = [], // ✅ Default para array vazio
+    loading,
+    error,
+    metricas,
+    permissoes,
+    obterEstatisticasGerais,
+  } = useEmendaDespesa(usuarioParaHook, {
+    carregarTodasEmendas: userRole !== null,
+    incluirEstatisticas: true,
+    autoRefresh: true,
+    filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
+    filtroUf: userRole !== "admin" ? userUf : null,
+    userRole: userRole,
+  });
+
+  const [activeCard, setActiveCard] = useState(null);
+  const [estatisticas, setEstatisticas] = useState({
+    totalEmendas: 0,
+    totalDespesas: 0,
+    valorTotalEmendas: 0,
+    valorTotalDespesas: 0,
+    saldoDisponivel: 0,
+    percentualExecutado: 0,
+    emendasPorStatus: [],
+    despesasPorStatus: [],
+    evolucaoMensal: [],
+    topMunicipios: [],
+  });
+
+  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
+  useEffect(() => {
+    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
+    if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
+      console.log("📊 Calculando estatísticas do Dashboard...");
+      console.log("📋 Emendas disponíveis:", emendas.length);
+      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
+
+      const stats = obterEstatisticasGerais
+        ? obterEstatisticasGerais()
+        : calcularEstatisticasLocais();
+      setEstatisticas(stats);
+
+      console.log("✅ Estatísticas calculadas:", stats);
+    } else {
+      console.log("⏳ Aguardando dados:", {
+        loading,
+        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
+        emendasTipo: typeof emendas,
+        emendasLength: emendas?.length,
+      });
+    }
+  }, [emendas, despesas, loading, obterEstatisticasGerais]);
+
+  // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
+  const calcularEstatisticasLocais = () => {
+    const totalEmendas = emendas.length;
+    const totalDespesas = despesas.length;
+
+    const valorTotalEmendas = emendas.reduce(
+      (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
+      0,
+    );
+    const valorTotalDespesas = despesas.reduce(
+      (sum, d) => sum + (d.valor || 0),
+      0,
+    );
+    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
+    const percentualExecutado =
+      valorTotalEmendas > 0
+        ? (valorTotalDespesas / valorTotalEmendas) * 100
+        : 0;
+
+    // Emendas por status
+    const emendasPorStatus = emendas.reduce((acc, emenda) => {
+      const status = emenda.status || "ativa";
+      const existing = acc.find((item) => item.name === status);
+      if (existing) {
+        existing.value += 1;
+        existing.valor += emenda.valorTotal || emenda.valorRecurso || 0;
+      } else {
+        acc.push({
+          name: status,
+          value: 1,
+          valor: emenda.valorTotal || emenda.valorRecurso || 0,
+        });
+      }
+      return acc;
+    }, []);
+
+    // Despesas por status
+    const despesasPorStatus = despesas.reduce((acc, despesa) => {
+      const status = despesa.status || "pendente";
+      const existing = acc.find((item) => item.name === status);
+      if (existing) {
+        existing.value += 1;
+        existing.valor += despesa.valor || 0;
+      } else {
+        acc.push({
+          name: status,
+          value: 1,
+          valor: despesa.valor || 0,
+        });
+      }
+      return acc;
+    }, []);
+
+    // Evolução mensal (últimos 6 meses)
+    const evolucaoMensal = [];
+    const hoje = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const mesNome = mes.toLocaleDateString("pt-BR", {
+        month: "short",
+        year: "2-digit",
+      });
+
+      const emendasMes = emendas.filter((e) => {
+        const dataEmenda =
+          e.dataCriacao?.toDate() ||
+          e.createdAt?.toDate() ||
+          new Date(e.data || Date.now());
+        return (
+          dataEmenda.getMonth() === mes.getMonth() &&
+          dataEmenda.getFullYear() === mes.getFullYear()
+        );
+      });
+
+      const despesasMes = despesas.filter((d) => {
+        const dataDespesa = d.data?.toDate() || new Date(d.data || Date.now());
+        return (
+          dataDespesa.getMonth() === mes.getMonth() &&
+          dataDespesa.getFullYear() === mes.getFullYear()
+        );
+      });
+
+      evolucaoMensal.push({
+        mes: mesNome,
+        emendas: emendasMes.length,
+        despesas: despesasMes.length,
+        valorEmendas: emendasMes.reduce(
+          (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
+          0,
+        ),
+        valorDespesas: despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0),
+      });
+    }
+
+    // Top municípios
+    const municipiosMap = {};
+    emendas.forEach((emenda) => {
+      const municipio = emenda.municipio || "Não informado";
+      if (!municipiosMap[municipio]) {
+        municipiosMap[municipio] = { nome: municipio, emendas: 0, valor: 0 };
+      }
+      municipiosMap[municipio].emendas += 1;
+      municipiosMap[municipio].valor +=
+        emenda.valorTotal || emenda.valorRecurso || 0;
     });
 
-    return emendasComExecucao;
+    const topMunicipios = Object.values(municipiosMap)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 5);
+
+    return {
+      totalEmendas,
+      totalDespesas,
+      valorTotalEmendas,
+      valorTotalDespesas,
+      saldoDisponivel,
+      percentualExecutado,
+      emendasPorStatus,
+      despesasPorStatus,
+      evolucaoMensal,
+      topMunicipios,
+    };
   };
 
-  const emendasComMetricas = calcularMetricasIntegradas();
-
-  // Cálculos principais atualizados
-  const totalEmendas = emendas.length;
-  const totalDespesas = despesas.length;
-  const valorTotalEmendas = emendasComMetricas.reduce(
-    (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
-    0,
-  );
-  const valorTotalExecutado = emendasComMetricas.reduce(
-    (sum, e) => sum + (e.valorExecutado || 0),
-    0,
-  );
-  const saldoTotalDisponivel = valorTotalEmendas - valorTotalExecutado;
-  const percentualGeralExecutado =
-    valorTotalEmendas > 0 ? (valorTotalExecutado / valorTotalEmendas) * 100 : 0;
-
-  // ✅ NOVAS MÉTRICAS ENTERPRISE
-  const emendasComSaldo = emendasComMetricas.filter(
-    (e) => e.saldoDisponivel > 0,
-  ).length;
-  const emendasEsgotadas = emendasComMetricas.filter(
-    (e) => e.saldoDisponivel <= 0,
-  ).length;
-  const emendasSemDespesas = emendasComMetricas.filter(
-    (e) => e.despesasCount === 0,
-  ).length;
-  const mediaExecucaoPorEmenda =
-    emendasComMetricas.length > 0
-      ? emendasComMetricas.reduce((sum, e) => sum + e.percentualExecutado, 0) /
-        emendasComMetricas.length
-      : 0;
-
-  // Dados para gráficos atualizados
-  const emendasPorMes = emendas.reduce((acc, e) => {
-    if (!e.data && !e.dataValidada && !e.validade) return acc;
-    const dataEmenda = e.data || e.dataValidada || e.validade;
-    const mes = new Date(dataEmenda).toLocaleString("pt-BR", {
-      month: "short",
-      year: "numeric",
-    });
-    acc[mes] = (acc[mes] || 0) + 1;
-    return acc;
-  }, {});
-
-  const dataBar = Object.entries(emendasPorMes).map(([mes, count]) => ({
-    mes,
-    count,
-  }));
-
-  // ✅ NOVO GRÁFICO: Execução por Emenda
-  const execucaoPorEmenda = emendasComMetricas
-    .filter((e) => e.valorTotal > 0)
-    .slice(0, 10) // Top 10
-    .map((e) => ({
-      nome: e.numero || e.parlamentar?.substring(0, 15) || "S/N",
-      valorTotal: e.valorTotal || 0,
-      valorExecutado: e.valorExecutado || 0,
-      percentual: e.percentualExecutado || 0,
-    }));
-
-  const execucaoPorTipo = emendas.reduce((acc, e) => {
-    const tipo = e.tipo || "Não definido";
-    if (!acc[tipo]) {
-      acc[tipo] = { name: tipo, value: 0, total: 0 };
-    }
-    const executado = despesas
-      .filter((l) => l.emendaId === e.id)
-      .reduce((sum, l) => sum + (l.valor || 0), 0);
-    acc[tipo].value += executado;
-    acc[tipo].total += e.valorTotal || 0;
-    return acc;
-  }, {});
-
-  const dataPie = Object.values(execucaoPorTipo);
-
-  // Alertas e insights atualizados
-  const emendasVencidas = emendas.filter((e) => {
-    const validade = e.validade || e.dataValidada;
-    if (!validade) return false;
-    return new Date(validade) < new Date();
-  });
-
-  const emendasProximasVencimento = emendas.filter((e) => {
-    const validade = e.validade || e.dataValidada;
-    if (!validade) return false;
-    const vencimento = new Date(validade);
-    const hoje = new Date();
-    const em30Dias = new Date();
-    em30Dias.setDate(hoje.getDate() + 30);
-    return vencimento >= hoje && vencimento <= em30Dias;
-  });
-
-  // ✅ NOVOS ALERTAS ENTERPRISE
-  const emendasSaldoBaixo = emendasComMetricas.filter((e) => {
-    const saldo = e.saldoDisponivel || 0;
-    const total = e.valorTotal || 0;
-    return total > 0 && saldo > 0 && saldo / total < 0.1; // Menos de 10%
-  });
-
-  const ultimosDespesas = despesas.slice(0, 5);
-
+  // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value || 0);
+    }).format(value);
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-      return new Date(dateStr).toLocaleDateString("pt-BR");
-    } catch {
-      return dateStr;
-    }
+  const formatNumber = (value) => {
+    return new Intl.NumberFormat("pt-BR").format(value);
   };
 
-  const handleCardClick = (cardType, path) => {
-    setActiveCard(cardType);
-    setTimeout(() => {
-      // Navegação seria implementada aqui
-      console.log(`Navegar para: ${path}`);
-      setActiveCard(null);
-    }, 200);
-  };
-
-  const getEmendaInfo = (emendaId) => {
-    const emenda = emendas.find((e) => e.id === emendaId);
-    return emenda
-      ? `${emenda.numero} - ${emenda.parlamentar}`
-      : "Emenda não encontrada";
-  };
-
+  // ✅ LOADING STATE
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingSpinner}></div>
-        <p style={styles.loadingText}>Carregando dashboard...</p>
+      <div className="dashboard-loading">
+        <div className="loading-spinner"></div>
+        <p>Carregando dados do dashboard...</p>
+        {permissoes && permissoes.aviso && (
+          <div className="loading-info">
+            <p>{permissoes.aviso}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ✅ ERROR STATE
+  if (error) {
+    return (
+      <div className="dashboard-error">
+        <h3>❌ Erro ao carregar dashboard</h3>
+        <p>{error}</p>
+        <button
+          className="error-button"
+          onClick={() => window.location.reload()}
+        >
+          🔄 Recarregar
+        </button>
+      </div>
+    );
+  }
+
+  // ✅ NOVO: VERIFICAÇÃO DE ACESSO NEGADO
+  if (permissoes && permissoes.semAcesso) {
+    return (
+      <div className="dashboard-no-access">
+        <div className="no-access-content">
+          <div className="no-access-icon">🚫</div>
+          <h2>Acesso Restrito</h2>
+          <p>{permissoes.aviso}</p>
+          <p>
+            Entre em contato com o administrador para completar seu cadastro.
+          </p>
+          <div className="no-access-details">
+            <h4>Informações necessárias:</h4>
+            <ul>
+              <li>✅ Município de atuação</li>
+              <li>✅ UF (Estado) válido</li>
+            </ul>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      {/* Header com saudação */}
-      <div style={styles.welcomeSection}>
-        <div>
-          <h1 style={styles.welcomeTitle}>
-            👋 Olá,{" "}
-            {usuario?.displayName || usuario?.email?.split("@")[0] || "Usuário"}
-            !
-          </h1>
-          <p style={styles.welcomeSubtitle}>
-            Dashboard integrado - Relacionamento Emendas e Despesas
-          </p>
-        </div>
-        <div style={styles.welcomeDate}>
-          {new Date().toLocaleDateString("pt-BR", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </div>
-      </div>
-
-      {/* ✅ KPIs ATUALIZADOS COM MÉTRICAS ENTERPRISE */}
-      <div style={styles.kpiGrid}>
-        <div
-          style={{
-            ...styles.kpiCard,
-            ...(activeCard === "emendas" ? styles.activeCard : {}),
-            borderLeft: `4px solid ${ACCENT}`,
-          }}
-          onClick={() => handleCardClick("emendas", "/emendas")}
-        >
-          <div style={styles.kpiIcon}>📄</div>
-          <div style={styles.kpiContent}>
-            <h3 style={{ ...styles.kpiValue, color: ACCENT }}>
-              {totalEmendas}
-            </h3>
-            <p style={styles.kpiLabel}>Emendas Cadastradas</p>
-            <span style={styles.clickHint}>
-              {emendasComSaldo} com saldo disponível
-            </span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            ...styles.kpiCard,
-            ...(activeCard === "despesas" ? styles.activeCard : {}),
-            borderLeft: `4px solid ${SUCCESS}`,
-          }}
-          onClick={() => handleCardClick("despesas", "/despesas")}
-        >
-          <div style={styles.kpiIcon}>💸</div>
-          <div style={styles.kpiContent}>
-            <h3 style={{ ...styles.kpiValue, color: SUCCESS }}>
-              {totalDespesas}
-            </h3>
-            <p style={styles.kpiLabel}>Despesas Registradas</p>
-            <span style={styles.clickHint}>Vinculadas às emendas</span>
-          </div>
-        </div>
-
-        <div style={{ ...styles.kpiCard, borderLeft: `4px solid ${WARNING}` }}>
-          <div style={styles.kpiIcon}>💰</div>
-          <div style={styles.kpiContent}>
-            <h3 style={{ ...styles.kpiValue, color: WARNING }}>
-              {formatCurrency(valorTotalEmendas)}
-            </h3>
-            <p style={styles.kpiLabel}>Valor Total Emendas</p>
-            <span style={styles.kpiSubtext}>Recursos disponibilizados</span>
-          </div>
-        </div>
-
-        <div style={{ ...styles.kpiCard, borderLeft: `4px solid ${ERROR}` }}>
-          <div style={styles.kpiIcon}>📊</div>
-          <div style={styles.kpiContent}>
-            <h3 style={{ ...styles.kpiValue, color: ERROR }}>
-              {formatCurrency(valorTotalExecutado)}
-            </h3>
-            <p style={styles.kpiLabel}>Valor Executado</p>
-            <span style={styles.kpiSubtext}>
-              {percentualGeralExecutado.toFixed(1)}% do total
-            </span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            ...styles.kpiCard,
-            borderLeft: `4px solid ${saldoTotalDisponivel > 0 ? SUCCESS : ERROR}`,
-          }}
-        >
-          <div style={styles.kpiIcon}>💳</div>
-          <div style={styles.kpiContent}>
-            <h3
-              style={{
-                ...styles.kpiValue,
-                color: saldoTotalDisponivel > 0 ? SUCCESS : ERROR,
-              }}
-            >
-              {formatCurrency(saldoTotalDisponivel)}
-            </h3>
-            <p style={styles.kpiLabel}>Saldo Total Disponível</p>
-            <span style={styles.kpiSubtext}>
-              {emendasEsgotadas} emendas esgotadas
-            </span>
-          </div>
-        </div>
-
-        {/* ✅ NOVO KPI: Média de Execução */}
-        <div style={{ ...styles.kpiCard, borderLeft: `4px solid ${PRIMARY}` }}>
-          <div style={styles.kpiIcon}>📈</div>
-          <div style={styles.kpiContent}>
-            <h3 style={{ ...styles.kpiValue, color: PRIMARY }}>
-              {mediaExecucaoPorEmenda.toFixed(1)}%
-            </h3>
-            <p style={styles.kpiLabel}>Média de Execução</p>
-            <span style={styles.kpiSubtext}>
-              {emendasSemDespesas} sem despesas
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ✅ ALERTAS ATUALIZADOS COM NOVOS CENÁRIOS */}
-      {(emendasVencidas.length > 0 ||
-        emendasProximasVencimento.length > 0 ||
-        emendasSaldoBaixo.length > 0) && (
-        <div style={styles.alertsSection}>
-          <h2 style={styles.sectionTitle}>⚠️ Alertas Importantes</h2>
-          <div style={styles.alertsGrid}>
-            {emendasVencidas.length > 0 && (
-              <div
-                style={{
-                  ...styles.alertCard,
-                  borderLeft: `4px solid ${ERROR}`,
-                }}
-              >
-                <div style={styles.alertIcon}>🚨</div>
-                <div>
-                  <h4 style={{ ...styles.alertTitle, color: ERROR }}>
-                    {emendasVencidas.length} Emenda
-                    {emendasVencidas.length !== 1 ? "s" : ""} Vencida
-                    {emendasVencidas.length !== 1 ? "s" : ""}
-                  </h4>
-                  <p style={styles.alertText}>
-                    Emendas com prazo de validade expirado
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {emendasProximasVencimento.length > 0 && (
-              <div
-                style={{
-                  ...styles.alertCard,
-                  borderLeft: `4px solid ${WARNING}`,
-                }}
-              >
-                <div style={styles.alertIcon}>⏰</div>
-                <div>
-                  <h4 style={{ ...styles.alertTitle, color: WARNING }}>
-                    {emendasProximasVencimento.length} Emenda
-                    {emendasProximasVencimento.length !== 1 ? "s" : ""} Próxima
-                    {emendasProximasVencimento.length !== 1 ? "s" : ""} ao
-                    Vencimento
-                  </h4>
-                  <p style={styles.alertText}>Vencem nos próximos 30 dias</p>
-                </div>
-              </div>
-            )}
-
-            {/* ✅ NOVO ALERTA: Saldo Baixo */}
-            {emendasSaldoBaixo.length > 0 && (
-              <div
-                style={{
-                  ...styles.alertCard,
-                  borderLeft: `4px solid ${WARNING}`,
-                }}
-              >
-                <div style={styles.alertIcon}>⚠️</div>
-                <div>
-                  <h4 style={{ ...styles.alertTitle, color: WARNING }}>
-                    {emendasSaldoBaixo.length} Emenda
-                    {emendasSaldoBaixo.length !== 1 ? "s" : ""} com Saldo Baixo
-                  </h4>
-                  <p style={styles.alertText}>
-                    Menos de 10% do valor disponível
-                  </p>
-                </div>
-              </div>
-            )}
+    <div className="dashboard">
+      {/* ✅ BANNER DE PERMISSÕES (se aplicável) */}
+      {permissoes && permissoes.aviso && (
+        <div className="permissions-banner">
+          <div className="banner-content">
+            <span className="banner-icon">ℹ️</span>
+            <span className="banner-text">{permissoes.aviso}</span>
           </div>
         </div>
       )}
 
-      {/* ✅ GRÁFICOS ATUALIZADOS + NOVO GRÁFICO DE EXECUÇÃO */}
-      <div style={styles.chartsGrid}>
-        <div style={styles.chartCard}>
-          <h2 style={styles.chartTitle}>📊 Execução por Tipo de Emenda</h2>
+      {/* ✅ HEADER COM INFORMAÇÕES DO USUÁRIO */}
+      <div className="dashboard-header">
+        <div className="header-content">
+          <h1>📊 Dashboard - Emendas Parlamentares</h1>
+          <div className="user-info">
+            <span className="user-name">
+              👤 {usuario?.nome || usuario?.displayName || "Usuário"}
+            </span>
+            <span
+              className={`user-role ${usuario?.role === "admin" ? "admin" : "user"}`}
+            >
+              {usuario?.role === "admin" ? "👑 Administrador" : "👤 Operador"}
+            </span>
+            {usuario?.role !== "admin" && usuario?.municipio && usuario?.uf && (
+              <span className="user-location">
+                📍 {usuario.municipio}/{usuario.uf.toUpperCase()}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ✅ CARDS DE RESUMO */}
+      <div className="summary-cards">
+        <div
+          className={`summary-card ${activeCard === "emendas" ? "active" : ""}`}
+          onClick={() =>
+            setActiveCard(activeCard === "emendas" ? null : "emendas")
+          }
+        >
+          <div className="card-icon">📋</div>
+          <div className="card-content">
+            <h3>Total de Emendas</h3>
+            <div className="card-value">
+              {formatNumber(estatisticas.totalEmendas)}
+            </div>
+            <div className="card-subtitle">
+              {formatCurrency(estatisticas.valorTotalEmendas)} em recursos
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`summary-card ${activeCard === "despesas" ? "active" : ""}`}
+          onClick={() =>
+            setActiveCard(activeCard === "despesas" ? null : "despesas")
+          }
+        >
+          <div className="card-icon">💰</div>
+          <div className="card-content">
+            <h3>Total de Despesas</h3>
+            <div className="card-value">
+              {formatNumber(estatisticas.totalDespesas)}
+            </div>
+            <div className="card-subtitle">
+              {formatCurrency(estatisticas.valorTotalDespesas)} executados
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`summary-card ${activeCard === "saldo" ? "active" : ""}`}
+          onClick={() => setActiveCard(activeCard === "saldo" ? null : "saldo")}
+        >
+          <div className="card-icon">💳</div>
+          <div className="card-content">
+            <h3>Saldo Disponível</h3>
+            <div className="card-value">
+              {formatCurrency(estatisticas.saldoDisponivel)}
+            </div>
+            <div className="card-subtitle">
+              {estatisticas.percentualExecutado.toFixed(1)}% executado
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`summary-card ${activeCard === "execucao" ? "active" : ""}`}
+          onClick={() =>
+            setActiveCard(activeCard === "execucao" ? null : "execucao")
+          }
+        >
+          <div className="card-icon">📈</div>
+          <div className="card-content">
+            <h3>Taxa de Execução</h3>
+            <div className="card-value">
+              {estatisticas.percentualExecutado.toFixed(1)}%
+            </div>
+            <div className="card-subtitle">
+              {estatisticas.percentualExecutado > 70
+                ? "✅ Boa execução"
+                : estatisticas.percentualExecutado > 40
+                  ? "⚠️ Execução moderada"
+                  : "🔴 Baixa execução"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ✅ GRÁFICOS */}
+      <div className="charts-grid">
+        {/* Gráfico de Emendas por Status */}
+        <div className="chart-container">
+          <h3>📊 Emendas por Status</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Tooltip
-                contentStyle={{ backgroundColor: WHITE, borderRadius: 8 }}
-                formatter={(value) => [
-                  formatCurrency(value),
-                  "Valor Executado",
-                ]}
-              />
-              <Legend />
               <Pie
-                data={dataPie}
-                dataKey="value"
-                nameKey="name"
+                data={estatisticas.emendasPorStatus}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={120}
-                paddingAngle={5}
+                labelLine={false}
+                label={({ name, value }) => `${name}: ${value}`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
               >
-                {dataPie.map((entry, idx) => (
+                {estatisticas.emendasPorStatus.map((entry, index) => (
                   <Cell
-                    key={`cell-${idx}`}
-                    fill={COLORS[idx % COLORS.length]}
+                    key={`cell-${index}`}
+                    fill={CHART_COLORS[index % CHART_COLORS.length]}
                   />
                 ))}
               </Pie>
+              <Tooltip formatter={(value, name) => [value, name]} />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        {/* ✅ NOVO GRÁFICO: Top Emendas por Execução */}
-        <div style={styles.chartCard}>
-          <h2 style={styles.chartTitle}>
-            🎯 Top Emendas - Execução Financeira
-          </h2>
+        {/* Gráfico de Despesas por Status */}
+        <div className="chart-container">
+          <h3>💰 Despesas por Status</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={execucaoPorEmenda}>
+            <BarChart data={estatisticas.despesasPorStatus}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="nome" />
+              <XAxis dataKey="name" />
               <YAxis />
               <Tooltip
-                contentStyle={{ backgroundColor: WHITE, borderRadius: 8 }}
-                formatter={(value, name) => [
-                  name === "percentual"
-                    ? `${value.toFixed(1)}%`
-                    : formatCurrency(value),
-                  name === "valorTotal"
-                    ? "Valor Total"
-                    : name === "valorExecutado"
-                      ? "Executado"
-                      : "Execução",
-                ]}
+                formatter={(value) => [formatNumber(value), "Quantidade"]}
               />
-              <Legend />
-              <Bar dataKey="valorTotal" fill="#4A90E2" name="Valor Total" />
-              <Bar dataKey="valorExecutado" fill="#27AE60" name="Executado" />
+              <Bar dataKey="value" fill="#4A90E2" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={styles.chartCard}>
-          <h2 style={styles.chartTitle}>📈 Emendas Cadastradas por Período</h2>
+        {/* Evolução Mensal */}
+        <div className="chart-container full-width">
+          <h3>📈 Evolução Mensal</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dataBar}>
+            <LineChart data={estatisticas.evolucaoMensal}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="mes" />
               <YAxis />
-              <Tooltip
-                contentStyle={{ backgroundColor: WHITE, borderRadius: 8 }}
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="emendas"
+                stroke="#154360"
+                strokeWidth={2}
+                name="Emendas"
               />
-              <Bar dataKey="count" fill={ACCENT} radius={[4, 4, 0, 0]} />
-            </BarChart>
+              <Line
+                type="monotone"
+                dataKey="despesas"
+                stroke="#27AE60"
+                strokeWidth={2}
+                name="Despesas"
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
 
-      {/* Últimas despesas - mantido igual */}
-      <div style={styles.recentSection}>
-        <div style={styles.recentHeader}>
-          <h2 style={styles.sectionTitle}>🕐 Últimas Despesas</h2>
-          <button
-            style={styles.viewAllButton}
-            onClick={() => console.log("Navegar para /despesas")}
-          >
-            Ver todas
-          </button>
-        </div>
-
-        {ultimosDespesas.length === 0 ? (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>📭</div>
-            <p style={styles.emptyText}>Nenhuma despesa registrada ainda</p>
-          </div>
-        ) : (
-          <div style={styles.recentList}>
-            {ultimosDespesas.map((despesa, index) => (
-              <div
-                key={despesa.id}
-                style={styles.recentItem}
-                onClick={() =>
-                  console.log(
-                    `Navegar para /emendas/${despesa.emendaId}/fluxo/${despesa.id}`,
-                  )
-                }
-              >
-                <div style={styles.recentIcon}>💸</div>
-                <div style={styles.recentContent}>
-                  <h4 style={styles.recentTitle}>
-                    {formatCurrency(despesa.valor)}
-                  </h4>
-                  <p style={styles.recentDescription}>{despesa.descricao}</p>
-                  <p style={styles.recentEmenda}>
-                    {getEmendaInfo(despesa.emendaId)}
-                  </p>
+        {/* Top Municípios */}
+        <div className="chart-container">
+          <h3>🏆 Top Municípios</h3>
+          <div className="top-list">
+            {estatisticas.topMunicipios.map((municipio, index) => (
+              <div key={municipio.nome} className="top-item">
+                <div className="top-rank">#{index + 1}</div>
+                <div className="top-info">
+                  <div className="top-name">{municipio.nome}</div>
+                  <div className="top-details">
+                    {municipio.emendas} emendas •{" "}
+                    {formatCurrency(municipio.valor)}
+                  </div>
                 </div>
-                <div style={styles.recentDate}>{formatDate(despesa.data)}</div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Ações rápidas - mantidas iguais */}
-      <div style={styles.quickActions}>
-        <h2 style={styles.sectionTitle}>⚡ Ações Rápidas</h2>
-        <div style={styles.actionsGrid}>
-          <button
-            style={styles.actionButton}
-            onClick={() => console.log("Navegar para /emendas")}
-          >
-            <span style={styles.actionIcon}>📄</span>
-            <span>Nova Emenda</span>
-          </button>
-          <button
-            style={styles.actionButton}
-            onClick={() => console.log("Navegar para /despesas")}
-          >
-            <span style={styles.actionIcon}>💸</span>
-            <span>Nova Despesa</span>
-          </button>
-          <button
-            style={styles.actionButton}
-            onClick={() => console.log("Navegar para /relatorios")}
-          >
-            <span style={styles.actionIcon}>📈</span>
-            <span>Ver Relatórios</span>
-          </button>
         </div>
       </div>
+
+      {/* ✅ ESTILOS MIGRADOS PARA VARIÁVEIS CSS */}
+      <style>{`
+        .dashboard {
+          padding: 20px;
+          background: #f8f9fa;
+          min-height: 100vh;
+        }
+
+        .dashboard-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 400px;
+          gap: 20px;
+        }
+
+        .loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #154360;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .loading-info {
+          text-align: center;
+          color: #6c757d;
+          font-style: italic;
+        }
+
+        .dashboard-error {
+          text-align: center;
+          padding: 40px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .error-button {
+          background: #154360;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          margin-top: 20px;
+          font-weight: 500;
+        }
+
+        .dashboard-no-access {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 60vh;
+          padding: 40px;
+        }
+
+        .no-access-content {
+          text-align: center;
+          background: white;
+          padding: 60px 40px;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          max-width: 500px;
+          border: 2px solid #E74C3C;
+        }
+
+        .no-access-icon {
+          font-size: 64px;
+          margin-bottom: 20px;
+        }
+
+        .no-access-content h2 {
+          color: #E74C3C;
+          margin-bottom: 15px;
+        }
+
+        .no-access-details {
+          margin-top: 30px;
+          text-align: left;
+          background: #f8f9fa;
+          padding: 20px;
+          border-radius: 8px;
+        }
+
+        .no-access-details h4 {
+          margin-bottom: 10px;
+          color: #154360;
+        }
+
+        .no-access-details ul {
+          margin: 0;
+          padding-left: 20px;
+        }
+
+        .permissions-banner {
+          background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+          border: 1px solid #ffeaa7;
+          border-radius: 8px;
+          padding: 15px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .banner-content {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .banner-icon {
+          font-size: 1.2em;
+        }
+
+        .banner-text {
+          color: #856404;
+          font-weight: 500;
+        }
+
+        .dashboard-header {
+          background: white;
+          border-radius: 12px;
+          padding: 25px;
+          margin-bottom: 20px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 15px;
+        }
+
+        .header-content h1 {
+          margin: 0;
+          color: #154360;
+          font-size: 1.8em;
+        }
+
+        .user-info {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          flex-wrap: wrap;
+        }
+
+        .user-name {
+          font-weight: 600;
+          color: #154360;
+        }
+
+        .user-role {
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.9em;
+          font-weight: 500;
+          color: white;
+        }
+
+        .user-role.admin {
+          background: #E74C3C;
+        }
+
+        .user-role.user {
+          background: #27AE60;
+        }
+
+        .user-location {
+          background: #4A90E2;
+          color: white;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.9em;
+          font-weight: 500;
+        }
+
+        .summary-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+
+        .summary-card {
+          background: white;
+          border-radius: 12px;
+          padding: 25px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 2px solid transparent;
+        }
+
+        .summary-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .summary-card.active {
+          border-color: #4A90E2;
+          box-shadow: 0 4px 20px rgba(74, 144, 226, 0.3);
+        }
+
+        .summary-card .card-icon {
+          font-size: 2.5em;
+          margin-bottom: 15px;
+        }
+
+        .summary-card h3 {
+          margin: 0 0 10px 0;
+          color: #6c757d;
+          font-size: 1em;
+          font-weight: 500;
+        }
+
+        .card-value {
+          font-size: 2em;
+          font-weight: 700;
+          color: #154360;
+          margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+          color: #6c757d;
+          font-size: 0.9em;
+        }
+
+        .charts-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          gap: 20px;
+        }
+
+        .chart-container {
+          background: white;
+          border-radius: 12px;
+          padding: 25px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chart-container.full-width {
+          grid-column: 1 / -1;
+        }
+
+        .chart-container h3 {
+          margin: 0 0 20px 0;
+          color: #154360;
+          font-size: 1.2em;
+        }
+
+        .top-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        .top-item {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          border-left: 4px solid #4A90E2;
+        }
+
+        .top-rank {
+          font-size: 1.5em;
+          font-weight: 700;
+          color: #4A90E2;
+          min-width: 40px;
+        }
+
+        .top-info {
+          flex: 1;
+        }
+
+        .top-name {
+          font-weight: 600;
+          color: #154360;
+          margin-bottom: 4px;
+        }
+
+        .top-details {
+          color: #6c757d;
+          font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard {
+            padding: 10px;
+          }
+
+          .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .user-info {
+            justify-content: flex-start;
+          }
+
+          .summary-cards {
+            grid-template-columns: 1fr;
+          }
+
+          .charts-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .chart-container {
+            padding: 15px;
+          }
+        }
+      `}</style>
     </div>
   );
-}
-
-// Estilos mantidos iguais do arquivo original
-const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
-    padding: "24px",
-  },
-
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "50vh",
-    color: PRIMARY,
-  },
-
-  loadingSpinner: {
-    width: 40,
-    height: 40,
-    border: "4px solid #e3e3e3",
-    borderTop: "4px solid " + PRIMARY,
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    marginBottom: 16,
-  },
-
-  loadingText: {
-    fontSize: 16,
-    fontWeight: "500",
-    margin: 0,
-  },
-
-  welcomeSection: {
-    background:
-      "linear-gradient(135deg, " + PRIMARY + " 0%, " + ACCENT + " 100%)",
-    borderRadius: 16,
-    padding: "32px",
-    marginBottom: 32,
-    color: WHITE,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: 16,
-  },
-
-  welcomeTitle: {
-    fontSize: 32,
-    fontWeight: "600",
-    margin: 0,
-    marginBottom: 8,
-  },
-
-  welcomeSubtitle: {
-    fontSize: 16,
-    opacity: 0.9,
-    margin: 0,
-  },
-
-  welcomeDate: {
-    fontSize: 14,
-    opacity: 0.8,
-    textAlign: "right",
-    textTransform: "capitalize",
-  },
-
-  kpiGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: 24,
-    marginBottom: 32,
-  },
-
-  kpiCard: {
-    background: WHITE,
-    borderRadius: 12,
-    padding: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-    transition: "all 0.3s ease",
-    cursor: "pointer",
-    position: "relative",
-    overflow: "hidden",
-  },
-
-  activeCard: {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-  },
-
-  kpiIcon: {
-    fontSize: 32,
-    flexShrink: 0,
-  },
-
-  kpiContent: {
-    flex: 1,
-  },
-
-  kpiValue: {
-    fontSize: 28,
-    fontWeight: "600",
-    margin: 0,
-    marginBottom: 4,
-    lineHeight: 1,
-  },
-
-  kpiLabel: {
-    fontSize: 14,
-    color: "#666",
-    margin: 0,
-    marginBottom: 4,
-    fontWeight: "500",
-  },
-
-  kpiSubtext: {
-    fontSize: 12,
-    color: "#999",
-    fontStyle: "italic",
-  },
-
-  clickHint: {
-    fontSize: 12,
-    color: ACCENT,
-    fontWeight: "500",
-  },
-
-  alertsSection: {
-    marginBottom: 32,
-  },
-
-  sectionTitle: {
-    color: PRIMARY,
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 16,
-    margin: 0,
-  },
-
-  alertsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: 16,
-  },
-
-  alertCard: {
-    background: WHITE,
-    borderRadius: 12,
-    padding: "20px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-  },
-
-  alertIcon: {
-    fontSize: 24,
-    flexShrink: 0,
-  },
-
-  alertTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    margin: 0,
-    marginBottom: 4,
-  },
-
-  alertText: {
-    fontSize: 14,
-    color: "#666",
-    margin: 0,
-  },
-
-  chartsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-    gap: 24,
-    marginBottom: 32,
-  },
-
-  chartCard: {
-    background: WHITE,
-    borderRadius: 12,
-    padding: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-  },
-
-  chartTitle: {
-    color: PRIMARY,
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-
-  recentSection: {
-    background: WHITE,
-    borderRadius: 12,
-    padding: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-    marginBottom: 32,
-  },
-
-  recentHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-
-  viewAllButton: {
-    background: ACCENT,
-    color: WHITE,
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: "500",
-    transition: "background-color 0.2s",
-  },
-
-  emptyState: {
-    textAlign: "center",
-    padding: 40,
-    color: "#666",
-  },
-
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
-
-  emptyText: {
-    fontSize: 16,
-    margin: 0,
-  },
-
-  recentList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  },
-
-  recentItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-    padding: "16px",
-    borderRadius: 8,
-    background: "#f8f9fa",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-  },
-
-  recentIcon: {
-    fontSize: 20,
-    flexShrink: 0,
-  },
-
-  recentContent: {
-    flex: 1,
-  },
-
-  recentTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: ERROR,
-    margin: 0,
-    marginBottom: 4,
-  },
-
-  recentDescription: {
-    fontSize: 14,
-    color: "#333",
-    margin: 0,
-    marginBottom: 4,
-  },
-
-  recentEmenda: {
-    fontSize: 12,
-    color: "#666",
-    margin: 0,
-  },
-
-  recentDate: {
-    fontSize: 12,
-    color: "#999",
-    textAlign: "right",
-  },
-
-  quickActions: {
-    background: WHITE,
-    borderRadius: 12,
-    padding: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-  },
-
-  actionsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: 16,
-  },
-
-  actionButton: {
-    background: GRAY,
-    border: "1px solid #e0e0e0",
-    borderRadius: 8,
-    padding: "16px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    fontSize: 14,
-    fontWeight: "500",
-    color: PRIMARY,
-    transition: "all 0.2s",
-  },
-
-  actionIcon: {
-    fontSize: 20,
-  },
-};
-
-// CSS Animation
-const spinnerCSS = `
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-`;
-
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = spinnerCSS;
-  document.head.appendChild(style);
 }

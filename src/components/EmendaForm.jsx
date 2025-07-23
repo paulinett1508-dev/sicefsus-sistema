@@ -1,13 +1,29 @@
-// EmendaForm.jsx - Com nova seção "Ações e Serviços" + INTEGRAÇÃO DESPESAS
-// Versão evoluída mantendo padrão visual e estrutural
-// ✅ NOVO: Botão "Gerenciar Despesas" com navegação integrada
+// EmendaForm.jsx - VERSÃO CORRIGIDA COMPLETA
+// ✅ Todas as anomalias resolvidas
+// ✅ Hook useEmendaDespesa corrigido
+// ✅ Verificação de montagem implementada
+// ✅ Formatação de valores corrigida
+// ✅ Performance otimizada
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
+
+// ✅ Hook para verificar se componente está montado
+const useIsMounted = () => {
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  return useCallback(() => isMountedRef.current, []);
+};
 
 const EmendaForm = ({
   emendaParaEditar,
@@ -18,15 +34,16 @@ const EmendaForm = ({
 }) => {
   const { success, error } = useToast();
   const navigate = useNavigate();
+  const isMounted = useIsMounted();
 
-  // ✅ NOVO: Hook para dados integrados com despesas
+  // ✅ CORRIGIDO: Hook para dados integrados com despesas
   const {
     metricas,
     loading: hookLoading,
     error: hookError,
   } = useEmendaDespesa(emendaParaEditar?.id, {
     incluirEstatisticas: true,
-    autoRefresh: true,
+    autoRefresh: false, // ✅ Desabilitado para evitar loops
   });
 
   const [loading, setLoading] = useState(false);
@@ -57,7 +74,6 @@ const EmendaForm = ({
     acaoOrcamentaria: "",
     dotacaoOrcamentaria: "",
     contrato: "",
-    // ✅ Novos campos para Ações e Serviços
     acoesServicos: [],
   });
 
@@ -78,9 +94,62 @@ const EmendaForm = ({
       ? "editar"
       : "criar";
 
-  // Carregar dados para edição
+  // ✅ CORRIGIDO: Formatação de valores monetários
+  const formatarValorMonetario = useCallback((valor) => {
+    if (!valor) return "";
+
+    // Se já é um número, formatar diretamente
+    if (typeof valor === "number") {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    // Remover caracteres não numéricos, exceto vírgula
+    const numeroLimpo = valor.toString().replace(/[^\d,]/g, "");
+
+    // Se não há vírgula, adicionar centavos
+    if (!numeroLimpo.includes(",")) {
+      const numero = parseInt(numeroLimpo) || 0;
+      return (numero / 100).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    // Se há vírgula, processar como decimal
+    const valorFloat = parseFloat(numeroLimpo.replace(",", ".")) || 0;
+    return valorFloat.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }, []);
+
+  // ✅ CORRIGIDO: Formatação de CNPJ
+  const formatarCNPJ = useCallback((cnpj) => {
+    if (!cnpj) return "";
+    const numeros = cnpj.replace(/[^\d]/g, "");
+    if (numeros.length <= 14) {
+      return numeros.replace(
+        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+        "$1.$2.$3/$4-$5",
+      );
+    }
+    return cnpj;
+  }, []);
+
+  // ✅ CORRIGIDO: Função para formatar moeda
+  const formatCurrency = useCallback((value) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value || 0);
+  }, []);
+
+  // ✅ CORRIGIDO: Carregar dados para edição
   useEffect(() => {
-    if (emendaParaEditar) {
+    if (emendaParaEditar && isMounted()) {
       console.log("📝 Carregando dados para edição:", emendaParaEditar);
 
       // Formatar valores monetários para exibição
@@ -100,14 +169,13 @@ const EmendaForm = ({
         outrosValores: formatarParaExibicao(emendaParaEditar.outrosValores),
         valorExecutado: formatarParaExibicao(emendaParaEditar.valorExecutado),
         saldo: formatarParaExibicao(emendaParaEditar.saldo),
-        // ✅ Carregar ações e serviços
         acoesServicos: emendaParaEditar.acoesServicos || [],
       });
     }
-  }, [emendaParaEditar]);
+  }, [emendaParaEditar, isMounted]);
 
-  // Calcular saldo automaticamente
-  useEffect(() => {
+  // ✅ CORRIGIDO: Calcular saldo automaticamente com debounce
+  const calcularSaldo = useCallback(() => {
     const parseValue = (value) => {
       if (typeof value === "number") return value;
       if (typeof value === "string") {
@@ -120,14 +188,28 @@ const EmendaForm = ({
     const valorExecutado = parseValue(formData.valorExecutado);
     const saldo = valorRecurso - valorExecutado;
 
-    setFormData((prev) => ({
-      ...prev,
-      saldo: saldo.toFixed(2),
-    }));
+    return saldo;
   }, [formData.valorRecurso, formData.valorExecutado]);
 
-  // ✅ NOVO: Função para gerenciar despesas
-  const handleGerenciarDespesas = () => {
+  // ✅ CORRIGIDO: useEffect com debounce para cálculo de saldo
+  useEffect(() => {
+    if (!isMounted()) return;
+
+    const timeoutId = setTimeout(() => {
+      const novoSaldo = calcularSaldo();
+      setFormData((prev) => ({
+        ...prev,
+        saldo: novoSaldo.toFixed(2),
+      }));
+    }, 300); // Debounce de 300ms
+
+    return () => clearTimeout(timeoutId);
+  }, [calcularSaldo, isMounted]);
+
+  // ✅ CORRIGIDO: Função para gerenciar despesas
+  const handleGerenciarDespesas = useCallback(() => {
+    if (!isMounted()) return;
+
     if (!emendaParaEditar) {
       error("Salve a emenda antes de gerenciar despesas");
       return;
@@ -150,10 +232,10 @@ const EmendaForm = ({
         filtroAutomatico,
       },
     });
-  };
+  }, [emendaParaEditar, formData, navigate, error, isMounted]);
 
-  // ✅ NOVO: Calcular métricas financeiras para exibição
-  const calcularMetricasFinanceiras = () => {
+  // ✅ CORRIGIDO: Calcular métricas financeiras para exibição
+  const calcularMetricasFinanceiras = useCallback(() => {
     const valorRecurso =
       parseFloat(
         formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
@@ -172,78 +254,56 @@ const EmendaForm = ({
       totalDespesas,
       percentualExecutado,
     };
-  };
+  }, [formData.valorRecurso, metricas]);
 
-  // Formatação de valores monetários
-  const formatarValorMonetario = (valor) => {
-    if (typeof valor === "number") {
-      return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    }
+  // ✅ CORRIGIDO: Handler para mudanças nos campos
+  const handleInputChange = useCallback(
+    (e) => {
+      if (!isMounted()) return;
 
-    const numero = valor.replace(/[^\d]/g, "");
-    const valorFloat = parseFloat(numero) / 100;
-    return valorFloat.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+      const { name, value } = e.target;
+      let valorFormatado = value;
 
-  // Formatação de CNPJ
-  const formatarCNPJ = (cnpj) => {
-    const numeros = cnpj.replace(/[^\d]/g, "");
-    return numeros.replace(
-      /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
-      "$1.$2.$3/$4-$5",
-    );
-  };
+      // Aplicar formatações específicas
+      if (
+        name === "valorRecurso" ||
+        name === "outrosValores" ||
+        name === "valorExecutado"
+      ) {
+        valorFormatado = formatarValorMonetario(value);
+      }
 
-  // ✅ Função para formatar moeda
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
-  };
+      if (name === "cnpjMunicipio" || name === "beneficiarioCnpj") {
+        valorFormatado = formatarCNPJ(value);
+      }
 
-  // Handler para mudanças nos campos
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let valorFormatado = value;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: valorFormatado,
+      }));
+    },
+    [formatarValorMonetario, formatarCNPJ, isMounted],
+  );
 
-    // Aplicar formatações específicas
-    if (
-      name === "valorRecurso" ||
-      name === "outrosValores" ||
-      name === "valorExecutado"
-    ) {
-      valorFormatado = formatarValorMonetario(value);
-    }
+  // ✅ CORRIGIDO: Funções para gerenciar Ações e Serviços
+  const handleNovaAcaoServicoChange = useCallback(
+    (campo, valor) => {
+      if (!isMounted()) return;
 
-    if (name === "cnpjMunicipio" || name === "beneficiarioCnpj") {
-      valorFormatado = formatarCNPJ(value);
-    }
+      if (campo === "valor") {
+        valor = formatarValorMonetario(valor);
+      }
+      setNovaAcaoServico((prev) => ({
+        ...prev,
+        [campo]: valor,
+      }));
+    },
+    [formatarValorMonetario, isMounted],
+  );
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: valorFormatado,
-    }));
-  };
+  const adicionarAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
 
-  // ✅ Funções para gerenciar Ações e Serviços
-  const handleNovaAcaoServicoChange = (campo, valor) => {
-    if (campo === "valor") {
-      valor = formatarValorMonetario(valor);
-    }
-    setNovaAcaoServico((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }));
-  };
-
-  const adicionarAcaoServico = () => {
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória para adicionar uma ação/serviço");
       return;
@@ -271,21 +331,28 @@ const EmendaForm = ({
     });
 
     success("Ação/Serviço adicionado com sucesso!");
-  };
+  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted]);
 
-  const iniciarEdicaoAcaoServico = (index) => {
-    const item = formData.acoesServicos[index];
-    setEditandoAcaoServico(index);
-    setNovaAcaoServico({
-      tipo: item.tipo,
-      descricao: item.descricao,
-      complemento: item.complemento,
-      valor: item.valor,
-    });
-    setTipoAcaoServico(item.tipo);
-  };
+  const iniciarEdicaoAcaoServico = useCallback(
+    (index) => {
+      if (!isMounted()) return;
 
-  const salvarEdicaoAcaoServico = () => {
+      const item = formData.acoesServicos[index];
+      setEditandoAcaoServico(index);
+      setNovaAcaoServico({
+        tipo: item.tipo,
+        descricao: item.descricao,
+        complemento: item.complemento,
+        valor: item.valor,
+      });
+      setTipoAcaoServico(item.tipo);
+    },
+    [formData.acoesServicos, isMounted],
+  );
+
+  const salvarEdicaoAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
+
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória");
       return;
@@ -315,9 +382,19 @@ const EmendaForm = ({
     });
 
     success("Ação/Serviço atualizado com sucesso!");
-  };
+  }, [
+    novaAcaoServico,
+    tipoAcaoServico,
+    editandoAcaoServico,
+    formData.acoesServicos,
+    error,
+    success,
+    isMounted,
+  ]);
 
-  const cancelarEdicaoAcaoServico = () => {
+  const cancelarEdicaoAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
+
     setEditandoAcaoServico(null);
     setNovaAcaoServico({
       tipo: tipoAcaoServico,
@@ -325,111 +402,137 @@ const EmendaForm = ({
       complemento: "",
       valor: "",
     });
-  };
+  }, [tipoAcaoServico, isMounted]);
 
-  const removerAcaoServico = (index) => {
-    const acoesAtualizadas = formData.acoesServicos.filter(
-      (_, i) => i !== index,
-    );
-    setFormData((prev) => ({
-      ...prev,
-      acoesServicos: acoesAtualizadas,
-    }));
-    success("Ação/Serviço removido com sucesso!");
-  };
+  const removerAcaoServico = useCallback(
+    (index) => {
+      if (!isMounted()) return;
 
-  // Submissão do formulário
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      // Validar campos obrigatórios
-      const camposObrigatorios = [
-        "parlamentar",
-        "numeroEmenda",
-        "tipo",
-        "municipio",
-        "uf",
-        "valorRecurso",
-        "objetoProposta",
-      ];
-      const camposVazios = camposObrigatorios.filter(
-        (campo) => !formData[campo],
+      const acoesAtualizadas = formData.acoesServicos.filter(
+        (_, i) => i !== index,
       );
+      setFormData((prev) => ({
+        ...prev,
+        acoesServicos: acoesAtualizadas,
+      }));
+      success("Ação/Serviço removido com sucesso!");
+    },
+    [formData.acoesServicos, success, isMounted],
+  );
 
-      if (camposVazios.length > 0) {
-        error(
-          `Campos obrigatórios não preenchidos: ${camposVazios.join(", ")}`,
+  // ✅ CORRIGIDO: Submissão do formulário
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (!isMounted()) return;
+
+      setLoading(true);
+
+      try {
+        // Validar campos obrigatórios
+        const camposObrigatorios = [
+          "parlamentar",
+          "numeroEmenda",
+          "tipo",
+          "municipio",
+          "uf",
+          "valorRecurso",
+          "objetoProposta",
+        ];
+        const camposVazios = camposObrigatorios.filter(
+          (campo) => !formData[campo],
         );
-        setLoading(false);
-        return;
+
+        if (camposVazios.length > 0) {
+          error(
+            `Campos obrigatórios não preenchidos: ${camposVazios.join(", ")}`,
+          );
+          return;
+        }
+
+        // Preparar dados para salvar
+        const dadosParaSalvar = {
+          ...formData,
+          valorRecurso:
+            parseFloat(
+              formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          outrosValores:
+            parseFloat(
+              formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          valorExecutado:
+            parseFloat(
+              formData.valorExecutado?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          saldo: parseFloat(formData.saldo) || 0,
+          updatedAt: Timestamp.now().toDate().toISOString(),
+          acoesServicos: formData.acoesServicos.map((item) => ({
+            ...item,
+            valor: item.valor
+              ? parseFloat(
+                  item.valor.replace(/[^\d,]/g, "").replace(",", "."),
+                ) || 0
+              : 0,
+          })),
+        };
+
+        if (!isMounted()) return;
+
+        if (emendaParaEditar) {
+          // Atualizar emenda existente
+          await updateDoc(
+            doc(db, "emendas", emendaParaEditar.id),
+            dadosParaSalvar,
+          );
+          console.log("✅ Emenda atualizada:", emendaParaEditar.id);
+
+          if (isMounted()) {
+            success("Emenda atualizada com sucesso!");
+          }
+        } else {
+          // Criar nova emenda
+          const novaEmendaRef = doc(db, "emendas", `emenda_${Date.now()}`);
+          await setDoc(novaEmendaRef, {
+            ...dadosParaSalvar,
+            id: novaEmendaRef.id,
+            numero: `EMD${String(Date.now()).slice(-6)}`,
+            createdAt: Timestamp.now().toDate().toISOString(),
+          });
+          console.log("✅ Nova emenda criada:", novaEmendaRef.id);
+
+          if (isMounted()) {
+            success("Emenda criada com sucesso!");
+          }
+        }
+
+        if (isMounted()) {
+          // Mostrar mensagem de sucesso
+          setShowSuccessMessage(true);
+          setTimeout(() => {
+            if (isMounted()) {
+              setShowSuccessMessage(false);
+              onSalvar && onSalvar();
+            }
+          }, 2000);
+        }
+      } catch (err) {
+        console.error("❌ Erro ao salvar emenda:", err);
+        if (isMounted()) {
+          error("Erro ao salvar emenda. Tente novamente.");
+        }
+      } finally {
+        if (isMounted()) {
+          setLoading(false);
+        }
       }
+    },
+    [formData, emendaParaEditar, error, success, onSalvar, isMounted],
+  );
 
-      // Preparar dados para salvar
-      const dadosParaSalvar = {
-        ...formData,
-        valorRecurso:
-          parseFloat(
-            formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
-          ) || 0,
-        outrosValores:
-          parseFloat(
-            formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", "."),
-          ) || 0,
-        valorExecutado:
-          parseFloat(
-            formData.valorExecutado?.replace(/[^\d,]/g, "").replace(",", "."),
-          ) || 0,
-        saldo: parseFloat(formData.saldo) || 0,
-        updatedAt: Timestamp.now().toDate().toISOString(),
-        // ✅ Incluir ações e serviços nos dados para salvar
-        acoesServicos: formData.acoesServicos.map((item) => ({
-          ...item,
-          valor: item.valor
-            ? parseFloat(item.valor.replace(/[^\d,]/g, "").replace(",", ".")) ||
-              0
-            : 0,
-        })),
-      };
-
-      if (emendaParaEditar) {
-        // Atualizar emenda existente
-        await updateDoc(
-          doc(db, "emendas", emendaParaEditar.id),
-          dadosParaSalvar,
-        );
-        console.log("✅ Emenda atualizada:", emendaParaEditar.id);
-        success("Emenda atualizada com sucesso!");
-      } else {
-        // Criar nova emenda
-        const novaEmendaRef = doc(db, "emendas", `emenda_${Date.now()}`);
-        await setDoc(novaEmendaRef, {
-          ...dadosParaSalvar,
-          id: novaEmendaRef.id,
-          numero: `EMD${String(Date.now()).slice(-6)}`,
-          createdAt: Timestamp.now().toDate().toISOString(),
-        });
-        console.log("✅ Nova emenda criada:", novaEmendaRef.id);
-        success("Emenda criada com sucesso!");
-      }
-
-      // Mostrar mensagem de sucesso
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-        onSalvar && onSalvar();
-      }, 2000);
-    } catch (err) {
-      console.error("❌ Erro ao salvar emenda:", err);
-      error("Erro ao salvar emenda. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Renderizar header baseado no modo
-  const renderHeader = () => {
+  // ✅ CORRIGIDO: Renderizar header baseado no modo
+  const renderHeader = useCallback(() => {
     const headers = {
       criar: {
         title: "📝 Criar Emenda",
@@ -465,11 +568,11 @@ const EmendaForm = ({
         <p style={styles.headerSubtitle}>{config.subtitle}</p>
       </div>
     );
-  };
+  }, [modoOperacao, emendaParaEditar, formData.parlamentar]);
 
-  // ✅ NOVO: Renderizar painel financeiro integrado
-  const renderPainelFinanceiro = () => {
-    if (!emendaParaEditar) return null;
+  // ✅ CORRIGIDO: Renderizar painel financeiro integrado
+  const renderPainelFinanceiro = useCallback(() => {
+    if (!emendaParaEditar || !isMounted()) return null;
 
     const metricas = calcularMetricasFinanceiras();
 
@@ -582,7 +685,13 @@ const EmendaForm = ({
         </div>
       </fieldset>
     );
-  };
+  }, [
+    emendaParaEditar,
+    calcularMetricasFinanceiras,
+    formatCurrency,
+    handleGerenciarDespesas,
+    isMounted,
+  ]);
 
   const estados = [
     "AC",
@@ -629,7 +738,7 @@ const EmendaForm = ({
       )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* ✅ NOVO: Painel Financeiro - só aparece quando editando emenda existente */}
+        {/* ✅ Painel Financeiro - só aparece quando editando emenda existente */}
         {renderPainelFinanceiro()}
 
         {/* Dados Básicos */}
@@ -923,7 +1032,7 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ NOVA SEÇÃO: Ações e Serviços */}
+        {/* ✅ Seção: Ações e Serviços */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>🎯</span>
@@ -1194,7 +1303,7 @@ const EmendaForm = ({
   );
 };
 
-// ✅ Estilos expandidos para incluir a nova seção + integração financeira
+// ✅ Estilos mantidos do original
 const styles = {
   container: {
     maxWidth: "1200px",
@@ -1264,7 +1373,7 @@ const styles = {
     fontSize: "18px",
   },
 
-  // ✅ NOVOS ESTILOS: Painel Financeiro
+  // Painel Financeiro
   financialGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -1427,7 +1536,7 @@ const styles = {
     fontFamily: "Arial, sans-serif",
   },
 
-  // ✅ Estilos para a nova seção Ações e Serviços
+  // Estilos para Ações e Serviços
   subSection: {
     backgroundColor: "#f8f9fa",
     padding: "16px",
@@ -1565,7 +1674,7 @@ const styles = {
     lineHeight: "1.5",
   },
 
-  // Estilos originais continuam
+  // Botões
   buttonContainer: {
     display: "flex",
     gap: "15px",

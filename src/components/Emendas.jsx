@@ -1,19 +1,73 @@
-// Emendas.jsx - Sistema SICEFSUS v1.7 - CORRIGIDO (Sem Re-renders)
+// Emendas.jsx - Sistema SICEFSUS v1.7 - CORREÇÃO CRÍTICA APLICADA
 // Componente principal de gestão de emendas
 
 import React, { useState, useEffect } from "react";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import {
+  deleteDoc,
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { db, auth } from "../firebase/firebaseConfig";
 import EmendaForm from "./EmendaForm";
 import EmendasTable from "./EmendasTable";
 import DespesaForm from "./DespesaForm";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 
-const Emendas = () => {
+const Emendas = ({ usuario }) => {
   const [currentView, setCurrentView] = useState("listagem");
   const [emendaSelecionada, setEmendaSelecionada] = useState(null);
+  const [userMunicipio, setUserMunicipio] = useState(null);
+  const [userUf, setUserUf] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
-  // ✅ Hook integrado - SEM autoRefresh para evitar loops
+  // ✅ Buscar dados do usuário no Firestore
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (usuario?.uid) {
+        try {
+          // Buscar documento do usuário
+          const usersSnapshot = await getDocs(
+            query(collection(db, "users"), where("uid", "==", usuario.uid)),
+          );
+
+          if (!usersSnapshot.empty) {
+            const userData = usersSnapshot.docs[0].data();
+            setUserMunicipio(userData.municipio);
+            setUserUf(userData.uf);
+            setUserRole(userData.role);
+            console.log("👤 Dados do usuário carregados:", {
+              municipio: userData.municipio,
+              uf: userData.uf,
+              role: userData.role,
+            });
+          }
+        } catch (error) {
+          console.error("❌ Erro ao buscar dados do usuário:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [usuario]);
+
+  // ✅ CORREÇÃO CRÍTICA: Construir objeto usuário completo para o hook
+  const usuarioParaHook = userRole
+    ? {
+        uid: usuario?.uid,
+        email: usuario?.email,
+        role: userRole,
+        municipio: userMunicipio,
+        uf: userUf,
+      }
+    : null;
+
+  console.log("✅ Usuário completo configurado:", usuarioParaHook);
+
+  // ✅ Hook integrado - COM USUÁRIO COMPLETO
   const {
     emendas,
     loading,
@@ -21,27 +75,33 @@ const Emendas = () => {
     atualizarSaldoEmenda,
     obterEstatisticasGerais,
     recarregar,
-  } = useEmendaDespesa(null, {
-    carregarTodasEmendas: true,
+  } = useEmendaDespesa(usuarioParaHook, {
+    carregarTodasEmendas: userRole !== null, // ✅ Só carrega quando role estiver definida
     incluirEstatisticas: true,
-    autoRefresh: false, // ✅ DESATIVADO para evitar loops
+    autoRefresh: false,
+    filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
+    filtroUf: userRole !== "admin" ? userUf : null,
+    userRole: userRole, // ✅ Também nas options para compatibilidade
   });
+
+  // ✅ Usar emendas direto do hook (já filtradas)
+  const emendasFiltradas = emendas; // Já vem filtradas do hook se for operador
 
   // ✅ UseEffect OTIMIZADO - só roda na primeira vez
   useEffect(() => {
     console.log("🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado");
-  }, []); // ✅ Array vazio = só roda uma vez
+  }, []);
 
   // ✅ Log separado para dados (só quando realmente mudam) - OTIMIZADO
   useEffect(() => {
-    const emendasLength = emendas?.length || 0;
+    const emendasLength = emendasFiltradas?.length || 0;
     if (emendasLength > 0) {
-      console.log("✅ Emendas carregadas via hook:", emendasLength);
+      console.log("✅ Emendas filtradas carregadas:", emendasLength);
     }
     if (error) {
       console.error("❌ Erro no hook:", error);
     }
-  }, [emendas?.length, error]); // ✅ Dependências específicas
+  }, [emendasFiltradas?.length, error]);
 
   // Handlers para navegação
   const handleVisualizar = (emenda) => {
@@ -115,28 +175,51 @@ const Emendas = () => {
     setCurrentView("despesas");
   };
 
-  // Cálculos para estatísticas usando o hook
-  const estatisticas = obterEstatisticasGerais();
-  const totalEmendas = estatisticas?.totalEmendas || emendas?.length || 0;
+  // Cálculos para estatísticas usando as emendas filtradas
+  const totalEmendas = emendasFiltradas?.length || 0;
   const emendasComRecursos =
-    emendas?.filter((e) => e.valorRecurso > 0).length || 0;
+    emendasFiltradas?.filter((e) => e.valorRecurso > 0).length || 0;
   const valorTotal =
-    estatisticas?.valorTotalGeral ||
-    emendas?.reduce((sum, e) => sum + (e.valorRecurso || 0), 0) ||
-    0;
+    emendasFiltradas?.reduce((sum, e) => sum + (e.valorRecurso || 0), 0) || 0;
 
   // Renderização condicional baseada na view atual
   const renderContent = () => {
+    // Verificar se o usuário tem município/UF cadastrado (apenas para operadores)
+    if (userRole !== "admin" && (!userMunicipio || !userUf) && !loading) {
+      return (
+        <div style={styles.warningContainer}>
+          <div style={styles.warningCard}>
+            <h2 style={styles.warningTitle}>⚠️ Configuração Pendente</h2>
+            <p style={styles.warningText}>
+              Seu usuário não possui município/UF cadastrado no sistema.
+            </p>
+            <p style={styles.warningText}>
+              Entre em contato com o administrador para configurar seu acesso.
+            </p>
+            <div style={styles.userInfo}>
+              <strong>Usuário:</strong> {usuario?.email}
+              <br />
+              <strong>Perfil:</strong> Operador
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     switch (currentView) {
       case "criar":
         return (
           <EmendaForm
             onCancelar={handleVoltar}
             onSalvar={async () => {
-              await recarregar(); // ✅ Recarregar após salvar
+              await recarregar();
               handleVoltar();
             }}
             onListarEmendas={handleVoltar}
+            // Passar município/UF do usuário como padrão para operadores
+            defaultMunicipio={userRole !== "admin" ? userMunicipio : null}
+            defaultUf={userRole !== "admin" ? userUf : null}
+            isOperador={userRole !== "admin"}
           />
         );
 
@@ -146,10 +229,11 @@ const Emendas = () => {
             emendaParaEditar={emendaSelecionada}
             onCancelar={handleVoltar}
             onSalvar={async () => {
-              await recarregar(); // ✅ Recarregar após salvar
+              await recarregar();
               handleVoltar();
             }}
             onListarEmendas={handleVoltar}
+            isOperador={userRole !== "admin"}
           />
         );
 
@@ -169,7 +253,6 @@ const Emendas = () => {
           <DespesaForm
             emendaId={emendaSelecionada?.id}
             onSalvar={async () => {
-              // Sincronizar dados após salvar usando o hook
               if (emendaSelecionada?.id) {
                 await atualizarSaldoEmenda(emendaSelecionada.id);
                 await recarregar();
@@ -177,14 +260,14 @@ const Emendas = () => {
               handleVoltar();
             }}
             onCancelar={handleVoltar}
-            usuario={{ uid: "user123" }} // Ajustar conforme seu sistema de auth
+            usuario={usuario}
           />
         );
 
       default:
         return (
           <div>
-            {/* Header compacto apenas com status */}
+            {/* Header com informações de filtro */}
             <div style={styles.compactHeader}>
               <div style={styles.statusInfo}>
                 <span style={styles.statusText}>Status:</span>
@@ -197,6 +280,14 @@ const Emendas = () => {
                 <span style={styles.versionValue}>
                   {loading ? "Carregando..." : `${totalEmendas} emendas`}
                 </span>
+                {userRole !== "admin" && userMunicipio && userUf && (
+                  <>
+                    <span style={styles.divider}>|</span>
+                    <span style={styles.filterInfo}>
+                      📍 {userMunicipio}/{userUf}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -204,7 +295,11 @@ const Emendas = () => {
             <div style={styles.statsContainer}>
               <div style={styles.statCard}>
                 <h3 style={styles.statNumber}>{totalEmendas}</h3>
-                <p style={styles.statLabel}>TOTAL DE EMENDAS</p>
+                <p style={styles.statLabel}>
+                  {userRole === "admin"
+                    ? "TOTAL DE EMENDAS"
+                    : "EMENDAS DO MUNICÍPIO"}
+                </p>
               </div>
               <div style={styles.statCard}>
                 <h3 style={styles.statNumber}>{emendasComRecursos}</h3>
@@ -247,9 +342,17 @@ const Emendas = () => {
                   🔄 Tentar novamente
                 </button>
               </div>
+            ) : totalEmendas === 0 ? (
+              <div style={styles.emptyContainer}>
+                <p style={styles.emptyText}>
+                  {userRole === "admin"
+                    ? "Nenhuma emenda cadastrada no sistema."
+                    : `Nenhuma emenda encontrada para ${userMunicipio}/${userUf}.`}
+                </p>
+              </div>
             ) : (
               <EmendasTable
-                emendas={emendas || []}
+                emendas={emendasFiltradas}
                 onView={handleVisualizar}
                 onEdit={handleEditar}
                 onDelete={handleDeletar}
@@ -306,6 +409,12 @@ const styles = {
   divider: {
     opacity: 0.7,
     margin: "0 4px",
+  },
+  filterInfo: {
+    fontWeight: "600",
+    background: "rgba(255,255,255,0.2)",
+    padding: "2px 10px",
+    borderRadius: "12px",
   },
   statsContainer: {
     display: "grid",
@@ -391,6 +500,52 @@ const styles = {
     borderRadius: "5px",
     fontSize: "14px",
     cursor: "pointer",
+  },
+  emptyContainer: {
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  emptyText: {
+    fontSize: "16px",
+    color: "#666",
+  },
+  warningContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    padding: "20px",
+  },
+  warningCard: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "40px",
+    textAlign: "center",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    maxWidth: "500px",
+    border: "2px solid #ffc107",
+  },
+  warningTitle: {
+    color: "#856404",
+    marginBottom: "15px",
+    fontSize: "24px",
+  },
+  warningText: {
+    color: "#856404",
+    marginBottom: "15px",
+    lineHeight: "1.6",
+  },
+  userInfo: {
+    background: "#fff3cd",
+    padding: "15px",
+    borderRadius: "8px",
+    color: "#856404",
+    fontSize: "14px",
+    textAlign: "left",
+    marginTop: "20px",
   },
 };
 

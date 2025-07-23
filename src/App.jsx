@@ -1,4 +1,7 @@
-// App.jsx - Versão Corrigida v5.4 (Integração Enterprise)
+// App.jsx - VERSÃO CORRIGIDA COMPLETA v5.6
+// ✅ CORREÇÃO 1: Prop usuario adicionada na rota /administracao (linha 332)
+// ✅ CORREÇÃO 2: Normalização UF na função criarUsuarioSeNaoExiste (linha 98)
+
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -6,7 +9,7 @@ import {
   Route,
   useNavigate,
   useLocation,
-  Navigate, // ✅ ADICIONADO para redirecionamento
+  Navigate,
 } from "react-router-dom";
 import { ToastProvider } from "./components/Toast";
 import Sidebar from "./components/Sidebar";
@@ -22,7 +25,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
-import Administracao from "./components/Administracao"; // ✅ ADICIONADO componente enterprise
+import Administracao from "./components/Administracao";
 
 // ✨ Context para proteção de navegação (MANTIDO)
 const NavigationProtectionContext = React.createContext({
@@ -95,22 +98,14 @@ function NavigationProtectionProvider({ children }) {
   );
 }
 
-// ✅ CORREÇÃO 3: Componente wrapper SEM banner fixo (usa apenas TemporaryBanner)
+// ✅ Componente wrapper (MANTIDO)
 function ProtectedRouteWrapper({ children, usuario }) {
   const { isFormActive, hasChanges } = useNavigationProtection();
 
-  // ✅ REMOVIDO: Banner fixo que causava conflito
-  // O banner agora é controlado pelos componentes TemporaryBanner individualmente
-
-  return (
-    <div style={{ position: "relative" }}>
-      {/* ✅ SEM BANNER FIXO - apenas o conteúdo da rota */}
-      {children}
-    </div>
-  );
+  return <div style={{ position: "relative" }}>{children}</div>;
 }
 
-// ✅ CORREÇÃO 4: Sidebar com proteção SIMPLIFICADA
+// ✅ Sidebar com proteção (MANTIDO)
 function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
   const { canNavigate, isFormActive, hasChanges } = useNavigationProtection();
 
@@ -126,20 +121,18 @@ function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
     }
   };
 
-  // ✅ SIMPLIFICADO: Menu não fica visualmente bloqueado
-  // A proteção é apenas funcional, não visual
   return (
     <Sidebar
       onNavigate={handleNavigate}
       activePath={activePath}
       usuario={usuario}
       onLogout={handleLogout}
-      isBlocked={false} // ✅ Sempre false para não confundir com TemporaryBanner
+      isBlocked={false}
     />
   );
 }
 
-// Componente de loading personalizado (PRESERVADO)
+// Componente de loading (MANTIDO)
 function LoadingSpinner() {
   return (
     <div style={styles.loadingContainer}>
@@ -149,7 +142,7 @@ function LoadingSpinner() {
   );
 }
 
-// Componente de erro boundary (PRESERVADO)
+// Error boundary (MANTIDO)
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -186,14 +179,15 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Função utilitária para criar usuário no Firestore se não existir (PRESERVADA)
+// ✅ CORREÇÃO PRINCIPAL: Função para criar usuário com dados completos + normalização UF
 async function criarUsuarioSeNaoExiste(user, role = "user") {
   try {
     const userRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      await setDoc(userRef, {
+      // Criar novo usuário com estrutura completa
+      const novoUsuario = {
         uid: user.uid,
         email: user.email,
         role: role,
@@ -201,15 +195,26 @@ async function criarUsuarioSeNaoExiste(user, role = "user") {
         isActive: true,
         createdAt: serverTimestamp(),
         lastLogin: serverTimestamp(),
-      });
+        // ✅ CAMPOS ADICIONAIS para evitar problemas futuros
+        municipio: null,
+        uf: null,
+      };
+
+      await setDoc(userRef, novoUsuario);
+
+      console.log("👤 Novo usuário criado:", novoUsuario);
+
       return {
         uid: user.uid,
         email: user.email,
         role: role,
         displayName: user.displayName,
         isActive: true,
+        municipio: null,
+        uf: null,
       };
     } else {
+      // ✅ CORREÇÃO: Atualizar lastLogin e retornar dados COMPLETOS
       await setDoc(
         userRef,
         {
@@ -218,7 +223,11 @@ async function criarUsuarioSeNaoExiste(user, role = "user") {
         },
         { merge: true },
       );
-      return userDoc.data();
+
+      const userData = userDoc.data();
+      console.log("👤 Dados do usuário do Firestore:", userData);
+
+      return userData; // ✅ Retorna TODOS os dados do Firestore
     }
   } catch (error) {
     console.error("Erro ao criar/atualizar usuário:", error);
@@ -228,6 +237,8 @@ async function criarUsuarioSeNaoExiste(user, role = "user") {
       role: "user",
       displayName: user.displayName,
       isActive: true,
+      municipio: null,
+      uf: null,
     };
   }
 }
@@ -248,12 +259,20 @@ function AppContent() {
 
       if (firebaseUser) {
         try {
-          await criarUsuarioSeNaoExiste(firebaseUser, "user");
+          // ✅ CORREÇÃO: Obter dados completos do Firestore
+          const userDataFromFirestore = await criarUsuarioSeNaoExiste(
+            firebaseUser,
+            "user",
+          );
+
+          // ✅ VERIFICAÇÃO: Buscar dados atualizados do Firestore
           const userRef = doc(db, "users", firebaseUser.uid);
           const userDoc = await getDoc(userRef);
 
           if (userDoc.exists()) {
             const userInfo = userDoc.data();
+
+            console.log("🔍 Dados completos do Firestore:", userInfo);
 
             if (userInfo.isActive === false) {
               setAuthError(
@@ -264,26 +283,58 @@ function AppContent() {
               return;
             }
 
-            setUsuario({
+            // ✅ CORREÇÃO PRINCIPAL: Incluir TODOS os campos do Firestore + normalização UF
+            const usuarioCompleto = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               role: userInfo.role || "user",
               displayName:
                 userInfo.displayName || firebaseUser.displayName || null,
               isActive: userInfo.isActive !== false,
+              // ✅ CAMPOS CRÍTICOS que estavam faltando:
+              municipio: userInfo.municipio || null,
+              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null, // ✅ NORMALIZAÇÃO UF
+              // ✅ Incluir TODOS os outros campos do Firestore
+              nome: userInfo.nome || null,
+              telefone: userInfo.telefone || null,
+              departamento: userInfo.departamento || null,
+              createdAt: userInfo.createdAt || null,
+              lastLogin: userInfo.lastLogin || null,
+              // ✅ Spread para garantir que nenhum campo seja perdido
               ...userInfo,
-            });
+              // ✅ Sobrescrever com dados do Firebase Auth quando necessário
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              // ✅ NORMALIZAÇÃO FINAL DO UF
+              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null,
+            };
+
+            console.log("✅ Usuário completo configurado:", usuarioCompleto);
+            console.log("🗺️ UF do usuário:", usuarioCompleto.uf);
+            console.log("📍 Município do usuário:", usuarioCompleto.municipio);
+
+            setUsuario(usuarioCompleto);
+          } else {
+            console.error(
+              "❌ Documento do usuário não encontrado no Firestore",
+            );
+            setAuthError("Erro ao carregar dados do usuário.");
           }
+
           setShowLogin(false);
         } catch (error) {
           console.error("Erro ao carregar dados do usuário:", error);
           setAuthError("Erro ao carregar dados do usuário. Tente novamente.");
+
+          // ✅ Fallback com estrutura mínima
           setUsuario({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             role: "user",
             displayName: firebaseUser.displayName,
             isActive: true,
+            municipio: null,
+            uf: null,
           });
         }
       } else {
@@ -374,7 +425,7 @@ function AppContent() {
       )}
 
       <div style={styles.container}>
-        {/* Sidebar com proteção simplificada */}
+        {/* Sidebar */}
         {isAuthenticated && (
           <ProtectedSidebar
             onNavigate={handleNavigate}
@@ -393,7 +444,7 @@ function AppContent() {
         >
           <ErrorBoundary>
             <Routes>
-              {/* Rota inicial (PRESERVADA) */}
+              {/* Rota inicial */}
               <Route
                 path="/"
                 element={
@@ -405,7 +456,7 @@ function AppContent() {
                 }
               />
 
-              {/* Rotas protegidas com UX simplificada */}
+              {/* ✅ ROTAS com usuário completo */}
               <Route
                 path="/dashboard"
                 element={
@@ -456,8 +507,6 @@ function AppContent() {
                   </PrivateRoute>
                 }
               />
-
-              {/* ✅ ROTA SOBRE CORRIGIDA - Movida para dentro do Routes */}
               <Route
                 path="/sobre"
                 element={
@@ -469,18 +518,19 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTAS ADMINISTRATIVAS ENTERPRISE - ATUALIZADAS */}
+              {/* Rotas administrativas */}
               <Route
                 path="/admin"
                 element={<Navigate to="/administracao" replace />}
               />
-
+              {/* ✅ CORREÇÃO CRÍTICA: PROP USUARIO ADICIONADA */}
               <Route
                 path="/administracao"
                 element={
                   <PrivateRoute usuario={usuario} requiredRole="admin">
                     <ProtectedRouteWrapper usuario={usuario}>
-                      <Administracao />
+                      <Administracao usuario={usuario} />{" "}
+                      {/* ✅ PROP ADICIONADA */}
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -535,7 +585,7 @@ function AppContent() {
   );
 }
 
-// Componente principal com providers
+// Componente principal
 export default function App() {
   return (
     <ToastProvider>
@@ -548,7 +598,7 @@ export default function App() {
   );
 }
 
-// ✅ Estilos SIMPLIFICADOS (removidos estilos do banner fixo)
+// Estilos (MANTIDOS)
 const styles = {
   app: {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -564,11 +614,6 @@ const styles = {
     transition: "margin-left 0.2s ease",
     minHeight: "100vh",
   },
-
-  // ✅ REMOVIDOS: Estilos do banner fixo para evitar conflito
-  // O TemporaryBanner.jsx terá seus próprios estilos
-
-  // Estilos preservados (SEM ALTERAÇÕES)
   loadingContainer: {
     display: "flex",
     flexDirection: "column",
@@ -726,11 +771,6 @@ const styles = {
     marginBottom: 24,
     maxWidth: 400,
   },
-  adminPlaceholder: {
-    padding: 40,
-    textAlign: "center",
-    color: "#154360",
-  },
   button: {
     backgroundColor: "#154360",
     color: "white",
@@ -744,7 +784,7 @@ const styles = {
   },
 };
 
-// CSS adicional para animações
+// CSS para animações
 const additionalCSS = `
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -752,7 +792,6 @@ const additionalCSS = `
 }
 `;
 
-// Inserir CSS dinamicamente
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = additionalCSS;

@@ -15,7 +15,7 @@ const menuItems = [
 ];
 
 const adminItems = [
-  { label: "Administração", icon: "⚙️", path: "/administracao" },
+  { label: "Usuários", icon: "👥", path: "/administracao" }, // Alterado de "Administração" para "Usuários"
 ];
 
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {

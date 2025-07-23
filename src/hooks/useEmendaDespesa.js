@@ -1,4 +1,4 @@
-// src/hooks/useEmendaDespesa.js
+// src/hooks/useEmendaDespesa.js - CORREÇÃO CRÍTICA IMPLEMENTADA
 // HOOK CUSTOMIZADO - RELACIONAMENTO EMENDA-DESPESA
 // ✅ Gerencia relacionamento crítico + cálculos automáticos + validações
 
@@ -19,11 +19,21 @@ import { db } from "../firebase/firebaseConfig";
 
 /**
  * Hook customizado para gerenciar relacionamento Emenda-Despesa
- * @param {string} emendaId - ID da emenda (opcional)
+ * @param {Object} usuario - Dados completos do usuário (CORREÇÃO: era string emendaId)
  * @param {Object} options - Opções de configuração
  * @returns {Object} - Dados e funções para gerenciar relacionamento
  */
-const useEmendaDespesa = (emendaId = null, options = {}) => {
+const useEmendaDespesa = (usuario = null, options = {}) => {
+  // ✅ DEBUG: Log completo do usuário recebido
+  console.log("🔧 DEBUG useEmendaDespesa - usuário recebido:", usuario);
+  console.log("🔧 DEBUG useEmendaDespesa - tipo do usuário:", typeof usuario);
+  console.log("🔧 DEBUG useEmendaDespesa - role:", usuario?.role);
+  console.log(
+    "🔧 DEBUG useEmendaDespesa - tipo da role:",
+    typeof usuario?.role,
+  );
+  console.log("🔧 DEBUG useEmendaDespesa - options:", options);
+
   // ✅ ESTADOS PRINCIPAIS
   const [emenda, setEmenda] = useState(null);
   const [emendas, setEmendas] = useState([]);
@@ -31,6 +41,13 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
   const [despesasEmenda, setDespesasEmenda] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [permissoes, setPermissoes] = useState({
+    podeEditar: false,
+    podeVisualizar: false,
+    isAdmin: false,
+    acessoTotal: false,
+    filtroAplicado: true,
+  });
   const [metricas, setMetricas] = useState({
     valorTotal: 0,
     valorExecutado: 0,
@@ -49,7 +66,77 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     incluirEstatisticas = true,
     carregarTodasEmendas = false,
     filtroStatus = null,
+    filtroMunicipio = null,
+    filtroUf = null,
+    userRole = null,
   } = options;
+
+  // ✅ CORREÇÃO PRINCIPAL: FUNÇÃO determinarPermissoes (linha ~65)
+  const determinarPermissoes = useCallback((user) => {
+    console.log("🎯 INICIANDO determinarPermissoes com:", user);
+
+    if (!user) {
+      console.log("❌ Usuário não fornecido");
+      return {
+        podeEditar: false,
+        podeVisualizar: false,
+        isAdmin: false,
+        acessoTotal: false,
+        filtroAplicado: true,
+        motivo: "Usuário não autenticado",
+        aviso: "Aguardando dados do usuário...",
+      };
+    }
+
+    // ✅ VERIFICAÇÃO ROBUSTA DE ADMIN
+    const role = user.role;
+    console.log("🔍 Role extraída:", role, "| Tipo:", typeof role);
+
+    // Verificação múltipla para garantir detecção de admin
+    const isAdmin =
+      role === "admin" ||
+      role === "Admin" ||
+      role === "ADMIN" ||
+      (typeof role === "string" && role.toLowerCase() === "admin");
+
+    console.log("👑 isAdmin calculado:", isAdmin);
+
+    if (isAdmin) {
+      console.log("✅ ADMIN DETECTADO - Liberando todas as permissões");
+      return {
+        podeEditar: true,
+        podeVisualizar: true,
+        isAdmin: true,
+        acessoTotal: true,
+        filtroAplicado: false,
+        motivo: "Usuário administrador - acesso total",
+        aviso: null,
+      };
+    }
+
+    // Para usuários não-admin
+    console.log("👤 Usuário comum - permissões limitadas");
+    return {
+      podeEditar: false,
+      podeVisualizar: true,
+      isAdmin: false,
+      acessoTotal: false,
+      filtroAplicado: true,
+      motivo: "Usuário operador - acesso limitado ao município",
+      aviso:
+        user.municipio && user.uf
+          ? `Visualizando dados de ${user.municipio}/${user.uf}`
+          : "Município/UF não configurado",
+    };
+  }, []);
+
+  // ✅ EFEITO: Calcular permissões quando usuário muda
+  useEffect(() => {
+    console.log("🔄 useEffect disparado - recalculando permissões");
+    const novasPermissoes = determinarPermissoes(usuario);
+    console.log("📋 Novas permissões calculadas:", novasPermissoes);
+    setPermissoes(novasPermissoes);
+  }, [usuario, determinarPermissoes]);
 
   // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
   const calcularMetricasEmenda = useCallback(
@@ -142,13 +229,30 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     }
   }, []);
 
-  // ✅ FUNÇÃO: Carregar todas as emendas com métricas
+  // ✅ FUNÇÃO: Carregar todas as emendas com métricas - COM FILTROS DE PERMISSÃO
   const carregarTodasEmendasComMetricas = useCallback(async () => {
     try {
       setLoading(true);
 
+      // ✅ Query base
+      let emendasQuery = query(
+        collection(db, "emendas"),
+        orderBy("numero", "asc"),
+      );
+
+      // ✅ Aplicar filtros baseados nas permissões
+      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
+        console.log("🔍 Aplicando filtros:", { filtroMunicipio, filtroUf });
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", filtroMunicipio),
+          where("uf", "==", filtroUf),
+          orderBy("numero", "asc"),
+        );
+      }
+
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
-        getDocs(query(collection(db, "emendas"), orderBy("numero", "asc"))),
+        getDocs(emendasQuery),
         getDocs(collection(db, "despesas")),
       ]);
 
@@ -171,6 +275,7 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
         };
       });
 
+      console.log("📊 Emendas carregadas:", emendasComMetricas.length);
       setEmendas(emendasComMetricas);
       setDespesas(despesasData);
 
@@ -182,7 +287,12 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [calcularMetricasEmenda]);
+  }, [
+    calcularMetricasEmenda,
+    permissoes.filtroAplicado,
+    filtroMunicipio,
+    filtroUf,
+  ]);
 
   // ✅ FUNÇÃO: Validar nova despesa contra saldo da emenda
   const validarNovaDespesa = useCallback(
@@ -351,10 +461,11 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
       setError(null);
       setLoading(true);
 
-      if (emendaId) {
+      // Se há uma emenda específica, carregá-la
+      if (options.emendaId) {
         const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(emendaId),
-          carregarDespesasEmenda(emendaId),
+          carregarEmenda(options.emendaId),
+          carregarDespesasEmenda(options.emendaId),
         ]);
 
         if (emendaData && incluirEstatisticas) {
@@ -375,17 +486,31 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [emendaId, incluirEstatisticas, carregarTodasEmendas]);
+  }, [
+    options.emendaId,
+    incluirEstatisticas,
+    carregarTodasEmendas,
+    carregarEmenda,
+    carregarDespesasEmenda,
+    calcularMetricasEmenda,
+    carregarTodasEmendasComMetricas,
+  ]);
 
   // ✅ EFEITO: Carregar dados iniciais - OTIMIZADO
   useEffect(() => {
     const carregarDadosIniciais = async () => {
+      // ✅ Só carregar se usuário estiver disponível OU se for carregamento total
+      if (!usuario && carregarTodasEmendas && userRole === null) {
+        console.log("⏳ Aguardando dados do usuário antes de carregar...");
+        return;
+      }
+
       setError(null);
 
-      if (emendaId) {
+      if (options.emendaId) {
         const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(emendaId),
-          carregarDespesasEmenda(emendaId),
+          carregarEmenda(options.emendaId),
+          carregarDespesasEmenda(options.emendaId),
         ]);
 
         if (emendaData && incluirEstatisticas) {
@@ -397,13 +522,24 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
         }
       }
 
-      if (carregarTodasEmendas) {
+      if (carregarTodasEmendas && userRole !== null) {
+        console.log("📊 Carregando todas as emendas...");
         await carregarTodasEmendasComMetricas();
       }
     };
 
     carregarDadosIniciais();
-  }, [emendaId, incluirEstatisticas, carregarTodasEmendas, carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda, carregarTodasEmendasComMetricas]);
+  }, [
+    usuario,
+    userRole,
+    carregarTodasEmendas,
+    options.emendaId,
+    incluirEstatisticas,
+    carregarEmenda,
+    carregarDespesasEmenda,
+    calcularMetricasEmenda,
+    carregarTodasEmendasComMetricas,
+  ]);
 
   // ✅ EFEITO: Listener em tempo real (se autoRefresh ativado)
   useEffect(() => {
@@ -413,9 +549,24 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     let unsubscribeDespesas;
 
     // Listener para emendas
-    if (carregarTodasEmendas) {
+    if (carregarTodasEmendas && userRole !== null) {
+      let emendasQuery = query(
+        collection(db, "emendas"),
+        orderBy("numero", "asc"),
+      );
+
+      // Aplicar filtros se necessário
+      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", filtroMunicipio),
+          where("uf", "==", filtroUf),
+          orderBy("numero", "asc"),
+        );
+      }
+
       unsubscribeEmendas = onSnapshot(
-        query(collection(db, "emendas"), orderBy("numero", "asc")),
+        emendasQuery,
         (snapshot) => {
           const emendasData = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -431,10 +582,10 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     }
 
     // Listener para despesas
-    const despesasQuery = emendaId
+    const despesasQuery = options.emendaId
       ? query(
           collection(db, "despesas"),
-          where("emendaId", "==", emendaId),
+          where("emendaId", "==", options.emendaId),
           orderBy("data", "desc"),
         )
       : query(collection(db, "despesas"), orderBy("data", "desc"));
@@ -447,7 +598,7 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
           ...doc.data(),
         }));
 
-        if (emendaId) {
+        if (options.emendaId) {
           setDespesasEmenda(despesasData);
         } else {
           setDespesas(despesasData);
@@ -475,11 +626,18 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
   }, [
     autoRefresh,
     carregarTodasEmendas,
-    emendaId,
+    userRole,
+    options.emendaId,
     emenda,
     incluirEstatisticas,
     calcularMetricasEmenda,
+    permissoes.filtroAplicado,
+    filtroMunicipio,
+    filtroUf,
   ]);
+
+  // ✅ Log final das permissões
+  console.log("🏁 PERMISSÕES FINAIS DO HOOK:", permissoes);
 
   // ✅ RETORNO DO HOOK
   return {
@@ -493,6 +651,10 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     // Estados
     loading,
     error,
+
+    // ✅ PERMISSÕES ADICIONADAS
+    permissoes,
+    ...permissoes, // Espalha podeEditar, podeVisualizar, isAdmin
 
     // Funções de carregamento
     carregarEmenda,
@@ -508,6 +670,19 @@ const useEmendaDespesa = (emendaId = null, options = {}) => {
     // Funções de análise
     obterEstatisticasGerais,
     filtrarEmendas,
+
+    // ✅ MÉTODOS AUXILIARES PARA COMPATIBILIDADE
+    podeEditarCampo: (campo) => {
+      const pode = permissoes.isAdmin || permissoes.podeEditar;
+      console.log(`🔐 podeEditarCampo(${campo}): ${pode}`);
+      return pode;
+    },
+
+    podeVisualizarCampo: (campo) => {
+      const pode = permissoes.isAdmin || permissoes.podeVisualizar;
+      console.log(`👁️ podeVisualizarCampo(${campo}): ${pode}`);
+      return pode;
+    },
 
     // Utilitários
     setError: (msg) => setError(msg),

@@ -1,5 +1,5 @@
-// Despesas.jsx - Com integração automática de filtro por emenda
-// ✅ Recebe filtro automático quando vem do módulo Emendas
+// Despesas.jsx - CORREÇÃO CRÍTICA APLICADA
+// ✅ Integração com useEmendaDespesa corrigido + sistema de permissões
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -9,6 +9,8 @@ import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import DespesaForm from "./DespesaForm";
 import DespesasList from "./DespesasList";
 import TemporaryBanner from "./TemporaryBanner";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
 const PRIMARY = "#154360";
@@ -25,21 +27,72 @@ export default function Despesas({ usuario }) {
   const { success, error, warning } = useToast();
   const { setFormActive, canNavigate } = useNavigationProtection();
 
+  // ✅ CORREÇÃO: Estados para dados do usuário (mesmo padrão do Emendas/Dashboard)
+  const [userRole, setUserRole] = useState(null);
+  const [userMunicipio, setUserMunicipio] = useState(null);
+  const [userUf, setUserUf] = useState(null);
+
   // ✅ NOVO: Obter filtro automático da navegação
   const [filtroAutomatico, setFiltroAutomatico] = useState(null);
 
-  // ✅ Hook integrado para dados das despesas
+  // ✅ Buscar dados do usuário no Firestore (igual ao Emendas)
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (usuario?.uid) {
+        try {
+          const usersSnapshot = await getDocs(
+            query(collection(db, "users"), where("uid", "==", usuario.uid)),
+          );
+
+          if (!usersSnapshot.empty) {
+            const userData = usersSnapshot.docs[0].data();
+            setUserMunicipio(userData.municipio);
+            setUserUf(userData.uf);
+            setUserRole(userData.role);
+            console.log("👤 Dados do usuário carregados (Despesas):", {
+              municipio: userData.municipio,
+              uf: userData.uf,
+              role: userData.role,
+            });
+          }
+        } catch (error) {
+          console.error("❌ Erro ao buscar dados do usuário:", error);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [usuario]);
+
+  // ✅ CORREÇÃO CRÍTICA: Construir objeto usuário completo para o hook
+  const usuarioParaHook = userRole
+    ? {
+        uid: usuario?.uid,
+        email: usuario?.email,
+        role: userRole,
+        municipio: userMunicipio,
+        uf: userUf,
+      }
+    : null;
+
+  console.log("✅ Usuário completo configurado (Despesas):", usuarioParaHook);
+
+  // ✅ CORREÇÃO: Hook integrado com usuário completo
   const {
     emendas,
     despesas,
     loading,
     error: hookError,
     metricasGerais,
+    permissoes,
     recarregar,
-  } = useEmendaDespesa(null, {
-    carregarTodasEmendas: true,
+  } = useEmendaDespesa(usuarioParaHook, {
+    carregarTodasEmendas: userRole !== null, // ✅ Só carrega quando role definida
     incluirEstatisticas: true,
     autoRefresh: true,
+    filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
+    filtroUf: userRole !== "admin" ? userUf : null,
+    userRole: userRole,
   });
 
   // ✅ Estados principais (mesmo padrão do Emendas)
@@ -168,10 +221,13 @@ export default function Despesas({ usuario }) {
 
   // ✅ Calcular estatísticas do dashboard (mesmo padrão do Emendas)
   const calcularEstatisticas = () => {
+    // ✅ Verificação segura dos arrays
+    const despesasSeguras = despesas || [];
+
     // Se há filtro automático, calcular apenas para essa emenda
     const despesasFiltradas = filtroAutomatico
-      ? despesas.filter((d) => d.emendaId === filtroAutomatico.emendaId)
-      : despesas;
+      ? despesasSeguras.filter((d) => d.emendaId === filtroAutomatico.emendaId)
+      : despesasSeguras;
 
     const totalDespesas = despesasFiltradas.length;
     const valorTotalDespesas = despesasFiltradas.reduce(
@@ -217,6 +273,30 @@ export default function Despesas({ usuario }) {
     }).format(value || 0);
   };
 
+  // ✅ VERIFICAÇÃO DE ACESSO (mesmo padrão do Dashboard)
+  if (userRole !== "admin" && (!userMunicipio || !userUf) && !loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.warningContainer}>
+          <div style={styles.warningCard}>
+            <h2 style={styles.warningTitle}>⚠️ Configuração Pendente</h2>
+            <p style={styles.warningText}>
+              Seu usuário não possui município/UF cadastrado no sistema.
+            </p>
+            <p style={styles.warningText}>
+              Entre em contato com o administrador para configurar seu acesso.
+            </p>
+            <div style={styles.userInfo}>
+              <strong>Usuário:</strong> {usuario?.email}
+              <br />
+              <strong>Perfil:</strong> Operador
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ✅ Renderização condicional baseada na view atual
   if (currentView === "criar" || currentView === "editar") {
     return (
@@ -258,6 +338,11 @@ export default function Despesas({ usuario }) {
         Status: ✅ Operacional | Versão: v1.7
         {filtroAutomatico && (
           <span style={styles.filtroIndicador}>| 🔍 Filtrado por Emenda</span>
+        )}
+        {userRole !== "admin" && userMunicipio && userUf && (
+          <span style={styles.filtroIndicador}>
+            | 📍 {userMunicipio}/{userUf}
+          </span>
         )}
       </div>
 
@@ -313,7 +398,11 @@ export default function Despesas({ usuario }) {
           <div style={styles.statCard}>
             <div style={styles.statNumber}>{estatisticas.totalDespesas}</div>
             <div style={styles.statLabel}>
-              {filtroAutomatico ? "DESPESAS DESTA EMENDA" : "TOTAL DE DESPESAS"}
+              {filtroAutomatico
+                ? "DESPESAS DESTA EMENDA"
+                : userRole === "admin"
+                  ? "TOTAL DE DESPESAS"
+                  : "DESPESAS DO MUNICÍPIO"}
             </div>
           </div>
 
@@ -348,6 +437,13 @@ export default function Despesas({ usuario }) {
               </span>
             )}
           </button>
+          <button
+            onClick={recarregar}
+            disabled={loading}
+            style={styles.refreshButton}
+          >
+            🔄 {loading ? "Carregando..." : "Atualizar"}
+          </button>
         </div>
 
         {/* ✅ Seção de Filtros (mesmo layout do Emendas) */}
@@ -363,19 +459,35 @@ export default function Despesas({ usuario }) {
             Total: {estatisticas.totalDespesas} despesa
             {estatisticas.totalDespesas !== 1 ? "s" : ""}
             {filtroAutomatico && " (filtrada)"}
+            {userRole !== "admin" &&
+              !filtroAutomatico &&
+              ` - ${userMunicipio}/${userUf}`}
           </div>
         </div>
 
         {/* ✅ Componente de listagem */}
-        <DespesasList
-          refresh={refreshKey}
-          onEdit={handleEditarDespesa}
-          onView={handleVisualizarDespesa}
-          onDelete={handleExcluirDespesa}
-          onNovaDespesa={handleNovaDespesa}
-          usuario={usuario}
-          filtroInicial={filtroAutomatico} // ✅ Passar filtro automático
-        />
+        {loading ? (
+          <div style={styles.loadingContainer}>
+            <p style={styles.loadingText}>Carregando despesas...</p>
+          </div>
+        ) : hookError ? (
+          <div style={styles.errorContainer}>
+            <p style={styles.errorText}>❌ {hookError}</p>
+            <button onClick={recarregar} style={styles.retryButton}>
+              🔄 Tentar novamente
+            </button>
+          </div>
+        ) : (
+          <DespesasList
+            refresh={refreshKey}
+            onEdit={handleEditarDespesa}
+            onView={handleVisualizarDespesa}
+            onDelete={handleExcluirDespesa}
+            onNovaDespesa={handleNovaDespesa}
+            usuario={usuario}
+            filtroInicial={filtroAutomatico} // ✅ Passar filtro automático
+          />
+        )}
       </div>
     </div>
   );
@@ -529,6 +641,8 @@ const styles = {
   // ✅ Botão igual ao Emendas
   buttonContainer: {
     marginBottom: "24px",
+    display: "flex",
+    gap: "10px",
   },
 
   newButton: {
@@ -552,6 +666,19 @@ const styles = {
     fontSize: "11px",
     opacity: 0.9,
     fontWeight: "400",
+  },
+
+  refreshButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
   // ✅ Seção de filtros igual ao Emendas
@@ -591,6 +718,82 @@ const styles = {
     fontSize: "14px",
     color: "#6c757d",
     fontWeight: "500",
+  },
+
+  // ✅ Estados de loading/erro (igual ao Emendas)
+  loadingContainer: {
+    textAlign: "center",
+    padding: "40px",
+  },
+
+  loadingText: {
+    fontSize: "18px",
+    color: "#666",
+  },
+
+  errorContainer: {
+    textAlign: "center",
+    padding: "40px",
+    backgroundColor: "#f8d7da",
+    borderRadius: "8px",
+    border: "1px solid #f5c6cb",
+  },
+
+  errorText: {
+    fontSize: "16px",
+    color: "#721c24",
+    marginBottom: "15px",
+  },
+
+  retryButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "5px",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+
+  // ✅ Warning container (igual ao Emendas)
+  warningContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    padding: "20px",
+  },
+
+  warningCard: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "40px",
+    textAlign: "center",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    maxWidth: "500px",
+    border: "2px solid #ffc107",
+  },
+
+  warningTitle: {
+    color: "#856404",
+    marginBottom: "15px",
+    fontSize: "24px",
+  },
+
+  warningText: {
+    color: "#856404",
+    marginBottom: "15px",
+    lineHeight: "1.6",
+  },
+
+  userInfo: {
+    background: "#fff3cd",
+    padding: "15px",
+    borderRadius: "8px",
+    color: "#856404",
+    fontSize: "14px",
+    textAlign: "left",
+    marginTop: "20px",
   },
 };
 
