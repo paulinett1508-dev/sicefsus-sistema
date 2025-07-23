@@ -285,6 +285,9 @@ function AppContent() {
 
             // ✅ CORREÇÃO PRINCIPAL: Incluir TODOS os campos do Firestore + normalização UF
             const usuarioCompleto = {
+              // ✅ Spread primeiro para incluir todos os campos do Firestore
+              ...userInfo,
+              // ✅ Sobrescrever com dados específicos necessários
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               role: userInfo.role || "user",
@@ -293,20 +296,14 @@ function AppContent() {
               isActive: userInfo.isActive !== false,
               // ✅ CAMPOS CRÍTICOS que estavam faltando:
               municipio: userInfo.municipio || null,
-              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null, // ✅ NORMALIZAÇÃO UF
-              // ✅ Incluir TODOS os outros campos do Firestore
+              // ✅ NORMALIZAÇÃO FINAL DO UF (sem duplicação)
+              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null,
+              // ✅ Outros campos específicos
               nome: userInfo.nome || null,
               telefone: userInfo.telefone || null,
               departamento: userInfo.departamento || null,
               createdAt: userInfo.createdAt || null,
               lastLogin: userInfo.lastLogin || null,
-              // ✅ Spread para garantir que nenhum campo seja perdido
-              ...userInfo,
-              // ✅ Sobrescrever com dados do Firebase Auth quando necessário
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              // ✅ NORMALIZAÇÃO FINAL DO UF
-              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null,
             };
 
             console.log("✅ Usuário completo configurado:", usuarioCompleto);
