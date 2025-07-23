@@ -26,6 +26,7 @@ const useIsMounted = () => {
 };
 
 const EmendaForm = ({
+  usuario,
   emendaParaEditar,
   onCancelar,
   onSalvar,
@@ -36,12 +37,13 @@ const EmendaForm = ({
   const navigate = useNavigate();
   const isMounted = useIsMounted();
 
-  // ✅ CORRIGIDO: Hook para dados integrados com despesas
+  // ✅ CORRIGIDO: Hook para dados integrados com despesas - NOVA ASSINATURA
   const {
     metricas,
     loading: hookLoading,
     error: hookError,
-  } = useEmendaDespesa(emendaParaEditar?.id, {
+  } = useEmendaDespesa(usuario, {
+    emendaId: emendaParaEditar?.id,
     incluirEstatisticas: true,
     autoRefresh: false, // ✅ Desabilitado para evitar loops
   });

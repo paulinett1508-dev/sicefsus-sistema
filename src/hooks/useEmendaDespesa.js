@@ -69,6 +69,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     filtroMunicipio = null,
     filtroUf = null,
     userRole = null,
+    emendaId = null,
   } = options;
 
   // ✅ CORREÇÃO PRINCIPAL: FUNÇÃO determinarPermissoes (linha ~65)
@@ -462,10 +463,10 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       setLoading(true);
 
       // Se há uma emenda específica, carregá-la
-      if (options.emendaId) {
+      if (emendaId) {
         const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(options.emendaId),
-          carregarDespesasEmenda(options.emendaId),
+          carregarEmenda(emendaId),
+          carregarDespesasEmenda(emendaId),
         ]);
 
         if (emendaData && incluirEstatisticas) {
@@ -487,7 +488,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       setLoading(false);
     }
   }, [
-    options.emendaId,
+    emendaId,
     incluirEstatisticas,
     carregarTodasEmendas,
     carregarEmenda,
@@ -507,10 +508,10 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
       setError(null);
 
-      if (options.emendaId) {
+      if (emendaId) {
         const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(options.emendaId),
-          carregarDespesasEmenda(options.emendaId),
+          carregarEmenda(emendaId),
+          carregarDespesasEmenda(emendaId),
         ]);
 
         if (emendaData && incluirEstatisticas) {
@@ -533,7 +534,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     usuario,
     userRole,
     carregarTodasEmendas,
-    options.emendaId,
+    emendaId,
     incluirEstatisticas,
     carregarEmenda,
     carregarDespesasEmenda,
@@ -582,10 +583,10 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     }
 
     // Listener para despesas
-    const despesasQuery = options.emendaId
+    const despesasQuery = emendaId
       ? query(
           collection(db, "despesas"),
-          where("emendaId", "==", options.emendaId),
+          where("emendaId", "==", emendaId),
           orderBy("data", "desc"),
         )
       : query(collection(db, "despesas"), orderBy("data", "desc"));
@@ -598,7 +599,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
           ...doc.data(),
         }));
 
-        if (options.emendaId) {
+        if (emendaId) {
           setDespesasEmenda(despesasData);
         } else {
           setDespesas(despesasData);
@@ -627,7 +628,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     autoRefresh,
     carregarTodasEmendas,
     userRole,
-    options.emendaId,
+    emendaId,
     emenda,
     incluirEstatisticas,
     calcularMetricasEmenda,

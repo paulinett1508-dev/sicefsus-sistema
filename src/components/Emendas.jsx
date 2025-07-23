@@ -24,46 +24,19 @@ const Emendas = ({ usuario }) => {
   const [userUf, setUserUf] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
-  // ✅ Buscar dados do usuário no Firestore
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (usuario?.uid) {
-        try {
-          // Buscar documento do usuário
-          const usersSnapshot = await getDocs(
-            query(collection(db, "users"), where("uid", "==", usuario.uid)),
-          );
+  // ✅ CORREÇÃO: Usar dados direto da prop usuario (já carregados no App.jsx)
+  const userMunicipio = usuario?.municipio;
+  const userUf = usuario?.uf;
+  const userRole = usuario?.role;
 
-          if (!usersSnapshot.empty) {
-            const userData = usersSnapshot.docs[0].data();
-            setUserMunicipio(userData.municipio);
-            setUserUf(userData.uf);
-            setUserRole(userData.role);
-            console.log("👤 Dados do usuário carregados:", {
-              municipio: userData.municipio,
-              uf: userData.uf,
-              role: userData.role,
-            });
-          }
-        } catch (error) {
-          console.error("❌ Erro ao buscar dados do usuário:", error);
-        }
-      }
-    };
+  console.log("👤 Dados do usuário (direto da prop):", {
+    municipio: userMunicipio,
+    uf: userUf,
+    role: userRole,
+  });
 
-    loadUserData();
-  }, [usuario]);
-
-  // ✅ CORREÇÃO CRÍTICA: Construir objeto usuário completo para o hook
-  const usuarioParaHook = userRole
-    ? {
-        uid: usuario?.uid,
-        email: usuario?.email,
-        role: userRole,
-        municipio: userMunicipio,
-        uf: userUf,
-      }
-    : null;
+  // ✅ CORREÇÃO: Usar dados diretos da prop
+  const usuarioParaHook = usuario;
 
   console.log("✅ Usuário completo configurado:", usuarioParaHook);
 
@@ -210,6 +183,7 @@ const Emendas = ({ usuario }) => {
       case "criar":
         return (
           <EmendaForm
+            usuario={usuario}
             onCancelar={handleVoltar}
             onSalvar={async () => {
               await recarregar();
@@ -226,6 +200,7 @@ const Emendas = ({ usuario }) => {
       case "editar":
         return (
           <EmendaForm
+            usuario={usuario}
             emendaParaEditar={emendaSelecionada}
             onCancelar={handleVoltar}
             onSalvar={async () => {
@@ -240,6 +215,7 @@ const Emendas = ({ usuario }) => {
       case "visualizar":
         return (
           <EmendaForm
+            usuario={usuario}
             emendaParaEditar={emendaSelecionada}
             onCancelar={handleVoltar}
             onSalvar={handleVoltar}
