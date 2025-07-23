@@ -34,9 +34,14 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   // ✅ NAVEGAÇÃO INTELIGENTE PARA EMENDAS
   const handleEmendasClick = () => {
     // Verificar se existe função de navegação do formulário
-    if (window.sicefsusNavigateToEmendas) {
-      // Usar a função exposta pelo EmendaForm (com verificação de mudanças)
-      window.sicefsusNavigateToEmendas();
+    if (typeof window.sicefsusNavigateToEmendas === 'function') {
+      try {
+        // Usar a função exposta pelo EmendaForm (com verificação de mudanças)
+        window.sicefsusNavigateToEmendas();
+      } catch (error) {
+        console.warn('Erro ao usar navegação do formulário:', error);
+        onNavigate("/emendas");
+      }
     } else {
       // Navegação direta se não houver formulário ativo
       onNavigate("/emendas");

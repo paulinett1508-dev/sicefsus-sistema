@@ -1,5 +1,5 @@
 // Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import {
   BarChart,
@@ -110,7 +110,7 @@ export default function Dashboard({ usuario }) {
   }, [emendas, despesas, loading, obterEstatisticasGerais]);
 
   // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
-  const calcularEstatisticasLocais = () => {
+  const calcularEstatisticasLocais = useCallback(() => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
@@ -231,7 +231,7 @@ export default function Dashboard({ usuario }) {
       evolucaoMensal,
       topMunicipios,
     };
-  };
+  }, [emendas, despesas]);
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
