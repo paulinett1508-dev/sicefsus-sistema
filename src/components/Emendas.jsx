@@ -20,9 +20,6 @@ import useEmendaDespesa from "../hooks/useEmendaDespesa";
 const Emendas = ({ usuario }) => {
   const [currentView, setCurrentView] = useState("listagem");
   const [emendaSelecionada, setEmendaSelecionada] = useState(null);
-  const [userMunicipio, setUserMunicipio] = useState(null);
-  const [userUf, setUserUf] = useState(null);
-  const [userRole, setUserRole] = useState(null);
 
   // ✅ CORREÇÃO: Usar dados direto da prop usuario (já carregados no App.jsx)
   const userMunicipio = usuario?.municipio;
