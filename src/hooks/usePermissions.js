@@ -87,14 +87,6 @@ const usePermissions = (usuario) => {
     const novasPermissoes = calcularPermissoes;
     setPermissoes(novasPermissoes);
 
-    // Log para desenvolvimento
-    if (process.env.NODE_ENV === "development") {
-      console.group("🔐 Permissões calculadas");
-      console.log("👤 Usuário:", usuario);
-      console.log("✅ Permissões:", novasPermissoes);
-      console.groupEnd();
-    }
-
     setLoading(false);
   }, [calcularPermissoes, usuario]);
 

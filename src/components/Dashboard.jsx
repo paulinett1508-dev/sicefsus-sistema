@@ -27,8 +27,7 @@ const CHART_COLORS = [
 ];
 
 export default function Dashboard({ usuario }) {
-  console.log("🏠 Dashboard iniciado");
-  console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
+  // Dashboard iniciado
 
   // ✅ CORREÇÃO 2: DASHBOARD.JSX - Linhas 38-65
   const [userRole, setUserRole] = useState(null);

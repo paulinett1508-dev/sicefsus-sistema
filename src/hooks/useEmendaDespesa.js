@@ -24,15 +24,7 @@ import { db } from "../firebase/firebaseConfig";
  * @returns {Object} - Dados e funções para gerenciar relacionamento
  */
 const useEmendaDespesa = (usuario = null, options = {}) => {
-  // ✅ DEBUG: Log completo do usuário recebido
-  console.log("🔧 DEBUG useEmendaDespesa - usuário recebido:", usuario);
-  console.log("🔧 DEBUG useEmendaDespesa - tipo do usuário:", typeof usuario);
-  console.log("🔧 DEBUG useEmendaDespesa - role:", usuario?.role);
-  console.log(
-    "🔧 DEBUG useEmendaDespesa - tipo da role:",
-    typeof usuario?.role,
-  );
-  console.log("🔧 DEBUG useEmendaDespesa - options:", options);
+  // Debug logs removidos para melhorar performance
 
   // ✅ ESTADOS PRINCIPAIS
   const [emenda, setEmenda] = useState(null);

@@ -26,11 +26,7 @@ const Emendas = ({ usuario }) => {
   const userUf = usuario?.uf;
   const userRole = usuario?.role;
 
-  console.log("👤 Dados do usuário (direto da prop):", {
-    municipio: userMunicipio,
-    uf: userUf,
-    role: userRole,
-  });
+  // Dados do usuário configurados
 
   // ✅ CORREÇÃO: Usar dados diretos da prop
   const usuarioParaHook = usuario;
