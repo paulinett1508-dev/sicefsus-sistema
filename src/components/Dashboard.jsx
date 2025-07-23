@@ -165,8 +165,133 @@ export default function Dashboard({ usuario }) {
     error: hookError,
     metricas,
     permissoes,
-    obterEstatisticasGerais,
   } = useEmendaDespesa(usuarioParaHook, hookOptions);
+
+  // ✅ FUNÇÃO PARA OBTER ESTATÍSTICAS GERAIS (ESTÁVEL)
+  const obterEstatisticasGerais = useCallback(() => {
+    if (!emendas.length) return null;
+
+    const totalEmendas = emendas.length;
+    const totalDespesas = despesas.length;
+
+    const valorTotalEmendas = emendas.reduce(
+      (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
+      0,
+    );
+    const valorTotalDespesas = despesas.reduce(
+      (sum, d) => sum + (d.valor || 0),
+      0,
+    );
+    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
+    const percentualExecutado =
+      valorTotalEmendas > 0
+        ? (valorTotalDespesas / valorTotalEmendas) * 100
+        : 0;
+
+    // Emendas por status
+    const emendasPorStatus = emendas.reduce((acc, emenda) => {
+      const status = emenda.status || "ativa";
+      const existing = acc.find((item) => item.name === status);
+      if (existing) {
+        existing.value += 1;
+        existing.valor += emenda.valorTotal || emenda.valorRecurso || 0;
+      } else {
+        acc.push({
+          name: status,
+          value: 1,
+          valor: emenda.valorTotal || emenda.valorRecurso || 0,
+        });
+      }
+      return acc;
+    }, []);
+
+    // Despesas por status
+    const despesasPorStatus = despesas.reduce((acc, despesa) => {
+      const status = despesa.status || "pendente";
+      const existing = acc.find((item) => item.name === status);
+      if (existing) {
+        existing.value += 1;
+        existing.valor += despesa.valor || 0;
+      } else {
+        acc.push({
+          name: status,
+          value: 1,
+          valor: despesa.valor || 0,
+        });
+      }
+      return acc;
+    }, []);
+
+    // Evolução mensal (últimos 6 meses)
+    const evolucaoMensal = [];
+    const hoje = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      const mesNome = mes.toLocaleDateString("pt-BR", {
+        month: "short",
+        year: "2-digit",
+      });
+
+      const emendasMes = emendas.filter((e) => {
+        const dataEmenda =
+          e.dataCriacao?.toDate() ||
+          e.createdAt?.toDate() ||
+          new Date(e.data || Date.now());
+        return (
+          dataEmenda.getMonth() === mes.getMonth() &&
+          dataEmenda.getFullYear() === mes.getFullYear()
+        );
+      });
+
+      const despesasMes = despesas.filter((d) => {
+        const dataDespesa = d.data?.toDate() || new Date(d.data || Date.now());
+        return (
+          dataDespesa.getMonth() === mes.getMonth() &&
+          dataDespesa.getFullYear() === mes.getFullYear()
+        );
+      });
+
+      evolucaoMensal.push({
+        mes: mesNome,
+        emendas: emendasMes.length,
+        despesas: despesasMes.length,
+        valorEmendas: emendasMes.reduce(
+          (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
+          0,
+        ),
+        valorDespesas: despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0),
+      });
+    }
+
+    // Top municípios
+    const municipiosMap = {};
+    emendas.forEach((emenda) => {
+      const municipio = emenda.municipio || "Não informado";
+      if (!municipiosMap[municipio]) {
+        municipiosMap[municipio] = { nome: municipio, emendas: 0, valor: 0 };
+      }
+      municipiosMap[municipio].emendas += 1;
+      municipiosMap[municipio].valor +=
+        emenda.valorTotal || emenda.valorRecurso || 0;
+    });
+
+    const topMunicipios = Object.values(municipiosMap)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 5);
+
+    return {
+      totalEmendas,
+      totalDespesas,
+      valorTotalEmendas,
+      valorTotalDespesas,
+      saldoDisponivel,
+      percentualExecutado,
+      emendasPorStatus,
+      despesasPorStatus,
+      evolucaoMensal,
+      topMunicipios,
+    };
+  }, [emendas, despesas]);
 
   // ✅ CONSOLIDAÇÃO DE ERROS
   const error = useMemo(() => {
@@ -197,9 +322,7 @@ export default function Dashboard({ usuario }) {
       console.log("📋 Emendas disponíveis:", emendas.length);
       console.log("💰 Despesas disponíveis:", despesas?.length || 0);
 
-      const stats = obterEstatisticasGerais
-        ? obterEstatisticasGerais()
-        : calcularEstatisticasLocais();
+      const stats = obterEstatisticasGerais() || calcularEstatisticasLocais();
       setEstatisticas(stats);
 
       console.log("✅ Estatísticas calculadas:", stats);
@@ -211,7 +334,7 @@ export default function Dashboard({ usuario }) {
         emendasLength: emendas?.length,
       });
     }
-  }, [emendas, despesas, loading, obterEstatisticasGerais]);
+  }, [emendas, despesas, loading]);
 
   // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
   const calcularEstatisticasLocais = useCallback(() => {
