@@ -86,7 +86,7 @@ const EmendaForm = ({
 
   // ✅ Estados para gerenciar a nova seção
   const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
-  const [editandoAcaoServico, setEditandoAcaoServico = useState(null);
+  const [editandoAcaoServico, setEditandoAcaoServico] = useState(null);
   const [novaAcaoServico, setNovaAcaoServico] = useState({
     tipo: "Metas Quantitativas",
     descricao: "",
