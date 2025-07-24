@@ -71,7 +71,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     userRole = null,
   } = options;
 
-  // ✅ CORREÇÃO PRINCIPAL: FUNÇÃO determinarPermissoes (linha ~65)
+  // ✅ CORREÇÃO PRINCIPAL: FUNÇÃO determinarPermissoes - LÓGICA SIMPLIFICADA
   const determinarPermissoes = useCallback((user) => {
     console.log("🎯 INICIANDO determinarPermissoes com:", user);
 
@@ -88,45 +88,50 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       };
     }
 
-    // ✅ VERIFICAÇÃO ROBUSTA DE ADMIN
     const role = user.role;
     console.log("🔍 Role extraída:", role, "| Tipo:", typeof role);
 
-    // Verificação múltipla para garantir detecção de admin
-    const isAdmin =
-      role === "admin" ||
-      role === "Admin" ||
-      role === "ADMIN" ||
-      (typeof role === "string" && role.toLowerCase() === "admin");
-
-    console.log("👑 isAdmin calculado:", isAdmin);
-
-    if (isAdmin) {
-      console.log("✅ ADMIN DETECTADO - Liberando todas as permissões");
+    // ✅ ADMIN: Acesso total, sem filtros
+    if (role === "admin") {
+      console.log("✅ ADMIN DETECTADO - Liberando TODAS as permissões");
       return {
         podeEditar: true,
         podeVisualizar: true,
         isAdmin: true,
         acessoTotal: true,
-        filtroAplicado: false,
-        motivo: "Usuário administrador - acesso total",
+        filtroAplicado: false, // ✅ Admin não tem filtro
+        motivo: "Administrador - acesso total ao sistema",
         aviso: null,
       };
     }
 
-    // Para usuários não-admin
-    console.log("👤 Usuário comum - permissões limitadas");
+    // ✅ OPERADOR: Pode editar, mas só do seu município
+    const municipio = user.municipio;
+    const uf = user.uf;
+    
+    if (municipio && uf) {
+      console.log("👤 OPERADOR COM MUNICÍPIO - Liberando permissões com filtro");
+      return {
+        podeEditar: true, // ✅ OPERADOR PODE EDITAR
+        podeVisualizar: true,
+        isAdmin: false,
+        acessoTotal: false,
+        filtroAplicado: true, // ✅ Filtro por município
+        motivo: `Operador - acesso limitado a ${municipio}/${uf.toUpperCase()}`,
+        aviso: null,
+      };
+    }
+
+    // ✅ OPERADOR SEM MUNICÍPIO: Sem acesso
+    console.log("❌ OPERADOR SEM MUNICÍPIO - Bloqueando acesso");
     return {
       podeEditar: false,
-      podeVisualizar: true,
+      podeVisualizar: false,
       isAdmin: false,
       acessoTotal: false,
       filtroAplicado: true,
-      motivo: "Usuário operador - acesso limitado ao município",
-      aviso:
-        user.municipio && user.uf
-          ? `Visualizando dados de ${user.municipio}/${user.uf}`
-          : "Município/UF não configurado",
+      motivo: "Operador sem município/UF cadastrado",
+      aviso: "Entre em contato com o administrador para configurar seu acesso",
     };
   }, []);
 
@@ -240,15 +245,17 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         orderBy("numero", "asc"),
       );
 
-      // ✅ Aplicar filtros baseados nas permissões
-      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
-        console.log("🔍 Aplicando filtros:", { filtroMunicipio, filtroUf });
+      // ✅ Aplicar filtros baseados no tipo de usuário
+      if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
+        console.log("🔍 Aplicando filtros para operador:", { filtroMunicipio, filtroUf });
         emendasQuery = query(
           collection(db, "emendas"),
           where("municipio", "==", filtroMunicipio),
           where("uf", "==", filtroUf),
           orderBy("numero", "asc"),
         );
+      } else if (permissoes.isAdmin) {
+        console.log("👑 Admin detectado - carregando TODAS as emendas");
       }
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
@@ -555,8 +562,8 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         orderBy("numero", "asc"),
       );
 
-      // Aplicar filtros se necessário
-      if (permissoes.filtroAplicado && filtroMunicipio && filtroUf) {
+      // ✅ Aplicar filtros baseados no tipo de usuário
+      if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
         emendasQuery = query(
           collection(db, "emendas"),
           where("municipio", "==", filtroMunicipio),
@@ -678,20 +685,21 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
        * @returns {boolean} - Se pode editar
        */
       podeEditarCampo: (campo) => {
-        // ✅ CORREÇÃO: Admin sempre pode editar
+        // ✅ ADMIN: Pode editar sempre
         if (usuario?.role === "admin") {
           console.log(`🔐 podeEditarCampo(${campo}): true - é admin`);
           return true;
         }
 
-        if (!permissoes) {
-          console.log(`🔐 podeEditarCampo(${campo}): false - sem permissões`);
-          return false;
+        // ✅ OPERADOR: Pode editar se tem município/UF
+        if (usuario?.municipio && usuario?.uf) {
+          console.log(`🔐 podeEditarCampo(${campo}): true - operador com município`);
+          return true;
         }
 
-        const resultado = permissoes.podeEditar;
-        console.log(`🔐 podeEditarCampo(${campo}): ${resultado}`);
-        return resultado;
+        // ✅ SEM PERMISSÃO
+        console.log(`🔐 podeEditarCampo(${campo}): false - sem permissão`);
+        return false;
       },
 
     podeVisualizarCampo: (campo) => {

@@ -86,7 +86,7 @@ const EmendaForm = ({
 
   // ✅ Estados para gerenciar a nova seção
   const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
-  const [editandoAcaoServico, setEditandoAcaoServico] = useState(null);
+  const [editandoAcaoServico, setEditandoAcaoServico = useState(null);
   const [novaAcaoServico, setNovaAcaoServico] = useState({
     tipo: "Metas Quantitativas",
     descricao: "",
@@ -824,7 +824,7 @@ const EmendaForm = ({
                 value={formData.parlamentar}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={!podeEditar}
                 required
               />
             </div>
@@ -839,7 +839,7 @@ const EmendaForm = ({
                 value={formData.numeroEmenda}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={!podeEditar}
                 required
               />
             </div>
@@ -1020,8 +1020,7 @@ const EmendaForm = ({
                 value={formData.valorExecutado}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
-                placeholder="0,00"
+                disabled={camposDesabilitados}Apply permission logic and enhance EmendaForm debugging for improved user role and edit access management.                placeholder="0,00"
               />
             </div>
 
