@@ -359,7 +359,7 @@ export default function Dashboard({ usuario }) {
               {formatCurrency(estatisticas.saldoDisponivel)}
             </div>
             <div className="card-subtitle">
-              {estatisticas.percentualExecutado.toFixed(1)}% executado
+              {(estatisticas.percentualExecutado ?? 0).toFixed(1)}% executado
             </div>
           </div>
         </div>
@@ -374,12 +374,12 @@ export default function Dashboard({ usuario }) {
           <div className="card-content">
             <h3>Taxa de Execução</h3>
             <div className="card-value">
-              {estatisticas.percentualExecutado.toFixed(1)}%
+              {(estatisticas.percentualExecutado ?? 0).toFixed(1)}%
             </div>
             <div className="card-subtitle">
-              {estatisticas.percentualExecutado > 70
+              {(estatisticas.percentualExecutado ?? 0) > 70
                 ? "✅ Boa execução"
-                : estatisticas.percentualExecutado > 40
+                : (estatisticas.percentualExecutado ?? 0) > 40
                   ? "⚠️ Execução moderada"
                   : "🔴 Baixa execução"}
             </div>
