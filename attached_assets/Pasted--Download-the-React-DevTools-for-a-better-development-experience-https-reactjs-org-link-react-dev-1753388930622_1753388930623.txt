@@ -1,0 +1,270 @@
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🔄 useEffect disparado - recalculando permissões
+ 🎯 INICIANDO determinarPermissoes com: Object
+ 🔍 Role extraída: admin | Tipo: string
+ 👑 isAdmin calculado: true
+ ✅ ADMIN DETECTADO - Liberando todas as permissões
+ 📋 Novas permissões calculadas: Object
+ 📊 Carregando todas as emendas...
+ 🔍 Aplicando filtros: Object
+ ⏳ Aguardando dados: Object
+ 🔄 useEffect disparado - recalculando permissões
+ 🎯 INICIANDO determinarPermissoes com: Object
+ 🔍 Role extraída: admin | Tipo: string
+ 👑 isAdmin calculado: true
+ ✅ ADMIN DETECTADO - Liberando todas as permissões
+ 📋 Novas permissões calculadas: Object
+ 📊 Carregando todas as emendas...
+ 🔍 Aplicando filtros: Object
+ ⏳ Aguardando dados: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 📊 Carregando todas as emendas...
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ ⏳ Aguardando dados: Object
+ 📊 Emendas carregadas: 0
+ 📊 Emendas carregadas: 0
+ 📊 Emendas carregadas: 2
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 📊 Calculando estatísticas do Dashboard...
+ 📋 Emendas disponíveis: 2
+ 💰 Despesas disponíveis: 2
+ ✅ Estatísticas calculadas: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🏠 Dashboard iniciado
+ 👤 Dados do usuário carregados para Dashboard: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 🔄 useEffect disparado - recalculando permissões
+ 🎯 INICIANDO determinarPermissoes com: Object
+ 🔍 Role extraída: admin | Tipo: string
+ 👑 isAdmin calculado: true
+ ✅ ADMIN DETECTADO - Liberando todas as permissões
+ 📋 Novas permissões calculadas: Object
+ 📊 Carregando todas as emendas...
+ 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+ 🔄 useEffect disparado - recalculando permissões
+ 🎯 INICIANDO determinarPermissoes com: Object
+ 🔍 Role extraída: admin | Tipo: string
+ 👑 isAdmin calculado: true
+ ✅ ADMIN DETECTADO - Liberando todas as permissões
+ 📋 Novas permissões calculadas: Object
+ 📊 Carregando todas as emendas...
+ 🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 📊 Carregando todas as emendas...
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+ 🏁 PERMISSÕES FINAIS DO HOOK: Object
+ 📊 Emendas carregadas: 2
+ 📊 Emendas carregadas: 2
+ 📊 Emendas carregadas: 2
+ ✅ Usando dados direto do App.jsx: Object
+ 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+ 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+ 🔧 DEBUG useEmendaDespesa - role: admin
+ 🔧 DEBUG useEmendaDespesa - tipo da role: string
+ 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+Emendas.jsx:22 ✅ Usando dados direto do App.jsx: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+Emendas.jsx:58 ✅ Emendas filtradas carregadas: 2
+Emendas.jsx:79 ➕ Criando nova emenda
+Emendas.jsx:22 ✅ Usando dados direto do App.jsx: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+Emendas.jsx:22 ✅ Usando dados direto do App.jsx: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:135 🔄 useEffect disparado - recalculando permissões
+useEmendaDespesa.js:76 🎯 INICIANDO determinarPermissoes com: Object
+useEmendaDespesa.js:93 🔍 Role extraída: admin | Tipo: string
+useEmendaDespesa.js:102 👑 isAdmin calculado: true
+useEmendaDespesa.js:105 ✅ ADMIN DETECTADO - Liberando todas as permissões
+useEmendaDespesa.js:137 📋 Novas permissões calculadas: Object
+useEmendaDespesa.js:677 🔐 podeEditarCampo(emenda): false
+EmendaForm.jsx:118 🔐 Permissões EmendaForm: Object
+useEmendaDespesa.js:135 🔄 useEffect disparado - recalculando permissões
+useEmendaDespesa.js:76 🎯 INICIANDO determinarPermissoes com: Object
+useEmendaDespesa.js:93 🔍 Role extraída: admin | Tipo: string
+useEmendaDespesa.js:102 👑 isAdmin calculado: true
+useEmendaDespesa.js:105 ✅ ADMIN DETECTADO - Liberando todas as permissões
+useEmendaDespesa.js:137 📋 Novas permissões calculadas: Object
+useEmendaDespesa.js:677 🔐 podeEditarCampo(emenda): false
+EmendaForm.jsx:118 🔐 Permissões EmendaForm: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:677 🔐 podeEditarCampo(emenda): true
+EmendaForm.jsx:118 🔐 Permissões EmendaForm: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
+useEmendaDespesa.js:28 🔧 DEBUG useEmendaDespesa - usuário recebido: Object
+useEmendaDespesa.js:29 🔧 DEBUG useEmendaDespesa - tipo do usuário: object
+useEmendaDespesa.js:30 🔧 DEBUG useEmendaDespesa - role: admin
+useEmendaDespesa.js:31 🔧 DEBUG useEmendaDespesa - tipo da role: string
+useEmendaDespesa.js:35 🔧 DEBUG useEmendaDespesa - options: Object
+useEmendaDespesa.js:640 🏁 PERMISSÕES FINAIS DO HOOK: Object
