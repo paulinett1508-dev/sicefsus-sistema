@@ -313,7 +313,7 @@ const EmendaForm = ({
         [name]: valorFormatado,
       }));
     },
-    [formatarValorMonetario, formatarCNPJ, isMounted, podeEditarCampo],
+    [formatarValorMonetario, formatarCNPJ, isMounted],
   );
 
   // ✅ CORRIGIDO: Funções para gerenciar Ações e Serviços
@@ -572,7 +572,6 @@ const EmendaForm = ({
       success,
       onSalvar,
       isMounted,
-      podeEditarCampo,
     ],
   );
 
@@ -824,7 +823,7 @@ const EmendaForm = ({
                 value={formData.parlamentar}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={!podeEditar}
+                disabled={camposDesabilitados}
                 required
               />
             </div>
@@ -839,7 +838,7 @@ const EmendaForm = ({
                 value={formData.numeroEmenda}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={!podeEditar}
+                disabled={camposDesabilitados}
                 required
               />
             </div>
@@ -1020,7 +1019,7 @@ const EmendaForm = ({
                 value={formData.valorExecutado}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}Apply permission logic and enhance EmendaForm debugging for improved user role and edit access management.                placeholder="0,00"
+                disabled={camposDesabilitados}Apply permission logicCorrecting the usage of the disabled attribute in the input fields to rely on the `camposDesabilitados` variable for proper permission handling.                placeholder="0,00"
               />
             </div>
 
