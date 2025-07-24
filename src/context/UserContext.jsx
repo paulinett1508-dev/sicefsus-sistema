@@ -95,9 +95,9 @@ export function UserProvider({ children }) {
       'VITE_FIREBASE_AUTH_DOMAIN',
       'VITE_FIREBASE_PROJECT_ID'
     ];
-    
+
     const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
-    
+
     if (missingVars.length > 0) {
       console.error("❌ FIREBASE CONFIG ERROR: Variáveis de ambiente ausentes:", missingVars);
       console.error("🔧 SOLUÇÃO: Configure as variáveis no Secrets do Replit:");
@@ -123,7 +123,7 @@ export function UserProvider({ children }) {
             uf: fullUser.uf,
             isActive: fullUser.isActive
           });
-          
+
           // Se o usuário estiver desativado, não o armazena
           if (fullUser.isActive === false) {
             console.log("⚠️ UserContext: Usuário desativado");

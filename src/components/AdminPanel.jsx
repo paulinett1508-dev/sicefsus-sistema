@@ -30,7 +30,48 @@ import ConfirmationModal from "./ConfirmationModal";
 // ✅ MUTEX GLOBAL para prevenir criação simultânea
 let creationMutex = false;
 
-const AdminPanel = ({ usuario }) => {
+const styles = {
+  container: {
+    padding: "20px",
+    maxWidth: "1200px",
+    margin: "0 auto",
+  },
+  errorContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "40px",
+    textAlign: "center",
+    backgroundColor: "#f8f9fa",
+    borderRadius: "8px",
+    margin: "20px",
+  },
+  errorTitle: {
+    color: "#E74C3C",
+    fontSize: "24px",
+    fontWeight: "600",
+    marginBottom: "12px",
+  },
+  errorText: {
+    color: "#666",
+    fontSize: "16px",
+    marginBottom: "20px",
+  },
+};
+
+export default function AdminPanel({ usuario }) {
+  const { showToast } = useToast();
+
+  // Verificação de permissões administrativa
+  if (!usuario || usuario.role !== 'admin') {
+    return (
+      <div style={styles.errorContainer}>
+        <h3 style={styles.errorTitle}>🚫 Acesso Negado</h3>
+        <p style={styles.errorText}>Você não tem permissão para acessar o painel administrativo.</p>
+      </div>
+    );
+  }
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users");
@@ -56,7 +97,6 @@ const AdminPanel = ({ usuario }) => {
   });
 
   const [formErrors, setFormErrors] = useState({});
-  const { showToast } = useToast();
   const auth = getAuth();
 
   // ✅ CLEANUP ao desmontar componente
@@ -83,10 +123,10 @@ const AdminPanel = ({ usuario }) => {
       // ✅ Aguardar inicialização do Firebase Auth como fallback
       const checkAuthAndLoad = async () => {
         console.log("🔄 AdminPanel: Verificando autenticação via Auth...");
-        
+
         // Aguardar um pouco para garantir que o auth esteja pronto
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         if (auth?.currentUser) {
           console.log("✅ Usuário autenticado via Auth, carregando dados...");
           loadUsers();
@@ -139,7 +179,7 @@ const AdminPanel = ({ usuario }) => {
       console.log("🔄 Iniciando consulta ao Firestore...");
       const usersCollection = collection(db, "users");
       const snapshot = await getDocs(usersCollection);
-      
+
       console.log("📊 Snapshot recebido:", {
         empty: snapshot.empty,
         size: snapshot.size,
@@ -160,16 +200,16 @@ const AdminPanel = ({ usuario }) => {
       }
     } catch (error) {
       console.error("❌ AdminPanel: Erro ao carregar usuários:", error);
-      
+
       if (isMountedRef.current) {
         let errorMessage = `Erro ao carregar usuários: ${error.message}`;
-        
+
         if (error.code === 'permission-denied') {
           errorMessage = "Sem permissão para acessar dados de usuários";
         } else if (error.code === 'unavailable') {
           errorMessage = "Serviço Firebase indisponível. Tente novamente.";
         }
-        
+
         showToast(errorMessage, "error");
       }
     } finally {
@@ -1093,5 +1133,3 @@ const AdminPanel = ({ usuario }) => {
     </div>
   );
 };
-
-export default AdminPanel;
