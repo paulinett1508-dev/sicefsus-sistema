@@ -23,15 +23,17 @@ if (missingVars.length > 0) {
   missingVars.forEach(varName => console.error(`   - ${varName}`));
 }
 
-// ✅ Log de debug das configurações (mascarando valores sensíveis)
-console.log('🔥 Firebase Config Status:', {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Configurada' : '❌ Ausente',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✅ Configurada' : '❌ Ausente',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✅ Configurada' : '❌ Ausente',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✅ Configurada' : '❌ Ausente',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✅ Configurada' : '❌ Ausente',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✅ Configurada' : '❌ Ausente',
-});
+// ✅ Log de debug das configurações (apenas em desenvolvimento)
+if (import.meta.env.DEV) {
+  console.log('🔥 Firebase Config Status:', {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Configurada' : '❌ Ausente',
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✅ Configurada' : '❌ Ausente',
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✅ Configurada' : '❌ Ausente',
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✅ Configurada' : '❌ Ausente',
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✅ Configurada' : '❌ Ausente',
+    appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✅ Configurada' : '❌ Ausente',
+  });
+}
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

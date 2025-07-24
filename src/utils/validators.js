@@ -84,22 +84,41 @@ export const validateMunicipio = (municipio) => {
  * @returns {Object} - Resultado da validação
  */
 export const validateLocation = (municipio, uf) => {
-  const municipioNorm = normalizeMunicipio(municipio);
-  const ufNorm = normalizeUF(uf);
+  const erros = [];
 
-  const municipioValido = validateMunicipio(municipioNorm);
-  const ufValida = validateUF(ufNorm);
+  if (!municipio || typeof municipio !== 'string' || municipio.trim() === "") {
+    erros.push("Município é obrigatório e deve ser um texto válido");
+  }
+
+  if (!uf || typeof uf !== 'string' || uf.trim() === "") {
+    erros.push("UF é obrigatória e deve ser um texto válido");
+  }
+
+  // Validação de comprimento
+  if (municipio && municipio.trim().length < 2) {
+    erros.push("Município deve ter pelo menos 2 caracteres");
+  }
+
+  if (municipio && municipio.trim().length > 100) {
+    erros.push("Município não pode ter mais de 100 caracteres");
+  }
+
+  const ufNormalizada = normalizeUF(uf);
+  if (ufNormalizada && !UFS_VALIDAS.includes(ufNormalizada)) {
+    erros.push(`UF inválida: ${uf}. UFs válidas: ${UFS_VALIDAS.join(', ')}`);
+  }
+
+  // Validação contra caracteres especiais maliciosos
+  const regex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+  if (municipio && !regex.test(municipio)) {
+    erros.push("Município contém caracteres inválidos");
+  }
 
   return {
-    valido: municipioValido && ufValida,
-    municipio: municipioNorm,
-    uf: ufNorm,
-    erros: {
-      municipio: !municipioValido ? "Município inválido ou muito curto" : null,
-      uf: !ufValida
-        ? "UF deve ter 2 caracteres e ser válida (ex: ma, pi, ce)"
-        : null,
-    },
+    valido: erros.length === 0,
+    erros,
+    municipio: municipio ? normalizeMunicipio(municipio) : null,
+    uf: ufNormalizada,
   };
 };
 

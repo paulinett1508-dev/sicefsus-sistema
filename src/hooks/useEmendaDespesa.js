@@ -106,17 +106,17 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     }
 
     // ✅ OPERADOR: Pode editar, mas só do seu município
-    const municipio = user.municipio;
-    const uf = user.uf;
+    const municipio = user.municipio?.toLowerCase();
+    const uf = user.uf?.toLowerCase();
     
     if (municipio && uf) {
       console.log("👤 OPERADOR COM MUNICÍPIO - Liberando permissões com filtro");
       return {
-        podeEditar: true, // ✅ OPERADOR PODE EDITAR
+        podeEditar: true,
         podeVisualizar: true,
         isAdmin: false,
         acessoTotal: false,
-        filtroAplicado: true, // ✅ Filtro por município
+        filtroAplicado: true,
         motivo: `Operador - acesso limitado a ${municipio}/${uf.toUpperCase()}`,
         aviso: null,
       };
@@ -137,10 +137,16 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
   // ✅ CORREÇÃO CRÍTICA: useEffect de permissões com dependências ESTÁVEIS
   useEffect(() => {
+    if (!usuario) {
+      setPermissoes(null);
+      return;
+    }
+
     console.log("🔄 useEffect disparado - recalculando permissões");
     const novasPermissoes = determinarPermissoes(usuario);
     console.log("📋 Novas permissões calculadas:", novasPermissoes);
     setPermissoes(novasPermissoes);
+  }, [usuario?.uid, usuario?.role, usuario?.municipio, usuario?.uf, determinarPermissoes]);es(novasPermissoes);
   }, [usuario?.uid, usuario?.role, usuario?.email]); // ✅ DEPENDÊNCIAS PRIMITIVAS ESTÁVEIS
 
   // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
