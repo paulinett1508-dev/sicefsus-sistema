@@ -1024,10 +1024,116 @@ export default function AdminPanel({ usuario }) {
         }
 
         @keyframes pulse {
-```python
-# Adding import of setDoc to the firebase/firestore imports in AdminPanel.jsx
-<replit_final_file>
-// AdminPanel.jsx - CORREÇÃO CRÍTICA v6.0
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+
+        .status-text {
+          flex: 1;
+          color: #856404;
+        }
+
+        .status-text strong {
+          font-size: 14px;
+        }
+
+        .status-text small {
+          font-size: 12px;
+          opacity: 0.8;
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 10px;
+          padding-top: 20px;
+          border-top: 1px solid #dee2e6;
+        }
+
+        .users-table {
+          overflow-x: auto;
+        }
+
+        .users-table table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .users-table th,
+        .users-table td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #dee2e6;
+        }
+
+        .users-table th {
+          background: #f8f9fa;
+          font-weight: 600;
+          color: #495057;
+        }
+
+        .badge {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.8em;
+          font-weight: 500;
+        }
+
+        .badge.admin {
+          background: #dc3545;
+          color: white;
+        }
+
+        .badge.user {
+          background: #28a745;
+          color: white;
+        }
+
+        .status {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.8em;
+          font-weight: 500;
+        }
+
+        .status.ativo {
+          background: #d4edda;
+          color: #155724;
+        }
+
+        .status.inativo {
+          background: #f8d7da;
+          color: #721c24;
+        }
+
+        .admin-access {
+          color: #856404;
+          font-weight: 500;
+          font-size: 0.9em;
+        }
+
+        .text-error {
+          color: #dc3545;
+          font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+          .admin-panel {
+            padding: 10px;
+          }
+
+          .form-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}</old_str>
 // ✅ CORREÇÃO 1: Prevenção de duplicação de usuários
 // ✅ CORREÇÃO 2: Sistema de mutex para criação
 // ✅ CORREÇÃO 3: Validação prévia de email existente
