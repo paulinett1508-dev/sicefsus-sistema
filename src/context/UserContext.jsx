@@ -89,6 +89,24 @@ export function UserProvider({ children }) {
       return;
     }
 
+    // ✅ Verificar se as variáveis de ambiente estão configuradas
+    const requiredEnvVars = [
+      'VITE_FIREBASE_API_KEY',
+      'VITE_FIREBASE_AUTH_DOMAIN',
+      'VITE_FIREBASE_PROJECT_ID'
+    ];
+    
+    const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+    
+    if (missingVars.length > 0) {
+      console.error("❌ FIREBASE CONFIG ERROR: Variáveis de ambiente ausentes:", missingVars);
+      console.error("🔧 SOLUÇÃO: Configure as variáveis no Secrets do Replit:");
+      missingVars.forEach(varName => console.error(`   - ${varName}`));
+      setLoading(false);
+      setUser(null);
+      return;
+    }
+
     // Inscreve-se nas mudanças de autenticação. Quando o usuário logar ou
     // deslogar, esta callback será executada.
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -106,6 +124,13 @@ export function UserProvider({ children }) {
           console.error("Erro ao carregar usuário:", err);
           if (err.code === "auth/invalid-api-key") {
             console.error("🔧 SOLUÇÃO: Configure as variáveis de ambiente do Firebase no Secrets do Replit");
+            console.error("📝 Variáveis necessárias:");
+            console.error("   - VITE_FIREBASE_API_KEY");
+            console.error("   - VITE_FIREBASE_AUTH_DOMAIN");
+            console.error("   - VITE_FIREBASE_PROJECT_ID");
+            console.error("   - VITE_FIREBASE_STORAGE_BUCKET");
+            console.error("   - VITE_FIREBASE_MESSAGING_SENDER_ID");
+            console.error("   - VITE_FIREBASE_APP_ID");
           }
           setUser(null);
         }

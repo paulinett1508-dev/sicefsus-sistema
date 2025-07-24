@@ -68,6 +68,14 @@ const AdminPanel = ({ usuario }) => {
   }, []);
 
   useEffect(() => {
+    // ✅ Verificar se Firebase está configurado antes de carregar usuários
+    if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+      console.error("❌ AdminPanel: Firebase não configurado");
+      setLoading(false);
+      return;
+    }
+    
+    console.log("🔄 AdminPanel: Carregando usuários...");
     loadUsers();
   }, []);
 
