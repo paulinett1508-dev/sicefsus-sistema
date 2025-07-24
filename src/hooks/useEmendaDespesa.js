@@ -108,7 +108,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     // ✅ OPERADOR: Pode editar, mas só do seu município
     const municipio = user.municipio?.toLowerCase();
     const uf = user.uf?.toLowerCase();
-    
+
     if (municipio && uf) {
       console.log("👤 OPERADOR COM MUNICÍPIO - Liberando permissões com filtro");
       return {
@@ -305,6 +305,22 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     filtroMunicipio,
     filtroUf,
   ]);
+
+  // ✅ FUNÇÃO: Validar estrutura básica de uma emenda
+  const validarEstruturaEmenda = useCallback((emenda) => {
+    if (!emenda || typeof emenda !== 'object') return false;
+
+    const camposObrigatorios = ['id', 'numero', 'valor', 'parlamentar'];
+    const estruturaValida = camposObrigatorios.every(campo => emenda.hasOwnProperty(campo));
+
+    // Validar tipos de dados críticos
+    const tiposValidos = 
+      typeof emenda.numero === 'string' &&
+      (typeof emenda.valor === 'number' || !isNaN(parseFloat(emenda.valor))) &&
+      typeof emenda.parlamentar === 'string';
+
+    return estruturaValida && tiposValidos;
+  }, []);
 
   // ✅ FUNÇÃO: Validar nova despesa contra saldo da emenda
   const validarNovaDespesa = useCallback(

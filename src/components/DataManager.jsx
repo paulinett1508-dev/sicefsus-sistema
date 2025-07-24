@@ -70,10 +70,10 @@ const DataManager = () => {
         exportData.collections.emendas = emendasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          // Converter Timestamps para strings
-          dataCriacao: doc.data().dataCriacao?.toDate().toISOString(),
-          dataVencimento: doc.data().dataVencimento?.toDate().toISOString(),
-          dataModificacao: doc.data().dataModificacao?.toDate().toISOString(),
+          // Converter Timestamps para strings com verificação
+          dataCriacao: doc.data().dataCriacao?.toDate?.()?.toISOString() || doc.data().dataCriacao,
+          dataVencimento: doc.data().dataVencimento?.toDate?.()?.toISOString() || doc.data().dataVencimento,
+          dataModificacao: doc.data().dataModificacao?.toDate?.()?.toISOString() || doc.data().dataModificacao,
         }));
       }
 
@@ -83,9 +83,9 @@ const DataManager = () => {
         exportData.collections.despesas = despesasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          dataCriacao: doc.data().dataCriacao?.toDate().toISOString(),
-          dataVencimento: doc.data().dataVencimento?.toDate().toISOString(),
-          dataModificacao: doc.data().dataModificacao?.toDate().toISOString(),
+          dataCriacao: doc.data().dataCriacao?.toDate?.()?.toISOString() || doc.data().dataCriacao,
+          dataVencimento: doc.data().dataVencimento?.toDate?.()?.toISOString() || doc.data().dataVencimento,
+          dataModificacao: doc.data().dataModificacao?.toDate?.()?.toISOString() || doc.data().dataModificacao,
         }));
       }
 
@@ -95,8 +95,8 @@ const DataManager = () => {
         exportData.collections.users = usersSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          dataCriacao: doc.data().dataCriacao?.toDate().toISOString(),
-          ultimoAcesso: doc.data().ultimoAcesso?.toDate().toISOString(),
+          dataCriacao: doc.data().dataCriacao?.toDate?.()?.toISOString() || doc.data().createdAt?.toDate?.()?.toISOString() || doc.data().dataCriacao,
+          ultimoAcesso: doc.data().ultimoAcesso?.toDate?.()?.toISOString() || doc.data().lastLogin?.toDate?.()?.toISOString() || doc.data().ultimoAcesso,
         }));
       }
 

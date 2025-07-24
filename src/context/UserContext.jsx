@@ -61,12 +61,17 @@ async function ensureFirestoreUser(firebaseUser) {
     // Sobrescreve com dados do Firebase Auth por garantia
     uid: firebaseUser.uid,
     email: firebaseUser.email,
-    displayName: data.displayName || firebaseUser.displayName || null,
+    displayName: data.displayName || data.nome || firebaseUser.displayName || null,
+    nome: data.nome || data.displayName || firebaseUser.displayName || null,
     role: data.role || "user",
     isActive: data.isActive !== false,
+    status: data.status || (data.isActive !== false ? "ativo" : "inativo"),
     municipio: data.municipio || null,
     // Normaliza uf (aceita UF ou uf) e converte para minúsculas
     uf: (data.uf || data.UF || null)?.toLowerCase() || null,
+    // Campos adicionais do AdminPanel
+    departamento: data.departamento || "",
+    telefone: data.telefone || "",
   };
 }
 
