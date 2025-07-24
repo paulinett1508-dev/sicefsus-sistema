@@ -672,11 +672,27 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     filtrarEmendas,
 
     // ✅ MÉTODOS AUXILIARES PARA COMPATIBILIDADE
-    podeEditarCampo: (campo) => {
-      const pode = permissoes.isAdmin || permissoes.podeEditar;
-      console.log(`🔐 podeEditarCampo(${campo}): ${pode}`);
-      return pode;
-    },
+    /**
+       * ✅ Verificar se usuário pode editar um campo específico
+       * @param {string} campo - Nome do campo a ser verificado
+       * @returns {boolean} - Se pode editar
+       */
+      podeEditarCampo: (campo) => {
+        // ✅ CORREÇÃO: Admin sempre pode editar
+        if (usuario?.role === "admin") {
+          console.log(`🔐 podeEditarCampo(${campo}): true - é admin`);
+          return true;
+        }
+
+        if (!permissoes) {
+          console.log(`🔐 podeEditarCampo(${campo}): false - sem permissões`);
+          return false;
+        }
+
+        const resultado = permissoes.podeEditar;
+        console.log(`🔐 podeEditarCampo(${campo}): ${resultado}`);
+        return resultado;
+      },
 
     podeVisualizarCampo: (campo) => {
       const pode = permissoes.isAdmin || permissoes.podeVisualizar;
