@@ -74,26 +74,43 @@ const AdminPanel = ({ usuario }) => {
       setLoading(false);
       return;
     }
-    
+
     console.log("🔄 AdminPanel: Carregando usuários...");
     loadUsers();
   }, []);
 
   const loadUsers = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const usersData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      setLoading(true);
+      console.log("📋 AdminPanel: Carregando usuários do Firestore...");
+      console.log("🔗 Database instance:", db ? "✅ OK" : "❌ Undefined");
+
+      if (!db) {
+        console.error("❌ Database não inicializada");
+        if (isMountedRef.current) {
+          showToast("Erro: Database não configurada", "error");
+          setLoading(false);
+        }
+        return;
+      }
+
+      const usersCollection = collection(db, "users");
+      const snapshot = await getDocs(usersCollection);
 
       if (isMountedRef.current) {
-        setUsers(usersData);
+        const usersList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        console.log(`✅ AdminPanel: ${usersList.length} usuários carregados`);
+        console.log("👥 Lista de usuários:", usersList.map(u => ({ email: u.email, role: u.role })));
+        setUsers(usersList);
       }
     } catch (error) {
-      console.error("❌ Erro ao carregar usuários:", error);
+      console.error("❌ AdminPanel: Erro ao carregar usuários:", error);
       if (isMountedRef.current) {
-        showToast("Erro ao carregar usuários", "error");
+        showToast(`Erro ao carregar usuários: ${error.message}`, "error");
       }
     } finally {
       if (isMountedRef.current) {
@@ -352,12 +369,22 @@ const AdminPanel = ({ usuario }) => {
     setEditingUser(null);
   };
 
-  // ✅ INTERFACE SEM ALTERAÇÕES (mantém design original)
+  console.log("🎯 AdminPanel: Status de renderização:", {
+    loading,
+    usersCount: users.length,
+    activeTab,
+    usuario: usuario?.email,
+    userRole: usuario?.role
+  });
+
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>Carregando painel administrativo...</p>
+      <div className="admin-loading">
+        <div className="spinner"></div>
+        <p>Carregando usuários...</p>
+        <div style={{ fontSize: '12px', marginTop: '10px', color: '#666' }}>
+          Debug: Firebase configurado: {import.meta.env.VITE_FIREBASE_API_KEY ? 'Sim' : 'Não'}
+        </div>
       </div>
     );
   }

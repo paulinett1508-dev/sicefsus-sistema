@@ -21,15 +21,19 @@ const Administracao = ({ usuario }) => {
   // informações fornecidas pelo contexto. Não há mais fallback para buscar
   // dados no Firestore aqui, pois o usuário já vem completo do UserContext.
   useEffect(() => {
-    console.log("🔍 ADMIN DEBUG - Verificando permissões...");
+    console.log("🔍 ADMINISTRACAO DEBUG - Verificando permissões...");
     console.log("👤 Usuário prop completo:", {
       usuario,
       hasUsuario: !!usuario,
       email: usuario?.email,
       role: usuario?.role,
-      uid: usuario?.uid
+      uid: usuario?.uid,
+      municipio: usuario?.municipio,
+      uf: usuario?.uf,
+      isActive: usuario?.isActive
     });
     console.log("📋 ADMIN_EMAILS configurados:", ADMIN_EMAILS);
+    console.log("🔧 Firebase API Key presente:", !!import.meta.env.VITE_FIREBASE_API_KEY);
     
     setLoading(true);
     setError(null);

@@ -113,11 +113,23 @@ export function UserProvider({ children }) {
       setLoading(true);
       if (firebaseUser) {
         try {
+          console.log("🔄 UserContext: Carregando dados completos do usuário...");
           const fullUser = await ensureFirestoreUser(firebaseUser);
+          console.log("👤 UserContext: Dados do usuário carregados:", {
+            uid: fullUser.uid,
+            email: fullUser.email,
+            role: fullUser.role,
+            municipio: fullUser.municipio,
+            uf: fullUser.uf,
+            isActive: fullUser.isActive
+          });
+          
           // Se o usuário estiver desativado, não o armazena
           if (fullUser.isActive === false) {
+            console.log("⚠️ UserContext: Usuário desativado");
             setUser(null);
           } else {
+            console.log("✅ UserContext: Usuário ativo definido no contexto");
             setUser(fullUser);
           }
         } catch (err) {
