@@ -75,8 +75,31 @@ const AdminPanel = ({ usuario }) => {
       return;
     }
 
-    console.log("🔄 AdminPanel: Carregando usuários...");
-    loadUsers();
+    // ✅ Aguardar inicialização do Firebase Auth
+    const checkAuthAndLoad = async () => {
+      console.log("🔄 AdminPanel: Verificando autenticação...");
+      
+      // Aguardar um pouco para garantir que o auth esteja pronto
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      if (auth?.currentUser) {
+        console.log("✅ Usuário autenticado, carregando dados...");
+        loadUsers();
+      } else {
+        console.log("⏳ Aguardando autenticação...");
+        // Tentar novamente após um delay
+        setTimeout(() => {
+          if (auth?.currentUser) {
+            loadUsers();
+          } else {
+            console.error("❌ Usuário não autenticado após aguardar");
+            setLoading(false);
+          }
+        }, 2000);
+      }
+    };
+
+    checkAuthAndLoad();
   }, []);
 
   const loadUsers = async () => {
@@ -84,6 +107,8 @@ const AdminPanel = ({ usuario }) => {
       setLoading(true);
       console.log("📋 AdminPanel: Carregando usuários do Firestore...");
       console.log("🔗 Database instance:", db ? "✅ OK" : "❌ Undefined");
+      console.log("🔗 Auth instance:", auth ? "✅ OK" : "❌ Undefined");
+      console.log("👤 Current user:", auth?.currentUser?.email || "Não logado");
 
       if (!db) {
         console.error("❌ Database não inicializada");
@@ -94,26 +119,62 @@ const AdminPanel = ({ usuario }) => {
         return;
       }
 
+      // ✅ Verificar se o usuário está autenticado
+      if (!auth?.currentUser) {
+        console.error("❌ Usuário não autenticado para carregar dados");
+        if (isMountedRef.current) {
+          showToast("Erro: Usuário não autenticado", "error");
+          setLoading(false);
+        }
+        return;
+      }
+
+      console.log("🔄 Iniciando consulta ao Firestore...");
       const usersCollection = collection(db, "users");
+      console.log("📂 Collection criada:", usersCollection);
+      
       const snapshot = await getDocs(usersCollection);
+      console.log("📊 Snapshot recebido:", {
+        empty: snapshot.empty,
+        size: snapshot.size,
+        docs: snapshot.docs.length
+      });
 
       if (isMountedRef.current) {
-        const usersList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const usersList = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          console.log("📄 Documento processado:", { id: doc.id, email: data.email, role: data.role });
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
 
         console.log(`✅ AdminPanel: ${usersList.length} usuários carregados`);
-        console.log("👥 Lista de usuários:", usersList.map(u => ({ email: u.email, role: u.role })));
+        console.log("👥 Lista completa de usuários:", usersList);
         setUsers(usersList);
       }
     } catch (error) {
-      console.error("❌ AdminPanel: Erro ao carregar usuários:", error);
+      console.error("❌ AdminPanel: Erro detalhado ao carregar usuários:", {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
+      
       if (isMountedRef.current) {
-        showToast(`Erro ao carregar usuários: ${error.message}`, "error");
+        let errorMessage = `Erro ao carregar usuários: ${error.message}`;
+        
+        if (error.code === 'permission-denied') {
+          errorMessage = "Sem permissão para acessar dados de usuários";
+        } else if (error.code === 'unavailable') {
+          errorMessage = "Serviço Firebase indisponível. Tente novamente.";
+        }
+        
+        showToast(errorMessage, "error");
       }
     } finally {
       if (isMountedRef.current) {
+        console.log("🏁 Finalizando carregamento de usuários");
         setLoading(false);
       }
     }
@@ -382,9 +443,28 @@ const AdminPanel = ({ usuario }) => {
       <div className="admin-loading">
         <div className="spinner"></div>
         <p>Carregando usuários...</p>
-        <div style={{ fontSize: '12px', marginTop: '10px', color: '#666' }}>
-          Debug: Firebase configurado: {import.meta.env.VITE_FIREBASE_API_KEY ? 'Sim' : 'Não'}
+        <div style={{ fontSize: '12px', marginTop: '15px', color: '#666', textAlign: 'left' }}>
+          <div><strong>Debug Info:</strong></div>
+          <div>Firebase: {import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Configurado' : '❌ Não configurado'}</div>
+          <div>Database: {db ? '✅ Inicializado' : '❌ Não inicializado'}</div>
+          <div>Auth: {auth ? '✅ Inicializado' : '❌ Não inicializado'}</div>
+          <div>Usuário: {auth?.currentUser?.email || '❌ Não logado'}</div>
+          <div>Usuário prop: {usuario?.email || '❌ Não fornecido'}</div>
         </div>
+        <button 
+          onClick={loadUsers} 
+          style={{
+            marginTop: '15px',
+            padding: '8px 16px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          🔄 Tentar Novamente
+        </button>
       </div>
     );
   }
