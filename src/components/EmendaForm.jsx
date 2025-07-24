@@ -94,36 +94,28 @@ const EmendaForm = ({
     valor: "",
   });
 
-  // ✅ CORREÇÃO: Determinar modo de operação com verificação de permissões
+  // ✅ CORREÇÃO: Determinar modo de operação simplificado
   const determinarModoOperacao = () => {
     if (modoVisualizacao) return "visualizar";
-    if (emendaParaEditar) {
-      // ✅ Verificar se admin pode editar ou se é modo readonly para operadores
-      if (!podeEditarCampo("emenda")) return "visualizar";
-      return "editar";
-    }
+    if (emendaParaEditar) return "editar";
     return "criar";
   };
 
   const modoOperacao = determinarModoOperacao();
 
   // ✅ CORREÇÃO CRÍTICA: Determinar se campos devem estar desabilitados
-  const camposDesabilitados =
-    modoOperacao === "visualizar" ||
-    (usuario?.role !== "admin" && permissoes && !permissoes.podeEditar);
+  const camposDesabilitados = modoOperacao === "visualizar";
 
-  // ✅ Log de debug das permissões (apenas em desenvolvimento)
+  // ✅ Log de debug das permissões (sempre ativo para debugging)
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("🔐 Permissões EmendaForm:", {
-        permissoes,
-        podeEditarCampo: podeEditarCampo("emenda"),
-        modoOperacao,
-        isAdmin: permissoes?.isAdmin,
-        camposDesabilitados,
-      });
-    }
-  }, [permissoes, modoOperacao, camposDesabilitados]);
+    console.log("🔐 DEBUG Permissões EmendaForm:", {
+      usuario: usuario?.role,
+      modoOperacao,
+      readOnly: modoVisualizacao,
+      camposDesabilitados,
+      permissoes,
+    });
+  }, [usuario, modoOperacao, modoVisualizacao, camposDesabilitados, permissoes]);
 
   // ✅ CORRIGIDO: Formatação de valores monetários
   const formatarValorMonetario = useCallback((valor) => {

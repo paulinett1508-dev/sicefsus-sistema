@@ -556,7 +556,7 @@ const DespesaForm = ({
 
   // ✅ Handle input change
   const handleInputChange = (e) => {
-    if (readOnly) return;
+    if (readOnly || modoOperacao === "visualizar") return;
 
     const { name, value } = e.target;
     let valorProcessado = value;
