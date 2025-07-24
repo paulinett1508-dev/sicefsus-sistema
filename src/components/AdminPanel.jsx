@@ -75,40 +75,46 @@ const AdminPanel = ({ usuario }) => {
       return;
     }
 
-    // ✅ Aguardar inicialização do Firebase Auth
-    const checkAuthAndLoad = async () => {
-      console.log("🔄 AdminPanel: Verificando autenticação...");
-      
-      // Aguardar um pouco para garantir que o auth esteja pronto
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (auth?.currentUser) {
-        console.log("✅ Usuário autenticado, carregando dados...");
-        loadUsers();
-      } else {
-        console.log("⏳ Aguardando autenticação...");
-        // Tentar novamente após um delay
-        setTimeout(() => {
-          if (auth?.currentUser) {
-            loadUsers();
-          } else {
-            console.error("❌ Usuário não autenticado após aguardar");
-            setLoading(false);
-          }
-        }, 2000);
-      }
-    };
+    // ✅ Se usuario prop está disponível, carregar imediatamente
+    if (usuario?.uid) {
+      console.log("✅ AdminPanel: Usuário disponível via prop, carregando dados...");
+      loadUsers();
+    } else {
+      // ✅ Aguardar inicialização do Firebase Auth como fallback
+      const checkAuthAndLoad = async () => {
+        console.log("🔄 AdminPanel: Verificando autenticação via Auth...");
+        
+        // Aguardar um pouco para garantir que o auth esteja pronto
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (auth?.currentUser) {
+          console.log("✅ Usuário autenticado via Auth, carregando dados...");
+          loadUsers();
+        } else {
+          console.log("⏳ Aguardando autenticação...");
+          // Tentar novamente após um delay
+          setTimeout(() => {
+            if (auth?.currentUser) {
+              loadUsers();
+            } else {
+              console.error("❌ Usuário não autenticado após aguardar");
+              setLoading(false);
+            }
+          }, 2000);
+        }
+      };
 
-    checkAuthAndLoad();
-  }, []);
+      checkAuthAndLoad();
+    }
+  }, [usuario]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       console.log("📋 AdminPanel: Carregando usuários do Firestore...");
       console.log("🔗 Database instance:", db ? "✅ OK" : "❌ Undefined");
-      console.log("🔗 Auth instance:", auth ? "✅ OK" : "❌ Undefined");
-      console.log("👤 Current user:", auth?.currentUser?.email || "Não logado");
+      console.log("👤 Usuario prop:", usuario?.email || "Não disponível");
+      console.log("👤 Auth current user:", auth?.currentUser?.email || "Não logado");
 
       if (!db) {
         console.error("❌ Database não inicializada");
@@ -119,9 +125,10 @@ const AdminPanel = ({ usuario }) => {
         return;
       }
 
-      // ✅ Verificar se o usuário está autenticado
-      if (!auth?.currentUser) {
-        console.error("❌ Usuário não autenticado para carregar dados");
+      // ✅ Verificar se há algum usuário autenticado (via prop ou auth)
+      const hasUser = usuario?.uid || auth?.currentUser?.uid;
+      if (!hasUser) {
+        console.error("❌ Nenhum usuário autenticado disponível");
         if (isMountedRef.current) {
           showToast("Erro: Usuário não autenticado", "error");
           setLoading(false);
@@ -131,9 +138,8 @@ const AdminPanel = ({ usuario }) => {
 
       console.log("🔄 Iniciando consulta ao Firestore...");
       const usersCollection = collection(db, "users");
-      console.log("📂 Collection criada:", usersCollection);
-      
       const snapshot = await getDocs(usersCollection);
+      
       console.log("📊 Snapshot recebido:", {
         empty: snapshot.empty,
         size: snapshot.size,
@@ -143,7 +149,6 @@ const AdminPanel = ({ usuario }) => {
       if (isMountedRef.current) {
         const usersList = snapshot.docs.map((doc) => {
           const data = doc.data();
-          console.log("📄 Documento processado:", { id: doc.id, email: data.email, role: data.role });
           return {
             id: doc.id,
             ...data,
@@ -151,15 +156,10 @@ const AdminPanel = ({ usuario }) => {
         });
 
         console.log(`✅ AdminPanel: ${usersList.length} usuários carregados`);
-        console.log("👥 Lista completa de usuários:", usersList);
         setUsers(usersList);
       }
     } catch (error) {
-      console.error("❌ AdminPanel: Erro detalhado ao carregar usuários:", {
-        message: error.message,
-        code: error.code,
-        stack: error.stack
-      });
+      console.error("❌ AdminPanel: Erro ao carregar usuários:", error);
       
       if (isMountedRef.current) {
         let errorMessage = `Erro ao carregar usuários: ${error.message}`;
