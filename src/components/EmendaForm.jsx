@@ -110,7 +110,7 @@ const EmendaForm = ({
   // ✅ CORREÇÃO CRÍTICA: Determinar se campos devem estar desabilitados
   const camposDesabilitados =
     modoOperacao === "visualizar" ||
-    (usuario?.role !== "admin" && !podeEditarCampo("emenda"));
+    (usuario?.role !== "admin" && permissoes && !permissoes.podeEditar);
 
   // ✅ Log de debug das permissões (apenas em desenvolvimento)
   useEffect(() => {
@@ -292,12 +292,6 @@ const EmendaForm = ({
     (e) => {
       if (!isMounted()) return;
 
-      // ✅ Verificar se usuário pode editar o campo
-      if (!podeEditarCampo("emenda")) {
-        console.log("🚫 Usuário sem permissão para editar campos");
-        return;
-      }
-
       const { name, value } = e.target;
       let valorFormatado = value;
 
@@ -465,7 +459,7 @@ const EmendaForm = ({
       if (!isMounted()) return;
 
       // ✅ Verificar permissões antes de salvar
-      if (!podeEditarCampo("emenda")) {
+      if (usuario?.role !== "admin" && permissoes && !permissoes.podeEditar) {
         error("Você não tem permissão para salvar emendas");
         return;
       }
@@ -625,7 +619,7 @@ const EmendaForm = ({
             </span>
             <span style={styles.permissionText}>
               {permissoes.isAdmin ? "Administrador" : "Operador"} |
-              {podeEditarCampo("emenda")
+              {(usuario?.role === "admin" || (permissoes && permissoes.podeEditar))
                 ? " ✅ Pode editar"
                 : " 👁️ Apenas visualização"}
             </span>
