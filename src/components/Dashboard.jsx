@@ -404,7 +404,7 @@ export default function Dashboard({ usuario }) {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {estatisticas.emendasPorStatus.map((entry, index) => (
+                {(estatisticas.emendasPorStatus || []).map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -465,7 +465,7 @@ export default function Dashboard({ usuario }) {
         <div className="chart-container">
           <h3>🏆 Top Municípios</h3>
           <div className="top-list">
-            {estatisticas.topMunicipios.map((municipio, index) => (
+            {(estatisticas.topMunicipios || []).map((municipio, index) => (
               <div key={municipio.nome} className="top-item">
                 <div className="top-rank">#{index + 1}</div>
                 <div className="top-info">
