@@ -1,17 +1,10 @@
 // Emendas.jsx - Sistema SICEFSUS v1.7 - CORREÇÃO CRÍTICA APLICADA
-// Componente principal de gestão de emendas
+// ✅ CORREÇÃO: Eliminada duplicação de consultas ao Firestore
+// ✅ CORREÇÃO: Usa dados direto da prop usuario do App.jsx
 
 import React, { useState, useEffect } from "react";
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
-import { db, auth } from "../firebase/firebaseConfig";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 import EmendaForm from "./EmendaForm";
 import EmendasTable from "./EmendasTable";
 import DespesaForm from "./DespesaForm";
@@ -21,19 +14,19 @@ const Emendas = ({ usuario }) => {
   const [currentView, setCurrentView] = useState("listagem");
   const [emendaSelecionada, setEmendaSelecionada] = useState(null);
 
-  // ✅ CORREÇÃO: Usar dados direto da prop usuario (já carregados no App.jsx)
+  // ✅ CORREÇÃO CRÍTICA: Usar dados direto da prop usuario (eliminada duplicação)
+  const userRole = usuario?.role;
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
-  const userRole = usuario?.role;
 
-  // Dados do usuário configurados
+  console.log("✅ Usando dados direto do App.jsx:", {
+    email: usuario?.email,
+    role: userRole,
+    municipio: userMunicipio,
+    uf: userUf,
+  });
 
-  // ✅ CORREÇÃO: Usar dados diretos da prop
-  const usuarioParaHook = usuario;
-
-  console.log("✅ Usuário completo configurado:", usuarioParaHook);
-
-  // ✅ Hook integrado - COM USUÁRIO COMPLETO
+  // ✅ Hook integrado - COM USUÁRIO COMPLETO direto da prop
   const {
     emendas,
     loading,
@@ -41,7 +34,7 @@ const Emendas = ({ usuario }) => {
     atualizarSaldoEmenda,
     obterEstatisticasGerais,
     recarregar,
-  } = useEmendaDespesa(usuarioParaHook, {
+  } = useEmendaDespesa(usuario, {
     carregarTodasEmendas: userRole !== null, // ✅ Só carrega quando role estiver definida
     incluirEstatisticas: true,
     autoRefresh: false,

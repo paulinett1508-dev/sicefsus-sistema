@@ -1,5 +1,5 @@
-// Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA + ERROR BOUNDARY
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+// Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
+import React, { useEffect, useState } from "react";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import {
   BarChart,
@@ -27,278 +27,26 @@ const CHART_COLORS = [
 ];
 
 export default function Dashboard({ usuario }) {
-  // ✅ SISTEMA DE DETECÇÃO DE ERROS
-  const [dashboardError, setDashboardError] = useState(null);
-  const [renderCount, setRenderCount] = useState(0);
-  const [isStable, setIsStable] = useState(true);
-  const renderCountRef = useRef(0);
-  const lastRenderTime = useRef(Date.now());
-  const mountTime = useRef(Date.now());
-
-  // ✅ DETECÇÃO DE LOOP INFINITO
-  useEffect(() => {
-    renderCountRef.current += 1;
-    setRenderCount(renderCountRef.current);
-    
-    const now = Date.now();
-    const timeSinceMount = now - mountTime.current;
-    const timeSinceLastRender = now - lastRenderTime.current;
-    
-    // Se renderizou mais de 50 vezes em menos de 5 segundos, há um problema
-    if (renderCountRef.current > 50 && timeSinceMount < 5000) {
-      console.error("🚨 LOOP INFINITO DETECTADO no Dashboard!");
-      setDashboardError({
-        tipo: "loop_infinito",
-        message: "Loop infinito de renderização detectado",
-        detalhes: `${renderCountRef.current} renders em ${timeSinceMount}ms`,
-        solucao: "Recarregue a página ou contate o suporte"
-      });
-      setIsStable(false);
-      return;
-    }
-    
-    // Se renderizou muito rapidamente (< 10ms), pode ser instabilidade
-    if (timeSinceLastRender < 10 && renderCountRef.current > 10) {
-      console.warn("⚠️ Renderização muito frequente detectada");
-      setIsStable(false);
-    }
-    
-    lastRenderTime.current = now;
-  });
-
-  // Dashboard iniciado
   console.log("🏠 Dashboard iniciado");
+  console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
 
-  // ✅ CORREÇÃO 2: DASHBOARD.JSX - Linhas 38-65
-  const [userRole, setUserRole] = useState(null);
-  const [userMunicipio, setUserMunicipio] = useState(null);
-  const [userUf, setUserUf] = useState(null);
-
-  // ✅ VALIDAÇÃO E MEMOIZAÇÃO DOS DADOS DO USUÁRIO
-  const usuarioValidated = useMemo(() => {
-    if (!usuario) {
-      setDashboardError({
-        tipo: "usuario_ausente",
-        message: "Dados do usuário não encontrados",
-        detalhes: "O componente Dashboard foi carregado sem dados de usuário válidos",
-        solucao: "Faça login novamente ou recarregue a página"
-      });
-      return null;
-    }
-
-    // Validações específicas
-    const validacoes = [];
-    
-    if (!usuario.role) {
-      validacoes.push("Papel/função do usuário não definido");
-    }
-    
-    if (usuario.role !== "admin" && (!usuario.municipio || !usuario.uf)) {
-      validacoes.push("Localização (município/UF) não configurada para usuário operador");
-    }
-    
-    if (!usuario.email) {
-      validacoes.push("Email do usuário não encontrado");
-    }
-
-    if (validacoes.length > 0) {
-      setDashboardError({
-        tipo: "dados_incompletos",
-        message: "Configuração do usuário incompleta",
-        detalhes: validacoes.join("; "),
-        solucao: "Complete seu perfil ou contate o administrador"
-      });
-      return null;
-    }
-
-    return {
-      uid: usuario.uid,
-      email: usuario.email,
-      role: usuario.role,
-      municipio: usuario.municipio,
-      uf: usuario.uf,
-      nome: usuario.nome || usuario.displayName,
-    };
-  }, [usuario]);
-
-  // ✅ Carregar dados do usuário primeiro com validação
-  useEffect(() => {
-    if (usuarioValidated) {
-      setUserRole(usuarioValidated.role);
-      setUserMunicipio(usuarioValidated.municipio);
-      setUserUf(usuarioValidated.uf);
-
-      // Limpar erro se dados estão OK
-      if (dashboardError?.tipo === "usuario_ausente" || dashboardError?.tipo === "dados_incompletos") {
-        setDashboardError(null);
-      }
-    }
-  }, [usuarioValidated, dashboardError]);
-
-  // ✅ Construir objeto usuário completo para o hook
-  const usuarioParaHook = useMemo(() => {
-    if (!usuarioValidated || !userRole) return null;
-    
-    return {
-      uid: usuarioValidated.uid,
-      email: usuarioValidated.email,
-      role: userRole,
-      municipio: userMunicipio,
-      uf: userUf,
-    };
-  }, [usuarioValidated, userRole, userMunicipio, userUf]);
-
-  // ✅ MEMOIZAÇÃO DAS OPÇÕES DO HOOK - SÓ RECRIAR QUANDO NECESSÁRIO
-  const hookOptions = useMemo(() => ({
-    carregarTodasEmendas: userRole !== null,
-    incluirEstatisticas: true,
-    autoRefresh: true, // ✅ Sempre true, throttle é feito no hook
-    filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
-    filtroUf: userRole !== "admin" ? userUf : null,
-    userRole: userRole,
-  }), [userRole, userMunicipio, userUf]); // ✅ Removido isStable da dependência
-
+  // ✅ CORREÇÃO: Hook corrigido com usuário completo
   const {
     emendas = [], // ✅ Default para array vazio
     despesas = [], // ✅ Default para array vazio
     loading,
-    error: hookError,
+    error,
     metricas,
     permissoes,
-  } = useEmendaDespesa(usuarioParaHook, hookOptions);
-
-  // ✅ FUNÇÃO PARA OBTER ESTATÍSTICAS GERAIS (ESTÁVEL)
-  const obterEstatisticasGerais = useCallback(() => {
-    if (!emendas.length) return null;
-
-    const totalEmendas = emendas.length;
-    const totalDespesas = despesas.length;
-
-    const valorTotalEmendas = emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
-      0,
-    );
-    const valorTotalDespesas = despesas.reduce(
-      (sum, d) => sum + (d.valor || 0),
-      0,
-    );
-    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
-    const percentualExecutado =
-      valorTotalEmendas > 0
-        ? (valorTotalDespesas / valorTotalEmendas) * 100
-        : 0;
-
-    // Emendas por status
-    const emendasPorStatus = emendas.reduce((acc, emenda) => {
-      const status = emenda.status || "ativa";
-      const existing = acc.find((item) => item.name === status);
-      if (existing) {
-        existing.value += 1;
-        existing.valor += emenda.valorTotal || emenda.valorRecurso || 0;
-      } else {
-        acc.push({
-          name: status,
-          value: 1,
-          valor: emenda.valorTotal || emenda.valorRecurso || 0,
-        });
-      }
-      return acc;
-    }, []);
-
-    // Despesas por status
-    const despesasPorStatus = despesas.reduce((acc, despesa) => {
-      const status = despesa.status || "pendente";
-      const existing = acc.find((item) => item.name === status);
-      if (existing) {
-        existing.value += 1;
-        existing.valor += despesa.valor || 0;
-      } else {
-        acc.push({
-          name: status,
-          value: 1,
-          valor: despesa.valor || 0,
-        });
-      }
-      return acc;
-    }, []);
-
-    // Evolução mensal (últimos 6 meses)
-    const evolucaoMensal = [];
-    const hoje = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      const mesNome = mes.toLocaleDateString("pt-BR", {
-        month: "short",
-        year: "2-digit",
-      });
-
-      const emendasMes = emendas.filter((e) => {
-        const dataEmenda =
-          e.dataCriacao?.toDate() ||
-          e.createdAt?.toDate() ||
-          new Date(e.data || Date.now());
-        return (
-          dataEmenda.getMonth() === mes.getMonth() &&
-          dataEmenda.getFullYear() === mes.getFullYear()
-        );
-      });
-
-      const despesasMes = despesas.filter((d) => {
-        const dataDespesa = d.data?.toDate() || new Date(d.data || Date.now());
-        return (
-          dataDespesa.getMonth() === mes.getMonth() &&
-          dataDespesa.getFullYear() === mes.getFullYear()
-        );
-      });
-
-      evolucaoMensal.push({
-        mes: mesNome,
-        emendas: emendasMes.length,
-        despesas: despesasMes.length,
-        valorEmendas: emendasMes.reduce(
-          (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
-          0,
-        ),
-        valorDespesas: despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0),
-      });
-    }
-
-    // Top municípios
-    const municipiosMap = {};
-    emendas.forEach((emenda) => {
-      const municipio = emenda.municipio || "Não informado";
-      if (!municipiosMap[municipio]) {
-        municipiosMap[municipio] = { nome: municipio, emendas: 0, valor: 0 };
-      }
-      municipiosMap[municipio].emendas += 1;
-      municipiosMap[municipio].valor +=
-        emenda.valorTotal || emenda.valorRecurso || 0;
-    });
-
-    const topMunicipios = Object.values(municipiosMap)
-      .sort((a, b) => b.valor - a.valor)
-      .slice(0, 5);
-
-    return {
-      totalEmendas,
-      totalDespesas,
-      valorTotalEmendas,
-      valorTotalDespesas,
-      saldoDisponivel,
-      percentualExecutado,
-      emendasPorStatus,
-      despesasPorStatus,
-      evolucaoMensal,
-      topMunicipios,
-    };
-  }, [emendas, despesas]);
-
-  // ✅ CONSOLIDAÇÃO DE ERROS
-  const error = useMemo(() => {
-    if (dashboardError) return dashboardError.message;
-    if (hookError) return hookError;
-    return null;
-  }, [dashboardError, hookError]);
+    obterEstatisticasGerais,
+  } = useEmendaDespesa(usuario, {
+    carregarTodasEmendas: true,
+    incluirEstatisticas: true,
+    autoRefresh: true,
+    filtroMunicipio: usuario?.municipio,
+    filtroUf: usuario?.uf,
+    userRole: usuario?.role,
+  });
 
   const [activeCard, setActiveCard] = useState(null);
   const [estatisticas, setEstatisticas] = useState({
@@ -314,18 +62,32 @@ export default function Dashboard({ usuario }) {
     topMunicipios: [],
   });
 
-  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - OTIMIZADO
+  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
   useEffect(() => {
+    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
     if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
       console.log("📊 Calculando estatísticas do Dashboard...");
-      
-      const stats = obterEstatisticasGerais() || calcularEstatisticasLocais();
+      console.log("📋 Emendas disponíveis:", emendas.length);
+      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
+
+      const stats = obterEstatisticasGerais
+        ? obterEstatisticasGerais()
+        : calcularEstatisticasLocais();
       setEstatisticas(stats);
+
+      console.log("✅ Estatísticas calculadas:", stats);
+    } else {
+      console.log("⏳ Aguardando dados:", {
+        loading,
+        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
+        emendasTipo: typeof emendas,
+        emendasLength: emendas?.length,
+      });
     }
-  }, [emendas.length, despesas.length, loading]); // ✅ SÓ LENGTH para evitar loops
+  }, [emendas, despesas, loading, obterEstatisticasGerais]);
 
   // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
-  const calcularEstatisticasLocais = useCallback(() => {
+  const calcularEstatisticasLocais = () => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
@@ -446,7 +208,7 @@ export default function Dashboard({ usuario }) {
       evolucaoMensal,
       topMunicipios,
     };
-  }, [emendas, despesas]);
+  };
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
@@ -475,84 +237,18 @@ export default function Dashboard({ usuario }) {
     );
   }
 
-  // ✅ SISTEMA DE ERRO APRIMORADO
-  if (dashboardError || error) {
-    const errorInfo = dashboardError || {
-      tipo: "erro_geral",
-      message: error,
-      detalhes: "Erro não especificado",
-      solucao: "Recarregue a página"
-    };
-
+  // ✅ ERROR STATE
+  if (error) {
     return (
-      <div className="dashboard-error-container">
-        <div className="dashboard-error">
-          <div className="error-icon">
-            {errorInfo.tipo === "loop_infinito" ? "🔄" : 
-             errorInfo.tipo === "usuario_ausente" ? "👤" :
-             errorInfo.tipo === "dados_incompletos" ? "⚙️" : "❌"}
-          </div>
-          
-          <h2>Oops! Algo deu errado</h2>
-          <h3>{errorInfo.message}</h3>
-          
-          <div className="error-details">
-            <p><strong>Detalhes:</strong> {errorInfo.detalhes}</p>
-            <p><strong>Solução sugerida:</strong> {errorInfo.solucao}</p>
-          </div>
-
-          {errorInfo.tipo === "loop_infinito" && (
-            <div className="error-warning">
-              <p>⚠️ <strong>Problema técnico detectado:</strong></p>
-              <p>O sistema detectou um loop infinito de renderização. Isso geralmente indica um problema de configuração ou dados instáveis.</p>
-              <p><strong>Renders executados:</strong> {renderCount}</p>
-            </div>
-          )}
-          
-          <div className="error-actions">
-            <button
-              className="error-button primary"
-              onClick={() => {
-                setDashboardError(null);
-                setRenderCount(0);
-                renderCountRef.current = 0;
-                mountTime.current = Date.now();
-                setIsStable(true);
-              }}
-            >
-              🔄 Tentar Novamente
-            </button>
-            
-            <button
-              className="error-button secondary"
-              onClick={() => window.location.reload()}
-            >
-              📄 Recarregar Página
-            </button>
-            
-            {errorInfo.tipo === "dados_incompletos" && (
-              <button
-                className="error-button info"
-                onClick={() => window.location.href = "/perfil"}
-              >
-                ⚙️ Completar Perfil
-              </button>
-            )}
-          </div>
-
-          <div className="error-debug">
-            <details>
-              <summary>Informações técnicas (para suporte)</summary>
-              <pre>{JSON.stringify({
-                tipo: errorInfo.tipo,
-                usuario: usuarioValidated,
-                renderCount,
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent
-              }, null, 2)}</pre>
-            </details>
-          </div>
-        </div>
+      <div className="dashboard-error">
+        <h3>❌ Erro ao carregar dashboard</h3>
+        <p>{error}</p>
+        <button
+          className="error-button"
+          onClick={() => window.location.reload()}
+        >
+          🔄 Recarregar
+        </button>
       </div>
     );
   }
@@ -822,156 +518,23 @@ export default function Dashboard({ usuario }) {
           font-style: italic;
         }
 
-        .dashboard-error-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 60vh;
-          padding: 40px 20px;
-          background: #f8f9fa;
-        }
-
         .dashboard-error {
           text-align: center;
           padding: 40px;
           background: white;
           border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          max-width: 600px;
-          width: 100%;
-          border: 2px solid #E74C3C;
-        }
-
-        .error-icon {
-          font-size: 64px;
-          margin-bottom: 20px;
-          animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-          100% { transform: scale(1); }
-        }
-
-        .dashboard-error h2 {
-          color: #E74C3C;
-          margin: 0 0 10px 0;
-          font-size: 28px;
-        }
-
-        .dashboard-error h3 {
-          color: #333;
-          margin: 0 0 20px 0;
-          font-size: 20px;
-          font-weight: 500;
-        }
-
-        .error-details {
-          background: #f8f9fa;
-          padding: 20px;
-          border-radius: 8px;
-          margin: 20px 0;
-          text-align: left;
-          border-left: 4px solid #4A90E2;
-        }
-
-        .error-details p {
-          margin: 10px 0;
-          line-height: 1.5;
-        }
-
-        .error-warning {
-          background: #fff3cd;
-          border: 1px solid #ffeaa7;
-          padding: 20px;
-          border-radius: 8px;
-          margin: 20px 0;
-          text-align: left;
-        }
-
-        .error-warning p {
-          margin: 8px 0;
-          color: #856404;
-        }
-
-        .error-actions {
-          display: flex;
-          gap: 15px;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin: 30px 0 20px 0;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .error-button {
-          border: none;
-          padding: 12px 24px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          font-size: 14px;
-          transition: all 0.3s ease;
-          min-width: 140px;
-        }
-
-        .error-button.primary {
           background: #154360;
           color: white;
-        }
-
-        .error-button.primary:hover {
-          background: #1e5f7a;
-          transform: translateY(-1px);
-        }
-
-        .error-button.secondary {
-          background: #6c757d;
-          color: white;
-        }
-
-        .error-button.secondary:hover {
-          background: #545b62;
-          transform: translateY(-1px);
-        }
-
-        .error-button.info {
-          background: #4A90E2;
-          color: white;
-        }
-
-        .error-button.info:hover {
-          background: #357abd;
-          transform: translateY(-1px);
-        }
-
-        .error-debug {
-          margin-top: 30px;
-          text-align: left;
-        }
-
-        .error-debug details {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          border: 1px solid #dee2e6;
-        }
-
-        .error-debug summary {
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
           cursor: pointer;
+          margin-top: 20px;
           font-weight: 500;
-          color: #6c757d;
-          margin-bottom: 10px;
-        }
-
-        .error-debug pre {
-          background: #2d3748;
-          color: #e2e8f0;
-          padding: 15px;
-          border-radius: 4px;
-          overflow-x: auto;
-          font-size: 12px;
-          line-height: 1.4;
-          margin: 10px 0 0 0;
         }
 
         .dashboard-no-access {

@@ -1,8 +1,9 @@
-// App.jsx - VERSÃO CORRIGIDA COMPLETA v5.6
+// App.jsx - VERSÃO CORRIGIDA COMPLETA v5.6 - CORREÇÃO DE RE-RENDERS
 // ✅ CORREÇÃO 1: Prop usuario adicionada na rota /administracao (linha 332)
 // ✅ CORREÇÃO 2: Normalização UF na função criarUsuarioSeNaoExiste (linha 98)
+// ✅ CORREÇÃO 3: Memoização do objeto usuário para evitar re-renders em cascata
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -19,9 +20,11 @@ import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Emendas from "./components/Emendas";
 import Despesas from "./components/Despesas";
-import { auth, db } from "./firebase/firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+// As configurações de Firebase e a lógica de autenticação foram movidas para
+// o UserContext. Portanto, não importamos mais auth, db ou métodos de
+// firestore aqui. Veja src/context/UserContext.jsx para detalhes.
+
+import { UserProvider, useUser } from "./context/UserContext";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
@@ -179,181 +182,42 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// ✅ CORREÇÃO PRINCIPAL: Função para criar usuário com dados completos + normalização UF
-async function criarUsuarioSeNaoExiste(user, role = "user") {
-  try {
-    const userRef = doc(db, "users", user.uid);
-    const userDoc = await getDoc(userRef);
-
-    if (!userDoc.exists()) {
-      // Criar novo usuário com estrutura completa
-      const novoUsuario = {
-        uid: user.uid,
-        email: user.email,
-        role: role,
-        displayName: user.displayName || null,
-        isActive: true,
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        // ✅ CAMPOS ADICIONAIS para evitar problemas futuros
-        municipio: null,
-        uf: null,
-      };
-
-      await setDoc(userRef, novoUsuario);
-
-      console.log("👤 Novo usuário criado:", novoUsuario);
-
-      return {
-        uid: user.uid,
-        email: user.email,
-        role: role,
-        displayName: user.displayName,
-        isActive: true,
-        municipio: null,
-        uf: null,
-      };
-    } else {
-      // ✅ CORREÇÃO: Atualizar lastLogin e retornar dados COMPLETOS
-      await setDoc(
-        userRef,
-        {
-          lastLogin: serverTimestamp(),
-          isActive: true,
-        },
-        { merge: true },
-      );
-
-      const userData = userDoc.data();
-      console.log("👤 Dados do usuário do Firestore:", userData);
-
-      return userData; // ✅ Retorna TODOS os dados do Firestore
-    }
-  } catch (error) {
-    console.error("Erro ao criar/atualizar usuário:", error);
-    return {
-      uid: user.uid,
-      email: user.email,
-      role: "user",
-      displayName: user.displayName,
-      isActive: true,
-      municipio: null,
-      uf: null,
-    };
-  }
-}
+// A função criarUsuarioSeNaoExiste foi removida. A criação e atualização do
+// documento do usuário agora é responsabilidade do UserContext, que garante
+// que os dados completos estejam disponíveis sem duplicar consultas.
 
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
-  const [usuario, setUsuario] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
+  // Obtém o usuário, estado de carregamento e função de logout a partir do
+  // UserContext. Isso elimina a necessidade de gerenciar auth localmente.
+  const { user: usuario, loading, logout } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
 
+  // Se o usuário não estiver autenticado e não estivermos na home ou login,
+  // redireciona para a página inicial. Isto substitui a navegação que
+  // acontecia no onAuthStateChanged e garante que rotas protegidas não
+  // fiquem acessíveis quando não há usuário.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
-      setAuthError(null);
+    if (
+      !usuario &&
+      location.pathname !== "/" &&
+      location.pathname !== "/login" &&
+      !showLogin
+    ) {
+      navigate("/");
+    }
+  }, [usuario, location.pathname, navigate, showLogin]);
 
-      if (firebaseUser) {
-        try {
-          // ✅ CORREÇÃO: Obter dados completos do Firestore
-          const userDataFromFirestore = await criarUsuarioSeNaoExiste(
-            firebaseUser,
-            "user",
-          );
-
-          // ✅ VERIFICAÇÃO: Buscar dados atualizados do Firestore
-          const userRef = doc(db, "users", firebaseUser.uid);
-          const userDoc = await getDoc(userRef);
-
-          if (userDoc.exists()) {
-            const userInfo = userDoc.data();
-
-            console.log("🔍 Dados completos do Firestore:", userInfo);
-
-            if (userInfo.isActive === false) {
-              setAuthError(
-                "Usuário desativado. Entre em contato com o administrador.",
-              );
-              await signOut(auth);
-              setUsuario(null);
-              return;
-            }
-
-            // ✅ CORREÇÃO PRINCIPAL: Incluir TODOS os campos do Firestore + normalização UF
-            const usuarioCompleto = {
-              // ✅ Spread primeiro para incluir todos os campos do Firestore
-              ...userInfo,
-              // ✅ Sobrescrever com dados específicos necessários
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              role: userInfo.role || "user",
-              displayName:
-                userInfo.displayName || firebaseUser.displayName || null,
-              isActive: userInfo.isActive !== false,
-              // ✅ CAMPOS CRÍTICOS que estavam faltando:
-              municipio: userInfo.municipio || null,
-              // ✅ NORMALIZAÇÃO FINAL DO UF (sem duplicação)
-              uf: (userInfo.uf || userInfo.UF)?.toLowerCase() || null,
-              // ✅ Outros campos específicos
-              nome: userInfo.nome || null,
-              telefone: userInfo.telefone || null,
-              departamento: userInfo.departamento || null,
-              createdAt: userInfo.createdAt || null,
-              lastLogin: userInfo.lastLogin || null,
-            };
-
-            console.log("✅ Usuário completo configurado:", usuarioCompleto);
-            console.log("🗺️ UF do usuário:", usuarioCompleto.uf);
-            console.log("📍 Município do usuário:", usuarioCompleto.municipio);
-
-            setUsuario(usuarioCompleto);
-          } else {
-            console.error(
-              "❌ Documento do usuário não encontrado no Firestore",
-            );
-            setAuthError("Erro ao carregar dados do usuário.");
-          }
-
-          setShowLogin(false);
-        } catch (error) {
-          console.error("Erro ao carregar dados do usuário:", error);
-          setAuthError("Erro ao carregar dados do usuário. Tente novamente.");
-
-          // ✅ Fallback com estrutura mínima
-          setUsuario({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            role: "user",
-            displayName: firebaseUser.displayName,
-            isActive: true,
-            municipio: null,
-            uf: null,
-          });
-        }
-      } else {
-        setUsuario(null);
-        if (location.pathname !== "/" && location.pathname !== "/login") {
-          navigate("/");
-        }
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [navigate, location.pathname]);
-
-  async function handleLogout() {
+  // ✅ CORREÇÃO: Memoizar função handleLogout para evitar re-renders
+  const handleLogout = useCallback(async () => {
     if (!canNavigate()) {
       return;
     }
-
     try {
-      await signOut(auth);
-      setUsuario(null);
+      await logout();
       setShowLogin(false);
       setAuthError(null);
       navigate("/");
@@ -361,31 +225,37 @@ function AppContent() {
       console.error("Erro ao fazer logout:", error);
       setAuthError("Erro ao fazer logout. Tente novamente.");
     }
-  }
+  }, [canNavigate, logout, navigate]);
 
-  function handleNavigate(path) {
-    if (canNavigate()) {
-      navigate(path);
-    }
-  }
+  // ✅ CORREÇÃO: Memoizar função handleNavigate para evitar re-renders
+  const handleNavigate = useCallback(
+    (path) => {
+      if (canNavigate()) {
+        navigate(path);
+      }
+    },
+    [canNavigate, navigate],
+  );
 
-  function handleShowLogin() {
+  // ✅ CORREÇÃO: Memoizar funções de login para evitar re-renders
+  const handleShowLogin = useCallback(() => {
     setShowLogin(true);
     setAuthError(null);
-  }
+  }, []);
 
-  function handleLoginSuccess() {
+  const handleLoginSuccess = useCallback(() => {
     setShowLogin(false);
     setAuthError(null);
     navigate("/dashboard");
-  }
+  }, [navigate]);
 
-  function handleLoginClose() {
+  const handleLoginClose = useCallback(() => {
     setShowLogin(false);
     setAuthError(null);
-  }
+  }, []);
 
-  const isAuthenticated = !!usuario;
+  // ✅ CORREÇÃO: Memoizar estado de autenticação
+  const isAuthenticated = useMemo(() => !!usuario, [usuario]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -585,17 +455,19 @@ function AppContent() {
 // Componente principal
 export default function App() {
   return (
-    <ToastProvider>
-      <Router>
-        <NavigationProtectionProvider>
-          <AppContent />
-        </NavigationProtectionProvider>
-      </Router>
-    </ToastProvider>
+    <UserProvider>
+      <ToastProvider>
+        <Router>
+          <NavigationProtectionProvider>
+            <AppContent />
+          </NavigationProtectionProvider>
+        </Router>
+      </ToastProvider>
+    </UserProvider>
   );
 }
 
-// Estilos (MANTIDOS)
+// Estilos (MANTIDOS EXATAMENTE IGUAIS)
 const styles = {
   app: {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -781,7 +653,7 @@ const styles = {
   },
 };
 
-// CSS para animações
+// CSS para animações (MANTIDO EXATAMENTE IGUAL)
 const additionalCSS = `
 @keyframes spin {
   0% { transform: rotate(0deg); }

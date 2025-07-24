@@ -1,0 +1,134 @@
+// UserContext.jsx
+// Este contexto centraliza a autenticação e o carregamento dos dados do usuário.
+// Ele encapsula a lógica de login e logout, bem como a leitura do documento do
+// usuário no Firestore. Ao consumir este contexto, os componentes podem
+// acessar `user`, verificar se os dados ainda estão carregando e chamar
+// `logout()` quando necessário.
+
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { auth, db } from "../firebase/firebaseConfig";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+
+// Cria o contexto. O valor padrão é `null` enquanto não há usuário autenticado.
+const UserContext = createContext({ user: null, loading: true, logout: () => {} });
+
+/**
+ * Cria/atualiza o documento do usuário no Firestore se ele ainda não existir.
+ * Retorna os dados completos do usuário normalizados, incluindo município e uf
+ * em letras minúsculas. Este comportamento replica a função
+ * `criarUsuarioSeNaoExiste` de App.jsx.
+ *
+ * @param {import("firebase/auth").User} firebaseUser Usuário autenticado
+ * @returns {Promise<Object>} Dados do usuário
+ */
+async function ensureFirestoreUser(firebaseUser) {
+  const userRef = doc(db, "users", firebaseUser.uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    // Cria novo documento com campos básicos. Não definimos municipio/uf aqui
+    // para permitir que o admin atribua esses dados posteriormente.
+    const novoUsuario = {
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      role: "user",
+      displayName: firebaseUser.displayName || null,
+      isActive: true,
+      createdAt: serverTimestamp(),
+      lastLogin: serverTimestamp(),
+      municipio: null,
+      uf: null,
+    };
+    await setDoc(userRef, novoUsuario);
+    return novoUsuario;
+  }
+
+  // Se o documento já existe, atualiza o último login e retorna os dados
+  await setDoc(
+    userRef,
+    {
+      lastLogin: serverTimestamp(),
+      isActive: true,
+    },
+    { merge: true },
+  );
+
+  const data = userDoc.data();
+  return {
+    // Espalha todos os campos existentes
+    ...data,
+    // Sobrescreve com dados do Firebase Auth por garantia
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    displayName: data.displayName || firebaseUser.displayName || null,
+    role: data.role || "user",
+    isActive: data.isActive !== false,
+    municipio: data.municipio || null,
+    // Normaliza uf (aceita UF ou uf) e converte para minúsculas
+    uf: (data.uf || data.UF || null)?.toLowerCase() || null,
+  };
+}
+
+/**
+ * Provedor de contexto responsável por ouvir o estado de autenticação do
+ * Firebase, carregar e armazenar os dados completos do usuário e disponibilizar
+ * um método de logout. Componentes filhos podem consumir este contexto via
+ * `useUser()`.
+ */
+export function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Inscreve-se nas mudanças de autenticação. Quando o usuário logar ou
+    // deslogar, esta callback será executada.
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setLoading(true);
+      if (firebaseUser) {
+        try {
+          const fullUser = await ensureFirestoreUser(firebaseUser);
+          // Se o usuário estiver desativado, não o armazena
+          if (fullUser.isActive === false) {
+            setUser(null);
+          } else {
+            setUser(fullUser);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar usuário:", err);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  /**
+   * Realiza logout do Firebase Auth e limpa o usuário do contexto.
+   */
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (err) {
+      console.error("Erro no logout:", err);
+    }
+  };
+
+  return (
+    <UserContext.Provider value={{ user, loading, logout }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+
+/**
+ * Hook que simplifica o consumo do UserContext.
+ * @returns {{user: Object|null, loading: boolean, logout: function}}
+ */
+export function useUser() {
+  return useContext(UserContext);
+}

@@ -1,109 +1,110 @@
-// src/components/Toast.jsx
-import React, { useState, useEffect, createContext, useContext } from "react";
+// Toast.jsx - SISTEMA CORRIGIDO v2.0
+// ✅ CORREÇÃO: Hook useToast compatível
+// ✅ CORREÇÃO: Função showToast sempre disponível
+// ✅ CORREÇÃO: Provider context otimizado
+
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 const ToastContext = createContext();
 
-// Hook para usar o toast em qualquer componente
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast deve ser usado dentro de ToastProvider");
-  }
-  return context;
-};
-
-// Provider do Toast - deve envolver toda a aplicação
-export function ToastProvider({ children }) {
+export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = "info", duration = 4000) => {
+  const showToast = useCallback((message, type = "info", duration = 4000) => {
     const id = Date.now() + Math.random();
-    const toast = { id, message, type, duration };
+    const newToast = {
+      id,
+      message,
+      type,
+      duration,
+    };
 
-    setToasts((prev) => [...prev, toast]);
+    setToasts((prev) => [...prev, newToast]);
 
-    // Auto remove após duration
-    if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
-    }
+    // Auto remove
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, duration);
 
     return id;
-  };
+  }, []);
 
-  const removeToast = (id) => {
+  const hideToast = useCallback((id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  };
+  }, []);
 
-  const clearAllToasts = () => {
-    setToasts([]);
-  };
-
-  // Métodos de conveniência
-  const success = (message, duration = 4000) =>
-    addToast(message, "success", duration);
-  const error = (message, duration = 6000) =>
-    addToast(message, "error", duration);
-  const warning = (message, duration = 5000) =>
-    addToast(message, "warning", duration);
-  const info = (message, duration = 4000) =>
-    addToast(message, "info", duration);
+  const success = useCallback(
+    (message, duration) => showToast(message, "success", duration),
+    [showToast],
+  );
+  const error = useCallback(
+    (message, duration) => showToast(message, "error", duration),
+    [showToast],
+  );
+  const warning = useCallback(
+    (message, duration) => showToast(message, "warning", duration),
+    [showToast],
+  );
+  const info = useCallback(
+    (message, duration) => showToast(message, "info", duration),
+    [showToast],
+  );
 
   const value = {
-    addToast,
-    removeToast,
-    clearAllToasts,
+    toasts,
+    showToast,
+    hideToast,
     success,
     error,
     warning,
     info,
-    toasts,
   };
 
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ToastContainer toasts={toasts} onHide={hideToast} />
     </ToastContext.Provider>
   );
-}
+};
 
-// Componente individual do Toast
-function ToastItem({ toast, onRemove }) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
+// ✅ CORREÇÃO: Hook sempre retorna funções válidas
+export const useToast = () => {
+  const context = useContext(ToastContext);
 
-  useEffect(() => {
-    // Animação de entrada
-    const timer = setTimeout(() => setIsVisible(true), 10);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleRemove = () => {
-    setIsLeaving(true);
-    setTimeout(() => onRemove(toast.id), 300);
-  };
-
-  const getToastStyles = () => {
-    const baseStyles = {
-      ...styles.toast,
-      transform: isVisible && !isLeaving ? "translateX(0)" : "translateX(100%)",
-      opacity: isVisible && !isLeaving ? 1 : 0,
+  if (!context) {
+    // ✅ Fallback para quando não há provider
+    console.warn(
+      "useToast usado fora do ToastProvider - usando console como fallback",
+    );
+    return {
+      showToast: (message, type) =>
+        console.log(`[${type?.toUpperCase() || "INFO"}] ${message}`),
+      success: (message) => console.log(`[SUCCESS] ${message}`),
+      error: (message) => console.error(`[ERROR] ${message}`),
+      warning: (message) => console.warn(`[WARNING] ${message}`),
+      info: (message) => console.info(`[INFO] ${message}`),
+      hideToast: () => {},
+      toasts: [],
     };
+  }
 
-    switch (toast.type) {
-      case "success":
-        return { ...baseStyles, ...styles.success };
-      case "error":
-        return { ...baseStyles, ...styles.error };
-      case "warning":
-        return { ...baseStyles, ...styles.warning };
-      default:
-        return { ...baseStyles, ...styles.info };
-    }
-  };
+  return context;
+};
 
+const ToastContainer = ({ toasts, onHide }) => {
+  if (toasts.length === 0) return null;
+
+  return (
+    <div style={styles.container}>
+      {toasts.map((toast) => (
+        <Toast key={toast.id} toast={toast} onHide={() => onHide(toast.id)} />
+      ))}
+    </div>
+  );
+};
+
+const Toast = ({ toast, onHide }) => {
   const getIcon = () => {
     switch (toast.type) {
       case "success":
@@ -117,37 +118,31 @@ function ToastItem({ toast, onRemove }) {
     }
   };
 
+  const getStyles = () => {
+    const baseStyle = styles.toast;
+    switch (toast.type) {
+      case "success":
+        return { ...baseStyle, ...styles.success };
+      case "error":
+        return { ...baseStyle, ...styles.error };
+      case "warning":
+        return { ...baseStyle, ...styles.warning };
+      default:
+        return { ...baseStyle, ...styles.info };
+    }
+  };
+
   return (
-    <div style={getToastStyles()}>
-      <div style={styles.content}>
-        <span style={styles.icon}>{getIcon()}</span>
-        <span style={styles.message}>{toast.message}</span>
-      </div>
-      <button
-        onClick={handleRemove}
-        style={styles.closeButton}
-        aria-label="Fechar notificação"
-      >
-        ✕
+    <div style={getStyles()}>
+      <span style={styles.icon}>{getIcon()}</span>
+      <span style={styles.message}>{toast.message}</span>
+      <button onClick={onHide} style={styles.closeButton}>
+        ×
       </button>
     </div>
   );
-}
+};
 
-// Container dos Toasts
-function ToastContainer({ toasts, onRemove }) {
-  if (toasts.length === 0) return null;
-
-  return (
-    <div style={styles.container}>
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
-      ))}
-    </div>
-  );
-}
-
-// Estilos do componente
 const styles = {
   container: {
     position: "fixed",
@@ -156,82 +151,71 @@ const styles = {
     zIndex: 9999,
     display: "flex",
     flexDirection: "column",
-    gap: 8,
+    gap: 10,
     maxWidth: 400,
-    pointerEvents: "none", // Permite cliques através do container
+    width: "100%",
   },
   toast: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 12,
     padding: "12px 16px",
     borderRadius: 8,
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    transition: "all 0.3s ease",
-    minWidth: 300,
-    maxWidth: 400,
+    animation: "slideIn 0.3s ease-out",
+    fontSize: 14,
+    fontWeight: 500,
+    maxWidth: "100%",
     wordBreak: "break-word",
-    pointerEvents: "auto", // Reativa cliques no toast
-    backdropFilter: "blur(8px)",
-    border: "1px solid rgba(255,255,255,0.2)",
   },
-  content: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
+  success: {
+    backgroundColor: "#d4edda",
+    color: "#155724",
+    border: "1px solid #c3e6cb",
+  },
+  error: {
+    backgroundColor: "#f8d7da",
+    color: "#721c24",
+    border: "1px solid #f5c6cb",
+  },
+  warning: {
+    backgroundColor: "#fff3cd",
+    color: "#856404",
+    border: "1px solid #ffeaa7",
+  },
+  info: {
+    backgroundColor: "#cce7ff",
+    color: "#004085",
+    border: "1px solid #b3d7ff",
   },
   icon: {
     fontSize: 16,
     flexShrink: 0,
   },
   message: {
-    fontSize: 14,
-    fontWeight: "500",
     flex: 1,
     lineHeight: 1.4,
   },
   closeButton: {
     background: "none",
     border: "none",
-    color: "inherit",
+    fontSize: 18,
     cursor: "pointer",
-    padding: "4px 6px",
-    marginLeft: 8,
-    borderRadius: 4,
+    color: "inherit",
     opacity: 0.7,
-    fontSize: 12,
+    padding: 0,
+    width: 20,
+    height: 20,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
-    transition: "opacity 0.2s",
-    ":hover": {
-      opacity: 1,
-    },
-  },
-  success: {
-    background: "#d4edda",
-    color: "#155724",
-    border: "1px solid #c3e6cb",
-  },
-  error: {
-    background: "#f8d7da",
-    color: "#721c24",
-    border: "1px solid #f5c6cb",
-  },
-  warning: {
-    background: "#fff3cd",
-    color: "#856404",
-    border: "1px solid #ffeaa7",
-  },
-  info: {
-    background: "#d1ecf1",
-    color: "#0c5460",
-    border: "1px solid #bee5eb",
   },
 };
 
-// CSS para animações (adicionar ao App.css)
-const cssAnimations = `
-@keyframes slideInRight {
+// CSS para animação
+const toastCSS = `
+@keyframes slideIn {
   from {
     transform: translateX(100%);
     opacity: 0;
@@ -242,37 +226,25 @@ const cssAnimations = `
   }
 }
 
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-/* Hover effect para close button */
-.toast-close-button:hover {
-  opacity: 1 !important;
-  background-color: rgba(0,0,0,0.1);
-}
-
-/* Responsividade para mobile */
 @media (max-width: 480px) {
   .toast-container {
-    left: 10px;
-    right: 10px;
-    top: 10px;
-  }
-
-  .toast-item {
-    min-width: auto;
-    max-width: none;
+    left: 10px !important;
+    right: 10px !important;
+    top: 10px !important;
+    max-width: none !important;
   }
 }
 `;
 
-export { cssAnimations };
+// Inserir CSS dinamicamente
+if (typeof document !== "undefined") {
+  const existingStyle = document.getElementById("toast-styles");
+  if (!existingStyle) {
+    const style = document.createElement("style");
+    style.id = "toast-styles";
+    style.textContent = toastCSS;
+    document.head.appendChild(style);
+  }
+}
+
 export default ToastProvider;

@@ -1,16 +1,12 @@
 // Administracao.jsx - Versão Final v3.1 - IMPORTS CORRIGIDOS
 import React, { useState, useEffect } from "react";
-import { getAuth } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore"; // ✅ CORREÇÃO: Imports completos do Firestore
-import { db } from "../firebase/firebaseConfig";
+// As informações do usuário (role, email, município, uf) já são fornecidas via prop `usuario`.
+// Não precisamos mais importar métodos de autenticação ou Firestore para verificar permissões aqui.
 import AdminPanel from "./AdminPanel";
+// Importa a lista de emails de administradores a partir do arquivo de
+// constantes centralizado. Desta forma, novos administradores podem ser
+// adicionados configurando a variável de ambiente VITE_ADMIN_EMAILS.
+import { ADMIN_EMAILS } from "../config/constants";
 
 const Administracao = ({ usuario }) => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -18,101 +14,35 @@ const Administracao = ({ usuario }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState(null);
 
-  // Lista de emails admin como fallback
-  const adminEmails = [
-    "paulinett1508@gmail.com",
-    "admin@sistema.com",
-    "administrador@sistema.com",
-  ];
+  // ✅ A lista de emails de administradores agora é lida de ADMIN_EMAILS.
+  // Consulte src/config/constants.js para entender como configurá-la via .env.
 
+  // Sempre que o usuário prop mudar, verifica as permissões com base nas
+  // informações fornecidas pelo contexto. Não há mais fallback para buscar
+  // dados no Firestore aqui, pois o usuário já vem completo do UserContext.
   useEffect(() => {
-    checkAdminPermissions();
-  }, [usuario]);
+    console.log("🔍 Verificando permissões de admin...");
+    console.log("👤 Usuário prop:", usuario);
+    setLoading(true);
+    setError(null);
 
-  const checkAdminPermissions = async () => {
-    try {
-      console.log("🔍 Verificando permissões de admin...");
-      console.log("👤 Usuário prop:", usuario);
-
-      setLoading(true);
-      setError(null);
-
-      // ✅ CORREÇÃO: Usar dados do prop primeiro
-      if (usuario && usuario.role) {
-        console.log("✅ Usando dados do usuário prop");
-        setUserInfo(usuario);
-        const isUserAdmin =
-          usuario.role === "admin" || adminEmails.includes(usuario.email);
-        setIsAdmin(isUserAdmin);
-        console.log("👑 É admin?", isUserAdmin);
-        setLoading(false);
-        return;
-      }
-
-      // Fallback: buscar dados no Firestore
-      console.log("⚠️ Dados do prop não disponíveis, buscando no Firestore...");
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-
-      if (!currentUser) {
-        console.log("❌ Usuário não autenticado");
-        setError("Usuário não autenticado");
-        setLoading(false);
-        return;
-      }
-
-      console.log("🔍 Buscando dados no Firestore para:", currentUser.email);
-
-      // ✅ CORREÇÃO: Agora com imports corretos
-      const userQuery = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email),
-      );
-      const userSnapshot = await getDocs(userQuery);
-
-      if (!userSnapshot.empty) {
-        const userData = userSnapshot.docs[0].data();
-        console.log("📄 Dados encontrados no Firestore:", userData);
-
-        setUserInfo({
-          ...userData,
-          uid: currentUser.uid,
-          email: currentUser.email,
-        });
-
-        const isUserAdmin =
-          userData.role === "admin" || adminEmails.includes(currentUser.email);
-        setIsAdmin(isUserAdmin);
-        console.log("👑 É admin (Firestore)?", isUserAdmin);
-      } else {
-        // Último fallback: verificar se email está na lista de admins
-        console.log(
-          "⚠️ Usuário não encontrado no Firestore, verificando lista de admins...",
-        );
-        const isUserAdmin = adminEmails.includes(currentUser.email);
-        setIsAdmin(isUserAdmin);
-        console.log("👑 É admin (fallback)?", isUserAdmin);
-
-        if (isUserAdmin) {
-          setUserInfo({
-            uid: currentUser.uid,
-            email: currentUser.email,
-            nome: "Administrador",
-            role: "admin",
-          });
-        } else {
-          setError("Usuário não encontrado no sistema");
-        }
-      }
-
-      console.log("✅ Verificação de permissões concluída");
-    } catch (error) {
-      console.error("❌ Erro ao verificar permissões:", error);
-      setError("Erro ao verificar permissões: " + error.message);
-    } finally {
+    if (!usuario) {
+      setIsAdmin(false);
+      setUserInfo(null);
+      setError("Usuário não autenticado");
       setLoading(false);
+      return;
     }
-  };
+
+    // Usa dados do usuário para definir info e permissões
+    setUserInfo(usuario);
+    const isUserAdmin =
+      usuario.role === "admin" ||
+      ADMIN_EMAILS.includes((usuario.email || "").toLowerCase());
+    setIsAdmin(isUserAdmin);
+    console.log("👑 É admin?", isUserAdmin);
+    setLoading(false);
+  }, [usuario]);
 
   if (loading) {
     return (

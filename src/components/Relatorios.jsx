@@ -36,27 +36,46 @@ export default function Relatorios({ usuario }) {
   const [selectedReport, setSelectedReport] = useState("overview");
   const [dateFilter, setDateFilter] = useState("all");
 
-  // Carregar dados
+  // Obter dados do usuário para filtragem
+  const userRole = usuario?.role;
+  const userMunicipio = usuario?.municipio;
+  const userUf = usuario?.uf;
+
+  // Carregar dados de emendas e despesas aplicando filtros conforme o perfil
   useEffect(() => {
     async function loadData() {
       setLoading(true);
       try {
-        const [emendasSnapshot, despesasSnapshot] = await Promise.all([
-          getDocs(collection(db, "emendas")),
-          getDocs(collection(db, "despesas")),
-        ]);
+        // Construir query para emendas: filtrar por município/UF quando não for admin
+        let emendasRef = collection(db, "emendas");
+        if (userRole && userRole !== "admin") {
+          emendasRef = query(
+            emendasRef,
+            where("municipio", "==", userMunicipio || null),
+            where("uf", "==", userUf || null),
+          );
+        }
 
+        const emendasSnapshot = await getDocs(emendasRef);
         const emendasData = emendasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+        setEmendas(emendasData);
 
-        const despesasData = despesasSnapshot.docs.map((doc) => ({
+        // Carregar todas as despesas e filtrar apenas se não for admin
+        const despesasSnapshot = await getDocs(collection(db, "despesas"));
+        let despesasData = despesasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        setEmendas(emendasData);
+        if (userRole && userRole !== "admin") {
+          const allowedEmendaIds = new Set(emendasData.map((e) => e.id));
+          despesasData = despesasData.filter((d) =>
+            allowedEmendaIds.has(d.emendaId),
+          );
+        }
         setDespesas(despesasData);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
@@ -64,9 +83,8 @@ export default function Relatorios({ usuario }) {
         setLoading(false);
       }
     }
-
     loadData();
-  }, []);
+  }, [userRole, userMunicipio, userUf]);
 
   // Funções de cálculo
   const formatCurrency = (value) =>
@@ -91,10 +109,7 @@ export default function Relatorios({ usuario }) {
       (sum, e) => sum + (e.valorTotal || 0),
       0,
     );
-    const valorExecutado = despesas.reduce(
-      (sum, l) => sum + (l.valor || 0),
-      0,
-    );
+    const valorExecutado = despesas.reduce((sum, l) => sum + (l.valor || 0), 0);
     const saldoDisponivel = emendas.reduce((sum, e) => sum + (e.saldo || 0), 0);
     const percentualExecutado =
       valorTotalEmendas > 0 ? (valorExecutado / valorTotalEmendas) * 100 : 0;
@@ -112,8 +127,7 @@ export default function Relatorios({ usuario }) {
       percentualExecutado,
       emendasVencidas,
       totalDespesas: despesas.length,
-      ticketMedio:
-        despesas.length > 0 ? valorExecutado / despesas.length : 0,
+      ticketMedio: despesas.length > 0 ? valorExecutado / despesas.length : 0,
     };
   };
 
@@ -135,9 +149,7 @@ export default function Relatorios({ usuario }) {
       execucaoPorAutor[autor].valorTotal += emenda.valorTotal || 0;
       execucaoPorAutor[autor].quantidadeEmendas += 1;
 
-      const despesasAutor = despesas.filter(
-        (l) => l.emendaId === emenda.id,
-      );
+      const despesasAutor = despesas.filter((l) => l.emendaId === emenda.id);
       execucaoPorAutor[autor].valorExecutado += despesasAutor.reduce(
         (sum, l) => sum + (l.valor || 0),
         0,
@@ -173,9 +185,7 @@ export default function Relatorios({ usuario }) {
       execucaoPorTipo[tipo].valorTotal += emenda.valorTotal || 0;
       execucaoPorTipo[tipo].quantidade += 1;
 
-      const despesasTipo = despesas.filter(
-        (l) => l.emendaId === emenda.id,
-      );
+      const despesasTipo = despesas.filter((l) => l.emendaId === emenda.id);
       execucaoPorTipo[tipo].valorExecutado += despesasTipo.reduce(
         (sum, l) => sum + (l.valor || 0),
         0,

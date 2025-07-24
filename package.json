@@ -24,6 +24,7 @@
     "@babel/parser": "^7.28.0",
     "@babel/traverse": "^7.28.0",
     "firebase": "^11.9.1",
+    "firebase-admin": "^13.4.0",
     "react-router-dom": "^7.6.3",
     "recharts": "^3.0.2"
   }

@@ -9,8 +9,8 @@ import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import DespesaForm from "./DespesaForm";
 import DespesasList from "./DespesasList";
 import TemporaryBanner from "./TemporaryBanner";
-import { collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+// Não precisamos mais buscar dados do usuário no Firestore aqui, pois eles
+// são fornecidos via prop `usuario` (UserContext).
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
 const PRIMARY = "#154360";
@@ -27,44 +27,21 @@ export default function Despesas({ usuario }) {
   const { success, error, warning } = useToast();
   const { setFormActive, canNavigate } = useNavigationProtection();
 
-  // ✅ CORREÇÃO: Estados para dados do usuário (mesmo padrão do Emendas/Dashboard)
-  const [userRole, setUserRole] = useState(null);
-  const [userMunicipio, setUserMunicipio] = useState(null);
-  const [userUf, setUserUf] = useState(null);
+  // ✅ Estados locais para controlar a visualização. Os dados do usuário são
+  // derivados diretamente da prop `usuario`, então não precisamos de estados
+  // separados para role, município ou UF.
 
   // ✅ NOVO: Obter filtro automático da navegação
   const [filtroAutomatico, setFiltroAutomatico] = useState(null);
 
-  // ✅ Buscar dados do usuário no Firestore (igual ao Emendas)
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (usuario?.uid) {
-        try {
-          const usersSnapshot = await getDocs(
-            query(collection(db, "users"), where("uid", "==", usuario.uid)),
-          );
+  // ✅ Não buscamos mais dados do usuário no Firestore. As informações
+  // necessárias (role, municipio, uf) vêm diretamente da prop `usuario`.
 
-          if (!usersSnapshot.empty) {
-            const userData = usersSnapshot.docs[0].data();
-            setUserMunicipio(userData.municipio);
-            setUserUf(userData.uf);
-            setUserRole(userData.role);
-            console.log("👤 Dados do usuário carregados (Despesas):", {
-              municipio: userData.municipio,
-              uf: userData.uf,
-              role: userData.role,
-            });
-          }
-        } catch (error) {
-          console.error("❌ Erro ao buscar dados do usuário:", error);
-        }
-      }
-    };
+  // ✅ Construir objeto usuário completo para o hook usando dados da prop
+  const userRole = usuario?.role;
+  const userMunicipio = usuario?.municipio;
+  const userUf = usuario?.uf;
 
-    loadUserData();
-  }, [usuario]);
-
-  // ✅ CORREÇÃO CRÍTICA: Construir objeto usuário completo para o hook
   const usuarioParaHook = userRole
     ? {
         uid: usuario?.uid,

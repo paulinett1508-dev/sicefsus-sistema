@@ -1,9 +1,9 @@
 // EmendaForm.jsx - VERSÃO CORRIGIDA COMPLETA
-// ✅ Todas as anomalias resolvidas
-// ✅ Hook useEmendaDespesa corrigido
-// ✅ Verificação de montagem implementada
-// ✅ Formatação de valores corrigida
-// ✅ Performance otimizada
+// ✅ CORREÇÃO: Hook useEmendaDespesa com assinatura correta
+// ✅ CORREÇÃO: Recebe prop usuario e integra com sistema de permissões
+// ✅ CORREÇÃO: Admin sempre pode editar campos
+// ✅ CORREÇÃO: Label "Município" adicionado
+// ✅ CORREÇÃO: Logs apenas em desenvolvimento
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -26,26 +26,31 @@ const useIsMounted = () => {
 };
 
 const EmendaForm = ({
-  usuario,
+  usuario, // ✅ CORREÇÃO: Receber prop usuario
   emendaParaEditar,
   onCancelar,
   onSalvar,
   onListarEmendas,
   modoVisualizacao = false,
+  defaultMunicipio = null,
+  defaultUf = null,
+  isOperador = false,
 }) => {
   const { success, error } = useToast();
   const navigate = useNavigate();
   const isMounted = useIsMounted();
 
-  // ✅ CORRIGIDO: Hook para dados integrados com despesas - NOVA ASSINATURA
+  // ✅ CORREÇÃO CRÍTICA: Hook com assinatura correta para métricas
   const {
     metricas,
     loading: hookLoading,
     error: hookError,
+    permissoes,
+    podeEditarCampo,
   } = useEmendaDespesa(usuario, {
-    emendaId: emendaParaEditar?.id,
+    emendaId: emendaParaEditar?.id, // ✅ Passa ID da emenda nas options
     incluirEstatisticas: true,
-    autoRefresh: false, // ✅ Desabilitado para evitar loops
+    autoRefresh: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -56,8 +61,8 @@ const EmendaForm = ({
     parlamentar: "",
     numeroEmenda: "",
     tipo: "Individual",
-    municipio: "",
-    uf: "",
+    municipio: defaultMunicipio || "",
+    uf: defaultUf || "",
     valorRecurso: "",
     objetoProposta: "",
     cnpjMunicipio: "",
@@ -89,12 +94,36 @@ const EmendaForm = ({
     valor: "",
   });
 
-  // Determinar modo de operação
-  const modoOperacao = modoVisualizacao
-    ? "visualizar"
-    : emendaParaEditar
-      ? "editar"
-      : "criar";
+  // ✅ CORREÇÃO: Determinar modo de operação com verificação de permissões
+  const determinarModoOperacao = () => {
+    if (modoVisualizacao) return "visualizar";
+    if (emendaParaEditar) {
+      // ✅ Verificar se admin pode editar ou se é modo readonly para operadores
+      if (!podeEditarCampo("emenda")) return "visualizar";
+      return "editar";
+    }
+    return "criar";
+  };
+
+  const modoOperacao = determinarModoOperacao();
+
+  // ✅ CORREÇÃO CRÍTICA: Determinar se campos devem estar desabilitados
+  const camposDesabilitados =
+    modoOperacao === "visualizar" ||
+    (usuario?.role !== "admin" && !podeEditarCampo("emenda"));
+
+  // ✅ Log de debug das permissões (apenas em desenvolvimento)
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔐 Permissões EmendaForm:", {
+        permissoes,
+        podeEditarCampo: podeEditarCampo("emenda"),
+        modoOperacao,
+        isAdmin: permissoes?.isAdmin,
+        camposDesabilitados,
+      });
+    }
+  }, [permissoes, modoOperacao, camposDesabilitados]);
 
   // ✅ CORRIGIDO: Formatação de valores monetários
   const formatarValorMonetario = useCallback((valor) => {
@@ -258,10 +287,16 @@ const EmendaForm = ({
     };
   }, [formData.valorRecurso, metricas]);
 
-  // ✅ CORRIGIDO: Handler para mudanças nos campos
+  // ✅ CORREÇÃO: Handler para mudanças nos campos com verificação de permissões
   const handleInputChange = useCallback(
     (e) => {
       if (!isMounted()) return;
+
+      // ✅ Verificar se usuário pode editar o campo
+      if (!podeEditarCampo("emenda")) {
+        console.log("🚫 Usuário sem permissão para editar campos");
+        return;
+      }
 
       const { name, value } = e.target;
       let valorFormatado = value;
@@ -284,7 +319,7 @@ const EmendaForm = ({
         [name]: valorFormatado,
       }));
     },
-    [formatarValorMonetario, formatarCNPJ, isMounted],
+    [formatarValorMonetario, formatarCNPJ, isMounted, podeEditarCampo],
   );
 
   // ✅ CORRIGIDO: Funções para gerenciar Ações e Serviços
@@ -429,6 +464,12 @@ const EmendaForm = ({
 
       if (!isMounted()) return;
 
+      // ✅ Verificar permissões antes de salvar
+      if (!podeEditarCampo("emenda")) {
+        error("Você não tem permissão para salvar emendas");
+        return;
+      }
+
       setLoading(true);
 
       try {
@@ -530,7 +571,15 @@ const EmendaForm = ({
         }
       }
     },
-    [formData, emendaParaEditar, error, success, onSalvar, isMounted],
+    [
+      formData,
+      emendaParaEditar,
+      error,
+      success,
+      onSalvar,
+      isMounted,
+      podeEditarCampo,
+    ],
   );
 
   // ✅ CORRIGIDO: Renderizar header baseado no modo
@@ -568,9 +617,29 @@ const EmendaForm = ({
       >
         <h2 style={styles.headerTitle}>{config.title}</h2>
         <p style={styles.headerSubtitle}>{config.subtitle}</p>
+        {/* ✅ Mostrar informações de permissão */}
+        {permissoes && (
+          <div style={styles.permissionInfo}>
+            <span style={styles.permissionIcon}>
+              {permissoes.isAdmin ? "👑" : "👤"}
+            </span>
+            <span style={styles.permissionText}>
+              {permissoes.isAdmin ? "Administrador" : "Operador"} |
+              {podeEditarCampo("emenda")
+                ? " ✅ Pode editar"
+                : " 👁️ Apenas visualização"}
+            </span>
+          </div>
+        )}
       </div>
     );
-  }, [modoOperacao, emendaParaEditar, formData.parlamentar]);
+  }, [
+    modoOperacao,
+    emendaParaEditar,
+    formData.parlamentar,
+    permissoes,
+    podeEditarCampo,
+  ]);
 
   // ✅ CORRIGIDO: Renderizar painel financeiro integrado
   const renderPainelFinanceiro = useCallback(() => {
@@ -761,7 +830,7 @@ const EmendaForm = ({
                 value={formData.parlamentar}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 required
               />
             </div>
@@ -776,7 +845,7 @@ const EmendaForm = ({
                 value={formData.numeroEmenda}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 required
               />
             </div>
@@ -790,7 +859,7 @@ const EmendaForm = ({
                 value={formData.tipo}
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 required
               >
                 <option value="Individual">Individual</option>
@@ -809,7 +878,7 @@ const EmendaForm = ({
                 value={formData.municipio}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 required
               />
             </div>
@@ -823,7 +892,7 @@ const EmendaForm = ({
                 value={formData.uf}
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 required
               >
                 <option value="">Selecione...</option>
@@ -845,7 +914,7 @@ const EmendaForm = ({
                 value={formData.valorRecurso}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 placeholder="0,00"
                 required
               />
@@ -861,7 +930,7 @@ const EmendaForm = ({
               value={formData.objetoProposta}
               onChange={handleInputChange}
               style={styles.textarea}
-              disabled={modoVisualizacao}
+              disabled={camposDesabilitados}
               rows={3}
               required
             />
@@ -884,7 +953,7 @@ const EmendaForm = ({
                 value={formData.cnpjMunicipio}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -897,7 +966,7 @@ const EmendaForm = ({
                 value={formData.beneficiarioCnpj}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -910,7 +979,7 @@ const EmendaForm = ({
                 value={formData.numeroProposta}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -922,7 +991,7 @@ const EmendaForm = ({
                 value={formData.programa}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
           </div>
@@ -944,7 +1013,7 @@ const EmendaForm = ({
                 value={formData.outrosValores}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 placeholder="0,00"
               />
             </div>
@@ -957,7 +1026,7 @@ const EmendaForm = ({
                 value={formData.valorExecutado}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
                 placeholder="0,00"
               />
             </div>
@@ -992,7 +1061,7 @@ const EmendaForm = ({
                 value={formData.dataValidada}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1004,7 +1073,7 @@ const EmendaForm = ({
                 value={formData.dataOb}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1016,7 +1085,7 @@ const EmendaForm = ({
                 value={formData.inicioExecucao}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1028,7 +1097,7 @@ const EmendaForm = ({
                 value={formData.finalExecucao}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
           </div>
@@ -1052,7 +1121,7 @@ const EmendaForm = ({
                   value="Metas Quantitativas"
                   checked={tipoAcaoServico === "Metas Quantitativas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={modoVisualizacao}
+                  disabled={camposDesabilitados}
                   style={styles.radioInput}
                 />
                 Metas Quantitativas
@@ -1064,7 +1133,7 @@ const EmendaForm = ({
                   value="Metas"
                   checked={tipoAcaoServico === "Metas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={modoVisualizacao}
+                  disabled={camposDesabilitados}
                   style={styles.radioInput}
                 />
                 Metas
@@ -1073,7 +1142,7 @@ const EmendaForm = ({
           </div>
 
           {/* Formulário para adicionar/editar ação/serviço */}
-          {!modoVisualizacao && (
+          {!camposDesabilitados && (
             <div style={styles.acaoServicoForm}>
               <h4 style={styles.subSectionTitle}>
                 {editandoAcaoServico !== null ? "Editar" : "Adicionar"}{" "}
@@ -1163,7 +1232,7 @@ const EmendaForm = ({
                 <div key={item.id} style={styles.acaoServicoItem}>
                   <div style={styles.acaoServicoHeader}>
                     <span style={styles.acaoServicoTipo}>{item.tipo}</span>
-                    {!modoVisualizacao && (
+                    {!camposDesabilitados && (
                       <div style={styles.acaoServicoActions}>
                         <button
                           type="button"
@@ -1222,7 +1291,7 @@ const EmendaForm = ({
                 value={formData.gnd}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1234,7 +1303,7 @@ const EmendaForm = ({
                 value={formData.funcional}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1246,7 +1315,7 @@ const EmendaForm = ({
                 value={formData.acaoOrcamentaria}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1258,7 +1327,7 @@ const EmendaForm = ({
                 value={formData.dotacaoOrcamentaria}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
 
@@ -1270,7 +1339,7 @@ const EmendaForm = ({
                 value={formData.contrato}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao}
+                disabled={camposDesabilitados}
               />
             </div>
           </div>
@@ -1286,7 +1355,7 @@ const EmendaForm = ({
             ← Voltar
           </button>
 
-          {!modoVisualizacao && (
+          {!camposDesabilitados && (
             <button
               type="submit"
               style={styles.submitButton}
@@ -1305,7 +1374,7 @@ const EmendaForm = ({
   );
 };
 
-// ✅ Estilos mantidos do original
+// ✅ Estilos completos
 const styles = {
   container: {
     maxWidth: "1200px",
@@ -1326,9 +1395,24 @@ const styles = {
     fontWeight: "bold",
   },
   headerSubtitle: {
-    margin: 0,
+    margin: "0 0 10px 0",
     fontSize: "14px",
     opacity: 0.8,
+  },
+  permissionInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    opacity: 0.9,
+    marginTop: "8px",
+  },
+  permissionIcon: {
+    fontSize: "14px",
+  },
+  permissionText: {
+    fontSize: "12px",
   },
   successMessage: {
     display: "flex",
@@ -1374,15 +1458,12 @@ const styles = {
   legendIcon: {
     fontSize: "18px",
   },
-
-  // Painel Financeiro
   financialGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: "16px",
     marginBottom: "24px",
   },
-
   financialCard: {
     display: "flex",
     alignItems: "center",
@@ -1394,23 +1475,19 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
     transition: "transform 0.2s ease",
   },
-
   cardIcon: {
     fontSize: "24px",
     opacity: 0.8,
   },
-
   cardContent: {
     flex: 1,
   },
-
   cardValue: {
     fontSize: "18px",
     fontWeight: "700",
     color: "#154360",
     marginBottom: "2px",
   },
-
   cardLabel: {
     fontSize: "12px",
     color: "#6c757d",
@@ -1418,26 +1495,22 @@ const styles = {
     letterSpacing: "0.5px",
     fontWeight: "600",
   },
-
   cardSubtext: {
     fontSize: "11px",
     color: "#28a745",
     fontWeight: "600",
     marginTop: "2px",
   },
-
   progressSection: {
     marginTop: "16px",
     marginBottom: "24px",
   },
-
   progressLabel: {
     fontSize: "14px",
     fontWeight: "600",
     color: "#495057",
     marginBottom: "8px",
   },
-
   progressBarContainer: {
     position: "relative",
     height: "20px",
@@ -1446,7 +1519,6 @@ const styles = {
     overflow: "hidden",
     border: "1px solid #dee2e6",
   },
-
   progressBar: {
     position: "absolute",
     top: 0,
@@ -1455,7 +1527,6 @@ const styles = {
     borderRadius: "10px 0 0 10px",
     transition: "width 0.5s ease",
   },
-
   actionButtonsContainer: {
     display: "flex",
     flexDirection: "column",
@@ -1465,7 +1536,6 @@ const styles = {
     borderRadius: "8px",
     border: "1px solid #e9ecef",
   },
-
   manageExpensesButton: {
     backgroundColor: "#4A90E2",
     color: "white",
@@ -1482,17 +1552,14 @@ const styles = {
     gap: "8px",
     boxShadow: "0 2px 4px rgba(74, 144, 226, 0.3)",
   },
-
   actionButtonsInfo: {
     textAlign: "center",
   },
-
   actionButtonsText: {
     fontSize: "13px",
     color: "#6c757d",
     fontStyle: "italic",
   },
-
   formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -1537,8 +1604,6 @@ const styles = {
     minHeight: "100px",
     fontFamily: "Arial, sans-serif",
   },
-
-  // Estilos para Ações e Serviços
   subSection: {
     backgroundColor: "#f8f9fa",
     padding: "16px",
@@ -1675,8 +1740,6 @@ const styles = {
     color: "#333",
     lineHeight: "1.5",
   },
-
-  // Botões
   buttonContainer: {
     display: "flex",
     gap: "15px",
