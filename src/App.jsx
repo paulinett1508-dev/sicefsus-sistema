@@ -29,6 +29,8 @@ import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
+import FirebaseError from "./components/FirebaseError";
+import { auth } from "./firebase/firebaseConfig";
 
 // ✨ Context para proteção de navegação (MANTIDO)
 const NavigationProtectionContext = React.createContext({
@@ -452,8 +454,27 @@ function AppContent() {
   );
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/emendas" element={<Emendas />} />
+      <Route path="/despesas" element={<Despesas />} />
+      <Route path="/relatorios" element={<Relatorios />} />
+      <Route path="/administracao" element={<Administracao />} />
+    </Routes>
+  );
+}
+
 // Componente principal
 export default function App() {
+  // ✅ Verificar se Firebase está configurado
+  if (!auth) {
+    return <FirebaseError />;
+  }
+
   return (
     <UserProvider>
       <ToastProvider>

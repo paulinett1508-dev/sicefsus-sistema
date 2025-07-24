@@ -81,6 +81,14 @@ export function UserProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ✅ Verificar se o Firebase está configurado corretamente
+    if (!auth) {
+      console.error("❌ Firebase Auth não está configurado. Verifique as variáveis de ambiente.");
+      setLoading(false);
+      setUser(null);
+      return;
+    }
+
     // Inscreve-se nas mudanças de autenticação. Quando o usuário logar ou
     // deslogar, esta callback será executada.
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -96,6 +104,9 @@ export function UserProvider({ children }) {
           }
         } catch (err) {
           console.error("Erro ao carregar usuário:", err);
+          if (err.code === "auth/invalid-api-key") {
+            console.error("🔧 SOLUÇÃO: Configure as variáveis de ambiente do Firebase no Secrets do Replit");
+          }
           setUser(null);
         }
       } else {
