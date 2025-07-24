@@ -1019,7 +1019,8 @@ const EmendaForm = ({
                 value={formData.valorExecutado}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}Apply permission logicCorrecting the usage of the disabled attribute in the input fields to rely on the `camposDesabilitados` variable for proper permission handling.                placeholder="0,00"
+                disabled={camposDesabilitados}
+                placeholder="0,00"
               />
             </div>
 
