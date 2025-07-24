@@ -146,8 +146,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     const novasPermissoes = determinarPermissoes(usuario);
     console.log("📋 Novas permissões calculadas:", novasPermissoes);
     setPermissoes(novasPermissoes);
-  }, [usuario?.uid, usuario?.role, usuario?.municipio, usuario?.uf, determinarPermissoes]);es(novasPermissoes);
-  }, [usuario?.uid, usuario?.role, usuario?.email]); // ✅ DEPENDÊNCIAS PRIMITIVAS ESTÁVEIS
+  }, [usuario?.uid, usuario?.role, usuario?.municipio, usuario?.uf, determinarPermissoes]);
 
   // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
   const calcularMetricasEmenda = useCallback(
