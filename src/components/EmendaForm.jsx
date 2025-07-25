@@ -319,7 +319,7 @@ const EmendaForm = ({
   const handleNovaAcaoServicoChange = useCallback(
     (campo, valor) => {
       if (!isMounted()) return;
-      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+      if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
       if (campo === "valor") {
         valor = formatarValorMonetario(valor);
@@ -329,12 +329,12 @@ const EmendaForm = ({
         [campo]: valor,
       }));
     },
-    [formatarValorMonetario, isMounted, readOnly],
+    [formatarValorMonetario, isMounted, modoVisualizacao],
   );
 
   const adicionarAcaoServico = useCallback(() => {
     if (!isMounted()) return;
-    if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+    if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória para adicionar uma ação/serviço");
@@ -362,12 +362,12 @@ const EmendaForm = ({
     });
 
     success("Ação/Serviço adicionado com sucesso!");
-  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted, readOnly]);
+  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted, modoVisualizacao]);
 
   const iniciarEdicaoAcaoServico = useCallback(
     (index) => {
       if (!isMounted()) return;
-      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+      if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
       const item = formData.acoesServicos[index];
       setEditandoAcaoServico(index);
@@ -379,12 +379,12 @@ const EmendaForm = ({
       });
       setTipoAcaoServico(item.tipo);
     },
-    [formData.acoesServicos, isMounted, readOnly],
+    [formData.acoesServicos, isMounted, modoVisualizacao],
   );
 
   const salvarEdicaoAcaoServico = useCallback(() => {
     if (!isMounted()) return;
-    if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+    if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória");
@@ -422,7 +422,7 @@ const EmendaForm = ({
     error,
     success,
     isMounted,
-    readOnly,
+    modoVisualizacao,
   ]);
 
   const cancelarEdicaoAcaoServico = useCallback(() => {
@@ -440,7 +440,7 @@ const EmendaForm = ({
   const removerAcaoServico = useCallback(
     (index) => {
       if (!isMounted()) return;
-      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+      if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
       const acoesAtualizadas = formData.acoesServicos.filter(
         (_, i) => i !== index,
@@ -451,7 +451,7 @@ const EmendaForm = ({
       }));
       success("Ação/Serviço removido com sucesso!");
     },
-    [formData.acoesServicos, success, isMounted, readOnly],
+    [formData.acoesServicos, success, isMounted, modoVisualizacao],
   );
 
   // ✅ CORREÇÃO: Submissão simplificada
@@ -460,7 +460,7 @@ const EmendaForm = ({
       e.preventDefault();
 
       if (!isMounted()) return;
-      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
+      if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
 
       // ✅ RADICAL: Verificação apenas de modo
       if (modoVisualizacao) {
@@ -573,7 +573,7 @@ const EmendaForm = ({
       success,
       onSalvar,
       isMounted,
-      readOnly, // ✅ CORREÇÃO: Usar readOnly simples
+      modoVisualizacao, // ✅ CORREÇÃO: Usar readOnly simples
     ],
   );
 
@@ -750,7 +750,7 @@ const EmendaForm = ({
     formatCurrency,
     handleGerenciarDespesas,
     isMounted,
-    readOnly, // ✅ CORREÇÃO: Dependência simplificada
+    modoVisualizacao, // ✅ CORREÇÃO: Dependência simplificada
   ]);
 
   const estados = [
@@ -820,7 +820,7 @@ const EmendaForm = ({
                 value={formData.parlamentar || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 required
               />
             </div>
@@ -835,7 +835,7 @@ const EmendaForm = ({
                 value={formData.numeroEmenda || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 required
               />
             </div>
@@ -849,7 +849,7 @@ const EmendaForm = ({
                 value={formData.tipo || "Individual"} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 required
               >
                 <option value="Individual">Individual</option>
@@ -868,7 +868,7 @@ const EmendaForm = ({
                 value={formData.municipio || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 required
               />
             </div>
@@ -882,7 +882,7 @@ const EmendaForm = ({
                 value={formData.uf || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 required
               >
                 <option value="">Selecione...</option>
@@ -904,7 +904,7 @@ const EmendaForm = ({
                 value={formData.valorRecurso || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
                 placeholder="0,00"
                 required
               />
@@ -920,7 +920,7 @@ const EmendaForm = ({
               value={formData.objetoProposta || ""} // ✅ CORREÇÃO: Sempre string
               onChange={handleInputChange}
               style={styles.textarea}
-              disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
+              disabled={modoVisualizacao} // ✅ CORREÇÃO: Usar apenas modoVisualizacao
               rows={3}
               required
             />
@@ -943,7 +943,7 @@ const EmendaForm = ({
                 value={formData.cnpjMunicipio || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -956,7 +956,7 @@ const EmendaForm = ({
                 value={formData.beneficiarioCnpj || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -969,7 +969,7 @@ const EmendaForm = ({
                 value={formData.numeroProposta || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -981,21 +981,7 @@ const EmendaForm = ({
                 value={formData.programa || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Valores */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>💰</span>
-            Valores
-          </legend>
-
-          ```python
-          <div style={styles.formGrid}>
+                disabled={modoVisualizacao} // ✅ COR<div style={styles.formGrid}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Outros Valores</label>
               <input
@@ -1004,7 +990,7 @@ const EmendaForm = ({
                 value={formData.outrosValores || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
                 placeholder="0,00"
               />
             </div>
@@ -1017,7 +1003,7 @@ const EmendaForm = ({
                 value={formData.valorExecutado || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
                 placeholder="0,00"
               />
             </div>
@@ -1052,7 +1038,7 @@ const EmendaForm = ({
                 value={formData.dataValidada || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1064,7 +1050,7 @@ const EmendaForm = ({
                 value={formData.dataOb || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1076,7 +1062,7 @@ const EmendaForm = ({
                 value={formData.inicioExecucao || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1088,7 +1074,7 @@ const EmendaForm = ({
                 value={formData.finalExecucao || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
           </div>
@@ -1111,7 +1097,7 @@ const EmendaForm = ({
                   value="Metas Quantitativas"
                   checked={tipoAcaoServico === "Metas Quantitativas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={readOnly} // ✅ MANTIDO: Já correto
+                  disabled={modoVisualizacao} // ✅ MANTIDO: Já correto
                   style={styles.radioInput}
                 />
                 Metas Quantitativas
@@ -1123,7 +1109,7 @@ const EmendaForm = ({
                   value="Metas"
                   checked={tipoAcaoServico === "Metas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={readOnly} // ✅ MANTIDO: Já correto
+                  disabled={modoVisualizacao} // ✅ MANTIDO: Já correto
                   style={styles.radioInput}
                 />
                 Metas
@@ -1131,7 +1117,7 @@ const EmendaForm = ({
             </div>
           </div>
 
-          {!readOnly && ( // ✅ CORREÇÃO: Usar readOnly simples
+          {!modoVisualizacao && ( // ✅ CORREÇÃO: Usar readOnly simples
             <div style={styles.acaoServicoForm}>
               <h4 style={styles.subSectionTitle}>
                 {editandoAcaoServico !== null ? "Editar" : "Adicionar"}{" "}
@@ -1220,7 +1206,7 @@ const EmendaForm = ({
                 <div key={item.id} style={styles.acaoServicoItem}>
                   <div style={styles.acaoServicoHeader}>
                     <span style={styles.acaoServicoTipo}>{item.tipo}</span>
-                    {!readOnly && ( // ✅ CORREÇÃO: Usar readOnly simples
+                    {!modoVisualizacao && ( // ✅ CORREÇÃO: Usar readOnly simples
                       <div style={styles.acaoServicoActions}>
                         <button
                           type="button"
@@ -1279,7 +1265,7 @@ const EmendaForm = ({
                 value={formData.gnd || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1291,7 +1277,7 @@ const EmendaForm = ({
                 value={formData.funcional || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1303,7 +1289,7 @@ const EmendaForm = ({
                 value={formData.acaoOrcamentaria || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1315,7 +1301,7 @@ const EmendaForm = ({
                 value={formData.dotacaoOrcamentaria || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1327,7 +1313,7 @@ const EmendaForm = ({
                 value={formData.contrato || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
           </div>
@@ -1343,7 +1329,7 @@ const EmendaForm = ({
             ← Voltar
           </button>
 
-          {!readOnly && ( // ✅ CORREÇÃO: Padrão simples
+          {!modoVisualizacao && ( // ✅ CORREÇÃO: Padrão simples
             <button
               type="submit"
               style={styles.submitButton}
