@@ -460,9 +460,6 @@ const EmendaForm = ({
       e.preventDefault();
 
       if (!isMounted()) return;
-      if (modoVisualizacao) return; // ✅ CORREÇÃO: Usar apenas modoVisualizacao
-
-      // ✅ RADICAL: Verificação apenas de modo
       if (modoVisualizacao) {
         error("Modo apenas visualização - não é possível salvar");
         return;
@@ -1334,7 +1331,7 @@ const EmendaForm = ({
             ← Voltar
           </button>
 
-          {!modoVisualizacao && ( // ✅ CORREÇÃO: Padrão simples
+          {!modoVisualizacao && (
             <button
               type="submit"
               style={styles.submitButton}
