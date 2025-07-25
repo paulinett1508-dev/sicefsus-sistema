@@ -48,7 +48,7 @@ const AdminPanel = () => {
     dataFim: "",
   });
 
-  const showToast = useToast();
+  const { showToast } = useToast();
   const auth = getAuth();
 
   useEffect(() => {
