@@ -579,7 +579,7 @@ const EmendaForm = ({
       success,
       onSalvar,
       isMounted,
-      modoVisualizacao, // ✅ RADICAL: Dependência final simplificada
+      readOnly, // ✅ CORREÇÃO: Usar readOnly simples
     ],
   );
 
@@ -738,7 +738,7 @@ const EmendaForm = ({
             type="button"
             onClick={handleGerenciarDespesas}
             style={styles.manageExpensesButton}
-            disabled={modoVisualizacao} // ✅ RADICAL: Direto sem variáveis
+            disabled={modoVisualizacao} // ✅ RADICAL: Direto
           >
             💰 Gerenciar Despesas ({metricas.totalDespesas})
           </button>
@@ -826,7 +826,7 @@ const EmendaForm = ({
                 value={formData.parlamentar || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 required
               />
             </div>
@@ -841,7 +841,7 @@ const EmendaForm = ({
                 value={formData.numeroEmenda || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 required
               />
             </div>
@@ -855,7 +855,7 @@ const EmendaForm = ({
                 value={formData.tipo || "Individual"} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 required
               >
                 <option value="Individual">Individual</option>
@@ -874,7 +874,7 @@ const EmendaForm = ({
                 value={formData.municipio || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 required
               />
             </div>
@@ -888,7 +888,7 @@ const EmendaForm = ({
                 value={formData.uf || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 required
               >
                 <option value="">Selecione...</option>
@@ -910,7 +910,7 @@ const EmendaForm = ({
                 value={formData.valorRecurso || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao} // ✅ RADICAL: Direto
+                disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
                 placeholder="0,00"
                 required
               />
@@ -926,7 +926,7 @@ const EmendaForm = ({
               value={formData.objetoProposta || ""} // ✅ CORREÇÃO: Sempre string
               onChange={handleInputChange}
               style={styles.textarea}
-              disabled={modoVisualizacao} // ✅ RADICAL: Direto
+              disabled={readOnly} // ✅ CORREÇÃO: Usar readOnly simples
               rows={3}
               required
             />
@@ -986,7 +986,7 @@ const EmendaForm = ({
                 name="programa"
                 value={formData.programa || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
-                style={styles.input}
+style={styles.input}
                 disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
@@ -1116,7 +1116,7 @@ const EmendaForm = ({
                   value="Metas Quantitativas"
                   checked={tipoAcaoServico === "Metas Quantitativas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                  disabled={readOnly} // ✅ MANTIDO: Já correto
                   style={styles.radioInput}
                 />
                 Metas Quantitativas
@@ -1128,7 +1128,7 @@ const EmendaForm = ({
                   value="Metas"
                   checked={tipoAcaoServico === "Metas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
+                  disabled={readOnly} // ✅ MANTIDO: Já correto
                   style={styles.radioInput}
                 />
                 Metas
@@ -1136,7 +1136,7 @@ const EmendaForm = ({
             </div>
           </div>
 
-          {!modoVisualizacao && ( // ✅ RADICAL: Direto
+          {!readOnly && ( // ✅ CORREÇÃO: Usar readOnly simples
             <div style={styles.acaoServicoForm}>
               <h4 style={styles.subSectionTitle}>
                 {editandoAcaoServico !== null ? "Editar" : "Adicionar"}{" "}
@@ -1225,7 +1225,7 @@ const EmendaForm = ({
                 <div key={item.id} style={styles.acaoServicoItem}>
                   <div style={styles.acaoServicoHeader}>
                     <span style={styles.acaoServicoTipo}>{item.tipo}</span>
-                    {!modoVisualizacao && ( // ✅ RADICAL: Direto
+                    {!readOnly && ( // ✅ CORREÇÃO: Usar readOnly simples
                       <div style={styles.acaoServicoActions}>
                         <button
                           type="button"
@@ -1702,7 +1702,7 @@ const styles = {
     alignItems: "center",
     marginBottom: "12px",
     paddingBottom: "8px",
-    borderBottom: "1px solid #e9ecef",
+    border: "1px solid #e9ecef",
   },
   acaoServicoTipo: {
     backgroundColor: "#154360",
