@@ -126,7 +126,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       podeEditar: true,
       podeVisualizar: true,
       isAdmin: true,
-      acessoTotal: true
+      acessoTotal: true,
       filtroAplicado: true,
       motivo: `Role desconhecida: ${role}`,
     };
