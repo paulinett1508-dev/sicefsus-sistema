@@ -1,116 +1,201 @@
-// DespesaForm.jsx - VERSÃO FINAL COM VALIDAÇÕES RIGOROSAS
-// ✅ Validação: Valor NF = Total Itens
-// ✅ Validação: Data lançamento >= Data NF
-// ✅ Novo fluxo: Permanece na tela após salvar com opções de navegação
+// EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS EDITÁVEIS
+// ✅ CORREÇÃO: Lógica simplificada de permissões
+// ✅ CORREÇÃO: Evitar re-renders excessivos
+// ✅ CORREÇÃO: Admin sempre pode editar
 
-import React, { useState, useEffect } from "react";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  doc,
-  query,
-  where,
-  getDocs,
-  serverTimestamp,
-} from "firebase/firestore";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import { useNavigationProtection } from "../App";
 import { useToast } from "./Toast";
-import ConfirmationModal from "./ConfirmationModal";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
-import SaldoEmendaWidget from "./SaldoEmendaWidget";
 
-const DespesaForm = ({
-  despesa,
-  onSalvar,
+// ✅ Hook para verificar se componente está montado
+const useIsMounted = () => {
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  return useCallback(() => isMountedRef.current, []);
+};
+
+const EmendaForm = ({
+  usuario, // ✅ CORREÇÃO: Receber prop usuario
+  emendaParaEditar,
   onCancelar,
-  emendaId,
-  usuario,
-  readOnly = false,
-  onChangeDetected,
+  onSalvar,
+  onListarEmendas,
+  modoVisualizacao = false,
+  defaultMunicipio = null,
+  defaultUf = null,
+  isOperador = false,
 }) => {
-  const { success, error, warning } = useToast();
-  const { setFormActive } = useNavigationProtection();
+  const { success, error } = useToast();
+  const navigate = useNavigate();
+  const isMounted = useIsMounted();
 
-  // ✅ Hook integrado para validações e cálculos
+  // ✅ CORREÇÃO CRÍTICA: Hook com assinatura correta para métricas
   const {
-    emendas,
-    validarNovaDespesa,
-    atualizarSaldoEmenda,
+    metricas,
     loading: hookLoading,
     error: hookError,
-    recarregar,
-  } = useEmendaDespesa(null, {
-    carregarTodasEmendas: true,
+    permissoes,
+    podeEditarCampo,
+  } = useEmendaDespesa(usuario, {
+    emendaId: emendaParaEditar?.id,
     incluirEstatisticas: true,
-    autoRefresh: true,
+    autoRefresh: false,
   });
 
-  // ✅ Data atual formatada
-  const getDataAtual = () => {
-    const hoje = new Date();
-    return hoje.toISOString().split("T")[0];
-  };
-
-  // ✅ Estado inicial do formulário
-  const [formData, setFormData] = useState({
-    numero: "",
-    emendaId: emendaId || "",
-    descricao: "",
-    valor: "",
-    data: getDataAtual(), // ✅ NOVO: Sempre data atual por padrão
-    dataPagamento: "",
-    numeroContrato: "",
-    acao: "",
-    dotacaoOrcamentaria: "",
-    notaFiscalNumero: "",
-    notaFiscalData: "",
-    notaFiscalFornecedor: "",
-    notaFiscalDescricao: "",
-    numeroEmpenho: "",
-    naturezaDespesa: "",
-    dataEmpenho: "",
-    dataLiquidacao: "",
-    discriminacao: "",
-    classificacaoFuncional: "",
-    observacoes: "",
-    itens: [{ descricao: "", valor: "", quantidade: "1" }],
-    totalItens: "0,00",
-    createdAt: "",
-    updatedAt: "",
-  });
-
-  // ✅ Estados de controle
   const [loading, setLoading] = useState(false);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialFormData, setInitialFormData] = useState(null);
-  const [isFormInitialized, setIsFormInitialized] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // ✅ NOVO: Estados para controle pós-salvamento
-  const [showSuccessOptions, setShowSuccessOptions] = useState(false);
-  const [despesaSalva, setDespesaSalva] = useState(null);
-  const [modoOperacao, setModoOperacao] = useState(
-    readOnly ? "visualizar" : despesa ? "editar" : "criar",
-  );
+  // Estado inicial do formulário
+  const [formData, setFormData] = useState({
+    parlamentar: "",
+    numeroEmenda: "",
+    tipo: "Individual",
+    municipio: defaultMunicipio || "",
+    uf: defaultUf || "",
+    valorRecurso: "",
+    objetoProposta: "",
+    cnpjMunicipio: "",
+    beneficiarioCnpj: "",
+    numeroProposta: "",
+    programa: "",
+    outrosValores: "",
+    valorExecutado: "",
+    saldo: "",
+    dataValidada: "",
+    dataOb: "",
+    inicioExecucao: "",
+    finalExecucao: "",
+    gnd: "",
+    funcional: "",
+    acaoOrcamentaria: "",
+    dotacaoOrcamentaria: "",
+    contrato: "",
+    acoesServicos: [],
+  });
 
-  // ✅ Opções para campos de seleção
-  const naturezasDespesa = [
-    "MATERIAL DE CONSUMO",
-    "MATERIAL PERMANENTE",
-    "SERVIÇOS TERCEIRIZADOS",
-    "OBRAS E INSTALAÇÕES",
-    "EQUIPAMENTOS E MATERIAL PERMANENTE",
-    "OUTROS SERVIÇOS DE TERCEIROS - PESSOA FÍSICA",
-    "OUTROS SERVIÇOS DE TERCEIROS - PESSOA JURÍDICA",
-  ];
+  // Estados para gerenciar a nova seção
+  const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
+  const [editandoAcaoServico, setEditandoAcaoServico] = useState(null);
+  const [novaAcaoServico, setNovaAcaoServico] = useState({
+    tipo: "Metas Quantitativas",
+    descricao: "",
+    complemento: "",
+    valor: "",
+  });
+
+  // ✅ CORREÇÃO CRÍTICA: Memoizar configurações de modo
+  const configModo = useMemo(() => {
+    if (modoVisualizacao) return { modo: "visualizar", podeEditar: false };
+    if (emendaParaEditar) return { modo: "editar", podeEditar: true };
+    return { modo: "criar", podeEditar: true };
+  }, [modoVisualizacao, emendaParaEditar]);
+
+  // ✅ CORREÇÃO DEFINITIVA: Lógica simplificada para campos desabilitados
+  const camposDesabilitados = useMemo(() => {
+    // Se está em modo visualização, campos sempre desabilitados
+    if (modoVisualizacao) {
+      console.log("🔒 MODO VISUALIZAÇÃO - Campos desabilitados");
+      return true;
+    }
+
+    // Se é admin, sempre pode editar (bypass de todas as verificações)
+    if (usuario?.role === "admin") {
+      console.log("👑 ADMIN DETECTADO - Campos LIBERADOS");
+      return false;
+    }
+
+    // Para outros usuários, verificar permissões do hook
+    const podeEditar = permissoes?.podeEditar === true;
+    console.log("🔍 VERIFICAÇÃO PERMISSÕES - podeEditar:", podeEditar);
+    return !podeEditar;
+  }, [modoVisualizacao, usuario?.role, permissoes?.podeEditar]);
+
+  // ✅ Log único de debug (sem loops infinitos)
+  useEffect(() => {
+    console.log("🔧 EMENDAFORM DEBUG:", {
+      modoVisualizacao,
+      usuarioRole: usuario?.role,
+      permissoesPodeEditar: permissoes?.podeEditar,
+      camposDesabilitados,
+      configModo,
+    });
+  }, [
+    modoVisualizacao,
+    usuario?.role,
+    permissoes?.podeEditar,
+    camposDesabilitados,
+    configModo,
+  ]);
+
+  // ✅ Formatação de valores monetários
+  const formatarValorMonetario = useCallback((valor) => {
+    if (!valor) return "";
+
+    if (typeof valor === "number") {
+      return valor.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    const numeroLimpo = valor.toString().replace(/[^\d,]/g, "");
+
+    if (!numeroLimpo.includes(",")) {
+      const numero = parseInt(numeroLimpo) || 0;
+      return (numero / 100).toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    const valorFloat = parseFloat(numeroLimpo.replace(",", ".")) || 0;
+    return valorFloat.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }, []);
+
+  // ✅ Formatação de CNPJ
+  const formatarCNPJ = useCallback((cnpj) => {
+    if (!cnpj) return "";
+    const numeros = cnpj.replace(/[^\d]/g, "");
+    if (numeros.length <= 14) {
+      return numeros.replace(
+        /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+        "$1.$2.$3/$4-$5",
+      );
+    }
+    return cnpj;
+  }, []);
+
+  // ✅ Função para formatar moeda
+  const formatCurrency = useCallback((value) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value || 0);
+  }, []);
 
   // ✅ Carregar dados para edição
   useEffect(() => {
-    if (despesa && !isFormInitialized) {
-      // Função para formatar valores para exibição
+    if (emendaParaEditar && isMounted()) {
+      console.log("📝 Carregando dados para edição:", emendaParaEditar);
+
       const formatarParaExibicao = (valor) => {
         if (typeof valor === "number") {
           return valor.toLocaleString("pt-BR", {
@@ -121,500 +206,405 @@ const DespesaForm = ({
         return valor || "";
       };
 
-      const itensFormatados =
-        despesa.itens?.length > 0
-          ? despesa.itens.map((item) => ({
-              descricao: item.descricao || "",
-              valor: formatarParaExibicao(item.valor || 0),
-              quantidade: item.quantidade || "1",
-            }))
-          : [{ descricao: "", valor: "", quantidade: "1" }];
-
-      const dadosIniciais = {
-        ...despesa,
-        valor: formatarParaExibicao(despesa.valor),
-        itens: itensFormatados,
-        totalItens: formatarParaExibicao(despesa.totalItens || 0),
-      };
-
-      setFormData(dadosIniciais);
-      setInitialFormData(dadosIniciais);
-      setIsFormInitialized(true);
-    }
-  }, [despesa, isFormInitialized]);
-
-  // ✅ Atualizar total dos itens automaticamente
-  useEffect(() => {
-    if (formData.itens && formData.itens.length > 0) {
-      const novoTotal = calcularTotalItens(formData.itens);
-      setFormData((prev) => ({
-        ...prev,
-        totalItens: novoTotal,
-      }));
-    }
-  }, [formData.itens]);
-
-  // ✅ NOVO: Sincronizar valor da despesa com total dos itens
-  useEffect(() => {
-    if (formData.itens && formData.itens.length > 0) {
-      const totalItens = calcularTotalItens(formData.itens);
-      setFormData((prev) => ({
-        ...prev,
-        valor: totalItens, // ✅ Valor da NF sempre igual ao total dos itens
-        totalItens: totalItens,
-      }));
-    }
-  }, [formData.itens]);
-
-  // ✅ Notificar mudanças para proteção de navegação
-  useEffect(() => {
-    if (onChangeDetected) {
-      onChangeDetected(hasChanges);
-    }
-  }, [hasChanges, onChangeDetected]);
-
-  // ✅ Função parseValue
-  const parseValue = (value) => {
-    if (typeof value === "number") return value;
-    if (typeof value === "string") {
-      return parseFloat(value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
-    }
-    return 0;
-  };
-
-  // ✅ Formatação de valores monetários
-  const formatarValorMonetario = (valor) => {
-    if (typeof valor === "number") {
-      return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+      setFormData({
+        ...emendaParaEditar,
+        valorRecurso: formatarParaExibicao(emendaParaEditar.valorRecurso),
+        outrosValores: formatarParaExibicao(emendaParaEditar.outrosValores),
+        valorExecutado: formatarParaExibicao(emendaParaEditar.valorExecutado),
+        saldo: formatarParaExibicao(emendaParaEditar.saldo),
+        acoesServicos: emendaParaEditar.acoesServicos || [],
       });
     }
+  }, [emendaParaEditar, isMounted]);
 
-    const numero = valor.replace(/[^\d]/g, "");
-    const valorFloat = parseFloat(numero) / 100;
-    return valorFloat.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+  // ✅ Calcular saldo automaticamente
+  const calcularSaldo = useCallback(() => {
+    const parseValue = (value) => {
+      if (typeof value === "number") return value;
+      if (typeof value === "string") {
+        return parseFloat(value.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+      }
+      return 0;
+    };
 
-  // ✅ Calcular total dos itens
-  const calcularTotalItens = (itens) => {
-    const total = itens.reduce((acc, item) => {
-      const valor = parseValue(item.valor || "0");
-      const quantidade = parseInt(item.quantidade || "1");
-      return acc + valor * quantidade;
-    }, 0);
-    return total.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+    const valorRecurso = parseValue(formData.valorRecurso);
+    const valorExecutado = parseValue(formData.valorExecutado);
+    const saldo = valorRecurso - valorExecutado;
 
-  // ✅ Verificar mudanças
-  const checkForChanges = (currentData) => {
-    if (!initialFormData || !isFormInitialized) return false;
+    return saldo;
+  }, [formData.valorRecurso, formData.valorExecutado]);
 
-    const fieldsToCompare = [
-      "descricao",
-      "valor",
-      "data",
-      "dataPagamento",
-      "numeroContrato",
-      "acao",
-      "dotacaoOrcamentaria",
-      "notaFiscalNumero",
-      "notaFiscalData",
-      "notaFiscalFornecedor",
-      "notaFiscalDescricao",
-      "emendaId",
-      "numeroEmpenho",
-      "naturezaDespesa",
-      "dataEmpenho",
-      "dataLiquidacao",
-      "discriminacao",
-      "classificacaoFuncional",
-      "observacoes",
-    ];
+  // ✅ useEffect com debounce para cálculo de saldo
+  useEffect(() => {
+    if (!isMounted()) return;
 
-    return fieldsToCompare.some((field) => {
-      const current = currentData[field]?.toString().trim() || "";
-      const initial = initialFormData[field]?.toString().trim() || "";
-      return current !== initial;
-    });
-  };
-
-  // ✅ Gerenciamento de itens
-  const adicionarItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      itens: [...prev.itens, { descricao: "", valor: "", quantidade: "1" }],
-    }));
-    setHasChanges(true);
-  };
-
-  const removerItem = (index) => {
-    if (formData.itens.length > 1) {
+    const timeoutId = setTimeout(() => {
+      const novoSaldo = calcularSaldo();
       setFormData((prev) => ({
         ...prev,
-        itens: prev.itens.filter((_, i) => i !== index),
+        saldo: novoSaldo.toFixed(2),
       }));
-      setHasChanges(true);
-    }
-  };
+    }, 300);
 
-  const atualizarItem = (index, campo, valor) => {
-    const novosItens = [...formData.itens];
-    if (campo === "valor") {
-      novosItens[index][campo] = formatarValorMonetario(valor);
-    } else {
-      novosItens[index][campo] = valor;
-    }
-    setFormData((prev) => ({ ...prev, itens: novosItens }));
-    setHasChanges(true);
-  };
+    return () => clearTimeout(timeoutId);
+  }, [calcularSaldo, isMounted]);
 
-  // ✅ Upload de arquivo - REMOVIDO TEMPORARIAMENTE
-  // TODO: Implementar upload de arquivos com configuração CORS correta do Firebase Storage
+  // ✅ Função para gerenciar despesas
+  const handleGerenciarDespesas = useCallback(() => {
+    if (!isMounted()) return;
 
-  // ✅ NOVA: Validação rigorosa do formulário
-  const validarFormulario = async () => {
-    const novosErrors = {};
-
-    // Campos obrigatórios
-    if (!formData.emendaId) novosErrors.emendaId = "Emenda é obrigatória";
-    if (!formData.descricao.trim())
-      novosErrors.descricao = "Descrição é obrigatória";
-    if (!formData.acao.trim()) novosErrors.acao = "Ação é obrigatória";
-    if (!formData.dotacaoOrcamentaria.trim())
-      novosErrors.dotacaoOrcamentaria = "Dotação Orçamentária é obrigatória";
-    if (!formData.notaFiscalNumero.trim())
-      novosErrors.notaFiscalNumero = "Número da NF é obrigatório";
-    if (!formData.notaFiscalData)
-      novosErrors.notaFiscalData = "Data da NF é obrigatória";
-    if (!formData.notaFiscalFornecedor.trim())
-      novosErrors.notaFiscalFornecedor = "Fornecedor é obrigatório";
-    if (!formData.numeroEmpenho.trim())
-      novosErrors.numeroEmpenho = "Número do Empenho é obrigatório";
-    if (!formData.naturezaDespesa)
-      novosErrors.naturezaDespesa = "Natureza da Despesa é obrigatória";
-    if (!formData.dataEmpenho)
-      novosErrors.dataEmpenho = "Data do Empenho é obrigatória";
-    if (!formData.data) novosErrors.data = "Data de lançamento é obrigatória";
-
-    // ✅ NOVA VALIDAÇÃO: Data de lançamento >= Data da NF
-    if (formData.data && formData.notaFiscalData) {
-      const dataLancamento = new Date(formData.data);
-      const dataNF = new Date(formData.notaFiscalData);
-
-      if (dataLancamento < dataNF) {
-        novosErrors.data =
-          "Data de lançamento não pode ser anterior à data da NF";
-      }
-    }
-
-    // ✅ NOVA VALIDAÇÃO: Verificar se há pelo menos um item válido
-    const itensValidos = formData.itens.filter(
-      (item) =>
-        item.descricao.trim() && item.valor && parseInt(item.quantidade) > 0,
-    );
-
-    if (itensValidos.length === 0) {
-      novosErrors.itens =
-        "Deve haver pelo menos um item válido com descrição, valor e quantidade";
-    }
-
-    // ✅ NOVA VALIDAÇÃO: Valor da NF deve bater com total dos itens
-    const valorNF = parseValue(formData.valor);
-    const totalItens = parseValue(formData.totalItens);
-
-    if (Math.abs(valorNF - totalItens) > 0.01) {
-      // Tolerância de 1 centavo para arredondamento
-      novosErrors.valor = `Valor da NF (${formData.valor}) deve ser igual ao total dos itens (${formData.totalItens})`;
-    }
-
-    // Validação usando hook para saldo da emenda
-    if (formData.emendaId && valorNF > 0) {
-      const validacao = await validarNovaDespesa(formData.emendaId, valorNF);
-      if (!validacao.valida) {
-        novosErrors.valor = validacao.erro;
-      }
-    }
-
-    // Validar itens individualmente
-    formData.itens.forEach((item, index) => {
-      if (item.descricao.trim() || item.valor || item.quantidade !== "1") {
-        // Se algum campo foi preenchido, todos são obrigatórios
-        if (!item.descricao.trim()) {
-          novosErrors[`item_descricao_${index}`] =
-            "Descrição do item é obrigatória";
-        }
-        if (!item.valor) {
-          novosErrors[`item_valor_${index}`] = "Valor do item é obrigatório";
-        }
-        if (!item.quantidade || parseInt(item.quantidade) < 1) {
-          novosErrors[`item_quantidade_${index}`] =
-            "Quantidade deve ser maior que 0";
-        }
-      }
-    });
-
-    setErrors(novosErrors);
-    return Object.keys(novosErrors).length === 0;
-  };
-
-  // ✅ Gerar próximo número
-  const gerarProximoNumero = async () => {
-    try {
-      const ano = new Date().getFullYear();
-      const q = query(
-        collection(db, "despesas"),
-        where("numero", ">=", `D${ano}001`),
-        where("numero", "<=", `D${ano}999`),
-      );
-
-      const snapshot = await getDocs(q);
-      const numeros = snapshot.docs.map((doc) => doc.data().numero).sort();
-
-      if (numeros.length === 0) {
-        return `D${ano}001`;
-      }
-
-      const ultimoNumero = numeros[numeros.length - 1];
-      const proximoSequencial = parseInt(ultimoNumero.slice(-3)) + 1;
-      return `D${ano}${proximoSequencial.toString().padStart(3, "0")}`;
-    } catch (error) {
-      console.error("Erro ao gerar número:", error);
-      return `D${new Date().getFullYear()}001`;
-    }
-  };
-
-  // ✅ NOVO: Submit do formulário com novo fluxo
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (readOnly) return;
-
-    if (!(await validarFormulario())) {
-      error("❌ Corrija os erros antes de salvar");
+    if (!emendaParaEditar) {
+      error("Salve a emenda antes de gerenciar despesas");
       return;
     }
 
-    setLoading(true);
-
-    try {
-      // ✅ Upload de arquivos removido temporariamente devido a problemas de CORS
-      const valorNumerico = parseValue(formData.valor);
-
-      // Dados para salvar
-      const dadosParaSalvar = {
-        emendaId: formData.emendaId,
-        descricao: formData.descricao.trim(),
-        valor: valorNumerico,
-        data: formData.data,
-        dataPagamento: formData.dataPagamento || null,
-        numeroContrato: formData.numeroContrato.trim() || null,
-        acao: formData.acao.trim(),
-        dotacaoOrcamentaria: formData.dotacaoOrcamentaria.trim(),
-        notaFiscalNumero: formData.notaFiscalNumero.trim(),
-        notaFiscalData: formData.notaFiscalData,
-        notaFiscalFornecedor: formData.notaFiscalFornecedor.trim(),
-        notaFiscalDescricao: formData.notaFiscalDescricao.trim() || null,
-        numeroEmpenho: formData.numeroEmpenho.trim(),
-        naturezaDespesa: formData.naturezaDespesa,
-        dataEmpenho: formData.dataEmpenho,
-        dataLiquidacao: formData.dataLiquidacao || null,
-        discriminacao: formData.discriminacao.trim() || null,
-        classificacaoFuncional: formData.classificacaoFuncional.trim() || null,
-        observacoes: formData.observacoes.trim() || null,
-        itens: formData.itens
-          .filter((item) => item.descricao.trim()) // Só salvar itens com descrição
-          .map((item) => ({
-            descricao: item.descricao.trim(),
-            valor: parseValue(item.valor),
-            quantidade: parseInt(item.quantidade) || 1,
-          })),
-        totalItens: parseValue(formData.totalItens),
-        userId: usuario.uid,
-        updatedAt: serverTimestamp(),
-      };
-
-      let despesaId;
-      if (despesa) {
-        // Atualizar despesa existente
-        await updateDoc(doc(db, "despesas", despesa.id), dadosParaSalvar);
-        despesaId = despesa.id;
-        success("Despesa atualizada com sucesso!");
-      } else {
-        // Criar nova despesa
-        dadosParaSalvar.numero = await gerarProximoNumero();
-        dadosParaSalvar.createdAt = serverTimestamp();
-        const docRef = await addDoc(
-          collection(db, "despesas"),
-          dadosParaSalvar,
-        );
-        despesaId = docRef.id;
-        success("Despesa criada com sucesso!");
-      }
-
-      // Atualizar saldo da emenda usando hook
-      await atualizarSaldoEmenda(formData.emendaId);
-      await recarregar();
-
-      // ✅ NOVO: Salvar dados da despesa e mostrar opções
-      setDespesaSalva({
-        id: despesaId,
-        ...dadosParaSalvar,
-        numero: dadosParaSalvar.numero || formData.numero,
-      });
-
-      setHasChanges(false);
-      setFormActive(false);
-      setShowSuccessOptions(true); // ✅ Mostrar opções de navegação
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      error("Erro ao salvar despesa");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ✅ NOVAS: Funções para opções pós-salvamento
-  const handleVoltarParaEmenda = () => {
-    setShowSuccessOptions(false);
-    if (onSalvar) {
-      onSalvar(); // Volta para o módulo Emendas
-    }
-  };
-
-  const handleEditarDespesaSalva = () => {
-    setShowSuccessOptions(false);
-    // Já está na mesma tela, apenas esconde as opções
-    setModoOperacao("editar");
-  };
-
-  const handleNovaDespesaMesmaEmenda = () => {
-    setShowSuccessOptions(false);
-
-    // Resetar formulário mantendo apenas a emenda
-    const novoFormData = {
-      numero: "",
-      emendaId: formData.emendaId, // ✅ Manter a mesma emenda
-      descricao: "",
-      valor: "",
-      data: getDataAtual(), // ✅ Nova data atual
-      dataPagamento: "",
-      numeroContrato: "",
-      acao: "",
-      dotacaoOrcamentaria: "",
-      notaFiscalNumero: "",
-      notaFiscalData: "",
-      notaFiscalFornecedor: "",
-      notaFiscalDescricao: "",
-      numeroEmpenho: "",
-      naturezaDespesa: "",
-      dataEmpenho: "",
-      dataLiquidacao: "",
-      discriminacao: "",
-      classificacaoFuncional: "",
-      observacoes: "",
-      itens: [{ descricao: "", valor: "", quantidade: "1" }],
-      totalItens: "0,00",
-      createdAt: "",
-      updatedAt: "",
+    const filtroAutomatico = {
+      emendaId: emendaParaEditar.id,
+      numero: formData.numeroEmenda || emendaParaEditar.numero,
+      parlamentar: formData.parlamentar,
+      valorRecurso:
+        parseFloat(
+          formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
+        ) || 0,
     };
 
-    setFormData(novoFormData);
-    setInitialFormData(novoFormData);
-    setModoOperacao("criar");
-    setErrors({});
-    setHasChanges(false);
+    navigate("/despesas", {
+      state: {
+        filtroAutomatico,
+      },
+    });
+  }, [emendaParaEditar, formData, navigate, error, isMounted]);
 
-    success("Formulário resetado para nova despesa da mesma emenda");
-  };
+  // ✅ Calcular métricas financeiras
+  const calcularMetricasFinanceiras = useCallback(() => {
+    const valorRecurso =
+      parseFloat(
+        formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
+      ) || 0;
 
-  const handleIrParaListagemDespesas = () => {
-    setShowSuccessOptions(false);
-    // Navegar para listagem usando função global
-    if (window.voltarParaListagemDespesas) {
-      window.voltarParaListagemDespesas();
-    }
-  };
+    const valorExecutado = metricas?.valorExecutado || 0;
+    const totalDespesas = metricas?.totalDespesas || 0;
+    const saldoDisponivel = valorRecurso - valorExecutado;
+    const percentualExecutado =
+      valorRecurso > 0 ? (valorExecutado / valorRecurso) * 100 : 0;
 
-  // ✅ Cancelar formulário
-  const handleCancel = () => {
-    if (hasChanges) {
-      setShowConfirmationModal(true);
-    } else {
-      setFormActive(false);
-      if (onCancelar) {
-        onCancelar();
+    return {
+      valorRecurso,
+      valorExecutado,
+      saldoDisponivel,
+      totalDespesas,
+      percentualExecutado,
+    };
+  }, [formData.valorRecurso, metricas]);
+
+  // ✅ Handler para mudanças nos campos
+  const handleInputChange = useCallback(
+    (e) => {
+      if (!isMounted()) return;
+
+      const { name, value } = e.target;
+      let valorFormatado = value;
+
+      if (
+        name === "valorRecurso" ||
+        name === "outrosValores" ||
+        name === "valorExecutado"
+      ) {
+        valorFormatado = formatarValorMonetario(value);
       }
+
+      if (name === "cnpjMunicipio" || name === "beneficiarioCnpj") {
+        valorFormatado = formatarCNPJ(value);
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        [name]: valorFormatado,
+      }));
+    },
+    [formatarValorMonetario, formatarCNPJ, isMounted],
+  );
+
+  // ✅ Funções para ações e serviços
+  const handleNovaAcaoServicoChange = useCallback(
+    (campo, valor) => {
+      if (!isMounted()) return;
+
+      if (campo === "valor") {
+        valor = formatarValorMonetario(valor);
+      }
+      setNovaAcaoServico((prev) => ({
+        ...prev,
+        [campo]: valor,
+      }));
+    },
+    [formatarValorMonetario, isMounted],
+  );
+
+  const adicionarAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
+
+    if (!novaAcaoServico.descricao.trim()) {
+      error("A descrição é obrigatória para adicionar uma ação/serviço");
+      return;
     }
-  };
 
-  // ✅ Handle input change
-  const handleInputChange = (e) => {
-    if (readOnly || modoOperacao === "visualizar") return;
+    const novoItem = {
+      id: Date.now(),
+      tipo: tipoAcaoServico,
+      descricao: novaAcaoServico.descricao.trim(),
+      complemento: novaAcaoServico.complemento.trim(),
+      valor: novaAcaoServico.valor,
+    };
 
-    const { name, value } = e.target;
-    let valorProcessado = value;
+    setFormData((prev) => ({
+      ...prev,
+      acoesServicos: [...prev.acoesServicos, novoItem],
+    }));
 
-    // ✅ REMOVIDA: Formatação automática do valor principal (agora é calculado pelos itens)
+    setNovaAcaoServico({
+      tipo: tipoAcaoServico,
+      descricao: "",
+      complemento: "",
+      valor: "",
+    });
 
-    const newFormData = { ...formData, [name]: valorProcessado };
-    setFormData(newFormData);
+    success("Ação/Serviço adicionado com sucesso!");
+  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted]);
 
-    // Verificar mudanças após inicialização
-    if (isFormInitialized) {
-      const hasRealChanges = checkForChanges(newFormData);
-      setHasChanges(hasRealChanges);
+  const iniciarEdicaoAcaoServico = useCallback(
+    (index) => {
+      if (!isMounted()) return;
+
+      const item = formData.acoesServicos[index];
+      setEditandoAcaoServico(index);
+      setNovaAcaoServico({
+        tipo: item.tipo,
+        descricao: item.descricao,
+        complemento: item.complemento,
+        valor: item.valor,
+      });
+      setTipoAcaoServico(item.tipo);
+    },
+    [formData.acoesServicos, isMounted],
+  );
+
+  const salvarEdicaoAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
+
+    if (!novaAcaoServico.descricao.trim()) {
+      error("A descrição é obrigatória");
+      return;
     }
 
-    // Limpar erro do campo
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
+    const acoesAtualizadas = [...formData.acoesServicos];
+    acoesAtualizadas[editandoAcaoServico] = {
+      ...acoesAtualizadas[editandoAcaoServico],
+      tipo: tipoAcaoServico,
+      descricao: novaAcaoServico.descricao.trim(),
+      complemento: novaAcaoServico.complemento.trim(),
+      valor: novaAcaoServico.valor,
+    };
 
-  // ✅ Função para formatar display da emenda
-  const formatarDisplayEmenda = (emenda) => {
-    const numero = emenda.numero || "S/N";
-    const parlamentar = emenda.parlamentar || "Não informado";
-    const objeto = emenda.objetoProposta || "Objeto não informado";
-    const municipio = emenda.municipio || "";
+    setFormData((prev) => ({
+      ...prev,
+      acoesServicos: acoesAtualizadas,
+    }));
 
-    const objetoTruncado =
-      objeto.length > 50 ? objeto.substring(0, 50) + "..." : objeto;
+    setEditandoAcaoServico(null);
+    setNovaAcaoServico({
+      tipo: tipoAcaoServico,
+      descricao: "",
+      complemento: "",
+      valor: "",
+    });
 
-    return `${numero} - ${parlamentar} | ${objetoTruncado} (${municipio})`;
-  };
+    success("Ação/Serviço atualizado com sucesso!");
+  }, [
+    novaAcaoServico,
+    tipoAcaoServico,
+    editandoAcaoServico,
+    formData.acoesServicos,
+    error,
+    success,
+    isMounted,
+  ]);
 
-  // ✅ Renderizar header baseado no modo
-  const renderHeader = () => {
+  const cancelarEdicaoAcaoServico = useCallback(() => {
+    if (!isMounted()) return;
+
+    setEditandoAcaoServico(null);
+    setNovaAcaoServico({
+      tipo: tipoAcaoServico,
+      descricao: "",
+      complemento: "",
+      valor: "",
+    });
+  }, [tipoAcaoServico, isMounted]);
+
+  const removerAcaoServico = useCallback(
+    (index) => {
+      if (!isMounted()) return;
+
+      const acoesAtualizadas = formData.acoesServicos.filter(
+        (_, i) => i !== index,
+      );
+      setFormData((prev) => ({
+        ...prev,
+        acoesServicos: acoesAtualizadas,
+      }));
+      success("Ação/Serviço removido com sucesso!");
+    },
+    [formData.acoesServicos, success, isMounted],
+  );
+
+  // ✅ Submissão do formulário
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (!isMounted()) return;
+
+      // ✅ Verificar permissões antes de salvar
+      if (usuario?.role !== "admin" && permissoes && !permissoes.podeEditar) {
+        error("Você não tem permissão para salvar emendas");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // Validar campos obrigatórios
+        const camposObrigatorios = [
+          "parlamentar",
+          "numeroEmenda",
+          "tipo",
+          "municipio",
+          "uf",
+          "valorRecurso",
+          "objetoProposta",
+        ];
+        const camposVazios = camposObrigatorios.filter(
+          (campo) => !formData[campo],
+        );
+
+        if (camposVazios.length > 0) {
+          error(
+            `Campos obrigatórios não preenchidos: ${camposVazios.join(", ")}`,
+          );
+          return;
+        }
+
+        // Preparar dados para salvar
+        const dadosParaSalvar = {
+          ...formData,
+          valorRecurso:
+            parseFloat(
+              formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          outrosValores:
+            parseFloat(
+              formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          valorExecutado:
+            parseFloat(
+              formData.valorExecutado?.replace(/[^\d,]/g, "").replace(",", "."),
+            ) || 0,
+          saldo: parseFloat(formData.saldo) || 0,
+          updatedAt: Timestamp.now().toDate().toISOString(),
+          acoesServicos: formData.acoesServicos.map((item) => ({
+            ...item,
+            valor: item.valor
+              ? parseFloat(
+                  item.valor.replace(/[^\d,]/g, "").replace(",", "."),
+                ) || 0
+              : 0,
+          })),
+        };
+
+        if (!isMounted()) return;
+
+        if (emendaParaEditar) {
+          await updateDoc(
+            doc(db, "emendas", emendaParaEditar.id),
+            dadosParaSalvar,
+          );
+          console.log("✅ Emenda atualizada:", emendaParaEditar.id);
+
+          if (isMounted()) {
+            success("Emenda atualizada com sucesso!");
+          }
+        } else {
+          const novaEmendaRef = doc(db, "emendas", `emenda_${Date.now()}`);
+          await setDoc(novaEmendaRef, {
+            ...dadosParaSalvar,
+            id: novaEmendaRef.id,
+            numero: `EMD${String(Date.now()).slice(-6)}`,
+            createdAt: Timestamp.now().toDate().toISOString(),
+          });
+          console.log("✅ Nova emenda criada:", novaEmendaRef.id);
+
+          if (isMounted()) {
+            success("Emenda criada com sucesso!");
+          }
+        }
+
+        if (isMounted()) {
+          setShowSuccessMessage(true);
+          setTimeout(() => {
+            if (isMounted()) {
+              setShowSuccessMessage(false);
+              onSalvar && onSalvar();
+            }
+          }, 2000);
+        }
+      } catch (err) {
+        console.error("❌ Erro ao salvar emenda:", err);
+        if (isMounted()) {
+          error("Erro ao salvar emenda. Tente novamente.");
+        }
+      } finally {
+        if (isMounted()) {
+          setLoading(false);
+        }
+      }
+    },
+    [
+      formData,
+      emendaParaEditar,
+      error,
+      success,
+      onSalvar,
+      isMounted,
+      usuario,
+      permissoes,
+    ],
+  );
+
+  // ✅ Renderizar header
+  const renderHeader = useCallback(() => {
     const headers = {
       criar: {
-        title: "📝 Criar Despesa",
-        subtitle: "Preencha os dados para criar uma nova despesa",
+        title: "📝 Criar Emenda",
+        subtitle: "Preencha os dados para criar uma nova emenda",
         bgColor: "#d4edda",
         textColor: "#155724",
       },
       editar: {
-        title: "✏️ Editar Despesa",
-        subtitle: `ID: ${despesa?.id || despesaSalva?.id || ""} | Emenda: ${formData.emendaId || ""}`,
+        title: "✏️ Editar Emenda",
+        subtitle: `ID: ${emendaParaEditar?.id || ""} | Parlamentar: ${formData.parlamentar || ""}`,
         bgColor: "#d4edda",
         textColor: "#155724",
       },
       visualizar: {
-        title: "👁️ Visualizar Despesa",
-        subtitle: `ID: ${despesa?.id || ""} | Emenda: ${formData.emendaId || ""}`,
+        title: "👁️ Visualizar Emenda",
+        subtitle: `ID: ${emendaParaEditar?.id || ""} | Parlamentar: ${formData.parlamentar || ""}`,
         bgColor: "#e7f3ff",
         textColor: "#004085",
       },
     };
 
-    const config = headers[modoOperacao];
+    const config = headers[configModo.modo];
 
     return (
       <div
@@ -626,304 +616,430 @@ const DespesaForm = ({
       >
         <h2 style={styles.headerTitle}>{config.title}</h2>
         <p style={styles.headerSubtitle}>{config.subtitle}</p>
-      </div>
-    );
-  };
-
-  // ✅ NOVO: Renderizar painel de opções pós-salvamento
-  const renderSuccessOptions = () => {
-    if (!showSuccessOptions) return null;
-
-    const emendaAtual = emendas.find((e) => e.id === formData.emendaId);
-
-    return (
-      <div style={styles.successOptionsOverlay}>
-        <div style={styles.successOptionsModal}>
-          <div style={styles.successOptionsHeader}>
-            <h3 style={styles.successOptionsTitle}>
-              ✅ Despesa salva com sucesso!
-            </h3>
-            <p style={styles.successOptionsSubtitle}>
-              Número: {despesaSalva?.numero} | Valor: R$ {formData.valor}
-            </p>
-          </div>
-
-          <div style={styles.successOptionsContent}>
-            <p style={styles.successOptionsQuestion}>
-              O que você gostaria de fazer agora?
-            </p>
-
-            <div style={styles.successOptionsButtons}>
-              <button
-                onClick={handleVoltarParaEmenda}
-                style={styles.successOptionButton}
-              >
-                ← Voltar para Emenda
-                <span style={styles.successOptionSubtext}>
-                  {emendaAtual?.numero} - {emendaAtual?.parlamentar}
-                </span>
-              </button>
-
-              <button
-                onClick={handleEditarDespesaSalva}
-                style={styles.successOptionButton}
-              >
-                ✏️ Editar Esta Despesa
-                <span style={styles.successOptionSubtext}>
-                  Continuar editando a despesa salva
-                </span>
-              </button>
-
-              <button
-                onClick={handleNovaDespesaMesmaEmenda}
-                style={styles.successOptionButton}
-              >
-                ➕ Nova Despesa (Mesma Emenda)
-                <span style={styles.successOptionSubtext}>
-                  Criar outra despesa para esta emenda
-                </span>
-              </button>
-
-              <button
-                onClick={handleIrParaListagemDespesas}
-                style={styles.successOptionButton}
-              >
-                📋 Ir para Listagem de Despesas
-                <span style={styles.successOptionSubtext}>
-                  Ver todas as despesas cadastradas
-                </span>
-              </button>
-            </div>
-          </div>
+        <div style={styles.permissionInfo}>
+          <span style={styles.permissionIcon}>
+            {usuario?.role === "admin" ? "👑" : "👤"}
+          </span>
+          <span style={styles.permissionText}>
+            {usuario?.role === "admin" ? "Administrador" : "Operador"} |
+            {camposDesabilitados
+              ? " 👁️ Apenas visualização"
+              : " ✅ Pode editar"}
+          </span>
         </div>
       </div>
     );
-  };
+  }, [
+    configModo.modo,
+    emendaParaEditar,
+    formData.parlamentar,
+    usuario?.role,
+    camposDesabilitados,
+  ]);
+
+  // ✅ Renderizar painel financeiro
+  const renderPainelFinanceiro = useCallback(() => {
+    if (!emendaParaEditar || !isMounted()) return null;
+
+    const metricas = calcularMetricasFinanceiras();
+
+    return (
+      <fieldset style={styles.fieldset}>
+        <legend style={styles.legend}>
+          <span style={styles.legendIcon}>💰</span>
+          Controle Financeiro e Despesas
+        </legend>
+
+        <div style={styles.financialGrid}>
+          <div style={styles.financialCard}>
+            <div style={styles.cardIcon}>💰</div>
+            <div style={styles.cardContent}>
+              <div style={styles.cardValue}>
+                {formatCurrency(metricas.valorRecurso)}
+              </div>
+              <div style={styles.cardLabel}>Valor da Emenda</div>
+            </div>
+          </div>
+
+          <div style={styles.financialCard}>
+            <div style={styles.cardIcon}>📊</div>
+            <div style={styles.cardContent}>
+              <div style={styles.cardValue}>
+                {formatCurrency(metricas.valorExecutado)}
+              </div>
+              <div style={styles.cardLabel}>Valor Executado</div>
+              <div style={styles.cardSubtext}>
+                {metricas.percentualExecutado.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              ...styles.financialCard,
+              backgroundColor:
+                metricas.saldoDisponivel <= 0 ? "#ffe6e6" : "white",
+            }}
+          >
+            <div style={styles.cardIcon}>
+              {metricas.saldoDisponivel > 0 ? "💳" : "⚠️"}
+            </div>
+            <div style={styles.cardContent}>
+              <div
+                style={{
+                  ...styles.cardValue,
+                  color: metricas.saldoDisponivel <= 0 ? "#dc3545" : "#28a745",
+                  fontWeight: "700",
+                }}
+              >
+                {formatCurrency(Math.abs(metricas.saldoDisponivel))}
+              </div>
+              <div style={styles.cardLabel}>
+                {metricas.saldoDisponivel > 0
+                  ? "Saldo Disponível"
+                  : "Valor Excedido"}
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.financialCard}>
+            <div style={styles.cardIcon}>📋</div>
+            <div style={styles.cardContent}>
+              <div style={styles.cardValue}>{metricas.totalDespesas}</div>
+              <div style={styles.cardLabel}>Despesas Registradas</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={styles.progressSection}>
+          <div style={styles.progressLabel}>
+            Execução da Emenda: {metricas.percentualExecutado.toFixed(1)}%
+          </div>
+          <div style={styles.progressBarContainer}>
+            <div
+              style={{
+                ...styles.progressBar,
+                width: `${Math.min(metricas.percentualExecutado, 100)}%`,
+                backgroundColor:
+                  metricas.percentualExecutado > 100
+                    ? "#dc3545"
+                    : metricas.percentualExecutado >= 75
+                      ? "#28a745"
+                      : metricas.percentualExecutado >= 50
+                        ? "#ffc107"
+                        : "#17a2b8",
+              }}
+            />
+          </div>
+        </div>
+
+        <div style={styles.actionButtonsContainer}>
+          <button
+            type="button"
+            onClick={handleGerenciarDespesas}
+            style={styles.manageExpensesButton}
+          >
+            💰 Gerenciar Despesas ({metricas.totalDespesas})
+          </button>
+          <div style={styles.actionButtonsInfo}>
+            <span style={styles.actionButtonsText}>
+              Clique para visualizar, criar ou editar despesas desta emenda
+            </span>
+          </div>
+        </div>
+      </fieldset>
+    );
+  }, [
+    emendaParaEditar,
+    calcularMetricasFinanceiras,
+    formatCurrency,
+    handleGerenciarDespesas,
+    isMounted,
+  ]);
+
+  const estados = [
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PR",
+    "PE",
+    "PI",
+    "RJ",
+    "RN",
+    "RS",
+    "RO",
+    "RR",
+    "SC",
+    "SP",
+    "SE",
+    "TO",
+  ];
 
   return (
     <div style={styles.container}>
       {renderHeader()}
 
-      {/* ✅ Widget de saldo da emenda */}
-      {formData.emendaId && !readOnly && (
-        <SaldoEmendaWidget
-          emendaId={formData.emendaId}
-          valorDespesaAtual={parseValue(formData.valor)}
-          compacto={false}
-        />
+      {showSuccessMessage && (
+        <div style={styles.successMessage}>
+          <span style={styles.successIcon}>✅</span>
+          <span style={styles.successText}>
+            {configModo.modo === "criar"
+              ? "Emenda criada"
+              : "Emenda atualizada"}{" "}
+            com sucesso!
+          </span>
+        </div>
       )}
 
-      {/* ✅ Alert para erros do hook */}
-      {hookError && <div style={styles.alertError}>⚠️ {hookError}</div>}
-
-      {/* ✅ NOVO: Alerta sobre validações importantes */}
-      <div style={styles.validationAlert}>
-        <div style={styles.validationAlertHeader}>
-          📋 <strong>Validações Importantes:</strong>
-        </div>
-        <ul style={styles.validationAlertList}>
-          <li>✅ Valor da NF deve ser igual ao total dos itens</li>
-          <li>
-            ✅ Data de lançamento deve ser igual ou posterior à data da NF
-          </li>
-          <li>✅ Todos os campos obrigatórios (*) devem ser preenchidos</li>
-          <li>✅ Data de lançamento é sempre a data atual por padrão</li>
-        </ul>
-      </div>
-
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* ✅ Seção: Dados da Despesa */}
+        {renderPainelFinanceiro()}
+
+        {/* Dados Básicos */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
-            <span style={styles.legendIcon}>💼</span>
-            Dados da Despesa
+            <span style={styles.legendIcon}>📋</span>
+            Dados Básicos
           </legend>
 
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
               <label style={styles.label}>
-                Emenda Parlamentar <span style={styles.required}>*</span>
-              </label>
-              <select
-                name="emendaId"
-                value={formData.emendaId}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.select,
-                  ...(errors.emendaId ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly}
-              >
-                <option value="">Selecione uma emenda...</option>
-                {emendas.map((emenda) => (
-                  <option key={emenda.id} value={emenda.id}>
-                    {formatarDisplayEmenda(emenda)}
-                  </option>
-                ))}
-              </select>
-              {errors.emendaId && (
-                <div style={styles.errorMessage}>{errors.emendaId}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Natureza da Despesa <span style={styles.required}>*</span>
-              </label>
-              <select
-                name="naturezaDespesa"
-                value={formData.naturezaDespesa}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.select,
-                  ...(errors.naturezaDespesa ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly}
-              >
-                <option value="">Selecione...</option>
-                {naturezasDespesa.map((natureza) => (
-                  <option key={natureza} value={natureza}>
-                    {natureza}
-                  </option>
-                ))}
-              </select>
-              {errors.naturezaDespesa && (
-                <div style={styles.errorMessage}>{errors.naturezaDespesa}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Valor Total da NF <span style={styles.required}>*</span>
-                <span style={styles.autoCalculated}>
-                  {" "}
-                  (Calculado pelos itens)
-                </span>
+                Parlamentar <span style={styles.required}>*</span>
               </label>
               <input
                 type="text"
-                name="valor"
-                value={formData.valor}
-                style={{
-                  ...styles.input,
-                  backgroundColor: "#f8f9fa",
-                  ...(errors.valor ? styles.inputError : {}),
-                }}
-                placeholder="0,00"
-                disabled={true} // ✅ Campo calculado automaticamente
+                name="parlamentar"
+                value={formData.parlamentar}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                required
               />
-              {errors.valor && (
-                <div style={styles.errorMessage}>{errors.valor}</div>
-              )}
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Número da Emenda <span style={styles.required}>*</span>
+              </label>
+              <input
+                type="text"
+                name="numeroEmenda"
+                value={formData.numeroEmenda}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                required
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Tipo <span style={styles.required}>*</span>
+              </label>
+              <select
+                name="tipo"
+                value={formData.tipo}
+                onChange={handleInputChange}
+                style={styles.select}
+                disabled={camposDesabilitados}
+                required
+              >
+                <option value="Individual">Individual</option>
+                <option value="Bancada">Bancada</option>
+                <option value="Comissão">Comissão</option>
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Município <span style={styles.required}>*</span>
+              </label>
+              <input
+                type="text"
+                name="municipio"
+                value={formData.municipio}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                required
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                UF <span style={styles.required}>*</span>
+              </label>
+              <select
+                name="uf"
+                value={formData.uf}
+                onChange={handleInputChange}
+                style={styles.select}
+                disabled={camposDesabilitados}
+                required
+              >
+                <option value="">Selecione...</option>
+                {estados.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {estado}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                Valor do Recurso <span style={styles.required}>*</span>
+              </label>
+              <input
+                type="text"
+                name="valorRecurso"
+                value={formData.valorRecurso}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                placeholder="0,00"
+                required
+              />
             </div>
           </div>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Descrição da Despesa <span style={styles.required}>*</span>
+              Objeto da Proposta <span style={styles.required}>*</span>
             </label>
             <textarea
-              name="descricao"
-              value={formData.descricao}
+              name="objetoProposta"
+              value={formData.objetoProposta}
               onChange={handleInputChange}
-              style={{
-                ...styles.textarea,
-                ...(errors.descricao ? styles.inputError : {}),
-              }}
-              placeholder="Descreva detalhadamente a despesa..."
+              style={styles.textarea}
+              disabled={camposDesabilitados}
+              rows={3}
               required
-              rows="3"
-              disabled={readOnly}
             />
-            {errors.descricao && (
-              <div style={styles.errorMessage}>{errors.descricao}</div>
-            )}
           </div>
         </fieldset>
 
-        {/* ✅ Seção: Controle Fiscal */}
+        {/* Identificação */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
-            <span style={styles.legendIcon}>📋</span>
-            Controle Fiscal
+            <span style={styles.legendIcon}>🏛️</span>
+            Identificação
           </legend>
 
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Número do Empenho <span style={styles.required}>*</span>
-              </label>
+              <label style={styles.label}>CNPJ do Município</label>
               <input
                 type="text"
-                name="numeroEmpenho"
-                value={formData.numeroEmpenho}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.numeroEmpenho ? styles.inputError : {}),
-                }}
-                placeholder="Ex: 2025NE000123"
-                required
-                disabled={readOnly}
-              />
-              {errors.numeroEmpenho && (
-                <div style={styles.errorMessage}>{errors.numeroEmpenho}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Data do Empenho <span style={styles.required}>*</span>
-              </label>
-              <input
-                type="date"
-                name="dataEmpenho"
-                value={formData.dataEmpenho}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.dataEmpenho ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly}
-              />
-              {errors.dataEmpenho && (
-                <div style={styles.errorMessage}>{errors.dataEmpenho}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Data de Liquidação</label>
-              <input
-                type="date"
-                name="dataLiquidacao"
-                value={formData.dataLiquidacao}
+                name="cnpjMunicipio"
+                value={formData.cnpjMunicipio}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly}
+                disabled={camposDesabilitados}
+                placeholder="00.000.000/0000-00"
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Classificação Funcional-Programática
-              </label>
+              <label style={styles.label}>CNPJ Beneficiário</label>
               <input
                 type="text"
-                name="classificacaoFuncional"
-                value={formData.classificacaoFuncional}
+                name="beneficiarioCnpj"
+                value={formData.beneficiarioCnpj}
                 onChange={handleInputChange}
                 style={styles.input}
-                placeholder="Ex: 10.122.0001.2010"
-                disabled={readOnly}
+                disabled={camposDesabilitados}
+                placeholder="00.000.000/0000-00"
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Número da Proposta</label>
+              <input
+                type="text"
+                name="numeroProposta"
+                value={formData.numeroProposta}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Programa</label>
+              <input
+                type="text"
+                name="programa"
+                value={formData.programa}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
               />
             </div>
           </div>
         </fieldset>
 
-        {/* ✅ Seção: Cronograma */}
+        {/* Valores */}
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legend}>
+            <span style={styles.legendIcon}>💰</span>
+            Valores
+          </legend>
+
+          <div style={styles.formGrid}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Outros Valores</label>
+              <input
+                type="text"
+                name="outrosValores"
+                value={formData.outrosValores}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                placeholder="0,00"
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Valor Executado</label>
+              <input
+                type="text"
+                name="valorExecutado"
+                value={formData.valorExecutado}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+                placeholder="0,00"
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Saldo (Calculado)</label>
+              <input
+                type="text"
+                name="saldo"
+                value={formData.saldo}
+                style={{ ...styles.input, backgroundColor: "#f8f9fa" }}
+                disabled={true}
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* Cronograma */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📅</span>
@@ -932,453 +1048,324 @@ const DespesaForm = ({
 
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Data de Lançamento <span style={styles.required}>*</span>
-                <span style={styles.validationNote}>
-                  {" "}
-                  (Deve ser ≥ Data da NF)
-                </span>
-              </label>
+              <label style={styles.label}>Data de Validade</label>
               <input
                 type="date"
-                name="data"
-                value={formData.data}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.data ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly}
-              />
-              {errors.data && (
-                <div style={styles.errorMessage}>{errors.data}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Data de Pagamento</label>
-              <input
-                type="date"
-                name="dataPagamento"
-                value={formData.dataPagamento}
+                name="dataValidada"
+                value={formData.dataValidada}
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={readOnly}
+                disabled={camposDesabilitados}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Nº do Contrato <span style={styles.required}>*</span>
-              </label>
+              <label style={styles.label}>Data OB</label>
               <input
-                type="text"
-                name="numeroContrato"
-                value={formData.numeroContrato}
+                type="date"
+                name="dataOb"
+                value={formData.dataOb}
                 onChange={handleInputChange}
                 style={styles.input}
-                placeholder="Ex: CT-2025-001"
-                disabled={readOnly}
+                disabled={camposDesabilitados}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Início da Execução</label>
+              <input
+                type="date"
+                name="inicioExecucao"
+                value={formData.inicioExecucao}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Final da Execução</label>
+              <input
+                type="date"
+                name="finalExecucao"
+                value={formData.finalExecucao}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
               />
             </div>
           </div>
         </fieldset>
 
-        {/* ✅ Seção: Dados Complementares */}
+        {/* Ações e Serviços */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
-            <span style={styles.legendIcon}>📋</span>
-            Dados Complementares
+            <span style={styles.legendIcon}>🎯</span>
+            Ações e Serviços
+          </legend>
+
+          <div style={styles.subSection}>
+            <h4 style={styles.subSectionTitle}>Tipo de Meta</h4>
+            <div style={styles.radioGroup}>
+              <label style={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="tipoMeta"
+                  value="Metas Quantitativas"
+                  checked={tipoAcaoServico === "Metas Quantitativas"}
+                  onChange={(e) => setTipoAcaoServico(e.target.value)}
+                  disabled={camposDesabilitados}
+                  style={styles.radioInput}
+                />
+                Metas Quantitativas
+              </label>
+              <label style={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="tipoMeta"
+                  value="Metas"
+                  checked={tipoAcaoServico === "Metas"}
+                  onChange={(e) => setTipoAcaoServico(e.target.value)}
+                  disabled={camposDesabilitados}
+                  style={styles.radioInput}
+                />
+                Metas
+              </label>
+            </div>
+          </div>
+
+          {!camposDesabilitados && (
+            <div style={styles.acaoServicoForm}>
+              <h4 style={styles.subSectionTitle}>
+                {editandoAcaoServico !== null ? "Editar" : "Adicionar"}{" "}
+                {tipoAcaoServico}
+              </h4>
+
+              <div style={styles.formGrid}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Descrição</label>
+                  <input
+                    type="text"
+                    value={novaAcaoServico.descricao}
+                    onChange={(e) =>
+                      handleNovaAcaoServicoChange("descricao", e.target.value)
+                    }
+                    style={styles.input}
+                    placeholder="Descrição da ação/serviço"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Complemento</label>
+                  <input
+                    type="text"
+                    value={novaAcaoServico.complemento}
+                    onChange={(e) =>
+                      handleNovaAcaoServicoChange("complemento", e.target.value)
+                    }
+                    style={styles.input}
+                    placeholder="Informações complementares"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Valor</label>
+                  <input
+                    type="text"
+                    value={novaAcaoServico.valor}
+                    onChange={(e) =>
+                      handleNovaAcaoServicoChange("valor", e.target.value)
+                    }
+                    style={styles.input}
+                    placeholder="0,00"
+                  />
+                </div>
+              </div>
+
+              <div style={styles.acaoServicoButtons}>
+                {editandoAcaoServico !== null ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={salvarEdicaoAcaoServico}
+                      style={styles.saveButton}
+                    >
+                      💾 Salvar Alterações
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelarEdicaoAcaoServico}
+                      style={styles.cancelButton}
+                    >
+                      ❌ Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={adicionarAcaoServico}
+                    style={styles.addButton}
+                  >
+                    ➕ Adicionar {tipoAcaoServico}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {formData.acoesServicos.length > 0 && (
+            <div style={styles.acaoServicoList}>
+              <h4 style={styles.subSectionTitle}>
+                Ações e Serviços Cadastrados ({formData.acoesServicos.length})
+              </h4>
+
+              {formData.acoesServicos.map((item, index) => (
+                <div key={item.id} style={styles.acaoServicoItem}>
+                  <div style={styles.acaoServicoHeader}>
+                    <span style={styles.acaoServicoTipo}>{item.tipo}</span>
+                    {!camposDesabilitados && (
+                      <div style={styles.acaoServicoActions}>
+                        <button
+                          type="button"
+                          onClick={() => iniciarEdicaoAcaoServico(index)}
+                          style={styles.editButton}
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removerAcaoServico(index)}
+                          style={styles.removeButton}
+                          title="Remover"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={styles.acaoServicoContent}>
+                    <div style={styles.acaoServicoField}>
+                      <strong>Descrição:</strong> {item.descricao}
+                    </div>
+                    {item.complemento && (
+                      <div style={styles.acaoServicoField}>
+                        <strong>Complemento:</strong> {item.complemento}
+                      </div>
+                    )}
+                    {item.valor && (
+                      <div style={styles.acaoServicoField}>
+                        <strong>Valor:</strong> R$ {item.valor}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </fieldset>
+
+        {/* Dados Técnicos */}
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legend}>
+            <span style={styles.legendIcon}>🔧</span>
+            Dados Técnicos
           </legend>
 
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Ação <span style={styles.required}>*</span>
-              </label>
+              <label style={styles.label}>GND</label>
               <input
                 type="text"
-                name="acao"
-                value={formData.acao}
+                name="gnd"
+                value={formData.gnd}
                 onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.acao ? styles.inputError : {}),
-                }}
-                placeholder="Ex: Construção de praça"
-                required
-                disabled={readOnly}
+                style={styles.input}
+                disabled={camposDesabilitados}
               />
-              {errors.acao && (
-                <div style={styles.errorMessage}>{errors.acao}</div>
-              )}
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Dotação Orçamentária <span style={styles.required}>*</span>
-              </label>
+              <label style={styles.label}>Funcional</label>
+              <input
+                type="text"
+                name="funcional"
+                value={formData.funcional}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Ação Orçamentária</label>
+              <input
+                type="text"
+                name="acaoOrcamentaria"
+                value={formData.acaoOrcamentaria}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={camposDesabilitados}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Dotação Orçamentária</label>
               <input
                 type="text"
                 name="dotacaoOrcamentaria"
                 value={formData.dotacaoOrcamentaria}
                 onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.dotacaoOrcamentaria ? styles.inputError : {}),
-                }}
-                placeholder="Ex: 12.361.0001.2010"
-                required
-                disabled={readOnly}
-              />
-              {errors.dotacaoOrcamentaria && (
-                <div style={styles.errorMessage}>
-                  {errors.dotacaoOrcamentaria}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {formData.observacoes && (
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Observações</label>
-              <textarea
-                name="observacoes"
-                value={formData.observacoes}
-                onChange={handleInputChange}
-                style={styles.textarea}
-                placeholder="Observações adicionais sobre a despesa..."
-                rows="2"
-                disabled={readOnly}
+                style={styles.input}
+                disabled={camposDesabilitados}
               />
             </div>
-          )}
-        </fieldset>
 
-        {/* ✅ Seção: Dados da Nota Fiscal */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>🧾</span>
-            Dados da Nota Fiscal
-          </legend>
-
-          <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Número da NF <span style={styles.required}>*</span>
-              </label>
+              <label style={styles.label}>Contrato</label>
               <input
                 type="text"
-                name="notaFiscalNumero"
-                value={formData.notaFiscalNumero}
+                name="contrato"
+                value={formData.contrato}
                 onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalNumero ? styles.inputError : {}),
-                }}
-                placeholder="Ex: NF-001234"
-                required
-                disabled={readOnly}
+                style={styles.input}
+                disabled={camposDesabilitados}
               />
-              {errors.notaFiscalNumero && (
-                <div style={styles.errorMessage}>{errors.notaFiscalNumero}</div>
-              )}
             </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Data da NF <span style={styles.required}>*</span>
-                <span style={styles.validationNote}>
-                  {" "}
-                  (Deve ser ≤ Data de lançamento)
-                </span>
-              </label>
-              <input
-                type="date"
-                name="notaFiscalData"
-                value={formData.notaFiscalData}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalData ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly}
-              />
-              {errors.notaFiscalData && (
-                <div style={styles.errorMessage}>{errors.notaFiscalData}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Fornecedor <span style={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                name="notaFiscalFornecedor"
-                value={formData.notaFiscalFornecedor}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalFornecedor ? styles.inputError : {}),
-                }}
-                placeholder="Nome do fornecedor"
-                required
-                disabled={readOnly}
-              />
-              {errors.notaFiscalFornecedor && (
-                <div style={styles.errorMessage}>
-                  {errors.notaFiscalFornecedor}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Descrição da NF</label>
-            <textarea
-              name="notaFiscalDescricao"
-              value={formData.notaFiscalDescricao}
-              onChange={handleInputChange}
-              style={styles.textarea}
-              placeholder="Descrição detalhada dos itens da nota fiscal..."
-              rows="2"
-              disabled={readOnly}
-            />
           </div>
         </fieldset>
 
-        {/* ✅ Seção: Itens da Nota Fiscal */}
-        {!readOnly && (
-          <fieldset style={styles.fieldset}>
-            <legend style={styles.legend}>
-              <span style={styles.legendIcon}>📦</span>
-              Itens da Nota Fiscal
-              <span style={styles.legendNote}>
-                {" "}
-                (O valor da NF será o total dos itens)
-              </span>
-            </legend>
-
-            {formData.itens.map((item, index) => (
-              <div key={index} style={styles.itemContainer}>
-                <div style={styles.itemHeader}>
-                  <span style={styles.itemTitle}>Item {index + 1}</span>
-                  {formData.itens.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removerItem(index)}
-                      style={styles.removeButton}
-                      title="Remover item"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-
-                <div style={styles.formGrid}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>
-                      Descrição <span style={styles.required}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={item.descricao}
-                      onChange={(e) =>
-                        atualizarItem(index, "descricao", e.target.value)
-                      }
-                      style={{
-                        ...styles.input,
-                        ...(errors[`item_descricao_${index}`]
-                          ? styles.inputError
-                          : {}),
-                      }}
-                      placeholder="Descrição do item"
-                      required
-                    />
-                    {errors[`item_descricao_${index}`] && (
-                      <div style={styles.errorMessage}>
-                        {errors[`item_descricao_${index}`]}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>
-                      Valor Unitário <span style={styles.required}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={item.valor}
-                      onChange={(e) =>
-                        atualizarItem(index, "valor", e.target.value)
-                      }
-                      style={{
-                        ...styles.input,
-                        ...(errors[`item_valor_${index}`]
-                          ? styles.inputError
-                          : {}),
-                      }}
-                      placeholder="0,00"
-                      required
-                    />
-                    {errors[`item_valor_${index}`] && (
-                      <div style={styles.errorMessage}>
-                        {errors[`item_valor_${index}`]}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>
-                      Quantidade <span style={styles.required}>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={item.quantidade}
-                      onChange={(e) =>
-                        atualizarItem(index, "quantidade", e.target.value)
-                      }
-                      style={{
-                        ...styles.input,
-                        ...(errors[`item_quantidade_${index}`]
-                          ? styles.inputError
-                          : {}),
-                      }}
-                      placeholder="1"
-                      min="1"
-                      required
-                    />
-                    {errors[`item_quantidade_${index}`] && (
-                      <div style={styles.errorMessage}>
-                        {errors[`item_quantidade_${index}`]}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={adicionarItem}
-              style={styles.addButton}
-            >
-              ➕ Adicionar Item
-            </button>
-
-            {/* Total dos Itens */}
-            <div style={styles.totalItensBox}>
-              <div style={styles.totalItensLabel}>
-                Total dos Itens = Valor da NF:
-              </div>
-              <div style={styles.totalItensValor}>R$ {formData.totalItens}</div>
-            </div>
-
-            {/* ✅ Alerta sobre validação de itens */}
-            {errors.itens && (
-              <div style={styles.errorMessage}>{errors.itens}</div>
-            )}
-          </fieldset>
-        )}
-
-        {/* ✅ Seção: Upload de Arquivos - REMOVIDA TEMPORARIAMENTE */}
-        {/* TODO: Implementar upload de arquivos após configurar CORS no Firebase Storage */}
-
-        {/* ✅ Informações do Sistema */}
-        <div style={styles.systemInfo}>
-          <div style={styles.systemInfoTitle}>Informações do Sistema</div>
-          <div style={styles.systemInfoContent}>
-            <span>
-              Número:{" "}
-              {formData.numero ||
-                despesaSalva?.numero ||
-                "Será gerado automaticamente"}
-            </span>
-            <span>
-              Criado:{" "}
-              {formData.createdAt
-                ? new Date(
-                    formData.createdAt.toDate?.() || formData.createdAt,
-                  ).toLocaleDateString("pt-BR")
-                : "Agora"}
-            </span>
-            <span>
-              Atualizado:{" "}
-              {formData.updatedAt
-                ? new Date(
-                    formData.updatedAt.toDate?.() || formData.updatedAt,
-                  ).toLocaleDateString("pt-BR")
-                : "Agora"}
-            </span>
-          </div>
-        </div>
-
-        {/* ✅ Botões de Ação */}
+        {/* Botões */}
         <div style={styles.buttonContainer}>
           <button
             type="button"
-            onClick={() => window.voltarParaListagemDespesas?.()}
-            style={styles.infoButton}
+            onClick={onCancelar}
+            style={styles.cancelButtonStyle}
           >
-            📋 Listar Despesas
+            ← Voltar
           </button>
 
-          <button
-            type="button"
-            onClick={handleCancel}
-            style={styles.cancelButton}
-          >
-            {readOnly ? "Fechar" : "Cancelar"}
-          </button>
-
-          {!readOnly && (
+          {!camposDesabilitados && (
             <button
               type="submit"
-              disabled={loading || hookLoading}
-              style={{
-                ...styles.submitButton,
-                opacity: loading || hookLoading ? 0.6 : 1,
-              }}
+              style={styles.submitButton}
+              disabled={loading}
             >
               {loading
                 ? "Salvando..."
-                : modoOperacao === "editar"
-                  ? "💾 Atualizar"
-                  : "💾 Salvar"}
+                : configModo.modo === "criar"
+                  ? "Criar Emenda"
+                  : "Atualizar Emenda"}
             </button>
           )}
         </div>
       </form>
-
-      {/* ✅ NOVO: Modal de opções pós-salvamento */}
-      {renderSuccessOptions()}
-
-      {/* ✅ Modal de Confirmação */}
-      <ConfirmationModal
-        isVisible={showConfirmationModal}
-        onCancel={() => setShowConfirmationModal(false)}
-        onConfirm={() => {
-          setShowConfirmationModal(false);
-          setHasChanges(false);
-          setFormActive(false);
-          if (onCancelar) {
-            onCancelar();
-          }
-        }}
-        title="⚠️ Alterações não salvas"
-        message="Existem alterações não salvas. Deseja realmente continuar e perder as alterações?"
-        confirmText="Sim, continuar"
-        cancelText="Cancelar"
-        type="warning"
-      />
     </div>
   );
 };
 
-// ✅ Estilos expandidos com novos elementos
+// ✅ Estilos completos
 const styles = {
   container: {
     maxWidth: "1200px",
@@ -1399,42 +1386,42 @@ const styles = {
     fontWeight: "bold",
   },
   headerSubtitle: {
-    margin: 0,
+    margin: "0 0 10px 0",
     fontSize: "14px",
     opacity: 0.8,
   },
-  alertError: {
-    backgroundColor: "#f8d7da",
-    border: "1px solid #f5c6cb",
-    borderRadius: "8px",
-    padding: "16px",
-    marginBottom: "20px",
-    color: "#721c24",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-
-  // ✅ NOVO: Estilos para alerta de validações
-  validationAlert: {
-    backgroundColor: "#e3f2fd",
-    border: "2px solid #2196f3",
-    borderRadius: "8px",
-    padding: "16px",
-    marginBottom: "20px",
-    color: "#1976d2",
-  },
-  validationAlertHeader: {
-    fontSize: "14px",
+  permissionInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "12px",
     fontWeight: "600",
-    marginBottom: "8px",
+    opacity: 0.9,
+    marginTop: "8px",
   },
-  validationAlertList: {
-    margin: "0",
-    paddingLeft: "20px",
-    fontSize: "13px",
-    lineHeight: "1.6",
+  permissionIcon: {
+    fontSize: "14px",
   },
-
+  permissionText: {
+    fontSize: "12px",
+  },
+  successMessage: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    backgroundColor: "#d4edda",
+    color: "#155724",
+    padding: "15px",
+    borderRadius: "8px",
+    border: "1px solid #c3e6cb",
+    marginBottom: "20px",
+  },
+  successIcon: {
+    fontSize: "20px",
+  },
+  successText: {
+    fontWeight: "bold",
+  },
   form: {
     display: "flex",
     flexDirection: "column",
@@ -1462,11 +1449,107 @@ const styles = {
   legendIcon: {
     fontSize: "18px",
   },
-  legendNote: {
-    fontSize: "12px",
-    fontWeight: "normal",
+  financialGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "16px",
+    marginBottom: "24px",
+  },
+  financialCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "white",
+    border: "1px solid #e9ecef",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+    transition: "transform 0.2s ease",
+  },
+  cardIcon: {
+    fontSize: "24px",
     opacity: 0.8,
-    marginLeft: "8px",
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardValue: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#154360",
+    marginBottom: "2px",
+  },
+  cardLabel: {
+    fontSize: "12px",
+    color: "#6c757d",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    fontWeight: "600",
+  },
+  cardSubtext: {
+    fontSize: "11px",
+    color: "#28a745",
+    fontWeight: "600",
+    marginTop: "2px",
+  },
+  progressSection: {
+    marginTop: "16px",
+    marginBottom: "24px",
+  },
+  progressLabel: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#495057",
+    marginBottom: "8px",
+  },
+  progressBarContainer: {
+    position: "relative",
+    height: "20px",
+    backgroundColor: "#e9ecef",
+    borderRadius: "10px",
+    overflow: "hidden",
+    border: "1px solid #dee2e6",
+  },
+  progressBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    height: "100%",
+    borderRadius: "10px 0 0 10px",
+    transition: "width 0.5s ease",
+  },
+  actionButtonsContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    padding: "20px",
+    backgroundColor: "#f8f9fa",
+    borderRadius: "8px",
+    border: "1px solid #e9ecef",
+  },
+  manageExpensesButton: {
+    backgroundColor: "#4A90E2",
+    color: "white",
+    border: "none",
+    borderRadius: "8px",
+    padding: "14px 24px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    boxShadow: "0 2px 4px rgba(74, 144, 226, 0.3)",
+  },
+  actionButtonsInfo: {
+    textAlign: "center",
+  },
+  actionButtonsText: {
+    fontSize: "13px",
+    color: "#6c757d",
+    fontStyle: "italic",
   },
   formGrid: {
     display: "grid",
@@ -1487,16 +1570,6 @@ const styles = {
   required: {
     color: "#dc3545",
   },
-  autoCalculated: {
-    color: "#28a745",
-    fontSize: "12px",
-    fontWeight: "normal",
-  },
-  validationNote: {
-    color: "#fd7e14",
-    fontSize: "11px",
-    fontWeight: "normal",
-  },
   input: {
     padding: "12px",
     border: "2px solid #dee2e6",
@@ -1504,10 +1577,6 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
-  },
-  inputError: {
-    borderColor: "#dc3545",
-    boxShadow: "0 0 0 3px rgba(220, 53, 69, 0.1)",
   },
   select: {
     padding: "12px",
@@ -1526,108 +1595,155 @@ const styles = {
     minHeight: "100px",
     fontFamily: "Arial, sans-serif",
   },
-  errorMessage: {
-    background: "#f8d7da",
-    border: "1px solid #f5c6cb",
-    borderRadius: "6px",
-    padding: "8px 12px",
-    color: "#721c24",
-    fontSize: "13px",
-    marginTop: "4px",
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-  },
-  itemContainer: {
-    border: "2px solid #e8f0fe",
+  subSection: {
+    backgroundColor: "#f8f9fa",
+    padding: "16px",
     borderRadius: "8px",
-    padding: "20px",
-    marginBottom: "16px",
-    background: "white",
-    position: "relative",
+    border: "1px solid #e9ecef",
+    marginBottom: "20px",
   },
-  itemHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "16px",
-    paddingBottom: "8px",
-    borderBottom: "1px solid #e8f0fe",
-  },
-  itemTitle: {
-    fontSize: "16px",
-    fontWeight: "600",
+  subSectionTitle: {
     color: "#154360",
-  },
-  removeButton: {
-    background: "#dc3545",
-    color: "white",
-    border: "none",
-    borderRadius: "50%",
-    width: "32px",
-    height: "32px",
-    cursor: "pointer",
     fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.3s ease",
-  },
-  addButton: {
-    background: "linear-gradient(135deg, #27AE60 0%, #219A52 100%)",
-    color: "white",
-    border: "2px solid #27AE60",
-    borderRadius: "8px",
-    padding: "12px 20px",
-    cursor: "pointer",
-    fontSize: "14px",
     fontWeight: "600",
-    marginTop: "16px",
-    transition: "all 0.3s ease",
+    marginBottom: "12px",
+    margin: "0 0 12px 0",
+  },
+  radioGroup: {
+    display: "flex",
+    gap: "20px",
+    flexWrap: "wrap",
+  },
+  radioLabel: {
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#333",
+    cursor: "pointer",
   },
-  totalItensBox: {
-    background: "linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%)",
-    border: "2px solid #27AE60",
-    borderRadius: "12px",
+  radioInput: {
+    width: "16px",
+    height: "16px",
+    cursor: "pointer",
+  },
+  acaoServicoForm: {
+    backgroundColor: "#f8f9fa",
     padding: "20px",
-    textAlign: "center",
+    borderRadius: "8px",
+    border: "1px solid #e9ecef",
+    marginBottom: "20px",
+  },
+  acaoServicoButtons: {
+    display: "flex",
+    gap: "12px",
+    justifyContent: "flex-start",
+    marginTop: "16px",
+  },
+  addButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 20px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background-color 0.3s ease",
+  },
+  saveButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 20px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background-color 0.3s ease",
+  },
+  cancelButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 20px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background-color 0.3s ease",
+  },
+  acaoServicoList: {
     marginTop: "20px",
   },
-  totalItensLabel: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#155724",
-    marginBottom: "8px",
-  },
-  totalItensValor: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#27AE60",
-    fontFamily: "monospace",
-  },
-  // ✅ Estilos de upload removidos - será reimplementado no futuro
-  systemInfo: {
-    marginTop: "24px",
-    padding: "16px",
-    background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+  acaoServicoItem: {
+    backgroundColor: "white",
     border: "1px solid #dee2e6",
     borderRadius: "8px",
+    padding: "16px",
+    marginBottom: "12px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
   },
-  systemInfoTitle: {
-    fontWeight: "600",
-    color: "#495057",
-    marginBottom: "8px",
-    fontSize: "14px",
-  },
-  systemInfoContent: {
+  acaoServicoHeader: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "20px",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "12px",
+    paddingBottom: "8px",
+    borderBottom: "1px solid #e9ecef",
+  },
+  acaoServicoTipo: {
+    backgroundColor: "#154360",
+    color: "white",
+    padding: "4px 12px",
+    borderRadius: "12px",
     fontSize: "12px",
-    color: "#6c757d",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  acaoServicoActions: {
+    display: "flex",
+    gap: "8px",
+  },
+  editButton: {
+    backgroundColor: "#ffc107",
+    color: "#000",
+    border: "none",
+    borderRadius: "4px",
+    padding: "6px 10px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
+  removeButton: {
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    padding: "6px 10px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
+  acaoServicoContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  acaoServicoField: {
+    fontSize: "14px",
+    color: "#333",
+    lineHeight: "1.5",
   },
   buttonContainer: {
     display: "flex",
@@ -1637,18 +1753,7 @@ const styles = {
     paddingTop: "20px",
     borderTop: "1px solid #dee2e6",
   },
-  infoButton: {
-    padding: "12px 24px",
-    backgroundColor: "#17a2b8",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  cancelButton: {
+  cancelButtonStyle: {
     padding: "12px 24px",
     backgroundColor: "#6c757d",
     color: "white",
@@ -1670,226 +1775,6 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s ease",
   },
-
-  // ✅ NOVOS: Estilos para modal de opções pós-salvamento
-  successOptionsOverlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    backdropFilter: "blur(4px)",
-  },
-  successOptionsModal: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: 0,
-    maxWidth: "600px",
-    width: "90%",
-    maxHeight: "90vh",
-    overflow: "auto",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
-    animation: "slideIn 0.3s ease",
-  },
-  successOptionsHeader: {
-    padding: "24px 24px 16px 24px",
-    borderBottom: "1px solid #e9ecef",
-    backgroundColor: "#d4edda",
-    borderRadius: "12px 12px 0 0",
-    textAlign: "center",
-  },
-  successOptionsTitle: {
-    color: "#155724",
-    margin: "0 0 8px 0",
-    fontSize: "20px",
-    fontWeight: "600",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
-  },
-  successOptionsSubtitle: {
-    color: "#155724",
-    margin: 0,
-    fontSize: "14px",
-    opacity: 0.8,
-  },
-  successOptionsContent: {
-    padding: "24px",
-  },
-  successOptionsQuestion: {
-    fontSize: "16px",
-    color: "#333",
-    marginBottom: "24px",
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  successOptionsButtons: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  successOptionButton: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    gap: "4px",
-    padding: "16px 20px",
-    backgroundColor: "#f8f9fa",
-    border: "2px solid #dee2e6",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#154360",
-    transition: "all 0.3s ease",
-    textAlign: "left",
-    width: "100%",
-  },
-  successOptionSubtext: {
-    fontSize: "13px",
-    color: "#6c757d",
-    fontWeight: "400",
-    lineHeight: "1.4",
-  },
 };
 
-// ✅ CSS adicional para animações e hover effects
-const additionalCSS = `
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.success-option-button:hover {
-  background-color: #e3f2fd !important;
-  border-color: #4A90E2 !important;
-  transform: translateX(4px);
-}
-
-.success-option-button:first-child:hover {
-  background-color: #fff3cd !important;
-  border-color: #ffc107 !important;
-}
-
-.success-option-button:nth-child(2):hover {
-  background-color: #e7f3ff !important;
-  border-color: #007bff !important;
-}
-
-.success-option-button:nth-child(3):hover {
-  background-color: #d4edda !important;
-  border-color: #28a745 !important;
-}
-
-.success-option-button:last-child:hover {
-  background-color: #f8d7da !important;
-  border-color: #dc3545 !important;
-}
-
-.add-button:hover {
-  background-color: #219A52;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
-}
-
-.remove-button:hover {
-  background-color: #c82333;
-  transform: scale(1.1);
-}
-
-/* Upload área removida temporariamente */
-
-.input:focus,
-.select:focus,
-.textarea:focus {
-  border-color: #4A90E2;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-  outline: none;
-}
-
-.item-container:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transform: translateY(-1px);
-}
-
-.total-itens-box {
-  position: relative;
-  overflow: hidden;
-}
-
-.total-itens-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-@media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .success-options-modal {
-    width: 95%;
-    margin: 20px;
-  }
-
-  .success-options-buttons {
-    gap: 8px;
-  }
-
-  .success-option-button {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .button-container {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .validation-alert-list {
-    font-size: 12px;
-    padding-left: 16px;
-  }
-}
-`;
-
-// Inserir CSS dinamicamente
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = additionalCSS;
-
-  // Adicionar classes aos elementos para hover effects
-  style.textContent += `
-    .success-option-button {
-      transition: all 0.3s ease;
-    }
-  `;
-
-  document.head.appendChild(style);
-}
-
-export default DespesaForm;
+export default EmendaForm;

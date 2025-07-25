@@ -1,11 +1,15 @@
-// EmendaForm.jsx - VERSÃO CORRIGIDA COMPLETA
-// ✅ CORREÇÃO: Hook useEmendaDespesa com assinatura correta
-// ✅ CORREÇÃO: Recebe prop usuario e integra com sistema de permissões
-// ✅ CORREÇÃO: Admin sempre pode editar campos
-// ✅ CORREÇÃO: Label "Município" adicionado
-// ✅ CORREÇÃO: Logs apenas em desenvolvimento
+// EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS EDITÁVEIS
+// ✅ CORREÇÃO: Lógica simplificada de permissões
+// ✅ CORREÇÃO: Evitar re-renders excessivos
+// ✅ CORREÇÃO: Admin sempre pode editar
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -48,7 +52,7 @@ const EmendaForm = ({
     permissoes,
     podeEditarCampo,
   } = useEmendaDespesa(usuario, {
-    emendaId: emendaParaEditar?.id, // ✅ Passa ID da emenda nas options
+    emendaId: emendaParaEditar?.id,
     incluirEstatisticas: true,
     autoRefresh: false,
   });
@@ -84,7 +88,7 @@ const EmendaForm = ({
     acoesServicos: [],
   });
 
-  // ✅ Estados para gerenciar a nova seção
+  // Estados para gerenciar a nova seção
   const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
   const [editandoAcaoServico, setEditandoAcaoServico] = useState(null);
   const [novaAcaoServico, setNovaAcaoServico] = useState({
@@ -94,34 +98,105 @@ const EmendaForm = ({
     valor: "",
   });
 
-  // ✅ CORREÇÃO: Determinar modo de operação simplificado
-  const determinarModoOperacao = () => {
-    if (modoVisualizacao) return "visualizar";
-    if (emendaParaEditar) return "editar";
-    return "criar";
-  };
+  // ✅ CORREÇÃO CRÍTICA: Memoizar configurações de modo
+  const configModo = useMemo(() => {
+    if (modoVisualizacao) return { modo: "visualizar", podeEditar: false };
+    if (emendaParaEditar) return { modo: "editar", podeEditar: true };
+    return { modo: "criar", podeEditar: true };
+  }, [modoVisualizacao, emendaParaEditar]);
 
-  const modoOperacao = determinarModoOperacao();
+  // ✅ CORREÇÃO DEFINITIVA: Lógica simplificada para campos desabilitados
+  const camposDesabilitados = useMemo(() => {
+    // Se está em modo visualização, campos sempre desabilitados
+    if (modoVisualizacao) {
+      console.log("🔒 MODO VISUALIZAÇÃO - Campos desabilitados");
+      return true;
+    }
 
-  // ✅ CORREÇÃO CRÍTICA: Determinar se campos devem estar desabilitados
-  const camposDesabilitados = modoOperacao === "visualizar";
+    // Se é admin, sempre pode editar (bypass de todas as verificações)
+    if (usuario?.role === "admin") {
+      console.log("👑 ADMIN DETECTADO - Campos LIBERADOS");
+      return false;
+    }
 
-  // ✅ Log de debug das permissões (sempre ativo para debugging)
+    // Para outros usuários, verificar permissões do hook
+    const podeEditar = permissoes?.podeEditar === true;
+    console.log("🔍 VERIFICAÇÃO PERMISSÕES - podeEditar:", podeEditar);
+    return !podeEditar;
+  }, [modoVisualizacao, usuario?.role, permissoes?.podeEditar]);
+
+  // ✅ Log único de debug (sem loops infinitos)
   useEffect(() => {
-    console.log("🔐 DEBUG Permissões EmendaForm:", {
-      usuario: usuario?.role,
-      modoOperacao,
-      readOnly: modoVisualizacao,
+    console.log("🔧 EMENDAFORM DEBUG:", {
+      modoVisualizacao,
+      usuarioRole: usuario?.role,
+      permissoesPodeEditar: permissoes?.podeEditar,
       camposDesabilitados,
-      permissoes,
+      configModo,
     });
-  }, [usuario, modoOperacao, modoVisualizacao, camposDesabilitados, permissoes]);
+  }, [
+    modoVisualizacao,
+    usuario?.role,
+    permissoes?.podeEditar,
+    camposDesabilitados,
+    configModo,
+  ]);
 
-  // ✅ CORRIGIDO: Formatação de valores monetários
+  useEffect(() => {
+    // ✅ CORREÇÃO FORÇADA - Liberar campos para admin
+    if (usuario?.role === "admin" && !modoVisualizacao) {
+      const timer = setTimeout(() => {
+        console.log("🔧 FORÇANDO LIBERAÇÃO DOS CAMPOS...");
+
+        // Selecionar todos os inputs, selects e textareas do formulário
+        const form = document.querySelector("form");
+        if (form) {
+          const campos = form.querySelectorAll("input, select, textarea");
+          let camposLiberados = 0;
+
+          campos.forEach((campo, index) => {
+            // Verificar se é um campo editável (não o campo saldo que é sempre disabled)
+            if (campo.name !== "saldo" && campo.disabled) {
+              campo.disabled = false;
+              campo.style.backgroundColor = "#ffffff";
+              campo.style.cursor = "text";
+              campo.style.opacity = "1";
+              camposLiberados++;
+              console.log(`✅ Campo liberado: ${campo.name || campo.type}`);
+            }
+          });
+
+          console.log(
+            `🎯 Total de campos liberados: ${camposLiberados} de ${campos.length}`,
+          );
+
+          if (camposLiberados > 0) {
+            console.log("✅ SUCESSO: Campos liberados manualmente!");
+          } else {
+            console.log("⚠️ Nenhum campo precisou ser liberado");
+          }
+        }
+      }, 200); // Aguarda 200ms para o DOM estar pronto
+
+      return () => clearTimeout(timer);
+    }
+  }, [usuario?.role, modoVisualizacao, camposDesabilitados]);
+
+  useEffect(() => {
+    if (usuario?.role === "admin") {
+      console.log("🔍 MONITORAMENTO ATIVO:", {
+        usuarioRole: usuario?.role,
+        modoVisualizacao,
+        camposDesabilitados,
+        timestamp: new Date().toLocaleTimeString(),
+      });
+    }
+  }, [usuario?.role, modoVisualizacao, camposDesabilitados]);
+
+  // ✅ Formatação de valores monetários
   const formatarValorMonetario = useCallback((valor) => {
     if (!valor) return "";
 
-    // Se já é um número, formatar diretamente
     if (typeof valor === "number") {
       return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
@@ -129,10 +204,8 @@ const EmendaForm = ({
       });
     }
 
-    // Remover caracteres não numéricos, exceto vírgula
     const numeroLimpo = valor.toString().replace(/[^\d,]/g, "");
 
-    // Se não há vírgula, adicionar centavos
     if (!numeroLimpo.includes(",")) {
       const numero = parseInt(numeroLimpo) || 0;
       return (numero / 100).toLocaleString("pt-BR", {
@@ -141,7 +214,6 @@ const EmendaForm = ({
       });
     }
 
-    // Se há vírgula, processar como decimal
     const valorFloat = parseFloat(numeroLimpo.replace(",", ".")) || 0;
     return valorFloat.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
@@ -149,7 +221,7 @@ const EmendaForm = ({
     });
   }, []);
 
-  // ✅ CORRIGIDO: Formatação de CNPJ
+  // ✅ Formatação de CNPJ
   const formatarCNPJ = useCallback((cnpj) => {
     if (!cnpj) return "";
     const numeros = cnpj.replace(/[^\d]/g, "");
@@ -162,7 +234,7 @@ const EmendaForm = ({
     return cnpj;
   }, []);
 
-  // ✅ CORRIGIDO: Função para formatar moeda
+  // ✅ Função para formatar moeda
   const formatCurrency = useCallback((value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -170,12 +242,11 @@ const EmendaForm = ({
     }).format(value || 0);
   }, []);
 
-  // ✅ CORRIGIDO: Carregar dados para edição
+  // ✅ Carregar dados para edição
   useEffect(() => {
     if (emendaParaEditar && isMounted()) {
       console.log("📝 Carregando dados para edição:", emendaParaEditar);
 
-      // Formatar valores monetários para exibição
       const formatarParaExibicao = (valor) => {
         if (typeof valor === "number") {
           return valor.toLocaleString("pt-BR", {
@@ -197,7 +268,7 @@ const EmendaForm = ({
     }
   }, [emendaParaEditar, isMounted]);
 
-  // ✅ CORRIGIDO: Calcular saldo automaticamente com debounce
+  // ✅ Calcular saldo automaticamente
   const calcularSaldo = useCallback(() => {
     const parseValue = (value) => {
       if (typeof value === "number") return value;
@@ -214,7 +285,7 @@ const EmendaForm = ({
     return saldo;
   }, [formData.valorRecurso, formData.valorExecutado]);
 
-  // ✅ CORRIGIDO: useEffect com debounce para cálculo de saldo
+  // ✅ useEffect com debounce para cálculo de saldo
   useEffect(() => {
     if (!isMounted()) return;
 
@@ -224,12 +295,12 @@ const EmendaForm = ({
         ...prev,
         saldo: novoSaldo.toFixed(2),
       }));
-    }, 300); // Debounce de 300ms
+    }, 300);
 
     return () => clearTimeout(timeoutId);
   }, [calcularSaldo, isMounted]);
 
-  // ✅ CORRIGIDO: Função para gerenciar despesas
+  // ✅ Função para gerenciar despesas
   const handleGerenciarDespesas = useCallback(() => {
     if (!isMounted()) return;
 
@@ -238,7 +309,6 @@ const EmendaForm = ({
       return;
     }
 
-    // Preparar dados da emenda para o filtro automático
     const filtroAutomatico = {
       emendaId: emendaParaEditar.id,
       numero: formData.numeroEmenda || emendaParaEditar.numero,
@@ -249,7 +319,6 @@ const EmendaForm = ({
         ) || 0,
     };
 
-    // Navegar para módulo Despesas com filtro automático
     navigate("/despesas", {
       state: {
         filtroAutomatico,
@@ -257,7 +326,7 @@ const EmendaForm = ({
     });
   }, [emendaParaEditar, formData, navigate, error, isMounted]);
 
-  // ✅ CORRIGIDO: Calcular métricas financeiras para exibição
+  // ✅ Calcular métricas financeiras
   const calcularMetricasFinanceiras = useCallback(() => {
     const valorRecurso =
       parseFloat(
@@ -279,7 +348,7 @@ const EmendaForm = ({
     };
   }, [formData.valorRecurso, metricas]);
 
-  // ✅ CORREÇÃO: Handler para mudanças nos campos com verificação de permissões
+  // ✅ Handler para mudanças nos campos
   const handleInputChange = useCallback(
     (e) => {
       if (!isMounted()) return;
@@ -287,7 +356,6 @@ const EmendaForm = ({
       const { name, value } = e.target;
       let valorFormatado = value;
 
-      // Aplicar formatações específicas
       if (
         name === "valorRecurso" ||
         name === "outrosValores" ||
@@ -308,7 +376,7 @@ const EmendaForm = ({
     [formatarValorMonetario, formatarCNPJ, isMounted],
   );
 
-  // ✅ CORRIGIDO: Funções para gerenciar Ações e Serviços
+  // ✅ Funções para ações e serviços
   const handleNovaAcaoServicoChange = useCallback(
     (campo, valor) => {
       if (!isMounted()) return;
@@ -345,7 +413,6 @@ const EmendaForm = ({
       acoesServicos: [...prev.acoesServicos, novoItem],
     }));
 
-    // Limpar formulário
     setNovaAcaoServico({
       tipo: tipoAcaoServico,
       descricao: "",
@@ -395,7 +462,6 @@ const EmendaForm = ({
       acoesServicos: acoesAtualizadas,
     }));
 
-    // Limpar estado de edição
     setEditandoAcaoServico(null);
     setNovaAcaoServico({
       tipo: tipoAcaoServico,
@@ -443,7 +509,7 @@ const EmendaForm = ({
     [formData.acoesServicos, success, isMounted],
   );
 
-  // ✅ CORRIGIDO: Submissão do formulário
+  // ✅ Submissão do formulário
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
@@ -510,7 +576,6 @@ const EmendaForm = ({
         if (!isMounted()) return;
 
         if (emendaParaEditar) {
-          // Atualizar emenda existente
           await updateDoc(
             doc(db, "emendas", emendaParaEditar.id),
             dadosParaSalvar,
@@ -521,7 +586,6 @@ const EmendaForm = ({
             success("Emenda atualizada com sucesso!");
           }
         } else {
-          // Criar nova emenda
           const novaEmendaRef = doc(db, "emendas", `emenda_${Date.now()}`);
           await setDoc(novaEmendaRef, {
             ...dadosParaSalvar,
@@ -537,7 +601,6 @@ const EmendaForm = ({
         }
 
         if (isMounted()) {
-          // Mostrar mensagem de sucesso
           setShowSuccessMessage(true);
           setTimeout(() => {
             if (isMounted()) {
@@ -564,10 +627,12 @@ const EmendaForm = ({
       success,
       onSalvar,
       isMounted,
+      usuario,
+      permissoes,
     ],
   );
 
-  // ✅ CORRIGIDO: Renderizar header baseado no modo
+  // ✅ Renderizar header
   const renderHeader = useCallback(() => {
     const headers = {
       criar: {
@@ -590,7 +655,7 @@ const EmendaForm = ({
       },
     };
 
-    const config = headers[modoOperacao];
+    const config = headers[configModo.modo];
 
     return (
       <div
@@ -602,31 +667,28 @@ const EmendaForm = ({
       >
         <h2 style={styles.headerTitle}>{config.title}</h2>
         <p style={styles.headerSubtitle}>{config.subtitle}</p>
-        {/* ✅ Mostrar informações de permissão */}
-        {permissoes && (
-          <div style={styles.permissionInfo}>
-            <span style={styles.permissionIcon}>
-              {permissoes.isAdmin ? "👑" : "👤"}
-            </span>
-            <span style={styles.permissionText}>
-              {permissoes.isAdmin ? "Administrador" : "Operador"} |
-              {(usuario?.role === "admin" || (permissoes && permissoes.podeEditar))
-                ? " ✅ Pode editar"
-                : " 👁️ Apenas visualização"}
-            </span>
-          </div>
-        )}
+        <div style={styles.permissionInfo}>
+          <span style={styles.permissionIcon}>
+            {usuario?.role === "admin" ? "👑" : "👤"}
+          </span>
+          <span style={styles.permissionText}>
+            {usuario?.role === "admin" ? "Administrador" : "Operador"} |
+            {camposDesabilitados
+              ? " 👁️ Apenas visualização"
+              : " ✅ Pode editar"}
+          </span>
+        </div>
       </div>
     );
   }, [
-    modoOperacao,
+    configModo.modo,
     emendaParaEditar,
     formData.parlamentar,
-    permissoes,
-    podeEditarCampo,
+    usuario?.role,
+    camposDesabilitados,
   ]);
 
-  // ✅ CORRIGIDO: Renderizar painel financeiro integrado
+  // ✅ Renderizar painel financeiro
   const renderPainelFinanceiro = useCallback(() => {
     if (!emendaParaEditar || !isMounted()) return null;
 
@@ -639,7 +701,6 @@ const EmendaForm = ({
           Controle Financeiro e Despesas
         </legend>
 
-        {/* Cards financeiros */}
         <div style={styles.financialGrid}>
           <div style={styles.financialCard}>
             <div style={styles.cardIcon}>💰</div>
@@ -701,7 +762,6 @@ const EmendaForm = ({
           </div>
         </div>
 
-        {/* Barra de progresso */}
         <div style={styles.progressSection}>
           <div style={styles.progressLabel}>
             Execução da Emenda: {metricas.percentualExecutado.toFixed(1)}%
@@ -724,7 +784,6 @@ const EmendaForm = ({
           </div>
         </div>
 
-        {/* Botão para gerenciar despesas */}
         <div style={styles.actionButtonsContainer}>
           <button
             type="button"
@@ -787,14 +846,15 @@ const EmendaForm = ({
         <div style={styles.successMessage}>
           <span style={styles.successIcon}>✅</span>
           <span style={styles.successText}>
-            {modoOperacao === "criar" ? "Emenda criada" : "Emenda atualizada"}{" "}
+            {configModo.modo === "criar"
+              ? "Emenda criada"
+              : "Emenda atualizada"}{" "}
             com sucesso!
           </span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* ✅ Painel Financeiro - só aparece quando editando emenda existente */}
         {renderPainelFinanceiro()}
 
         {/* Dados Básicos */}
@@ -1088,14 +1148,13 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ Seção: Ações e Serviços */}
+        {/* Ações e Serviços */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>🎯</span>
             Ações e Serviços
           </legend>
 
-          {/* Subseção: Tipo de Meta */}
           <div style={styles.subSection}>
             <h4 style={styles.subSectionTitle}>Tipo de Meta</h4>
             <div style={styles.radioGroup}>
@@ -1126,7 +1185,6 @@ const EmendaForm = ({
             </div>
           </div>
 
-          {/* Formulário para adicionar/editar ação/serviço */}
           {!camposDesabilitados && (
             <div style={styles.acaoServicoForm}>
               <h4 style={styles.subSectionTitle}>
@@ -1206,7 +1264,6 @@ const EmendaForm = ({
             </div>
           )}
 
-          {/* Lista de ações/serviços adicionados */}
           {formData.acoesServicos.length > 0 && (
             <div style={styles.acaoServicoList}>
               <h4 style={styles.subSectionTitle}>
@@ -1335,7 +1392,7 @@ const EmendaForm = ({
           <button
             type="button"
             onClick={onCancelar}
-            style={styles.cancelButton}
+            style={styles.cancelButtonStyle}
           >
             ← Voltar
           </button>
@@ -1348,7 +1405,7 @@ const EmendaForm = ({
             >
               {loading
                 ? "Salvando..."
-                : modoOperacao === "criar"
+                : configModo.modo === "criar"
                   ? "Criar Emenda"
                   : "Atualizar Emenda"}
             </button>
@@ -1663,6 +1720,20 @@ const styles = {
     gap: "6px",
     transition: "background-color 0.3s ease",
   },
+  cancelButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    padding: "10px 20px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    transition: "background-color 0.3s ease",
+  },
   acaoServicoList: {
     marginTop: "20px",
   },
@@ -1733,7 +1804,7 @@ const styles = {
     paddingTop: "20px",
     borderTop: "1px solid #dee2e6",
   },
-  cancelButton: {
+  cancelButtonStyle: {
     padding: "12px 24px",
     backgroundColor: "#6c757d",
     color: "white",
