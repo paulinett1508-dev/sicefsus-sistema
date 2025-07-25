@@ -38,6 +38,8 @@ const AdminPanel = () => {
     status: "ativo",
     departamento: "",
     telefone: "",
+    municipio: "",
+    uf: "",
   });
 
   // Filtros logs
@@ -99,6 +101,12 @@ const AdminPanel = () => {
       return;
     }
 
+    // Validação específica para operadores
+    if (formData.role === "user" && (!formData.municipio || !formData.uf)) {
+      showToast("Município e UF são obrigatórios para operadores", "error");
+      return;
+    }
+
     try {
       // Criar usuário no Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
@@ -108,7 +116,7 @@ const AdminPanel = () => {
       );
 
       // Criar documento do usuário no Firestore
-      await addDoc(collection(db, "users"), {
+      const userData = {
         uid: userCredential.user.uid,
         email: formData.email,
         nome: formData.nome,
@@ -118,7 +126,15 @@ const AdminPanel = () => {
         telefone: formData.telefone,
         dataCriacao: Timestamp.now(),
         ultimoAcesso: null,
-      });
+      };
+
+      // Adicionar município e UF apenas para operadores
+      if (formData.role === "user") {
+        userData.municipio = formData.municipio.trim();
+        userData.uf = formData.uf.trim().toLowerCase();
+      }
+
+      await addDoc(collection(db, "users"), userData);
 
       // Enviar email de reset de senha
       await sendPasswordResetEmail(auth, formData.email);
@@ -143,15 +159,34 @@ const AdminPanel = () => {
 
     if (!editingUser) return;
 
+    // Validação específica para operadores
+    if (formData.role === "user" && (!formData.municipio || !formData.uf)) {
+      showToast("Município e UF são obrigatórios para operadores", "error");
+      return;
+    }
+
     try {
-      await updateDoc(doc(db, "users", editingUser.id), {
+      const updateData = {
         nome: formData.nome,
         role: formData.role,
         status: formData.status,
         departamento: formData.departamento,
         telefone: formData.telefone,
         dataModificacao: Timestamp.now(),
-      });
+      };
+
+      // Gerenciar município e UF baseado no perfil
+      if (formData.role === "admin") {
+        // Se mudou para admin, remover município e UF
+        updateData.municipio = null;
+        updateData.uf = null;
+      } else if (formData.role === "user") {
+        // Se é operador, incluir município e UF
+        updateData.municipio = formData.municipio.trim();
+        updateData.uf = formData.uf.trim().toLowerCase();
+      }
+
+      await updateDoc(doc(db, "users", editingUser.id), updateData);
 
       await addLog("UPDATE_USER", `Usuário atualizado: ${formData.email}`);
 
@@ -217,6 +252,8 @@ const AdminPanel = () => {
       status: "ativo",
       departamento: "",
       telefone: "",
+      municipio: "",
+      uf: "",
     });
     setShowUserForm(false);
     setEditingUser(null);
@@ -231,6 +268,8 @@ const AdminPanel = () => {
       status: user.status,
       departamento: user.departamento || "",
       telefone: user.telefone || "",
+      municipio: user.municipio || "",
+      uf: user.uf || "",
     });
     setShowUserForm(true);
   };
@@ -385,11 +424,18 @@ const AdminPanel = () => {
                     <label>Perfil</label>
                     <select
                       value={formData.role}
-                      onChange={(e) =>
-                        setFormData({ ...formData, role: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const newRole = e.target.value;
+                        setFormData({ 
+                          ...formData, 
+                          role: newRole,
+                          // Limpar município e UF se mudou para admin
+                          municipio: newRole === "admin" ? "" : formData.municipio,
+                          uf: newRole === "admin" ? "" : formData.uf
+                        });
+                      }}
                     >
-                      <option value="user">Usuário</option>
+                      <option value="user">Operador</option>
                       <option value="admin">Administrador</option>
                     </select>
                   </div>
@@ -432,6 +478,64 @@ const AdminPanel = () => {
                       }
                     />
                   </div>
+
+                  {/* Campos Município e UF apenas para operadores */}
+                  {formData.role === "user" && (
+                    <>
+                      <div className="form-group">
+                        <label>Município *</label>
+                        <input
+                          type="text"
+                          value={formData.municipio}
+                          onChange={(e) =>
+                            setFormData({ ...formData, municipio: e.target.value })
+                          }
+                          placeholder="Digite o município"
+                          required={formData.role === "user"}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>UF *</label>
+                        <select
+                          value={formData.uf}
+                          onChange={(e) =>
+                            setFormData({ ...formData, uf: e.target.value })
+                          }
+                          required={formData.role === "user"}
+                        >
+                          <option value="">Selecione a UF</option>
+                          <option value="ac">AC - Acre</option>
+                          <option value="al">AL - Alagoas</option>
+                          <option value="ap">AP - Amapá</option>
+                          <option value="am">AM - Amazonas</option>
+                          <option value="ba">BA - Bahia</option>
+                          <option value="ce">CE - Ceará</option>
+                          <option value="df">DF - Distrito Federal</option>
+                          <option value="es">ES - Espírito Santo</option>
+                          <option value="go">GO - Goiás</option>
+                          <option value="ma">MA - Maranhão</option>
+                          <option value="mt">MT - Mato Grosso</option>
+                          <option value="ms">MS - Mato Grosso do Sul</option>
+                          <option value="mg">MG - Minas Gerais</option>
+                          <option value="pa">PA - Pará</option>
+                          <option value="pb">PB - Paraíba</option>
+                          <option value="pr">PR - Paraná</option>
+                          <option value="pe">PE - Pernambuco</option>
+                          <option value="pi">PI - Piauí</option>
+                          <option value="rj">RJ - Rio de Janeiro</option>
+                          <option value="rn">RN - Rio Grande do Norte</option>
+                          <option value="rs">RS - Rio Grande do Sul</option>
+                          <option value="ro">RO - Rondônia</option>
+                          <option value="rr">RR - Roraima</option>
+                          <option value="sc">SC - Santa Catarina</option>
+                          <option value="sp">SP - São Paulo</option>
+                          <option value="se">SE - Sergipe</option>
+                          <option value="to">TO - Tocantins</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="form-actions">
@@ -459,6 +563,7 @@ const AdminPanel = () => {
                   <th>Perfil</th>
                   <th>Status</th>
                   <th>Departamento</th>
+                  <th>Município/UF</th>
                   <th>Último Acesso</th>
                   <th>Ações</th>
                 </tr>
@@ -483,6 +588,14 @@ const AdminPanel = () => {
                       </span>
                     </td>
                     <td>{user.departamento || "-"}</td>
+                    <td>
+                      {user.role === "admin" 
+                        ? "🌐 Acesso Total" 
+                        : user.municipio && user.uf 
+                          ? `${user.municipio}/${user.uf.toUpperCase()}`
+                          : "⚠️ Não configurado"
+                      }
+                    </td>
                     <td>
                       {user.ultimoAcesso
                         ? user.ultimoAcesso.toDate().toLocaleString("pt-BR")
