@@ -981,7 +981,12 @@ const EmendaForm = ({
                 value={formData.programa || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={modoVisualizacao} // ✅ COR<div style={styles.formGrid}>
+                disabled={modoVisualizacao} // ✅ CORREÇÃO: Padrão simples
+              />
+            </div>
+          </div>
+
+          <div style={styles.formGrid}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Outros Valores</label>
               <input
