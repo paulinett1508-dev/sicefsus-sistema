@@ -155,7 +155,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     if (novasPermissoes.podeEditar || novasPermissoes.isAdmin) {
       setError(null);
     }
-  }, [usuario?.uid, usuario?.role, determinarPermissoes]);
+  }, [usuario?.uid, usuario?.role]);
 
   // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
   const calcularMetricasEmenda = useCallback(

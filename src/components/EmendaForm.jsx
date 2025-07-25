@@ -1,7 +1,9 @@
-// EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS EDITÁVEIS
-// ✅ CORREÇÃO: Lógica simplificada de permissões
-// ✅ CORREÇÃO: Evitar re-renders excessivos
-// ✅ CORREÇÃO: Admin sempre pode editar
+// EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS FUNCIONAIS
+// ✅ CORREÇÃO: Substituída lógica complexa por padrão simples do DespesaForm
+// ✅ CORREÇÃO: Removida manipulação forçada do DOM (antipattern React)
+// ✅ CORREÇÃO: Simplificada verificação de permissões
+// ✅ CORREÇÃO: Eliminados imports conflitantes
+// ✅ CORREÇÃO: Removida validação bloqueante
 
 import React, {
   useState,
@@ -14,7 +16,9 @@ import { useNavigate } from "react-router-dom";
 import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
+// ✅ CORREÇÃO: APENAS useEmendaDespesa - removidos outros hooks conflitantes
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
+// ❌ REMOVIDOS: usePermissions, useValidation (causavam conflitos)
 
 // ✅ Hook para verificar se componente está montado
 const useIsMounted = () => {
@@ -30,12 +34,12 @@ const useIsMounted = () => {
 };
 
 const EmendaForm = ({
-  usuario, // ✅ CORREÇÃO: Receber prop usuario
+  usuario,
   emendaParaEditar,
   onCancelar,
   onSalvar,
   onListarEmendas,
-  modoVisualizacao = false,
+  modoVisualizacao = false, // ✅ CORREÇÃO: Usar como readOnly
   defaultMunicipio = null,
   defaultUf = null,
   isOperador = false,
@@ -44,7 +48,7 @@ const EmendaForm = ({
   const navigate = useNavigate();
   const isMounted = useIsMounted();
 
-  // ✅ CORREÇÃO CRÍTICA: Hook com assinatura correta para métricas
+  // ✅ Hook com assinatura correta para métricas
   const {
     metricas,
     loading: hookLoading,
@@ -60,7 +64,7 @@ const EmendaForm = ({
   const [loading, setLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // Estado inicial do formulário
+  // ✅ CORREÇÃO: Estado inicial simplificado
   const [formData, setFormData] = useState({
     parlamentar: "",
     numeroEmenda: "",
@@ -98,100 +102,35 @@ const EmendaForm = ({
     valor: "",
   });
 
-  // ✅ CORREÇÃO CRÍTICA: Memoizar configurações de modo
+  // ✅ CORREÇÃO CRÍTICA: Configuração de modo simplificada
   const configModo = useMemo(() => {
-    if (modoVisualizacao) return { modo: "visualizar", podeEditar: false };
-    if (emendaParaEditar) return { modo: "editar", podeEditar: true };
-    return { modo: "criar", podeEditar: true };
+    if (modoVisualizacao) return { modo: "visualizar", readOnly: true };
+    if (emendaParaEditar) return { modo: "editar", readOnly: false };
+    return { modo: "criar", readOnly: false };
   }, [modoVisualizacao, emendaParaEditar]);
 
-  // ✅ CORREÇÃO DEFINITIVA: Lógica simplificada para campos desabilitados
-  const camposDesabilitados = useMemo(() => {
-    // Se está em modo visualização, campos sempre desabilitados
-    if (modoVisualizacao) {
-      console.log("🔒 MODO VISUALIZAÇÃO - Campos desabilitados");
-      return true;
-    }
+  // ✅ CORREÇÃO DEFINITIVA: Substituída lógica complexa por padrão simples
+  // Seguindo o padrão do DespesaForm.jsx que funciona perfeitamente
+  const readOnly = configModo.readOnly;
 
-    // Se é admin, sempre pode editar (bypass de todas as verificações)
-    if (usuario?.role === "admin") {
-      console.log("👑 ADMIN DETECTADO - Campos LIBERADOS");
-      return false;
-    }
-
-    // Para outros usuários, verificar permissões do hook
-    const podeEditar = permissoes?.podeEditar === true;
-    console.log("🔍 VERIFICAÇÃO PERMISSÕES - podeEditar:", podeEditar);
-    return !podeEditar;
-  }, [modoVisualizacao, usuario?.role, permissoes?.podeEditar]);
-
-  // ✅ Log único de debug (sem loops infinitos)
+  // ✅ CORREÇÃO: Log simplificado de debug
   useEffect(() => {
-    console.log("🔧 EMENDAFORM DEBUG:", {
-      modoVisualizacao,
+    console.log("🔧 EMENDAFORM CORRIGIDO:", {
+      modo: configModo.modo,
+      readOnly,
       usuarioRole: usuario?.role,
       permissoesPodeEditar: permissoes?.podeEditar,
-      camposDesabilitados,
-      configModo,
     });
-  }, [
-    modoVisualizacao,
-    usuario?.role,
-    permissoes?.podeEditar,
-    camposDesabilitados,
-    configModo,
-  ]);
+  }, [configModo.modo, readOnly, usuario?.role, permissoes?.podeEditar]);
 
+  // ✅ CORREÇÃO: Remover manipulação forçada do DOM (antipattern React)
+  // Comentado completamente - não é necessário manipular DOM diretamente
+  /*
   useEffect(() => {
-    // ✅ CORREÇÃO FORÇADA - Liberar campos para admin
-    if (usuario?.role === "admin" && !modoVisualizacao) {
-      const timer = setTimeout(() => {
-        console.log("🔧 FORÇANDO LIBERAÇÃO DOS CAMPOS...");
-
-        // Selecionar todos os inputs, selects e textareas do formulário
-        const form = document.querySelector("form");
-        if (form) {
-          const campos = form.querySelectorAll("input, select, textarea");
-          let camposLiberados = 0;
-
-          campos.forEach((campo, index) => {
-            // Verificar se é um campo editável (não o campo saldo que é sempre disabled)
-            if (campo.name !== "saldo" && campo.disabled) {
-              campo.disabled = false;
-              campo.style.backgroundColor = "#ffffff";
-              campo.style.cursor = "text";
-              campo.style.opacity = "1";
-              camposLiberados++;
-              console.log(`✅ Campo liberado: ${campo.name || campo.type}`);
-            }
-          });
-
-          console.log(
-            `🎯 Total de campos liberados: ${camposLiberados} de ${campos.length}`,
-          );
-
-          if (camposLiberados > 0) {
-            console.log("✅ SUCESSO: Campos liberados manualmente!");
-          } else {
-            console.log("⚠️ Nenhum campo precisou ser liberado");
-          }
-        }
-      }, 200); // Aguarda 200ms para o DOM estar pronto
-
-      return () => clearTimeout(timer);
-    }
-  }, [usuario?.role, modoVisualizacao, camposDesabilitados]);
-
-  useEffect(() => {
-    if (usuario?.role === "admin") {
-      console.log("🔍 MONITORAMENTO ATIVO:", {
-        usuarioRole: usuario?.role,
-        modoVisualizacao,
-        camposDesabilitados,
-        timestamp: new Date().toLocaleTimeString(),
-      });
-    }
-  }, [usuario?.role, modoVisualizacao, camposDesabilitados]);
+    // ❌ REMOVIDO: Manipulação forçada do DOM
+    // React deve gerenciar o estado dos campos através de props
+  }, []);
+  */
 
   // ✅ Formatação de valores monetários
   const formatarValorMonetario = useCallback((valor) => {
@@ -348,14 +287,17 @@ const EmendaForm = ({
     };
   }, [formData.valorRecurso, metricas]);
 
-  // ✅ Handler para mudanças nos campos
+  // ✅ CORREÇÃO RADICAL: Handler PURO sem qualquer verificação complexa
   const handleInputChange = useCallback(
     (e) => {
       if (!isMounted()) return;
 
       const { name, value } = e.target;
+      console.log(`🔧 INPUT CHANGE RADICAL: ${name} = "${value}"`); // ✅ Debug
+
       let valorFormatado = value;
 
+      // Formatação específica para campos monetários
       if (
         name === "valorRecurso" ||
         name === "outrosValores" ||
@@ -364,6 +306,7 @@ const EmendaForm = ({
         valorFormatado = formatarValorMonetario(value);
       }
 
+      // Formatação específica para CNPJ
       if (name === "cnpjMunicipio" || name === "beneficiarioCnpj") {
         valorFormatado = formatarCNPJ(value);
       }
@@ -372,14 +315,17 @@ const EmendaForm = ({
         ...prev,
         [name]: valorFormatado,
       }));
+
+      console.log(`✅ VALOR ATUALIZADO RADICAL: ${name} = "${valorFormatado}"`); // ✅ Debug
     },
-    [formatarValorMonetario, formatarCNPJ, isMounted],
+    [formatarValorMonetario, formatarCNPJ, isMounted], // ✅ RADICAL: Sem verificações
   );
 
   // ✅ Funções para ações e serviços
   const handleNovaAcaoServicoChange = useCallback(
     (campo, valor) => {
       if (!isMounted()) return;
+      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
       if (campo === "valor") {
         valor = formatarValorMonetario(valor);
@@ -389,11 +335,12 @@ const EmendaForm = ({
         [campo]: valor,
       }));
     },
-    [formatarValorMonetario, isMounted],
+    [formatarValorMonetario, isMounted, readOnly],
   );
 
   const adicionarAcaoServico = useCallback(() => {
     if (!isMounted()) return;
+    if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória para adicionar uma ação/serviço");
@@ -421,11 +368,12 @@ const EmendaForm = ({
     });
 
     success("Ação/Serviço adicionado com sucesso!");
-  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted]);
+  }, [novaAcaoServico, tipoAcaoServico, error, success, isMounted, readOnly]);
 
   const iniciarEdicaoAcaoServico = useCallback(
     (index) => {
       if (!isMounted()) return;
+      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
       const item = formData.acoesServicos[index];
       setEditandoAcaoServico(index);
@@ -437,11 +385,12 @@ const EmendaForm = ({
       });
       setTipoAcaoServico(item.tipo);
     },
-    [formData.acoesServicos, isMounted],
+    [formData.acoesServicos, isMounted, readOnly],
   );
 
   const salvarEdicaoAcaoServico = useCallback(() => {
     if (!isMounted()) return;
+    if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
     if (!novaAcaoServico.descricao.trim()) {
       error("A descrição é obrigatória");
@@ -479,6 +428,7 @@ const EmendaForm = ({
     error,
     success,
     isMounted,
+    readOnly,
   ]);
 
   const cancelarEdicaoAcaoServico = useCallback(() => {
@@ -496,6 +446,7 @@ const EmendaForm = ({
   const removerAcaoServico = useCallback(
     (index) => {
       if (!isMounted()) return;
+      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
       const acoesAtualizadas = formData.acoesServicos.filter(
         (_, i) => i !== index,
@@ -506,19 +457,20 @@ const EmendaForm = ({
       }));
       success("Ação/Serviço removido com sucesso!");
     },
-    [formData.acoesServicos, success, isMounted],
+    [formData.acoesServicos, success, isMounted, readOnly],
   );
 
-  // ✅ Submissão do formulário
+  // ✅ CORREÇÃO: Submissão simplificada
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
 
       if (!isMounted()) return;
+      if (readOnly) return; // ✅ CORREÇÃO: Verificação simples
 
-      // ✅ Verificar permissões antes de salvar
-      if (usuario?.role !== "admin" && permissoes && !permissoes.podeEditar) {
-        error("Você não tem permissão para salvar emendas");
+      // ✅ RADICAL: Verificação apenas de modo
+      if (modoVisualizacao) {
+        error("Modo apenas visualização - não é possível salvar");
         return;
       }
 
@@ -627,8 +579,7 @@ const EmendaForm = ({
       success,
       onSalvar,
       isMounted,
-      usuario,
-      permissoes,
+      modoVisualizacao, // ✅ RADICAL: Dependência final simplificada
     ],
   );
 
@@ -673,9 +624,7 @@ const EmendaForm = ({
           </span>
           <span style={styles.permissionText}>
             {usuario?.role === "admin" ? "Administrador" : "Operador"} |
-            {camposDesabilitados
-              ? " 👁️ Apenas visualização"
-              : " ✅ Pode editar"}
+            {modoVisualizacao ? " 👁️ Apenas visualização" : " ✅ Pode editar"}
           </span>
         </div>
       </div>
@@ -685,7 +634,7 @@ const EmendaForm = ({
     emendaParaEditar,
     formData.parlamentar,
     usuario?.role,
-    camposDesabilitados,
+    modoVisualizacao, // ✅ RADICAL: Usar direto
   ]);
 
   // ✅ Renderizar painel financeiro
@@ -789,6 +738,7 @@ const EmendaForm = ({
             type="button"
             onClick={handleGerenciarDespesas}
             style={styles.manageExpensesButton}
+            disabled={modoVisualizacao} // ✅ RADICAL: Direto sem variáveis
           >
             💰 Gerenciar Despesas ({metricas.totalDespesas})
           </button>
@@ -806,6 +756,7 @@ const EmendaForm = ({
     formatCurrency,
     handleGerenciarDespesas,
     isMounted,
+    readOnly, // ✅ CORREÇÃO: Dependência simplificada
   ]);
 
   const estados = [
@@ -872,10 +823,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="parlamentar"
-                value={formData.parlamentar}
+                value={formData.parlamentar || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 required
               />
             </div>
@@ -887,10 +838,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="numeroEmenda"
-                value={formData.numeroEmenda}
+                value={formData.numeroEmenda || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 required
               />
             </div>
@@ -901,10 +852,10 @@ const EmendaForm = ({
               </label>
               <select
                 name="tipo"
-                value={formData.tipo}
+                value={formData.tipo || "Individual"} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 required
               >
                 <option value="Individual">Individual</option>
@@ -920,10 +871,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="municipio"
-                value={formData.municipio}
+                value={formData.municipio || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 required
               />
             </div>
@@ -934,10 +885,10 @@ const EmendaForm = ({
               </label>
               <select
                 name="uf"
-                value={formData.uf}
+                value={formData.uf || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.select}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 required
               >
                 <option value="">Selecione...</option>
@@ -956,10 +907,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="valorRecurso"
-                value={formData.valorRecurso}
+                value={formData.valorRecurso || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={modoVisualizacao} // ✅ RADICAL: Direto
                 placeholder="0,00"
                 required
               />
@@ -972,10 +923,10 @@ const EmendaForm = ({
             </label>
             <textarea
               name="objetoProposta"
-              value={formData.objetoProposta}
+              value={formData.objetoProposta || ""} // ✅ CORREÇÃO: Sempre string
               onChange={handleInputChange}
               style={styles.textarea}
-              disabled={camposDesabilitados}
+              disabled={modoVisualizacao} // ✅ RADICAL: Direto
               rows={3}
               required
             />
@@ -995,10 +946,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="cnpjMunicipio"
-                value={formData.cnpjMunicipio}
+                value={formData.cnpjMunicipio || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -1008,10 +959,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="beneficiarioCnpj"
-                value={formData.beneficiarioCnpj}
+                value={formData.beneficiarioCnpj || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                 placeholder="00.000.000/0000-00"
               />
             </div>
@@ -1021,10 +972,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="numeroProposta"
-                value={formData.numeroProposta}
+                value={formData.numeroProposta || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1033,10 +984,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="programa"
-                value={formData.programa}
+                value={formData.programa || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
           </div>
@@ -1055,10 +1006,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="outrosValores"
-                value={formData.outrosValores}
+                value={formData.outrosValores || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                 placeholder="0,00"
               />
             </div>
@@ -1068,10 +1019,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="valorExecutado"
-                value={formData.valorExecutado}
+                value={formData.valorExecutado || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                 placeholder="0,00"
               />
             </div>
@@ -1081,9 +1032,9 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="saldo"
-                value={formData.saldo}
+                value={formData.saldo || ""} // ✅ CORREÇÃO: Sempre string
                 style={{ ...styles.input, backgroundColor: "#f8f9fa" }}
-                disabled={true}
+                disabled={true} // ✅ Campo sempre calculado
                 placeholder="0,00"
               />
             </div>
@@ -1103,10 +1054,10 @@ const EmendaForm = ({
               <input
                 type="date"
                 name="dataValidada"
-                value={formData.dataValidada}
+                value={formData.dataValidada || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1115,10 +1066,10 @@ const EmendaForm = ({
               <input
                 type="date"
                 name="dataOb"
-                value={formData.dataOb}
+                value={formData.dataOb || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1127,10 +1078,10 @@ const EmendaForm = ({
               <input
                 type="date"
                 name="inicioExecucao"
-                value={formData.inicioExecucao}
+                value={formData.inicioExecucao || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1139,10 +1090,10 @@ const EmendaForm = ({
               <input
                 type="date"
                 name="finalExecucao"
-                value={formData.finalExecucao}
+                value={formData.finalExecucao || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
           </div>
@@ -1165,7 +1116,7 @@ const EmendaForm = ({
                   value="Metas Quantitativas"
                   checked={tipoAcaoServico === "Metas Quantitativas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={camposDesabilitados}
+                  disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                   style={styles.radioInput}
                 />
                 Metas Quantitativas
@@ -1177,7 +1128,7 @@ const EmendaForm = ({
                   value="Metas"
                   checked={tipoAcaoServico === "Metas"}
                   onChange={(e) => setTipoAcaoServico(e.target.value)}
-                  disabled={camposDesabilitados}
+                  disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
                   style={styles.radioInput}
                 />
                 Metas
@@ -1185,7 +1136,7 @@ const EmendaForm = ({
             </div>
           </div>
 
-          {!camposDesabilitados && (
+          {!modoVisualizacao && ( // ✅ RADICAL: Direto
             <div style={styles.acaoServicoForm}>
               <h4 style={styles.subSectionTitle}>
                 {editandoAcaoServico !== null ? "Editar" : "Adicionar"}{" "}
@@ -1197,7 +1148,7 @@ const EmendaForm = ({
                   <label style={styles.label}>Descrição</label>
                   <input
                     type="text"
-                    value={novaAcaoServico.descricao}
+                    value={novaAcaoServico.descricao || ""} // ✅ CORREÇÃO: Sempre string
                     onChange={(e) =>
                       handleNovaAcaoServicoChange("descricao", e.target.value)
                     }
@@ -1210,7 +1161,7 @@ const EmendaForm = ({
                   <label style={styles.label}>Complemento</label>
                   <input
                     type="text"
-                    value={novaAcaoServico.complemento}
+                    value={novaAcaoServico.complemento || ""} // ✅ CORREÇÃO: Sempre string
                     onChange={(e) =>
                       handleNovaAcaoServicoChange("complemento", e.target.value)
                     }
@@ -1223,7 +1174,7 @@ const EmendaForm = ({
                   <label style={styles.label}>Valor</label>
                   <input
                     type="text"
-                    value={novaAcaoServico.valor}
+                    value={novaAcaoServico.valor || ""} // ✅ CORREÇÃO: Sempre string
                     onChange={(e) =>
                       handleNovaAcaoServicoChange("valor", e.target.value)
                     }
@@ -1274,7 +1225,7 @@ const EmendaForm = ({
                 <div key={item.id} style={styles.acaoServicoItem}>
                   <div style={styles.acaoServicoHeader}>
                     <span style={styles.acaoServicoTipo}>{item.tipo}</span>
-                    {!camposDesabilitados && (
+                    {!modoVisualizacao && ( // ✅ RADICAL: Direto
                       <div style={styles.acaoServicoActions}>
                         <button
                           type="button"
@@ -1330,10 +1281,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="gnd"
-                value={formData.gnd}
+                value={formData.gnd || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1342,10 +1293,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="funcional"
-                value={formData.funcional}
+                value={formData.funcional || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1354,10 +1305,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="acaoOrcamentaria"
-                value={formData.acaoOrcamentaria}
+                value={formData.acaoOrcamentaria || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1366,10 +1317,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="dotacaoOrcamentaria"
-                value={formData.dotacaoOrcamentaria}
+                value={formData.dotacaoOrcamentaria || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
 
@@ -1378,10 +1329,10 @@ const EmendaForm = ({
               <input
                 type="text"
                 name="contrato"
-                value={formData.contrato}
+                value={formData.contrato || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
                 style={styles.input}
-                disabled={camposDesabilitados}
+                disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
           </div>
@@ -1397,7 +1348,7 @@ const EmendaForm = ({
             ← Voltar
           </button>
 
-          {!camposDesabilitados && (
+          {!readOnly && ( // ✅ CORREÇÃO: Padrão simples
             <button
               type="submit"
               style={styles.submitButton}
@@ -1416,7 +1367,7 @@ const EmendaForm = ({
   );
 };
 
-// ✅ Estilos completos
+// ✅ Estilos mantidos do original
 const styles = {
   container: {
     maxWidth: "1200px",
