@@ -145,7 +145,7 @@ const EmendaForm = ({
 
     // Remover tudo exceto dígitos
     const apenasNumeros = valor.toString().replace(/\D/g, "");
-    
+
     if (!apenasNumeros) return "";
 
     // Converter para número e dividir por 100 para obter centavos
@@ -290,7 +290,7 @@ const EmendaForm = ({
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
-      
+
       let valorFormatado = value;
 
       // Formatação específica para campos monetários
@@ -980,7 +980,7 @@ const EmendaForm = ({
                 name="programa"
                 value={formData.programa || ""} // ✅ CORREÇÃO: Sempre string
                 onChange={handleInputChange}
-style={styles.input}
+                style={styles.input}
                 disabled={readOnly} // ✅ CORREÇÃO: Padrão simples
               />
             </div>
@@ -994,6 +994,7 @@ style={styles.input}
             Valores
           </legend>
 
+          ```python
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Outros Valores</label>
