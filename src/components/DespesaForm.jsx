@@ -490,21 +490,62 @@ const DespesaForm = ({
   };
 
   // ✅ Renderização do componente
+  // ✅ Renderizar header padronizado
+  const renderHeader = () => {
+    const headers = {
+      criar: {
+        title: "📝 Criar Despesa",
+        subtitle: "Preencha os dados para criar uma nova despesa",
+        bgColor: "#d4edda",
+        textColor: "#155724",
+      },
+      editar: {
+        title: "✏️ Editar Despesa", 
+        subtitle: `ID: ${despesa?.id || ""} | Descrição: ${formData.descricao || ""}`,
+        bgColor: "#d4edda",
+        textColor: "#155724",
+      },
+      visualizar: {
+        title: "👁️ Visualizar Despesa",
+        subtitle: `ID: ${despesa?.id || ""} | Descrição: ${formData.descricao || ""}`,
+        bgColor: "#e7f3ff",
+        textColor: "#004085",
+      },
+    };
+
+    const modo = readOnly ? "visualizar" : despesa ? "editar" : "criar";
+    const config = headers[modo];
+
+    return (
+      <div
+        style={{
+          ...styles.header,
+          backgroundColor: config.bgColor,
+          color: config.textColor,
+        }}
+      >
+        <h2 style={styles.headerTitle}>{config.title}</h2>
+        <p style={styles.headerSubtitle}>{config.subtitle}</p>
+        <div style={styles.permissionInfo}>
+          <span style={styles.permissionIcon}>
+            {usuario?.role === "admin" ? "👑" : "👤"}
+          </span>
+          <span style={styles.permissionText}>
+            {usuario?.role === "admin" ? "Administrador" : "Operador"} |
+            {readOnly ? " 👁️ Apenas visualização" : " ✅ Pode editar"}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>
-          {readOnly
-            ? "👁️ Visualizar Despesa"
-            : despesa
-              ? "✏️ Editar Despesa"
-              : "➕ Nova Despesa"}
-        </h2>
+      {renderHeader()}
 
-        {hookError && (
-          <div style={styles.errorMessage}>❌ Erro: {hookError}</div>
-        )}
-      </div>
+      {hookError && (
+        <div style={styles.errorMessage}>❌ Erro: {hookError}</div>
+      )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
         {/* ✅ Widget de saldo da emenda */}
@@ -1061,18 +1102,39 @@ const styles = {
     maxWidth: "1200px",
     margin: "0 auto",
     padding: "20px",
-    backgroundColor: "#f8f9fa",
-    minHeight: "100vh",
+    backgroundColor: "#ffffff",
+    fontFamily: "Arial, sans-serif",
   },
   header: {
+    padding: "20px",
+    borderRadius: "10px",
     marginBottom: "30px",
-    textAlign: "center",
+    border: "2px solid #dee2e6",
   },
-  title: {
-    fontSize: "28px",
+  headerTitle: {
+    margin: "0 0 10px 0",
+    fontSize: "24px",
     fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: "10px",
+  },
+  headerSubtitle: {
+    margin: "0 0 10px 0",
+    fontSize: "14px",
+    opacity: 0.8,
+  },
+  permissionInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    opacity: 0.9,
+    marginTop: "8px",
+  },
+  permissionIcon: {
+    fontSize: "14px",
+  },
+  permissionText: {
+    fontSize: "12px",
   },
   errorMessage: {
     backgroundColor: "#f8d7da",
@@ -1084,23 +1146,26 @@ const styles = {
     fontSize: "12px",
   },
   form: {
-    backgroundColor: "#ffffff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "30px",
   },
   fieldset: {
-    border: "2px solid #e9ecef",
-    borderRadius: "8px",
+    border: "2px solid #154360",
+    borderRadius: "10px",
     padding: "20px",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     marginBottom: "25px",
-    backgroundColor: "#fafbfc",
   },
   legend: {
-    fontSize: "18px",
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
     fontWeight: "bold",
-    color: "#495057",
-    padding: "0 10px",
+    fontSize: "16px",
     display: "flex",
     alignItems: "center",
     gap: "8px",

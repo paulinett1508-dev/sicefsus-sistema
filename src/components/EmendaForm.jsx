@@ -109,9 +109,8 @@ const EmendaForm = ({
     return { modo: "criar", readOnly: false };
   }, [modoVisualizacao, emendaParaEditar]);
 
-  // ✅ CORREÇÃO DEFINITIVA: Substituída lógica complexa por padrão simples
-  // Seguindo o padrão do DespesaForm.jsx que funciona perfeitamente
-  const readOnly = configModo.readOnly;
+  // ✅ CORREÇÃO DEFINITIVA: Campos sempre editáveis exceto em modo visualização
+  const readOnly = modoVisualizacao;
 
   // ✅ CORREÇÃO: Log simplificado de debug
   useEffect(() => {
@@ -287,14 +286,11 @@ const EmendaForm = ({
     };
   }, [formData.valorRecurso, metricas]);
 
-  // ✅ CORREÇÃO RADICAL: Handler PURO sem qualquer verificação complexa
+  // ✅ CORREÇÃO RADICAL: Handler ULTRA SIMPLES para garantir digitação
   const handleInputChange = useCallback(
     (e) => {
-      if (!isMounted()) return;
-
       const { name, value } = e.target;
-      console.log(`🔧 INPUT CHANGE RADICAL: ${name} = "${value}"`); // ✅ Debug
-
+      
       let valorFormatado = value;
 
       // Formatação específica para campos monetários
@@ -315,10 +311,8 @@ const EmendaForm = ({
         ...prev,
         [name]: valorFormatado,
       }));
-
-      console.log(`✅ VALOR ATUALIZADO RADICAL: ${name} = "${valorFormatado}"`); // ✅ Debug
     },
-    [formatarValorMonetario, formatarCNPJ, isMounted], // ✅ RADICAL: Sem verificações
+    [formatarValorMonetario, formatarCNPJ],
   );
 
   // ✅ Funções para ações e serviços
