@@ -191,10 +191,11 @@ const DespesaForm = ({
     }
   }, [hasChanges, readOnly, setFormActive]);
 
-  // ✅ Formatação de valores monetários
+  // ✅ CORREÇÃO: Formatação de valores monetários com digitação contínua
   const formatarValorMonetario = (valor) => {
     if (!valor) return "";
 
+    // Se é um número, formatar direto
     if (typeof valor === "number") {
       return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
@@ -202,18 +203,17 @@ const DespesaForm = ({
       });
     }
 
-    const numeroLimpo = valor.toString().replace(/[^\d,]/g, "");
+    // Remover tudo exceto dígitos
+    const apenasNumeros = valor.toString().replace(/\D/g, "");
+    
+    if (!apenasNumeros) return "";
 
-    if (!numeroLimpo.includes(",")) {
-      const numero = parseInt(numeroLimpo) || 0;
-      return (numero / 100).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    }
+    // Converter para número e dividir por 100 para obter centavos
+    const numero = parseInt(apenasNumeros) || 0;
+    const valorDecimal = numero / 100;
 
-    const valorFloat = parseFloat(numeroLimpo.replace(",", ".")) || 0;
-    return valorFloat.toLocaleString("pt-BR", {
+    // Formatar como moeda brasileira
+    return valorDecimal.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });

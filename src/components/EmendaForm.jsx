@@ -131,10 +131,11 @@ const EmendaForm = ({
   }, []);
   */
 
-  // ✅ Formatação de valores monetários
+  // ✅ CORREÇÃO: Formatação de valores monetários com digitação contínua
   const formatarValorMonetario = useCallback((valor) => {
     if (!valor) return "";
 
+    // Se é um número, formatar direto
     if (typeof valor === "number") {
       return valor.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
@@ -142,18 +143,17 @@ const EmendaForm = ({
       });
     }
 
-    const numeroLimpo = valor.toString().replace(/[^\d,]/g, "");
+    // Remover tudo exceto dígitos
+    const apenasNumeros = valor.toString().replace(/\D/g, "");
+    
+    if (!apenasNumeros) return "";
 
-    if (!numeroLimpo.includes(",")) {
-      const numero = parseInt(numeroLimpo) || 0;
-      return (numero / 100).toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    }
+    // Converter para número e dividir por 100 para obter centavos
+    const numero = parseInt(apenasNumeros) || 0;
+    const valorDecimal = numero / 100;
 
-    const valorFloat = parseFloat(numeroLimpo.replace(",", ".")) || 0;
-    return valorFloat.toLocaleString("pt-BR", {
+    // Formatar como moeda brasileira
+    return valorDecimal.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -286,7 +286,7 @@ const EmendaForm = ({
     };
   }, [formData.valorRecurso, metricas]);
 
-  // ✅ CORREÇÃO RADICAL: Handler ULTRA SIMPLES para garantir digitação
+  // ✅ CORREÇÃO: Handler com formatação automática fluida
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
