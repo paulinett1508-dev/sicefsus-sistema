@@ -1,392 +1,200 @@
-// AdminPanel.jsx - CORREÇÃO CRÍTICA v6.0
-// ✅ CORREÇÃO 1: Prevenção de duplicação de usuários
-// ✅ CORREÇÃO 2: Sistema de mutex para criação
-// ✅ CORREÇÃO 3: Validação prévia de email existente
-
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   collection,
   getDocs,
-  addDoc,
-  deleteDoc,
   doc,
-  setDoc,
   updateDoc,
+  deleteDoc,
+  addDoc,
   query,
-  where,
   orderBy,
+  where,
   Timestamp,
 } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   getAuth,
-  signOut,
-  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
 
-// ✅ MUTEX GLOBAL para prevenir criação simultânea
-let creationMutex = false;
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "1200px",
-    margin: "0 auto",
-  },
-  errorContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px",
-    textAlign: "center",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    margin: "20px",
-  },
-  errorTitle: {
-    color: "#E74C3C",
-    fontSize: "24px",
-    fontWeight: "600",
-    marginBottom: "12px",
-  },
-  errorText: {
-    color: "#666",
-    fontSize: "16px",
-    marginBottom: "20px",
-  },
-};
-
-export default function AdminPanel({ usuario }) {
-  const { showToast } = useToast();
+const AdminPanel = () => {
   const [users, setUsers] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users");
   const [showUserForm, setShowUserForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
-  // ✅ REF para controle de componente montado
-  const isMountedRef = useRef(true);
-
+  // Formulário usuário
   const [formData, setFormData] = useState({
     email: "",
-    senha: "",
     nome: "",
     role: "user",
     status: "ativo",
     departamento: "",
     telefone: "",
-    municipio: "",
-    uf: "",
   });
 
-  const [formErrors, setFormErrors] = useState({});
+  // Filtros logs
+  const [logFilters, setLogFilters] = useState({
+    usuario: "",
+    acao: "",
+    dataInicio: "",
+    dataFim: "",
+  });
+
+  const showToast = useToast();
   const auth = getAuth();
 
-  // ✅ CLEANUP ao desmontar componente
   useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      creationMutex = false; // Reset mutex
-    };
-  }, []);
-
-  useEffect(() => {
-    // ✅ Verificar se Firebase está configurado antes de carregar usuários
-    if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-      console.error("❌ AdminPanel: Firebase não configurado");
-      setLoading(false);
-      return;
-    }
-
-    // ✅ Carregar usuários independente de verificação de admin
-    console.log("✅ AdminPanel: Carregando dados...");
     loadUsers();
-  }, [usuario]);
+    loadLogs();
+  }, []);
 
   const loadUsers = async () => {
     try {
-      setLoading(true);
-      console.log("📋 AdminPanel: Carregando usuários do Firestore...");
-
-      if (!db) {
-        console.error("❌ Database não inicializada");
-        if (isMountedRef.current) {
-          showToast("Erro: Database não configurada", "error");
-          setLoading(false);
-        }
-        return;
-      }
-
-      console.log("🔄 Iniciando consulta ao Firestore...");
-      const usersCollection = collection(db, "users");
-      const snapshot = await getDocs(usersCollection);
-
-      console.log("📊 Snapshot recebido:", {
-        empty: snapshot.empty,
-        size: snapshot.size,
-        docs: snapshot.docs.length
-      });
-
-      if (isMountedRef.current) {
-        const usersList = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            ...data,
-          };
-        });
-
-        console.log(`✅ AdminPanel: ${usersList.length} usuários carregados`);
-        setUsers(usersList);
-      }
-    } catch (error) {
-      console.error("❌ AdminPanel: Erro ao carregar usuários:", error);
-
-      if (isMountedRef.current) {
-        let errorMessage = `Erro ao carregar usuários: ${error.message}`;
-
-        if (error.code === 'permission-denied') {
-          errorMessage = "Sem permissão para acessar dados de usuários";
-        } else if (error.code === 'unavailable') {
-          errorMessage = "Serviço Firebase indisponível. Tente novamente.";
-        }
-
-        showToast(errorMessage, "error");
-      }
-    } finally {
-      if (isMountedRef.current) {
-        console.log("🏁 Finalizando carregamento de usuários");
-        setLoading(false);
-      }
-    }
-  };
-
-  // ✅ VALIDAÇÃO PRÉVIA - Verificar se email já existe
-  const verificarEmailExistente = async (email) => {
-    try {
-      const normalizedEmail = email.toLowerCase().trim();
       const querySnapshot = await getDocs(
-        query(collection(db, "users"), where("email", "==", normalizedEmail)),
+        query(collection(db, "users"), orderBy("dataCriacao", "desc")),
       );
-
-      return !querySnapshot.empty;
+      const usersData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUsers(usersData);
     } catch (error) {
-      console.error("Erro ao verificar email:", error);
-      return false;
+      console.error("Erro ao carregar usuários:", error);
+      showToast("Erro ao carregar usuários", "error");
     }
   };
 
-  // ✅ VALIDAÇÃO COM VERIFICAÇÃO DE EMAIL
-  const validateFormWithEmailCheck = async (data) => {
-    const erros = {};
-
-    // Validação básica
-    if (!data.email || !data.email.includes("@")) {
-      erros.email = "Email válido é obrigatório";
-    } else {
-      // ✅ VERIFICAR SE EMAIL JÁ EXISTE
-      const emailExiste = await verificarEmailExistente(data.email);
-      if (emailExiste && !editingUser) {
-        erros.email = "Este email já está cadastrado no sistema";
-      }
+  const loadLogs = async () => {
+    try {
+      setLoading(true);
+      const querySnapshot = await getDocs(
+        query(collection(db, "logs"), orderBy("timestamp", "desc")),
+      );
+      const logsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setLogs(logsData);
+    } catch (error) {
+      console.error("Erro ao carregar logs:", error);
+      showToast("Erro ao carregar logs", "error");
+    } finally {
+      setLoading(false);
     }
-
-    if (!editingUser && (!data.senha || data.senha.length < 6)) {
-      erros.senha = "Senha deve ter pelo menos 6 caracteres";
-    }
-
-    if (!data.nome || data.nome.trim().length < 2) {
-      erros.nome = "Nome completo é obrigatório";
-    }
-
-    // Validação condicional para operadores
-    if (data.role !== "admin") {
-      if (!data.municipio || data.municipio.trim().length === 0) {
-        erros.municipio = "Município é obrigatório para operadores";
-      }
-      if (!data.uf || data.uf.length !== 2) {
-        erros.uf = "UF é obrigatório para operadores";
-      }
-    }
-
-    setFormErrors(erros);
-    return Object.keys(erros).length === 0;
   };
 
-  // ✅ CRIAÇÃO DE USUÁRIO COM MUTEX E VERIFICAÇÕES
   const handleCreateUser = async (e) => {
     e.preventDefault();
 
-    // ✅ VERIFICAÇÃO 1: Mutex global
-    if (creationMutex) {
-      showToast("⚠️ Criação já em andamento. Aguarde...", "warning");
+    if (!formData.email || !formData.nome) {
+      showToast("Email e nome são obrigatórios", "error");
       return;
     }
-
-    // ✅ VERIFICAÇÃO 2: Estado local
-    if (isCreatingUser) {
-      return;
-    }
-
-    // ✅ VERIFICAÇÃO 3: Componente montado
-    if (!isMountedRef.current) {
-      return;
-    }
-
-    // ✅ ATIVAR MUTEX E ESTADO
-    creationMutex = true;
-    setIsCreatingUser(true);
 
     try {
-      console.log("🔒 MUTEX ATIVADO - Iniciando criação de usuário");
-
-      // ✅ VALIDAÇÃO COMPLETA COM EMAIL
-      const isValid = await validateFormWithEmailCheck(formData);
-      if (!isValid) {
-        showToast("Corrija os erros no formulário", "error");
-        return;
-      }
-
-      // ✅ VERIFICAÇÃO DUPLA DE EMAIL
-      const emailJaExiste = await verificarEmailExistente(formData.email);
-      if (emailJaExiste) {
-        setFormErrors({ email: "Email já cadastrado durante a validação" });
-        showToast("❌ Email já existe no sistema", "error");
-        return;
-      }
-
-      // ✅ CONFIRMAÇÃO DE SENHA ADMIN
-      const currentUser = auth.currentUser;
-      const adminEmail = currentUser?.email;
-      const adminPassword = prompt(
-        "🔐 Para criar usuário, digite sua senha de administrador:",
-      );
-
-      if (!adminPassword) {
-        showToast("Senha de admin necessária", "warning");
-        return;
-      }
-
-      console.log("👤 Criando usuário no Firebase Auth...");
-
-      // ✅ CRIAÇÃO NO AUTH COM TIMEOUT
-      const createPromise = createUserWithEmailAndPassword(
+      // Criar usuário no Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
-        formData.email.toLowerCase().trim(),
-        formData.senha,
+        formData.email,
+        "TempPassword123!", // Senha temporária
       );
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout na criação")), 10000),
-      );
-
-      const userCredential = await Promise.race([
-        createPromise,
-        timeoutPromise,
-      ]);
-      console.log("✅ Usuário criado no Auth:", userCredential.user.uid);
-
-      // ✅ LOGOUT DO USUÁRIO CRIADO
-      await signOut(auth);
-      console.log("🔄 Usuário criado deslogado");
-
-      // ✅ RELOGAR ADMIN
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-      console.log("✅ Admin relogado");
-
-      // ✅ VERIFICAÇÃO FINAL: Se componente ainda montado
-      if (!isMountedRef.current) {
-        console.log("⚠️ Componente desmontado durante criação");
-        return;
-      }
-
-      // ✅ CRIAR DOCUMENTO NO FIRESTORE
-      const documentData = {
+      // Criar documento do usuário no Firestore
+      await addDoc(collection(db, "users"), {
         uid: userCredential.user.uid,
-        email: formData.email.toLowerCase().trim(),
-        nome: formData.nome.trim(),
+        email: formData.email,
+        nome: formData.nome,
         role: formData.role,
         status: formData.status,
-        departamento: formData.departamento || "",
-        telefone: formData.telefone || "",
+        departamento: formData.departamento,
+        telefone: formData.telefone,
         dataCriacao: Timestamp.now(),
-        createdAt: Timestamp.now(),
         ultimoAcesso: null,
-      };
+      });
 
-      // ✅ ADICIONAR LOCALIZAÇÃO APENAS PARA OPERADORES
-      if (formData.role !== "admin") {
-        documentData.municipio = formData.municipio.trim();
-        documentData.uf = formData.uf.toLowerCase().trim();
-      }
+      // Enviar email de reset de senha
+      await sendPasswordResetEmail(auth, formData.email);
 
-      await addDoc(collection(db, "users"), documentData);
-      console.log("✅ Documento criado no Firestore");
+      // Log da ação
+      await addLog("CREATE_USER", `Usuário criado: ${formData.email}`);
 
-      // ✅ LOG DE AUDITORIA
-      const logMessage =
-        formData.role === "admin"
-          ? `Admin criado: ${formData.email}`
-          : `Operador criado: ${formData.email} - ${formData.municipio}/${formData.uf.toUpperCase()}`;
-
-      await addLog("CREATE_USER", logMessage);
-
-      // ✅ FEEDBACK E LIMPEZA
-      if (isMountedRef.current) {
-        showToast("✅ Usuário criado com sucesso!", "success");
-        await loadUsers();
-        resetForm();
-      }
+      showToast(
+        "Usuário criado com sucesso! Email de configuração enviado.",
+        "success",
+      );
+      loadUsers();
+      resetForm();
     } catch (error) {
-      console.error("❌ Erro na criação:", error);
-
-      if (isMountedRef.current) {
-        let errorMessage = "Erro ao criar usuário";
-
-        if (error.code === "auth/email-already-in-use") {
-          errorMessage = "❌ Email já cadastrado no Firebase Auth";
-          setFormErrors({ email: "Email já existe no Firebase" });
-        } else if (error.code === "auth/weak-password") {
-          errorMessage = "❌ Senha muito fraca";
-          setFormErrors({ senha: "Senha deve ser mais forte" });
-        } else if (error.message === "Timeout na criação") {
-          errorMessage = "❌ Timeout - Tente novamente";
-        }
-
-        showToast(errorMessage, "error");
-      }
-
-      // ✅ TENTAR RELOGAR ADMIN EM CASO DE ERRO
-      try {
-        const adminEmail = auth.currentUser?.email || usuario?.email;
-        if (adminEmail) {
-          // Não podemos relogar automaticamente sem senha
-          console.log("⚠️ Admin precisa fazer login novamente");
-        }
-      } catch (reloginError) {
-        console.error("Erro no relogin:", reloginError);
-      }
-    } finally {
-      // ✅ SEMPRE LIMPAR MUTEX E ESTADO
-      creationMutex = false;
-
-      if (isMountedRef.current) {
-        setIsCreatingUser(false);
-      }
-
-      console.log("🔓 MUTEX LIBERADO");
+      console.error("Erro ao criar usuário:", error);
+      showToast("Erro ao criar usuário: " + error.message, "error");
     }
   };
 
-  // ✅ FUNÇÃO AUXILIAR PARA LOGS
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
+
+    if (!editingUser) return;
+
+    try {
+      await updateDoc(doc(db, "users", editingUser.id), {
+        nome: formData.nome,
+        role: formData.role,
+        status: formData.status,
+        departamento: formData.departamento,
+        telefone: formData.telefone,
+        dataModificacao: Timestamp.now(),
+      });
+
+      await addLog("UPDATE_USER", `Usuário atualizado: ${formData.email}`);
+
+      showToast("Usuário atualizado com sucesso!", "success");
+      loadUsers();
+      resetForm();
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      showToast("Erro ao atualizar usuário", "error");
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "users", userToDelete.id));
+      await addLog("DELETE_USER", `Usuário excluído: ${userToDelete.email}`);
+
+      showToast("Usuário excluído com sucesso!", "success");
+      loadUsers();
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+    } catch (error) {
+      console.error("Erro ao excluir usuário:", error);
+      showToast("Erro ao excluir usuário", "error");
+    }
+  };
+
+  const handleResetPassword = async (user) => {
+    try {
+      await sendPasswordResetEmail(auth, user.email);
+      await addLog(
+        "RESET_PASSWORD",
+        `Reset de senha enviado para: ${user.email}`,
+      );
+      showToast("Email de reset de senha enviado!", "success");
+    } catch (error) {
+      console.error("Erro ao enviar reset:", error);
+      showToast("Erro ao enviar email de reset", "error");
+    }
+  };
+
   const addLog = async (action, description) => {
     try {
       await addDoc(collection(db, "logs"), {
@@ -401,378 +209,400 @@ export default function AdminPanel({ usuario }) {
     }
   };
 
-  // ✅ RESET FORM LIMPO
   const resetForm = () => {
     setFormData({
       email: "",
-      senha: "",
       nome: "",
       role: "user",
       status: "ativo",
       departamento: "",
       telefone: "",
-      municipio: "",
-      uf: "",
     });
-    setFormErrors({});
     setShowUserForm(false);
     setEditingUser(null);
   };
 
-  console.log("🎯 AdminPanel: Status de renderização:", {
-    loading,
-    usersCount: users.length,
-    activeTab,
-    usuario: usuario?.email,
-    userRole: usuario?.role
+  const startEdit = (user) => {
+    setEditingUser(user);
+    setFormData({
+      email: user.email,
+      nome: user.nome,
+      role: user.role,
+      status: user.status,
+      departamento: user.departamento || "",
+      telefone: user.telefone || "",
+    });
+    setShowUserForm(true);
+  };
+
+  const confirmDelete = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  // Filtrar logs
+  const filteredLogs = logs.filter((log) => {
+    let matches = true;
+
+    if (logFilters.usuario) {
+      matches =
+        matches &&
+        log.userEmail?.toLowerCase().includes(logFilters.usuario.toLowerCase());
+    }
+
+    if (logFilters.acao) {
+      matches =
+        matches &&
+        log.action?.toLowerCase().includes(logFilters.acao.toLowerCase());
+    }
+
+    if (logFilters.dataInicio) {
+      const inicio = new Date(logFilters.dataInicio);
+      matches = matches && log.timestamp?.toDate() >= inicio;
+    }
+
+    if (logFilters.dataFim) {
+      const fim = new Date(logFilters.dataFim);
+      fim.setHours(23, 59, 59, 999);
+      matches = matches && log.timestamp?.toDate() <= fim;
+    }
+
+    return matches;
   });
 
-  // Verificação de permissões administrativa - depois do carregamento
-  if (!loading && (!usuario || usuario.role !== 'admin')) {
-    return (
-      <div style={styles.errorContainer}>
-        <h3 style={styles.errorTitle}>🚫 Acesso Negado</h3>
-        <p style={styles.errorText}>Você não tem permissão para acessar o painel administrativo.</p>
-        <p style={styles.errorText}>Usuário atual: {usuario?.email || 'Não logado'}</p>
-        <p style={styles.errorText}>Role: {usuario?.role || 'Não definido'}</p>
-      </div>
-    );
-  }
+  // Estatísticas
+  const stats = {
+    totalUsers: users.length,
+    activeUsers: users.filter((u) => u.status === "ativo").length,
+    adminUsers: users.filter((u) => u.role === "admin").length,
+    recentLogins: users.filter((u) => {
+      if (!u.ultimoAcesso) return false;
+      const dayAgo = new Date();
+      dayAgo.setDate(dayAgo.getDate() - 1);
+      return u.ultimoAcesso.toDate() > dayAgo;
+    }).length,
+  };
 
   if (loading) {
     return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Carregando usuários...</p>
-        <div style={{ fontSize: '12px', marginTop: '15px', color: '#666', textAlign: 'left' }}>
-          <div><strong>Debug Info:</strong></div>
-          <div>Firebase: {import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Configurado' : '❌ Não configurado'}</div>
-          <div>Database: {db ? '✅ Inicializado' : '❌ Não inicializado'}</div>
-          <div>Auth: {auth ? '✅ Inicializado' : '❌ Não inicializado'}</div>
-          <div>Usuário: {auth?.currentUser?.email || '❌ Não logado'}</div>
-          <div>Usuário prop: {usuario?.email || '❌ Não fornecido'}</div>
-        </div>
-        <button 
-          onClick={loadUsers} 
-          style={{
-            marginTop: '15px',
-            padding: '8px 16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          🔄 Tentar Novamente
-        </button>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Carregando painel administrativo...</p>
       </div>
     );
   }
 
   return (
     <div className="admin-panel">
-      <div className="admin-header card">
+      <div className="admin-header">
+        <h1>🔐 Painel Administrativo</h1>
         <div className="stats-row">
           <div className="stat-item">
-            <span className="stat-value">{users.length}</span>
+            <span className="stat-value">{stats.totalUsers}</span>
             <span className="stat-label">Total Usuários</span>
           </div>
           <div className="stat-item">
-            <span className="stat-value">
-              {users.filter((u) => u.status === "ativo").length}
-            </span>
+            <span className="stat-value">{stats.activeUsers}</span>
             <span className="stat-label">Ativos</span>
           </div>
           <div className="stat-item">
-            <span className="stat-value">
-              {users.filter((u) => u.role === "admin").length}
-            </span>
+            <span className="stat-value">{stats.adminUsers}</span>
             <span className="stat-label">Admins</span>
           </div>
-        </div>
-      </div>
-
-      <div className="users-section">
-        <div className="section-header">
-          <h2>👥 Gestão de Usuários</h2>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowUserForm(true)}
-            disabled={isCreatingUser || creationMutex}
-          >
-            {isCreatingUser || creationMutex
-              ? "🔒 Criando usuário..."
-              : "➕ Novo Usuário"}
-          </button>
-        </div>
-
-        {showUserForm && (
-          <div className="user-form-container card">
-            <div className="form-header">
-              <h3>{editingUser ? "Editar Usuário" : "Novo Usuário"}</h3>
-              <button className="btn-close" onClick={resetForm}>
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateUser}>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Email *</label>
-                  <input
-                    type="email"
-                    className={`form-control ${formErrors.email ? "error" : ""}`}
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        email: e.target.value,
-                      }))
-                    }
-                    disabled={editingUser || isCreatingUser}
-                    required
-                  />
-                  {formErrors.email && (
-                    <span className="error-text">{formErrors.email}</span>
-                  )}
-                </div>
-
-                {!editingUser && (
-                  <div className="form-group">
-                    <label>Senha *</label>
-                    <input
-                      type="password"
-                      className={`form-control ${formErrors.senha ? "error" : ""}`}
-                      value={formData.senha}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          senha: e.target.value,
-                        }))
-                      }
-                      disabled={isCreatingUser}
-                      required
-                      minLength={6}
-                    />
-                    {formErrors.senha && (
-                      <span className="error-text">{formErrors.senha}</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="form-group">
-                  <label>Nome Completo *</label>
-                  <input
-                    type="text"
-                    className={`form-control ${formErrors.nome ? "error" : ""}`}
-                    value={formData.nome}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        nome: e.target.value,
-                      }))
-                    }
-                    disabled={isCreatingUser}
-                    required
-                  />
-                  {formErrors.nome && (
-                    <span className="error-text">{formErrors.nome}</span>
-                  )}
-                </div>
-
-                <div className="form-group">
-                  <label>Perfil</label>
-                  <select
-                    className="form-control"
-                    value={formData.role}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        role: e.target.value,
-                        // Limpar campos se mudou para admin
-                        municipio:
-                          e.target.value === "admin" ? "" : prev.municipio,
-                        uf: e.target.value === "admin" ? "" : prev.uf,
-                      }))
-                    }
-                    disabled={isCreatingUser}
-                  >
-                    <option value="user">Operador</option>
-                    <option value="admin">Administrador</option>
-                  </select>
-                </div>
-
-                {/* Campos condicionais para operadores */}
-                {formData.role !== "admin" && (
-                  <>
-                    <div className="form-group">
-                      <label>Município *</label>
-                      <input
-                        type="text"
-                        className={`form-control ${formErrors.municipio ? "error" : ""}`}
-                        value={formData.municipio}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            municipio: e.target.value,
-                          }))
-                        }
-                        disabled={isCreatingUser}
-                        required
-                      />
-                      {formErrors.municipio && (
-                        <span className="error-text">
-                          {formErrors.municipio}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="form-group">
-                      <label>UF *</label>
-                      <select
-                        className={`form-control ${formErrors.uf ? "error" : ""}`}
-                        value={formData.uf}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            uf: e.target.value,
-                          }))
-                        }
-                        disabled={isCreatingUser}
-                        required
-                      >
-                        <option value="">Selecione...</option>
-                        <option value="ac">AC - Acre</option>
-                        <option value="al">AL - Alagoas</option>
-                        <option value="ap">AP - Amapá</option>
-                        <option value="am">AM - Amazonas</option>
-                        <option value="ba">BA - Bahia</option>
-                        <option value="ce">CE - Ceará</option>
-                        <option value="df">DF - Distrito Federal</option>
-                        <option value="es">ES - Espírito Santo</option>
-                        <option value="go">GO - Goiás</option>
-                        <option value="ma">MA - Maranhão</option>
-                        <option value="mt">MT - Mato Grosso</option>
-                        <option value="ms">MS - Mato Grosso do Sul</option>
-                        <option value="mg">MG - Minas Gerais</option>
-                        <option value="pa">PA - Pará</option>
-                        <option value="pb">PB - Paraíba</option>
-                        <option value="pr">PR - Paraná</option>
-                        <option value="pe">PE - Pernambuco</option>
-                        <option value="pi">PI - Piauí</option>
-                        <option value="rj">RJ - Rio de Janeiro</option>
-                        <option value="rn">RN - Rio Grande do Norte</option>
-                        <option value="rs">RS - Rio Grande do Sul</option>
-                        <option value="ro">RO - Rondônia</option>
-                        <option value="rr">RR - Roraima</option>
-                        <option value="sc">SC - Santa Catarina</option>
-                        <option value="sp">SP - São Paulo</option>
-                        <option value="se">SE - Sergipe</option>
-                        <option value="to">TO - Tocantins</option>
-                      </select>
-                      {formErrors.uf && (
-                        <span className="error-text">{formErrors.uf}</span>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Alerta de status */}
-              {(isCreatingUser || creationMutex) && (
-                <div className="creation-status">
-                  <div className="status-icon">🔒</div>
-                  <div className="status-text">
-                    <strong>Criação em andamento...</strong>
-                    <br />
-                    <small>
-                      Não feche esta janela. O processo pode levar alguns
-                      segundos.
-                    </small>
-                  </div>
-                </div>
-              )}
-
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={resetForm}
-                  disabled={isCreatingUser || creationMutex}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={
-                    isCreatingUser ||
-                    creationMutex ||
-                    Object.keys(formErrors).length > 0
-                  }
-                >
-                  {isCreatingUser || creationMutex
-                    ? "🔒 Criando..."
-                    : editingUser
-                      ? "Atualizar"
-                      : "Criar Usuário"}
-                </button>
-              </div>
-            </form>
+          <div className="stat-item">
+            <span className="stat-value">{stats.recentLogins}</span>
+            <span className="stat-label">Login 24h</span>
           </div>
-        )}
-
-        {/* Lista de usuários existente... */}
-        <div className="users-table card">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Perfil</th>
-                <th>Status</th>
-                <th>Localização</th>
-                <th>Criado em</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td>{user.nome || "Nome não informado"}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`badge ${user.role}`}>
-                      {user.role === "admin" ? "👑 Admin" : "👤 Operador"}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`status ${user.status}`}>
-                      {user.status === "ativo" ? "✅ Ativo" : "❌ Inativo"}
-                    </span>
-                  </td>
-                  <td>
-                    {user.role === "admin" ? (
-                      <span className="admin-access">👑 Acesso Total</span>
-                    ) : user.municipio && user.uf ? (
-                      <span>
-                        {user.municipio}/{user.uf.toUpperCase()}
-                      </span>
-                    ) : (
-                      <span className="text-error">❌ Não cadastrado</span>
-                    )}
-                  </td>
-                  <td>
-                    {user.createdAt?.toDate()?.toLocaleDateString("pt-BR") ||
-                      user.dataCriacao?.toDate()?.toLocaleDateString("pt-BR") ||
-                      "Não informado"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
+
+      <div className="admin-tabs">
+        <button
+          className={`tab ${activeTab === "users" ? "active" : ""}`}
+          onClick={() => setActiveTab("users")}
+        >
+          👥 Usuários
+        </button>
+        <button
+          className={`tab ${activeTab === "logs" ? "active" : ""}`}
+          onClick={() => setActiveTab("logs")}
+        >
+          📋 Logs de Auditoria
+        </button>
+      </div>
+
+      {activeTab === "users" && (
+        <div className="users-section">
+          <div className="section-header">
+            <h2>Gestão de Usuários</h2>
+            <button
+              className="btn-primary"
+              onClick={() => setShowUserForm(true)}
+            >
+              ➕ Novo Usuário
+            </button>
+          </div>
+
+          {showUserForm && (
+            <div className="user-form-container">
+              <div className="form-header">
+                <h3>{editingUser ? "Editar Usuário" : "Novo Usuário"}</h3>
+                <button className="btn-close" onClick={resetForm}>
+                  ✕
+                </button>
+              </div>
+
+              <form
+                onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
+              >
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Email *</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      disabled={editingUser}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Nome Completo *</label>
+                    <input
+                      type="text"
+                      value={formData.nome}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nome: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Perfil</label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                      }
+                    >
+                      <option value="user">Usuário</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData({ ...formData, status: e.target.value })
+                      }
+                    >
+                      <option value="ativo">Ativo</option>
+                      <option value="inativo">Inativo</option>
+                      <option value="bloqueado">Bloqueado</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Departamento</label>
+                    <input
+                      type="text"
+                      value={formData.departamento}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          departamento: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Telefone</label>
+                    <input
+                      type="tel"
+                      value={formData.telefone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, telefone: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={resetForm}
+                  >
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    {editingUser ? "Atualizar" : "Criar"} Usuário
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="users-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Email</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                  <th>Departamento</th>
+                  <th>Último Acesso</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.nome}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`badge ${user.role}`}>
+                        {user.role === "admin" ? "👑 Admin" : "👤 Usuário"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`status ${user.status}`}>
+                        {user.status === "ativo"
+                          ? "✅ Ativo"
+                          : user.status === "inativo"
+                            ? "⏸️ Inativo"
+                            : "🚫 Bloqueado"}
+                      </span>
+                    </td>
+                    <td>{user.departamento || "-"}</td>
+                    <td>
+                      {user.ultimoAcesso
+                        ? user.ultimoAcesso.toDate().toLocaleString("pt-BR")
+                        : "Nunca"}
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="btn-edit"
+                          onClick={() => startEdit(user)}
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          className="btn-reset"
+                          onClick={() => handleResetPassword(user)}
+                          title="Reset Senha"
+                        >
+                          🔄
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => confirmDelete(user)}
+                          title="Excluir"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "logs" && (
+        <div className="logs-section">
+          <h2>📋 Logs de Auditoria</h2>
+
+          <div className="logs-filters">
+            <div className="filter-grid">
+              <input
+                type="text"
+                placeholder="Filtrar por usuário..."
+                value={logFilters.usuario}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, usuario: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="Filtrar por ação..."
+                value={logFilters.acao}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, acao: e.target.value })
+                }
+              />
+              <input
+                type="date"
+                value={logFilters.dataInicio}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, dataInicio: e.target.value })
+                }
+              />
+              <input
+                type="date"
+                value={logFilters.dataFim}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, dataFim: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <div className="logs-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Usuário</th>
+                  <th>Ação</th>
+                  <th>Descrição</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLogs.map((log) => (
+                  <tr key={log.id}>
+                    <td>{log.timestamp?.toDate().toLocaleString("pt-BR")}</td>
+                    <td>{log.userEmail}</td>
+                    <td>
+                      <span
+                        className={`action-badge ${log.action.toLowerCase()}`}
+                      >
+                        {log.action.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td>{log.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onConfirm={handleDeleteUser}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setUserToDelete(null);
+        }}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o usuário "${userToDelete?.nome}"? Esta ação não pode ser desfeita.`}
+        confirmText="Excluir"
+        confirmButtonClass="btn-danger"
+      />
 
       <style>{`
         .admin-panel {
@@ -804,7 +634,7 @@ export default function AdminPanel({ usuario }) {
           100% { transform: rotate(360deg); }
         }
 
-        .card {
+        .admin-header {
           background: white;
           border-radius: 12px;
           padding: 25px;
@@ -812,8 +642,10 @@ export default function AdminPanel({ usuario }) {
           margin-bottom: 20px;
         }
 
-        .admin-header {
-          margin-bottom: 20px;
+        .admin-header h1 {
+          margin: 0 0 20px 0;
+          color: #2c3e50;
+          font-size: 1.8em;
         }
 
         .stats-row {
@@ -823,26 +655,55 @@ export default function AdminPanel({ usuario }) {
         }
 
         .stat-item {
-          background: linear-gradient(135deg, #4A90E2, #357ABD);
+          background: #f8f9fa;
           padding: 15px;
           border-radius: 8px;
           text-align: center;
-          color: white;
+          border-left: 4px solid #007bff;
         }
 
         .stat-value {
           display: block;
           font-size: 1.8em;
           font-weight: 700;
+          color: #2c3e50;
         }
 
         .stat-label {
           font-size: 0.9em;
-          opacity: 0.9;
+          color: #6c757d;
           margin-top: 5px;
         }
 
-        .users-section {
+        .admin-tabs {
+          display: flex;
+          background: white;
+          border-radius: 8px;
+          margin-bottom: 20px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+          flex: 1;
+          padding: 15px 20px;
+          border: none;
+          background: #f8f9fa;
+          cursor: pointer;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .tab.active {
+          background: #007bff;
+          color: white;
+        }
+
+        .tab:hover:not(.active) {
+          background: #e9ecef;
+        }
+
+        .users-section, .logs-section {
           background: white;
           border-radius: 12px;
           padding: 25px;
@@ -861,39 +722,42 @@ export default function AdminPanel({ usuario }) {
           color: #2c3e50;
         }
 
-        .btn {
+        .btn-primary {
+          background: #007bff;
+          color: white;
           border: none;
           padding: 10px 20px;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 500;
-          transition: all 0.2s;
+          transition: background-color 0.2s;
         }
 
-        .btn-primary {
-          background: #007bff;
-          color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
+        .btn-primary:hover {
           background: #0056b3;
-        }
-
-        .btn-primary:disabled {
-          background: #6c757d;
-          cursor: not-allowed;
-          opacity: 0.6;
         }
 
         .btn-secondary {
           background: #6c757d;
           color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+          margin-right: 10px;
+        }
+
+        .btn-secondary:hover {
+          background: #545b62;
         }
 
         .user-form-container {
           background: #f8f9fa;
-          border: 1px solid #dee2e6;
+          border-radius: 8px;
+          padding: 20px;
           margin-bottom: 25px;
+          border: 1px solid #dee2e6;
         }
 
         .form-header {
@@ -901,8 +765,6 @@ export default function AdminPanel({ usuario }) {
           justify-content: space-between;
           align-items: center;
           margin-bottom: 20px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #dee2e6;
         }
 
         .form-header h3 {
@@ -916,7 +778,10 @@ export default function AdminPanel({ usuario }) {
           font-size: 1.5em;
           cursor: pointer;
           color: #6c757d;
-          padding: 5px;
+        }
+
+        .btn-close:hover {
+          color: #dc3545;
         }
 
         .form-grid {
@@ -929,113 +794,66 @@ export default function AdminPanel({ usuario }) {
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 5px;
         }
 
         .form-group label {
           font-weight: 500;
-          color: #495057;
+          margin-bottom: 5px;
+          color: #2c3e50;
         }
 
-        .form-control {
+        .form-group input,
+        .form-group select {
           padding: 10px;
           border: 1px solid #ced4da;
           border-radius: 4px;
           font-size: 14px;
         }
 
-        .form-control:focus {
+        .form-group input:focus,
+        .form-group select:focus {
           outline: none;
           border-color: #007bff;
           box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-        }
-
-        .form-control.error {
-          border-color: #dc3545;
-          background-color: rgba(220, 53, 69, 0.05);
-        }
-
-        .form-control:disabled {
-          background-color: #e9ecef;
-          opacity: 0.6;
-        }
-
-        .error-text {
-          color: #dc3545;
-          font-size: 0.8em;
-          font-weight: 500;
-        }
-
-        /* ✅ NOVO: Status de criação */
-        .creation-status {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: #fff3cd;
-          border: 1px solid #ffeaa7;
-          border-radius: 8px;
-          margin: 20px 0;
-        }
-
-        .status-icon {
-          font-size: 24px;
-          animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-
-        .status-text {
-          flex: 1;
-          color: #856404;
-        }
-
-        .status-text strong {
-          font-size: 14px;
-        }
-
-        .status-text small {
-          font-size: 12px;
-          opacity: 0.8;
         }
 
         .form-actions {
           display: flex;
           justify-content: flex-end;
           gap: 10px;
-          padding-top: 20px;
-          border-top: 1px solid #dee2e6;
         }
 
-        .users-table {
+        .users-table, .logs-table {
           overflow-x: auto;
         }
 
-        .users-table table {
+        .users-table table,
+        .logs-table table {
           width: 100%;
           border-collapse: collapse;
+          margin-top: 20px;
         }
 
         .users-table th,
-        .users-table td {
+        .users-table td,
+        .logs-table th,
+        .logs-table td {
           padding: 12px;
           text-align: left;
           border-bottom: 1px solid #dee2e6;
         }
 
-        .users-table th {
+        .users-table th,
+        .logs-table th {
           background: #f8f9fa;
           font-weight: 600;
-          color: #495057;
+          color: #2c3e50;
         }
 
         .badge {
           padding: 4px 8px;
           border-radius: 4px;
-          font-size: 0.8em;
+          font-size: 0.85em;
           font-weight: 500;
         }
 
@@ -1052,7 +870,7 @@ export default function AdminPanel({ usuario }) {
         .status {
           padding: 4px 8px;
           border-radius: 4px;
-          font-size: 0.8em;
+          font-size: 0.85em;
           font-weight: 500;
         }
 
@@ -1062,19 +880,89 @@ export default function AdminPanel({ usuario }) {
         }
 
         .status.inativo {
+          background: #fff3cd;
+          color: #856404;
+        }
+
+        .status.bloqueado {
           background: #f8d7da;
           color: #721c24;
         }
 
-        .admin-access {
-          color: #856404;
-          font-weight: 500;
-          font-size: 0.9em;
+        .action-buttons {
+          display: flex;
+          gap: 5px;
         }
 
-        .text-error {
-          color: #dc3545;
+        .btn-edit,
+        .btn-reset,
+        .btn-delete {
+          background: none;
+          border: none;
+          font-size: 1.2em;
+          cursor: pointer;
+          padding: 5px;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+        }
+
+        .btn-edit:hover {
+          background: #007bff;
+          color: white;
+        }
+
+        .btn-reset:hover {
+          background: #17a2b8;
+          color: white;
+        }
+
+        .btn-delete:hover {
+          background: #dc3545;
+          color: white;
+        }
+
+        .logs-filters {
+          margin-bottom: 20px;
+        }
+
+        .filter-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 15px;
+        }
+
+        .filter-grid input {
+          padding: 10px;
+          border: 1px solid #ced4da;
+          border-radius: 4px;
+        }
+
+        .action-badge {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.85em;
           font-weight: 500;
+          text-transform: uppercase;
+        }
+
+        .action-badge.create_user {
+          background: #d4edda;
+          color: #155724;
+        }
+
+        .action-badge.update_user {
+          background: #fff3cd;
+          color: #856404;
+        }
+
+        .action-badge.delete_user {
+          background: #f8d7da;
+          color: #721c24;
+        }
+
+        .action-badge.reset_password {
+          background: #cce5ff;
+          color: #004085;
         }
 
         @media (max-width: 768px) {
@@ -1089,8 +977,23 @@ export default function AdminPanel({ usuario }) {
           .stats-row {
             grid-template-columns: repeat(2, 1fr);
           }
+
+          .filter-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .users-table,
+          .logs-table {
+            font-size: 0.9em;
+          }
+
+          .action-buttons {
+            flex-direction: column;
+          }
         }
       `}</style>
     </div>
   );
-}
+};
+
+export default AdminPanel;
