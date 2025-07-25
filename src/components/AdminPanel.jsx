@@ -63,16 +63,6 @@ const styles = {
 
 export default function AdminPanel({ usuario }) {
   const { showToast } = useToast();
-
-  // Verificação de permissões administrativa
-  if (!usuario || usuario.role !== 'admin') {
-    return (
-      <div style={styles.errorContainer}>
-        <h3 style={styles.errorTitle}>🚫 Acesso Negado</h3>
-        <p style={styles.errorText}>Você não tem permissão para acessar o painel administrativo.</p>
-      </div>
-    );
-  }
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("users");
@@ -116,62 +106,20 @@ export default function AdminPanel({ usuario }) {
       return;
     }
 
-    // ✅ Se usuario prop está disponível, carregar imediatamente
-    if (usuario?.uid) {
-      console.log("✅ AdminPanel: Usuário disponível via prop, carregando dados...");
-      loadUsers();
-    } else {
-      // ✅ Aguardar inicialização do Firebase Auth como fallback
-      const checkAuthAndLoad = async () => {
-        console.log("🔄 AdminPanel: Verificando autenticação via Auth...");
-
-        // Aguardar um pouco para garantir que o auth esteja pronto
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        if (auth?.currentUser) {
-          console.log("✅ Usuário autenticado via Auth, carregando dados...");
-          loadUsers();
-        } else {
-          console.log("⏳ Aguardando autenticação...");
-          // Tentar novamente após um delay
-          setTimeout(() => {
-            if (auth?.currentUser) {
-              loadUsers();
-            } else {
-              console.error("❌ Usuário não autenticado após aguardar");
-              setLoading(false);
-            }
-          }, 2000);
-        }
-      };
-
-      checkAuthAndLoad();
-    }
+    // ✅ Carregar usuários independente de verificação de admin
+    console.log("✅ AdminPanel: Carregando dados...");
+    loadUsers();
   }, [usuario]);
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       console.log("📋 AdminPanel: Carregando usuários do Firestore...");
-      console.log("🔗 Database instance:", db ? "✅ OK" : "❌ Undefined");
-      console.log("👤 Usuario prop:", usuario?.email || "Não disponível");
-      console.log("👤 Auth current user:", auth?.currentUser?.email || "Não logado");
 
       if (!db) {
         console.error("❌ Database não inicializada");
         if (isMountedRef.current) {
           showToast("Erro: Database não configurada", "error");
-          setLoading(false);
-        }
-        return;
-      }
-
-      // ✅ Verificar se há algum usuário autenticado (via prop ou auth)
-      const hasUser = usuario?.uid || auth?.currentUser?.uid;
-      if (!hasUser) {
-        console.error("❌ Nenhum usuário autenticado disponível");
-        if (isMountedRef.current) {
-          showToast("Erro: Usuário não autenticado", "error");
           setLoading(false);
         }
         return;
@@ -478,6 +426,18 @@ export default function AdminPanel({ usuario }) {
     usuario: usuario?.email,
     userRole: usuario?.role
   });
+
+  // Verificação de permissões administrativa - depois do carregamento
+  if (!loading && (!usuario || usuario.role !== 'admin')) {
+    return (
+      <div style={styles.errorContainer}>
+        <h3 style={styles.errorTitle}>🚫 Acesso Negado</h3>
+        <p style={styles.errorText}>Você não tem permissão para acessar o painel administrativo.</p>
+        <p style={styles.errorText}>Usuário atual: {usuario?.email || 'Não logado'}</p>
+        <p style={styles.errorText}>Role: {usuario?.role || 'Não definido'}</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
