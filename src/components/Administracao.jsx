@@ -1,5 +1,5 @@
 // Administracao.jsx - Versão Final v3.1 - IMPORTS CORRIGIDOS
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 // As informações do usuário (role, email, município, uf) já são fornecidas via prop `usuario`.
 // Não precisamos mais importar métodos de autenticação ou Firestore para verificar permissões aqui.
 import AdminPanel from "./AdminPanel";
@@ -34,7 +34,7 @@ const Administracao = ({ usuario }) => {
     });
     console.log("📋 ADMIN_EMAILS configurados:", ADMIN_EMAILS);
     console.log("🔧 Firebase API Key presente:", !!import.meta.env.VITE_FIREBASE_API_KEY);
-    
+
     setLoading(true);
     setError(null);
 
@@ -62,7 +62,7 @@ const Administracao = ({ usuario }) => {
     const isUserAdmin =
       usuario.role === "admin" ||
       ADMIN_EMAILS.includes((usuario.email || "").toLowerCase());
-    
+
     console.log("🔐 Verificação de permissões:", {
       userRole: usuario.role,
       userEmail: usuario.email,
@@ -70,7 +70,7 @@ const Administracao = ({ usuario }) => {
       isEmailAdmin: ADMIN_EMAILS.includes((usuario.email || "").toLowerCase()),
       finalIsAdmin: isUserAdmin
     });
-    
+
     setIsAdmin(isUserAdmin);
     console.log("👑 Resultado final - É admin?", isUserAdmin);
     setLoading(false);
