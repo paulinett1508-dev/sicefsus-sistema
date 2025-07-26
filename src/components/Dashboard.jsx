@@ -86,37 +86,48 @@ export default function Dashboard({ usuario }) {
     }
   }, [emendas, despesas, loading, obterEstatisticasGerais]);
 
-  // ✅ FUNÇÃO FALLBACK PARA CALCULAR ESTATÍSTICAS LOCALMENTE
+  // Dashboard.jsx - CORREÇÃO DO SALDO DISPONÍVEL (R$ NaN)
+  // Substituir a função calcularEstatisticasLocais (linhas ~110-220)
+
   const calcularEstatisticasLocais = () => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
-    const valorTotalEmendas = emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
-      0,
-    );
-    const valorTotalDespesas = despesas.reduce(
-      (sum, d) => sum + (d.valor || 0),
-      0,
-    );
-    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
+    // ✅ CORREÇÃO CRÍTICA: Garantir valores numéricos válidos
+    const valorTotalEmendas = emendas.reduce((sum, e) => {
+      const valor = parseFloat(e.valorTotal || e.valorRecurso || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+
+    const valorTotalDespesas = despesas.reduce((sum, d) => {
+      const valor = parseFloat(d.valor || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+
+    // ✅ CORREÇÃO: Cálculo seguro do saldo
+    const saldoDisponivel = Math.max(0, valorTotalEmendas - valorTotalDespesas);
+
+    // ✅ CORREÇÃO: Verificação de divisão por zero
     const percentualExecutado =
       valorTotalEmendas > 0
-        ? (valorTotalDespesas / valorTotalEmendas) * 100
+        ? Math.min(100, (valorTotalDespesas / valorTotalEmendas) * 100)
         : 0;
 
     // Emendas por status
     const emendasPorStatus = emendas.reduce((acc, emenda) => {
       const status = emenda.status || "ativa";
       const existing = acc.find((item) => item.name === status);
+      const valor = parseFloat(emenda.valorTotal || emenda.valorRecurso || 0);
+      const valorSeguro = isNaN(valor) ? 0 : valor;
+
       if (existing) {
         existing.value += 1;
-        existing.valor += emenda.valorTotal || emenda.valorRecurso || 0;
+        existing.valor += valorSeguro;
       } else {
         acc.push({
           name: status,
           value: 1,
-          valor: emenda.valorTotal || emenda.valorRecurso || 0,
+          valor: valorSeguro,
         });
       }
       return acc;
@@ -126,14 +137,17 @@ export default function Dashboard({ usuario }) {
     const despesasPorStatus = despesas.reduce((acc, despesa) => {
       const status = despesa.status || "pendente";
       const existing = acc.find((item) => item.name === status);
+      const valor = parseFloat(despesa.valor || 0);
+      const valorSeguro = isNaN(valor) ? 0 : valor;
+
       if (existing) {
         existing.value += 1;
-        existing.valor += despesa.valor || 0;
+        existing.valor += valorSeguro;
       } else {
         acc.push({
           name: status,
           value: 1,
-          valor: despesa.valor || 0,
+          valor: valorSeguro,
         });
       }
       return acc;
@@ -168,15 +182,23 @@ export default function Dashboard({ usuario }) {
         );
       });
 
+      // ✅ CORREÇÃO: Valores seguros para evolução mensal
+      const valorEmendasMes = emendasMes.reduce((sum, e) => {
+        const valor = parseFloat(e.valorTotal || e.valorRecurso || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
+
+      const valorDespesasMes = despesasMes.reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
+
       evolucaoMensal.push({
         mes: mesNome,
         emendas: emendasMes.length,
         despesas: despesasMes.length,
-        valorEmendas: emendasMes.reduce(
-          (sum, e) => sum + (e.valorTotal || e.valorRecurso || 0),
-          0,
-        ),
-        valorDespesas: despesasMes.reduce((sum, d) => sum + (d.valor || 0), 0),
+        valorEmendas: valorEmendasMes,
+        valorDespesas: valorDespesasMes,
       });
     }
 
@@ -184,17 +206,29 @@ export default function Dashboard({ usuario }) {
     const municipiosMap = {};
     emendas.forEach((emenda) => {
       const municipio = emenda.municipio || "Não informado";
+      const valor = parseFloat(emenda.valorTotal || emenda.valorRecurso || 0);
+      const valorSeguro = isNaN(valor) ? 0 : valor;
+
       if (!municipiosMap[municipio]) {
         municipiosMap[municipio] = { nome: municipio, emendas: 0, valor: 0 };
       }
       municipiosMap[municipio].emendas += 1;
-      municipiosMap[municipio].valor +=
-        emenda.valorTotal || emenda.valorRecurso || 0;
+      municipiosMap[municipio].valor += valorSeguro;
     });
 
     const topMunicipios = Object.values(municipiosMap)
       .sort((a, b) => b.valor - a.valor)
       .slice(0, 5);
+
+    // ✅ LOG PARA VERIFICAÇÃO
+    console.log("📊 Estatísticas calculadas com segurança:", {
+      totalEmendas,
+      totalDespesas,
+      valorTotalEmendas,
+      valorTotalDespesas,
+      saldoDisponivel,
+      percentualExecutado: percentualExecutado.toFixed(2) + "%",
+    });
 
     return {
       totalEmendas,

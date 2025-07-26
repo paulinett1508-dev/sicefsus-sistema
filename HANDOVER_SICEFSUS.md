@@ -1,5 +1,10 @@
-
 # 📋 HANDOVER - Sistema SICEFSUS
+
+**📅 Gerado automaticamente em:** 26/07/2025, 21:14:24  
+**🔧 Por:** Script generateHandover.cjs  
+**📊 Status:** Sistema em Produção Ativa
+
+---
 
 ## 🎯 O QUE É O SISTEMA
 
@@ -64,9 +69,12 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 - **Firebase Storage** - Armazenamento
 
 ### Bibliotecas Auxiliares
-- **Recharts** - Gráficos e visualizações
-- **React Hooks** - Gerenciamento de estado
-- **CSS-in-JS** - Estilização inline
+- **@babel/parser**: ^7.28.0
+- **@babel/traverse**: ^7.28.0
+- **firebase**: ^11.9.1
+- **firebase-admin**: ^13.4.0
+- **react-router-dom**: ^7.6.3
+- **recharts**: ^3.0.2
 
 ### Ambiente de Desenvolvimento
 - **Replit** - Plataforma de desenvolvimento
@@ -78,27 +86,126 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 ## 📁 ESTRUTURA DE PASTAS
 
 ```
-SICEFSUS/
-├── public/                     # Arquivos estáticos
+├── HANDOVER_SICEFSUS.md
+├── README.md
+├── attached_assets
+│   ├── Pasted--Download-the-React-DevTools-for-a-better-development-experience-https-reactjs-org-link-react-dev-1753451522775_1753451522776.txt
+│   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-AdminPanel-jsx-Unexpected-token-11-1753400909790_1753400909791.txt
+│   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753451625790_1753451625791.txt
+│   ├── image_1753402535914.png
+│   ├── image_1753448958060.png
+│   ├── image_1753451051428.png
+│   ├── image_1753451754238.png
+│   └── image_1753452147636.png
+├── index.html
+├── package-lock.json
+├── package.json
+├── public
 │   └── favicon.png
-├── src/                        # Código fonte principal
-│   ├── components/             # Componentes React
-│   ├── config/                 # Configurações
-│   ├── context/                # Context API
-│   ├── firebase/               # Configuração Firebase
-│   ├── hooks/                  # Custom hooks
-│   ├── images/                 # Imagens e assets
-│   ├── styles/                 # Estilos CSS
-│   ├── utils/                  # Utilitários
-│   ├── App.jsx                 # Componente principal
-│   └── index.jsx              # Entry point
-├── attached_assets/           # Assets anexados
-├── .config/                   # Configurações do sistema
-├── package.json              # Dependências npm
-├── vite.config.js            # Configuração Vite
-├── index.html               # HTML principal
-└── README.md               # Documentação básica
+├── restore.cjs
+├── scripts
+│   ├── generateHandover.cjs
+│   └── package.json
+├── src
+│   ├── App.css
+│   ├── App.jsx
+│   ├── components
+│   │   ├── AdminPanel.jsx
+│   │   ├── Administracao.jsx
+│   │   ├── ConfirmationModal.jsx
+│   │   ├── ContextPanel.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── DataManager.jsx
+│   │   ├── DespesaForm.jsx
+│   │   ├── Despesas.jsx
+│   │   ├── DespesasFilters.jsx
+│   │   ├── DespesasList.jsx
+│   │   ├── DespesasTable.jsx
+│   │   ├── EmendaForm.jsx
+│   │   ├── Emendas.jsx
+│   │   ├── EmendasFilters.jsx
+│   │   ├── EmendasList.jsx
+│   │   ├── EmendasTable.jsx
+│   │   ├── ErrorBoundary.jsx
+│   │   ├── FirebaseError.jsx
+│   │   ├── FluxoEmenda.jsx
+│   │   ├── GlobalSearch.jsx
+│   │   ├── Home.jsx
+│   │   ├── Login.jsx
+│   │   ├── PaginatedTable.jsx
+│   │   ├── Pagination.jsx
+│   │   ├── PrintButton.jsx
+│   │   ├── PrivateRoute.jsx
+│   │   ├── Relatorios.jsx
+│   │   ├── SaldoEmendaWidget.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── Sobre.jsx
+│   │   ├── TemporaryBanner.jsx
+│   │   ├── Toast.jsx
+│   │   ├── VisualizacaoEmendaDespesas.js
+│   │   └── WorkflowManager.jsx
+│   ├── config
+│   │   └── constants.js
+│   ├── context
+│   │   └── UserContext.jsx
+│   ├── firebase
+│   │   └── firebaseConfig.js
+│   ├── hooks
+│   │   ├── useEmendaDespesa.js
+│   │   ├── useNavigationProtection.js
+│   │   ├── usePageTitle.js
+│   │   ├── usePagination.js
+│   │   ├── usePermissions.js
+│   │   └── useValidation.js
+│   ├── images
+│   │   └── logo-sicefsus.png
+│   ├── index.jsx
+│   ├── styles
+│   │   └── theme.css
+│   └── utils
+│       ├── exportImport.js
+│       ├── firebaseCollections.js
+│       ├── printUtils.js
+│       └── validators.js
+├── tsconfig.json
+└── vite.config.js
+
 ```
+
+---
+
+## 🔄 MUDANÇAS RECENTES DETECTADAS
+
+### ✅ **Novos Componentes Adicionados**
+- AdminPanel.jsx
+- Administracao.jsx
+- Dashboard.jsx
+- DataManager.jsx
+- DespesaForm.jsx
+- Despesas.jsx
+- DespesasList.jsx
+- DespesasTable.jsx
+- EmendaForm.jsx
+- Emendas.jsx
+- EmendasTable.jsx
+- ErrorBoundary.jsx
+- FirebaseError.jsx
+- Relatorios.jsx
+- SaldoEmendaWidget.jsx
+- Sidebar.jsx
+- Toast.jsx
+- VisualizacaoEmendaDespesas.js
+
+### 🔧 **Funcionalidades Modificadas**
+- Administracao.jsx
+- Dashboard.jsx
+- Despesas.jsx
+- EmendaForm.jsx
+- Emendas.jsx
+- FluxoEmenda.jsx
+- Toast.jsx
+
+
 
 ---
 
@@ -126,69 +233,122 @@ SICEFSUS/
 
 ### 🧩 **Componentes Principais**
 
-#### `src/components/Dashboard.jsx`
-- **Funcionalidade**: Página inicial com métricas
-- **Responsabilidades**: Exibir estatísticas, gráficos, KPIs
-- **Dependências**: useEmendaDespesa hook, Recharts
-- **Integração**: Conecta com Emendas.jsx e Despesas.jsx
-
-#### `src/components/Emendas.jsx`
-- **Funcionalidade**: Gestão completa de emendas
-- **Responsabilidades**: CRUD de emendas, navegação para despesas
-- **Dependências**: EmendaForm, EmendasTable, useEmendaDespesa
-- **Características**: Filtros, paginação, permissões por usuário
-
-#### `src/components/EmendaForm.jsx`
-- **Funcionalidade**: Formulário de cadastro/edição de emendas
-- **Responsabilidades**: Validação, salvamento, integração Firebase
-- **Dependências**: Firebase Firestore, validadores
-- **Modos**: Criação, edição, visualização
-
-#### `src/components/EmendasTable.jsx`
-- **Funcionalidade**: Tabela de listagem de emendas
-- **Responsabilidades**: Exibição, ações (editar, deletar, despesas)
-- **Dependências**: Paginação, filtros
-- **Características**: Responsiva, ações condicionais
-
-#### `src/components/Despesas.jsx`
-- **Funcionalidade**: Gestão de despesas por emenda
-- **Responsabilidades**: CRUD de despesas, controle de saldos
-- **Dependências**: DespesaForm, DespesasTable, useEmendaDespesa
-- **Integração**: Recebe contexto de emendas
-
-#### `src/components/DespesaForm.jsx`
-- **Funcionalidade**: Formulário de despesas
-- **Responsabilidades**: Validação de saldos, cálculos automáticos
-- **Dependências**: Firebase, validadores financeiros
-- **Características**: Validação em tempo real
+#### `src/components/AdminPanel.jsx`
+- **Funcionalidade**: Formulário usuário
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: AdminPanel, auth, loadUsers, querySnapshot, usersData...
+- **Dependências**: react, ../firebase/firebaseConfig, ./Toast...
 
 #### `src/components/Administracao.jsx`
-- **Funcionalidade**: Painel administrativo
-- **Responsabilidades**: Gestão de usuários, permissões
-- **Dependências**: AdminPanel, Firebase Auth
-- **Restrições**: Apenas usuários admin
+- **Funcionalidade**: Administracao.jsx - Versão Final v3.1 - IMPORTS CORRIGIDOS
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: Administracao, isUserAdmin
+- **Dependências**: react, ./AdminPanel, ../config/constants
+
+#### `src/components/ConfirmationModal.jsx`
+- **Funcionalidade**: src/components/ConfirmationModal.jsx - Modal de Confirmação Personalizado
+- **Tipo**: Functional Component
+- **Funções**: ConfirmationModal, getIconByType, getColorByType, handleOverlayClick, styles...
+- **Dependências**: react
+
+#### `src/components/ContextPanel.jsx`
+- **Funcionalidade**: ContextPanel.jsx - Painel de Contexto da Emenda
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: ContextPanel, loadContextData, despesasQuery, despesasSnapshot, despesas...
+- **Dependências**: react, ../firebase/firebaseConfig
+
+#### `src/components/Dashboard.jsx`
+- **Funcionalidade**: Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: CHART_COLORS, Dashboard, stats, calcularEstatisticasLocais, totalEmendas...
+- **Dependências**: react, ../hooks/useEmendaDespesa
+
+#### `src/components/DataManager.jsx`
+- **Funcionalidade**: Exportar emendas
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: DataManager, fileInputRef, showToast, loadBackups, querySnapshot...
+- **Dependências**: react, ../firebase/firebaseConfig, ./Toast...
+
+#### `src/components/DespesaForm.jsx`
+- **Funcionalidade**: Estado inicial com campos obrigatórios conforme print oficial
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: DespesaForm, isMounted, navigate, carregarEmendas, q...
+- **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
+
+#### `src/components/Despesas.jsx`
+- **Funcionalidade**: Despesas.jsx - Sistema SICEFSUS v2.0 - FLUXO EMENDA->DESPESA CORRIGIDO
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: Despesas, navigate, location, userRole, userMunicipio...
+- **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
+
+#### `src/components/DespesasFilters.jsx`
+- **Funcionalidade**: DespesasFilters.jsx - PADRONIZADO COM EMENDASFILTERS v1.0
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: PRIMARY, ACCENT, ERROR, SUCCESS, WARNING...
+- **Dependências**: react
+
+#### `src/components/DespesasList.jsx`
+- **Funcionalidade**: DespesasList.jsx - PADRONIZADO COM EMENDASLIST v1.0
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: PRIMARY, ACCENT, SUCCESS, WARNING, ERROR...
+- **Dependências**: react, ../firebase/firebaseConfig, ./DespesasFilters...
+
 
 ---
 
-### 🔧 **Context e Hooks**
-
-#### `src/context/UserContext.jsx`
-- **Funcionalidade**: Contexto global de usuário
-- **Responsabilidades**: Autenticação, dados do usuário, permissões
-- **Dependências**: Firebase Auth, Firestore
-- **Características**: Provider para toda aplicação
+### 🎣 **Hooks Customizados**
 
 #### `src/hooks/useEmendaDespesa.js`
-- **Funcionalidade**: Hook principal para dados
-- **Responsabilidades**: Carregamento de emendas/despesas, cálculos
-- **Dependências**: Firebase Firestore, useEffect, useState
-- **Características**: Cache, permissões, filtros automáticos
+- **Funcionalidade**: src/hooks/useEmendaDespesa.js - VERSÃO CORRIGIDA v2.0
+- **Funções**: useEmendaDespesa, determinarPermissoes, permissoesLiberadas...
+- **Exports**: useEmendaDespesa, useIsMounted
+
+#### `src/hooks/useNavigationProtection.js`
+- **Funcionalidade**: hooks/useNavigationProtection.js - Hook Completo para Proteção de Navegação
+- **Funções**: useNavigationProtection, navigate, location...
+- **Exports**: useNavigationProtection, useNavigationProtection, useFormNavigation, useModuleNavigation
+
+#### `src/hooks/usePageTitle.js`
+- **Funcionalidade**: src/hooks/usePageTitle.js
+- **Funções**: usePageTitle, baseTitle, Dashboard...
+- **Exports**: function, usePageTitle
 
 #### `src/hooks/usePagination.js`
-- **Funcionalidade**: Hook para paginação
-- **Responsabilidades**: Controle de páginas, itens por página
-- **Dependências**: React hooks
-- **Utilização**: Tabelas de emendas e despesas
+- **Funcionalidade**: src/hooks/usePagination.js
+- **Funções**: usePagination, totalItems, totalPages...
+- **Exports**: usePagination, usePagination, usePaginationWithFilter, usePaginationWithSort
+
+#### `src/hooks/usePermissions.js`
+- **Funcionalidade**: src/hooks/usePermissions.js - HOOK CENTRALIZADO DE PERMISSÕES
+- **Funções**: usePermissions, calcularPermissoes, municipio...
+- **Exports**: usePermissions
+
+#### `src/hooks/useValidation.js`
+- **Funcionalidade**: src/hooks/useValidation.js
+- **Funções**: validationRules, emailRegex, actualMessage...
+- **Exports**: validationRules, useValidation, useFormValidation, formatters, schemas
+
+
+---
+
+### 🛠️ **Utilitários**
+
+#### `src/utils/exportImport.js`
+- **Funcionalidade**: Sem descrição disponível
+- **Funções**: 
+
+#### `src/utils/firebaseCollections.js`
+- **Funcionalidade**: src/utils/firebaseCollections.js
+- **Funções**: COLLECTIONS, USER_SCHEMA, EMENDA_SCHEMA...
+
+#### `src/utils/printUtils.js`
+- **Funcionalidade**: src/utils/printUtils.js
+- **Funções**: formatCurrency, formatDate, printReport...
+
+#### `src/utils/validators.js`
+- **Funcionalidade**: src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
+- **Funções**: UFS_VALIDAS, normalizeUF, normalized...
+
 
 ---
 
@@ -202,42 +362,16 @@ SICEFSUS/
 
 ---
 
-### 🎨 **Estilos e Assets**
-
-#### `src/styles/theme.css`
-- **Funcionalidade**: Tema global CSS
-- **Responsabilidades**: Variáveis CSS, estilos globais
-- **Características**: Design system, cores padronizadas
-
-#### `src/images/logo-sicefsus.png`
-- **Funcionalidade**: Logo oficial do sistema
-- **Utilização**: Header, login, documentos
-
----
-
-### 🛠️ **Utilitários**
-
-#### `src/utils/validators.js`
-- **Funcionalidade**: Validadores de formulário
-- **Responsabilidades**: Validação de dados, formatação
-- **Utilização**: Formulários de emendas e despesas
-
-#### `src/utils/exportImport.js`
-- **Funcionalidade**: Exportação de dados
-- **Responsabilidades**: Geração de relatórios, export CSV/PDF
-- **Dependências**: Dados do Firebase
-
----
-
 ### ⚙️ **Configuração**
 
 #### `package.json`
 - **Dependências principais**:
-  - react: ^18.2.0
-  - react-router-dom: ^6.x
-  - firebase: ^10.x
-  - recharts: ^2.x
-  - vite: ^5.x
+  - @babel/parser: ^7.28.0
+  - @babel/traverse: ^7.28.0
+  - firebase: ^11.9.1
+  - firebase-admin: ^13.4.0
+  - react-router-dom: ^7.6.3
+  - recharts: ^3.0.2
 
 #### `vite.config.js`
 - **Configurações**: Build, dev server, plugins React
@@ -274,7 +408,20 @@ npm run build
 
 # Preview da build
 npm run preview
+
+# Gerar/Atualizar documentação
+node scripts/generateHandover.cjs
 ```
+
+---
+
+## 📊 **ESTATÍSTICAS DO SISTEMA**
+
+- **Total de Componentes**: 34
+- **Total de Hooks**: 6
+- **Total de Utilitários**: 4
+- **Dependências Principais**: 6
+- **Dependências de Desenvolvimento**: 7
 
 ---
 
@@ -286,10 +433,28 @@ npm run preview
 4. **Responsividade**: Interface adaptada para mobile e desktop
 5. **Segurança**: Regras de segurança Firebase configuradas
 6. **Performance**: Lazy loading e otimizações implementadas
+7. **Documentação**: Atualizada automaticamente via script
 
 ---
 
-**Data de Criação**: Janeiro 2025  
-**Versão**: 2.0  
-**Desenvolvido em**: Replit  
-**Status**: Produção Ativa
+**📅 Data de Criação**: Janeiro 2025  
+**🔄 Última Atualização**: 26/07/2025, 21:14:24  
+**📊 Versão**: 2.0  
+**💻 Desenvolvido em**: Replit  
+**✅ Status**: Produção Ativa
+
+---
+
+## 🔧 **PARA DESENVOLVEDORES**
+
+Para atualizar esta documentação:
+```bash
+node scripts/generateHandover.cjs
+```
+
+O script detecta automaticamente:
+- ✅ Novos componentes adicionados
+- ✅ Funcionalidades modificadas ou removidas  
+- ✅ Estrutura de pastas alterada
+- ✅ Dependências atualizadas no package.json
+- ✅ Mudanças significativas no fluxo da aplicação
