@@ -1,0 +1,49 @@
+Dashboard.jsx:75 
+ Uncaught ReferenceError: Cannot access 'calcularEstatisticasLocais' before initialization
+    at Dashboard.jsx:75:5
+    at Dashboard (Dashboard.jsx:71:34)
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: 
+{email: 'paulinett1508@gmail.com', role: 'admin', displayName: 'Paulo Miranda', createdAt: _Timestamp, municipio: 'Floriano', …}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: 
+{email: 'paulinett1508@gmail.com', role: 'admin', displayName: 'Paulo Miranda', createdAt: _Timestamp, municipio: 'Floriano', …}
+Dashboard.jsx:75 
+ Uncaught ReferenceError: Cannot access 'calcularEstatisticasLocais' before initialization
+    at Dashboard.jsx:75:5
+    at Dashboard (Dashboard.jsx:71:34)
+react-dom.development.js:18687 
+ The above error occurred in the <Dashboard> component:
+
+    at Dashboard (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Dashboard.jsx:49:37)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:105:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:175:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:224:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:66:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at App
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+App.jsx:162 
+ Erro capturado pelo Error Boundary: ReferenceError: Cannot access 'calcularEstatisticasLocais' before initialization
+    at Dashboard.jsx:75:5
+    at updateMemo (react-dom.development.js:17246:19)
+    at Object.useMemo (react-dom.development.js:17886:16)
+    at useMemo (react.development.js:1650:21)
+    at Dashboard (Dashboard.jsx:71:34)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at beginWork$1 (react-dom.development.js:27426:14)
+    at performUnitOfWork (react-dom.development.js:26557:12) 
+{componentStack: '\n    at Dashboard (https://91331338-5ea0-4039-8bb8…dev/src/context/UserContext.jsx:70:32)\n    at App'}
