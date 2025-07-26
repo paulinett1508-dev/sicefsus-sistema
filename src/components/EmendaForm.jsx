@@ -1,3 +1,4 @@
+
 // EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS OBRIGATÓRIOS CONFORME PRINT
 // ✅ CORREÇÃO: Baseado no arquivo original funcional
 // ✅ CORREÇÃO: Apenas campos obrigatórios adicionados conforme print oficial
@@ -14,16 +15,6 @@ import { doc, setDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
-
-const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
-const [novaAcaoServico, setNovaAcaoServico] = useState({
-  tipo: "Metas Quantitativas",
-  descricao: "",
-  complemento: "",
-  valor: ""
-});
-
-acoesServicos: [], // Array de ações/serviços
 
 // Hook para verificar se componente está montado
 const useIsMounted = () => {
@@ -1369,7 +1360,7 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.3s ease",
   },
-   novaAcaoContainer: {
+  novaAcaoContainer: {
     background: "#f8f9fa",
     borderRadius: "8px",
     padding: "20px",
@@ -1481,118 +1472,5 @@ const styles = {
     alignItems: "flex-start",
   },
 };
-
-novaAcaoContainer: {
-  background: "#f8f9fa",
-  borderRadius: "8px",
-  padding: "20px",
-  marginBottom: "20px",
-  border: "2px dashed #dee2e6",
-},
-tipoSelector: {
-  marginBottom: "15px",
-},
-novaAcaoForm: {
-  display: "grid",
-  gridTemplateColumns: "2fr 3fr 1fr auto",
-  gap: "15px",
-  alignItems: "end",
-},
-addButton: {
-  background: "#28a745",
-  color: "white",
-  border: "none",
-  borderRadius: "6px",
-  padding: "12px 16px",
-  fontWeight: "bold",
-  cursor: "pointer",
-  transition: "background-color 0.3s ease",
-  whiteSpace: "nowrap",
-},
-addButtonDisabled: {
-  background: "#6c757d",
-  cursor: "not-allowed",
-},
-acoesListContainer: {
-  marginTop: "20px",
-},
-emptyState: {
-  textAlign: "center",
-  color: "#6c757d",
-  fontStyle: "italic",
-  padding: "20px",
-},
-acoesList: {
-  display: "flex",
-  flexDirection: "column",
-  gap: "15px",
-},
-acaoItem: {
-  background: "white",
-  border: "1px solid #dee2e6",
-  borderRadius: "8px",
-  padding: "15px",
-  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-},
-acaoHeader: {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "10px",
-},
-acaoTipo: {
-  background: "#154360",
-  color: "white",
-  padding: "4px 12px",
-  borderRadius: "20px",
-  fontSize: "0.85em",
-  fontWeight: "bold",
-},
-acaoValor: {
-  background: "#28a745",
-  color: "white",
-  padding: "4px 12px",
-  borderRadius: "20px",
-  fontWeight: "bold",
-},
-removeButton: {
-  background: "#dc3545",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-  padding: "4px 8px",
-  cursor: "pointer",
-  fontSize: "0.9em",
-},
-removeButtonHover: {
-  background: "#c82333",
-},
-acaoDescricao: {
-  color: "#154360",
-  marginBottom: "8px",
-  fontSize: "1.05em",
-},
-acaoComplemento: {
-  color: "#6c757d",
-  fontSize: "0.95em",
-  lineHeight: "1.4",
-},
-resumoTotal: {
-  background: "#e9ecef",
-  padding: "15px",
-  borderRadius: "8px",
-  marginTop: "20px",
-  textAlign: "center",
-  color: "#154360",
-},
-smallScreenNovaAcaoForm: {
-  gridTemplateColumns: "1fr",
-},
-smallScreenAcaoHeader: {
-  flexDirection: "column",
-  gap: "10px",
-  alignItems: "flex-start",
-}
-
 
 export default EmendaForm;
