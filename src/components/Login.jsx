@@ -13,7 +13,7 @@ export default function Login({ onLoginSuccess }) {
   const [erro, setErro] = useState("");
   const [modoCadastro, setModoCadastro] = useState(false);
   const [lembrarEmail, setLembrarEmail] = useState(false);
-  const [perfil, setPerfil] = useState("user"); // "user" ou "admin"
+  
 
   // Ao carregar, verifica se há e-mail salvo
   useEffect(() => {
@@ -30,11 +30,14 @@ export default function Login({ onLoginSuccess }) {
     try {
       if (modoCadastro) {
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
-        // Cria o documento do usuário no Firestore com o perfil escolhido
+        // Cria o documento do usuário no Firestore (sempre como operador)
         await setDoc(doc(db, "users", cred.user.uid), {
           uid: cred.user.uid,
           email: cred.user.email,
-          role: perfil, // "admin" ou "user"
+          role: "user", // Sempre operador no auto-registro
+          isActive: true,
+          municipio: null, // Será definido pelo admin
+          uf: null, // Será definido pelo admin
           createdAt: serverTimestamp(),
         });
       } else {
@@ -87,30 +90,7 @@ export default function Login({ onLoginSuccess }) {
             required
             style={styles.input}
           />
-          {modoCadastro && (
-            <div style={styles.radioContainer}>
-              <label>
-                <input
-                  type="radio"
-                  name="perfil"
-                  value="user"
-                  checked={perfil === "user"}
-                  onChange={() => setPerfil("user")}
-                />
-                Operador
-              </label>
-              <label style={{ marginLeft: 16 }}>
-                <input
-                  type="radio"
-                  name="perfil"
-                  value="admin"
-                  checked={perfil === "admin"}
-                  onChange={() => setPerfil("admin")}
-                />
-                Administrador
-              </label>
-            </div>
-          )}
+          
           <div style={styles.checkboxContainer}>
             <input
               type="checkbox"
