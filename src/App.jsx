@@ -32,6 +32,7 @@ import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth } from "./firebase/firebaseConfig";
+import ThemeToggle from "./components/ThemeToggle";
 
 // ✨ Context para proteção de navegação (MANTIDO)
 const NavigationProtectionContext = React.createContext({
@@ -303,6 +304,13 @@ function AppContent() {
             usuario={usuario}
             onLogout={handleLogout}
           />
+        )}
+
+        {/* Botão de tema no canto superior direito */}
+        {isAuthenticated && (
+          <div style={styles.themeToggleContainer}>
+            <ThemeToggle compact={true} />
+          </div>
         )}
 
         {/* Conteúdo principal */}
@@ -674,6 +682,13 @@ const styles = {
     fontSize: 16,
     fontWeight: "500",
     transition: "background-color 0.2s",
+  },
+  themeToggleContainer: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    zIndex: 1000,
+    transition: "right 0.2s ease",
   },
 };
 
