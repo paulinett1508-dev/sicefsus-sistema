@@ -1,6 +1,6 @@
 // Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
-import React, { useEffect, useState, useMemo } from "react";
-import { useEmendaDespesa } from "../hooks/useEmendaDespesa";
+import React, { useEffect, useState } from "react";
+import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import {
   BarChart,
   Bar,
@@ -29,11 +29,6 @@ const CHART_COLORS = [
 export default function Dashboard({ usuario }) {
   console.log("🏠 Dashboard iniciado");
   console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
-
-  useEffect(() => {
-    console.log("🏠 Dashboard iniciado");
-    console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
-  }, [usuario?.uid]); // Só re-executa se o UID do usuário mudar
 
   // ✅ CORREÇÃO: Hook corrigido com usuário completo
   const {
@@ -67,11 +62,34 @@ export default function Dashboard({ usuario }) {
     topMunicipios: [],
   });
 
+  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
+  useEffect(() => {
+    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
+    if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
+      console.log("📊 Calculando estatísticas do Dashboard...");
+      console.log("📋 Emendas disponíveis:", emendas.length);
+      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
+
+      const stats = obterEstatisticasGerais
+        ? obterEstatisticasGerais()
+        : calcularEstatisticasLocais();
+      setEstatisticas(stats);
+
+      console.log("✅ Estatísticas calculadas:", stats);
+    } else {
+      console.log("⏳ Aguardando dados:", {
+        loading,
+        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
+        emendasTipo: typeof emendas,
+        emendasLength: emendas?.length,
+      });
+    }
+  }, [emendas, despesas, loading, obterEstatisticasGerais]);
+
   // Dashboard.jsx - CORREÇÃO DO SALDO DISPONÍVEL (R$ NaN)
   // Substituir a função calcularEstatisticasLocais (linhas ~110-220)
 
-  // Função para calcular estatísticas localmente
-  const calcularEstatisticasLocais = (emendasData, despesasData) => {
+  const calcularEstatisticasLocais = () => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
@@ -79,24 +97,24 @@ export default function Dashboard({ usuario }) {
     const valorTotalEmendas = emendas.reduce((sum, e) => {
       // Tentar múltiplos campos de valor
       let valor = e.valorRecurso || e.valorTotal || e.valor || 0;
-
+      
       // Se for string, remover formatação monetária
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
       }
-
+      
       valor = parseFloat(valor);
       return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
 
     const valorTotalDespesas = despesas.reduce((sum, d) => {
       let valor = d.valor || 0;
-
+      
       // Se for string, remover formatação monetária
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
       }
-
+      
       valor = parseFloat(valor);
       return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
@@ -114,7 +132,7 @@ export default function Dashboard({ usuario }) {
     const emendasPorStatus = emendas.reduce((acc, emenda) => {
       const status = emenda.status || "ativa";
       const existing = acc.find((item) => item.name === status);
-
+      
       // Processar valor de forma segura
       let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
       if (typeof valor === 'string') {
@@ -140,7 +158,7 @@ export default function Dashboard({ usuario }) {
     const despesasPorStatus = despesas.reduce((acc, despesa) => {
       const status = despesa.status || "pendente";
       const existing = acc.find((item) => item.name === status);
-
+      
       // Processar valor de forma segura
       let valor = despesa.valor || 0;
       if (typeof valor === 'string') {
@@ -223,7 +241,7 @@ export default function Dashboard({ usuario }) {
     const municipiosMap = {};
     emendas.forEach((emenda) => {
       const municipio = emenda.municipio || "Não informado";
-
+      
       let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
@@ -266,12 +284,6 @@ export default function Dashboard({ usuario }) {
     };
   };
 
-  // ✅ CORREÇÃO: Memoizar estatísticas para evitar recálculos desnecessários
-  const stats = useMemo(() => {
-    console.log('📊 Calculando estatísticas do Dashboard...');
-    return calcularEstatisticasLocais(emendas, despesas);
-  }, [emendas, despesas]);
-
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
     // Garantir que o valor é numérico e válido
@@ -279,7 +291,7 @@ export default function Dashboard({ usuario }) {
     if (isNaN(numericValue)) {
       return "R$ 0,00";
     }
-
+    
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
