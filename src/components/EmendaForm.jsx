@@ -15,6 +15,16 @@ import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 
+const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
+const [novaAcaoServico, setNovaAcaoServico] = useState({
+  tipo: "Metas Quantitativas",
+  descricao: "",
+  complemento: "",
+  valor: ""
+});
+
+acoesServicos: [], // Array de ações/serviços
+
 // Hook para verificar se componente está montado
 const useIsMounted = () => {
   const isMountedRef = useRef(true);
@@ -781,6 +791,218 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
+        {/* ✅ NOVA SEÇÃO: AÇÕES E SERVIÇOS - METAS QUANTITATIVAS */}
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legend}>
+            <span style={styles.legendIcon}>📊</span>
+            Ações e Serviços - Metas Quantitativas
+          </legend>
+
+          {/* Formulário para adicionar nova ação/serviço */}
+          <div style={styles.novaAcaoContainer}>
+            <div style={styles.tipoSelector}>
+              <label style={styles.label}>Tipo de Ação/Serviço</label>
+              <select
+                value={tipoAcaoServico}
+                onChange={(e) => setTipoAcaoServico(e.target.value)}
+                style={styles.select}
+                disabled={modoVisualizacao}
+              >
+                <option value="Metas Quantitativas">Metas Quantitativas</option>
+                <option value="Metas">Metas</option>
+              </select>
+            </div>
+
+            <div style={window.innerWidth <= 768 ? styles.smallScreenNovaAcaoForm : styles.novaAcaoForm}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  {tipoAcaoServico === "Metas Quantitativas" ? "Estratégia" : "Título da Meta"}
+                </label>
+                <input
+                  type="text"
+                  value={novaAcaoServico.descricao}
+                  onChange={(e) => setNovaAcaoServico(prev => ({ ...prev, descricao: e.target.value }))}
+                  style={styles.input}
+                  placeholder={tipoAcaoServico === "Metas Quantitativas" 
+                    ? "Ex: Estratégia de Rastreamento e Controle de Condições Crônicas"
+                    : "Ex: Oferta de medicamentos da Atenção Básica"
+                  }
+                  disabled={modoVisualizacao}
+                />
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  {tipoAcaoServico === "Metas Quantitativas" ? "Descrição Detalhada" : "Detalhamento"}
+                </label>
+                <textarea
+                  value={novaAcaoServico.complemento}
+                  onChange={(e) => setNovaAcaoServico(prev => ({ ...prev, complemento: e.target.value }))}
+                  style={{ ...styles.textarea, minHeight: "80px" }}
+                  placeholder={tipoAcaoServico === "Metas Quantitativas"
+                    ? "Aquisição de Insumos e Materiais de Uso Contínuo para Acompanhamento de Pessoas com Condições Crônicas"
+                    : "Manutenção da oferta de medicamentos, insumos e materiais de forma regular para os estabelecimentos de saúde"
+                  }
+                  disabled={modoVisualizacao}
+                />
+              </div>
+
+              {tipoAcaoServico === "Metas Quantitativas" && (
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Valor (R$)</label>
+                  <input
+                    type="text"
+                    value={novaAcaoServico.valor}
+                    onChange={(e) => {
+                      const valorFormatado = formatarValorMonetario(e.target.value);
+                      setNovaAcaoServico(prev => ({ ...prev, valor: valorFormatado }));
+                    }}
+                    style={styles.input}
+                    placeholder="200.000,00"
+                    disabled={modoVisualizacao}
+                  />
+                </div>
+              )}
+
+              {!modoVisualizacao && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!novaAcaoServico.descricao.trim()) {
+                      error("Preencha a descrição/estratégia");
+                      return;
+                    }
+                    if (!novaAcaoServico.complemento.trim()) {
+                      error("Preencha o detalhamento");
+                      return;
+                    }
+                    if (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00")) {
+                      error("Preencha o valor para Metas Quantitativas");
+                      return;
+                    }
+
+                    const novaAcao = {
+                      tipo: tipoAcaoServico,
+                      estrategia: novaAcaoServico.descricao,
+                      descricao: novaAcaoServico.complemento,
+                      valor: tipoAcaoServico === "Metas Quantitativas" ? novaAcaoServico.valor : "",
+                      id: Date.now() // ID temporário para edição
+                    };
+
+                    setFormData(prev => ({
+                      ...prev,
+                      acoesServicos: [...(prev.acoesServicos || []), novaAcao]
+                    }));
+
+                    // Limpar formulário
+                    setNovaAcaoServico({
+                      tipo: tipoAcaoServico,
+                      descricao: "",
+                      complemento: "",
+                      valor: ""
+                    });
+
+                    success(`${tipoAcaoServico} adicionada com sucesso!`);
+                  }}
+                  style={{
+                    ...styles.addButton,
+                    ...((!novaAcaoServico.descricao.trim() || !novaAcaoServico.complemento.trim() || 
+                        (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00"))) 
+                        && styles.addButtonDisabled)
+                  }}
+                  disabled={!novaAcaoServico.descricao.trim() || !novaAcaoServico.complemento.trim() || 
+                           (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00"))}
+                >
+                  ➕ Adicionar {tipoAcaoServico}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Lista de ações/serviços adicionadas */}
+          <div style={styles.acoesListContainer}>
+            <h4 style={{ margin: "0 0 15px 0", color: "#154360" }}>
+              Ações/Serviços Cadastradas ({(formData.acoesServicos || []).length})
+            </h4>
+
+            {(!formData.acoesServicos || formData.acoesServicos.length === 0) ? (
+              <div style={styles.emptyState}>
+                Nenhuma ação/serviço cadastrada ainda.
+                <br />
+                <small>Use o formulário acima para adicionar metas quantitativas ou metas.</small>
+              </div>
+            ) : (
+              <div style={styles.acoesList}>
+                {formData.acoesServicos.map((acao, index) => (
+                  <div key={acao.id || index} style={styles.acaoItem}>
+                    <div style={window.innerWidth <= 768 ? styles.smallScreenAcaoHeader : styles.acaoHeader}>
+                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                        <span style={styles.acaoTipo}>{acao.tipo}</span>
+                        {acao.tipo === "Metas Quantitativas" && acao.valor && (
+                          <span style={styles.acaoValor}>
+                            {typeof acao.valor === 'string' && acao.valor.includes(',') 
+                              ? `R$ ${acao.valor}`
+                              : formatCurrency(parseFloat(acao.valor) || 0)
+                            }
+                          </span>
+                        )}
+                      </div>
+                      {!modoVisualizacao && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm("Tem certeza que deseja remover esta ação/serviço?")) {
+                              setFormData(prev => ({
+                                ...prev,
+                                acoesServicos: prev.acoesServicos.filter((_, i) => i !== index)
+                              }));
+                              success("Ação/Serviço removida!");
+                            }
+                          }}
+                          style={styles.removeButton}
+                          onMouseEnter={(e) => e.target.style.background = styles.removeButtonHover.background}
+                          onMouseLeave={(e) => e.target.style.background = styles.removeButton.background}
+                        >
+                          🗑️ Remover
+                        </button>
+                      )}
+                    </div>
+
+                    <div style={styles.acaoDescricao}>
+                      <strong>{acao.estrategia}</strong>
+                    </div>
+
+                    <div style={styles.acaoComplemento}>
+                      {acao.descricao}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Resumo total apenas para Metas Quantitativas */}
+            {formData.acoesServicos && formData.acoesServicos.some(a => a.tipo === "Metas Quantitativas" && a.valor) && (
+              <div style={styles.resumoTotal}>
+                <strong>
+                  Valor Total das Metas Quantitativas: {
+                    formatCurrency(
+                      formData.acoesServicos
+                        .filter(a => a.tipo === "Metas Quantitativas" && a.valor)
+                        .reduce((total, a) => {
+                          const valor = typeof a.valor === 'string' && a.valor.includes(',')
+                            ? parseFloat(a.valor.replace(/[^\d,]/g, '').replace(',', '.'))
+                            : parseFloat(a.valor);
+                          return total + (valor || 0);
+                        }, 0)
+                    )
+                  }
+                </strong>
+              </div>
+            )}
+          </div>
+        </fieldset>
+
+        
         {/* Identificação (mantida do original) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
@@ -1259,5 +1481,118 @@ const styles = {
     alignItems: "flex-start",
   },
 };
+
+novaAcaoContainer: {
+  background: "#f8f9fa",
+  borderRadius: "8px",
+  padding: "20px",
+  marginBottom: "20px",
+  border: "2px dashed #dee2e6",
+},
+tipoSelector: {
+  marginBottom: "15px",
+},
+novaAcaoForm: {
+  display: "grid",
+  gridTemplateColumns: "2fr 3fr 1fr auto",
+  gap: "15px",
+  alignItems: "end",
+},
+addButton: {
+  background: "#28a745",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  padding: "12px 16px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "background-color 0.3s ease",
+  whiteSpace: "nowrap",
+},
+addButtonDisabled: {
+  background: "#6c757d",
+  cursor: "not-allowed",
+},
+acoesListContainer: {
+  marginTop: "20px",
+},
+emptyState: {
+  textAlign: "center",
+  color: "#6c757d",
+  fontStyle: "italic",
+  padding: "20px",
+},
+acoesList: {
+  display: "flex",
+  flexDirection: "column",
+  gap: "15px",
+},
+acaoItem: {
+  background: "white",
+  border: "1px solid #dee2e6",
+  borderRadius: "8px",
+  padding: "15px",
+  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+},
+acaoHeader: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "10px",
+},
+acaoTipo: {
+  background: "#154360",
+  color: "white",
+  padding: "4px 12px",
+  borderRadius: "20px",
+  fontSize: "0.85em",
+  fontWeight: "bold",
+},
+acaoValor: {
+  background: "#28a745",
+  color: "white",
+  padding: "4px 12px",
+  borderRadius: "20px",
+  fontWeight: "bold",
+},
+removeButton: {
+  background: "#dc3545",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  padding: "4px 8px",
+  cursor: "pointer",
+  fontSize: "0.9em",
+},
+removeButtonHover: {
+  background: "#c82333",
+},
+acaoDescricao: {
+  color: "#154360",
+  marginBottom: "8px",
+  fontSize: "1.05em",
+},
+acaoComplemento: {
+  color: "#6c757d",
+  fontSize: "0.95em",
+  lineHeight: "1.4",
+},
+resumoTotal: {
+  background: "#e9ecef",
+  padding: "15px",
+  borderRadius: "8px",
+  marginTop: "20px",
+  textAlign: "center",
+  color: "#154360",
+},
+smallScreenNovaAcaoForm: {
+  gridTemplateColumns: "1fr",
+},
+smallScreenAcaoHeader: {
+  flexDirection: "column",
+  gap: "10px",
+  alignItems: "flex-start",
+}
+
 
 export default EmendaForm;
