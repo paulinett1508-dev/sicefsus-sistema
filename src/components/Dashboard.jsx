@@ -95,13 +95,28 @@ export default function Dashboard({ usuario }) {
 
     // ✅ CORREÇÃO CRÍTICA: Garantir valores numéricos válidos
     const valorTotalEmendas = emendas.reduce((sum, e) => {
-      const valor = parseFloat(e.valorTotal || e.valorRecurso || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
+      // Tentar múltiplos campos de valor
+      let valor = e.valorRecurso || e.valorTotal || e.valor || 0;
+      
+      // Se for string, remover formatação monetária
+      if (typeof valor === 'string') {
+        valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+      }
+      
+      valor = parseFloat(valor);
+      return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
 
     const valorTotalDespesas = despesas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
+      let valor = d.valor || 0;
+      
+      // Se for string, remover formatação monetária
+      if (typeof valor === 'string') {
+        valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+      }
+      
+      valor = parseFloat(valor);
+      return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
 
     // ✅ CORREÇÃO: Cálculo seguro do saldo
@@ -117,8 +132,14 @@ export default function Dashboard({ usuario }) {
     const emendasPorStatus = emendas.reduce((acc, emenda) => {
       const status = emenda.status || "ativa";
       const existing = acc.find((item) => item.name === status);
-      const valor = parseFloat(emenda.valorTotal || emenda.valorRecurso || 0);
-      const valorSeguro = isNaN(valor) ? 0 : valor;
+      
+      // Processar valor de forma segura
+      let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
+      if (typeof valor === 'string') {
+        valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+      }
+      valor = parseFloat(valor);
+      const valorSeguro = isNaN(valor) || valor < 0 ? 0 : valor;
 
       if (existing) {
         existing.value += 1;
@@ -137,8 +158,14 @@ export default function Dashboard({ usuario }) {
     const despesasPorStatus = despesas.reduce((acc, despesa) => {
       const status = despesa.status || "pendente";
       const existing = acc.find((item) => item.name === status);
-      const valor = parseFloat(despesa.valor || 0);
-      const valorSeguro = isNaN(valor) ? 0 : valor;
+      
+      // Processar valor de forma segura
+      let valor = despesa.valor || 0;
+      if (typeof valor === 'string') {
+        valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+      }
+      valor = parseFloat(valor);
+      const valorSeguro = isNaN(valor) || valor < 0 ? 0 : valor;
 
       if (existing) {
         existing.value += 1;
@@ -184,13 +211,21 @@ export default function Dashboard({ usuario }) {
 
       // ✅ CORREÇÃO: Valores seguros para evolução mensal
       const valorEmendasMes = emendasMes.reduce((sum, e) => {
-        const valor = parseFloat(e.valorTotal || e.valorRecurso || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
+        let valor = e.valorRecurso || e.valorTotal || e.valor || 0;
+        if (typeof valor === 'string') {
+          valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+        }
+        valor = parseFloat(valor);
+        return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
       }, 0);
 
       const valorDespesasMes = despesasMes.reduce((sum, d) => {
-        const valor = parseFloat(d.valor || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
+        let valor = d.valor || 0;
+        if (typeof valor === 'string') {
+          valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+        }
+        valor = parseFloat(valor);
+        return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
       }, 0);
 
       evolucaoMensal.push({
@@ -206,8 +241,13 @@ export default function Dashboard({ usuario }) {
     const municipiosMap = {};
     emendas.forEach((emenda) => {
       const municipio = emenda.municipio || "Não informado";
-      const valor = parseFloat(emenda.valorTotal || emenda.valorRecurso || 0);
-      const valorSeguro = isNaN(valor) ? 0 : valor;
+      
+      let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
+      if (typeof valor === 'string') {
+        valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
+      }
+      valor = parseFloat(valor);
+      const valorSeguro = isNaN(valor) || valor < 0 ? 0 : valor;
 
       if (!municipiosMap[municipio]) {
         municipiosMap[municipio] = { nome: municipio, emendas: 0, valor: 0 };
@@ -246,10 +286,16 @@ export default function Dashboard({ usuario }) {
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
+    // Garantir que o valor é numérico e válido
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) {
+      return "R$ 0,00";
+    }
+    
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value);
+    }).format(numericValue);
   };
 
   const formatNumber = (value) => {
