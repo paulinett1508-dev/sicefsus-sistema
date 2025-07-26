@@ -1,9 +1,26 @@
 
+/* === BOTÃO DE TEMA === */
+.theme-toggle-button:hover {
+  background: var(--theme-surface-secondary) !important;
+  border-color: var(--primary) !important;
+  transform: scale(1.05) !important;
+}
+
+.theme-toggle-button:active {
+  transform: scale(0.95) !important;
+}
+
 /* === RESPONSIVIDADE PARA BOTÃO DE TEMA === */
 @media (max-width: 768px) {
   .theme-toggle-container {
     right: 15px !important;
     top: 10px !important;
+  }
+  
+  .theme-toggle-button {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 16px !important;
   }
 }
 

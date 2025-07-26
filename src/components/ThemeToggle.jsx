@@ -45,51 +45,49 @@ export default function ThemeToggle({ compact = false }) {
 }
 
 const styles = {
-  toggleButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    background: 'var(--theme-surface)',
-    border: '2px solid var(--theme-border)',
-    borderRadius: '8px',
-    padding: '8px 12px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    color: 'var(--theme-text)',
-    fontFamily: 'var(--font-family)',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-
   compactButton: {
-    background: 'var(--theme-surface)',
-    border: '1px solid var(--theme-border)',
+    width: 42,
+    height: 42,
     borderRadius: '50%',
-    width: '44px',
-    height: '44px',
+    border: '2px solid var(--theme-border)',
+    background: 'var(--theme-surface)',
+    color: 'var(--theme-text)',
+    fontSize: 18,
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '20px',
-    transition: 'all 0.2s ease',
     boxShadow: '0 2px 8px var(--theme-shadow)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease',
+    zIndex: 'var(--z-theme-toggle)',
     position: 'relative',
-    '@media (max-width: 768px)': {
-      width: '40px',
-      height: '40px',
-      fontSize: '18px',
-    },
   },
-
+  
+  toggleButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '8px 16px',
+    borderRadius: 8,
+    border: '2px solid var(--theme-border)',
+    background: 'var(--theme-surface)',
+    color: 'var(--theme-text)',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 500,
+    boxShadow: '0 2px 8px var(--theme-shadow)',
+    transition: 'all 0.3s ease',
+    fontFamily: 'var(--font-family)',
+  },
+  
   icon: {
-    fontSize: '16px',
+    fontSize: 16,
+    display: 'flex',
+    alignItems: 'center',
   },
-
+  
   text: {
-    fontSize: '14px',
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: 500,
   },
 };

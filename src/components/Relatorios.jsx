@@ -643,8 +643,10 @@ export default function Relatorios({ usuario }) {
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundColor: GRAY,
+    backgroundColor: "var(--theme-bg)",
     padding: "20px",
+    color: "var(--theme-text)",
+    transition: "all 0.3s ease",
   },
 
   loadingContainer: {
@@ -653,14 +655,14 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "50vh",
-    color: PRIMARY,
+    color: "var(--primary)",
   },
 
   loadingSpinner: {
     width: 40,
     height: 40,
-    border: "4px solid #e3e3e3",
-    borderTop: "4px solid " + PRIMARY,
+    border: "4px solid var(--theme-border)",
+    borderTop: "4px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 16,
@@ -676,10 +678,11 @@ const styles = {
   },
 
   title: {
-    color: PRIMARY,
+    color: "var(--primary)",
     fontSize: 28,
     fontWeight: "600",
     margin: 0,
+    transition: "color 0.3s ease",
   },
 
   filters: {
@@ -690,22 +693,26 @@ const styles = {
 
   select: {
     padding: "8px 12px",
-    border: "1px solid #ddd",
+    border: "1px solid var(--theme-border)",
     borderRadius: 6,
     fontSize: 14,
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     cursor: "pointer",
+    transition: "all 0.3s ease",
   },
 
   tabs: {
     display: "flex",
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
     borderRadius: 8,
     padding: 4,
     marginBottom: 24,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 8px var(--theme-shadow)",
     overflowX: "auto",
     gap: 2,
+    border: "1px solid var(--theme-border-light)",
+    transition: "all 0.3s ease",
   },
 
   tab: {
@@ -719,14 +726,14 @@ const styles = {
     gap: 8,
     fontSize: 14,
     fontWeight: "500",
-    color: "#666",
-    transition: "all 0.2s",
+    color: "var(--theme-text-secondary)",
+    transition: "all 0.3s ease",
     whiteSpace: "nowrap",
   },
 
   activeTab: {
-    backgroundColor: PRIMARY,
-    color: WHITE,
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
   },
 
   tabIcon: {
@@ -738,10 +745,12 @@ const styles = {
   },
 
   content: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
     borderRadius: 12,
     padding: 24,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    boxShadow: "0 4px 20px var(--theme-shadow)",
+    border: "1px solid var(--theme-border-light)",
+    transition: "all 0.3s ease",
   },
 
   reportSection: {
@@ -749,11 +758,12 @@ const styles = {
   },
 
   sectionTitle: {
-    color: PRIMARY,
+    color: "var(--primary)",
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 24,
     margin: 0,
+    transition: "color 0.3s ease",
   },
 
   kpiGrid: {
@@ -764,24 +774,28 @@ const styles = {
   },
 
   kpiCard: {
-    backgroundColor: GRAY,
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: 20,
     borderRadius: 8,
     textAlign: "center",
-    borderLeft: `4px solid ${PRIMARY}`,
+    borderLeft: "4px solid var(--primary)",
+    border: "1px solid var(--theme-border-light)",
+    transition: "all 0.3s ease",
   },
 
   kpiValue: {
     fontSize: 24,
     fontWeight: "600",
-    color: PRIMARY,
+    color: "var(--primary)",
     marginBottom: 8,
+    transition: "color 0.3s ease",
   },
 
   kpiLabel: {
     fontSize: 14,
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
+    transition: "color 0.3s ease",
   },
 
   chartContainer: {
