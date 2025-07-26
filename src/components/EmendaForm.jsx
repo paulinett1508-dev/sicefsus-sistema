@@ -548,9 +548,12 @@ const EmendaForm = ({
           setTimeout(() => {
             if (isMounted()) {
               setShowSuccessMessage(false);
-              onSalvar && onSalvar();
+              // Chamar onSalvar apenas se existir
+              if (onSalvar && typeof onSalvar === 'function') {
+                onSalvar();
+              }
             }
-          }, 2000);
+          }, 1500);
         }
       } catch (err) {
         console.error("❌ Erro ao salvar emenda:", err);
@@ -1334,14 +1337,18 @@ const EmendaForm = ({
           {!modoVisualizacao && (
             <button
               type="submit"
-              style={styles.submitButton}
+              style={{
+                ...styles.submitButton,
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
               disabled={loading}
             >
               {loading
                 ? "Salvando..."
                 : configModo.modo === "criar"
-                  ? "Criar Emenda"
-                  : "Atualizar Emenda"}
+                  ? "✅ Criar Emenda"
+                  : "✅ Atualizar Emenda"}
             </button>
           )}
         </div>

@@ -100,20 +100,20 @@ const Emendas = ({ usuario }) => {
     }
   };
 
-  // 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda que aceita parâmetros
+  // 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda simplificado
   const handleSalvarEmenda = useCallback(
-    async (dadosEmenda) => {
-      console.log("📝 handleSalvarEmenda chamado com dados:", dadosEmenda);
+    async () => {
+      console.log("📝 handleSalvarEmenda chamado - aguardando salvamento do EmendaForm");
 
       try {
-        // A lógica de salvamento já está no EmendaForm
-        // Aqui apenas recarregamos e voltamos
-        await recarregar();
-        console.log("✅ Dados recarregados após salvamento");
-        handleVoltar();
+        // Aguardar um pouco para garantir que o salvamento do EmendaForm termine
+        setTimeout(async () => {
+          await recarregar();
+          console.log("✅ Dados recarregados após salvamento");
+          handleVoltar();
+        }, 1000);
       } catch (error) {
         console.error("❌ Erro no handleSalvarEmenda:", error);
-        throw error; // Re-throw para o EmendaForm tratar
       }
     },
     [recarregar, handleVoltar],
