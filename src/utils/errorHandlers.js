@@ -1,7 +1,5 @@
 
 // src/utils/errorHandlers.js - Centralized Error Handling
-import { createErrorReport } from './validators.js';
-
 /**
  * ✅ Handle Firebase errors with user-friendly messages
  * @param {Error} error - Firebase error
@@ -11,10 +9,14 @@ import { createErrorReport } from './validators.js';
 export const handleFirebaseError = (error, context = 'Firebase Operation') => {
   console.error(`🔥 Firebase Error in ${context}:`, error);
   
-  const errorReport = createErrorReport(context, error, { 
-    firebaseCode: error.code,
-    firebaseMessage: error.message 
-  });
+  const errorReport = {
+    context,
+    message: error.message,
+    stack: error.stack,
+    code: error.code,
+    timestamp: new Date().toISOString(),
+    url: window.location.href
+  };
   
   // Store error for debugging
   try {
@@ -139,4 +141,23 @@ export const clearStoredErrors = () => {
   } catch (error) {
     console.warn('Could not clear stored errors:', error);
   }
+};
+
+/**
+ * ✅ Create standardized error report
+ * @param {string} context - Context where error occurred
+ * @param {Error} error - The error object
+ * @param {Object} additionalData - Additional data to include
+ * @returns {Object} - Standardized error report
+ */
+export const createErrorReport = (context, error, additionalData = {}) => {
+  return {
+    context,
+    message: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    url: window.location.href,
+    ...additionalData
+  };
 };

@@ -97,7 +97,7 @@ class ErrorBoundary extends React.Component {
 
 const styles = {
   errorContainer: {
-    min-height: '100vh',
+    minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
