@@ -21,30 +21,14 @@ const Administracao = ({ usuario }) => {
   // informações fornecidas pelo contexto. Não há mais fallback para buscar
   // dados no Firestore aqui, pois o usuário já vem completo do UserContext.
   useEffect(() => {
-    console.log("🔍 ADMINISTRACAO DEBUG - Verificando permissões...");
-    console.log("👤 Usuário prop completo:", {
-      usuario,
-      hasUsuario: !!usuario,
-      email: usuario?.email,
-      role: usuario?.role,
-      uid: usuario?.uid,
-      municipio: usuario?.municipio,
-      uf: usuario?.uf,
-      isActive: usuario?.isActive
-    });
-    console.log("📋 ADMIN_EMAILS configurados:", ADMIN_EMAILS);
-    console.log("🔧 Firebase API Key presente:", !!import.meta.env.VITE_FIREBASE_API_KEY);
-
     setLoading(true);
     setError(null);
 
-    // ✅ Verificar se Firebase está configurado
     if (!import.meta.env.VITE_FIREBASE_API_KEY) {
       setIsAdmin(false);
       setUserInfo(null);
       setError("Firebase não configurado. Configure as variáveis de ambiente no Secrets do Replit.");
       setLoading(false);
-      console.error("❌ Firebase não configurado para administração");
       return;
     }
 
@@ -53,28 +37,17 @@ const Administracao = ({ usuario }) => {
       setUserInfo(null);
       setError("Usuário não autenticado");
       setLoading(false);
-      console.log("❌ Usuário não autenticado");
       return;
     }
 
-    // Usa dados do usuário para definir info e permissões
     setUserInfo(usuario);
     const isUserAdmin =
       usuario.role === "admin" ||
       ADMIN_EMAILS.includes((usuario.email || "").toLowerCase());
 
-    console.log("🔐 Verificação de permissões:", {
-      userRole: usuario.role,
-      userEmail: usuario.email,
-      isRoleAdmin: usuario.role === "admin",
-      isEmailAdmin: ADMIN_EMAILS.includes((usuario.email || "").toLowerCase()),
-      finalIsAdmin: isUserAdmin
-    });
-
     setIsAdmin(isUserAdmin);
-    console.log("👑 Resultado final - É admin?", isUserAdmin);
     setLoading(false);
-  }, [usuario]);
+  }, [usuario?.uid]); // Só re-executa se o UID mudar
 
   if (loading) {
     return (

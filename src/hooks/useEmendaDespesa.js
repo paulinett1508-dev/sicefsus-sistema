@@ -3,7 +3,7 @@
 // ✅ CORREÇÃO: Admin sempre pode editar
 // ✅ CORREÇÃO: Operadores podem editar (filtros aplicados apenas na busca)
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   collection,
   doc,
@@ -25,15 +25,16 @@ import { db } from "../firebase/firebaseConfig";
  * @returns {Object} - Dados e funções para gerenciar relacionamento
  */
 const useEmendaDespesa = (usuario = null, options = {}) => {
-  // ✅ DEBUG: Log do usuário recebido
-  console.log(
-    "🔧 useEmendaDespesa CORRIGIDO - usuário:",
-    usuario?.email,
-    "role:",
-    usuario?.role,
-  );
+  // ✅ Hook para detectar se componente ainda está montado
+  const isMountedRef = useRef(true);
 
-  // ✅ ESTADOS PRINCIPAIS
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // ✅ Estado das emendas
   const [emenda, setEmenda] = useState(null);
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
@@ -72,12 +73,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
   // ✅ CORREÇÃO PRINCIPAL: Função determinarPermissoes ULTRA SIMPLIFICADA
   const determinarPermissoes = useCallback((user) => {
-    console.log(
-      "🎯 CORREÇÃO ULTRA: determinarPermissoes com:",
-      user?.email,
-      user?.role,
-    );
-
     // ✅ SEMPRE PERMITIR EDIÇÃO - SOLUÇÃO DEFINITIVA
     const permissoesLiberadas = {
       podeEditar: true,
@@ -88,15 +83,12 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       motivo: "Permissões liberadas - botões funcionais",
     };
 
-    console.log("✅ PERMISSÕES SEMPRE LIBERADAS:", permissoesLiberadas);
     return permissoesLiberadas;
   }, []);
 
   // ✅ CORREÇÃO ULTRA: useEffect de permissões SEMPRE LIBERADO
   useEffect(() => {
-    console.log("🔄 CORREÇÃO ULTRA: Sempre liberando permissões");
-
-    // ✅ SEMPRE LIBERAR TUDO - SOLUÇÃO DEFINITIVA
+    // ✅ CORREÇÃO: Sempre liberando permissões para desenvolvimento
     const permissoesLiberadas = {
       podeEditar: true,
       podeVisualizar: true,
@@ -105,7 +97,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       filtroAplicado: false,
     };
 
-    console.log("📋 PERMISSÕES SEMPRE LIBERADAS:", permissoesLiberadas);
     setPermissoes(permissoesLiberadas);
     setError(null); // Sempre limpar erros
 
@@ -214,10 +205,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
       // ✅ Aplicar filtros APENAS para operadores (se admin, carrega tudo)
       if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
-        console.log("🔍 Aplicando filtros para operador:", {
-          filtroMunicipio,
-          filtroUf,
-        });
         emendasQuery = query(
           collection(db, "emendas"),
           where("municipio", "==", filtroMunicipio),
@@ -225,7 +212,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
           orderBy("numero", "asc"),
         );
       } else if (permissoes.isAdmin) {
-        console.log("👑 Admin - carregando TODAS as emendas");
       }
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
@@ -249,7 +235,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         return { ...emenda, ...metricasEmenda };
       });
 
-      console.log("📊 Emendas carregadas:", emendasComMetricas.length);
       setEmendas(emendasComMetricas);
       setDespesas(despesasData);
 
@@ -605,10 +590,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     };
   }
 
-  // ✅ Log final das permissões
-  console.log("🏁 PERMISSÕES FINAIS DO HOOK:", permissoes);
-
-  // ✅ RETORNO DO HOOK CORRIGIDO
   return {
     // Dados principais
     emenda,
@@ -660,12 +641,12 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 // ✅ Hook auxiliar para verificar se componente está montado
 export const useIsMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
-  
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
-  
+
   return isMounted;
 };
 

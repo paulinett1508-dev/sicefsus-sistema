@@ -286,13 +286,13 @@ const AdminPanel = () => {
     if (logFilters.usuario) {
       matches =
         matches &&
-        log.userEmail?.toLowerCase().includes(logFilters.usuario.toLowerCase());
+        (log.userEmail || "").toLowerCase().includes(logFilters.usuario.toLowerCase());
     }
 
     if (logFilters.acao) {
       matches =
         matches &&
-        log.action?.toLowerCase().includes(logFilters.acao.toLowerCase());
+        (log.action || "").toLowerCase().includes(logFilters.acao.toLowerCase());
     }
 
     if (logFilters.dataInicio) {
