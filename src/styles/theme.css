@@ -79,16 +79,28 @@
   --theme-text-muted: #6c757d;
   --theme-border: #495057;
   --theme-border-light: #343a40;
-  --theme-shadow: rgba(0, 0, 0, 0.3);
-  --theme-shadow-light: rgba(0, 0, 0, 0.2);
+  --theme-shadow: rgba(0, 0, 0, 0.4);
+  --theme-shadow-light: rgba(0, 0, 0, 0.3);
 
   /* Ajustes para melhor contraste no tema dark */
   --primary: #4A90E2;
+  --primary-light: #6ba4eb;
+  --primary-dark: #357ABD;
   --accent: #6ba4eb;
+  --accent-light: #8bb5f0;
+  --accent-dark: #4A90E2;
   --success: #2ecc71;
+  --success-light: #58d68d;
+  --success-dark: #27ae60;
   --warning: #f5b041;
+  --warning-light: #f7c572;
+  --warning-dark: #f39c12;
   --error: #ec7063;
+  --error-light: #f1948a;
+  --error-dark: #e74c3c;
   --info: #46c5d8;
+  --info-light: #73d3e3;
+  --info-dark: #17a2b8;
 }
 
   /* === SOMBRAS === */
