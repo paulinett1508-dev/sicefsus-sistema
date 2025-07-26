@@ -57,26 +57,34 @@ export default function DespesasList({
   const [estatisticasGerais, setEstatisticasGerais] = useState(null);
   const [estatisticasFiltro, setEstatisticasFiltro] = useState(null);
 
-  // ✅ Sincronizar dados do hook com estado local
+  // ✅ Sincronizar dados do hook com estado local - CORRIGIDO
   useEffect(() => {
-    if (despesasHook.length >= 0) {
-      setDespesas(despesasHook);
+    // ✅ CORREÇÃO: Verificar se hook não está mais loading e sincronizar
+    if (!hookLoading) {
+      setDespesas(despesasHook || []);
 
       // Aplicar filtro inicial se existir
       if (filtroInicial?.emendaId) {
-        const filtradas = despesasHook.filter(
+        const filtradas = (despesasHook || []).filter(
           (d) => d.emendaId === filtroInicial.emendaId,
         );
         setDespesasFiltradas(filtradas);
         calcularEstatisticasFiltro(filtradas);
       } else {
-        setDespesasFiltradas(despesasHook);
-        calcularEstatisticasFiltro(despesasHook);
+        setDespesasFiltradas(despesasHook || []);
+        calcularEstatisticasFiltro(despesasHook || []);
       }
 
+      // ✅ CORREÇÃO CRÍTICA: Sempre definir loading como false quando hook terminar
       setLoading(false);
+      
+      console.log("📊 DespesasList: Dados sincronizados", {
+        hookLoading,
+        despesasCount: (despesasHook || []).length,
+        localLoading: false
+      });
     }
-  }, [despesasHook, filtroInicial]);
+  }, [despesasHook, filtroInicial, hookLoading]);
 
   // ✅ Calcular estatísticas gerais
   useEffect(() => {
@@ -239,8 +247,8 @@ export default function DespesasList({
     return filtroInicial.emendaId;
   };
 
-  // ✅ Loading combinado
-  if (loading || hookLoading) {
+  // ✅ Loading combinado - CORRIGIDO
+  if (hookLoading) {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.loadingSpinner}></div>

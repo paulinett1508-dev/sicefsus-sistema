@@ -227,6 +227,19 @@ const Despesas = ({ usuario }) => {
       ? despesasFiltradas
       : despesas || [];
 
+  // ✅ DEBUG: Log estados para diagnosticar problema de loading
+  useEffect(() => {
+    console.log("🔍 DESPESAS DEBUG:", {
+      hookLoading: loading,
+      carregandoDespesas,
+      despesasHookLength: (despesas || []).length,
+      despesasFiltradasLength: despesasFiltradas.length,
+      despesasParaExibirLength: despesasParaExibir.length,
+      temFiltros: Object.values(filtros).some((v) => v),
+      filtroAutomatico: !!filtroAutomatico
+    });
+  }, [loading, carregandoDespesas, despesas, despesasFiltradas, despesasParaExibir, filtros, filtroAutomatico]);
+
   // Handlers para navegação
   const handleVisualizar = (despesa) => {
     console.log("👁️ Visualizando despesa:", despesa.id);
@@ -558,7 +571,7 @@ const Despesas = ({ usuario }) => {
             </div>
 
             {/* Tabela de Despesas */}
-            {loading || carregandoDespesas ? (
+            {loading ? (
               <div style={styles.loadingContainer}>
                 <p style={styles.loadingText}>
                   {filtroAutomatico
