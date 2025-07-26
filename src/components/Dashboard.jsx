@@ -1,5 +1,5 @@
 // Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 import "../styles/dashboard.css";
 import {
@@ -63,34 +63,8 @@ export default function Dashboard({ usuario }) {
     topMunicipios: [],
   });
 
-  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
-  useEffect(() => {
-    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
-    if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
-      console.log("📊 Calculando estatísticas do Dashboard...");
-      console.log("📋 Emendas disponíveis:", emendas.length);
-      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
-
-      const stats = obterEstatisticasGerais
-        ? obterEstatisticasGerais()
-        : calcularEstatisticasLocais();
-      setEstatisticas(stats);
-
-      console.log("✅ Estatísticas calculadas:", stats);
-    } else {
-      console.log("⏳ Aguardando dados:", {
-        loading,
-        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
-        emendasTipo: typeof emendas,
-        emendasLength: emendas?.length,
-      });
-    }
-  }, [emendas, despesas, loading, obterEstatisticasGerais]);
-
-  // Dashboard.jsx - CORREÇÃO DO SALDO DISPONÍVEL (R$ NaN)
-  // Substituir a função calcularEstatisticasLocais (linhas ~110-220)
-
-  const calcularEstatisticasLocais = () => {
+  // ✅ FUNÇÃO PARA CALCULAR ESTATÍSTICAS LOCAIS (MOVIDA PARA ANTES DO useEffect)
+  const calcularEstatisticasLocais = useCallback(() => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
@@ -283,7 +257,50 @@ export default function Dashboard({ usuario }) {
       evolucaoMensal,
       topMunicipios,
     };
-  };
+  }, [emendas, despesas]);
+
+  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
+  useEffect(() => {
+    // ✅ CORREÇÃO: Verificação segura de arrays antes de usar .length
+    if (!loading && emendas && Array.isArray(emendas) && emendas.length > 0) {
+      console.log("📊 Calculando estatísticas do Dashboard...");
+      console.log("📋 Emendas disponíveis:", emendas.length);
+      console.log("💰 Despesas disponíveis:", despesas?.length || 0);
+
+      // ✅ CORREÇÃO: Verificar se as estatísticas do hook têm as propriedades corretas
+      let stats;
+      if (obterEstatisticasGerais && metricas) {
+        const hookStats = obterEstatisticasGerais();
+        // Mapear as propriedades do hook para o formato esperado pelo Dashboard
+        stats = {
+          totalEmendas: hookStats.totalEmendas || 0,
+          totalDespesas: hookStats.totalDespesas || 0,
+          valorTotalEmendas: hookStats.valorTotalGeral || hookStats.valorTotalEmendas || 0,
+          valorTotalDespesas: hookStats.valorExecutadoGeral || hookStats.valorTotalDespesas || 0,
+          saldoDisponivel: hookStats.saldoDisponivelGeral || hookStats.saldoDisponivel || 0,
+          percentualExecutado: hookStats.percentualGeralExecutado || hookStats.percentualExecutado || 0,
+          emendasPorStatus: hookStats.emendasPorStatus || [],
+          despesasPorStatus: hookStats.despesasPorStatus || [],
+          evolucaoMensal: hookStats.evolucaoMensal || [],
+          topMunicipios: hookStats.topMunicipios || [],
+        };
+      } else {
+        stats = calcularEstatisticasLocais();
+      }
+      
+      setEstatisticas(stats);
+      console.log("✅ Estatísticas calculadas:", stats);
+    } else {
+      console.log("⏳ Aguardando dados:", {
+        loading,
+        emendasValidas: emendas && Array.isArray(emendas) && emendas.length > 0,
+        emendasTipo: typeof emendas,
+        emendasLength: emendas?.length,
+      });
+    }
+  }, [emendas, despesas, loading, obterEstatisticasGerais, metricas, calcularEstatisticasLocais]);
+
+  
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
