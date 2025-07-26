@@ -10,6 +10,7 @@ export default function ThemeToggle({ compact = false }) {
       <button
         onClick={toggleTheme}
         style={styles.compactButton}
+        className="theme-toggle-button"
         title={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
         aria-label={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
         onMouseEnter={(e) => {

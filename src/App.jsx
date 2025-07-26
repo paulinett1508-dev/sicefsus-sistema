@@ -265,11 +265,8 @@ function AppContent() {
   const themeToggleStyle = useMemo(() => ({
     ...styles.themeToggleContainer,
     right: isAuthenticated ? "235px" : "15px", // Ajuste quando sidebar estiver presente
-    '@media (max-width: 768px)': {
-      right: "15px", // Em telas pequenas sempre no canto
-      top: "10px",
-    },
-  }), [isAuthenticated]);
+    display: location.pathname === "/" && !isAuthenticated ? "none" : "block", // Ocultar apenas na home quando não autenticado
+  }), [isAuthenticated, location.pathname]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -316,12 +313,10 @@ function AppContent() {
           />
         )}
 
-        {/* Botão de tema no canto superior direito - sempre visível quando há usuário */}
-        {usuario && (
-          <div style={themeToggleStyle}>
-            <ThemeToggle compact={true} />
-          </div>
-        )}
+        {/* Botão de tema no canto superior direito - sempre visível quando autenticado */}
+        <div style={themeToggleStyle}>
+          <ThemeToggle compact={true} />
+        </div>
 
         {/* Conteúdo principal */}
         <div
@@ -696,7 +691,7 @@ const styles = {
   themeToggleContainer: {
     position: "fixed",
     top: "15px",
-    zIndex: 1000,
+    zIndex: 999,
     transition: "all 0.2s ease",
   },
 };

@@ -1,3 +1,13 @@
+
+/* === RESPONSIVIDADE PARA BOTÃO DE TEMA === */
+@media (max-width: 768px) {
+  .theme-toggle-container {
+    right: 15px !important;
+    top: 10px !important;
+  }
+}
+
+
 /* src/styles/theme.css - TEMA CENTRALIZADO DO SISTEMA */
 /* ✅ Variáveis CSS para padronização completa */
 
@@ -143,6 +153,7 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
   --z-toast: 9999;
+  --z-theme-toggle: 999;
 
   /* === LAYOUT === */
   --sidebar-width: 220px;
