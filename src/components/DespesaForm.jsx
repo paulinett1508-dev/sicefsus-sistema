@@ -1,1445 +1,1071 @@
-// DespesaForm.jsx - VERSÃO CORRIGIDA v3.0 - CRÍTICA
-// ✅ CORREÇÃO CRÍTICA: Simplificada verificação readOnly
-// ✅ CORREÇÃO CRÍTICA: Campos sempre editáveis quando não em modo readOnly
-// ✅ CORREÇÃO CRÍTICA: Eliminada lógica complexa de permissões
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  collection,
-  addDoc,
-  updateDoc,
   doc,
+  setDoc,
+  updateDoc,
+  collection,
   query,
   where,
   getDocs,
-  serverTimestamp,
+  addDoc,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebase/firebaseConfig";
-import { useNavigationProtection } from "../App";
-import { useToast } from "./Toast";
-import ConfirmationModal from "./ConfirmationModal";
-import useEmendaDespesa from "../hooks/useEmendaDespesa";
-import SaldoEmendaWidget from "./SaldoEmendaWidget";
+import { db } from "../firebase/firebaseConfig";
+import Toast from "./Toast";
+import { useIsMounted } from "../hooks/useEmendaDespesa";
 
 const DespesaForm = ({
-  despesa,
-  onSalvar,
-  onCancelar,
-  emendaId,
   usuario,
-  readOnly = false, // ✅ CORREÇÃO CRÍTICA: Única fonte de verdade
-  onChangeDetected,
+  despesaParaEditar,
+  onCancelar,
+  onSalvar,
+  modoVisualizacao = false,
+  emendasDisponiveis = [],
+  emendaPreSelecionada = null,
+  emendaInfo = null,
+  isPrimeiraDespesa = false,
+  titulo = null,
+  subtitle = null,
+  emendaId = null,
 }) => {
-  const { success, error, warning } = useToast();
-  const { setFormActive } = useNavigationProtection();
+  const isMounted = useIsMounted();
+  const navigate = useNavigate();
 
-  // ✅ Hook integrado para validações e cálculos
-  const {
-    emendas,
-    validarNovaDespesa,
-    atualizarSaldoEmenda,
-    loading: hookLoading,
-    error: hookError,
-    recarregar,
-  } = useEmendaDespesa(null, {
-    carregarTodasEmendas: true,
-    incluirEstatisticas: true,
-    autoRefresh: true,
-  });
-
-  // ✅ Data atual formatada
-  const getDataAtual = () => {
-    const hoje = new Date();
-    return hoje.toISOString().split("T")[0];
-  };
-
-  // ✅ Estado inicial do formulário
+  // Estado inicial com campos obrigatórios conforme print oficial
   const [formData, setFormData] = useState({
-    numero: "",
-    emendaId: emendaId || "",
-    descricao: "",
+    emendaId: emendaPreSelecionada || emendaId || "",
+    discriminacao: "",
+    fornecedor: "",
     valor: "",
-    data: getDataAtual(),
-    dataPagamento: "",
-    numeroContrato: "",
-    acao: "",
-    dotacaoOrcamentaria: "",
-    notaFiscalNumero: "",
-    notaFiscalData: "",
-    notaFiscalFornecedor: "",
-    notaFiscalDescricao: "",
     numeroEmpenho: "",
-    naturezaDespesa: "",
+    numeroNota: "",
     dataEmpenho: "",
     dataLiquidacao: "",
-    discriminacao: "",
+    dataPagamento: "",
+    acao: "",
+    dotacaoOrcamentaria: "",
     classificacaoFuncional: "",
+    numeroContrato: "",
+    categoria: "",
+    descricao: "",
     observacoes: "",
-    itens: [{ descricao: "", valor: "", quantidade: "1" }],
-    totalItens: "0,00",
-    createdAt: "",
-    updatedAt: "",
+    status: "pendente",
+    dataVencimento: "",
+    centroCusto: "",
+    naturezaDespesa: "",
+    elementoDespesa: "",
+    fonteRecurso: "",
+    programaTrabalho: "",
+    planoInterno: "",
+    contrapartida: 0,
+    percentualExecucao: 0,
+    etapaExecucao: "",
+    coordenadasGeograficas: "",
+    populacaoBeneficiada: "",
+    impactoSocial: "",
+    cnpjFornecedor: "",
+    enderecoFornecedor: "",
+    telefoneFornecedor: "",
+    emailFornecedor: "",
+    dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
   });
 
-  // ✅ Estados de controle
-  const [loading, setLoading] = useState(false);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialFormData, setInitialFormData] = useState(null);
-  const [isFormInitialized, setIsFormInitialized] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
+  const [emendas, setEmendas] = useState(emendasDisponiveis);
 
-  // ✅ Estados para controle pós-salvamento
-  const [showSuccessOptions, setShowSuccessOptions] = useState(false);
-  const [despesaSalva, setDespesaSalva] = useState(null);
-  const [modoOperacao, setModoOperacao] = useState(
-    readOnly ? "visualizar" : despesa ? "editar" : "criar",
-  );
-
-  // ✅ Opções para campos de seleção
-  const naturezasDespesa = [
-    "MATERIAL DE CONSUMO",
-    "MATERIAL PERMANENTE",
-    "SERVIÇOS TERCEIRIZADOS",
-    "OBRAS E INSTALAÇÕES",
-    "EQUIPAMENTOS E MATERIAL PERMANENTE",
-    "OUTROS SERVIÇOS DE TERCEIROS - PESSOA FÍSICA",
-    "OUTROS SERVIÇOS DE TERCEIROS - PESSOA JURÍDICA",
-  ];
-
-  // ✅ Carregar dados para edição
+  // Carregar emendas se não foram fornecidas
   useEffect(() => {
-    if (despesa && !isFormInitialized) {
-      const formatarParaExibicao = (valor) => {
-        if (typeof valor === "number") {
-          return valor.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          });
-        }
-        return valor || "";
-      };
-
-      const itensFormatados =
-        despesa.itens?.length > 0
-          ? despesa.itens.map((item) => ({
-              descricao: item.descricao || "",
-              valor: formatarParaExibicao(item.valor || 0),
-              quantidade: item.quantidade || "1",
-            }))
-          : [{ descricao: "", valor: "", quantidade: "1" }];
-
-      const dadosIniciais = {
-        ...despesa,
-        valor: formatarParaExibicao(despesa.valor),
-        itens: itensFormatados,
-        totalItens: formatarParaExibicao(despesa.totalItens || 0),
-      };
-
-      setFormData(dadosIniciais);
-      setInitialFormData(dadosIniciais);
-      setIsFormInitialized(true);
+    if (emendas.length === 0 && !emendaPreSelecionada) {
+      carregarEmendas();
     }
-  }, [despesa, isFormInitialized]);
+  }, []);
 
-  // ✅ Atualizar total dos itens automaticamente
+  // Carregar dados para edição
   useEffect(() => {
-    const calcularTotalItens = () => {
-      const total = formData.itens.reduce((sum, item) => {
-        const valor = parseFloat(
-          item.valor?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-        );
-        const quantidade = parseInt(item.quantidade) || 1;
-        return sum + valor * quantidade;
-      }, 0);
-
-      const totalFormatado = total.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-
-      if (formData.totalItens !== totalFormatado) {
-        setFormData((prev) => ({
-          ...prev,
-          totalItens: totalFormatado,
-        }));
-      }
-    };
-
-    calcularTotalItens();
-  }, [formData.itens, formData.totalItens]);
-
-  // ✅ Detectar mudanças no formulário
-  useEffect(() => {
-    if (initialFormData && onChangeDetected) {
-      const hasChangesNow =
-        JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      if (hasChangesNow !== hasChanges) {
-        setHasChanges(hasChangesNow);
-        onChangeDetected(hasChangesNow);
-      }
-    }
-  }, [formData, initialFormData, hasChanges, onChangeDetected]);
-
-  // ✅ Ativar proteção de navegação quando há mudanças
-  useEffect(() => {
-    if (setFormActive) {
-      setFormActive(hasChanges && !readOnly);
-    }
-  }, [hasChanges, readOnly, setFormActive]);
-
-  // ✅ CORREÇÃO: Formatação de valores monetários com digitação contínua
-  const formatarValorMonetario = (valor) => {
-    if (!valor) return "";
-
-    // Se é um número, formatar direto
-    if (typeof valor === "number") {
-      return valor.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    }
-
-    // Remover tudo exceto dígitos
-    const apenasNumeros = valor.toString().replace(/\D/g, "");
-    
-    if (!apenasNumeros) return "";
-
-    // Converter para número e dividir por 100 para obter centavos
-    const numero = parseInt(apenasNumeros) || 0;
-    const valorDecimal = numero / 100;
-
-    // Formatar como moeda brasileira
-    return valorDecimal.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
-
-  // ✅ CORREÇÃO CRÍTICA: Handler EXTREMAMENTE SIMPLIFICADO
-  const handleInputChange = (e) => {
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
-
-    const { name, value } = e.target;
-    let valorFormatado = value;
-
-    // Formatação específica para campos monetários
-    if (name === "valor") {
-      valorFormatado = formatarValorMonetario(value);
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: valorFormatado,
-    }));
-
-    // Limpar erro específico do campo
-    if (errors[name]) {
-      setErrors((prev) => ({
+    if (despesaParaEditar) {
+      setFormData((prev) => ({
         ...prev,
-        [name]: null,
+        ...despesaParaEditar,
+        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
       }));
     }
+  }, [despesaParaEditar]);
+
+  // Preencher dados da emenda quando vem pré-selecionada
+  useEffect(() => {
+    if (emendaPreSelecionada && emendaInfo && !despesaParaEditar) {
+      setFormData((prev) => ({
+        ...prev,
+        emendaId: emendaPreSelecionada,
+      }));
+    }
+  }, [emendaPreSelecionada, emendaInfo, despesaParaEditar]);
+
+  const carregarEmendas = async () => {
+    try {
+      const q = query(collection(db, "emendas"));
+      const querySnapshot = await getDocs(q);
+      const emendasData = [];
+
+      querySnapshot.forEach((doc) => {
+        emendasData.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      setEmendas(emendasData);
+    } catch (error) {
+      console.error("Erro ao carregar emendas:", error);
+    }
   };
 
-  // ✅ Handler para itens da nota fiscal
-  const handleItemChange = (index, campo, valor) => {
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
+  const handleInputChange = useCallback(
+    (e) => {
+      if (!isMounted()) return;
 
-    let valorFormatado = valor;
-    if (campo === "valor") {
-      valorFormatado = formatarValorMonetario(valor);
-    }
+      const { name, value } = e.target;
 
-    const novosItens = [...formData.itens];
-    novosItens[index] = {
-      ...novosItens[index],
-      [campo]: valorFormatado,
+      // Formatação especial para valor monetário
+      if (name === "valor") {
+        const valorFormatado = formatarMoeda(value);
+        setFormData((prev) => ({ ...prev, [name]: valorFormatado }));
+      } else {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+      }
+
+      // Limpar erro do campo
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+    },
+    [isMounted, errors],
+  );
+
+  const formatarMoeda = (valor) => {
+    let numero = valor.replace(/\D/g, "");
+
+    if (numero.length === 0) return "";
+    if (numero.length === 1) return `0,0${numero}`;
+    if (numero.length === 2) return `0,${numero}`;
+
+    numero = numero.replace(/^(\d+)(\d{2})$/, "$1,$2");
+    numero = numero.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+
+    return numero;
+  };
+
+  const validarFormulario = () => {
+    const novosErrors = {};
+
+    // Campos obrigatórios conforme print oficial
+    const camposObrigatorios = {
+      emendaId: "Emenda é obrigatória",
+      discriminacao: "Discriminação é obrigatória",
+      fornecedor: "Fornecedor é obrigatório",
+      valor: "Valor é obrigatório",
+      numeroEmpenho: "Nº do Empenho é obrigatório",
+      numeroNota: "Nº da Nota Fiscal é obrigatório",
+      dataEmpenho: "Data do Empenho é obrigatória",
+      dataLiquidacao: "Data da Liquidação é obrigatória",
+      dataPagamento: "Data do Pagamento é obrigatória",
+      acao: "Ação é obrigatória",
+      dotacaoOrcamentaria: "Dotação Orçamentária é obrigatória",
+      classificacaoFuncional: "Classificação Funcional é obrigatória",
     };
 
-    setFormData((prev) => ({
-      ...prev,
-      itens: novosItens,
-    }));
-  };
+    Object.keys(camposObrigatorios).forEach((campo) => {
+      if (!formData[campo] || formData[campo].toString().trim() === "") {
+        novosErrors[campo] = camposObrigatorios[campo];
+      }
+    });
 
-  // ✅ Adicionar novo item
-  const adicionarItem = () => {
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
+    // Validação para valor monetário
+    if (formData.valor) {
+      const valor = parseFloat(
+        formData.valor.replace(/[^\d,]/g, "").replace(",", "."),
+      );
+      if (isNaN(valor) || valor <= 0) {
+        novosErrors.valor = "Valor deve ser maior que 0";
+      }
 
-    setFormData((prev) => ({
-      ...prev,
-      itens: [...prev.itens, { descricao: "", valor: "", quantidade: "1" }],
-    }));
-  };
-
-  // ✅ Remover item
-  const removerItem = (index) => {
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
-    if (formData.itens.length <= 1) return;
-
-    const novosItens = formData.itens.filter((_, i) => i !== index);
-    setFormData((prev) => ({
-      ...prev,
-      itens: novosItens,
-    }));
-  };
-
-  // ✅ Validações do formulário
-  const validarFormulario = () => {
-    const novosErros = {};
-
-    // Campos obrigatórios
-    if (!formData.emendaId) {
-      novosErros.emendaId = "Emenda é obrigatória";
-    }
-    if (!formData.descricao?.trim()) {
-      novosErros.descricao = "Descrição é obrigatória";
-    }
-    if (!formData.valor) {
-      novosErros.valor = "Valor é obrigatório";
-    }
-    if (!formData.data) {
-      novosErros.data = "Data de lançamento é obrigatória";
-    }
-    if (!formData.acao?.trim()) {
-      novosErros.acao = "Ação é obrigatória";
-    }
-    if (!formData.dotacaoOrcamentaria?.trim()) {
-      novosErros.dotacaoOrcamentaria = "Dotação orçamentária é obrigatória";
-    }
-    if (!formData.notaFiscalNumero?.trim()) {
-      novosErros.notaFiscalNumero = "Número da nota fiscal é obrigatório";
-    }
-    if (!formData.notaFiscalData) {
-      novosErros.notaFiscalData = "Data da nota fiscal é obrigatória";
-    }
-    if (!formData.notaFiscalFornecedor?.trim()) {
-      novosErros.notaFiscalFornecedor =
-        "Fornecedor da nota fiscal é obrigatório";
-    }
-
-    // Validação de datas
-    if (formData.data && formData.notaFiscalData) {
-      const dataLancamento = new Date(formData.data);
-      const dataNF = new Date(formData.notaFiscalData);
-
-      if (dataLancamento < dataNF) {
-        novosErros.data =
-          "Data de lançamento deve ser maior ou igual à data da nota fiscal";
+      // Verificar se não excede o saldo da emenda
+      if (emendaInfo && valor > emendaInfo.saldoDisponivel) {
+        novosErrors.valor = `Valor excede o saldo disponível (R$ ${emendaInfo.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})`;
       }
     }
 
-    // Validação do valor da NF vs total dos itens
-    const valorNF = parseFloat(
-      formData.valor?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-    );
-    const totalItens = parseFloat(
-      formData.totalItens?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-    );
-
-    if (Math.abs(valorNF - totalItens) > 0.01) {
-      novosErros.valor =
-        "Valor da nota fiscal deve ser igual ao total dos itens";
-      novosErros.totalItens =
-        "Total dos itens deve ser igual ao valor da nota fiscal";
-    }
-
-    // Validação dos itens
-    const itensValidos = formData.itens.every((item) => {
-      return item.descricao?.trim() && item.valor && item.quantidade;
-    });
-
-    if (!itensValidos) {
-      novosErros.itens =
-        "Todos os itens devem ter descrição, valor e quantidade preenchidos";
-    }
-
-    setErrors(novosErros);
-    return Object.keys(novosErros).length === 0;
+    setErrors(novosErrors);
+    return Object.keys(novosErrors).length === 0;
   };
 
-  // ✅ CORREÇÃO CRÍTICA: Submissão EXTREMAMENTE SIMPLIFICADA
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
 
     if (!validarFormulario()) {
-      error("Por favor, corrija os erros no formulário antes de continuar");
+      setToast({
+        show: true,
+        message: "Por favor, preencha todos os campos obrigatórios.",
+        type: "error",
+      });
       return;
     }
 
     setLoading(true);
 
     try {
-      // Preparar dados para salvar
       const dadosParaSalvar = {
         ...formData,
-        valor: parseFloat(
-          formData.valor?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-        ),
-        totalItens: parseFloat(
-          formData.totalItens?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-        ),
-        itens: formData.itens.map((item) => ({
-          ...item,
-          valor: parseFloat(
-            item.valor?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-          ),
-          quantidade: parseInt(item.quantidade) || 1,
-        })),
-        updatedAt: serverTimestamp(),
+        valor:
+          parseFloat(formData.valor.replace(/[^\d,]/g, "").replace(",", ".")) ||
+          0,
+        contrapartida: parseFloat(formData.contrapartida) || 0,
+        percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
+        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
+        criadoPor: usuario?.email || "sistema",
+        atualizadoEm: new Date(),
+        criadoEm: despesaParaEditar?.criadoEm || new Date(),
       };
 
-      if (despesa) {
-        // Atualizar despesa existente
-        await updateDoc(doc(db, "despesas", despesa.id), dadosParaSalvar);
-        success("Despesa atualizada com sucesso!");
-      } else {
-        // Criar nova despesa
-        const novaDespesaRef = await addDoc(collection(db, "despesas"), {
-          ...dadosParaSalvar,
-          numero: `DSP${String(Date.now()).slice(-6)}`,
-          createdAt: serverTimestamp(),
+      if (despesaParaEditar) {
+        const despesaRef = doc(db, "despesas", despesaParaEditar.id);
+        await updateDoc(despesaRef, dadosParaSalvar);
+        setToast({
+          show: true,
+          message: "Despesa atualizada com sucesso!",
+          type: "success",
         });
-        success("Despesa criada com sucesso!");
-        setDespesaSalva({ id: novaDespesaRef.id, ...dadosParaSalvar });
+      } else {
+        const docRef = await addDoc(
+          collection(db, "despesas"),
+          dadosParaSalvar,
+        );
+        setToast({
+          show: true,
+          message: "Despesa criada com sucesso!",
+          type: "success",
+        });
       }
 
-      // Atualizar saldo da emenda
-      if (formData.emendaId) {
-        await atualizarSaldoEmenda(formData.emendaId);
-      }
-
-      setShowSuccessOptions(true);
-      setHasChanges(false);
-
-      if (onSalvar) {
+      if (onSalvar && typeof onSalvar === "function") {
         onSalvar();
       }
-    } catch (err) {
-      console.error("❌ Erro ao salvar despesa:", err);
-      error("Erro ao salvar despesa. Tente novamente.");
+    } catch (error) {
+      console.error("❌ Erro ao salvar despesa:", error);
+      setToast({
+        show: true,
+        message: "Erro ao salvar despesa. Tente novamente.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Handler para cancelar
-  const handleCancel = () => {
-    if (hasChanges && !readOnly) {
-      setShowConfirmationModal(true);
-    } else {
-      onCancelar();
-    }
-  };
-
-  // ✅ Confirmar cancelamento
-  const confirmarCancelamento = () => {
-    setShowConfirmationModal(false);
-    setHasChanges(false);
-    onCancelar();
-  };
-
-  // ✅ Upload de arquivo
-  const handleFileUpload = async (file) => {
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
-
-    try {
-      const storageRef = ref(storage, `despesas/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-
-      setUploadedFile({
-        name: file.name,
-        url: downloadURL,
-        size: file.size,
-      });
-
-      success("Arquivo enviado com sucesso!");
-    } catch (err) {
-      console.error("❌ Erro no upload:", err);
-      error("Erro ao enviar arquivo. Tente novamente.");
-    }
-  };
-
-  // ✅ Drag and drop handlers
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (readOnly) return; // ✅ ÚNICA verificação necessária
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
-    }
-  };
-
-  // ✅ Renderização do componente
-  // ✅ Renderizar header padronizado
-  const renderHeader = () => {
-    const headers = {
-      criar: {
-        title: "📝 Criar Despesa",
-        subtitle: "Preencha os dados para criar uma nova despesa",
-        bgColor: "#d4edda",
-        textColor: "#155724",
-      },
-      editar: {
-        title: "✏️ Editar Despesa", 
-        subtitle: `ID: ${despesa?.id || ""} | Descrição: ${formData.descricao || ""}`,
-        bgColor: "#d4edda",
-        textColor: "#155724",
-      },
-      visualizar: {
-        title: "👁️ Visualizar Despesa",
-        subtitle: `ID: ${despesa?.id || ""} | Descrição: ${formData.descricao || ""}`,
-        bgColor: "#e7f3ff",
-        textColor: "#004085",
-      },
-    };
-
-    const modo = readOnly ? "visualizar" : despesa ? "editar" : "criar";
-    const config = headers[modo];
-
-    return (
-      <div
-        style={{
-          ...styles.header,
-          backgroundColor: config.bgColor,
-          color: config.textColor,
-        }}
-      >
-        <h2 style={styles.headerTitle}>{config.title}</h2>
-        <p style={styles.headerSubtitle}>{config.subtitle}</p>
-        <div style={styles.permissionInfo}>
-          <span style={styles.permissionIcon}>
-            {usuario?.role === "admin" ? "👑" : "👤"}
-          </span>
-          <span style={styles.permissionText}>
-            {usuario?.role === "admin" ? "Administrador" : "Operador"} |
-            {readOnly ? " 👁️ Apenas visualização" : " ✅ Pode editar"}
-          </span>
-        </div>
-      </div>
-    );
+  const styles = {
+    container: {
+      maxWidth: "1200px",
+      margin: "0 auto",
+      padding: "20px",
+      backgroundColor: "#f8f9fa",
+    },
+    card: {
+      backgroundColor: "white",
+      borderRadius: "8px",
+      padding: "30px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+      marginBottom: "20px",
+    },
+    header: {
+      borderBottom: "2px solid #e9ecef",
+      paddingBottom: "20px",
+      marginBottom: "30px",
+    },
+    title: {
+      fontSize: "24px",
+      fontWeight: "bold",
+      color: "#333",
+      margin: "0 0 8px 0",
+    },
+    subtitle: {
+      fontSize: "14px",
+      color: "#666",
+      margin: 0,
+    },
+    emendaInfo: {
+      backgroundColor: "#e3f2fd",
+      border: "2px solid #2196f3",
+      borderRadius: "8px",
+      padding: "20px",
+      marginBottom: "30px",
+    },
+    emendaInfoTitle: {
+      fontSize: "16px",
+      fontWeight: "bold",
+      color: "#1565c0",
+      marginBottom: "15px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    emendaInfoGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+      gap: "15px",
+    },
+    emendaInfoRow: {
+      fontSize: "14px",
+      color: "#1565c0",
+    },
+    section: {
+      marginBottom: "30px",
+    },
+    sectionTitle: {
+      fontSize: "18px",
+      fontWeight: "bold",
+      color: "#495057",
+      marginBottom: "20px",
+      paddingBottom: "10px",
+      borderBottom: "1px solid #dee2e6",
+    },
+    formRow: {
+      display: "flex",
+      gap: "20px",
+      marginBottom: "20px",
+      flexWrap: "wrap",
+    },
+    formGroup: {
+      flex: 1,
+      minWidth: "200px",
+    },
+    formGroupMedium: {
+      flex: "0 0 200px",
+    },
+    label: {
+      display: "block",
+      fontWeight: "bold",
+      marginBottom: "8px",
+      color: "#333",
+      fontSize: "14px",
+    },
+    labelRequired: {
+      display: "block",
+      fontWeight: "bold",
+      marginBottom: "8px",
+      color: "#333",
+      fontSize: "14px",
+    },
+    input: {
+      width: "100%",
+      padding: "12px",
+      border: "2px solid #e9ecef",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      boxSizing: "border-box",
+    },
+    inputError: {
+      width: "100%",
+      padding: "12px",
+      border: "2px solid #dc3545",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      boxSizing: "border-box",
+    },
+    inputReadonly: {
+      width: "100%",
+      padding: "12px",
+      border: "2px solid #2196f3",
+      borderRadius: "6px",
+      fontSize: "14px",
+      backgroundColor: "#e3f2fd",
+      color: "#1565c0",
+      fontWeight: "bold",
+      boxSizing: "border-box",
+    },
+    select: {
+      width: "100%",
+      padding: "12px",
+      border: "2px solid #e9ecef",
+      borderRadius: "6px",
+      fontSize: "14px",
+      backgroundColor: "white",
+      boxSizing: "border-box",
+    },
+    textarea: {
+      width: "100%",
+      padding: "12px",
+      border: "2px solid #e9ecef",
+      borderRadius: "6px",
+      fontSize: "14px",
+      minHeight: "100px",
+      resize: "vertical",
+      boxSizing: "border-box",
+    },
+    errorText: {
+      color: "#dc3545",
+      fontSize: "12px",
+      marginTop: "5px",
+    },
+    helpText: {
+      color: "#6c757d",
+      fontSize: "12px",
+      marginTop: "5px",
+    },
+    buttonGroup: {
+      display: "flex",
+      gap: "15px",
+      justifyContent: "flex-end",
+      marginTop: "30px",
+      paddingTop: "20px",
+      borderTop: "1px solid #dee2e6",
+    },
+    button: {
+      padding: "12px 24px",
+      borderRadius: "6px",
+      fontSize: "14px",
+      fontWeight: "bold",
+      cursor: "pointer",
+      border: "none",
+      transition: "all 0.3s ease",
+    },
+    buttonPrimary: {
+      backgroundColor: "#007bff",
+      color: "white",
+    },
+    buttonSecondary: {
+      backgroundColor: "#6c757d",
+      color: "white",
+    },
+    buttonSuccess: {
+      backgroundColor: "#28a745",
+      color: "white",
+    },
+    toggleButton: {
+      backgroundColor: "#17a2b8",
+      color: "white",
+      padding: "8px 16px",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer",
+      fontSize: "12px",
+      marginBottom: "20px",
+    },
   };
 
   return (
     <div style={styles.container}>
-      {renderHeader()}
-
-      {hookError && (
-        <div style={styles.errorMessage}>❌ Erro: {hookError}</div>
-      )}
-
-      <form onSubmit={handleSubmit} style={styles.form}>
-        {/* ✅ Widget de saldo da emenda */}
-        {formData.emendaId && (
-          <SaldoEmendaWidget
-            emendaId={formData.emendaId}
-            valorNovaDespesa={parseFloat(
-              formData.valor?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-            )}
-            despesaAtualId={despesa?.id}
-          />
-        )}
-
-        {/* ✅ Seção: Dados Básicos */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>📋</span>
-            Dados Básicos da Despesa
-          </legend>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Emenda *</label>
-              <select
-                name="emendaId"
-                value={formData.emendaId || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.select,
-                  ...(errors.emendaId ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              >
-                <option value="">Selecione uma emenda</option>
-                {emendas.map((emenda) => (
-                  <option key={emenda.id} value={emenda.id}>
-                    {emenda.numero} - {emenda.parlamentar} - {emenda.municipio}/
-                    {emenda.uf}
-                  </option>
-                ))}
-              </select>
-              {errors.emendaId && (
-                <div style={styles.errorMessage}>{errors.emendaId}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Número do Contrato</label>
-              <input
-                type="text"
-                name="numeroContrato"
-                value={formData.numeroContrato || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                placeholder="Ex: CT-2025-001"
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-            </div>
-          </div>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Descrição da Despesa *</label>
-              <textarea
-                name="descricao"
-                value={formData.descricao || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.textarea,
-                  ...(errors.descricao ? styles.inputError : {}),
-                }}
-                placeholder="Ex: Construção de praça"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.descricao && (
-                <div style={styles.errorMessage}>{errors.descricao}</div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Ação *</label>
-              <input
-                type="text"
-                name="acao"
-                value={formData.acao || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.acao ? styles.inputError : {}),
-                }}
-                placeholder="Ex: Construção de praça"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.acao && (
-                <div style={styles.errorMessage}>{errors.acao}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Dotação Orçamentária *</label>
-              <input
-                type="text"
-                name="dotacaoOrcamentaria"
-                value={formData.dotacaoOrcamentaria || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.dotacaoOrcamentaria ? styles.inputError : {}),
-                }}
-                placeholder="Ex: 12.361.0001.2010"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.dotacaoOrcamentaria && (
-                <div style={styles.errorMessage}>
-                  {errors.dotacaoOrcamentaria}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Campo de observações (opcional) */}
-          {(formData.observacoes || !readOnly) && (
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Observações</label>
-              <textarea
-                name="observacoes"
-                value={formData.observacoes || ""}
-                onChange={handleInputChange}
-                style={styles.textarea}
-                placeholder="Observações adicionais sobre a despesa..."
-                rows="2"
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-            </div>
-          )}
-        </fieldset>
-
-        {/* ✅ Seção: Nota Fiscal */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>🧾</span>
-            Dados da Nota Fiscal
-          </legend>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Número da Nota Fiscal *</label>
-              <input
-                type="text"
-                name="notaFiscalNumero"
-                value={formData.notaFiscalNumero || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalNumero ? styles.inputError : {}),
-                }}
-                placeholder="Ex: NF-001234"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.notaFiscalNumero && (
-                <div style={styles.errorMessage}>{errors.notaFiscalNumero}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Valor da Nota Fiscal *</label>
-              <input
-                type="text"
-                name="valor"
-                value={formData.valor || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.valor ? styles.inputError : {}),
-                }}
-                placeholder="0,00"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.valor && (
-                <div style={styles.errorMessage}>{errors.valor}</div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Data da Nota Fiscal *</label>
-              <input
-                type="date"
-                name="notaFiscalData"
-                value={formData.notaFiscalData || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalData ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.notaFiscalData && (
-                <div style={styles.errorMessage}>{errors.notaFiscalData}</div>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Data de Lançamento *</label>
-              <input
-                type="date"
-                name="data"
-                value={formData.data || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.data ? styles.inputError : {}),
-                }}
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.data && (
-                <div style={styles.errorMessage}>{errors.data}</div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.formRow}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Fornecedor *</label>
-              <input
-                type="text"
-                name="notaFiscalFornecedor"
-                value={formData.notaFiscalFornecedor || ""}
-                onChange={handleInputChange}
-                style={{
-                  ...styles.input,
-                  ...(errors.notaFiscalFornecedor ? styles.inputError : {}),
-                }}
-                placeholder="Nome do fornecedor"
-                required
-                disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-              />
-              {errors.notaFiscalFornecedor && (
-                <div style={styles.errorMessage}>
-                  {errors.notaFiscalFornecedor}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Descrição da Nota Fiscal</label>
-            <textarea
-              name="notaFiscalDescricao"
-              value={formData.notaFiscalDescricao || ""}
-              onChange={handleInputChange}
-              style={styles.textarea}
-              placeholder="Descrição detalhada dos itens da nota fiscal..."
-              rows="2"
-              disabled={readOnly} // ✅ CORREÇÃO CRÍTICA: Única verificação
-            />
-          </div>
-        </fieldset>
-
-        {/* ✅ Seção: Itens da Nota Fiscal */}
-        {!readOnly && ( // ✅ CORREÇÃO CRÍTICA: Única verificação
-          <fieldset style={styles.fieldset}>
-            <legend style={styles.legend}>
-              <span style={styles.legendIcon}>📦</span>
-              Itens da Nota Fiscal
-            </legend>
-
-            {formData.itens.map((item, index) => (
-              <div key={index} style={styles.itemRow}>
-                <div style={styles.itemNumber}>{index + 1}</div>
-
-                <div style={styles.itemFields}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Descrição do Item *</label>
-                    <input
-                      type="text"
-                      value={item.descricao}
-                      onChange={(e) =>
-                        handleItemChange(index, "descricao", e.target.value)
-                      }
-                      style={styles.input}
-                      placeholder="Ex: Cimento Portland"
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Quantidade *</label>
-                    <input
-                      type="number"
-                      value={item.quantidade}
-                      onChange={(e) =>
-                        handleItemChange(index, "quantidade", e.target.value)
-                      }
-                      style={styles.input}
-                      placeholder="1"
-                      min="1"
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Valor Unitário *</label>
-                    <input
-                      type="text"
-                      value={item.valor}
-                      onChange={(e) =>
-                        handleItemChange(index, "valor", e.target.value)
-                      }
-                      style={styles.input}
-                      placeholder="0,00"
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Total</label>
-                    <input
-                      type="text"
-                      value={(() => {
-                        const valor = parseFloat(
-                          item.valor
-                            ?.replace(/[^\d,]/g, "")
-                            .replace(",", ".") || "0",
-                        );
-                        const quantidade = parseInt(item.quantidade) || 1;
-                        const total = valor * quantidade;
-                        return total.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        });
-                      })()}
-                      style={styles.inputReadonly}
-                      readOnly
-                    />
-                  </div>
-                </div>
-
-                {formData.itens.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removerItem(index)}
-                    style={styles.removeItemButton}
-                    title="Remover item"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
-            ))}
-
-            <div style={styles.itemActions}>
-              <button
-                type="button"
-                onClick={adicionarItem}
-                style={styles.addItemButton}
-              >
-                ➕ Adicionar Item
-              </button>
-
-              <div style={styles.totalItens}>
-                <strong>Total dos Itens: R$ {formData.totalItens}</strong>
-                {errors.totalItens && (
-                  <div style={styles.errorMessage}>{errors.totalItens}</div>
-                )}
-              </div>
-            </div>
-          </fieldset>
-        )}
-
-        {/* ✅ Seção: Upload de Arquivos */}
-        {!readOnly && ( // ✅ CORREÇÃO CRÍTICA: Única verificação
-          <fieldset style={styles.fieldset}>
-            <legend style={styles.legend}>
-              <span style={styles.legendIcon}>📎</span>
-              Anexar Documentos
-            </legend>
-
-            <div
-              style={{
-                ...styles.dropZone,
-                ...(dragActive ? styles.dropZoneActive : {}),
-              }}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
-            >
-              <div style={styles.dropZoneContent}>
-                <span style={styles.dropZoneIcon}>📁</span>
-                <p style={styles.dropZoneText}>
-                  Arraste arquivos aqui ou{" "}
-                  <label style={styles.fileInputLabel}>
-                    clique para selecionar
-                    <input
-                      type="file"
-                      style={styles.fileInput}
-                      onChange={(e) => {
-                        if (e.target.files[0]) {
-                          handleFileUpload(e.target.files[0]);
-                        }
-                      }}
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    />
-                  </label>
-                </p>
-                <p style={styles.dropZoneSubtext}>
-                  Formatos aceitos: PDF, JPG, PNG, DOC, DOCX
-                </p>
-              </div>
-            </div>
-
-            {uploadedFile && (
-              <div style={styles.uploadedFile}>
-                <span style={styles.fileIcon}>📄</span>
-                <div style={styles.fileInfo}>
-                  <div style={styles.fileName}>{uploadedFile.name}</div>
-                  <div style={styles.fileSize}>
-                    {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </div>
-                </div>
-                <a
-                  href={uploadedFile.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={styles.fileLink}
-                >
-                  Ver arquivo
-                </a>
-              </div>
-            )}
-          </fieldset>
-        )}
-
-        {/* ✅ Botões de ação */}
-        <div style={styles.buttonGroup}>
-          <button
-            type="button"
-            onClick={handleCancel}
-            style={styles.cancelButton}
-          >
-            {readOnly ? "Fechar" : "Cancelar"}
-          </button>
-
-          {!readOnly && ( // ✅ CORREÇÃO CRÍTICA: Única verificação
-            <button
-              type="submit"
-              disabled={loading || hookLoading}
-              style={{
-                ...styles.submitButton,
-                opacity: loading || hookLoading ? 0.6 : 1,
-              }}
-            >
-              {loading
-                ? "Salvando..."
-                : despesa
-                  ? "💾 Atualizar Despesa"
-                  : "➕ Criar Despesa"}
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* ✅ Modal de confirmação */}
-      {showConfirmationModal && (
-        <ConfirmationModal
-          isOpen={showConfirmationModal}
-          onClose={() => setShowConfirmationModal(false)}
-          onConfirm={confirmarCancelamento}
-          title="Confirmar Cancelamento"
-          message="Você tem alterações não salvas. Tem certeza que deseja cancelar?"
-          confirmText="Sim, cancelar"
-          cancelText="Continuar editando"
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: "", type: "" })}
         />
       )}
 
-      {/* ✅ Opções pós-salvamento */}
-      {showSuccessOptions && (
-        <div style={styles.successOptions}>
-          <div style={styles.successOptionsContent}>
-            <h3 style={styles.successTitle}>✅ Despesa salva com sucesso!</h3>
-            <p style={styles.successMessage}>
-              O que você gostaria de fazer agora?
-            </p>
-            <div style={styles.successButtons}>
-              <button
-                onClick={() => {
-                  setShowSuccessOptions(false);
-                  onCancelar();
-                }}
-                style={styles.successButton}
-              >
-                📋 Voltar à Lista
-              </button>
-              <button
-                onClick={() => {
-                  setShowSuccessOptions(false);
-                  // Limpar formulário para nova despesa
-                  setFormData({
-                    numero: "",
-                    emendaId: formData.emendaId, // Manter a mesma emenda
-                    descricao: "",
-                    valor: "",
-                    data: getDataAtual(),
-                    dataPagamento: "",
-                    numeroContrato: "",
-                    acao: "",
-                    dotacaoOrcamentaria: "",
-                    notaFiscalNumero: "",
-                    notaFiscalData: "",
-                    notaFiscalFornecedor: "",
-                    notaFiscalDescricao: "",
-                    numeroEmpenho: "",
-                    naturezaDespesa: "",
-                    dataEmpenho: "",
-                    dataLiquidacao: "",
-                    discriminacao: "",
-                    classificacaoFuncional: "",
-                    observacoes: "",
-                    itens: [{ descricao: "", valor: "", quantidade: "1" }],
-                    totalItens: "0,00",
-                    createdAt: "",
-                    updatedAt: "",
-                  });
-                  setErrors({});
-                  setHasChanges(false);
-                }}
-                style={styles.successButton}
-              >
-                ➕ Nova Despesa
-              </button>
+      <div style={styles.card}>
+        <div style={styles.header}>
+          <h2 style={styles.title}>
+            {titulo ||
+              (modoVisualizacao
+                ? "Visualizar Despesa"
+                : despesaParaEditar
+                  ? "Editar Despesa"
+                  : "Nova Despesa")}
+          </h2>
+          <p style={styles.subtitle}>
+            {subtitle ||
+              (modoVisualizacao
+                ? "Detalhes da despesa da emenda"
+                : "Preencha todos os campos obrigatórios conforme documentação oficial")}
+          </p>
+        </div>
+
+        {/* Card informativo da emenda quando pré-selecionada */}
+        {emendaInfo && (
+          <div style={styles.emendaInfo}>
+            <h3 style={styles.emendaInfoTitle}>
+              📄 Dados da Emenda Selecionada
+            </h3>
+            <div style={styles.emendaInfoGrid}>
+              <div style={styles.emendaInfoRow}>
+                <strong>Parlamentar:</strong> {emendaInfo.parlamentar}
+              </div>
+              <div style={styles.emendaInfoRow}>
+                <strong>Número:</strong> {emendaInfo.numeroEmenda}
+              </div>
+              <div style={styles.emendaInfoRow}>
+                <strong>Município:</strong> {emendaInfo.municipio}/
+                {emendaInfo.uf}
+              </div>
+              <div style={styles.emendaInfoRow}>
+                <strong>Valor Total:</strong> R${" "}
+                {emendaInfo.valorRecurso?.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
+              </div>
+              <div style={styles.emendaInfoRow}>
+                <strong>Saldo Disponível:</strong> R${" "}
+                {emendaInfo.saldoDisponivel?.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
+              </div>
+              <div style={styles.emendaInfoRow}>
+                <strong>Programa:</strong> {emendaInfo.programa}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Seção 1: Dados Básicos */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>📋 Dados Básicos da Despesa</h3>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>Emenda *</label>
+                {emendaPreSelecionada && emendaInfo ? (
+                  <>
+                    <input
+                      type="text"
+                      value={`${emendaInfo.parlamentar} - ${emendaInfo.numeroEmenda}`}
+                      style={styles.inputReadonly}
+                      readOnly
+                    />
+                    <input
+                      type="hidden"
+                      name="emendaId"
+                      value={formData.emendaId}
+                    />
+                    <span style={styles.helpText}>
+                      Emenda pré-selecionada do fluxo anterior
+                    </span>
+                  </>
+                ) : (
+                  <select
+                    name="emendaId"
+                    value={formData.emendaId}
+                    onChange={handleInputChange}
+                    style={
+                      errors.emendaId
+                        ? { ...styles.select, borderColor: "#dc3545" }
+                        : styles.select
+                    }
+                    disabled={modoVisualizacao}
+                  >
+                    <option value="">Selecione uma emenda...</option>
+                    {emendas.map((emenda) => (
+                      <option key={emenda.id} value={emenda.id}>
+                        {emenda.parlamentar} - {emenda.numeroEmenda} -{" "}
+                        {emenda.municipio}/{emenda.uf}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {errors.emendaId && (
+                  <span style={styles.errorText}>{errors.emendaId}</span>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>Discriminação *</label>
+                <textarea
+                  name="discriminacao"
+                  value={formData.discriminacao}
+                  onChange={handleInputChange}
+                  style={
+                    errors.discriminacao
+                      ? { ...styles.textarea, borderColor: "#dc3545" }
+                      : styles.textarea
+                  }
+                  readOnly={modoVisualizacao}
+                  placeholder="Descreva detalhadamente a discriminação da despesa..."
+                />
+                {errors.discriminacao && (
+                  <span style={styles.errorText}>{errors.discriminacao}</span>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>Fornecedor *</label>
+                <input
+                  type="text"
+                  name="fornecedor"
+                  value={formData.fornecedor}
+                  onChange={handleInputChange}
+                  style={errors.fornecedor ? styles.inputError : styles.input}
+                  readOnly={modoVisualizacao}
+                  placeholder="Nome completo do fornecedor"
+                />
+                {errors.fornecedor && (
+                  <span style={styles.errorText}>{errors.fornecedor}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Valor *</label>
+                <input
+                  type="text"
+                  name="valor"
+                  value={formData.valor}
+                  onChange={handleInputChange}
+                  style={errors.valor ? styles.inputError : styles.input}
+                  readOnly={modoVisualizacao}
+                  placeholder="0,00"
+                />
+                {errors.valor && (
+                  <span style={styles.errorText}>{errors.valor}</span>
+                )}
+                <span style={styles.helpText}>
+                  Digite apenas números. Ex: 100000 = R$ 1.000,00
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Seção 2: Dados do Empenho e Nota Fiscal */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>
+              📄 Dados do Empenho e Nota Fiscal
+            </h3>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Nº do Empenho *</label>
+                <input
+                  type="text"
+                  name="numeroEmpenho"
+                  value={formData.numeroEmpenho}
+                  onChange={handleInputChange}
+                  style={
+                    errors.numeroEmpenho ? styles.inputError : styles.input
+                  }
+                  readOnly={modoVisualizacao}
+                  placeholder="Número do empenho"
+                />
+                {errors.numeroEmpenho && (
+                  <span style={styles.errorText}>{errors.numeroEmpenho}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Nº da Nota Fiscal *</label>
+                <input
+                  type="text"
+                  name="numeroNota"
+                  value={formData.numeroNota}
+                  onChange={handleInputChange}
+                  style={errors.numeroNota ? styles.inputError : styles.input}
+                  readOnly={modoVisualizacao}
+                  placeholder="Número da nota fiscal"
+                />
+                {errors.numeroNota && (
+                  <span style={styles.errorText}>{errors.numeroNota}</span>
+                )}
+                <span style={styles.helpText}>
+                  Obrigatório - toda despesa deve ter nota fiscal
+                </span>
+              </div>
+
+              <div style={styles.formGroupMedium}>
+                <label style={styles.label}>Nº do Contrato</label>
+                <input
+                  type="text"
+                  name="numeroContrato"
+                  value={formData.numeroContrato}
+                  onChange={handleInputChange}
+                  style={styles.input}
+                  readOnly={modoVisualizacao}
+                  placeholder="Número do contrato (se houver)"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Seção 3: Datas Obrigatórias */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>📅 Datas da Despesa</h3>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Data do Empenho *</label>
+                <input
+                  type="date"
+                  name="dataEmpenho"
+                  value={formData.dataEmpenho}
+                  onChange={handleInputChange}
+                  style={errors.dataEmpenho ? styles.inputError : styles.input}
+                  readOnly={modoVisualizacao}
+                />
+                {errors.dataEmpenho && (
+                  <span style={styles.errorText}>{errors.dataEmpenho}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Data da Liquidação *</label>
+                <input
+                  type="date"
+                  name="dataLiquidacao"
+                  value={formData.dataLiquidacao}
+                  onChange={handleInputChange}
+                  style={
+                    errors.dataLiquidacao ? styles.inputError : styles.input
+                  }
+                  readOnly={modoVisualizacao}
+                />
+                {errors.dataLiquidacao && (
+                  <span style={styles.errorText}>{errors.dataLiquidacao}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Data do Pagamento *</label>
+                <input
+                  type="date"
+                  name="dataPagamento"
+                  value={formData.dataPagamento}
+                  onChange={handleInputChange}
+                  style={
+                    errors.dataPagamento ? styles.inputError : styles.input
+                  }
+                  readOnly={modoVisualizacao}
+                />
+                {errors.dataPagamento && (
+                  <span style={styles.errorText}>{errors.dataPagamento}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Seção 4: Classificação Orçamentária */}
+          <div style={styles.section}>
+            <h3 style={styles.sectionTitle}>💰 Classificação Orçamentária</h3>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroupMedium}>
+                <label style={styles.labelRequired}>Ação *</label>
+                <select
+                  name="acao"
+                  value={formData.acao}
+                  onChange={handleInputChange}
+                  style={
+                    errors.acao
+                      ? { ...styles.select, borderColor: "#dc3545" }
+                      : styles.select
+                  }
+                  disabled={modoVisualizacao}
+                >
+                  <option value="">Selecione a ação</option>
+                  <option value="8535">
+                    8535 - Estruturação de Unidades de Atenção Especializada em
+                    Saúde
+                  </option>
+                  <option value="8536">
+                    8536 - Estruturação da Rede de Serviços de Atenção Básica de
+                    Saúde
+                  </option>
+                  <option value="8585">
+                    8585 - Atenção à Saúde da População para Procedimentos em
+                    Média e Alta Complexidade
+                  </option>
+                  <option value="8730">
+                    8730 - Atenção à Saúde da População para Procedimentos de
+                    Média e Alta Complexidade
+                  </option>
+                  <option value="20AD">20AD - Atenção Primária à Saúde</option>
+                  <option value="21C0">
+                    21C0 - Recursos para estruturação da rede de serviços de
+                    atenção básica
+                  </option>
+                </select>
+                {errors.acao && (
+                  <span style={styles.errorText}>{errors.acao}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>
+                  Dotação Orçamentária *
+                </label>
+                <input
+                  type="text"
+                  name="dotacaoOrcamentaria"
+                  value={formData.dotacaoOrcamentaria}
+                  onChange={handleInputChange}
+                  style={
+                    errors.dotacaoOrcamentaria
+                      ? styles.inputError
+                      : styles.input
+                  }
+                  readOnly={modoVisualizacao}
+                  placeholder="Código da dotação orçamentária"
+                />
+                {errors.dotacaoOrcamentaria && (
+                  <span style={styles.errorText}>
+                    {errors.dotacaoOrcamentaria}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div style={styles.formRow}>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>
+                  Classificação Funcional-Programática *
+                </label>
+                <input
+                  type="text"
+                  name="classificacaoFuncional"
+                  value={formData.classificacaoFuncional}
+                  onChange={handleInputChange}
+                  style={
+                    errors.classificacaoFuncional
+                      ? styles.inputError
+                      : styles.input
+                  }
+                  readOnly={modoVisualizacao}
+                  placeholder="Classificação funcional-programática"
+                />
+                {errors.classificacaoFuncional && (
+                  <span style={styles.errorText}>
+                    {errors.classificacaoFuncional}
+                  </span>
+                )}
+                <span style={styles.helpText}>Ex: 10.302.0002.20AD.0001</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Seção 5: Campos Avançados (Toggle) */}
+          {!modoVisualizacao && (
+            <button
+              type="button"
+              onClick={() => setMostrarCamposAvancados(!mostrarCamposAvancados)}
+              style={styles.toggleButton}
+            >
+              {mostrarCamposAvancados ? "🔼 Ocultar" : "🔽 Mostrar"} Campos
+              Avançados
+            </button>
+          )}
+
+          {(mostrarCamposAvancados || modoVisualizacao) && (
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>📝 Campos Avançados</h3>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Observações</label>
+                  <textarea
+                    name="observacoes"
+                    value={formData.observacoes}
+                    onChange={handleInputChange}
+                    style={styles.textarea}
+                    readOnly={modoVisualizacao}
+                    placeholder="Observações adicionais sobre a despesa..."
+                  />
+                </div>
+              </div>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroupMedium}>
+                  <label style={styles.label}>Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    style={styles.select}
+                    disabled={modoVisualizacao}
+                  >
+                    <option value="pendente">Pendente</option>
+                    <option value="empenhado">Empenhado</option>
+                    <option value="liquidado">Liquidado</option>
+                    <option value="pago">Pago</option>
+                    <option value="cancelado">Cancelado</option>
+                  </select>
+                </div>
+
+                <div style={styles.formGroupMedium}>
+                  <label style={styles.label}>Categoria</label>
+                  <select
+                    name="categoria"
+                    value={formData.categoria}
+                    onChange={handleInputChange}
+                    style={styles.select}
+                    disabled={modoVisualizacao}
+                  >
+                    <option value="">Selecione a categoria</option>
+                    <option value="equipamentos">Equipamentos</option>
+                    <option value="reformas">Reformas</option>
+                    <option value="construcao">Construção</option>
+                    <option value="servicos">Serviços</option>
+                    <option value="medicamentos">Medicamentos</option>
+                    <option value="materiais">Materiais</option>
+                    <option value="outros">Outros</option>
+                  </select>
+                </div>
+
+                <div style={styles.formGroupMedium}>
+                  <label style={styles.label}>Data de Vencimento</label>
+                  <input
+                    type="date"
+                    name="dataVencimento"
+                    value={formData.dataVencimento}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                  />
+                </div>
+              </div>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Centro de Custo</label>
+                  <input
+                    type="text"
+                    name="centroCusto"
+                    value={formData.centroCusto}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="Código do centro de custo"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Natureza da Despesa</label>
+                  <input
+                    type="text"
+                    name="naturezaDespesa"
+                    value={formData.naturezaDespesa}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="Ex: 4.4.90.52"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Elemento de Despesa</label>
+                  <input
+                    type="text"
+                    name="elementoDespesa"
+                    value={formData.elementoDespesa}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="Código do elemento"
+                  />
+                </div>
+              </div>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>CNPJ do Fornecedor</label>
+                  <input
+                    type="text"
+                    name="cnpjFornecedor"
+                    value={formData.cnpjFornecedor}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="00.000.000/0000-00"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Telefone do Fornecedor</label>
+                  <input
+                    type="text"
+                    name="telefoneFornecedor"
+                    value={formData.telefoneFornecedor}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="(00) 00000-0000"
+                  />
+                </div>
+
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Email do Fornecedor</label>
+                  <input
+                    type="email"
+                    name="emailFornecedor"
+                    value={formData.emailFornecedor}
+                    onChange={handleInputChange}
+                    style={styles.input}
+                    readOnly={modoVisualizacao}
+                    placeholder="fornecedor@email.com"
+                  />
+                </div>
+              </div>
+
+              <div style={styles.formRow}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Endereço do Fornecedor</label>
+                  <textarea
+                    name="enderecoFornecedor"
+                    value={formData.enderecoFornecedor}
+                    onChange={handleInputChange}
+                    style={styles.textarea}
+                    readOnly={modoVisualizacao}
+                    placeholder="Endereço completo do fornecedor..."
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Botões de Ação */}
+          {!modoVisualizacao && (
+            <div style={styles.buttonGroup}>
+              <button
+                type="button"
+                onClick={onCancelar}
+                style={{ ...styles.button, ...styles.buttonSecondary }}
+                disabled={loading}
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="submit"
+                style={{ ...styles.button, ...styles.buttonSuccess }}
+                disabled={loading}
+              >
+                {loading
+                  ? "⏳ Salvando..."
+                  : despesaParaEditar
+                    ? "✅ Atualizar Despesa"
+                    : "✅ Criar Despesa"}
+              </button>
+            </div>
+          )}
+
+          {modoVisualizacao && (
+            <div style={styles.buttonGroup}>
+              <button
+                type="button"
+                onClick={onCancelar}
+                style={{ ...styles.button, ...styles.buttonPrimary }}
+              >
+                ← Voltar
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
     </div>
   );
-};
-
-// ✅ Estilos do componente
-const styles = {
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "20px",
-    backgroundColor: "#ffffff",
-    fontFamily: "Arial, sans-serif",
-  },
-  header: {
-    padding: "20px",
-    borderRadius: "10px",
-    marginBottom: "30px",
-    border: "2px solid #dee2e6",
-  },
-  headerTitle: {
-    margin: "0 0 10px 0",
-    fontSize: "24px",
-    fontWeight: "bold",
-  },
-  headerSubtitle: {
-    margin: "0 0 10px 0",
-    fontSize: "14px",
-    opacity: 0.8,
-  },
-  permissionInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontSize: "12px",
-    fontWeight: "600",
-    opacity: 0.9,
-    marginTop: "8px",
-  },
-  permissionIcon: {
-    fontSize: "14px",
-  },
-  permissionText: {
-    fontSize: "12px",
-  },
-  errorMessage: {
-    backgroundColor: "#f8d7da",
-    color: "#721c24",
-    padding: "8px 12px",
-    borderRadius: "4px",
-    border: "1px solid #f5c6cb",
-    marginTop: "5px",
-    fontSize: "12px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "30px",
-  },
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    marginBottom: "25px",
-  },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  legendIcon: {
-    fontSize: "20px",
-  },
-  formRow: {
-    display: "flex",
-    gap: "20px",
-    marginBottom: "20px",
-    flexWrap: "wrap",
-  },
-  formGroup: {
-    flex: "1",
-    minWidth: "250px",
-  },
-  label: {
-    display: "block",
-    marginBottom: "8px",
-    fontWeight: "600",
-    color: "#495057",
-    fontSize: "14px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "#ffffff",
-  },
-  inputError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
-  },
-  inputReadonly: {
-    width: "100%",
-    padding: "12px",
-    border: "2px solid #e9ecef",
-    borderRadius: "6px",
-    fontSize: "14px",
-    backgroundColor: "#f8f9fa",
-    color: "#6c757d",
-  },
-  select: {
-    width: "100%",
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    backgroundColor: "#ffffff",
-    cursor: "pointer",
-  },
-  textarea: {
-    width: "100%",
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    resize: "vertical",
-    minHeight: "80px",
-    backgroundColor: "#ffffff",
-  },
-  itemRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "15px",
-    marginBottom: "20px",
-    padding: "15px",
-    backgroundColor: "#ffffff",
-    border: "1px solid #dee2e6",
-    borderRadius: "8px",
-  },
-  itemNumber: {
-    backgroundColor: "#007bff",
-    color: "white",
-    width: "30px",
-    height: "30px",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "14px",
-    fontWeight: "bold",
-    flexShrink: 0,
-  },
-  itemFields: {
-    display: "flex",
-    gap: "15px",
-    flex: "1",
-    flexWrap: "wrap",
-  },
-  removeItemButton: {
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    padding: "8px 12px",
-    cursor: "pointer",
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-  itemActions: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: "20px",
-    padding: "15px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    border: "1px solid #dee2e6",
-  },
-  addItemButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
-  totalItens: {
-    fontSize: "16px",
-    color: "#495057",
-  },
-  dropZone: {
-    border: "2px dashed #dee2e6",
-    borderRadius: "8px",
-    padding: "40px",
-    textAlign: "center",
-    backgroundColor: "#fafbfc",
-    transition: "all 0.3s ease",
-    cursor: "pointer",
-  },
-  dropZoneActive: {
-    borderColor: "#007bff",
-    backgroundColor: "#f0f8ff",
-  },
-  dropZoneContent: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "10px",
-  },
-  dropZoneIcon: {
-    fontSize: "48px",
-    opacity: 0.5,
-  },
-  dropZoneText: {
-    fontSize: "16px",
-    color: "#495057",
-    margin: 0,
-  },
-  dropZoneSubtext: {
-    fontSize: "12px",
-    color: "#6c757d",
-    margin: 0,
-  },
-  fileInputLabel: {
-    color: "#007bff",
-    textDecoration: "underline",
-    cursor: "pointer",
-  },
-  fileInput: {
-    display: "none",
-  },
-  uploadedFile: {
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    padding: "15px",
-    backgroundColor: "#d4edda",
-    border: "1px solid #c3e6cb",
-    borderRadius: "8px",
-    marginTop: "15px",
-  },
-  fileIcon: {
-    fontSize: "24px",
-  },
-  fileInfo: {
-    flex: "1",
-  },
-  fileName: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    color: "#155724",
-  },
-  fileSize: {
-    fontSize: "12px",
-    color: "#6c757d",
-  },
-  fileLink: {
-    color: "#007bff",
-    textDecoration: "none",
-    fontWeight: "bold",
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "15px",
-    justifyContent: "center",
-    marginTop: "30px",
-    flexWrap: "wrap",
-  },
-  submitButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    padding: "12px 30px",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  cancelButton: {
-    backgroundColor: "#6c757d",
-    color: "white",
-    padding: "12px 30px",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease",
-  },
-  successOptions: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-  },
-  successOptionsContent: {
-    backgroundColor: "white",
-    padding: "30px",
-    borderRadius: "12px",
-    textAlign: "center",
-    maxWidth: "400px",
-    width: "90%",
-  },
-  successTitle: {
-    fontSize: "20px",
-    fontWeight: "bold",
-    color: "#28a745",
-    marginBottom: "10px",
-  },
-  successMessage: {
-    fontSize: "16px",
-    color: "#495057",
-    marginBottom: "20px",
-  },
-  successButtons: {
-    display: "flex",
-    gap: "15px",
-    justifyContent: "center",
-  },
-  successButton: {
-    backgroundColor: "#007bff",
-    color: "white",
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "bold",
-    cursor: "pointer",
-  },
 };
 
 export default DespesaForm;

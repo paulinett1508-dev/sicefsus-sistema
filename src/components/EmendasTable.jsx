@@ -28,6 +28,30 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     };
   };
 
+  const renderIconeDespesas = (emenda) => {
+    const temDespesas = emenda.totalDespesas > 0;
+
+    return (
+      <button
+        onClick={() => onDespesas(emenda)}
+        style={{
+          ...styles.actionButton,
+          backgroundColor: temDespesas ? "#4A90E2" : "#cccccc",
+          cursor: temDespesas ? "pointer" : "not-allowed",
+          opacity: temDespesas ? 1 : 0.5,
+        }}
+        disabled={!temDespesas}
+        title={
+          temDespesas
+            ? `Ver ${emenda.totalDespesas} despesa(s)`
+            : "Nenhuma despesa cadastrada"
+        }
+      >
+        💰 {emenda.totalDespesas || 0}
+      </button>
+    );
+  };
+
   // ✅ Função para calcular status real
   const calcularStatus = (emenda) => {
     const execucao = calcularExecucao(emenda);

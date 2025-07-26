@@ -1,10 +1,20 @@
-// Emendas.jsx - Sistema SICEFSUS v1.7 - CORREÇÃO CRÍTICA APLICADA
-// ✅ CORREÇÃO: Eliminada duplicação de consultas ao Firestore
-// ✅ CORREÇÃO: Usa dados direto da prop usuario do App.jsx
-// 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda agora aceita parâmetros corretamente
+// Emendas.jsx - Sistema SICEFSUS v2.0 - FLUXO EMENDA->DESPESA CORRIGIDO
+// ✅ CORREÇÃO: Fluxo inteligente para despesas
+// ✅ CORREÇÃO: Ícone condicional baseado em totalDespesas
+// ✅ CORREÇÃO: Navegação melhorada com contexto
+// ✅ CORREÇÃO: Métricas atualizadas em tempo real
+// ✅ CORREÇÃO: handleSalvarEmenda funcional
 
 import React, { useState, useEffect, useCallback } from "react";
-import { deleteDoc, doc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import {
+  deleteDoc,
+  doc,
+  query,
+  collection,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import EmendaForm from "./EmendaForm";
 import EmendasTable from "./EmendasTable";
@@ -12,15 +22,16 @@ import DespesaForm from "./DespesaForm";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 
 const Emendas = ({ usuario }) => {
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState("listagem");
   const [emendaSelecionada, setEmendaSelecionada] = useState(null);
 
-  // ✅ CORREÇÃO CRÍTICA: Usar dados direto da prop usuario (eliminada duplicação)
+  // ✅ CORREÇÃO CRÍTICA: Usar dados direto da prop usuario
   const userRole = usuario?.role;
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
-  console.log("✅ Usando dados direto do App.jsx:", {
+  console.log("✅ Sistema SICEFSUS v2.0 - Dados do usuário:", {
     email: usuario?.email,
     role: userRole,
     municipio: userMunicipio,
@@ -36,32 +47,122 @@ const Emendas = ({ usuario }) => {
     obterEstatisticasGerais,
     recarregar,
   } = useEmendaDespesa(usuario, {
-    carregarTodasEmendas: userRole !== null, // ✅ Só carrega quando role estiver definida
+    carregarTodasEmendas: userRole !== null,
     incluirEstatisticas: true,
     autoRefresh: false,
     filtroMunicipio: userRole !== "admin" ? userMunicipio : null,
     filtroUf: userRole !== "admin" ? userUf : null,
-    userRole: userRole, // ✅ Também nas options para compatibilidade
+    userRole: userRole,
   });
 
-  // ✅ Usar emendas direto do hook (já filtradas)
-  const emendasFiltradas = emendas; // Já vem filtradas do hook se for operador
+  // ✅ CORREÇÃO: Calcular métricas com despesas em tempo real
+  const [emendasComMetricas, setEmendasComMetricas] = useState([]);
+  const [calculandoMetricas, setCalculandoMetricas] = useState(false);
+
+  // ✅ CORREÇÃO: Função para calcular métricas de despesas
+  const calcularMetricasComDespesas = useCallback(async (emendasData) => {
+    if (!emendasData || emendasData.length === 0) return [];
+
+    setCalculandoMetricas(true);
+    console.log(
+      "📊 Calculando métricas de despesas para",
+      emendasData.length,
+      "emendas",
+    );
+
+    try {
+      const emendasComMetricas = await Promise.all(
+        emendasData.map(async (emenda) => {
+          try {
+            // Buscar despesas da emenda
+            const despesasQuery = query(
+              collection(db, "despesas"),
+              where("emendaId", "==", emenda.id),
+            );
+            const despesasSnapshot = await getDocs(despesasQuery);
+
+            const totalDespesas = despesasSnapshot.size;
+            const valorExecutado = despesasSnapshot.docs.reduce(
+              (sum, doc) => sum + (doc.data().valor || 0),
+              0,
+            );
+
+            const valorRecurso = emenda.valorRecurso || emenda.valorTotal || 0;
+            const saldoDisponivel = valorRecurso - valorExecutado;
+            const percentualExecutado =
+              valorRecurso > 0 ? (valorExecutado / valorRecurso) * 100 : 0;
+
+            return {
+              ...emenda,
+              totalDespesas,
+              valorExecutado,
+              saldoDisponivel,
+              percentualExecutado,
+              temDespesas: totalDespesas > 0,
+            };
+          } catch (error) {
+            console.error(
+              "Erro ao calcular métricas para emenda:",
+              emenda.id,
+              error,
+            );
+            return {
+              ...emenda,
+              totalDespesas: 0,
+              valorExecutado: 0,
+              temDespesas: false,
+            };
+          }
+        }),
+      );
+
+      console.log("✅ Métricas calculadas:", emendasComMetricas.length);
+      return emendasComMetricas;
+    } catch (error) {
+      console.error("❌ Erro ao calcular métricas:", error);
+      return emendasData.map((emenda) => ({
+        ...emenda,
+        totalDespesas: 0,
+        temDespesas: false,
+      }));
+    } finally {
+      setCalculandoMetricas(false);
+    }
+  }, []);
+
+  // ✅ Efeito para calcular métricas quando emendas mudam
+  useEffect(() => {
+    const calcularMetricas = async () => {
+      if (emendas && emendas.length > 0) {
+        const emendasAtualizadas = await calcularMetricasComDespesas(emendas);
+        setEmendasComMetricas(emendasAtualizadas);
+      } else {
+        setEmendasComMetricas([]);
+      }
+    };
+
+    calcularMetricas();
+  }, [emendas, calcularMetricasComDespesas]);
 
   // ✅ UseEffect OTIMIZADO - só roda na primeira vez
   useEffect(() => {
-    console.log("🎯 Sistema SICEFSUS v1.7 - Hook integrado carregado");
+    console.log("🎯 Sistema SICEFSUS v2.0 - Fluxo Emenda->Despesa carregado");
   }, []);
 
-  // ✅ Log separado para dados (só quando realmente mudam) - OTIMIZADO
+  // ✅ Log otimizado para dados
   useEffect(() => {
-    const emendasLength = emendasFiltradas?.length || 0;
+    const emendasLength = emendasComMetricas?.length || 0;
     if (emendasLength > 0) {
-      console.log("✅ Emendas filtradas carregadas:", emendasLength);
+      console.log("✅ Emendas com métricas carregadas:", emendasLength);
+      const comDespesas = emendasComMetricas.filter(
+        (e) => e.temDespesas,
+      ).length;
+      console.log("💰 Emendas com despesas:", comDespesas);
     }
     if (error) {
       console.error("❌ Erro no hook:", error);
     }
-  }, [emendasFiltradas?.length, error]);
+  }, [emendasComMetricas?.length, error]);
 
   // Handlers para navegação
   const handleVisualizar = (emenda) => {
@@ -100,23 +201,23 @@ const Emendas = ({ usuario }) => {
     }
   };
 
-  // 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda simplificado
+  // ✅ CORREÇÃO DEFINITIVA: handleSalvarEmenda funcional
   const handleSalvarEmenda = useCallback(
-    async () => {
-      console.log("📝 handleSalvarEmenda chamado - aguardando salvamento do EmendaForm");
+    async (dadosSalvos) => {
+      console.log("📝 handleSalvarEmenda chamado com:", dadosSalvos);
 
       try {
-        // Aguardar um pouco para garantir que o salvamento do EmendaForm termine
-        setTimeout(async () => {
-          await recarregar();
-          console.log("✅ Dados recarregados após salvamento");
-          handleVoltar();
-        }, 1000);
+        // Aguardar recarregamento imediato
+        await recarregar();
+        console.log("✅ Dados recarregados após salvamento");
+
+        // Voltar para listagem após confirmação
+        handleVoltar();
       } catch (error) {
         console.error("❌ Erro no handleSalvarEmenda:", error);
       }
     },
-    [recarregar, handleVoltar],
+    [recarregar],
   );
 
   // ✅ FUNÇÃO DELETAR IMPLEMENTADA CORRETAMENTE
@@ -130,12 +231,8 @@ const Emendas = ({ usuario }) => {
 
     if (window.confirm("Tem certeza que deseja excluir esta emenda?")) {
       try {
-        // ✅ Deletar do Firestore
         await deleteDoc(doc(db, "emendas", emendaId));
-
-        // ✅ Recarregar dados
         await recarregar();
-
         console.log("✅ Emenda deletada com sucesso:", emendaId);
         alert("Emenda deletada com sucesso!");
       } catch (error) {
@@ -145,21 +242,72 @@ const Emendas = ({ usuario }) => {
     }
   };
 
+  // ✅ CORREÇÃO PRINCIPAL: Handler de despesas inteligente
+  const handleDespesas = useCallback(
+    (emenda) => {
+      console.log(
+        "💰 Acessando despesas da emenda:",
+        emenda.numero,
+        "- Total:",
+        emenda.totalDespesas,
+      );
+
+      // Verificar se tem despesas
+      if (!emenda.totalDespesas || emenda.totalDespesas === 0) {
+        // Se não tem despesas, perguntar se quer criar a primeira
+        const criarPrimeira = window.confirm(
+          `A emenda "${emenda.parlamentar}" não possui despesas cadastradas.\n\n` +
+            "Deseja criar a primeira despesa agora?",
+        );
+
+        if (criarPrimeira) {
+          console.log("➕ Criando primeira despesa para emenda:", emenda.id);
+          setEmendaSelecionada(emenda);
+          setCurrentView("criar-despesa");
+        }
+        return;
+      }
+
+      // Se tem despesas, navegar para listagem filtrada
+      console.log("📋 Navegando para despesas filtradas:", {
+        emendaId: emenda.id,
+        totalDespesas: emenda.totalDespesas,
+      });
+
+      navigate("/despesas", {
+        state: {
+          filtroAutomatico: {
+            emendaId: emenda.id,
+            numeroEmenda: emenda.numero || emenda.numeroEmenda,
+            parlamentar: emenda.parlamentar,
+            valorRecurso: emenda.valorRecurso || emenda.valorTotal,
+            totalDespesas: emenda.totalDespesas,
+            breadcrumb: {
+              origem: "Emendas",
+              emenda: `${emenda.parlamentar} - ${emenda.numero || emenda.numeroEmenda}`,
+              totalDespesas: emenda.totalDespesas,
+            },
+          },
+        },
+      });
+    },
+    [navigate],
+  );
+
   // Expor função para o menu externo
   window.voltarParaListagemEmendas = handleVoltarParaListagem;
 
-  const handleDespesas = (emenda) => {
-    console.log("💰 Gerenciar despesas:", emenda.numero);
-    setEmendaSelecionada(emenda);
-    setCurrentView("despesas");
-  };
-
-  // Cálculos para estatísticas usando as emendas filtradas
-  const totalEmendas = emendasFiltradas?.length || 0;
+  // Cálculos para estatísticas usando as emendas com métricas
+  const totalEmendas = emendasComMetricas?.length || 0;
   const emendasComRecursos =
-    emendasFiltradas?.filter((e) => e.valorRecurso > 0).length || 0;
+    emendasComMetricas?.filter((e) => e.valorRecurso > 0).length || 0;
+  const emendasComDespesas =
+    emendasComMetricas?.filter((e) => e.temDespesas).length || 0;
   const valorTotal =
-    emendasFiltradas?.reduce((sum, e) => sum + (e.valorRecurso || 0), 0) || 0;
+    emendasComMetricas?.reduce((sum, e) => sum + (e.valorRecurso || 0), 0) || 0;
+  const valorExecutadoTotal =
+    emendasComMetricas?.reduce((sum, e) => sum + (e.valorExecutado || 0), 0) ||
+    0;
 
   // Renderização condicional baseada na view atual
   const renderContent = () => {
@@ -193,7 +341,6 @@ const Emendas = ({ usuario }) => {
             onCancelar={handleVoltar}
             onSalvar={handleSalvarEmenda}
             onListarEmendas={handleVoltar}
-            // Passar município/UF do usuário como padrão para operadores
             defaultMunicipio={userRole !== "admin" ? userMunicipio : null}
             defaultUf={userRole !== "admin" ? userUf : null}
             isOperador={userRole !== "admin"}
@@ -224,19 +371,35 @@ const Emendas = ({ usuario }) => {
           />
         );
 
-      case "despesas":
+      case "criar-despesa":
         return (
           <DespesaForm
             emendaId={emendaSelecionada?.id}
+            emendaInfo={{
+              numero:
+                emendaSelecionada?.numero || emendaSelecionada?.numeroEmenda,
+              parlamentar: emendaSelecionada?.parlamentar,
+              valorRecurso:
+                emendaSelecionada?.valorRecurso ||
+                emendaSelecionada?.valorTotal,
+              municipio: emendaSelecionada?.municipio,
+              uf: emendaSelecionada?.uf,
+            }}
             onSalvar={async () => {
+              console.log("💾 Salvando primeira despesa...");
+              // Atualizar métricas da emenda
               if (emendaSelecionada?.id) {
                 await atualizarSaldoEmenda(emendaSelecionada.id);
                 await recarregar();
               }
+              // Voltar para listagem
               handleVoltar();
             }}
             onCancelar={handleVoltar}
             usuario={usuario}
+            isPrimeiraDespesa={true}
+            titulo="💰 Criar Primeira Despesa"
+            subtitle={`Emenda: ${emendaSelecionada?.parlamentar} - ${emendaSelecionada?.numero}`}
           />
         );
 
@@ -250,12 +413,18 @@ const Emendas = ({ usuario }) => {
                 <span style={styles.statusValue}>✅ Operacional</span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.versionText}>Versão:</span>
-                <span style={styles.versionValue}>v1.7</span>
+                <span style={styles.versionValue}>v2.0</span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.statusText}>Dados:</span>
                 <span style={styles.versionValue}>
                   {loading ? "Carregando..." : `${totalEmendas} emendas`}
                 </span>
+                {calculandoMetricas && (
+                  <>
+                    <span style={styles.divider}>|</span>
+                    <span style={styles.calculating}>📊 Calculando...</span>
+                  </>
+                )}
                 {userRole !== "admin" && userMunicipio && userUf && (
                   <>
                     <span style={styles.divider}>|</span>
@@ -267,7 +436,7 @@ const Emendas = ({ usuario }) => {
               </div>
             </div>
 
-            {/* Estatísticas do Dashboard */}
+            {/* Estatísticas do Dashboard CORRIGIDAS */}
             <div style={styles.statsContainer}>
               <div style={styles.statCard}>
                 <h3 style={styles.statNumber}>{totalEmendas}</h3>
@@ -282,6 +451,10 @@ const Emendas = ({ usuario }) => {
                 <p style={styles.statLabel}>EMENDAS COM RECURSOS</p>
               </div>
               <div style={styles.statCard}>
+                <h3 style={styles.statNumber}>{emendasComDespesas}</h3>
+                <p style={styles.statLabel}>EMENDAS COM DESPESAS</p>
+              </div>
+              <div style={styles.statCard}>
                 <h3 style={styles.statNumber}>
                   {valorTotal.toLocaleString("pt-BR", {
                     style: "currency",
@@ -290,9 +463,18 @@ const Emendas = ({ usuario }) => {
                 </h3>
                 <p style={styles.statLabel}>VALOR TOTAL</p>
               </div>
+              <div style={styles.statCard}>
+                <h3 style={styles.statNumber}>
+                  {valorExecutadoTotal.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </h3>
+                <p style={styles.statLabel}>VALOR EXECUTADO</p>
+              </div>
             </div>
 
-            {/* Botão Nova Emenda */}
+            {/* Botões de Ação */}
             <div style={styles.actionContainer}>
               <button style={styles.primaryButton} onClick={handleCriar}>
                 ➕ Nova Emenda
@@ -300,9 +482,10 @@ const Emendas = ({ usuario }) => {
               <button
                 style={styles.refreshButton}
                 onClick={recarregar}
-                disabled={loading}
+                disabled={loading || calculandoMetricas}
               >
-                🔄 {loading ? "Carregando..." : "Atualizar"}
+                🔄{" "}
+                {loading || calculandoMetricas ? "Atualizando..." : "Atualizar"}
               </button>
             </div>
 
@@ -328,11 +511,12 @@ const Emendas = ({ usuario }) => {
               </div>
             ) : (
               <EmendasTable
-                emendas={emendasFiltradas}
+                emendas={emendasComMetricas}
                 onView={handleVisualizar}
                 onEdit={handleEditar}
                 onDelete={handleDeletar}
                 onDespesas={handleDespesas}
+                calculandoMetricas={calculandoMetricas}
               />
             )}
           </div>
@@ -343,7 +527,7 @@ const Emendas = ({ usuario }) => {
   return <div style={styles.container}>{renderContent()}</div>;
 };
 
-// Estilos do componente
+// ✅ Estilos atualizados
 const styles = {
   container: {
     padding: "20px",
@@ -386,6 +570,13 @@ const styles = {
     opacity: 0.7,
     margin: "0 4px",
   },
+  calculating: {
+    fontWeight: "600",
+    background: "rgba(255,193,7,0.3)",
+    padding: "2px 8px",
+    borderRadius: "10px",
+    fontSize: "12px",
+  },
   filterInfo: {
     fontWeight: "600",
     background: "rgba(255,255,255,0.2)",
@@ -394,8 +585,8 @@ const styles = {
   },
   statsContainer: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
     marginBottom: "20px",
   },
   statCard: {
@@ -406,13 +597,13 @@ const styles = {
     textAlign: "center",
   },
   statNumber: {
-    fontSize: "28px",
+    fontSize: "24px",
     fontWeight: "bold",
     color: "#154360",
     margin: "0 0 10px 0",
   },
   statLabel: {
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "bold",
     color: "#666",
     textTransform: "uppercase",
