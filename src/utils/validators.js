@@ -361,7 +361,7 @@ export const validateUserData = (userData) => {
  * @param {Object} resultado - Resultado da validação
  */
 export const logValidation = (operacao, dados, resultado) => {
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env.DEV) {
     console.group(`🔍 Validação: ${operacao}`);
     console.log("📥 Dados de entrada:", dados);
     console.log("✅ Resultado:", resultado);
@@ -370,4 +370,27 @@ export const logValidation = (operacao, dados, resultado) => {
     }
     console.groupEnd();
   }
+};
+
+/**
+ * ✅ NOVA: Criar relatório de erro detalhado para debugging
+ * @param {string} context - Contexto onde ocorreu o erro
+ * @param {Error} error - Objeto de erro
+ * @param {Object} additionalData - Dados adicionais para contexto
+ * @returns {Object} - Relatório estruturado do erro
+ */
+export const createErrorReport = (context, error, additionalData = {}) => {
+  return {
+    context,
+    message: error.message || 'Erro desconhecido',
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+    url: typeof window !== 'undefined' ? window.location.href : 'N/A',
+    additionalData,
+    errorName: error.name,
+    fileName: error.fileName,
+    lineNumber: error.lineNumber,
+    columnNumber: error.columnNumber
+  };
 };

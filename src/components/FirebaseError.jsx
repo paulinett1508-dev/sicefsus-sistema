@@ -31,6 +31,18 @@ export default function FirebaseError() {
         <div style={styles.helpBox}>
           <p><strong>💡 Dica:</strong> Os valores devem vir do seu projeto Firebase Console</p>
         </div>
+
+        <div style={styles.diagnostics}>
+          <h3>Diagnóstico:</h3>
+          <ul style={styles.diagnosticsList}>
+            <li>VITE_FIREBASE_API_KEY: {import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Definida' : '❌ Ausente'}</li>
+            <li>VITE_FIREBASE_AUTH_DOMAIN: {import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✅ Definida' : '❌ Ausente'}</li>
+            <li>VITE_FIREBASE_PROJECT_ID: {import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✅ Definida' : '❌ Ausente'}</li>
+            <li>VITE_FIREBASE_STORAGE_BUCKET: {import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✅ Definida' : '❌ Ausente'}</li>
+            <li>VITE_FIREBASE_MESSAGING_SENDER_ID: {import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✅ Definida' : '❌ Ausente'}</li>
+            <li>VITE_FIREBASE_APP_ID: {import.meta.env.VITE_FIREBASE_APP_ID ? '✅ Definida' : '❌ Ausente'}</li>
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -87,5 +99,19 @@ const styles = {
     borderRadius: '8px',
     border: '1px solid #007bff',
     color: '#004085',
+  },
+  diagnostics: {
+    textAlign: 'left',
+    marginTop: '20px',
+    backgroundColor: '#f8f9fa',
+    padding: '15px',
+    borderRadius: '8px',
+    border: '1px solid #dee2e6',
+  },
+  diagnosticsList: {
+    margin: '10px 0',
+    paddingLeft: '20px',
+    fontSize: '14px',
+    lineHeight: '1.6',
   },
 };

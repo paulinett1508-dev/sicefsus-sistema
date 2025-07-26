@@ -20,12 +20,33 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo
     });
 
-    // Log para monitoramento (não incluir em produção)
+    // Log para monitoramento
     if (import.meta.env.DEV) {
       console.group('🐛 Error Details');
       console.error('Error:', error);
       console.error('Error Info:', errorInfo);
       console.groupEnd();
+    }
+
+    // Log structured error for potential monitoring services
+    const errorReport = {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    // Store error in localStorage for debugging
+    try {
+      const existingErrors = JSON.parse(localStorage.getItem('sicefsus_errors') || '[]');
+      existingErrors.push(errorReport);
+      // Keep only last 10 errors
+      const recentErrors = existingErrors.slice(-10);
+      localStorage.setItem('sicefsus_errors', JSON.stringify(recentErrors));
+    } catch (storageError) {
+      console.warn('Could not store error in localStorage:', storageError);
     }
   }
 
