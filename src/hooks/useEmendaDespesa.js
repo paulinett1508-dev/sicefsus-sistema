@@ -657,4 +657,16 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
   };
 };
 
+// ✅ Hook auxiliar para verificar se componente está montado
+export const useIsMounted = () => {
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+  
+  return isMounted;
+};
+
 export default useEmendaDespesa;
