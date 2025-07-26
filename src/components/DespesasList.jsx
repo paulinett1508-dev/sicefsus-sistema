@@ -59,31 +59,29 @@ export default function DespesasList({
 
   // ✅ Sincronizar dados do hook com estado local - CORRIGIDO
   useEffect(() => {
-    // ✅ CORREÇÃO: Verificar se hook não está mais loading e sincronizar
-    if (!hookLoading) {
-      setDespesas(despesasHook || []);
+    // ✅ CORREÇÃO: Sempre atualizar dados independente do loading
+    setDespesas(despesasHook || []);
 
-      // Aplicar filtro inicial se existir
-      if (filtroInicial?.emendaId) {
-        const filtradas = (despesasHook || []).filter(
-          (d) => d.emendaId === filtroInicial.emendaId,
-        );
-        setDespesasFiltradas(filtradas);
-        calcularEstatisticasFiltro(filtradas);
-      } else {
-        setDespesasFiltradas(despesasHook || []);
-        calcularEstatisticasFiltro(despesasHook || []);
-      }
-
-      // ✅ CORREÇÃO CRÍTICA: Sempre definir loading como false quando hook terminar
-      setLoading(false);
-      
-      console.log("📊 DespesasList: Dados sincronizados", {
-        hookLoading,
-        despesasCount: (despesasHook || []).length,
-        localLoading: false
-      });
+    // Aplicar filtro inicial se existir
+    if (filtroInicial?.emendaId) {
+      const filtradas = (despesasHook || []).filter(
+        (d) => d.emendaId === filtroInicial.emendaId,
+      );
+      setDespesasFiltradas(filtradas);
+      calcularEstatisticasFiltro(filtradas);
+    } else {
+      setDespesasFiltradas(despesasHook || []);
+      calcularEstatisticasFiltro(despesasHook || []);
     }
+
+    // ✅ CORREÇÃO CRÍTICA: Definir loading baseado no hook loading
+    setLoading(hookLoading);
+    
+    console.log("📊 DespesasList: Dados sincronizados", {
+      hookLoading,
+      despesasCount: (despesasHook || []).length,
+      localLoading: hookLoading
+    });
   }, [despesasHook, filtroInicial, hookLoading]);
 
   // ✅ Calcular estatísticas gerais

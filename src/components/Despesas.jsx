@@ -238,7 +238,7 @@ const Despesas = ({ usuario }) => {
       temFiltros: Object.values(filtros).some((v) => v),
       filtroAutomatico: !!filtroAutomatico
     });
-  }, [loading, carregandoDespesas, despesas, despesasFiltradas, despesasParaExibir, filtros, filtroAutomatico]);
+  }, [loading, carregandoDespesas, despesas?.length, despesasFiltradas.length, despesasParaExibir.length]);
 
   // Handlers para navegação
   const handleVisualizar = (despesa) => {
@@ -571,8 +571,9 @@ const Despesas = ({ usuario }) => {
             </div>
 
             {/* Tabela de Despesas */}
-            {loading ? (
+            {loading || carregandoDespesas ? (
               <div style={styles.loadingContainer}>
+                <div className="loading-spinner" style={styles.loadingSpinner}></div>
                 <p style={styles.loadingText}>
                   {filtroAutomatico
                     ? "Carregando despesas da emenda..."
@@ -815,6 +816,18 @@ const styles = {
   loadingContainer: {
     textAlign: "center",
     padding: "40px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "20px",
+  },
+  loadingSpinner: {
+    width: "40px",
+    height: "40px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #154360",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
   },
   loadingText: {
     fontSize: "18px",
@@ -854,5 +867,17 @@ const styles = {
     marginBottom: "20px",
   },
 };
+
+// Adicionar CSS para animação
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 export default Despesas;
