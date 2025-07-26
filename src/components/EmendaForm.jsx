@@ -782,11 +782,11 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ NOVA SEÇÃO: AÇÕES E SERVIÇOS - METAS QUANTITATIVAS */}
+        {/* ✅ NOVA SEÇÃO: AÇÕES E SERVIÇOS */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📊</span>
-            Ações e Serviços - Metas Quantitativas
+            Ações e Serviços
           </legend>
 
           {/* Formulário para adicionar nova ação/serviço */}
@@ -804,7 +804,7 @@ const EmendaForm = ({
               </select>
             </div>
 
-            <div style={window.innerWidth <= 768 ? styles.smallScreenNovaAcaoForm : styles.novaAcaoForm}>
+            <div style={styles.acoesFormGrid}>
               <div style={styles.formGroup}>
                 <label style={styles.label}>
                   {tipoAcaoServico === "Metas Quantitativas" ? "Estratégia" : "Título da Meta"}
@@ -1375,6 +1375,15 @@ const styles = {
     gridTemplateColumns: "2fr 3fr 1fr auto",
     gap: "15px",
     alignItems: "end",
+  },
+  acoesFormGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 2fr 200px",
+    gap: "20px",
+    alignItems: "start",
+    "@media (max-width: 768px)": {
+      gridTemplateColumns: "1fr",
+    },
   },
   addButton: {
     background: "#28a745",
