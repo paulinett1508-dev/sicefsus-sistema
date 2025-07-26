@@ -1,0 +1,14 @@
+
+{
+  "name": "sicefsus-scripts",
+  "version": "1.0.0",
+  "description": "Scripts utilitários para o sistema SICEFSUS",
+  "main": "generateHandover.cjs",
+  "scripts": {
+    "handover": "node generateHandover.cjs",
+    "docs": "node generateHandover.cjs"
+  },
+  "keywords": ["sicefsus", "handover", "documentation"],
+  "author": "Sistema SICEFSUS",
+  "license": "ISC"
+}
