@@ -67,24 +67,11 @@ export default function Dashboard({ usuario }) {
     topMunicipios: [],
   });
 
-  // ✅ CALCULAR ESTATÍSTICAS QUANDO DADOS CARREGAREM - COM VERIFICAÇÃO DE SEGURANÇA
-  const estatisticasMemoizadas = useMemo(() => {
-    if (!usuario || loading || !emendas || emendas.length === 0) {
-      return null;
-    }
-    return calcularEstatisticasLocais(emendas, despesas);
-  }, [usuario?.uid, emendas, despesas, loading]);
-
-  useEffect(() => {
-    if (estatisticasMemoizadas) {
-      setEstatisticas(estatisticasMemoizadas);
-    }
-  }, [estatisticasMemoizadas]);
-
   // Dashboard.jsx - CORREÇÃO DO SALDO DISPONÍVEL (R$ NaN)
   // Substituir a função calcularEstatisticasLocais (linhas ~110-220)
 
-  const calcularEstatisticasLocais = () => {
+  // Função para calcular estatísticas localmente
+  const calcularEstatisticasLocais = (emendasData, despesasData) => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
@@ -278,6 +265,12 @@ export default function Dashboard({ usuario }) {
       topMunicipios,
     };
   };
+
+  // ✅ CORREÇÃO: Memoizar estatísticas para evitar recálculos desnecessários
+  const stats = useMemo(() => {
+    console.log('📊 Calculando estatísticas do Dashboard...');
+    return calcularEstatisticasLocais(emendas, despesas);
+  }, [emendas, despesas]);
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
