@@ -650,4 +650,5 @@ export const useIsMounted = () => {
   return isMounted;
 };
 
+export { useEmendaDespesa };
 export default useEmendaDespesa;
