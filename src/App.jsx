@@ -261,6 +261,16 @@ function AppContent() {
   // ✅ CORREÇÃO: Memoizar estado de autenticação
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
 
+  // ✅ Estilo dinâmico para o botão de tema baseado na sidebar
+  const themeToggleStyle = useMemo(() => ({
+    ...styles.themeToggleContainer,
+    right: isAuthenticated ? "235px" : "15px", // Ajuste quando sidebar estiver presente
+    '@media (max-width: 768px)': {
+      right: "15px", // Em telas pequenas sempre no canto
+      top: "10px",
+    },
+  }), [isAuthenticated]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -306,9 +316,9 @@ function AppContent() {
           />
         )}
 
-        {/* Botão de tema no canto superior direito */}
-        {isAuthenticated && (
-          <div style={styles.themeToggleContainer}>
+        {/* Botão de tema no canto superior direito - sempre visível quando há usuário */}
+        {usuario && (
+          <div style={themeToggleStyle}>
             <ThemeToggle compact={true} />
           </div>
         )}
@@ -685,10 +695,9 @@ const styles = {
   },
   themeToggleContainer: {
     position: "fixed",
-    top: "20px",
-    right: "20px",
+    top: "15px",
     zIndex: 1000,
-    transition: "right 0.2s ease",
+    transition: "all 0.2s ease",
   },
 };
 

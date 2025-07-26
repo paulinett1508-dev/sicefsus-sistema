@@ -12,6 +12,14 @@ export default function ThemeToggle({ compact = false }) {
         style={styles.compactButton}
         title={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
         aria-label={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'scale(1.1)';
+          e.target.style.boxShadow = '0 4px 12px var(--theme-shadow)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'scale(1)';
+          e.target.style.boxShadow = '0 2px 8px var(--theme-shadow)';
+        }}
       >
         {isDarkMode ? '☀️' : '🌙'}
       </button>
@@ -54,16 +62,25 @@ const styles = {
 
   compactButton: {
     background: 'var(--theme-surface)',
-    border: '2px solid var(--theme-border)',
+    border: '1px solid var(--theme-border)',
     borderRadius: '50%',
-    width: '40px',
-    height: '40px',
+    width: '44px',
+    height: '44px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '18px',
+    fontSize: '20px',
     transition: 'all 0.2s ease',
+    boxShadow: '0 2px 8px var(--theme-shadow)',
+    backdropFilter: 'blur(10px)',
+    WebkitBackdropFilter: 'blur(10px)',
+    position: 'relative',
+    '@media (max-width: 768px)': {
+      width: '40px',
+      height: '40px',
+      fontSize: '18px',
+    },
   },
 
   icon: {
