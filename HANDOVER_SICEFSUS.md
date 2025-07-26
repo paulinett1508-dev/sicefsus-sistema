@@ -1,6 +1,6 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 26/07/2025, 21:14:24  
+**📅 Gerado automaticamente em:** 26/07/2025, 22:47:57  
 **🔧 Por:** Script generateHandover.cjs  
 **📊 Status:** Sistema em Produção Ativa
 
@@ -91,12 +91,17 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 ├── attached_assets
 │   ├── Pasted--Download-the-React-DevTools-for-a-better-development-experience-https-reactjs-org-link-react-dev-1753451522775_1753451522776.txt
 │   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-AdminPanel-jsx-Unexpected-token-11-1753400909790_1753400909791.txt
+│   ├── Pasted-novaAcaoContainer-background-f8f9fa-borderRadius-8px-padding-20px-margin-1753568259576_1753568259577.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753451625790_1753451625791.txt
+│   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753569649423_1753569649424.txt
 │   ├── image_1753402535914.png
 │   ├── image_1753448958060.png
 │   ├── image_1753451051428.png
 │   ├── image_1753451754238.png
-│   └── image_1753452147636.png
+│   ├── image_1753452147636.png
+│   ├── image_1753565453462.png
+│   ├── image_1753566668285.png
+│   └── image_1753569542664.png
 ├── index.html
 ├── package-lock.json
 ├── package.json
@@ -200,6 +205,7 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 - Administracao.jsx
 - Dashboard.jsx
 - Despesas.jsx
+- DespesasList.jsx
 - EmendaForm.jsx
 - Emendas.jsx
 - FluxoEmenda.jsx
@@ -272,7 +278,7 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 #### `src/components/DespesaForm.jsx`
 - **Funcionalidade**: Estado inicial com campos obrigatórios conforme print oficial
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: DespesaForm, isMounted, navigate, carregarEmendas, q...
+- **Funções**: DespesaForm, isMounted, navigate, configModo, carregarEmendas...
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
 
 #### `src/components/Despesas.jsx`
@@ -338,8 +344,8 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 - **Funções**: 
 
 #### `src/utils/firebaseCollections.js`
-- **Funcionalidade**: src/utils/firebaseCollections.js
-- **Funções**: COLLECTIONS, USER_SCHEMA, EMENDA_SCHEMA...
+- **Funcionalidade**: src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
+- **Funções**: COLLECTIONS, EMENDA_SCHEMA, USER_SCHEMA...
 
 #### `src/utils/printUtils.js`
 - **Funcionalidade**: src/utils/printUtils.js
@@ -438,7 +444,7 @@ node scripts/generateHandover.cjs
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 26/07/2025, 21:14:24  
+**🔄 Última Atualização**: 26/07/2025, 22:47:57  
 **📊 Versão**: 2.0  
 **💻 Desenvolvido em**: Replit  
 **✅ Status**: Produção Ativa
