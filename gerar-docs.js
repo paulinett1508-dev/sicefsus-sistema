@@ -1,6 +1,3 @@
-
-#!/usr/bin/env node
-
 /**
  * Script para regenerar a documentação do projeto
  * Uso: node gerar-docs.js [opcoes]

@@ -1,8 +1,9 @@
 // Emendas.jsx - Sistema SICEFSUS v1.7 - CORREÇÃO CRÍTICA APLICADA
 // ✅ CORREÇÃO: Eliminada duplicação de consultas ao Firestore
 // ✅ CORREÇÃO: Usa dados direto da prop usuario do App.jsx
+// 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda agora aceita parâmetros corretamente
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import EmendaForm from "./EmendaForm";
@@ -99,6 +100,25 @@ const Emendas = ({ usuario }) => {
     }
   };
 
+  // 🔧 CORREÇÃO DEFINITIVA: handleSalvarEmenda que aceita parâmetros
+  const handleSalvarEmenda = useCallback(
+    async (dadosEmenda) => {
+      console.log("📝 handleSalvarEmenda chamado com dados:", dadosEmenda);
+
+      try {
+        // A lógica de salvamento já está no EmendaForm
+        // Aqui apenas recarregamos e voltamos
+        await recarregar();
+        console.log("✅ Dados recarregados após salvamento");
+        handleVoltar();
+      } catch (error) {
+        console.error("❌ Erro no handleSalvarEmenda:", error);
+        throw error; // Re-throw para o EmendaForm tratar
+      }
+    },
+    [recarregar, handleVoltar],
+  );
+
   // ✅ FUNÇÃO DELETAR IMPLEMENTADA CORRETAMENTE
   const handleDeletar = async (emendaId) => {
     console.log("🗑️ Deletar emenda ID:", emendaId);
@@ -171,10 +191,7 @@ const Emendas = ({ usuario }) => {
           <EmendaForm
             usuario={usuario}
             onCancelar={handleVoltar}
-            onSalvar={async () => {
-              await recarregar();
-              handleVoltar();
-            }}
+            onSalvar={handleSalvarEmenda}
             onListarEmendas={handleVoltar}
             // Passar município/UF do usuário como padrão para operadores
             defaultMunicipio={userRole !== "admin" ? userMunicipio : null}
@@ -189,10 +206,7 @@ const Emendas = ({ usuario }) => {
             usuario={usuario}
             emendaParaEditar={emendaSelecionada}
             onCancelar={handleVoltar}
-            onSalvar={async () => {
-              await recarregar();
-              handleVoltar();
-            }}
+            onSalvar={handleSalvarEmenda}
             onListarEmendas={handleVoltar}
             isOperador={userRole !== "admin"}
           />
