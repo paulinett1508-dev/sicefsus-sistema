@@ -1057,7 +1057,6 @@ const styles = {
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-```text
   },
   legend: {
     background: "white",
