@@ -25,6 +25,7 @@ import Despesas from "./components/Despesas";
 // firestore aqui. Veja src/context/UserContext.jsx para detalhes.
 
 import { UserProvider, useUser } from "./context/UserContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
@@ -476,15 +477,17 @@ export default function App() {
   }
 
   return (
-    <UserProvider>
-      <ToastProvider>
-        <Router>
-          <NavigationProtectionProvider>
-            <AppContent />
-          </NavigationProtectionProvider>
-        </Router>
-      </ToastProvider>
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <ToastProvider>
+          <Router>
+            <NavigationProtectionProvider>
+              <AppContent />
+            </NavigationProtectionProvider>
+          </Router>
+        </ToastProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }
 

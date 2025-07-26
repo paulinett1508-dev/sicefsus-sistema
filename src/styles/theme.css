@@ -32,7 +32,7 @@
   --info-light: #46c5d8;
   --info-dark: #138496;
 
-  /* === CORES NEUTRAS === */
+  /* === CORES NEUTRAS BASE === */
   --white: #ffffff;
   --black: #000000;
   --gray-50: #f8f9fa;
@@ -45,6 +45,41 @@
   --gray-700: #343a40;
   --gray-800: #212529;
   --gray-900: #0f1419;
+
+  /* === TEMA LIGHT (padrão) === */
+  --theme-bg: #f4f6f8;
+  --theme-surface: #ffffff;
+  --theme-surface-secondary: #f8f9fa;
+  --theme-text: #212529;
+  --theme-text-secondary: #6c757d;
+  --theme-text-muted: #9fa6ad;
+  --theme-border: #dee2e6;
+  --theme-border-light: #e9ecef;
+  --theme-shadow: rgba(0, 0, 0, 0.1);
+  --theme-shadow-light: rgba(0, 0, 0, 0.05);
+}
+
+/* === TEMA DARK === */
+[data-theme="dark"] {
+  --theme-bg: #0f1419;
+  --theme-surface: #1a1f26;
+  --theme-surface-secondary: #222831;
+  --theme-text: #e9ecef;
+  --theme-text-secondary: #adb5bd;
+  --theme-text-muted: #6c757d;
+  --theme-border: #495057;
+  --theme-border-light: #343a40;
+  --theme-shadow: rgba(0, 0, 0, 0.3);
+  --theme-shadow-light: rgba(0, 0, 0, 0.2);
+
+  /* Ajustes para melhor contraste no tema dark */
+  --primary: #4A90E2;
+  --accent: #6ba4eb;
+  --success: #2ecc71;
+  --warning: #f5b041;
+  --error: #ec7063;
+  --info: #46c5d8;
+}
 
   /* === SOMBRAS === */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -116,12 +151,19 @@
   --container-max-width: 1200px;
 
   /* === ESPECÍFICOS DO SISTEMA === */
-  --table-header-bg: var(--gray-50);
-  --table-border: var(--gray-200);
-  --form-border: var(--gray-300);
+  --table-header-bg: var(--theme-surface-secondary);
+  --table-border: var(--theme-border);
+  --form-border: var(--theme-border);
   --form-focus-color: var(--accent);
-  --card-bg: var(--white);
-  --body-bg: #f4f6f8;
+  --card-bg: var(--theme-surface);
+  --body-bg: var(--theme-bg);
+}
+
+/* === ESTILOS GLOBAIS DE TEMA === */
+body {
+  background-color: var(--body-bg);
+  color: var(--theme-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* === CLASSES UTILITÁRIAS === */
@@ -228,7 +270,8 @@
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow);
   padding: var(--space-6);
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--theme-border-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Form controls padrão */
@@ -238,7 +281,8 @@
   border-radius: var(--border-radius);
   font-size: var(--font-size-sm);
   transition: all var(--transition-normal);
-  background: var(--white);
+  background: var(--theme-surface);
+  color: var(--theme-text);
   font-family: var(--font-family);
   width: 100%;
 }

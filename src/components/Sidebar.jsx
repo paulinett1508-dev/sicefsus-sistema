@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import GlobalSearch from "./GlobalSearch";
 import { Link } from "react-router-dom";
+import ThemeToggle from "./ThemeToggle";
 
 const PRIMARY = "#154360";
 const ACCENT = "#4A90E2";
@@ -269,6 +270,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             </div>
           </div>
         )}
+
+        <ThemeToggle />
 
         <button
           onClick={onLogout}

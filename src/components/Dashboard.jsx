@@ -565,8 +565,9 @@ export default function Dashboard({ usuario }) {
       <style>{`
         .dashboard {
           padding: 20px;
-          background: #f8f9fa;
+          background: var(--theme-bg);
           min-height: 100vh;
+          transition: background-color 0.3s ease;
         }
 
         .dashboard-loading {
@@ -601,9 +602,11 @@ export default function Dashboard({ usuario }) {
         .dashboard-error {
           text-align: center;
           padding: 40px;
-          background: white;
+          background: var(--theme-surface);
+          color: var(--theme-text);
           border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 10px var(--theme-shadow);
+          transition: all 0.3s ease;
         }
 
         .error-button {
@@ -688,11 +691,12 @@ export default function Dashboard({ usuario }) {
         }
 
         .dashboard-header {
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
           padding: 25px;
           margin-bottom: 20px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 10px var(--theme-shadow);
+          transition: all 0.3s ease;
         }
 
         .header-content {
@@ -705,7 +709,7 @@ export default function Dashboard({ usuario }) {
 
         .header-content h1 {
           margin: 0;
-          color: #154360;
+          color: var(--primary);
           font-size: 1.8em;
         }
 
@@ -754,10 +758,10 @@ export default function Dashboard({ usuario }) {
         }
 
         .summary-card {
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
           padding: 25px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 10px var(--theme-shadow);
           cursor: pointer;
           transition: all 0.3s ease;
           border: 2px solid transparent;
@@ -780,7 +784,7 @@ export default function Dashboard({ usuario }) {
 
         .summary-card h3 {
           margin: 0 0 10px 0;
-          color: #6c757d;
+          color: var(--theme-text-secondary);
           font-size: 1em;
           font-weight: 500;
         }
@@ -788,12 +792,12 @@ export default function Dashboard({ usuario }) {
         .card-value {
           font-size: 2em;
           font-weight: 700;
-          color: #154360;
+          color: var(--primary);
           margin-bottom: 5px;
         }
 
         .card-subtitle {
-          color: #6c757d;
+          color: var(--theme-text-secondary);
           font-size: 0.9em;
         }
 
@@ -804,10 +808,11 @@ export default function Dashboard({ usuario }) {
         }
 
         .chart-container {
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
           padding: 25px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 10px var(--theme-shadow);
+          transition: all 0.3s ease;
         }
 
         .chart-container.full-width {
@@ -816,7 +821,7 @@ export default function Dashboard({ usuario }) {
 
         .chart-container h3 {
           margin: 0 0 20px 0;
-          color: #154360;
+          color: var(--primary);
           font-size: 1.2em;
         }
 
@@ -831,9 +836,10 @@ export default function Dashboard({ usuario }) {
           align-items: center;
           gap: 15px;
           padding: 15px;
-          background: #f8f9fa;
+          background: var(--theme-surface-secondary);
           border-radius: 8px;
           border-left: 4px solid #4A90E2;
+          transition: background-color 0.3s ease;
         }
 
         .top-rank {
@@ -849,12 +855,12 @@ export default function Dashboard({ usuario }) {
 
         .top-name {
           font-weight: 600;
-          color: #154360;
+          color: var(--primary);
           margin-bottom: 4px;
         }
 
         .top-details {
-          color: #6c757d;
+          color: var(--theme-text-secondary);
           font-size: 0.9em;
         }
 
