@@ -383,174 +383,213 @@ const AdminPanel = () => {
           </div>
 
           {showUserForm && (
-            <div className="user-form-container">
-              <div className="form-header">
-                <h3>{editingUser ? "Editar Usuário" : "Novo Usuário"}</h3>
-                <button className="btn-close" onClick={resetForm}>
-                  ✕
-                </button>
-              </div>
+            <div className="form-modal-overlay">
+              <div className="form-modal">
+                <div className="form-modal-header">
+                  <h2>{editingUser ? "✏️ Editar Usuário" : "➕ Novo Usuário"}</h2>
+                  <button className="close-button" onClick={resetForm}>
+                    ✕
+                  </button>
+                </div>
 
-              <form
-                onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
-              >
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>Email *</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      disabled={editingUser}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Nome Completo *</label>
-                    <input
-                      type="text"
-                      value={formData.nome}
-                      onChange={(e) =>
-                        setFormData({ ...formData, nome: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Perfil</label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => {
-                        const newRole = e.target.value;
-                        setFormData({ 
-                          ...formData, 
-                          role: newRole,
-                          // Limpar município e UF se mudou para admin
-                          municipio: newRole === "admin" ? "" : formData.municipio,
-                          uf: newRole === "admin" ? "" : formData.uf
-                        });
-                      }}
-                    >
-                      <option value="user">Operador</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) =>
-                        setFormData({ ...formData, status: e.target.value })
-                      }
-                    >
-                      <option value="ativo">Ativo</option>
-                      <option value="inativo">Inativo</option>
-                      <option value="bloqueado">Bloqueado</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Departamento</label>
-                    <input
-                      type="text"
-                      value={formData.departamento}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          departamento: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Telefone</label>
-                    <input
-                      type="tel"
-                      value={formData.telefone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, telefone: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  {/* Campos Município e UF apenas para operadores */}
-                  {formData.role === "user" && (
-                    <>
-                      <div className="form-group">
-                        <label>Município *</label>
+                <form
+                  className="form-container"
+                  onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
+                >
+                  <div className="form-section">
+                    <h3 className="section-title">📋 Dados Pessoais</h3>
+                    
+                    <div className="form-row">
+                      <div className="form-field">
+                        <label className="field-label required">Email</label>
                         <input
-                          type="text"
-                          value={formData.municipio}
+                          type="email"
+                          className="field-input"
+                          value={formData.email}
                           onChange={(e) =>
-                            setFormData({ ...formData, municipio: e.target.value })
+                            setFormData({ ...formData, email: e.target.value })
                           }
-                          placeholder="Digite o município"
-                          required={formData.role === "user"}
+                          disabled={editingUser}
+                          required
+                          placeholder="usuario@exemplo.com"
                         />
                       </div>
 
-                      <div className="form-group">
-                        <label>UF *</label>
-                        <select
-                          value={formData.uf}
+                      <div className="form-field">
+                        <label className="field-label required">Nome Completo</label>
+                        <input
+                          type="text"
+                          className="field-input"
+                          value={formData.nome}
                           onChange={(e) =>
-                            setFormData({ ...formData, uf: e.target.value })
+                            setFormData({ ...formData, nome: e.target.value })
                           }
-                          required={formData.role === "user"}
+                          required
+                          placeholder="Nome completo do usuário"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-field">
+                        <label className="field-label">Departamento</label>
+                        <input
+                          type="text"
+                          className="field-input"
+                          value={formData.departamento}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              departamento: e.target.value,
+                            })
+                          }
+                          placeholder="Ex: Secretaria de Saúde"
+                        />
+                      </div>
+
+                      <div className="form-field">
+                        <label className="field-label">Telefone</label>
+                        <input
+                          type="tel"
+                          className="field-input"
+                          value={formData.telefone}
+                          onChange={(e) =>
+                            setFormData({ ...formData, telefone: e.target.value })
+                          }
+                          placeholder="(00) 00000-0000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-section">
+                    <h3 className="section-title">🔐 Configurações de Acesso</h3>
+                    
+                    <div className="form-row">
+                      <div className="form-field">
+                        <label className="field-label">Perfil do Usuário</label>
+                        <select
+                          className="field-select"
+                          value={formData.role}
+                          onChange={(e) => {
+                            const newRole = e.target.value;
+                            setFormData({ 
+                              ...formData, 
+                              role: newRole,
+                              municipio: newRole === "admin" ? "" : formData.municipio,
+                              uf: newRole === "admin" ? "" : formData.uf
+                            });
+                          }}
                         >
-                          <option value="">Selecione a UF</option>
-                          <option value="ac">AC - Acre</option>
-                          <option value="al">AL - Alagoas</option>
-                          <option value="ap">AP - Amapá</option>
-                          <option value="am">AM - Amazonas</option>
-                          <option value="ba">BA - Bahia</option>
-                          <option value="ce">CE - Ceará</option>
-                          <option value="df">DF - Distrito Federal</option>
-                          <option value="es">ES - Espírito Santo</option>
-                          <option value="go">GO - Goiás</option>
-                          <option value="ma">MA - Maranhão</option>
-                          <option value="mt">MT - Mato Grosso</option>
-                          <option value="ms">MS - Mato Grosso do Sul</option>
-                          <option value="mg">MG - Minas Gerais</option>
-                          <option value="pa">PA - Pará</option>
-                          <option value="pb">PB - Paraíba</option>
-                          <option value="pr">PR - Paraná</option>
-                          <option value="pe">PE - Pernambuco</option>
-                          <option value="pi">PI - Piauí</option>
-                          <option value="rj">RJ - Rio de Janeiro</option>
-                          <option value="rn">RN - Rio Grande do Norte</option>
-                          <option value="rs">RS - Rio Grande do Sul</option>
-                          <option value="ro">RO - Rondônia</option>
-                          <option value="rr">RR - Roraima</option>
-                          <option value="sc">SC - Santa Catarina</option>
-                          <option value="sp">SP - São Paulo</option>
-                          <option value="se">SE - Sergipe</option>
-                          <option value="to">TO - Tocantins</option>
+                          <option value="user">👤 Operador</option>
+                          <option value="admin">👑 Administrador</option>
+                        </select>
+                        <small className="field-hint">
+                          {formData.role === "admin" 
+                            ? "Acesso total ao sistema" 
+                            : "Acesso limitado por localização"
+                          }
+                        </small>
+                      </div>
+
+                      <div className="form-field">
+                        <label className="field-label">Status</label>
+                        <select
+                          className="field-select"
+                          value={formData.status}
+                          onChange={(e) =>
+                            setFormData({ ...formData, status: e.target.value })
+                          }
+                        >
+                          <option value="ativo">✅ Ativo</option>
+                          <option value="inativo">⏸️ Inativo</option>
+                          <option value="bloqueado">🚫 Bloqueado</option>
                         </select>
                       </div>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </div>
 
-                <div className="form-actions">
-                  <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={resetForm}
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit" className="btn-primary">
-                    {editingUser ? "Atualizar" : "Criar"} Usuário
-                  </button>
-                </div>
-              </form>
+                  {/* Seção de Localização para Operadores */}
+                  {formData.role === "user" && (
+                    <div className="form-section location-section">
+                      <h3 className="section-title">📍 Localização de Acesso</h3>
+                      <div className="location-info">
+                        <p>⚠️ Operadores têm acesso limitado a emendas de sua região</p>
+                      </div>
+                      
+                      <div className="form-row">
+                        <div className="form-field">
+                          <label className="field-label required">Município</label>
+                          <input
+                            type="text"
+                            className="field-input"
+                            value={formData.municipio}
+                            onChange={(e) =>
+                              setFormData({ ...formData, municipio: e.target.value })
+                            }
+                            placeholder="Digite o nome do município"
+                            required={formData.role === "user"}
+                          />
+                        </div>
+
+                        <div className="form-field">
+                          <label className="field-label required">Estado (UF)</label>
+                          <select
+                            className="field-select"
+                            value={formData.uf}
+                            onChange={(e) =>
+                              setFormData({ ...formData, uf: e.target.value })
+                            }
+                            required={formData.role === "user"}
+                          >
+                            <option value="">Selecione o Estado</option>
+                            <option value="ac">AC - Acre</option>
+                            <option value="al">AL - Alagoas</option>
+                            <option value="ap">AP - Amapá</option>
+                            <option value="am">AM - Amazonas</option>
+                            <option value="ba">BA - Bahia</option>
+                            <option value="ce">CE - Ceará</option>
+                            <option value="df">DF - Distrito Federal</option>
+                            <option value="es">ES - Espírito Santo</option>
+                            <option value="go">GO - Goiás</option>
+                            <option value="ma">MA - Maranhão</option>
+                            <option value="mt">MT - Mato Grosso</option>
+                            <option value="ms">MS - Mato Grosso do Sul</option>
+                            <option value="mg">MG - Minas Gerais</option>
+                            <option value="pa">PA - Pará</option>
+                            <option value="pb">PB - Paraíba</option>
+                            <option value="pr">PR - Paraná</option>
+                            <option value="pe">PE - Pernambuco</option>
+                            <option value="pi">PI - Piauí</option>
+                            <option value="rj">RJ - Rio de Janeiro</option>
+                            <option value="rn">RN - Rio Grande do Norte</option>
+                            <option value="rs">RS - Rio Grande do Sul</option>
+                            <option value="ro">RO - Rondônia</option>
+                            <option value="rr">RR - Roraima</option>
+                            <option value="sc">SC - Santa Catarina</option>
+                            <option value="sp">SP - São Paulo</option>
+                            <option value="se">SE - Sergipe</option>
+                            <option value="to">TO - Tocantins</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={resetForm}
+                    >
+                      ❌ Cancelar
+                    </button>
+                    <button type="submit" className="btn btn-primary">
+                      {editingUser ? "💾 Atualizar" : "✅ Criar"} Usuário
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
 
@@ -865,75 +904,206 @@ const AdminPanel = () => {
           background: #545b62;
         }
 
-        .user-form-container {
-          background: #f8f9fa;
-          border-radius: 8px;
+        /* ✅ FORMULÁRIO MODAL - PADRÃO SICEFSUS */
+        .form-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
           padding: 20px;
-          margin-bottom: 25px;
-          border: 1px solid #dee2e6;
         }
 
-        .form-header {
+        .form-modal {
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+          max-width: 800px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          border: 2px solid #154360;
+        }
+
+        .form-modal-header {
+          background: linear-gradient(135deg, #154360, #1A5276);
+          color: white;
+          padding: 20px 25px;
+          border-radius: 10px 10px 0 0;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 20px;
         }
 
-        .form-header h3 {
+        .form-modal-header h2 {
           margin: 0;
-          color: #2c3e50;
-        }
-
-        .btn-close {
-          background: none;
-          border: none;
           font-size: 1.5em;
+          font-weight: 600;
+        }
+
+        .close-button {
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          font-size: 1.2em;
           cursor: pointer;
-          color: #6c757d;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background-color 0.2s;
         }
 
-        .btn-close:hover {
-          color: #dc3545;
+        .close-button:hover {
+          background: rgba(255, 255, 255, 0.3);
         }
 
-        .form-grid {
+        .form-container {
+          padding: 25px;
+        }
+
+        .form-section {
+          margin-bottom: 30px;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          border-left: 4px solid #154360;
+        }
+
+        .section-title {
+          color: #154360;
+          font-size: 1.1em;
+          font-weight: 600;
+          margin: 0 0 20px 0;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .form-row {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
           gap: 20px;
-          margin-bottom: 20px;
+          margin-bottom: 15px;
         }
 
-        .form-group {
+        .form-field {
           display: flex;
           flex-direction: column;
         }
 
-        .form-group label {
-          font-weight: 500;
-          margin-bottom: 5px;
+        .field-label {
+          font-weight: 600;
           color: #2c3e50;
-        }
-
-        .form-group input,
-        .form-group select {
-          padding: 10px;
-          border: 1px solid #ced4da;
-          border-radius: 4px;
+          margin-bottom: 8px;
           font-size: 14px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .field-label.required::after {
+          content: " *";
+          color: #dc3545;
+          font-weight: bold;
+        }
+
+        .field-input,
+        .field-select {
+          padding: 12px;
+          border: 2px solid #e9ecef;
+          border-radius: 6px;
+          font-size: 14px;
+          transition: all 0.2s;
+          background: white;
+        }
+
+        .field-input:focus,
+        .field-select:focus {
           outline: none;
-          border-color: #007bff;
-          box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+          border-color: #154360;
+          box-shadow: 0 0 0 3px rgba(21, 67, 96, 0.1);
+        }
+
+        .field-input:disabled {
+          background: #f8f9fa;
+          color: #6c757d;
+          cursor: not-allowed;
+        }
+
+        .field-hint {
+          color: #6c757d;
+          font-size: 12px;
+          margin-top: 5px;
+          font-style: italic;
+        }
+
+        .location-section {
+          border-left-color: #ffc107;
+          background: #fff8e1;
+        }
+
+        .location-info {
+          background: #fff3cd;
+          border: 1px solid #ffeaa7;
+          border-radius: 6px;
+          padding: 12px;
+          margin-bottom: 15px;
+        }
+
+        .location-info p {
+          margin: 0;
+          color: #856404;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .form-actions {
           display: flex;
           justify-content: flex-end;
-          gap: 10px;
+          gap: 15px;
+          padding-top: 20px;
+          border-top: 2px solid #e9ecef;
+          margin-top: 20px;
+        }
+
+        .btn {
+          padding: 12px 24px;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #154360, #1A5276);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          background: linear-gradient(135deg, #1A5276, #2C5F84);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(21, 67, 96, 0.3);
+        }
+
+        .btn-secondary {
+          background: #6c757d;
+          color: white;
+        }
+
+        .btn-secondary:hover {
+          background: #5a6268;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
         }
 
         .users-table, .logs-table {
@@ -1083,10 +1253,6 @@ const AdminPanel = () => {
             padding: 10px;
           }
 
-          .form-grid {
-            grid-template-columns: 1fr;
-          }
-
           .stats-row {
             grid-template-columns: repeat(2, 1fr);
           }
@@ -1102,6 +1268,48 @@ const AdminPanel = () => {
 
           .action-buttons {
             flex-direction: column;
+          }
+
+          /* ✅ RESPONSIVIDADE DO FORMULÁRIO */
+          .form-modal-overlay {
+            padding: 10px;
+          }
+
+          .form-modal {
+            max-width: 100%;
+            max-height: 95vh;
+          }
+
+          .form-modal-header {
+            padding: 15px 20px;
+          }
+
+          .form-modal-header h2 {
+            font-size: 1.3em;
+          }
+
+          .form-container {
+            padding: 20px;
+          }
+
+          .form-row {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
+
+          .form-section {
+            padding: 15px;
+            margin-bottom: 20px;
+          }
+
+          .form-actions {
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .btn {
+            width: 100%;
+            justify-content: center;
           }
         }
       `}</style>
