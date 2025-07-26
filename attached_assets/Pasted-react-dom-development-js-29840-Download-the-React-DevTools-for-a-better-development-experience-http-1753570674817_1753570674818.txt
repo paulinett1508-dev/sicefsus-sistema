@@ -1,0 +1,189 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: {apiKey: '✅ Configurada', authDomain: '✅ Configurada', projectId: '✅ Configurada', storageBucket: '✅ Configurada', messagingSenderId: '✅ Configurada', …}
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+UserContext.jsx:121 🔄 UserContext: Carregando dados completos do usuário...
+UserContext.jsx:123 👤 UserContext: Dados do usuário carregados: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi', …}
+UserContext.jsx:137 ✅ UserContext: Usuário ativo definido no contexto
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: true}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: true}
+useEmendaDespesa.js:97 🔄 CORREÇÃO ULTRA: Sempre liberando permissões
+useEmendaDespesa.js:108 📋 PERMISSÕES SEMPRE LIBERADAS: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+useEmendaDespesa.js:488 📊 Carregando todas as emendas...
+useEmendaDespesa.js:228 👑 Admin - carregando TODAS as emendas
+Dashboard.jsx:80 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+useEmendaDespesa.js:97 🔄 CORREÇÃO ULTRA: Sempre liberando permissões
+useEmendaDespesa.js:108 📋 PERMISSÕES SEMPRE LIBERADAS: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+useEmendaDespesa.js:488 📊 Carregando todas as emendas...
+useEmendaDespesa.js:228 👑 Admin - carregando TODAS as emendas
+Dashboard.jsx:80 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:80 ⏳ Aguardando dados: {loading: true, emendasValidas: true, emendasTipo: 'object', emendasLength: 2}
+useEmendaDespesa.js:252 📊 Emendas carregadas: 2
+useEmendaDespesa.js:252 📊 Emendas carregadas: 2
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:69 📊 Calculando estatísticas do Dashboard...
+Dashboard.jsx:70 📋 Emendas disponíveis: 2
+Dashboard.jsx:71 💰 Despesas disponíveis: 0
+Dashboard.jsx:78 ✅ Estatísticas calculadas: {totalEmendas: 2, valorTotalGeral: 201500, valorExecutadoGeral: 0, saldoDisponivelGeral: 201500, percentualGeralExecutado: 0, …}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Dashboard.jsx:30 🏠 Dashboard iniciado
+Dashboard.jsx:31 👤 Dados do usuário carregados para Dashboard: {lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', role: 'admin', isActive: true, displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:29 🔧 useEmendaDespesa CORRIGIDO - usuário: paulinett1508@gmail.com role: admin
+useEmendaDespesa.js:609 🏁 PERMISSÕES FINAIS DO HOOK: {podeEditar: true, podeVisualizar: true, isAdmin: true, acessoTotal: true, filtroAplicado: false}
+Administracao.jsx:24 🔍 ADMINISTRACAO DEBUG - Verificando permissões...
+Administracao.jsx:25 👤 Usuário prop completo: {usuario: {…}, hasUsuario: true, email: 'paulinett1508@gmail.com', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Administracao.jsx:35 📋 ADMIN_EMAILS configurados: (2) ['admin@exemplo.com', 'outro@exemplo.com']
+Administracao.jsx:36 🔧 Firebase API Key presente: true
+Administracao.jsx:66 🔐 Verificação de permissões: {userRole: 'admin', userEmail: 'paulinett1508@gmail.com', isRoleAdmin: true, isEmailAdmin: false, finalIsAdmin: true}
+Administracao.jsx:75 👑 Resultado final - É admin? true
+Administracao.jsx:24 🔍 ADMINISTRACAO DEBUG - Verificando permissões...
+Administracao.jsx:25 👤 Usuário prop completo: {usuario: {…}, hasUsuario: true, email: 'paulinett1508@gmail.com', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Administracao.jsx:35 📋 ADMIN_EMAILS configurados: (2) ['admin@exemplo.com', 'outro@exemplo.com']
+Administracao.jsx:36 🔧 Firebase API Key presente: true
+Administracao.jsx:66 🔐 Verificação de permissões: {userRole: 'admin', userEmail: 'paulinett1508@gmail.com', isRoleAdmin: true, isEmailAdmin: false, finalIsAdmin: true}
+Administracao.jsx:75 👑 Resultado final - É admin? true
+AdminPanel.jsx:732  Uncaught TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at AdminPanel.jsx:732:63
+    at Array.map (<anonymous>)
+    at AdminPanel (AdminPanel.jsx:726:31)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+(anônimo) @ AdminPanel.jsx:732
+AdminPanel @ AdminPanel.jsx:726
+renderWithHooks @ react-dom.development.js:16305
+updateFunctionComponent @ react-dom.development.js:19588
+beginWork @ react-dom.development.js:21601
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+beginWork$1 @ react-dom.development.js:27451
+performUnitOfWork @ react-dom.development.js:26557
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+AdminPanel.jsx:732  Uncaught TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at AdminPanel.jsx:732:63
+    at Array.map (<anonymous>)
+    at AdminPanel (AdminPanel.jsx:726:31)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+(anônimo) @ AdminPanel.jsx:732
+AdminPanel @ AdminPanel.jsx:726
+renderWithHooks @ react-dom.development.js:16305
+updateFunctionComponent @ react-dom.development.js:19588
+beginWork @ react-dom.development.js:21601
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+beginWork$1 @ react-dom.development.js:27451
+performUnitOfWork @ react-dom.development.js:26557
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+recoverFromConcurrentError @ react-dom.development.js:25850
+performSyncWorkOnRoot @ react-dom.development.js:26096
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+react-dom.development.js:18687  The above error occurred in the <AdminPanel> component:
+
+    at AdminPanel (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/AdminPanel.jsx:41:29)
+    at div
+    at div
+    at Administracao (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Administracao.jsx:21:26)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:105:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:175:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:224:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:66:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at App
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ react-dom.development.js:18687
+callback @ react-dom.development.js:18755
+callCallback @ react-dom.development.js:13923
+commitUpdateQueue @ react-dom.development.js:13944
+commitLayoutEffectOnFiber @ react-dom.development.js:23364
+commitLayoutMountEffects_complete @ react-dom.development.js:24688
+commitLayoutEffects_begin @ react-dom.development.js:24674
+commitLayoutEffects @ react-dom.development.js:24612
+commitRootImpl @ react-dom.development.js:26823
+commitRoot @ react-dom.development.js:26682
+performSyncWorkOnRoot @ react-dom.development.js:26117
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+App.jsx:162  Erro capturado pelo Error Boundary: TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at AdminPanel.jsx:732:63
+    at Array.map (<anonymous>)
+    at AdminPanel (AdminPanel.jsx:726:31)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at beginWork$1 (react-dom.development.js:27426:14)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+    at renderRootSync (react-dom.development.js:26434:7) {componentStack: '\n    at AdminPanel (https://91331338-5ea0-4039-8bb…dev/src/context/UserContext.jsx:70:32)\n    at App'}
+componentDidCatch @ App.jsx:162
+callback @ react-dom.development.js:18768
+callCallback @ react-dom.development.js:13923
+commitUpdateQueue @ react-dom.development.js:13944
+commitLayoutEffectOnFiber @ react-dom.development.js:23364
+commitLayoutMountEffects_complete @ react-dom.development.js:24688
+commitLayoutEffects_begin @ react-dom.development.js:24674
+commitLayoutEffects @ react-dom.development.js:24612
+commitRootImpl @ react-dom.development.js:26823
+commitRoot @ react-dom.development.js:26682
+performSyncWorkOnRoot @ react-dom.development.js:26117
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
