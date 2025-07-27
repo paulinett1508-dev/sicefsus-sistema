@@ -1,14 +1,13 @@
 // src/components/UsersTable.jsx - Tabela de Usuários Conforme Padrão SICEFSUS
 import React from "react";
 
-const UsersTable = ({ 
-  users, 
-  onEdit, 
-  onResetPassword, 
-  onDelete, 
-  saving = false 
+const UsersTable = ({
+  users,
+  onEdit,
+  onResetPassword,
+  onDelete,
+  saving = false,
 }) => {
-
   const formatLastAccess = (lastAccess) => {
     if (!lastAccess) {
       return <span className="never-accessed">Nunca acessou</span>;
@@ -32,11 +31,15 @@ const UsersTable = ({
     const statusMap = {
       ativo: { label: "✅ Ativo", className: "ativo" },
       inativo: { label: "⏸️ Inativo", className: "inativo" },
-      bloqueado: { label: "🚫 Bloqueado", className: "bloqueado" }
+      bloqueado: { label: "🚫 Bloqueado", className: "bloqueado" },
     };
 
     const statusInfo = statusMap[status] || statusMap.ativo;
-    return <span className={`status ${statusInfo.className}`}>{statusInfo.label}</span>;
+    return (
+      <span className={`status ${statusInfo.className}`}>
+        {statusInfo.label}
+      </span>
+    );
   };
 
   const formatRole = (role) => {
@@ -52,7 +55,9 @@ const UsersTable = ({
       <div className="empty-state">
         <div className="empty-icon">👥</div>
         <h3>Nenhum usuário encontrado</h3>
-        <p>Clique em "Novo Usuário" para adicionar o primeiro usuário ao sistema.</p>
+        <p>
+          Clique em "Novo Usuário" para adicionar o primeiro usuário ao sistema.
+        </p>
       </div>
     );
   }
@@ -75,12 +80,17 @@ const UsersTable = ({
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.id} className={user.primeiroAcesso ? "first-access" : ""}>
+              <tr
+                key={user.id}
+                className={user.primeiroAcesso ? "first-access" : ""}
+              >
                 <td>
                   <div className="user-name">
                     {user.nome}
                     {user.primeiroAcesso && (
-                      <span className="first-access-badge">🔑 Primeiro acesso</span>
+                      <span className="first-access-badge">
+                        🔑 Primeiro acesso
+                      </span>
                     )}
                   </div>
                 </td>
@@ -107,7 +117,11 @@ const UsersTable = ({
                     <button
                       className="btn-reset"
                       onClick={() => onResetPassword(user)}
-                      title={user.primeiroAcesso ? "Reenviar email de primeiro acesso" : "Enviar reset de senha"}
+                      title={
+                        user.primeiroAcesso
+                          ? "Reenviar email de primeiro acesso"
+                          : "Enviar reset de senha"
+                      }
                       disabled={saving}
                     >
                       🔑
@@ -309,139 +323,6 @@ const UsersTable = ({
         }
       `}</style>
     </>
-  );
-};
-
-export default UsersTable;// src/components/UsersTable.jsx - Tabela de Usuários Isolada
-import React from "react";
-
-const UsersTable = ({ 
-  users, 
-  onEdit, 
-  onResetPassword, 
-  onDelete, 
-  saving = false 
-}) => {
-
-  const formatLastAccess = (lastAccess) => {
-    if (!lastAccess) {
-      return <span className="never-accessed">Nunca acessou</span>;
-    }
-    return <span>{lastAccess.toDate().toLocaleString("pt-BR")}</span>;
-  };
-
-  const formatLocation = (user) => {
-    if (user.role === "admin") {
-      return "🌐 Acesso Total";
-    }
-
-    if (user.municipio && user.uf) {
-      return `${user.municipio}/${user.uf.toUpperCase()}`;
-    }
-
-    return "⚠️ Não configurado";
-  };
-
-  const formatStatus = (status) => {
-    const statusMap = {
-      ativo: { label: "✅ Ativo", className: "ativo" },
-      inativo: { label: "⏸️ Inativo", className: "inativo" },
-      bloqueado: { label: "🚫 Bloqueado", className: "bloqueado" }
-    };
-
-    const statusInfo = statusMap[status] || statusMap.ativo;
-    return <span className={`status ${statusInfo.className}`}>{statusInfo.label}</span>;
-  };
-
-  const formatRole = (role) => {
-    return (
-      <span className={`badge ${role}`}>
-        {role === "admin" ? "👑 Admin" : "👤 Usuário"}
-      </span>
-    );
-  };
-
-  if (users.length === 0) {
-    return (
-      <div className="empty-state">
-        <div className="empty-icon">👥</div>
-        <h3>Nenhum usuário encontrado</h3>
-        <p>Clique em "Novo Usuário" para adicionar o primeiro usuário ao sistema.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="users-table">
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Perfil</th>
-              <th>Status</th>
-              <th>Departamento</th>
-              <th>Município/UF</th>
-              <th>Último Acesso</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className={user.primeiroAcesso ? "first-access" : ""}>
-                <td>
-                  <div className="user-name">
-                    {user.nome}
-                    {user.primeiroAcesso && (
-                      <span className="first-access-badge">🔑 Primeiro acesso</span>
-                    )}
-                  </div>
-                </td>
-                <td>{user.email}</td>
-                <td>{formatRole(user.role)}</td>
-                <td>{formatStatus(user.status)}</td>
-                <td>{user.departamento || "-"}</td>
-                <td>{formatLocation(user)}</td>
-                <td>
-                  <div className="access-info">
-                    {formatLastAccess(user.ultimoAcesso)}
-                  </div>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button
-                      className="btn-edit"
-                      onClick={() => onEdit(user)}
-                      title="Editar dados"
-                      disabled={saving}
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="btn-reset"
-                      onClick={() => onResetPassword(user)}
-                      title={user.primeiroAcesso ? "Reenviar email de primeiro acesso" : "Enviar reset de senha"}
-                      disabled={saving}
-                    >
-                      🔑
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={() => onDelete(user)}
-                      title="Excluir usuário"
-                      disabled={saving}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
   );
 };
 

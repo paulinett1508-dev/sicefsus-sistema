@@ -6,6 +6,7 @@ import UserForm from "./UserForm";
 import UsersTable from "./UsersTable";
 import AdminStats from "./AdminStats";
 import { UserService } from "../services/userService";
+import "../styles/adminStyles.css";
 
 const AdminPanel = () => {
   // ✅ ESTADOS PRINCIPAIS
@@ -53,10 +54,7 @@ const AdminPanel = () => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      await Promise.all([
-        loadUsers(),
-        loadLogs()
-      ]);
+      await Promise.all([loadUsers(), loadLogs()]);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       showToast("Erro ao carregar dados do sistema", "error");
@@ -97,7 +95,6 @@ const AdminPanel = () => {
       showToast(result.message, "success");
       await loadUsers();
       resetForm();
-
     } catch (error) {
       showToast(error.message, "error");
     } finally {
@@ -113,13 +110,19 @@ const AdminPanel = () => {
     setSaving(true);
 
     try {
-      const result = await userService.updateUser(editingUser.id, formData, editingUser.email);
-      await userService.addLog("UPDATE_USER", `Usuário atualizado: ${formData.email}`);
+      const result = await userService.updateUser(
+        editingUser.id,
+        formData,
+        editingUser.email,
+      );
+      await userService.addLog(
+        "UPDATE_USER",
+        `Usuário atualizado: ${formData.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers();
       resetForm();
-
     } catch (error) {
       showToast(error.message, "error");
     } finally {
@@ -133,13 +136,15 @@ const AdminPanel = () => {
 
     try {
       const result = await userService.deleteUser(userToDelete.id);
-      await userService.addLog("DELETE_USER", `Usuário excluído: ${userToDelete.email}`);
+      await userService.addLog(
+        "DELETE_USER",
+        `Usuário excluído: ${userToDelete.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers();
       setShowDeleteModal(false);
       setUserToDelete(null);
-
     } catch (error) {
       showToast(error.message, "error");
     }
@@ -149,11 +154,13 @@ const AdminPanel = () => {
   const handleResetPassword = async (user) => {
     try {
       const result = await userService.sendPasswordReset(user);
-      await userService.addLog("RESET_PASSWORD", `Reset de senha: ${user.email}`);
+      await userService.addLog(
+        "RESET_PASSWORD",
+        `Reset de senha: ${user.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers(); // Recarregar para atualizar flags
-
     } catch (error) {
       showToast(error.message, "error");
     }
@@ -201,15 +208,19 @@ const AdminPanel = () => {
       let matches = true;
 
       if (logFilters.usuario) {
-        matches = matches && (log.userEmail || "")
-          .toLowerCase()
-          .includes(logFilters.usuario.toLowerCase());
+        matches =
+          matches &&
+          (log.userEmail || "")
+            .toLowerCase()
+            .includes(logFilters.usuario.toLowerCase());
       }
 
       if (logFilters.acao) {
-        matches = matches && (log.action || "")
-          .toLowerCase()
-          .includes(logFilters.acao.toLowerCase());
+        matches =
+          matches &&
+          (log.action || "")
+            .toLowerCase()
+            .includes(logFilters.acao.toLowerCase());
       }
 
       if (logFilters.dataInicio) {
@@ -352,7 +363,9 @@ const AdminPanel = () => {
                       <td>{log.timestamp?.toDate().toLocaleString("pt-BR")}</td>
                       <td>{log.userEmail}</td>
                       <td>
-                        <span className={`action-badge ${log.action.toLowerCase()}`}>
+                        <span
+                          className={`action-badge ${log.action.toLowerCase()}`}
+                        >
                           {log.action.replace("_", " ")}
                         </span>
                       </td>
@@ -391,12 +404,6 @@ const AdminPanel = () => {
         confirmText="Excluir"
         confirmButtonClass="btn-danger"
       />
-    </div>
-  );
-};
-
-export default AdminPanel;
-      `}</style>
     </div>
   );
 };
