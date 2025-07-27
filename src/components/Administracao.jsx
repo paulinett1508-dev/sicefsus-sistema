@@ -41,20 +41,62 @@ const Administracao = ({ usuario }) => {
     carregarUsuarios();
   }, [carregarUsuarios]);
 
+  // Estado do formulário
+  const [formData, setFormData] = useState({
+    email: "",
+    nome: "",
+    role: "user",
+    status: "ativo",
+    departamento: "",
+    telefone: "",
+    municipio: "",
+    uf: "",
+  });
+
   // Handlers de ação
   const handleNovoUsuario = () => {
+    setFormData({
+      email: "",
+      nome: "",
+      role: "user",
+      status: "ativo",
+      departamento: "",
+      telefone: "",
+      municipio: "",
+      uf: "",
+    });
     setEditingUser(null);
     setModoVisualizacao(false);
     setShowForm(true);
   };
 
   const handleEditarUsuario = (user) => {
+    setFormData({
+      email: user.email || "",
+      nome: user.nome || "",
+      role: user.role || "user",
+      status: user.status || "ativo",
+      departamento: user.departamento || "",
+      telefone: user.telefone || "",
+      municipio: user.municipio || "",
+      uf: user.uf || "",
+    });
     setEditingUser(user);
     setModoVisualizacao(false);
     setShowForm(true);
   };
 
   const handleVisualizarUsuario = (user) => {
+    setFormData({
+      email: user.email || "",
+      nome: user.nome || "",
+      role: user.role || "user",
+      status: user.status || "ativo",
+      departamento: user.departamento || "",
+      telefone: user.telefone || "",
+      municipio: user.municipio || "",
+      uf: user.uf || "",
+    });
     setEditingUser(user);
     setModoVisualizacao(true);
     setShowForm(true);
@@ -64,14 +106,49 @@ const Administracao = ({ usuario }) => {
     setShowForm(false);
     setEditingUser(null);
     setModoVisualizacao(false);
+    setFormData({
+      email: "",
+      nome: "",
+      role: "user",
+      status: "ativo",
+      departamento: "",
+      telefone: "",
+      municipio: "",
+      uf: "",
+    });
   };
 
-  const handleSalvar = async () => {
-    setSaving(false);
-    setShowForm(false);
-    setEditingUser(null);
-    setModoVisualizacao(false);
-    await carregarUsuarios();
+  const handleSalvarUsuario = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      if (editingUser) {
+        // Atualizar usuário existente
+        const result = await userService.updateUser(editingUser.id, formData, editingUser.email);
+        if (result.success) {
+          success(result.message);
+        }
+      } else {
+        // Criar novo usuário
+        const result = await userService.createUser(formData);
+        if (result.success) {
+          success(result.message);
+        }
+      }
+
+      // Fechar formulário e recarregar dados
+      setShowForm(false);
+      setEditingUser(null);
+      setModoVisualizacao(false);
+      await carregarUsuarios();
+      
+    } catch (err) {
+      console.error("Erro ao salvar usuário:", err);
+      error(err.message || "Erro ao salvar usuário");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleExcluirUsuario = async (userId) => {
@@ -153,22 +230,9 @@ const Administracao = ({ usuario }) => {
       {/* ✅ MODAL DE FORMULÁRIO */}
       {showForm && (
         <UserForm
-          formData={{
-            email: "",
-            nome: "",
-            role: "user",
-            status: "ativo",
-            departamento: "",
-            telefone: "",
-            municipio: "",
-            uf: "",
-          }}
-          setFormData={() => {}}
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setSaving(true);
-            // A lógica de salvar está no UserForm
-          }}
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleSalvarUsuario}
           onCancel={handleCancelar}
           editingUser={editingUser}
           saving={saving}
@@ -194,11 +258,12 @@ const styles = {
     border: "none",
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     padding: "var(--space-6) var(--space-8)",
     borderRadius: "var(--border-radius-lg)",
     boxShadow: "var(--shadow-lg)",
     marginBottom: "var(--space-6)",
+    gap: "var(--space-4)",
   },
 
   headerContent: {
@@ -244,6 +309,9 @@ const styles = {
     gap: "var(--space-2)",
     transition: "all var(--transition-normal)",
     boxShadow: "var(--shadow)",
+    minWidth: "fit-content",
+    height: "fit-content",
+    whiteSpace: "nowrap",
   },
 
   buttonIcon: {
