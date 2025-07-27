@@ -733,7 +733,7 @@ const styles = {
 
   viewButton: {
     background: "none",
-    border: "none",
+    border: "1px solid transparent",
     cursor: "pointer",
     fontSize: 14,
     padding: 4,
@@ -747,7 +747,7 @@ const styles = {
 
   editButton: {
     background: "none",
-    border: "none",
+    border: "1px solid transparent",
     cursor: "pointer",
     fontSize: 14,
     padding: 4,
@@ -761,7 +761,7 @@ const styles = {
 
   deleteButton: {
     background: "none",
-    border: "none",
+    border: "1px solid transparent",
     cursor: "pointer",
     fontSize: 14,
     padding: 4,
