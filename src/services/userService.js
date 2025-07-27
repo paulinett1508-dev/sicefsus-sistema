@@ -560,6 +560,12 @@ const userService = {
       console.error('❌ Erro no debug:', error);
       return { canProceed: false, reason: error.message };
     }
+  }
+};
+
+// ✅ EXPORTAR COMO DEFAULT
+export default userService;eason: error.message };
+    }
   },
 
   async listAllEmails() {
