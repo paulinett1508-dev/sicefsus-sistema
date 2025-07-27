@@ -564,11 +564,7 @@ const userService = {
 };
 
 // ✅ EXPORTAR COMO DEFAULT
-export default userService;eason: error.message };
-    }
-  },
-
-  async listAllEmails() {
+export default userService;
     console.log('📋 === LISTANDO TODOS OS EMAILS CADASTRADOS ===');
 
     try {
