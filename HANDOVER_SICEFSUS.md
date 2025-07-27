@@ -1,6 +1,6 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 26/07/2025, 22:47:57  
+**📅 Gerado automaticamente em:** 26/07/2025, 23:59:24  
 **🔧 Por:** Script generateHandover.cjs  
 **📊 Status:** Sistema em Produção Ativa
 
@@ -91,9 +91,11 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 ├── attached_assets
 │   ├── Pasted--Download-the-React-DevTools-for-a-better-development-experience-https-reactjs-org-link-react-dev-1753451522775_1753451522776.txt
 │   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-AdminPanel-jsx-Unexpected-token-11-1753400909790_1753400909791.txt
+│   ├── Pasted-Dashboard-jsx-75-Uncaught-ReferenceError-Cannot-access-calcularEstatisticasLocais-before-initi-1753570935959_1753570935963.txt
 │   ├── Pasted-novaAcaoContainer-background-f8f9fa-borderRadius-8px-padding-20px-margin-1753568259576_1753568259577.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753451625790_1753451625791.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753569649423_1753569649424.txt
+│   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753570674817_1753570674818.txt
 │   ├── image_1753402535914.png
 │   ├── image_1753448958060.png
 │   ├── image_1753451051428.png
@@ -146,12 +148,14 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 │   │   ├── Sidebar.jsx
 │   │   ├── Sobre.jsx
 │   │   ├── TemporaryBanner.jsx
+│   │   ├── ThemeToggle.jsx
 │   │   ├── Toast.jsx
 │   │   ├── VisualizacaoEmendaDespesas.js
 │   │   └── WorkflowManager.jsx
 │   ├── config
 │   │   └── constants.js
 │   ├── context
+│   │   ├── ThemeContext.jsx
 │   │   └── UserContext.jsx
 │   ├── firebase
 │   │   └── firebaseConfig.js
@@ -166,8 +170,10 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 │   │   └── logo-sicefsus.png
 │   ├── index.jsx
 │   ├── styles
+│   │   ├── dashboard.css
 │   │   └── theme.css
 │   └── utils
+│       ├── errorHandlers.js
 │       ├── exportImport.js
 │       ├── firebaseCollections.js
 │       ├── printUtils.js
@@ -195,9 +201,12 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 - EmendasTable.jsx
 - ErrorBoundary.jsx
 - FirebaseError.jsx
+- Home.jsx
+- Login.jsx
 - Relatorios.jsx
 - SaldoEmendaWidget.jsx
 - Sidebar.jsx
+- ThemeToggle.jsx
 - Toast.jsx
 - VisualizacaoEmendaDespesas.js
 
@@ -266,7 +275,7 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 #### `src/components/Dashboard.jsx`
 - **Funcionalidade**: Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: CHART_COLORS, Dashboard, stats, calcularEstatisticasLocais, totalEmendas...
+- **Funções**: CHART_COLORS, Dashboard, calcularEstatisticasLocais, totalEmendas, totalDespesas...
 - **Dependências**: react, ../hooks/useEmendaDespesa
 
 #### `src/components/DataManager.jsx`
@@ -306,7 +315,7 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 
 #### `src/hooks/useEmendaDespesa.js`
 - **Funcionalidade**: src/hooks/useEmendaDespesa.js - VERSÃO CORRIGIDA v2.0
-- **Funções**: useEmendaDespesa, determinarPermissoes, permissoesLiberadas...
+- **Funções**: useEmendaDespesa, isMountedRef, determinarPermissoes...
 - **Exports**: useEmendaDespesa, useIsMounted
 
 #### `src/hooks/useNavigationProtection.js`
@@ -338,6 +347,10 @@ Facilitar o controle financeiro e administrativo de emendas parlamentares do SUS
 ---
 
 ### 🛠️ **Utilitários**
+
+#### `src/utils/errorHandlers.js`
+- **Funcionalidade**: src/utils/errorHandlers.js - Centralized Error Handling
+- **Funções**: handleFirebaseError, errorReport, existingErrors...
 
 #### `src/utils/exportImport.js`
 - **Funcionalidade**: Sem descrição disponível
@@ -423,9 +436,9 @@ node scripts/generateHandover.cjs
 
 ## 📊 **ESTATÍSTICAS DO SISTEMA**
 
-- **Total de Componentes**: 34
+- **Total de Componentes**: 35
 - **Total de Hooks**: 6
-- **Total de Utilitários**: 4
+- **Total de Utilitários**: 5
 - **Dependências Principais**: 6
 - **Dependências de Desenvolvimento**: 7
 
@@ -444,7 +457,7 @@ node scripts/generateHandover.cjs
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 26/07/2025, 22:47:57  
+**🔄 Última Atualização**: 26/07/2025, 23:59:24  
 **📊 Versão**: 2.0  
 **💻 Desenvolvido em**: Replit  
 **✅ Status**: Produção Ativa

@@ -1,8 +1,9 @@
-// Despesas.jsx - Sistema SICEFSUS v2.0 - FLUXO EMENDA->DESPESA CORRIGIDO
+// Despesas.jsx - Sistema SICEFSUS v2.0 - COM DARK MODE COMPLETO
 // ✅ CORREÇÃO: Filtro automático baseado em state navigation
 // ✅ CORREÇÃO: Breadcrumb para navegação de volta
 // ✅ CORREÇÃO: Contexto preservado da emenda de origem
 // ✅ CORREÇÃO: Carregamento otimizado com filtros
+// ✅ NOVO: Dark Mode completo com variáveis CSS
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -226,19 +227,6 @@ const Despesas = ({ usuario }) => {
     despesasFiltradas.length > 0 || Object.values(filtros).some((v) => v)
       ? despesasFiltradas
       : despesas || [];
-
-  // ✅ DEBUG: Log estados para diagnosticar problema de loading
-  useEffect(() => {
-    console.log("🔍 DESPESAS DEBUG:", {
-      hookLoading: loading,
-      carregandoDespesas,
-      despesasHookLength: (despesas || []).length,
-      despesasFiltradasLength: despesasFiltradas.length,
-      despesasParaExibirLength: despesasParaExibir.length,
-      temFiltros: Object.values(filtros).some((v) => v),
-      filtroAutomatico: !!filtroAutomatico
-    });
-  }, [loading, carregandoDespesas, despesas?.length, despesasFiltradas.length, despesasParaExibir.length]);
 
   // Handlers para navegação
   const handleVisualizar = (despesa) => {
@@ -573,7 +561,6 @@ const Despesas = ({ usuario }) => {
             {/* Tabela de Despesas */}
             {loading || carregandoDespesas ? (
               <div style={styles.loadingContainer}>
-                <div className="loading-spinner" style={styles.loadingSpinner}></div>
                 <p style={styles.loadingText}>
                   {filtroAutomatico
                     ? "Carregando despesas da emenda..."
@@ -619,47 +606,50 @@ const Despesas = ({ usuario }) => {
   return <div style={styles.container}>{renderContent()}</div>;
 };
 
-// ✅ Estilos completos
+// ✅ ESTILOS COM DARK MODE COMPLETO
 const styles = {
   container: {
     padding: "20px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-bg)",
     minHeight: "100vh",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-family)",
+    color: "var(--theme-text)",
+    transition: "background-color 0.3s ease, color 0.3s ease",
   },
   breadcrumb: {
     display: "flex",
     alignItems: "center",
     padding: "12px 20px",
-    backgroundColor: "#e3f2fd",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     marginBottom: "20px",
     fontSize: "14px",
-    border: "1px solid #bbdefb",
+    border: "1px solid var(--theme-border)",
+    boxShadow: "var(--shadow-sm)",
   },
   breadcrumbLink: {
     background: "none",
     border: "none",
-    color: "#1976d2",
+    color: "var(--accent)",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "600",
     textDecoration: "none",
     padding: "4px 8px",
     borderRadius: "4px",
-    transition: "background-color 0.2s ease",
+    transition: "all 0.2s ease",
   },
   breadcrumbSeparator: {
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     margin: "0 8px",
     fontWeight: "bold",
   },
   breadcrumbCurrent: {
-    color: "#333",
+    color: "var(--theme-text)",
     fontWeight: "600",
   },
   breadcrumbCount: {
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     fontSize: "12px",
     marginLeft: "8px",
     fontStyle: "italic",
@@ -668,12 +658,12 @@ const styles = {
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "center",
-    background: "linear-gradient(135deg, #154360, #4A90E2)",
-    color: "white",
+    background: "linear-gradient(135deg, var(--primary), var(--accent))",
+    color: "var(--white)",
     padding: "8px 20px",
     borderRadius: "8px",
     marginBottom: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
     width: "100%",
   },
   statusInfo: {
@@ -681,7 +671,7 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     fontSize: "14px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-family)",
   },
   statusText: {
     fontWeight: "normal",
@@ -713,32 +703,35 @@ const styles = {
     marginBottom: "20px",
   },
   statCard: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     padding: "20px",
     borderRadius: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
     textAlign: "center",
+    border: "1px solid var(--theme-border)",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   statNumber: {
     fontSize: "22px",
     fontWeight: "bold",
-    color: "#154360",
+    color: "var(--primary)",
     margin: "0 0 10px 0",
   },
   statLabel: {
     fontSize: "11px",
     fontWeight: "bold",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
     letterSpacing: "1px",
     margin: 0,
   },
   filtrosContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     padding: "20px",
     borderRadius: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
     marginBottom: "20px",
+    border: "1px solid var(--theme-border)",
   },
   filtrosGrid: {
     display: "grid",
@@ -754,35 +747,39 @@ const styles = {
   filtroLabel: {
     fontSize: "12px",
     fontWeight: "600",
-    color: "#333",
+    color: "var(--theme-text)",
     textTransform: "uppercase",
   },
   filtroInput: {
     padding: "8px 12px",
-    border: "1px solid #ddd",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "14px",
+    backgroundColor: "var(--theme-bg)",
+    color: "var(--theme-text)",
   },
   filtroSelect: {
     padding: "8px 12px",
-    border: "1px solid #ddd",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-bg)",
+    color: "var(--theme-text)",
   },
   filtroActions: {
     display: "flex",
     gap: "10px",
   },
   limparButton: {
-    backgroundColor: "#6c757d",
-    color: "white",
+    backgroundColor: "var(--secondary)",
+    color: "var(--white)",
     border: "none",
     padding: "8px 16px",
     borderRadius: "4px",
     fontSize: "14px",
     cursor: "pointer",
     fontWeight: "500",
+    transition: "all 0.2s ease",
   },
   actionContainer: {
     marginBottom: "20px",
@@ -790,8 +787,8 @@ const styles = {
     gap: "10px",
   },
   primaryButton: {
-    backgroundColor: "#28a745",
-    color: "white",
+    backgroundColor: "var(--success)",
+    color: "var(--white)",
     border: "none",
     padding: "12px 24px",
     borderRadius: "5px",
@@ -799,11 +796,11 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
   },
   refreshButton: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--accent)",
+    color: "var(--white)",
     border: "none",
     padding: "12px 24px",
     borderRadius: "5px",
@@ -811,73 +808,56 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
   },
   loadingContainer: {
     textAlign: "center",
     padding: "40px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "20px",
-  },
-  loadingSpinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #154360",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
+    backgroundColor: "var(--theme-surface)",
+    borderRadius: "8px",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
   loadingText: {
     fontSize: "18px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
   },
   errorContainer: {
     textAlign: "center",
     padding: "40px",
-    backgroundColor: "#f8d7da",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
-    border: "1px solid #f5c6cb",
+    border: "1px solid var(--error)",
+    boxShadow: "var(--shadow)",
   },
   errorText: {
     fontSize: "16px",
-    color: "#721c24",
+    color: "var(--error)",
     marginBottom: "15px",
   },
   retryButton: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--accent)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 20px",
     borderRadius: "5px",
     fontSize: "14px",
     cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   emptyContainer: {
     textAlign: "center",
     padding: "60px 20px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
   emptyText: {
     fontSize: "16px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     marginBottom: "20px",
   },
 };
-
-// Adicionar CSS para animação
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 export default Despesas;

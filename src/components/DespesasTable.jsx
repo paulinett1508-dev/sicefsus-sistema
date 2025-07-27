@@ -1,12 +1,14 @@
-// DespesasTable.jsx - PADRONIZADO COM EMENDASTABLE v1.0
-// ✅ Mesmo padrão visual e estrutural da tabela de emendas
+// DespesasTable.jsx - ATUALIZADA CONFORME PRINT OFICIAL
+// ✅ Colunas sincronizadas com MÓDULO DESPESAS
+// ✅ Exibição da Natureza das Despesas Programadas
+// ✅ Campos do print organizados conforme layout oficial
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
 
-// ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
+// ✅ CORES PADRONIZADAS
 const PRIMARY = "#154360";
 const ACCENT = "#4A90E2";
 const WHITE = "#fff";
@@ -26,48 +28,39 @@ export default function DespesasTable({
   const navigate = useNavigate();
   const [excludindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
+  const [modoVisualizacao, setModoVisualizacao] = useState("resumido"); // "resumido" ou "detalhado"
 
-  // ✅ Função para formatar datas do Firestore (mesmo padrão)
+  // ✅ Função para formatar datas
   function formatarDataFirestore(data) {
-    if (!data) return "";
-    
+    if (!data) return "-";
+
     try {
       let date;
-      
-      // Se for timestamp do Firestore
+
       if (data.seconds) {
         date = new Date(data.seconds * 1000);
-      }
-      // Se for string ISO ou timestamp
-      else if (typeof data === "string") {
+      } else if (typeof data === "string") {
         date = new Date(data);
-      }
-      // Se já for Date
-      else if (data instanceof Date) {
+      } else if (data instanceof Date) {
         date = data;
-      }
-      // Se for timestamp numérico
-      else if (typeof data === "number") {
+      } else if (typeof data === "number") {
         date = new Date(data);
+      } else {
+        return "-";
       }
-      else {
-        return "";
-      }
-      
-      // Verificar se a data é válida
+
       if (isNaN(date.getTime())) {
-        return "";
+        return "-";
       }
-      
-      // Formatar para padrão brasileiro
+
       return date.toLocaleDateString("pt-BR", {
         day: "2-digit",
-        month: "2-digit", 
-        year: "numeric"
+        month: "2-digit",
+        year: "numeric",
       });
     } catch (error) {
       console.error("Erro ao formatar data:", error, data);
-      return "";
+      return "-";
     }
   }
 
@@ -76,22 +69,36 @@ export default function DespesasTable({
     if (!emendas) return "Carregando...";
     const emenda = emendas.find((e) => e.id === id);
     return emenda
-      ? `${emenda.numero} - ${emenda.parlamentar}`
+      ? `${emenda.numero || emenda.numeroEmenda} - ${emenda.parlamentar}`
       : "Emenda não encontrada";
   }
 
-  // ✅ Função para abrir fluxo da emenda
-  function handleAbrirFluxo(despesa) {
-    navigate(`/emendas/${despesa.emendaId}/fluxo/${despesa.id}`);
-  }
+  // ✅ Calcular total por natureza de despesa
+  const calcularTotalPorNatureza = () => {
+    return despesas.reduce((acc, despesa) => {
+      const natureza = despesa.naturezaDespesaProgramada || "NÃO CLASSIFICADO";
+      const valor = parseFloat(
+        despesa.valorNaturezaDespesa || despesa.valor || 0,
+      );
+
+      if (!acc[natureza]) {
+        acc[natureza] = { quantidade: 0, valor: 0 };
+      }
+
+      acc[natureza].quantidade += 1;
+      acc[natureza].valor += valor;
+
+      return acc;
+    }, {});
+  };
+
+  const totaisPorNatureza = calcularTotalPorNatureza();
 
   // ✅ Função para excluir despesa
   async function handleExcluir(despesa) {
     setExcluindo(despesa.id);
     try {
-      // Usar transação para garantir consistência
       await runTransaction(db, async (transaction) => {
-        // Buscar emenda atual
         const emendaRef = doc(db, "emendas", despesa.emendaId);
         const emendaDoc = await transaction.get(emendaRef);
 
@@ -100,12 +107,10 @@ export default function DespesasTable({
         }
 
         const saldoAtual = emendaDoc.data().saldo;
-        const novoSaldo = saldoAtual + despesa.valor;
+        const novoSaldo = saldoAtual + (despesa.valor || 0);
 
-        // Atualizar saldo da emenda (estornar valor)
         transaction.update(emendaRef, { saldo: novoSaldo });
 
-        // Excluir despesa
         const despesaRef = doc(db, "despesas", despesa.id);
         transaction.delete(despesaRef);
       });
@@ -120,11 +125,6 @@ export default function DespesasTable({
     }
   }
 
-  // ✅ Função para confirmar exclusão
-  function confirmarExclusao(despesa) {
-    setConfirmExclusao(despesa);
-  }
-
   // ✅ Handlers de ação
   function handleEditar(despesa) {
     if (onEdit) onEdit(despesa);
@@ -134,178 +134,317 @@ export default function DespesasTable({
     if (onView) onView(despesa);
   }
 
-  // ✅ Função para identificar emendas únicas
-  function getEmendasUnicas() {
-    return [...new Set(despesas.map(d => d.emendaId))];
+  function confirmarExclusao(despesa) {
+    setConfirmExclusao(despesa);
   }
 
   return (
     <div style={styles.container}>
-      {/* ✅ Header da Tabela (mesmo padrão do Emendas) */}
-      <div style={styles.tableHeader}>
-        <h2 style={styles.title}>
-          💰 Despesas Registradas ({despesas.length}
-          {despesas.length !== totalDespesas &&
-            totalDespesas > 0 &&
-            ` de ${totalDespesas}`}
-          )
-        </h2>
-        <div style={styles.summary}>
-          {despesas.length !== totalDespesas && totalDespesas > 0 && (
-            <span style={styles.resultInfo}>
-              📊 {despesas.length} resultado(s) filtrado(s)
-            </span>
-          )}
+      {/* ✅ Header com Natureza das Despesas Programadas */}
+      <div style={styles.headerSection}>
+        <div style={styles.tableHeader}>
+          <h2 style={styles.title}>
+            💰 Módulo Despesas ({despesas.length}
+            {despesas.length !== totalDespesas &&
+              totalDespesas > 0 &&
+              ` de ${totalDespesas}`}
+            )
+          </h2>
+          <div style={styles.viewToggle}>
+            <button
+              onClick={() => setModoVisualizacao("resumido")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoVisualizacao === "resumido"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📊 Resumido
+            </button>
+            <button
+              onClick={() => setModoVisualizacao("detalhado")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoVisualizacao === "detalhado"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📋 Detalhado
+            </button>
+          </div>
+        </div>
+
+        {/* ✅ Natureza das Despesas Programadas - Conforme Print */}
+        <div style={styles.naturezaSection}>
+          <h3 style={styles.naturezaTitle}>
+            NATUREZA DAS DESPESAS PROGRAMADAS:
+          </h3>
+          <div style={styles.naturezaGrid}>
+            {Object.keys(totaisPorNatureza).map((natureza) => (
+              <div key={natureza} style={styles.naturezaItem}>
+                <div style={styles.naturezaLabel}>{natureza}</div>
+                <div style={styles.naturezaValor}>
+                  R${" "}
+                  {totaisPorNatureza[natureza].valor.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </div>
+                <div style={styles.naturezaQuantidade}>
+                  {totaisPorNatureza[natureza].quantidade} despesa(s)
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* ✅ Container da Tabela */}
+      {/* ✅ Tabela Principal */}
       <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.headerRow}>
-              <th style={styles.th}>Número</th>
-              <th style={styles.th}>Emenda</th>
-              <th style={styles.th}>Descrição</th>
-              <th style={styles.th}>Valor</th>
-              <th style={styles.th}>Data</th>
-              <th style={styles.th}>Fornecedor</th>
-              <th style={styles.th}>NF</th>
-              <th style={styles.th}>Status</th>
-              <th style={styles.th}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {despesas.map((despesa, index) => (
-              <tr
-                key={despesa.id}
-                style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
-              >
-                <td style={styles.td}>
-                  <span style={styles.numeroCell}>
-                    {despesa.numero || "Não definido"}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  <div style={styles.emendaInfo}>
-                    {getEmendaInfo(despesa.emendaId)}
-                  </div>
-                </td>
-                <td style={styles.td}>
-                  <div style={styles.descricaoCell}>
-                    {despesa.descricao || "-"}
-                  </div>
-                </td>
-                <td style={styles.tdValue}>
-                  R${" "}
-                  {despesa.valor?.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </td>
-                <td style={styles.td}>
-                  <span style={styles.dataCell}>
-                    {formatarDataFirestore(despesa.data)}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  <div style={styles.fornecedorCell}>
-                    {despesa.notaFiscalFornecedor || "-"}
-                  </div>
-                </td>
-                <td style={styles.td}>
-                  <span style={styles.nfNumero}>
-                    {despesa.notaFiscalNumero || "-"}
-                  </span>
-                </td>
-                <td style={styles.td}>
-                  <span style={styles.statusBadge}>✅ Processado</span>
-                </td>
-                <td style={styles.tdActions}>
-                  <div style={styles.actionsContainer}>
-                    <button
-                      onClick={() => handleVisualizar(despesa)}
-                      style={styles.viewButton}
-                      title="Visualizar despesa"
-                    >
-                      👁️
-                    </button>
-                    <button
-                      onClick={() => handleEditar(despesa)}
-                      style={styles.editButton}
-                      title="Editar despesa"
-                      disabled={excludindo === despesa.id}
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => handleAbrirFluxo(despesa)}
-                      style={styles.fluxoButton}
-                      title="Abrir fluxo da emenda"
-                    >
-                      📊
-                    </button>
-                    <button
-                      onClick={() => confirmarExclusao(despesa)}
-                      style={styles.deleteButton}
-                      title="Excluir despesa"
-                      disabled={excludindo === despesa.id}
-                    >
-                      {excludindo === despesa.id ? "⏳" : "🗑️"}
-                    </button>
-                  </div>
-                </td>
+        {modoVisualizacao === "resumido" ? (
+          // ✅ MODO RESUMIDO - Campos principais
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.headerRow}>
+                <th style={styles.th}>Fornecedor</th>
+                <th style={styles.th}>Valor</th>
+                <th style={styles.th}>Nº Empenho</th>
+                <th style={styles.th}>Nº NF</th>
+                <th style={styles.th}>Data Pagamento</th>
+                <th style={styles.th}>Natureza</th>
+                <th style={styles.th}>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {despesas.map((despesa, index) => (
+                <tr
+                  key={despesa.id}
+                  style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
+                >
+                  <td style={styles.td}>
+                    <div style={styles.fornecedorCell}>
+                      {despesa.fornecedor || "-"}
+                    </div>
+                  </td>
+                  <td style={styles.tdValue}>
+                    R${" "}
+                    {(despesa.valor || 0).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroEmpenho || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.dataCell}>
+                      {formatarDataFirestore(despesa.dataPagamento)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.naturezaBadge}>
+                      {despesa.naturezaDespesaProgramada || "N/A"}
+                    </span>
+                  </td>
+                  <td style={styles.tdActions}>
+                    <div style={styles.actionsContainer}>
+                      <button
+                        onClick={() => handleVisualizar(despesa)}
+                        style={styles.viewButton}
+                        title="Visualizar despesa"
+                      >
+                        👁️
+                      </button>
+                      <button
+                        onClick={() => handleEditar(despesa)}
+                        style={styles.editButton}
+                        title="Editar despesa"
+                        disabled={excludindo === despesa.id}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => confirmarExclusao(despesa)}
+                        style={styles.deleteButton}
+                        title="Excluir despesa"
+                        disabled={excludindo === despesa.id}
+                      >
+                        {excludindo === despesa.id ? "⏳" : "🗑️"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          // ✅ MODO DETALHADO - Todos os campos conforme print
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.headerRow}>
+                <th style={styles.th}>Fornecedor</th>
+                <th style={styles.th}>Valor</th>
+                <th style={styles.th}>Nº Empenho</th>
+                <th style={styles.th}>Nº Contrato</th>
+                <th style={styles.th}>Nº NF</th>
+                <th style={styles.th}>Discriminação</th>
+                <th style={styles.th}>Data Empenho</th>
+                <th style={styles.th}>Data Liquidação</th>
+                <th style={styles.th}>Data Pagamento</th>
+                <th style={styles.th}>Ação</th>
+                <th style={styles.th}>Dotação</th>
+                <th style={styles.th}>Class. Funcional</th>
+                <th style={styles.th}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {despesas.map((despesa, index) => (
+                <tr
+                  key={despesa.id}
+                  style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
+                >
+                  <td style={styles.td}>
+                    <div style={styles.fornecedorCell}>
+                      {despesa.fornecedor || "-"}
+                    </div>
+                  </td>
+                  <td style={styles.tdValue}>
+                    R${" "}
+                    {(despesa.valor || 0).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroEmpenho || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroContrato || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <div style={styles.discriminacaoCell}>
+                      {despesa.discriminacao || "-"}
+                    </div>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.dataCell}>
+                      {formatarDataFirestore(despesa.dataEmpenho)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.dataCell}>
+                      {formatarDataFirestore(despesa.dataLiquidacao)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.dataCell}>
+                      {formatarDataFirestore(despesa.dataPagamento)}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.acaoCell}>{despesa.acao || "-"}</span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.dotacaoOrcamentaria || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <div style={styles.classificacaoCell}>
+                      {despesa.classificacaoFuncionalProgramatica ||
+                        despesa.classificacaoFuncional ||
+                        "-"}
+                    </div>
+                  </td>
+                  <td style={styles.tdActions}>
+                    <div style={styles.actionsContainer}>
+                      <button
+                        onClick={() => handleVisualizar(despesa)}
+                        style={styles.viewButton}
+                        title="Visualizar"
+                      >
+                        👁️
+                      </button>
+                      <button
+                        onClick={() => handleEditar(despesa)}
+                        style={styles.editButton}
+                        title="Editar"
+                        disabled={excludindo === despesa.id}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => confirmarExclusao(despesa)}
+                        style={styles.deleteButton}
+                        title="Excluir"
+                        disabled={excludindo === despesa.id}
+                      >
+                        {excludindo === despesa.id ? "⏳" : "🗑️"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
-        {/* ✅ Estado Vazio (mesmo padrão do Emendas) */}
+        {/* ✅ Estado Vazio */}
         {despesas.length === 0 && (
           <div style={styles.emptyState}>
-            {totalDespesas > 0 ? (
-              <>
-                <div style={styles.emptyIcon}>🔍</div>
-                <h3 style={styles.emptyTitle}>Nenhuma despesa encontrada</h3>
-                <p style={styles.emptyText}>
-                  Tente ajustar os filtros ou limpar a pesquisa
-                </p>
-              </>
-            ) : (
-              <>
-                <div style={styles.emptyIcon}>💰</div>
-                <h3 style={styles.emptyTitle}>Nenhuma despesa registrada</h3>
-                <p style={styles.emptyText}>
-                  Clique em "Nova Despesa" para começar
-                </p>
-              </>
-            )}
+            <div style={styles.emptyIcon}>💰</div>
+            <h3 style={styles.emptyTitle}>Nenhuma despesa registrada</h3>
+            <p style={styles.emptyText}>
+              Clique em "Nova Despesa" para começar
+            </p>
           </div>
         )}
       </div>
 
-      {/* ✅ Resumo Simplificado */}
+      {/* ✅ Resumo Final */}
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
             <span style={styles.summaryLabel}>Total de Despesas:</span>
             <span style={styles.summaryValue}>{despesas.length}</span>
-            {despesas.length !== totalDespesas && totalDespesas > 0 && (
-              <span style={styles.summarySubtext}>
-                (de {totalDespesas} total)
-              </span>
-            )}
           </div>
-          {getEmendasUnicas().length > 1 && (
-            <div style={styles.summaryCard}>
-              <span style={styles.summaryLabel}>Emendas Envolvidas:</span>
-              <span style={styles.summaryValue}>{getEmendasUnicas().length}</span>
-              <span style={styles.summarySubtext}>diferentes</span>
-            </div>
-          )}
+          <div style={styles.summaryCard}>
+            <span style={styles.summaryLabel}>Valor Total:</span>
+            <span style={styles.summaryValueMoney}>
+              R${" "}
+              {despesas
+                .reduce((sum, d) => sum + (d.valor || 0), 0)
+                .toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
+            </span>
+          </div>
+          <div style={styles.summaryCard}>
+            <span style={styles.summaryLabel}>Naturezas Diferentes:</span>
+            <span style={styles.summaryValue}>
+              {Object.keys(totaisPorNatureza).length}
+            </span>
+          </div>
         </div>
       )}
 
-      {/* ✅ Modal de Confirmação de Exclusão (mesmo padrão) */}
+      {/* ✅ Modal de Confirmação */}
       {confirmExclusao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -316,21 +455,20 @@ export default function DespesasTable({
               </p>
               <div style={styles.modalDetails}>
                 <p>
-                  <strong>Número:</strong>{" "}
-                  {confirmExclusao.numero || "Não definido"}
+                  <strong>Fornecedor:</strong> {confirmExclusao.fornecedor}
                 </p>
                 <p>
                   <strong>Valor:</strong> R${" "}
-                  {confirmExclusao.valor?.toLocaleString("pt-BR", {
+                  {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
                   })}
                 </p>
                 <p>
-                  <strong>Descrição:</strong> {confirmExclusao.descricao}
+                  <strong>Nº Empenho:</strong> {confirmExclusao.numeroEmpenho}
                 </p>
                 <p>
-                  <strong>Fornecedor:</strong>{" "}
-                  {confirmExclusao.notaFiscalFornecedor}
+                  <strong>Discriminação:</strong>{" "}
+                  {confirmExclusao.discriminacao}
                 </p>
               </div>
               <div style={styles.modalWarning}>
@@ -361,7 +499,7 @@ export default function DespesasTable({
   );
 }
 
-// ✅ Estilos padronizados (mesmo padrão do EmendasTable)
+// ✅ Estilos Atualizados
 const styles = {
   container: {
     backgroundColor: WHITE,
@@ -371,13 +509,17 @@ const styles = {
     margin: "0 32px 24px 32px",
   },
 
+  headerSection: {
+    backgroundColor: "#f8f9fa",
+    borderBottom: "2px solid #dee2e6",
+  },
+
   tableHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "20px 24px",
-    borderBottom: "1px solid #f0f0f0",
-    backgroundColor: "#f8f9fa",
+    borderBottom: "1px solid #e9ecef",
   },
 
   title: {
@@ -390,20 +532,77 @@ const styles = {
     gap: "8px",
   },
 
-  summary: {
+  viewToggle: {
     display: "flex",
-    gap: 16,
-    alignItems: "center",
-    flexWrap: "wrap",
+    gap: "8px",
   },
 
-  resultInfo: {
-    fontSize: 12,
-    color: ACCENT,
-    fontWeight: "600",
-    backgroundColor: "#e3f2fd",
-    padding: "4px 8px",
-    borderRadius: 4,
+  toggleButton: {
+    padding: "8px 16px",
+    border: "1px solid #dee2e6",
+    borderRadius: "4px",
+    background: "white",
+    color: "#6c757d",
+    fontSize: "12px",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+
+  toggleButtonActive: {
+    background: PRIMARY,
+    color: "white",
+    borderColor: PRIMARY,
+  },
+
+  naturezaSection: {
+    padding: "20px 24px",
+  },
+
+  naturezaTitle: {
+    fontSize: "14px",
+    fontWeight: "bold",
+    color: PRIMARY,
+    textTransform: "uppercase",
+    marginBottom: "15px",
+    letterSpacing: "0.5px",
+  },
+
+  naturezaGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gap: "15px",
+  },
+
+  naturezaItem: {
+    background: "white",
+    border: "2px solid #e9ecef",
+    borderRadius: "8px",
+    padding: "15px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  naturezaLabel: {
+    fontWeight: "bold",
+    color: PRIMARY,
+    fontSize: "13px",
+    flex: 1,
+  },
+
+  naturezaValor: {
+    fontWeight: "bold",
+    color: SUCCESS,
+    fontSize: "16px",
+    fontFamily: "monospace",
+  },
+
+  naturezaQuantidade: {
+    fontSize: "11px",
+    color: "#6c757d",
+    textAlign: "right",
+    minWidth: "80px",
   },
 
   tableContainer: {
@@ -413,7 +612,7 @@ const styles = {
   table: {
     width: "100%",
     borderCollapse: "collapse",
-    fontSize: 13,
+    fontSize: 12,
   },
 
   headerRow: {
@@ -421,11 +620,11 @@ const styles = {
   },
 
   th: {
-    padding: "14px 12px",
+    padding: "12px 8px",
     textAlign: "left",
     color: WHITE,
     fontWeight: "600",
-    fontSize: 13,
+    fontSize: 11,
     borderRight: "1px solid rgba(255,255,255,0.1)",
     whiteSpace: "nowrap",
     textTransform: "uppercase",
@@ -441,17 +640,17 @@ const styles = {
   },
 
   td: {
-    padding: "12px",
+    padding: "10px 8px",
     borderBottom: "1px solid #eee",
-    fontSize: 13,
+    fontSize: 12,
     color: "#333",
     verticalAlign: "middle",
   },
 
   tdValue: {
-    padding: "12px",
+    padding: "10px 8px",
     borderBottom: "1px solid #eee",
-    fontSize: 13,
+    fontSize: 12,
     color: SUCCESS,
     fontWeight: "600",
     textAlign: "right",
@@ -459,77 +658,75 @@ const styles = {
   },
 
   tdActions: {
-    padding: "12px",
+    padding: "10px 8px",
     borderBottom: "1px solid #eee",
-    fontSize: 13,
+    fontSize: 12,
     color: "#333",
     textAlign: "center",
     whiteSpace: "nowrap",
   },
 
+  fornecedorCell: {
+    maxWidth: 150,
+    fontWeight: "500",
+    fontSize: 12,
+    color: "#495057",
+  },
+
   numeroCell: {
     fontFamily: "monospace",
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "600",
     color: PRIMARY,
     backgroundColor: "#e3f2fd",
-    padding: "4px 8px",
-    borderRadius: "4px",
+    padding: "2px 6px",
+    borderRadius: "3px",
     display: "inline-block",
-  },
-
-  emendaInfo: {
-    maxWidth: 200,
-    fontWeight: "500",
-    fontSize: 12,
-    color: ACCENT,
-  },
-
-  descricaoCell: {
-    maxWidth: 180,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    fontWeight: "500",
   },
 
   dataCell: {
     fontFamily: "monospace",
-    fontSize: 12,
+    fontSize: 11,
     color: "#666",
     fontWeight: "500",
   },
 
-  fornecedorCell: {
-    maxWidth: 150,
+  naturezaBadge: {
+    backgroundColor: "#fff3cd",
+    color: "#856404",
+    padding: "2px 6px",
+    borderRadius: "10px",
+    fontSize: "10px",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+
+  discriminacaoCell: {
+    maxWidth: 120,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
-    fontWeight: "500",
-    color: "#495057",
+    fontSize: 11,
   },
 
-  nfNumero: {
+  acaoCell: {
+    fontSize: 11,
+    fontWeight: "500",
+    color: ACCENT,
+  },
+
+  classificacaoCell: {
+    maxWidth: 100,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    fontSize: 10,
     fontFamily: "monospace",
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#6c757d",
-  },
-
-  statusBadge: {
-    backgroundColor: "#d4edda",
-    color: "#155724",
-    padding: "4px 8px",
-    borderRadius: "12px",
-    fontSize: "11px",
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
   },
 
   actionsContainer: {
     display: "flex",
-    gap: 6,
+    gap: 4,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -538,9 +735,9 @@ const styles = {
     background: "none",
     border: "none",
     cursor: "pointer",
-    fontSize: 16,
-    padding: 6,
-    borderRadius: 4,
+    fontSize: 14,
+    padding: 4,
+    borderRadius: 3,
     color: ACCENT,
     transition: "all 0.2s",
     display: "flex",
@@ -552,24 +749,10 @@ const styles = {
     background: "none",
     border: "none",
     cursor: "pointer",
-    fontSize: 16,
-    padding: 6,
-    borderRadius: 4,
+    fontSize: 14,
+    padding: 4,
+    borderRadius: 3,
     color: WARNING,
-    transition: "all 0.2s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  fluxoButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontSize: 16,
-    padding: 6,
-    borderRadius: 4,
-    color: PRIMARY,
     transition: "all 0.2s",
     display: "flex",
     alignItems: "center",
@@ -580,9 +763,9 @@ const styles = {
     background: "none",
     border: "none",
     cursor: "pointer",
-    fontSize: 16,
-    padding: 6,
-    borderRadius: 4,
+    fontSize: 14,
+    padding: 4,
+    borderRadius: 3,
     color: ERROR,
     transition: "all 0.2s",
     display: "flex",
@@ -628,12 +811,6 @@ const styles = {
     fontFamily: "monospace",
   },
 
-  summarySubtext: {
-    fontSize: 11,
-    color: "#999",
-    fontStyle: "italic",
-  },
-
   emptyState: {
     textAlign: "center",
     padding: "80px 20px",
@@ -659,7 +836,7 @@ const styles = {
     color: "#666",
   },
 
-  // ✅ Modal styles (mesmo padrão do Emendas)
+  // ✅ Modal styles
   modalOverlay: {
     position: "fixed",
     top: 0,
