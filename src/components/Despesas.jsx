@@ -51,16 +51,18 @@ const Despesas = ({ usuario }) => {
     uf: userUf,
   });
 
-  // ✅ Hook para carregar despesas
-  const { despesas, loading, error, atualizarSaldoEmenda, recarregar } =
-    useEmendaDespesa(usuario, {
-      carregarTodasEmendas: false, // Não carrega emendas aqui
-      incluirEstatisticas: false,
-      autoRefresh: true,
-      userRole: userRole,
-    });
+  // ✅ Hook para funções auxiliares
+  const { atualizarSaldoEmenda, recarregar } = useEmendaDespesa(usuario, {
+    carregarTodasEmendas: false,
+    incluirEstatisticas: false,
+    autoRefresh: false,
+    userRole: userRole,
+  });
 
-  // ✅ Estados locais para despesas filtradas
+  // ✅ Estados locais corrigidos
+  const [despesas, setDespesas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [despesasFiltradas, setDespesasFiltradas] = useState([]);
   const [emendasDisponiveis, setEmendasDisponiveis] = useState([]);
   const [carregandoDespesas, setCarregandoDespesas] = useState(false);
@@ -208,6 +210,39 @@ const Despesas = ({ usuario }) => {
     }
   }, [userRole, userMunicipio, userUf]);
 
+  // ✅ CORREÇÃO CRÍTICA: Carregar despesas diretamente do Firebase
+  useEffect(() => {
+    const carregarDespesas = async () => {
+      try {
+        setLoading(true);
+        console.log("📊 Carregando despesas do Firebase...");
+        
+        // Query para buscar todas as despesas
+        const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
+        const despesasSnapshot = await getDocs(despesasQuery);
+        
+        const despesasData = [];
+        despesasSnapshot.forEach((doc) => {
+          despesasData.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+        
+        console.log("✅ Despesas carregadas:", despesasData.length);
+        setDespesas(despesasData);
+        
+      } catch (error) {
+        console.error("❌ Erro ao carregar despesas:", error);
+        setError("Erro ao carregar despesas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDespesas();
+  }, []);
+
   // ✅ Carregar dados iniciais
   useEffect(() => {
     console.log("🎯 Sistema SICEFSUS v2.0 - Despesas carregado");
@@ -276,8 +311,14 @@ const Despesas = ({ usuario }) => {
           await atualizarSaldoEmenda(dadosSalvos.emendaId);
         }
 
-        // Recarregar dados
-        await recarregar();
+        // Recarregar despesas diretamente
+        const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
+        const despesasSnapshot = await getDocs(despesasQuery);
+        const despesasData = despesasSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDespesas(despesasData);
         await carregarDespesasFiltradas();
 
         console.log("✅ Dados recarregados após salvamento");
@@ -286,7 +327,7 @@ const Despesas = ({ usuario }) => {
         console.error("❌ Erro no handleSalvarDespesa:", error);
       }
     },
-    [atualizarSaldoEmenda, recarregar, carregarDespesasFiltradas],
+    [atualizarSaldoEmenda, carregarDespesasFiltradas],
   );
 
   // ✅ Função deletar despesa
@@ -301,8 +342,17 @@ const Despesas = ({ usuario }) => {
     if (window.confirm("Tem certeza que deseja excluir esta despesa?")) {
       try {
         await deleteDoc(doc(db, "despesas", despesaId));
-        await recarregar();
+        
+        // Recarregar despesas diretamente
+        const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
+        const despesasSnapshot = await getDocs(despesasQuery);
+        const despesasData = despesasSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setDespesas(despesasData);
         await carregarDespesasFiltradas();
+        
         console.log("✅ Despesa deletada com sucesso:", despesaId);
         alert("Despesa deletada com sucesso!");
       } catch (error) {
@@ -547,9 +597,22 @@ const Despesas = ({ usuario }) => {
               </button>
               <button
                 style={styles.refreshButton}
-                onClick={() => {
-                  recarregar();
-                  carregarDespesasFiltradas();
+                onClick={async () => {
+                  try {
+                    setLoading(true);
+                    const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
+                    const despesasSnapshot = await getDocs(despesasQuery);
+                    const despesasData = despesasSnapshot.docs.map(doc => ({
+                      id: doc.id,
+                      ...doc.data(),
+                    }));
+                    setDespesas(despesasData);
+                    await carregarDespesasFiltradas();
+                  } catch (error) {
+                    console.error("❌ Erro ao atualizar:", error);
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
                 disabled={loading || carregandoDespesas}
               >
