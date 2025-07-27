@@ -50,6 +50,12 @@ const AdminPanel = () => {
     loadInitialData();
   }, []);
 
+  // ✅ DEBUG: Monitorar mudanças do showUserForm
+  useEffect(() => {
+    console.log("🎭 DEBUG: showUserForm mudou para:", showUserForm);
+    console.log("👤 DEBUG: editingUser atual:", editingUser ? "SIM" : "NÃO");
+  }, [showUserForm, editingUser]);
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
@@ -153,6 +159,7 @@ const AdminPanel = () => {
 
   // ✅ UTILITÁRIOS DE FORMULÁRIO
   const resetForm = () => {
+    console.log("🔄 DEBUG: resetForm iniciado");
     setFormData({
       email: "",
       nome: "",
@@ -163,15 +170,27 @@ const AdminPanel = () => {
       municipio: "",
       uf: "",
     });
+    console.log("📝 DEBUG: formData resetado");
     setShowUserForm(false);
+    console.log("🚪 DEBUG: setShowUserForm(false)");
     setEditingUser(null);
+    console.log("👤 DEBUG: setEditingUser(null)");
+    console.log("✅ DEBUG: resetForm concluído");
   };
 
   // ✅ HANDLERS DE AÇÕES
   const handleNovoUsuario = () => {
-    console.log("🆕 Botão Novo Usuário clicado");
+    console.log("🆕 DEBUG: Botão Novo Usuário clicado");
+    console.log("🔍 DEBUG: Estados antes do reset:", {
+      showUserForm,
+      editingUser: !!editingUser,
+      loading,
+      saving
+    });
     resetForm();
+    console.log("🔄 DEBUG: Reset executado, setShowUserForm(true)");
     setShowUserForm(true);
+    console.log("✅ DEBUG: setShowUserForm(true) executado");
   };
 
   const handleEditarUsuario = (user) => {
@@ -255,7 +274,12 @@ const AdminPanel = () => {
         </div>
         <button
           style={styles.addButton}
-          onClick={handleNovoUsuario}
+          onClick={(e) => {
+            console.log("🖱️ DEBUG: Clique físico no botão detectado", e);
+            console.log("🚫 DEBUG: Botão desabilitado?", loading || saving);
+            console.log("📊 DEBUG: Estados atuais:", { loading, saving, showUserForm, editingUser: !!editingUser });
+            handleNovoUsuario();
+          }}
           disabled={loading || saving}
         >
           <span style={styles.buttonIcon}>➕</span>
