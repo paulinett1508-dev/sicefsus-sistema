@@ -1,7 +1,8 @@
-// Despesas.jsx - Sistema SICEFSUS v2.0 - LAYOUT ORIGINAL COM CORREÇÕES
-// ✅ CORREÇÃO: Substituir useEmendaDespesa por carregamento direto
+// Despesas.jsx - Sistema SICEFSUS v2.1 - COM FILTRO POR MUNICÍPIO
+// ✅ CORREÇÃO PRINCIPAL: Implementação de filtro por município para operadores
 // ✅ MANTIDO: Layout e interface originais
 // ✅ MANTIDO: Toda a estrutura de componentes existente
+// ✅ NOVA LÓGICA: Despesas filtradas por município do usuário operador
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -27,96 +28,6 @@ const Despesas = ({ usuario }) => {
   const [filtroAutomatico, setFiltroAutomatico] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
-
-  // ✅ CORREÇÃO: Estados locais ao invés do hook conflitante
-  const [despesas, setDespesas] = useState([]);
-  const [emendas, setEmendas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [despesasFiltradas, setDespesasFiltradas] = useState([]);
-
-  // Dados do usuário (mantido original)
-  const userRole = usuario?.role;
-  const userMunicipio = usuario?.municipio;
-  const userUf = usuario?.uf;
-
-  console.log("✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário:", {
-    email: usuario?.email,
-    role: userRole,
-    municipio: userMunicipio,
-    uf: userUf,
-  });
-
-  // ✅ SUBSTITUA o useEffect de carregamento no Despesas.jsx por este:
-
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        setLoading(true);
-        console.log("📊 Carregando despesas do Firebase...");
-
-        // ✅ CORREÇÃO: Query simples sem orderBy (igual ao Dashboard)
-        const despesasQuery = query(collection(db, "despesas"));
-        const despesasSnapshot = await getDocs(despesasQuery);
-
-        const despesasData = [];
-        despesasSnapshot.forEach((doc) => {
-          despesasData.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-
-        console.log("✅ Despesas carregadas:", despesasData.length);
-        setDespesas(despesasData);
-        setDespesasFiltradas(despesasData);
-
-        // Carregar emendas
-        const emendasQuery = query(collection(db, "emendas"));
-        const emendasSnapshot = await getDocs(emendasQuery);
-
-        const emendasData = [];
-        emendasSnapshot.forEach((doc) => {
-          emendasData.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-
-        console.log("📋 Emendas disponíveis carregadas:", emendasData.length);
-        setEmendas(emendasData);
-      } catch (error) {
-        console.error("❌ Erro ao carregar dados:", error);
-        setError("Erro ao carregar despesas");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    carregarDados();
-  }, []);
-
-  console.log("🎯 Sistema SICEFSUS v2.0 - Despesas carregado");
-
-  // Aplicar filtro automático da emenda (mantido original)
-  useEffect(() => {
-    if (location.state?.filtroAutomatico) {
-      const filtro = location.state.filtroAutomatico;
-      console.log("🎯 Aplicando filtro automático da emenda:", filtro);
-
-      setFiltroAutomatico(filtro);
-
-      if (filtro.breadcrumb) {
-        console.log("🍞 Breadcrumb configurado:", filtro.breadcrumb);
-        setBreadcrumb(filtro.breadcrumb);
-      }
-
-      // Aplicar filtro quando dados estiverem carregados
-      if (despesas.length > 0) {
-        carregarDespesasComFiltro(filtro);
-      }
-    }
-  }, [location.state, despesas]);
 
   // Função para carregar despesas com filtro (mantida original)
   const carregarDespesasComFiltro = useCallback(async (filtro) => {
@@ -147,18 +58,59 @@ const Despesas = ({ usuario }) => {
     }
   }, []);
 
-  // ✅ CORREÇÃO: Função de recarregamento atualizada
+  // ✅ CORREÇÃO: Função de recarregamento atualizada com filtro por município
   const recarregar = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("🔄 Recarregando dados com filtro por município...");
 
-      const despesasQuery = query(collection(db, "despesas"));
-      const despesasSnapshot = await getDocs(despesasQuery);
+      // Recarregar emendas baseado no role
+      let emendasPermitidas = [];
+      let emendasData = [];
 
-      const despesasData = [];
-      despesasSnapshot.forEach((doc) => {
-        despesasData.push({ id: doc.id, ...doc.data() });
-      });
+      if (userRole === "admin") {
+        const emendasQuery = query(collection(db, "emendas"));
+        const emendasSnapshot = await getDocs(emendasQuery);
+
+        emendasSnapshot.forEach((doc) => {
+          const emendaData = { id: doc.id, ...doc.data() };
+          emendasData.push(emendaData);
+          emendasPermitidas.push(doc.id);
+        });
+      } else if (userRole === "operador" && userMunicipio) {
+        const emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", userMunicipio)
+        );
+        const emendasSnapshot = await getDocs(emendasQuery);
+
+        emendasSnapshot.forEach((doc) => {
+          const emendaData = { id: doc.id, ...doc.data() };
+          emendasData.push(emendaData);
+          emendasPermitidas.push(doc.id);
+        });
+      }
+
+      setEmendas(emendasData);
+
+      // Recarregar despesas das emendas permitidas
+      let despesasData = [];
+
+      if (emendasPermitidas.length > 0) {
+        const batchSize = 10;
+        for (let i = 0; i < emendasPermitidas.length; i += batchSize) {
+          const batch = emendasPermitidas.slice(i, i + batchSize);
+          const despesasQuery = query(
+            collection(db, "despesas"),
+            where("emendaId", "in", batch)
+          );
+          const despesasSnapshot = await getDocs(despesasQuery);
+
+          despesasSnapshot.forEach((doc) => {
+            despesasData.push({ id: doc.id, ...doc.data() });
+          });
+        }
+      }
 
       setDespesas(despesasData);
 
@@ -167,12 +119,15 @@ const Despesas = ({ usuario }) => {
       } else {
         setDespesasFiltradas(despesasData);
       }
+
+      console.log("✅ Dados recarregados com sucesso");
     } catch (error) {
       console.error("❌ Erro ao recarregar:", error);
+      setError(`Erro ao recarregar: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  }, [filtroAutomatico, carregarDespesasComFiltro]);
+  }, [filtroAutomatico, carregarDespesasComFiltro, userRole, userMunicipio]);
 
   // Handlers (mantidos originais)
   const handleVisualizar = (despesa) => {
@@ -264,6 +219,14 @@ const Despesas = ({ usuario }) => {
     return sum + valor;
   }, 0);
 
+  // ✅ Estatísticas de permissão para exibição
+  const estatisticasPermissao = {
+    totalEmendas: emendas.length,
+    totalDespesas: despesas.length,
+    municipioFiltrado: userRole === "operador" ? userMunicipio : null,
+    tipoUsuario: userRole
+  };
+
   // Renderização condicional (mantida original)
   const renderContent = () => {
     switch (currentView) {
@@ -306,14 +269,19 @@ const Despesas = ({ usuario }) => {
       default:
         return (
           <div>
-            {/* Header com informações (mantido original) */}
+            {/* Header com informações (atualizado com dados de permissão) */}
             <div style={styles.compactHeader}>
               <div style={styles.statusInfo}>
                 <span style={styles.statusText}>Status:</span>
                 <span style={styles.statusValue}>✅ Operacional</span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.versionText}>Versão:</span>
-                <span style={styles.versionValue}>v2.0</span>
+                <span style={styles.versionValue}>v2.1</span>
+                <span style={styles.divider}>|</span>
+                <span style={styles.statusText}>Usuário:</span>
+                <span style={styles.versionValue}>
+                  {userRole === "admin" ? "👑 Admin" : `🏘️ ${userMunicipio}`}
+                </span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.statusText}>Dados:</span>
                 <span style={styles.versionValue}>
@@ -321,6 +289,21 @@ const Despesas = ({ usuario }) => {
                 </span>
               </div>
             </div>
+
+            {/* ✅ Banner de Informação de Permissões */}
+            {userRole === "operador" && userMunicipio && (
+              <div style={styles.permissaoInfo}>
+                <span style={styles.permissaoIcon}>🔒</span>
+                <div style={styles.permissaoContent}>
+                  <span style={styles.permissaoTexto}>
+                    <strong>Filtro Ativo:</strong> Exibindo apenas despesas de emendas do município <strong>{userMunicipio}/{userUf}</strong>
+                  </span>
+                  <span style={styles.permissaoSubtexto}>
+                    {estatisticasPermissao.totalEmendas} emenda(s) • {estatisticasPermissao.totalDespesas} despesa(s) disponíveis para seu município
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Breadcrumb (mantido original) */}
             {breadcrumb && (
@@ -354,7 +337,9 @@ const Despesas = ({ usuario }) => {
                 <p style={styles.statLabel}>
                   {filtroAutomatico
                     ? "DESPESAS DA EMENDA"
-                    : "TOTAL DE DESPESAS"}
+                    : userRole === "operador" 
+                      ? `DESPESAS - ${userMunicipio}`
+                      : "TOTAL DE DESPESAS"}
                 </p>
               </div>
               <div style={styles.statCard}>
@@ -414,8 +399,15 @@ const Despesas = ({ usuario }) => {
                 <p style={styles.emptyText}>
                   {filtroAutomatico
                     ? "Esta emenda ainda não possui despesas cadastradas."
-                    : "Nenhuma despesa cadastrada no sistema."}
+                    : userRole === "operador" 
+                      ? `Nenhuma despesa encontrada para o município ${userMunicipio}.`
+                      : "Nenhuma despesa cadastrada no sistema."}
                 </p>
+                {userRole === "operador" && totalDespesas === 0 && (
+                  <p style={styles.emptySubtext}>
+                    💡 Dica: Despesas são vinculadas a emendas. Verifique se existem emendas cadastradas para seu município.
+                  </p>
+                )}
               </div>
             ) : (
               <DespesasList
@@ -450,7 +442,7 @@ const Despesas = ({ usuario }) => {
   );
 };
 
-// Estilos originais (mantidos)
+// Estilos originais + novos estilos para permissões
 const styles = {
   container: {
     padding: "20px",
@@ -492,6 +484,41 @@ const styles = {
   divider: {
     opacity: 0.7,
     margin: "0 4px",
+  },
+  // ✅ NOVOS ESTILOS PARA BANNER DE PERMISSÕES
+  permissaoInfo: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px 20px",
+    backgroundColor: "#e8f5e8",
+    border: "2px solid #4caf50",
+    borderRadius: 12,
+    marginBottom: "20px",
+    fontSize: 14,
+    color: "#2e7d32",
+    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
+  },
+  permissaoIcon: {
+    fontSize: 20,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+  permissaoContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    flex: 1,
+  },
+  permissaoTexto: {
+    fontSize: 14,
+    lineHeight: 1.4,
+    fontWeight: "500",
+  },
+  permissaoSubtexto: {
+    fontSize: 12,
+    opacity: 0.8,
+    fontWeight: "400",
   },
   breadcrumbContainer: {
     display: "flex",
@@ -628,7 +655,152 @@ const styles = {
   emptyText: {
     fontSize: "16px",
     color: "#666",
+    marginBottom: "10px",
+  },
+  emptySubtext: {
+    fontSize: "14px",
+    color: "#888",
+    fontStyle: "italic",
   },
 };
 
-export default Despesas;
+export default Despesas; ✅ Estados locais para dados
+  const [despesas, setDespesas] = useState([]);
+  const [emendas, setEmendas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [despesasFiltradas, setDespesasFiltradas] = useState([]);
+
+  // ✅ DADOS DO USUÁRIO PARA FILTRO POR MUNICÍPIO
+  const userRole = usuario?.role;
+  const userMunicipio = usuario?.municipio;
+  const userUf = usuario?.uf;
+
+  console.log("🔒 Despesas.jsx v2.1 - Dados do usuário:", {
+    email: usuario?.email,
+    role: userRole,
+    municipio: userMunicipio,
+    uf: userUf,
+  });
+
+  // ✅ CORREÇÃO PRINCIPAL: Carregamento com filtro por município
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        console.log("📊 Carregando dados com filtro por município...");
+
+        // ✅ STEP 1: Carregar emendas baseado no role do usuário
+        let emendasPermitidas = [];
+        let emendasData = [];
+
+        if (userRole === "admin") {
+          // Admin vê todas as emendas
+          console.log("👑 Usuário ADMIN - carregando todas as emendas");
+          const emendasQuery = query(collection(db, "emendas"));
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            const emendaData = { id: doc.id, ...doc.data() };
+            emendasData.push(emendaData);
+            emendasPermitidas.push(doc.id);
+          });
+        } else if (userRole === "operador" && userMunicipio) {
+          // Operador vê apenas emendas do seu município
+          console.log(`🏘️ Usuário OPERADOR - carregando emendas do município: ${userMunicipio}`);
+          const emendasQuery = query(
+            collection(db, "emendas"),
+            where("municipio", "==", userMunicipio)
+          );
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            const emendaData = { id: doc.id, ...doc.data() };
+            emendasData.push(emendaData);
+            emendasPermitidas.push(doc.id);
+          });
+        } else {
+          console.warn("⚠️ Usuário sem permissões definidas ou município não informado");
+          setEmendas([]);
+          setDespesas([]);
+          setDespesasFiltradas([]);
+          setLoading(false);
+          return;
+        }
+
+        console.log(`✅ Emendas permitidas carregadas: ${emendasPermitidas.length}`);
+        console.log("📋 IDs das emendas permitidas:", emendasPermitidas);
+        setEmendas(emendasData);
+
+        // ✅ STEP 2: Carregar despesas das emendas permitidas
+        let despesasData = [];
+
+        if (emendasPermitidas.length > 0) {
+          // Firebase tem limitação de 'in' para 10 itens, fazemos em lotes
+          const batchSize = 10;
+
+          for (let i = 0; i < emendasPermitidas.length; i += batchSize) {
+            const batch = emendasPermitidas.slice(i, i + batchSize);
+            console.log(`📦 Processando lote ${Math.floor(i/batchSize) + 1} - IDs:`, batch);
+
+            const despesasQuery = query(
+              collection(db, "despesas"),
+              where("emendaId", "in", batch)
+            );
+            const despesasSnapshot = await getDocs(despesasQuery);
+
+            despesasSnapshot.forEach((doc) => {
+              despesasData.push({
+                id: doc.id,
+                ...doc.data(),
+              });
+            });
+          }
+        }
+
+        console.log(`✅ Despesas filtradas carregadas: ${despesasData.length}`);
+        console.log("💰 Amostra de despesas:", despesasData.slice(0, 3).map(d => ({
+          id: d.id,
+          emendaId: d.emendaId,
+          fornecedor: d.fornecedor,
+          valor: d.valor
+        })));
+
+        setDespesas(despesasData);
+        setDespesasFiltradas(despesasData);
+
+      } catch (error) {
+        console.error("❌ Erro ao carregar dados:", error);
+        setError(`Erro ao carregar despesas: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarDados();
+  }, [userRole, userMunicipio]);
+
+  console.log("🎯 Sistema SICEFSUS v2.1 - Despesas carregado com filtro por município");
+
+  // Aplicar filtro automático da emenda (mantido original)
+  useEffect(() => {
+    if (location.state?.filtroAutomatico) {
+      const filtro = location.state.filtroAutomatico;
+      console.log("🎯 Aplicando filtro automático da emenda:", filtro);
+
+      setFiltroAutomatico(filtro);
+
+      if (filtro.breadcrumb) {
+        console.log("🍞 Breadcrumb configurado:", filtro.breadcrumb);
+        setBreadcrumb(filtro.breadcrumb);
+      }
+
+      // Aplicar filtro quando dados estiverem carregados
+      if (despesas.length > 0) {
+        carregarDespesasComFiltro(filtro);
+      }
+    }
+  }, [location.state, despesas]);
+
+  //
