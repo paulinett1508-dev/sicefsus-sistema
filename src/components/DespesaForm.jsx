@@ -13,6 +13,8 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import Toast from "./Toast";
 import { useIsMounted } from "../hooks/useEmendaDespesa";
+import { useMoedaFormatting, parseValorMonetario } from "../utils/formatters";
+import { useCNPJValidation } from "../utils/validators";
 
 const DespesaForm = ({
   usuario,
@@ -76,6 +78,10 @@ const DespesaForm = ({
   const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
   const [emendas, setEmendas] = useState(emendasDisponiveis);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  // ✅ Hooks de formatação
+  const { valorError, handleValorChange } = useMoedaFormatting();
+  const { cnpjError, handleCNPJChange } = useCNPJValidation();
 
   // Configuração de modo simplificada (seguindo padrão do EmendaForm)
   const configModo = {
@@ -141,10 +147,11 @@ const DespesaForm = ({
 
       const { name, value } = e.target;
 
-      // Formatação especial para valor monetário
+      // Formatação especial para campos específicos
       if (name === "valor") {
-        const valorFormatado = formatarMoeda(value);
-        setFormData((prev) => ({ ...prev, [name]: valorFormatado }));
+        handleValorChange(value, emendaInfo, setFormData);
+      } else if (name === "cnpjFornecedor") {
+        handleCNPJChange(value, setFormData);
       } else {
         setFormData((prev) => ({ ...prev, [name]: value }));
       }
@@ -154,21 +161,10 @@ const DespesaForm = ({
         setErrors((prev) => ({ ...prev, [name]: "" }));
       }
     },
-    [isMounted, errors],
+    [isMounted, errors, emendaInfo, handleValorChange, handleCNPJChange],
   );
 
-  const formatarMoeda = (valor) => {
-    let numero = valor.replace(/\D/g, "");
-
-    if (numero.length === 0) return "";
-    if (numero.length === 1) return `0,0${numero}`;
-    if (numero.length === 2) return `0,${numero}`;
-
-    numero = numero.replace(/^(\d+)(\d{2})$/, "$1,$2");
-    numero = numero.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-
-    return numero;
-  };
+  
 
   const validarFormulario = () => {
     const novosErrors = {};
@@ -197,9 +193,7 @@ const DespesaForm = ({
 
     // Validação para valor monetário
     if (formData.valor) {
-      const valor = parseFloat(
-        formData.valor.replace(/[^\d,]/g, "").replace(",", "."),
-      );
+      const valor = parseValorMonetario(formData.valor);
       if (isNaN(valor) || valor <= 0) {
         novosErrors.valor = "Valor deve ser maior que 0";
       }
@@ -208,6 +202,15 @@ const DespesaForm = ({
       if (emendaInfo && valor > emendaInfo.saldoDisponivel) {
         novosErrors.valor = `Valor excede o saldo disponível (R$ ${emendaInfo.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})`;
       }
+    }
+
+    // Adicionar erros dos hooks de formatação
+    if (valorError) {
+      novosErrors.valor = valorError;
+    }
+
+    if (cnpjError) {
+      novosErrors.cnpjFornecedor = cnpjError;
     }
 
     setErrors(novosErrors);
@@ -231,9 +234,7 @@ const DespesaForm = ({
     try {
       const dadosParaSalvar = {
         ...formData,
-        valor:
-          parseFloat(formData.valor.replace(/[^\d,]/g, "").replace(",", ".")) ||
-          0,
+        valor: parseValorMonetario(formData.valor) || 0,
         contrapartida: parseFloat(formData.contrapartida) || 0,
         percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
         dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
@@ -816,10 +817,16 @@ const DespesaForm = ({
                   name="cnpjFornecedor"
                   value={formData.cnpjFornecedor}
                   onChange={handleInputChange}
-                  style={styles.input}
+                  style={cnpjError ? styles.inputError : styles.input}
                   readOnly={modoVisualizacao}
                   placeholder="00.000.000/0000-00"
                 />
+                {cnpjError && (
+                  <span style={styles.errorText}>{cnpjError}</span>
+                )}
+                <span style={styles.helpText}>
+                  CNPJ será formatado automaticamente conforme você digita
+                </span>
               </div>
 
               <div style={styles.formGroup}>

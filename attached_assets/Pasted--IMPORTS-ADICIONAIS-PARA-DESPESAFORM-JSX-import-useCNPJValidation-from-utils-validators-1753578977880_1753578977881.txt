@@ -1,0 +1,119 @@
+// ✅ IMPORTS ADICIONAIS PARA DESPESAFORM.JSX
+import { useCNPJValidation } from "../utils/validators";
+import { useMoedaFormatting, formatarMoedaDisplay } from "../utils/formatters";
+
+// ✅ DENTRO DO COMPONENTE DESPESAFORM, ADICIONE:
+const { cnpjError, handleCNPJChange } = useCNPJValidation();
+const { valorError, handleValorChange } = useMoedaFormatting();
+
+// ✅ SUBSTITUA O handleInputChange EXISTENTE:
+const handleInputChange = useCallback(
+  (e) => {
+    if (!isMounted) return;
+
+    const { name, value } = e.target;
+
+    // Tratamento especial para valor monetário
+    if (name === "valor") {
+      handleValorChange(value, emendaInfo, setFormData);
+      return;
+    }
+    
+    // Tratamento especial para CNPJ
+    if (name === "cnpjFornecedor") {
+      handleCNPJChange(value, setFormData);
+      return;
+    }
+
+    // Outros campos
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Limpar erro do campo
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  },
+  [isMounted, errors, emendaInfo, handleValorChange, handleCNPJChange],
+);
+
+// ✅ ATUALIZE A VALIDAÇÃO DE FORMULÁRIO:
+const validarFormulario = () => {
+  const novosErrors = {};
+
+  // Campos obrigatórios existentes...
+  const camposObrigatorios = {
+    emendaId: "Emenda é obrigatória",
+    discriminacao: "Discriminação é obrigatória",
+    fornecedor: "Fornecedor é obrigatório",
+    valor: "Valor é obrigatório",
+    numeroEmpenho: "Nº do Empenho é obrigatório",
+    numeroNota: "Nº da Nota Fiscal é obrigatório",
+    dataEmpenho: "Data do Empenho é obrigatória",
+    dataLiquidacao: "Data da Liquidação é obrigatória",
+    dataPagamento: "Data do Pagamento é obrigatória",
+    acao: "Ação é obrigatória",
+    dotacaoOrcamentaria: "Dotação Orçamentária é obrigatória",
+    classificacaoFuncional: "Classificação Funcional é obrigatória",
+  };
+
+  Object.keys(camposObrigatorios).forEach((campo) => {
+    if (!formData[campo] || formData[campo].toString().trim() === "") {
+      novosErrors[campo] = camposObrigatorios[campo];
+    }
+  });
+
+  // ✅ VALIDAÇÃO DE VALOR MELHORADA
+  if (valorError) {
+    novosErrors.valor = valorError;
+  }
+
+  // ✅ VALIDAÇÃO DE CNPJ
+  if (formData.cnpjFornecedor && cnpjError) {
+    novosErrors.cnpjFornecedor = cnpjError;
+  }
+
+  setErrors(novosErrors);
+  return Object.keys(novosErrors).length === 0;
+};
+
+// ✅ NO JSX DO CAMPO VALOR, ADICIONE:
+<div style={styles.formGroup}>
+  <label style={styles.labelRequired}>Valor *</label>
+  <input
+    type="text"
+    name="valor"
+    value={formData.valor}
+    onChange={handleInputChange}
+    style={(errors.valor || valorError) ? styles.inputError : styles.input}
+    readOnly={modoVisualizacao}
+    placeholder="0,00"
+    required
+  />
+  {(errors.valor || valorError) && (
+    <span style={styles.errorText}>{errors.valor || valorError}</span>
+  )}
+  <span style={styles.helpText}>
+    Digite apenas números. Ex: 100000 = R$ 1.000,00
+  </span>
+</div>
+
+// ✅ NO JSX DO CAMPO CNPJ, SUBSTITUA POR:
+<div style={styles.formGroup}>
+  <label style={styles.label}>CNPJ do Fornecedor</label>
+  <input
+    type="text"
+    name="cnpjFornecedor"
+    value={formData.cnpjFornecedor}
+    onChange={handleInputChange}
+    style={cnpjError ? styles.inputError : styles.input}
+    readOnly={modoVisualizacao}
+    placeholder="00.000.000/0000-00"
+    maxLength="18"
+  />
+  {cnpjError && (
+    <span style={styles.errorText}>{cnpjError}</span>
+  )}
+  <span style={styles.helpText}>
+    CNPJ será validado automaticamente
+  </span>
+</div>
