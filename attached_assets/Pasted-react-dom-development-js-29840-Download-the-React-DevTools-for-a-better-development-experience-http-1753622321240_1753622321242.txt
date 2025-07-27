@@ -1,0 +1,134 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: {apiKey: '✅ Configurada', authDomain: '✅ Configurada', projectId: '✅ Configurada', storageBucket: '✅ Configurada', messagingSenderId: '✅ Configurada', …}
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+UserContext.jsx:121 🔄 UserContext: Carregando dados completos do usuário...
+UserContext.jsx:123 👤 UserContext: Dados do usuário carregados: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi', …}
+UserContext.jsx:137 ✅ UserContext: Usuário ativo definido no contexto
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: true, emendasTipo: 'object', emendasLength: 2}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:266 📊 Calculando estatísticas do Dashboard...
+Dashboard.jsx:267 📋 Emendas disponíveis: 2
+Dashboard.jsx:268 💰 Despesas disponíveis: 3
+Dashboard.jsx:292 ✅ Estatísticas calculadas: {totalEmendas: 2, totalDespesas: 3, valorTotalEmendas: 201500, valorTotalDespesas: 3812.12, saldoDisponivel: 197687.88, …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: true, emendasTipo: 'object', emendasLength: 2}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:266 📊 Calculando estatísticas do Dashboard...
+Dashboard.jsx:267 📋 Emendas disponíveis: 2
+Dashboard.jsx:268 💰 Despesas disponíveis: 3
+Dashboard.jsx:292 ✅ Estatísticas calculadas: {totalEmendas: 2, totalDespesas: 3, valorTotalEmendas: 201500, valorTotalDespesas: 3812.12, saldoDisponivel: 197687.88, …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', role: 'admin', uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', isActive: true, uf: 'pi', …}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Emendas.jsx:155 🎯 Sistema SICEFSUS v2.1 - Modal UX carregado
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Emendas.jsx:155 🎯 Sistema SICEFSUS v2.1 - Modal UX carregado
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:73 📊 Calculando métricas de despesas para 2 emendas
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:125 ✅ Métricas calculadas: 2
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:162 ✅ Emendas com métricas carregadas: 2
+Emendas.jsx:166 💰 Emendas com despesas: 2
+Emendas.jsx:175 👁️ Visualizando emenda: EMD980614
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+react-dom.development.js:86  Warning: Unsupported style property @media (max-width: 768px). Did you mean @media (maxWidth: 768px)?
+    at div
+    at div
+    at fieldset
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/EmendaForm.jsx:42:3)
+    at div
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:34:20)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:107:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:177:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:226:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:68:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at ThemeProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/ThemeContext.jsx:20:33)
+    at App
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+warnHyphenatedStyleName @ react-dom.development.js:2695
+warnValidStyle @ react-dom.development.js:2743
+setValueForStyles @ react-dom.development.js:2816
+setInitialDOMProperties @ react-dom.development.js:9688
+setInitialProperties @ react-dom.development.js:9921
+finalizeInitialChildren @ react-dom.development.js:10950
+completeWork @ react-dom.development.js:22193
+completeUnitOfWork @ react-dom.development.js:26596
+performUnitOfWork @ react-dom.development.js:26568
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+EmendaForm.jsx:164 📝 Carregando dados para edição: {id: 'emenda_1752863980614', programa: '', acoesServicos: Array(0), dataValidada: '2025-07-30', dotacaoOrcamentaria: '', …}
+Emendas.jsx:193 🔄 Voltando para listagem
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:181 ✏️ Editando emenda: EMD980614
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+EmendaForm.jsx:164 📝 Carregando dados para edição: {id: 'emenda_1752863980614', programa: '', acoesServicos: Array(0), dataValidada: '2025-07-30', dotacaoOrcamentaria: '', …}
+Emendas.jsx:193 🔄 Voltando para listagem
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
