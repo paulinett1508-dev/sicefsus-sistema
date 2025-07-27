@@ -1,4 +1,5 @@
-// src/components/UsersTable.jsx - Tabela de Usuários Conforme Padrão SICEFSUS
+
+// src/components/UsersTable.jsx - Tabela de Usuários com UX Melhorada
 import React from "react";
 
 const UsersTable = ({
@@ -10,33 +11,37 @@ const UsersTable = ({
 }) => {
   const formatLastAccess = (lastAccess) => {
     if (!lastAccess) {
-      return <span className="never-accessed">Nunca acessou</span>;
+      return <span style={styles.neverAccessed}>Nunca acessou</span>;
     }
     return <span>{lastAccess.toDate().toLocaleString("pt-BR")}</span>;
   };
 
   const formatLocation = (user) => {
     if (user.role === "admin") {
-      return "🌐 Acesso Total";
+      return <span style={styles.locationBadge}>🌐 Acesso Total</span>;
     }
 
     if (user.municipio && user.uf) {
-      return `${user.municipio}/${user.uf.toUpperCase()}`;
+      return (
+        <span style={styles.locationBadge}>
+          {user.municipio}/{user.uf.toUpperCase()}
+        </span>
+      );
     }
 
-    return "⚠️ Não configurado";
+    return <span style={styles.locationWarning}>⚠️ Não configurado</span>;
   };
 
   const formatStatus = (status) => {
     const statusMap = {
-      ativo: { label: "✅ Ativo", className: "ativo" },
-      inativo: { label: "⏸️ Inativo", className: "inativo" },
-      bloqueado: { label: "🚫 Bloqueado", className: "bloqueado" },
+      ativo: { label: "✅ Ativo", style: styles.statusAtivo },
+      inativo: { label: "⏸️ Inativo", style: styles.statusInativo },
+      bloqueado: { label: "🚫 Bloqueado", style: styles.statusBloqueado },
     };
 
     const statusInfo = statusMap[status] || statusMap.ativo;
     return (
-      <span className={`status ${statusInfo.className}`}>
+      <span style={statusInfo.style}>
         {statusInfo.label}
       </span>
     );
@@ -44,7 +49,7 @@ const UsersTable = ({
 
   const formatRole = (role) => {
     return (
-      <span className={`badge ${role}`}>
+      <span style={role === "admin" ? styles.badgeAdmin : styles.badgeUser}>
         {role === "admin" ? "👑 Admin" : "👤 Usuário"}
       </span>
     );
@@ -52,10 +57,10 @@ const UsersTable = ({
 
   if (users.length === 0) {
     return (
-      <div className="empty-state">
-        <div className="empty-icon">👥</div>
-        <h3>Nenhum usuário encontrado</h3>
-        <p>
+      <div style={styles.emptyState}>
+        <div style={styles.emptyIcon}>👥</div>
+        <h3 style={styles.emptyTitle}>Nenhum usuário encontrado</h3>
+        <p style={styles.emptyText}>
           Clique em "Novo Usuário" para adicionar o primeiro usuário ao sistema.
         </p>
       </div>
@@ -63,51 +68,54 @@ const UsersTable = ({
   }
 
   return (
-    <>
-      <div className="users-table">
-        <table>
+    <div style={styles.tableContainer}>
+      <div style={styles.tableWrapper}>
+        <table style={styles.table}>
           <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Perfil</th>
-              <th>Status</th>
-              <th>Departamento</th>
-              <th>Município/UF</th>
-              <th>Último Acesso</th>
-              <th>Ações</th>
+            <tr style={styles.headerRow}>
+              <th style={styles.th}>Nome</th>
+              <th style={styles.th}>Email</th>
+              <th style={styles.th}>Perfil</th>
+              <th style={styles.th}>Status</th>
+              <th style={styles.th}>Departamento</th>
+              <th style={styles.th}>Município/UF</th>
+              <th style={styles.th}>Último Acesso</th>
+              <th style={styles.th}>Ações</th>
             </tr>
           </thead>
           <tbody>
             {users.map((user) => (
               <tr
                 key={user.id}
-                className={user.primeiroAcesso ? "first-access" : ""}
+                style={{
+                  ...styles.row,
+                  ...(user.primeiroAcesso ? styles.firstAccessRow : {})
+                }}
               >
-                <td>
-                  <div className="user-name">
-                    {user.nome}
+                <td style={styles.td}>
+                  <div style={styles.userNameContainer}>
+                    <span style={styles.userName}>{user.nome}</span>
                     {user.primeiroAcesso && (
-                      <span className="first-access-badge">
+                      <span style={styles.firstAccessBadge}>
                         🔑 Primeiro acesso
                       </span>
                     )}
                   </div>
                 </td>
-                <td>{user.email}</td>
-                <td>{formatRole(user.role)}</td>
-                <td>{formatStatus(user.status)}</td>
-                <td>{user.departamento || "-"}</td>
-                <td>{formatLocation(user)}</td>
-                <td>
-                  <div className="access-info">
+                <td style={styles.td}>{user.email}</td>
+                <td style={styles.td}>{formatRole(user.role)}</td>
+                <td style={styles.td}>{formatStatus(user.status)}</td>
+                <td style={styles.td}>{user.departamento || "-"}</td>
+                <td style={styles.td}>{formatLocation(user)}</td>
+                <td style={styles.td}>
+                  <div style={styles.accessInfo}>
                     {formatLastAccess(user.ultimoAcesso)}
                   </div>
                 </td>
-                <td>
-                  <div className="action-buttons">
+                <td style={styles.td}>
+                  <div style={styles.actionButtons}>
                     <button
-                      className="btn-edit"
+                      style={styles.btnEdit}
                       onClick={() => onEdit(user)}
                       title="Editar dados"
                       disabled={saving}
@@ -115,7 +123,7 @@ const UsersTable = ({
                       ✏️
                     </button>
                     <button
-                      className="btn-reset"
+                      style={styles.btnReset}
                       onClick={() => onResetPassword(user)}
                       title={
                         user.primeiroAcesso
@@ -127,7 +135,7 @@ const UsersTable = ({
                       🔑
                     </button>
                     <button
-                      className="btn-delete"
+                      style={styles.btnDelete}
                       onClick={() => onDelete(user)}
                       title="Excluir usuário"
                       disabled={saving}
@@ -141,189 +149,224 @@ const UsersTable = ({
           </tbody>
         </table>
       </div>
-
-      {/* ✅ ESTILOS CONFORME PADRÃO SICEFSUS ORIGINAL */}
-      <style>{`
-        .users-table {
-          overflow-x: auto;
-        }
-
-        .users-table table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 0;
-        }
-
-        .users-table th,
-        .users-table td {
-          padding: 12px;
-          text-align: left;
-          border-bottom: 1px solid #dee2e6;
-        }
-
-        .users-table th {
-          background: #f8f9fa;
-          font-weight: 600;
-          color: #2c3e50;
-        }
-
-        .users-table tr:hover {
-          background: #f8f9fa;
-        }
-
-        .first-access {
-          background: #fff8e1 !important;
-        }
-
-        .first-access:hover {
-          background: #fff3cd !important;
-        }
-
-        .user-name {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .first-access-badge {
-          background: #fff3cd;
-          color: #856404;
-          font-size: 0.75em;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-weight: 500;
-          width: fit-content;
-        }
-
-        .badge {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.85em;
-          font-weight: 500;
-        }
-
-        .badge.admin {
-          background: #dc3545;
-          color: white;
-        }
-
-        .badge.user {
-          background: #28a745;
-          color: white;
-        }
-
-        .status {
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 0.85em;
-          font-weight: 500;
-        }
-
-        .status.ativo {
-          background: #d4edda;
-          color: #155724;
-        }
-
-        .status.inativo {
-          background: #fff3cd;
-          color: #856404;
-        }
-
-        .status.bloqueado {
-          background: #f8d7da;
-          color: #721c24;
-        }
-
-        .access-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .never-accessed {
-          color: #dc3545;
-          font-style: italic;
-          font-size: 0.9em;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 5px;
-        }
-
-        .btn-edit,
-        .btn-reset,
-        .btn-delete {
-          background: none;
-          border: none;
-          font-size: 1.2em;
-          cursor: pointer;
-          padding: 5px;
-          border-radius: 4px;
-          transition: background-color 0.2s;
-        }
-
-        .btn-edit:hover:not(:disabled) {
-          background: #007bff;
-          color: white;
-        }
-
-        .btn-reset:hover:not(:disabled) {
-          background: #17a2b8;
-          color: white;
-        }
-
-        .btn-delete:hover:not(:disabled) {
-          background: #dc3545;
-          color: white;
-        }
-
-        .btn-edit:disabled,
-        .btn-reset:disabled,
-        .btn-delete:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 60px 20px;
-          color: #6c757d;
-        }
-
-        .empty-icon {
-          font-size: 3em;
-          margin-bottom: 20px;
-          opacity: 0.5;
-        }
-
-        .empty-state h3 {
-          margin: 0 0 10px 0;
-          color: #495057;
-        }
-
-        .empty-state p {
-          margin: 0;
-          font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-          .users-table {
-            font-size: 0.9em;
-          }
-
-          .action-buttons {
-            flex-direction: column;
-          }
-
-          .users-table th,
-          .users-table td {
-            padding: 8px;
-          }
-        }
-      `}</style>
-    </>
+    </div>
   );
+};
+
+const styles = {
+  tableContainer: {
+    background: "var(--theme-surface)",
+    borderRadius: "12px",
+    boxShadow: "var(--shadow)",
+    border: "2px solid var(--theme-border)",
+    overflow: "hidden",
+  },
+
+  tableWrapper: {
+    overflowX: "auto",
+  },
+
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: "14px",
+  },
+
+  headerRow: {
+    background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
+  },
+
+  th: {
+    padding: "16px 12px",
+    textAlign: "left",
+    fontWeight: "600",
+    color: "var(--white)",
+    fontSize: "14px",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+
+  row: {
+    transition: "all 0.2s ease",
+    borderBottom: "1px solid var(--theme-border)",
+  },
+
+  firstAccessRow: {
+    backgroundColor: "var(--warning-light)",
+  },
+
+  td: {
+    padding: "12px",
+    color: "var(--theme-text)",
+    verticalAlign: "middle",
+  },
+
+  userNameContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+
+  userName: {
+    fontWeight: "600",
+    color: "var(--primary)",
+  },
+
+  firstAccessBadge: {
+    backgroundColor: "var(--warning)",
+    color: "var(--white)",
+    fontSize: "0.75em",
+    padding: "2px 8px",
+    borderRadius: "12px",
+    fontWeight: "500",
+    width: "fit-content",
+  },
+
+  badgeAdmin: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85em",
+    fontWeight: "600",
+    background: "var(--error)",
+    color: "var(--white)",
+  },
+
+  badgeUser: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85em",
+    fontWeight: "600",
+    background: "var(--success)",
+    color: "var(--white)",
+  },
+
+  statusAtivo: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85em",
+    fontWeight: "600",
+    background: "var(--success-light)",
+    color: "var(--success-dark)",
+    border: "1px solid var(--success)",
+  },
+
+  statusInativo: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85em",
+    fontWeight: "600",
+    background: "var(--warning-light)",
+    color: "var(--warning-dark)",
+    border: "1px solid var(--warning)",
+  },
+
+  statusBloqueado: {
+    padding: "6px 12px",
+    borderRadius: "20px",
+    fontSize: "0.85em",
+    fontWeight: "600",
+    background: "var(--error-light)",
+    color: "var(--error-dark)",
+    border: "1px solid var(--error)",
+  },
+
+  locationBadge: {
+    padding: "4px 8px",
+    borderRadius: "12px",
+    fontSize: "0.8em",
+    fontWeight: "500",
+    background: "var(--accent-light)",
+    color: "var(--accent-dark)",
+    border: "1px solid var(--accent)",
+  },
+
+  locationWarning: {
+    padding: "4px 8px",
+    borderRadius: "12px",
+    fontSize: "0.8em",
+    fontWeight: "500",
+    background: "var(--error-light)",
+    color: "var(--error-dark)",
+    border: "1px solid var(--error)",
+  },
+
+  accessInfo: {
+    fontSize: "0.9em",
+  },
+
+  neverAccessed: {
+    color: "var(--error)",
+    fontStyle: "italic",
+    fontWeight: "500",
+  },
+
+  actionButtons: {
+    display: "flex",
+    gap: "8px",
+  },
+
+  btnEdit: {
+    background: "var(--info)",
+    border: "none",
+    color: "var(--white)",
+    fontSize: "1.1em",
+    cursor: "pointer",
+    padding: "8px 10px",
+    borderRadius: "6px",
+    transition: "all 0.2s ease",
+    boxShadow: "var(--shadow-sm)",
+  },
+
+  btnReset: {
+    background: "var(--accent)",
+    border: "none",
+    color: "var(--white)",
+    fontSize: "1.1em",
+    cursor: "pointer",
+    padding: "8px 10px",
+    borderRadius: "6px",
+    transition: "all 0.2s ease",
+    boxShadow: "var(--shadow-sm)",
+  },
+
+  btnDelete: {
+    background: "var(--error)",
+    border: "none",
+    color: "var(--white)",
+    fontSize: "1.1em",
+    cursor: "pointer",
+    padding: "8px 10px",
+    borderRadius: "6px",
+    transition: "all 0.2s ease",
+    boxShadow: "var(--shadow-sm)",
+  },
+
+  emptyState: {
+    textAlign: "center",
+    padding: "60px 20px",
+    color: "var(--theme-text-secondary)",
+    background: "var(--theme-surface)",
+    borderRadius: "12px",
+    border: "2px dashed var(--theme-border)",
+  },
+
+  emptyIcon: {
+    fontSize: "4em",
+    marginBottom: "20px",
+    opacity: 0.5,
+  },
+
+  emptyTitle: {
+    margin: "0 0 10px 0",
+    color: "var(--theme-text)",
+    fontSize: "1.5em",
+  },
+
+  emptyText: {
+    margin: 0,
+    fontSize: "1em",
+    lineHeight: 1.5,
+  },
 };
 
 export default UsersTable;
