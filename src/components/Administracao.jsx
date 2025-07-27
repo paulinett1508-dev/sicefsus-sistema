@@ -142,13 +142,12 @@ const Administracao = ({ usuario }) => {
         </div>
 
         <UsersTable
-          users={users}
-          loading={loading}
-          onEditar={handleEditarUsuario}
-          onVisualizar={handleVisualizarUsuario}
-          onExcluir={handleExcluirUsuario}
-          onResetSenha={handleResetSenha}
-        />
+            users={users}
+            onEdit={handleEditarUsuario}
+            onResetPassword={handleResetSenha}
+            onDelete={handleExcluirUsuario}
+            saving={saving}
+          />
       </div>
 
       {/* ✅ MODAL DE FORMULÁRIO */}
