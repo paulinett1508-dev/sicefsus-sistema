@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -80,8 +79,12 @@ const DespesaForm = ({
 
   // Configuração de modo simplificada (seguindo padrão do EmendaForm)
   const configModo = {
-    modo: modoVisualizacao ? "visualizar" : (despesaParaEditar ? "editar" : "criar"),
-    readOnly: modoVisualizacao
+    modo: modoVisualizacao
+      ? "visualizar"
+      : despesaParaEditar
+        ? "editar"
+        : "criar",
+    readOnly: modoVisualizacao,
   };
 
   // Carregar emendas se não foram fornecidas
@@ -133,7 +136,8 @@ const DespesaForm = ({
 
   const handleInputChange = useCallback(
     (e) => {
-      if (!isMounted()) return;
+      // ✅ CORREÇÃO: Verificar se isMounted é true (não uma função)
+      if (!isMounted) return;
 
       const { name, value } = e.target;
 
@@ -258,10 +262,11 @@ const DespesaForm = ({
         });
       }
 
-      if (isMounted()) {
+      // ✅ CORREÇÃO: Verificar isMounted sem função
+      if (isMounted) {
         setShowSuccessMessage(true);
         setTimeout(() => {
-          if (isMounted()) {
+          if (isMounted) {
             setShowSuccessMessage(false);
             if (onSalvar && typeof onSalvar === "function") {
               onSalvar();
@@ -314,8 +319,7 @@ const DespesaForm = ({
               : subtitle ||
                 (modoVisualizacao
                   ? "Detalhes da despesa da emenda"
-                  : `ID: ${despesaParaEditar?.id || ""} | Fornecedor: ${formData.fornecedor || ""}`))
-          }
+                  : `ID: ${despesaParaEditar?.id || ""} | Fornecedor: ${formData.fornecedor || ""}`))}
         </p>
       </div>
 
@@ -334,19 +338,17 @@ const DespesaForm = ({
       {/* Card informativo da emenda quando pré-selecionada */}
       {emendaInfo && (
         <div style={styles.emendaInfo}>
-          <h3 style={styles.emendaInfoTitle}>
-            📄 Dados da Emenda Selecionada
-          </h3>
+          <h3 style={styles.emendaInfoTitle}>📄 Dados da Emenda Selecionada</h3>
           <div style={styles.emendaInfoGrid}>
             <div style={styles.emendaInfoRow}>
               <strong>Parlamentar:</strong> {emendaInfo.parlamentar}
             </div>
             <div style={styles.emendaInfoRow}>
-              <strong>Número:</strong> {emendaInfo.numeroEmenda}
+              <strong>Número:</strong>{" "}
+              {emendaInfo.numero || emendaInfo.numeroEmenda}
             </div>
             <div style={styles.emendaInfoRow}>
-              <strong>Município:</strong> {emendaInfo.municipio}/
-              {emendaInfo.uf}
+              <strong>Município:</strong> {emendaInfo.municipio}/{emendaInfo.uf}
             </div>
             <div style={styles.emendaInfoRow}>
               <strong>Valor Total:</strong> R${" "}
@@ -382,7 +384,7 @@ const DespesaForm = ({
                 <>
                   <input
                     type="text"
-                    value={`${emendaInfo.parlamentar} - ${emendaInfo.numeroEmenda}`}
+                    value={`${emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
                     style={styles.inputReadonly}
                     readOnly
                   />
@@ -497,9 +499,7 @@ const DespesaForm = ({
                 name="numeroEmpenho"
                 value={formData.numeroEmpenho}
                 onChange={handleInputChange}
-                style={
-                  errors.numeroEmpenho ? styles.inputError : styles.input
-                }
+                style={errors.numeroEmpenho ? styles.inputError : styles.input}
                 readOnly={modoVisualizacao}
                 placeholder="Número do empenho"
                 required
@@ -575,9 +575,7 @@ const DespesaForm = ({
                 name="dataLiquidacao"
                 value={formData.dataLiquidacao}
                 onChange={handleInputChange}
-                style={
-                  errors.dataLiquidacao ? styles.inputError : styles.input
-                }
+                style={errors.dataLiquidacao ? styles.inputError : styles.input}
                 readOnly={modoVisualizacao}
                 required
               />
@@ -593,9 +591,7 @@ const DespesaForm = ({
                 name="dataPagamento"
                 value={formData.dataPagamento}
                 onChange={handleInputChange}
-                style={
-                  errors.dataPagamento ? styles.inputError : styles.input
-                }
+                style={errors.dataPagamento ? styles.inputError : styles.input}
                 readOnly={modoVisualizacao}
                 required
               />
@@ -669,18 +665,14 @@ const DespesaForm = ({
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.labelRequired}>
-                Dotação Orçamentária *
-              </label>
+              <label style={styles.labelRequired}>Dotação Orçamentária *</label>
               <input
                 type="text"
                 name="dotacaoOrcamentaria"
                 value={formData.dotacaoOrcamentaria}
                 onChange={handleInputChange}
                 style={
-                  errors.dotacaoOrcamentaria
-                    ? styles.inputError
-                    : styles.input
+                  errors.dotacaoOrcamentaria ? styles.inputError : styles.input
                 }
                 readOnly={modoVisualizacao}
                 placeholder="Código da dotação orçamentária"

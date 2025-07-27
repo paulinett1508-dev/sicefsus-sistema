@@ -1,5 +1,8 @@
-// Emendas.jsx - Sistema SICEFSUS v2.0 - COM MODAL UX MELHORADO
-// ✅ ATUALIZADO: Modal UX para primeira despesa implementado
+// Emendas.jsx - Sistema SICEFSUS v2.1 - COM PRIMEIRADESPESAMODAL INTEGRADO
+// ✅ CORREÇÃO: PrimeiraDespesaModal substituindo window.confirm
+// ✅ CORREÇÃO: UX moderna para primeira despesa
+// ✅ CORREÇÃO: Estados do modal adicionados
+// ✅ CORREÇÃO: Import do PrimeiraDespesaModal
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,16 +26,18 @@ const Emendas = ({ usuario }) => {
   const [currentView, setCurrentView] = useState("listagem");
   const [emendaSelecionada, setEmendaSelecionada] = useState(null);
 
-  // ✅ NOVOS ESTADOS PARA O MODAL UX
-  const [showPrimeiraDespesaModal, setShowPrimeiraDespesaModal] = useState(false);
-  const [emendaParaPrimeiraDespesa, setEmendaParaPrimeiraDespesa] = useState(null);
+  // ✅ NOVO: Estados para o modal UX
+  const [showPrimeiraDespesaModal, setShowPrimeiraDespesaModal] =
+    useState(false);
+  const [emendaParaPrimeiraDespesa, setEmendaParaPrimeiraDespesa] =
+    useState(null);
 
   // ✅ CORREÇÃO CRÍTICA: Usar dados direto da prop usuario
   const userRole = usuario?.role;
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
-  console.log("✅ Sistema SICEFSUS v2.0 - Dados do usuário:", {
+  console.log("✅ Sistema SICEFSUS v2.1 - Dados do usuário:", {
     email: usuario?.email,
     role: userRole,
     municipio: userMunicipio,
@@ -147,7 +152,7 @@ const Emendas = ({ usuario }) => {
 
   // ✅ UseEffect OTIMIZADO - só roda na primeira vez
   useEffect(() => {
-    console.log("🎯 Sistema SICEFSUS v2.0 - Fluxo Emenda->Despesa carregado");
+    console.log("🎯 Sistema SICEFSUS v2.1 - Modal UX carregado");
   }, []);
 
   // ✅ Log otimizado para dados
@@ -243,7 +248,27 @@ const Emendas = ({ usuario }) => {
     }
   };
 
-  // ✅ FUNÇÃO MODIFICADA: Handler de despesas com MODAL UX
+  // ✅ NOVO: Handlers do Modal UX
+  const handleModalConfirm = () => {
+    if (emendaParaPrimeiraDespesa) {
+      console.log(
+        "➕ Criando primeira despesa via modal para emenda:",
+        emendaParaPrimeiraDespesa.id,
+      );
+      setEmendaSelecionada(emendaParaPrimeiraDespesa);
+      setCurrentView("criar-despesa");
+      setShowPrimeiraDespesaModal(false);
+      setEmendaParaPrimeiraDespesa(null);
+    }
+  };
+
+  const handleModalCancel = () => {
+    console.log("❌ Modal cancelado pelo usuário");
+    setShowPrimeiraDespesaModal(false);
+    setEmendaParaPrimeiraDespesa(null);
+  };
+
+  // ✅ CORREÇÃO PRINCIPAL: Handler de despesas com Modal UX
   const handleDespesas = useCallback(
     (emenda) => {
       console.log(
@@ -256,6 +281,7 @@ const Emendas = ({ usuario }) => {
       // Verificar se tem despesas
       if (!emenda.totalDespesas || emenda.totalDespesas === 0) {
         // ✅ NOVO: Usar modal UX ao invés de window.confirm
+        console.log("🎯 Abrindo modal UX para primeira despesa");
         setEmendaParaPrimeiraDespesa(emenda);
         setShowPrimeiraDespesaModal(true);
         return;
@@ -406,7 +432,7 @@ const Emendas = ({ usuario }) => {
                 <span style={styles.statusValue}>✅ Operacional</span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.versionText}>Versão:</span>
-                <span style={styles.versionValue}>v2.0</span>
+                <span style={styles.versionValue}>v2.1</span>
                 <span style={styles.divider}>|</span>
                 <span style={styles.statusText}>Dados:</span>
                 <span style={styles.versionValue}>
@@ -456,139 +482,265 @@ const Emendas = ({ usuario }) => {
                 </h3>
                 <p style={styles.statLabel}>VALOR TOTAL</p>
               </div>
+              <div style={styles.statCard}>
+                <h3 style={styles.statNumber}>
+                  {valorExecutadoTotal.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </h3>
+                <p style={styles.statLabel}>VALOR EXECUTADO</p>
+              </div>
             </div>
+
+            {/* Botões de Ação */}
+            <div style={styles.actionContainer}>
+              <button style={styles.primaryButton} onClick={handleCriar}>
+                ➕ Nova Emenda
+              </button>
+              <button
+                style={styles.refreshButton}
+                onClick={recarregar}
+                disabled={loading || calculandoMetricas}
+              >
+                🔄{" "}
+                {loading || calculandoMetricas ? "Atualizando..." : "Atualizar"}
+              </button>
+            </div>
+
+            {/* Tabela de Emendas */}
+            {loading ? (
+              <div style={styles.loadingContainer}>
+                <p style={styles.loadingText}>Carregando emendas...</p>
+              </div>
+            ) : error ? (
+              <div style={styles.errorContainer}>
+                <p style={styles.errorText}>❌ {error}</p>
+                <button onClick={recarregar} style={styles.retryButton}>
+                  🔄 Tentar novamente
+                </button>
+              </div>
+            ) : totalEmendas === 0 ? (
+              <div style={styles.emptyContainer}>
+                <p style={styles.emptyText}>
+                  {userRole === "admin"
+                    ? "Nenhuma emenda cadastrada no sistema."
+                    : `Nenhuma emenda encontrada para ${userMunicipio}/${userUf}.`}
+                </p>
+              </div>
+            ) : (
+              <EmendasTable
+                emendas={emendasComMetricas}
+                onView={handleVisualizar}
+                onEdit={handleEditar}
+                onDelete={handleDeletar}
+                onDespesas={handleDespesas}
+                calculandoMetricas={calculandoMetricas}
+              />
+            )}
+
+            {/* ✅ NOVO: Modal UX para Primeira Despesa */}
+            <PrimeiraDespesaModal
+              isOpen={showPrimeiraDespesaModal}
+              emendaInfo={emendaParaPrimeiraDespesa}
+              onConfirm={handleModalConfirm}
+              onCancel={handleModalCancel}
+            />
           </div>
         );
     }
   };
 
-  const styles = {
-    compactHeader: {
-      backgroundColor: "#f0f0f0",
-      padding: "10px",
-      marginBottom: "20px",
-      borderRadius: "5px",
-    },
-    statusInfo: {
-      display: "flex",
-      alignItems: "center",
-      flexWrap: "wrap",
-    },
-    statusText: {
-      fontWeight: "bold",
-      marginRight: "5px",
-    },
-    statusValue: {
-      color: "green",
-      marginRight: "10px",
-    },
-    versionText: {
-      fontWeight: "bold",
-      marginRight: "5px",
-    },
-    versionValue: {
-      color: "#555",
-      marginRight: "10px",
-    },
-    divider: {
-      margin: "0 5px",
-    },
-    filterInfo: {
-      fontStyle: "italic",
-      color: "#777",
-    },
-    calculating: {
-      fontStyle: "italic",
-      color: "orange",
-    },
-    statsContainer: {
-      display: "flex",
-      justifyContent: "space-around",
-      marginBottom: "20px",
-      flexWrap: "wrap",
-    },
-    statCard: {
-      backgroundColor: "#fff",
-      padding: "15px",
-      borderRadius: "5px",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      textAlign: "center",
-      width: "200px",
-      marginBottom: "15px",
-    },
-    statNumber: {
-      fontSize: "24px",
-      fontWeight: "bold",
-      color: "#333",
-    },
-    statLabel: {
-      fontSize: "14px",
-      color: "#666",
-    },
-    button: {
-      backgroundColor: "#4CAF50",
-      color: "white",
-      padding: "10px 20px",
-      margin: "0 10px",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-    },
-    actionButtons: {
-      marginTop: "20px",
-      textAlign: "center",
-    },
-    warningContainer: {
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100vh",
-      backgroundColor: "#f9f9f9",
-    },
-    warningCard: {
-      backgroundColor: "#fff",
-      padding: "20px",
-      borderRadius: "8px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-      textAlign: "center",
-      maxWidth: "500px",
-    },
-    warningTitle: {
-      color: "#ff9800",
-      marginBottom: "15px",
-    },
-    warningText: {
-      color: "#555",
-      marginBottom: "10px",
-      fontSize: "16px",
-    },
-    userInfo: {
-      marginTop: "20px",
-      fontSize: "14px",
-      color: "#777",
-    },
-  };
+  return <div style={styles.container}>{renderContent()}</div>;
+};
 
-  return (
-    <>
-      {/* Modal UX - Primeira Despesa (IMPLEMENTADO) */}
-      <PrimeiraDespesaModal
-        show={showPrimeiraDespesaModal}
-        onClose={() => setShowPrimeiraDespesaModal(false)}
-        emenda={emendaParaPrimeiraDespesa}
-        onCriarDespesa={() => {
-          console.log(
-            "✅ Modal UX - Criar primeira despesa para",
-            emendaParaPrimeiraDespesa.numero,
-          );
-          setShowPrimeiraDespesaModal(false);
-          setEmendaSelecionada(emendaParaPrimeiraDespesa);
-          setCurrentView("criar-despesa");
-        }}
-      />
-      {renderContent()}
-    </>
-  );
+// ✅ Estilos atualizados
+const styles = {
+  container: {
+    padding: "20px",
+    backgroundColor: "#f8f9fa",
+    minHeight: "100vh",
+    fontFamily: "Arial, sans-serif",
+  },
+  compactHeader: {
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #154360, #4A90E2)",
+    color: "white",
+    padding: "8px 20px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    width: "100%",
+  },
+  statusInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    fontFamily: "Arial, sans-serif",
+  },
+  statusText: {
+    fontWeight: "normal",
+  },
+  statusValue: {
+    fontWeight: "500",
+  },
+  versionText: {
+    fontWeight: "normal",
+  },
+  versionValue: {
+    fontWeight: "500",
+  },
+  divider: {
+    opacity: 0.7,
+    margin: "0 4px",
+  },
+  calculating: {
+    fontWeight: "600",
+    background: "rgba(255,193,7,0.3)",
+    padding: "2px 8px",
+    borderRadius: "10px",
+    fontSize: "12px",
+  },
+  filterInfo: {
+    fontWeight: "600",
+    background: "rgba(255,255,255,0.2)",
+    padding: "2px 10px",
+    borderRadius: "12px",
+  },
+  statsContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+    marginBottom: "20px",
+  },
+  statCard: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    textAlign: "center",
+  },
+  statNumber: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#154360",
+    margin: "0 0 10px 0",
+  },
+  statLabel: {
+    fontSize: "11px",
+    fontWeight: "bold",
+    color: "#666",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    margin: 0,
+  },
+  actionContainer: {
+    marginBottom: "20px",
+    display: "flex",
+    gap: "10px",
+  },
+  primaryButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  refreshButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  loadingContainer: {
+    textAlign: "center",
+    padding: "40px",
+  },
+  loadingText: {
+    fontSize: "18px",
+    color: "#666",
+  },
+  errorContainer: {
+    textAlign: "center",
+    padding: "40px",
+    backgroundColor: "#f8d7da",
+    borderRadius: "8px",
+    border: "1px solid #f5c6cb",
+  },
+  errorText: {
+    fontSize: "16px",
+    color: "#721c24",
+    marginBottom: "15px",
+  },
+  retryButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "5px",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+  emptyContainer: {
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  emptyText: {
+    fontSize: "16px",
+    color: "#666",
+  },
+  warningContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    padding: "20px",
+  },
+  warningCard: {
+    background: "white",
+    borderRadius: "12px",
+    padding: "40px",
+    textAlign: "center",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    maxWidth: "500px",
+    border: "2px solid #ffc107",
+  },
+  warningTitle: {
+    color: "#856404",
+    marginBottom: "15px",
+    fontSize: "24px",
+  },
+  warningText: {
+    color: "#856404",
+    marginBottom: "15px",
+    lineHeight: "1.6",
+  },
+  userInfo: {
+    background: "#fff3cd",
+    padding: "15px",
+    borderRadius: "8px",
+    color: "#856404",
+    fontSize: "14px",
+    textAlign: "left",
+    marginTop: "20px",
+  },
 };
 
 export default Emendas;
