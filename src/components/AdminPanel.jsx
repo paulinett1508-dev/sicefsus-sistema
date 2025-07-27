@@ -1,3 +1,4 @@
+
 // src/components/AdminPanel.jsx - Versão Completa e Funcional
 import React, { useState, useEffect } from "react";
 import { useToast } from "./Toast";
@@ -33,13 +34,13 @@ const AdminPanel = () => {
     uf: "",
   });
 
-    // ✅ FILTROS DE LOGS
-    const [logFilters, setLogFilters] = useState({
-      usuario: "",
-      acao: "",
-      dataInicio: "",
-      dataFim: "",
-    });
+  // ✅ FILTROS DE LOGS
+  const [logFilters, setLogFilters] = useState({
+    usuario: "",
+    acao: "",
+    dataInicio: "",
+    dataFim: "",
+  });
 
   // ✅ SERVIÇOS
   const { showToast } = useToast();
@@ -72,15 +73,15 @@ const AdminPanel = () => {
     }
   };
 
-    // ✅ CARREGAR LOGS
-    const loadLogs = async () => {
-      try {
-        const logsData = await userService.loadLogs();
-        setLogs(logsData);
-      } catch (error) {
-        showToast(error.message, "error");
-      }
-    };
+  // ✅ CARREGAR LOGS
+  const loadLogs = async () => {
+    try {
+      const logsData = await userService.loadLogs();
+      setLogs(logsData);
+    } catch (error) {
+      showToast(error.message, "error");
+    }
+  };
 
   // ✅ CRIAR NOVO USUÁRIO
   const handleCreateUser = async (e) => {
@@ -195,41 +196,41 @@ const AdminPanel = () => {
     setShowDeleteModal(true);
   };
 
-    // ✅ FILTRAR LOGS
-    const getFilteredLogs = () => {
-      return logs.filter((log) => {
-        let matches = true;
+  // ✅ FILTRAR LOGS
+  const getFilteredLogs = () => {
+    return logs.filter((log) => {
+      let matches = true;
 
-        if (logFilters.usuario) {
-          matches =
-            matches &&
-            (log.userEmail || "")
-              .toLowerCase()
-              .includes(logFilters.usuario.toLowerCase());
-        }
+      if (logFilters.usuario) {
+        matches =
+          matches &&
+          (log.userEmail || "")
+            .toLowerCase()
+            .includes(logFilters.usuario.toLowerCase());
+      }
 
-        if (logFilters.acao) {
-          matches =
-            matches &&
-            (log.action || "")
-              .toLowerCase()
-              .includes(logFilters.acao.toLowerCase());
-        }
+      if (logFilters.acao) {
+        matches =
+          matches &&
+          (log.action || "")
+            .toLowerCase()
+            .includes(logFilters.acao.toLowerCase());
+      }
 
-        if (logFilters.dataInicio) {
-          const inicio = new Date(logFilters.dataInicio);
-          matches = matches && log.timestamp?.toDate() >= inicio;
-        }
+      if (logFilters.dataInicio) {
+        const inicio = new Date(logFilters.dataInicio);
+        matches = matches && log.timestamp?.toDate() >= inicio;
+      }
 
-        if (logFilters.dataFim) {
-          const fim = new Date(logFilters.dataFim);
-          fim.setHours(23, 59, 59, 999);
-          matches = matches && log.timestamp?.toDate() <= fim;
-        }
+      if (logFilters.dataFim) {
+        const fim = new Date(logFilters.dataFim);
+        fim.setHours(23, 59, 59, 999);
+        matches = matches && log.timestamp?.toDate() <= fim;
+      }
 
-        return matches;
-      });
-    };
+      return matches;
+    });
+  };
 
   if (loading) {
     return (
@@ -263,120 +264,128 @@ const AdminPanel = () => {
         </button>
       </div>
 
-        {/* ✅ ESTATÍSTICAS */}
-        <AdminStats users={users} />
+      {/* ✅ ESTATÍSTICAS */}
+      <AdminStats users={users} />
 
-        {/* ✅ NAVEGAÇÃO POR TABS */}
-        <div className="admin-tabs">
-          <button
-            className={`tab ${activeTab === "users" ? "active" : ""}`}
-            onClick={() => setActiveTab("users")}
-          >
-            👥 Usuários ({users.length})
-          </button>
-          <button
-            className={`tab ${activeTab === "logs" ? "active" : ""}`}
-            onClick={() => setActiveTab("logs")}
-          >
-            📋 Logs de Auditoria ({logs.length})
-          </button>
+      {/* ✅ NAVEGAÇÃO POR TABS */}
+      <div style={styles.tabsContainer}>
+        <button
+          style={{
+            ...styles.tab,
+            ...(activeTab === "users" ? styles.tabActive : {}),
+          }}
+          onClick={() => setActiveTab("users")}
+        >
+          👥 Usuários ({users.length})
+        </button>
+        <button
+          style={{
+            ...styles.tab,
+            ...(activeTab === "logs" ? styles.tabActive : {}),
+          }}
+          onClick={() => setActiveTab("logs")}
+        >
+          📋 Logs de Auditoria ({logs.length})
+        </button>
+      </div>
+
+      {/* ✅ ABA DE USUÁRIOS */}
+      {activeTab === "users" && (
+        <div style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>Gestão de Usuários</h2>
+          </div>
+
+          <UsersTable
+            users={users}
+            onEdit={handleEditarUsuario}
+            onResetPassword={handleResetPassword}
+            onDelete={handleConfirmarExclusao}
+            saving={saving}
+          />
         </div>
+      )}
 
-        {/* ✅ ABA DE USUÁRIOS */}
-        {activeTab === "users" && (
-          <div className="users-section">
-            <div className="section-header">
-              <h2>Gestão de Usuários</h2>
-            </div>
-
-            <UsersTable
-              users={users}
-              onEdit={handleEditarUsuario}
-              onResetPassword={handleResetPassword}
-              onDelete={handleConfirmarExclusao}
-              saving={saving}
-            />
+      {/* ✅ ABA DE LOGS */}
+      {activeTab === "logs" && (
+        <div style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>📋 Logs de Auditoria</h2>
           </div>
-        )}
 
-        {/* ✅ ABA DE LOGS */}
-        {activeTab === "logs" && (
-          <div className="logs-section">
-            <div className="section-header">
-              <h2>📋 Logs de Auditoria</h2>
-            </div>
-
-            {/* ✅ FILTROS DE LOGS */}
-            <div className="logs-filters">
-              <div className="filter-grid">
-                <input
-                  type="text"
-                  placeholder="Filtrar por usuário..."
-                  value={logFilters.usuario}
-                  onChange={(e) =>
-                    setLogFilters({ ...logFilters, usuario: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Filtrar por ação..."
-                  value={logFilters.acao}
-                  onChange={(e) =>
-                    setLogFilters({ ...logFilters, acao: e.target.value })
-                  }
-                />
-                <input
-                  type="date"
-                  placeholder="Data início"
-                  value={logFilters.dataInicio}
-                  onChange={(e) =>
-                    setLogFilters({ ...logFilters, dataInicio: e.target.value })
-                  }
-                />
-                <input
-                  type="date"
-                  placeholder="Data fim"
-                  value={logFilters.dataFim}
-                  onChange={(e) =>
-                    setLogFilters({ ...logFilters, dataFim: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            {/* ✅ TABELA DE LOGS */}
-            <div className="logs-table">
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>Usuário</th>
-                      <th>Ação</th>
-                      <th>Descrição</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {getFilteredLogs().map((log) => (
-                      <tr key={log.id}>
-                        <td>{log.timestamp?.toDate().toLocaleString("pt-BR")}</td>
-                        <td>{log.userEmail}</td>
-                        <td>
-                          <span
-                            className={`action-badge ${log.action.toLowerCase()}`}
-                          >
-                            {log.action.replace("_", " ")}
-                          </span>
-                        </td>
-                        <td>{log.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+          {/* ✅ FILTROS DE LOGS */}
+          <div style={styles.filtersContainer}>
+            <div style={styles.filterGrid}>
+              <input
+                style={styles.filterInput}
+                type="text"
+                placeholder="Filtrar por usuário..."
+                value={logFilters.usuario}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, usuario: e.target.value })
+                }
+              />
+              <input
+                style={styles.filterInput}
+                type="text"
+                placeholder="Filtrar por ação..."
+                value={logFilters.acao}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, acao: e.target.value })
+                }
+              />
+              <input
+                style={styles.filterInput}
+                type="date"
+                placeholder="Data início"
+                value={logFilters.dataInicio}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, dataInicio: e.target.value })
+                }
+              />
+              <input
+                style={styles.filterInput}
+                type="date"
+                placeholder="Data fim"
+                value={logFilters.dataFim}
+                onChange={(e) =>
+                  setLogFilters({ ...logFilters, dataFim: e.target.value })
+                }
+              />
             </div>
           </div>
-        )}
+
+          {/* ✅ TABELA DE LOGS */}
+          <div style={styles.tableContainer}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.tableHeader}>Timestamp</th>
+                  <th style={styles.tableHeader}>Usuário</th>
+                  <th style={styles.tableHeader}>Ação</th>
+                  <th style={styles.tableHeader}>Descrição</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getFilteredLogs().map((log) => (
+                  <tr key={log.id} style={styles.tableRow}>
+                    <td style={styles.tableCell}>
+                      {log.timestamp?.toDate().toLocaleString("pt-BR")}
+                    </td>
+                    <td style={styles.tableCell}>{log.userEmail}</td>
+                    <td style={styles.tableCell}>
+                      <span style={styles.actionBadge}>
+                        {log.action.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td style={styles.tableCell}>{log.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* ✅ MODAL DE FORMULÁRIO */}
       {showUserForm && (
@@ -483,6 +492,67 @@ const styles = {
     fontSize: "1.1em",
   },
 
+  tabsContainer: {
+    display: "flex",
+    marginBottom: "20px",
+    borderBottom: "2px solid var(--theme-border)",
+  },
+
+  tab: {
+    background: "none",
+    border: "none",
+    padding: "12px 20px",
+    fontSize: "1em",
+    cursor: "pointer",
+    color: "var(--theme-text-secondary)",
+    borderBottom: "3px solid transparent",
+    transition: "all 0.2s ease",
+  },
+
+  tabActive: {
+    color: "var(--primary)",
+    borderBottomColor: "var(--primary)",
+    fontWeight: "600",
+  },
+
+  section: {
+    marginBottom: "30px",
+  },
+
+  sectionHeader: {
+    marginBottom: "20px",
+  },
+
+  sectionTitle: {
+    fontSize: "1.5em",
+    fontWeight: "600",
+    color: "var(--theme-text)",
+    margin: 0,
+  },
+
+  filtersContainer: {
+    background: "var(--theme-surface)",
+    padding: "20px",
+    borderRadius: "10px",
+    marginBottom: "20px",
+    border: "2px solid var(--theme-border)",
+  },
+
+  filterGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+  },
+
+  filterInput: {
+    padding: "10px 12px",
+    border: "2px solid var(--theme-border)",
+    borderRadius: "8px",
+    fontSize: "1em",
+    background: "var(--theme-surface-secondary)",
+    color: "var(--theme-text)",
+  },
+
   tableContainer: {
     background: "var(--theme-surface)",
     borderRadius: "12px",
@@ -491,24 +561,35 @@ const styles = {
     border: "2px solid var(--theme-border)",
   },
 
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+
   tableHeader: {
-    padding: "20px 24px",
-    background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
-    borderBottom: "2px solid var(--theme-border)",
-  },
-
-  tableTitle: {
+    background: "var(--primary)",
     color: "var(--white)",
-    fontSize: "1.3em",
+    padding: "15px",
+    textAlign: "left",
     fontWeight: "600",
-    margin: 0,
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
   },
 
-  tableIcon: {
-    fontSize: "0.9em",
+  tableRow: {
+    borderBottom: "1px solid var(--theme-border)",
+  },
+
+  tableCell: {
+    padding: "12px 15px",
+    color: "var(--theme-text)",
+  },
+
+  actionBadge: {
+    background: "var(--primary-light)",
+    color: "var(--primary-dark)",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    fontSize: "0.85em",
+    fontWeight: "500",
   },
 };
 
