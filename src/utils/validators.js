@@ -1,5 +1,6 @@
 // src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
 // ✅ Funções utilitárias para normalização e validação
+import { useState } from 'react';
 
 // Lista oficial de UFs brasileiras
 const UFS_VALIDAS = [
@@ -393,4 +394,91 @@ export const createErrorReport = (context, error, additionalData = {}) => {
     lineNumber: error.lineNumber,
     columnNumber: error.columnNumber
   };
+};
+
+// src/utils/validators.js - VALIDADORES COMPLETOS PARA SICEFSUS
+
+// ✅ CNPJ Validators
+export const formatarCNPJ = (valor) => {
+  if (!valor) return "";
+
+  // Remove tudo que não é número
+  const numeros = valor.replace(/\D/g, "");
+
+  // Aplica máscara XX.XXX.XXX/XXXX-XX
+  return numeros.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    "$1.$2.$3/$4-$5"
+  );
+};
+
+export const validarCNPJ = (cnpj) => {
+  if (!cnpj) return { valido: false, erro: "CNPJ é obrigatório" };
+
+  // Remove caracteres especiais
+  const numero = cnpj.replace(/[^\d]/g, "");
+
+  // Verifica se tem 14 dígitos
+  if (numero.length !== 14) {
+    return { valido: false, erro: "CNPJ deve ter 14 dígitos" };
+  }
+
+  // Verifica se todos os dígitos são iguais
+  if (/^(\d)\1+$/.test(numero)) {
+    return { valido: false, erro: "CNPJ inválido" };
+  }
+
+  // Calcula primeiro dígito verificador
+  let soma = 0;
+  let peso = 5;
+
+  for (let i = 0; i < 12; i++) {
+    soma += parseInt(numero[i]) * peso;
+    peso = peso === 2 ? 9 : peso - 1;
+  }
+
+  let digito1 = soma % 11;
+  digito1 = digito1 < 2 ? 0 : 11 - digito1;
+
+  // Calcula segundo dígito verificador
+  soma = 0;
+  peso = 6;
+
+  for (let i = 0; i < 13; i++) {
+    soma += parseInt(numero[i]) * peso;
+    peso = peso === 2 ? 9 : peso - 1;
+  }
+
+  let digito2 = soma % 11;
+  digito2 = digito2 < 2 ? 0 : 11 - digito2;
+
+  // Verifica se os dígitos calculados conferem
+  if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
+    return { valido: false, erro: "CNPJ inválido - dígitos verificadores incorretos" };
+  }
+
+  return { valido: true, erro: null };
+};
+
+// ✅ HOOK PARA USO NO DESPESAFORM
+export const useCNPJValidation = () => {
+  const [cnpjError, setCnpjError] = useState('');
+
+  const handleCNPJChange = (valor, setFormData) => {
+    // Formata o CNPJ
+    const cnpjFormatado = formatarCNPJ(valor);
+
+    // Atualiza o form
+    setFormData(prev => ({ ...prev, cnpjFornecedor: cnpjFormatado }));
+
+    // Valida apenas se tem 14 dígitos
+    if (cnpjFormatado.replace(/\D/g, '').length === 14) {
+      const validacao = validarCNPJ(cnpjFormatado);
+      setCnpjError(validacao.valido ? '' : validacao.erro);
+    } else {
+      setCnpjError('');
+    }
+  };
+
+  return { cnpjError, handleCNPJChange };
 };
