@@ -1,10 +1,10 @@
 
 // src/components/AdminStats.jsx - Estatísticas Padronizadas SICEFSUS
-import React from "react";
+import React, { useMemo } from "react";
 
 const AdminStats = ({ users }) => {
-  // ✅ CALCULAR ESTATÍSTICAS ESSENCIAIS COM LOCALIZAÇÃO
-  const calculateStats = () => {
+  // ✅ CALCULAR ESTATÍSTICAS ESSENCIAIS COM LOCALIZAÇÃO - MEMOIZED
+  const stats = useMemo(() => {
     const total = users.length;
     const active = users.filter((u) => u.status === "ativo").length;
     const admins = users.filter((u) => u.role === "admin").length;
@@ -36,9 +36,7 @@ const AdminStats = ({ users }) => {
       operatorsWithoutLocation,
       locationStats
     };
-  };
-
-  const stats = calculateStats();
+  }, [users]); // Recalcular apenas quando users mudar
 
   // ✅ CARDS COMPACTOS E FOCADOS
   const CompactCard = ({ icon, value, label, color = "primary", alert = false }) => (
@@ -238,4 +236,4 @@ const styles = {
   },
 };
 
-export default AdminStats;
+export default React.memo(AdminStats);

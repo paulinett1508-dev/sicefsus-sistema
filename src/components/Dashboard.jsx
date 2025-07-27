@@ -31,6 +31,11 @@ export default function Dashboard({ usuario }) {
   console.log("🏠 Dashboard iniciado");
   console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
 
+  useEffect(() => {
+    console.log("🏠 Dashboard iniciado");
+    console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
+  }, [usuario?.uid]); // Só re-executar quando o usuário mudar
+
   // ✅ CORREÇÃO: Hook corrigido com usuário completo
   const {
     emendas = [], // ✅ Default para array vazio
@@ -72,24 +77,24 @@ export default function Dashboard({ usuario }) {
     const valorTotalEmendas = emendas.reduce((sum, e) => {
       // Tentar múltiplos campos de valor
       let valor = e.valorRecurso || e.valorTotal || e.valor || 0;
-      
+
       // Se for string, remover formatação monetária
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
       }
-      
+
       valor = parseFloat(valor);
       return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
 
     const valorTotalDespesas = despesas.reduce((sum, d) => {
       let valor = d.valor || 0;
-      
+
       // Se for string, remover formatação monetária
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
       }
-      
+
       valor = parseFloat(valor);
       return sum + (isNaN(valor) || valor < 0 ? 0 : valor);
     }, 0);
@@ -107,7 +112,7 @@ export default function Dashboard({ usuario }) {
     const emendasPorStatus = emendas.reduce((acc, emenda) => {
       const status = emenda.status || "ativa";
       const existing = acc.find((item) => item.name === status);
-      
+
       // Processar valor de forma segura
       let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
       if (typeof valor === 'string') {
@@ -133,7 +138,7 @@ export default function Dashboard({ usuario }) {
     const despesasPorStatus = despesas.reduce((acc, despesa) => {
       const status = despesa.status || "pendente";
       const existing = acc.find((item) => item.name === status);
-      
+
       // Processar valor de forma segura
       let valor = despesa.valor || 0;
       if (typeof valor === 'string') {
@@ -216,7 +221,7 @@ export default function Dashboard({ usuario }) {
     const municipiosMap = {};
     emendas.forEach((emenda) => {
       const municipio = emenda.municipio || "Não informado";
-      
+
       let valor = emenda.valorRecurso || emenda.valorTotal || emenda.valor || 0;
       if (typeof valor === 'string') {
         valor = valor.replace(/[R$\s.,]/g, '').replace(',', '.');
@@ -287,7 +292,7 @@ export default function Dashboard({ usuario }) {
       } else {
         stats = calcularEstatisticasLocais();
       }
-      
+
       setEstatisticas(stats);
       console.log("✅ Estatísticas calculadas:", stats);
     } else {
@@ -300,7 +305,7 @@ export default function Dashboard({ usuario }) {
     }
   }, [emendas, despesas, loading, obterEstatisticasGerais, metricas, calcularEstatisticasLocais]);
 
-  
+
 
   // ✅ FORMATAÇÃO DE VALORES
   const formatCurrency = (value) => {
@@ -309,7 +314,7 @@ export default function Dashboard({ usuario }) {
     if (isNaN(numericValue)) {
       return "R$ 0,00";
     }
-    
+
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -579,7 +584,7 @@ export default function Dashboard({ usuario }) {
         </div>
       </div>
 
-      
+
     </div>
   );
 }

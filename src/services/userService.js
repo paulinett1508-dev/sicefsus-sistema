@@ -19,9 +19,15 @@ import {
 } from "firebase/auth";
 import { db } from "../firebase/firebaseConfig";
 
+let userServiceInstance = null;
+
 export class UserService {
   constructor() {
+    if (userServiceInstance) {
+      return userServiceInstance;
+    }
     this.auth = getAuth();
+    userServiceInstance = this;
   }
 
   // ✅ GERAR SENHA TEMPORÁRIA SEGURA

@@ -1381,7 +1381,7 @@ const styles = {
     gridTemplateColumns: "1fr 2fr 200px",
     gap: "20px",
     alignItems: "start",
-    "@media (max-width: 768px)": {
+    "@media screen and (max-width: 768px)": {
       gridTemplateColumns: "1fr",
     },
   },
