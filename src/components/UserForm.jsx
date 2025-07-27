@@ -40,24 +40,17 @@ const UserForm = ({
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        {/* ✅ HEADER MELHORADO */}
+        {/* ✅ HEADER MINIMALISTA */}
         <div style={styles.header}>
-          <div>
-            <h2 style={styles.headerTitle}>
-              {editingUser ? "✏️ Editar Usuário" : "➕ Novo Usuário"}
-            </h2>
-            <p style={styles.headerSubtitle}>
-              {editingUser 
-                ? "Modifique os dados do usuário conforme necessário"
-                : "Preencha os dados para criar um novo usuário no sistema"
-              }
-            </p>
-          </div>
+          <h2 style={styles.headerTitle}>
+            {editingUser ? "Editar Usuário" : "Novo Usuário"}
+          </h2>
           <button
             style={styles.closeButton}
             onClick={onCancel}
             disabled={saving}
             type="button"
+            title="Fechar"
           >
             ✕
           </button>
@@ -325,33 +318,30 @@ const styles = {
   },
 
   header: {
-    ...formStyles.header,
-    background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
-    color: "var(--white)",
+    background: "var(--theme-surface)",
+    borderBottom: "2px solid var(--theme-border)",
+    padding: "20px 24px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: "10px 10px 0 0",
+    borderRadius: "12px 12px 0 0",
   },
 
   headerTitle: {
-    ...formStyles.headerTitle,
-    color: "var(--white)",
-  },
-
-  headerSubtitle: {
-    ...formStyles.headerSubtitle,
-    color: "rgba(255, 255, 255, 0.9)",
+    margin: 0,
+    fontSize: "1.4em",
+    fontWeight: "600",
+    color: "var(--theme-text)",
   },
 
   closeButton: {
-    background: "rgba(255, 255, 255, 0.2)",
-    border: "none",
-    color: "var(--white)",
-    width: "35px",
-    height: "35px",
+    background: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
+    color: "var(--theme-text-secondary)",
+    width: "32px",
+    height: "32px",
     borderRadius: "50%",
-    fontSize: "1.2em",
+    fontSize: "1.1em",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
