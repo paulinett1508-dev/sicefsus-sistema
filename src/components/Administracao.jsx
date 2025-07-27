@@ -1,430 +1,304 @@
-// Administracao.jsx - Versão Final v3.1 - IMPORTS CORRIGIDOS
-import React, { useState, useEffect, useMemo } from "react";
-// As informações do usuário (role, email, município, uf) já são fornecidas via prop `usuario`.
-// Não precisamos mais importar métodos de autenticação ou Firestore para verificar permissões aqui.
-import AdminPanel from "./AdminPanel";
-// Importa a lista de emails de administradores a partir do arquivo de
-// constantes centralizado. Desta forma, novos administradores podem ser
-// adicionados configurando a variável de ambiente VITE_ADMIN_EMAILS.
-import { ADMIN_EMAILS } from "../config/constants";
+// src/components/Administracao.jsx - Página Principal de Administração SICEFSUS
+import React, { useState, useEffect, useCallback } from "react";
+import { UserService } from "../services/userService";
+import UserForm from "./UserForm";
+import UsersTable from "./UsersTable";
+import AdminStats from "./AdminStats";
+import { useToast } from "./Toast";
+import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
 const Administracao = ({ usuario }) => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [userInfo, setUserInfo] = useState(null);
-  const [error, setError] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [modoVisualizacao, setModoVisualizacao] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // ✅ A lista de emails de administradores agora é lida de ADMIN_EMAILS.
-  // Consulte src/config/constants.js para entender como configurá-la via .env.
+  const { success, error } = useToast();
+  const userService = new UserService();
 
-  // Sempre que o usuário prop mudar, verifica as permissões com base nas
-  // informações fornecidas pelo contexto. Não há mais fallback para buscar
-  // dados no Firestore aqui, pois o usuário já vem completo do UserContext.
+  // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
+    addFormInteractivity();
+  }, []);
+
+  // Carregar usuários
+  const carregarUsuarios = useCallback(async () => {
     setLoading(true);
-    setError(null);
-
-    if (!import.meta.env.VITE_FIREBASE_API_KEY) {
-      setIsAdmin(false);
-      setUserInfo(null);
-      setError("Firebase não configurado. Configure as variáveis de ambiente no Secrets do Replit.");
+    try {
+      const usuariosData = await userService.loadUsers();
+      setUsers(usuariosData);
+    } catch (err) {
+      console.error("Erro ao carregar usuários:", err);
+      error("Erro ao carregar usuários");
+    } finally {
       setLoading(false);
+    }
+  }, [error, userService]);
+
+  useEffect(() => {
+    carregarUsuarios();
+  }, [carregarUsuarios]);
+
+  // Handlers de ação
+  const handleNovoUsuario = () => {
+    setEditingUser(null);
+    setModoVisualizacao(false);
+    setShowForm(true);
+  };
+
+  const handleEditarUsuario = (user) => {
+    setEditingUser(user);
+    setModoVisualizacao(false);
+    setShowForm(true);
+  };
+
+  const handleVisualizarUsuario = (user) => {
+    setEditingUser(user);
+    setModoVisualizacao(true);
+    setShowForm(true);
+  };
+
+  const handleCancelar = () => {
+    setShowForm(false);
+    setEditingUser(null);
+    setModoVisualizacao(false);
+  };
+
+  const handleSalvar = async () => {
+    setSaving(false);
+    setShowForm(false);
+    setEditingUser(null);
+    setModoVisualizacao(false);
+    await carregarUsuarios();
+  };
+
+  const handleExcluirUsuario = async (userId) => {
+    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) {
       return;
     }
 
-    if (!usuario) {
-      setIsAdmin(false);
-      setUserInfo(null);
-      setError("Usuário não autenticado");
-      setLoading(false);
+    try {
+      await userService.deleteUser(userId);
+      success("Usuário excluído com sucesso!");
+      await carregarUsuarios();
+    } catch (err) {
+      console.error("Erro ao excluir usuário:", err);
+      error("Erro ao excluir usuário");
+    }
+  };
+
+  const handleResetSenha = async (user) => {
+    if (!window.confirm(`Enviar email de reset de senha para ${user.email}?`)) {
       return;
     }
 
-    setUserInfo(usuario);
-    const isUserAdmin =
-      usuario.role === "admin" ||
-      ADMIN_EMAILS.includes((usuario.email || "").toLowerCase());
-
-    setIsAdmin(isUserAdmin);
-    setLoading(false);
-  }, [usuario?.uid]); // Só re-executa se o UID mudar
-
-  if (loading) {
-    return (
-      <div className="admin-loading">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <h3>Verificando permissões...</h3>
-          <p>Aguarde enquanto validamos seu acesso ao painel administrativo</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="admin-error">
-        <div className="error-container">
-          <div className="error-icon">❌</div>
-          <h3>Erro de Acesso</h3>
-          <p>{error}</p>
-          <div className="debug-info">
-            <h4>Informações de Debug:</h4>
-            <pre>{JSON.stringify({ usuario, userInfo, error }, null, 2)}</pre>
-          </div>
-          <button
-            className="retry-button"
-            onClick={() => window.location.reload()}
-          >
-            🔄 Tentar Novamente
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="admin-denied">
-        <div className="denied-container">
-          <div className="denied-icon">🚫</div>
-          <h3>Acesso Negado</h3>
-          <p>Você não tem permissão para acessar o painel administrativo.</p>
-          <p>
-            Apenas usuários com perfil de administrador podem acessar esta área.
-          </p>
-          <div className="user-info">
-            <strong>Usuário atual:</strong>{" "}
-            {userInfo?.email || "Não identificado"}
-            <br />
-            <strong>Perfil:</strong> {userInfo?.role || "Não definido"}
-          </div>
-        </div>
-      </div>
-    );
-  }
+    try {
+      const result = await userService.sendPasswordReset(user);
+      if (result.success) {
+        success(result.message);
+        await carregarUsuarios();
+      }
+    } catch (err) {
+      console.error("Erro ao enviar reset:", err);
+      error("Erro ao enviar email de reset");
+    }
+  };
 
   return (
-    <div className="administracao-container">
-      {/* ✅ CORREÇÃO: Header melhorado sem informações desnecessárias para admins */}
-      <div className="admin-header">
-        <div className="header-content">
-          <div className="header-left">
-            <div className="header-icon">👑</div>
-            <div className="header-info">
-              <h1>Gestão de Usuários</h1>
-              <div className="header-details">
-                <span className="user-email">{userInfo?.email}</span>
-                {/* ✅ CORREÇÃO: Só mostrar localização se não for admin */}
-                {userInfo?.role !== "admin" &&
-                  userInfo?.municipio &&
-                  userInfo?.uf && (
-                    <span className="user-location">
-                      📍 {userInfo.municipio} - {userInfo.uf}
-                    </span>
-                  )}
-              </div>
-            </div>
-          </div>
-          <div className="header-right">
-            <div className="admin-badge">
-              <span className="badge-icon">👑</span>
-              <span className="badge-text">Administrador</span>
-            </div>
-          </div>
+    <div style={styles.container}>
+      {/* ✅ HEADER PADRONIZADO */}
+      <div style={styles.header}>
+        <div style={styles.headerContent}>
+          <h1 style={styles.headerTitle}>
+            <span style={styles.headerIcon}>👥</span>
+            Administração de Usuários
+          </h1>
+          <p style={styles.headerSubtitle}>
+            Gerencie usuários, permissões e acessos do sistema SICEFSUS
+          </p>
         </div>
+        <button
+          style={styles.addButton}
+          onClick={handleNovoUsuario}
+          disabled={loading}
+        >
+          <span style={styles.buttonIcon}>➕</span>
+          Novo Usuário
+        </button>
       </div>
 
-      {/* ✅ Painel administrativo */}
-      <div className="admin-content">
-        <AdminPanel usuario={userInfo} />
+      {/* ✅ ESTATÍSTICAS COMPACTAS */}
+      <AdminStats users={users} />
+
+      {/* ✅ TABELA PRINCIPAL */}
+      <div style={styles.tableContainer}>
+        <div style={styles.tableHeader}>
+          <h2 style={styles.tableTitle}>
+            <span style={styles.tableIcon}>📋</span>
+            Lista de Usuários ({users.length})
+          </h2>
+        </div>
+
+        <UsersTable
+          users={users}
+          loading={loading}
+          onEditar={handleEditarUsuario}
+          onVisualizar={handleVisualizarUsuario}
+          onExcluir={handleExcluirUsuario}
+          onResetSenha={handleResetSenha}
+        />
       </div>
 
-      <style>{`
-        .administracao-container {
-          min-height: 100vh;
-          background: #f8f9fa;
-        }
-
-        .admin-header {
-          background: linear-gradient(135deg, #154360 0%, #1e5f7a 100%);
-          color: white;
-          padding: 25px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .header-left {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .header-icon {
-          width: 60px;
-          height: 60px;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 28px;
-        }
-
-        .header-info h1 {
-          margin: 0 0 8px 0;
-          font-size: 28px;
-          font-weight: 600;
-        }
-
-        .header-details {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          font-size: 14px;
-          opacity: 0.9;
-        }
-
-        .user-email {
-          font-weight: 500;
-        }
-
-        .user-location {
-          font-size: 13px;
-          opacity: 0.8;
-        }
-
-        .header-right {
-          display: flex;
-          align-items: center;
-        }
-
-        .admin-badge {
-          background: rgba(255, 255, 255, 0.2);
-          padding: 10px 16px;
-          border-radius: 25px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 14px;
-          font-weight: 500;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .badge-icon {
-          font-size: 16px;
-        }
-
-        .admin-content {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 30px 25px;
-        }
-
-        .admin-loading {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f8f9fa;
-        }
-
-        .loading-container {
-          text-align: center;
-          padding: 40px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          max-width: 400px;
-        }
-
-        .loading-spinner {
-          width: 50px;
-          height: 50px;
-          border: 4px solid #e1e5e9;
-          border-top: 4px solid #154360;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 20px;
-        }
-
-        .loading-container h3 {
-          margin: 0 0 10px 0;
-          color: #154360;
-          font-size: 20px;
-        }
-
-        .loading-container p {
-          margin: 0;
-          color: #666;
-          font-size: 14px;
-        }
-
-        .admin-error {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f8f9fa;
-        }
-
-        .error-container {
-          text-align: center;
-          padding: 40px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          max-width: 500px;
-        }
-
-        .error-icon {
-          font-size: 48px;
-          margin-bottom: 20px;
-        }
-
-        .error-container h3 {
-          margin: 0 0 15px 0;
-          color: #E74C3C;
-          font-size: 24px;
-        }
-
-        .error-container p {
-          margin: 0 0 20px 0;
-          color: #666;
-          font-size: 16px;
-        }
-
-        .debug-info {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          margin: 20px 0;
-          text-align: left;
-        }
-
-        .debug-info h4 {
-          margin: 0 0 10px 0;
-          color: #333;
-          font-size: 14px;
-        }
-
-        .debug-info pre {
-          font-size: 12px;
-          color: #666;
-          overflow-x: auto;
-          white-space: pre-wrap;
-          word-break: break-word;
-        }
-
-        .retry-button {
-          background: #154360;
-          color: white;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 8px;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-        }
-
-        .retry-button:hover {
-          background: #1e5f7a;
-          transform: translateY(-1px);
-        }
-
-        .admin-denied {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #f8f9fa;
-        }
-
-        .denied-container {
-          text-align: center;
-          padding: 40px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          max-width: 500px;
-        }
-
-        .denied-icon {
-          font-size: 48px;
-          margin-bottom: 20px;
-        }
-
-        .denied-container h3 {
-          margin: 0 0 15px 0;
-          color: #E74C3C;
-          font-size: 24px;
-        }
-
-        .denied-container p {
-          margin: 0 0 15px 0;
-          color: #666;
-          font-size: 16px;
-          line-height: 1.5;
-        }
-
-        .user-info {
-          background: #f8f9fa;
-          padding: 15px;
-          border-radius: 8px;
-          margin-top: 20px;
-          text-align: left;
-          font-size: 14px;
-          color: #333;
-          line-height: 1.6;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-          .admin-header {
-            padding: 20px 15px;
-          }
-
-          .header-content {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-          }
-
-          .header-left {
-            flex-direction: column;
-            gap: 15px;
-          }
-
-          .header-info h1 {
-            font-size: 24px;
-          }
-
-          .admin-content {
-            padding: 20px 15px;
-          }
-
-          .loading-container,
-          .error-container,
-          .denied-container {
-            margin: 20px;
-            padding: 30px 20px;
-          }
-        }
-      `}</style>
+      {/* ✅ MODAL DE FORMULÁRIO */}
+      {showForm && (
+        <UserForm
+          formData={{
+            email: "",
+            nome: "",
+            role: "user",
+            status: "ativo",
+            departamento: "",
+            telefone: "",
+            municipio: "",
+            uf: "",
+          }}
+          setFormData={() => {}}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setSaving(true);
+            // A lógica de salvar está no UserForm
+          }}
+          onCancel={handleCancelar}
+          editingUser={editingUser}
+          saving={saving}
+          modoVisualizacao={modoVisualizacao}
+        />
+      )}
     </div>
   );
+};
+
+// ✅ ESTILOS PADRONIZADOS SEGUINDO EMENDAS.JSX
+const styles = {
+  container: {
+    ...formStyles.container,
+    maxWidth: "1400px",
+  },
+
+  // ✅ HEADER SEGUINDO PADRÃO EMENDAS
+  header: {
+    ...formStyles.header,
+    background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+    color: "var(--white)",
+    border: "none",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "var(--space-6) var(--space-8)",
+    borderRadius: "var(--border-radius-lg)",
+    boxShadow: "var(--shadow-lg)",
+    marginBottom: "var(--space-6)",
+  },
+
+  headerContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "var(--space-2)",
+  },
+
+  headerTitle: {
+    ...formStyles.headerTitle,
+    color: "var(--white)",
+    fontSize: "var(--font-size-3xl)",
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-3)",
+    margin: 0,
+  },
+
+  headerIcon: {
+    fontSize: "1.2em",
+    opacity: 0.9,
+  },
+
+  headerSubtitle: {
+    ...formStyles.headerSubtitle,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: "var(--font-size-lg)",
+    margin: 0,
+  },
+
+  addButton: {
+    ...formStyles.submitButton,
+    background: "rgba(255, 255, 255, 0.2)",
+    backdropFilter: "blur(10px)",
+    border: "2px solid rgba(255, 255, 255, 0.3)",
+    color: "var(--white)",
+    padding: "var(--space-4) var(--space-6)",
+    fontSize: "var(--font-size-base)",
+    fontWeight: "var(--font-weight-semibold)",
+    borderRadius: "var(--border-radius-lg)",
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-2)",
+    transition: "all var(--transition-normal)",
+    boxShadow: "var(--shadow)",
+  },
+
+  buttonIcon: {
+    fontSize: "1.1em",
+  },
+
+  // ✅ CONTAINER DA TABELA
+  tableContainer: {
+    background: "var(--theme-surface)",
+    borderRadius: "var(--border-radius-lg)",
+    border: "2px solid var(--theme-border)",
+    boxShadow: "var(--shadow)",
+    overflow: "hidden",
+    transition: "all var(--transition-normal)",
+  },
+
+  tableHeader: {
+    background: "linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-secondary) 100%)",
+    padding: "var(--space-5) var(--space-6)",
+    borderBottom: "2px solid var(--theme-border)",
+  },
+
+  tableTitle: {
+    margin: 0,
+    fontSize: "var(--font-size-xl)",
+    fontWeight: "var(--font-weight-semibold)",
+    color: "var(--primary)",
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-3)",
+  },
+
+  tableIcon: {
+    fontSize: "1.1em",
+    opacity: 0.8,
+  },
+
+  // ✅ RESPONSIVIDADE
+  "@media (max-width: 768px)": {
+    header: {
+      flexDirection: "column",
+      gap: "var(--space-4)",
+      textAlign: "center",
+    },
+
+    headerTitle: {
+      fontSize: "var(--font-size-2xl)",
+    },
+
+    addButton: {
+      width: "100%",
+      justifyContent: "center",
+    },
+  },
 };
 
 export default Administracao;

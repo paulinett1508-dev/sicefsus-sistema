@@ -289,7 +289,7 @@ const UserForm = ({
   );
 };
 
-// ✅ ESTILOS BASEADOS NO PADRÃO DO SISTEMA
+// ✅ ESTILOS UNIVERSAIS APLICADOS (seguindo padrão EmendaForm/DespesaForm)
 const styles = {
   overlay: {
     position: "fixed",
@@ -303,6 +303,8 @@ const styles = {
     justifyContent: "center",
     zIndex: 1000,
     padding: "20px",
+    backdropFilter: "blur(12px) saturate(180%)",
+    animation: "fadeIn 0.3s ease",
   },
 
   modal: {
@@ -315,23 +317,24 @@ const styles = {
     overflowY: "auto",
     border: "2px solid var(--primary)",
     color: "var(--theme-text)",
+    animation: "slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+    transition: "all 0.3s ease",
   },
 
   header: {
-    background: "var(--theme-surface)",
+    ...formStyles.header,
+    borderRadius: "12px 12px 0 0",
     borderBottom: "2px solid var(--theme-border)",
-    padding: "20px 24px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: "12px 12px 0 0",
   },
 
   headerTitle: {
+    ...formStyles.headerTitle,
     margin: 0,
     fontSize: "1.4em",
     fontWeight: "600",
-    color: "var(--theme-text)",
   },
 
   closeButton: {
@@ -349,6 +352,7 @@ const styles = {
     transition: "all 0.2s ease",
   },
 
+  // ✅ APLICANDO ESTILOS UNIVERSAIS DO SISTEMA
   container: formStyles.container,
   fieldset: formStyles.fieldset,
   legend: formStyles.legend,

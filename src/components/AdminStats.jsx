@@ -1,5 +1,5 @@
 
-// src/components/AdminStats.jsx - Estatísticas com Design Melhorado
+// src/components/AdminStats.jsx - Estatísticas Padronizadas SICEFSUS
 import React from "react";
 
 const AdminStats = ({ users }) => {
@@ -76,75 +76,82 @@ const styles = {
   container: {
     display: "flex",
     flexDirection: "column",
-    gap: "15px",
+    gap: "var(--space-4)",
+    fontFamily: "var(--font-family)",
   },
 
-  // ✅ BARRA DE RESUMO COMPACTA
+  // ✅ BARRA DE RESUMO SEGUINDO PADRÃO DASHBOARD
   summaryBar: {
     display: "flex",
     alignItems: "center",
-    background: "var(--theme-surface)",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    border: "1px solid var(--theme-border)",
-    gap: "16px",
-    fontSize: "0.9em",
+    background: "linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-secondary) 100%)",
+    borderRadius: "var(--border-radius-lg)",
+    padding: "var(--space-4) var(--space-5)",
+    border: "2px solid var(--theme-border)",
+    gap: "var(--space-5)",
+    fontSize: "var(--font-size-sm)",
+    boxShadow: "var(--shadow)",
+    transition: "all var(--transition-normal)",
   },
 
   summaryItem: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
+    gap: "var(--space-2)",
   },
 
   summaryLabel: {
     color: "var(--theme-text-secondary)",
-    fontWeight: "500",
+    fontWeight: "var(--font-weight-medium)",
   },
 
   summaryValue: {
     color: "var(--theme-text)",
-    fontWeight: "600",
+    fontWeight: "var(--font-weight-semibold)",
     fontSize: "1.1em",
   },
 
   summaryDivider: {
     color: "var(--theme-text-muted)",
     fontSize: "0.8em",
+    opacity: 0.6,
   },
 
-  // ✅ BANNER DE ALERTA DISCRETO
+  // ✅ BANNER DE ALERTA PADRONIZADO
   alertBanner: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "var(--space-2)",
     background: "var(--warning-light)",
-    border: "1px solid var(--warning)",
-    borderRadius: "6px",
-    padding: "10px 14px",
-    fontSize: "0.9em",
+    border: "2px solid var(--warning)",
+    borderRadius: "var(--border-radius)",
+    padding: "var(--space-3) var(--space-4)",
+    fontSize: "var(--font-size-sm)",
+    boxShadow: "var(--shadow-sm)",
+    animation: "slideUp 0.3s ease",
   },
 
   alertIcon: {
-    fontSize: "1.1em",
+    fontSize: "1.2em",
   },
 
   alertText: {
     color: "var(--warning-dark)",
-    fontWeight: "500",
+    fontWeight: "var(--font-weight-medium)",
   },
 
-  // ✅ CARDS COMPACTOS PARA CASOS ESPECIAIS
+  // ✅ CARDS SEGUINDO PADRÃO DO SISTEMA
   compactCard: {
-    background: "var(--theme-surface)",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    border: "1px solid var(--theme-border)",
+    background: "linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-secondary) 100%)",
+    borderRadius: "var(--border-radius-lg)",
+    padding: "var(--space-4) var(--space-5)",
+    border: "2px solid var(--theme-border)",
     borderLeft: "4px solid",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    transition: "all 0.2s ease",
+    gap: "var(--space-4)",
+    transition: "all var(--transition-normal)",
+    boxShadow: "var(--shadow)",
   },
 
   cardIcon: {
@@ -155,20 +162,20 @@ const styles = {
   cardContent: {
     display: "flex",
     flexDirection: "column",
-    gap: "2px",
+    gap: "var(--space-1)",
   },
 
   cardValue: {
     fontSize: "1.4em",
-    fontWeight: "600",
+    fontWeight: "var(--font-weight-semibold)",
     color: "var(--theme-text)",
     lineHeight: 1,
   },
 
   cardLabel: {
-    fontSize: "0.8em",
+    fontSize: "var(--font-size-xs)",
     color: "var(--theme-text-secondary)",
-    fontWeight: "500",
+    fontWeight: "var(--font-weight-medium)",
   },
 };
 
