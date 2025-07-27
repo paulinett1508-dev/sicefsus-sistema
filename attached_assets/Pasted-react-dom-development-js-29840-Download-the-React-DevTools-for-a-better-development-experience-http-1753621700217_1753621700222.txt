@@ -1,0 +1,131 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: {apiKey: '✅ Configurada', authDomain: '✅ Configurada', projectId: '✅ Configurada', storageBucket: '✅ Configurada', messagingSenderId: '✅ Configurada', …}
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+UserContext.jsx:121 🔄 UserContext: Carregando dados completos do usuário...
+UserContext.jsx:123 👤 UserContext: Dados do usuário carregados: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi', …}
+UserContext.jsx:137 ✅ UserContext: Usuário ativo definido no contexto
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: true, emendasTipo: 'object', emendasLength: 2}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:266 📊 Calculando estatísticas do Dashboard...
+Dashboard.jsx:267 📋 Emendas disponíveis: 2
+Dashboard.jsx:268 💰 Despesas disponíveis: 3
+Dashboard.jsx:292 ✅ Estatísticas calculadas: {totalEmendas: 2, totalDespesas: 3, valorTotalEmendas: 201500, valorTotalDespesas: 3812.12, saldoDisponivel: 197687.88, …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {municipio: 'Floriano', email: 'paulinett1508@gmail.com', role: 'admin', lastLogin: _Timestamp, uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:22 🔄 DEBUG: UserForm useEffect executado
+UserForm.jsx:22 🔄 DEBUG: UserForm useEffect executado
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
+UserForm.jsx:14 🎭 DEBUG: UserForm renderizado com props: {formData: {…}, editingUser: true, saving: false}
