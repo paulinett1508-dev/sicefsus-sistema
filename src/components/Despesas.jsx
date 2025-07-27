@@ -316,8 +316,7 @@ const Despesas = ({ usuario }) => {
         }
 
         // Recarregar despesas diretamente
-        const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
-        const despesasSnapshot = await getDocs(despesasQuery);
+        const despesasSnapshot = await getDocs(collection(db, "despesas"));
         const despesasData = despesasSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -348,8 +347,7 @@ const Despesas = ({ usuario }) => {
         await deleteDoc(doc(db, "despesas", despesaId));
 
         // Recarregar despesas diretamente
-        const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
-        const despesasSnapshot = await getDocs(despesasQuery);
+        const despesasSnapshot = await getDocs(collection(db, "despesas"));
         const despesasData = despesasSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
