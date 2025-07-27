@@ -9,6 +9,8 @@ import {
   where,
   getDocs,
   addDoc,
+  getDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import Toast from "./Toast";
@@ -78,10 +80,81 @@ const DespesaForm = ({
   const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
   const [emendas, setEmendas] = useState(emendasDisponiveis);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [testeFirebase, setTesteFirebase] = useState({ loading: false, resultado: null });
 
   // ✅ Hooks de formatação
   const { valorError, handleValorChange } = useMoedaFormatting();
   const { cnpjError, handleCNPJChange } = useCNPJValidation();
+
+  // 🚨 FUNÇÃO DE TESTE FIREBASE
+  const testarFirebaseDirectly = async () => {
+    setTesteFirebase({ loading: true, resultado: null });
+    
+    try {
+      console.log("🧪 TESTE: Iniciando teste direto do Firebase...");
+      
+      // Teste 1: Criar documento de teste
+      const dadosTeste = {
+        teste: true,
+        timestamp: new Date(),
+        usuario: usuario?.email || 'teste',
+        dados: {
+          discriminacao: "TESTE DE CONEXÃO FIREBASE",
+          fornecedor: "Fornecedor Teste",
+          valor: 100,
+          numeroEmpenho: "TESTE001",
+          numeroNota: "NF-TESTE-001",
+          dataEmpenho: new Date().toISOString().split('T')[0],
+          dataLiquidacao: new Date().toISOString().split('T')[0],
+          dataPagamento: new Date().toISOString().split('T')[0],
+          acao: "TESTE",
+          dotacaoOrcamentaria: "TESTE",
+          classificacaoFuncional: "TESTE",
+          status: "teste"
+        }
+      };
+
+      console.log("🧪 TESTE: Tentando adicionar documento...");
+      const docRef = await addDoc(collection(db, "despesas"), dadosTeste);
+      console.log("✅ TESTE: Documento criado com ID:", docRef.id);
+
+      // Teste 2: Verificar se foi criado
+      console.log("🧪 TESTE: Verificando se documento existe...");
+      const docSnapshot = await getDoc(doc(db, "despesas", docRef.id));
+      
+      if (docSnapshot.exists()) {
+        console.log("✅ TESTE: Documento confirmado:", docSnapshot.data());
+        
+        // Teste 3: Deletar documento de teste
+        console.log("🧪 TESTE: Deletando documento de teste...");
+        await deleteDoc(doc(db, "despesas", docRef.id));
+        console.log("✅ TESTE: Documento de teste deletado");
+        
+        setTesteFirebase({ 
+          loading: false, 
+          resultado: "✅ SUCESSO: Firebase funcionando - coleção despesas criada!" 
+        });
+      } else {
+        throw new Error("Documento não foi encontrado após criação");
+      }
+      
+    } catch (error) {
+      console.error("❌ TESTE: Erro no Firebase:", error);
+      console.error("❌ TESTE: Código do erro:", error.code);
+      console.error("❌ TESTE: Mensagem:", error.message);
+      
+      let mensagemErro = "❌ ERRO: ";
+      if (error.code === 'permission-denied') {
+        mensagemErro += "REGRAS FIREBASE BLOQUEANDO - Configure as regras de segurança!";
+      } else if (error.code === 'network-request-failed') {
+        mensagemErro += "ERRO DE REDE - Verifique conexão com Firebase";
+      } else {
+        mensagemErro += `${error.code || 'unknown'}: ${error.message}`;
+      }
+      
+      setTesteFirebase({ loading: false, resultado: mensagemErro });
+    }
+  };
 
   // Configuração de modo simplificada (seguindo padrão do EmendaForm)
   const configModo = {
@@ -225,8 +298,14 @@ const DespesaForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    console.log("🚀 DEBUG SUBMIT: Iniciando handleSubmit...");
+    console.log("🚀 DEBUG SUBMIT: Dados do formulário:", formData);
+    console.log("🚀 DEBUG SUBMIT: Usuário:", usuario);
+    console.log("🚀 DEBUG SUBMIT: Modo edição:", !!despesaParaEditar);
 
     if (!validarFormulario()) {
+      console.warn("⚠️ DEBUG SUBMIT: Validação falhou");
       setToast({
         show: true,
         message: "Por favor, preencha todos os campos obrigatórios.",
@@ -235,6 +314,7 @@ const DespesaForm = ({
       return;
     }
 
+    console.log("✅ DEBUG SUBMIT: Validação passou");
     setLoading(true);
 
     try {
@@ -249,25 +329,47 @@ const DespesaForm = ({
         criadoEm: despesaParaEditar?.criadoEm || new Date(),
       };
 
+      console.log("🔄 DEBUG SUBMIT: Dados preparados para salvar:", dadosParaSalvar);
+
       if (despesaParaEditar) {
+        console.log("📝 DEBUG SUBMIT: Modo EDIÇÃO - atualizando documento:", despesaParaEditar.id);
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
         await updateDoc(despesaRef, dadosParaSalvar);
+        console.log("✅ DEBUG SUBMIT: Documento atualizado com sucesso");
+        
         setToast({
           show: true,
           message: "Despesa atualizada com sucesso!",
           type: "success",
         });
       } else {
-        const docRef = await addDoc(
-          collection(db, "despesas"),
-          dadosParaSalvar,
-        );
+        console.log("🆕 DEBUG SUBMIT: Modo CRIAR - adicionando novo documento...");
+        console.log("🆕 DEBUG SUBMIT: Coletando referência...");
+        
+        const collectionRef = collection(db, "despesas");
+        console.log("🆕 DEBUG SUBMIT: Referência coletada:", collectionRef);
+        
+        console.log("🆕 DEBUG SUBMIT: Chamando addDoc...");
+        const docRef = await addDoc(collectionRef, dadosParaSalvar);
+        console.log("✅ DEBUG SUBMIT: Documento criado com ID:", docRef.id);
+        
+        // Verificar se realmente foi criado
+        console.log("🔍 DEBUG SUBMIT: Verificando se documento foi realmente criado...");
+        const docCheck = await getDoc(docRef);
+        if (docCheck.exists()) {
+          console.log("✅ DEBUG SUBMIT: Documento confirmado no Firestore:", docCheck.data());
+        } else {
+          console.error("❌ DEBUG SUBMIT: Documento NÃO encontrado após criação!");
+        }
+        
         setToast({
           show: true,
           message: "Despesa criada com sucesso!",
           type: "success",
         });
       }
+
+      console.log("🎉 DEBUG SUBMIT: Operação concluída com sucesso");
 
       // ✅ CORREÇÃO: Verificar isMounted sem função
       if (isMounted) {
@@ -276,19 +378,35 @@ const DespesaForm = ({
           if (isMounted) {
             setShowSuccessMessage(false);
             if (onSalvar && typeof onSalvar === "function") {
+              console.log("🔄 DEBUG SUBMIT: Chamando callback onSalvar");
               onSalvar();
             }
           }
         }, 1500);
       }
     } catch (error) {
-      console.error("❌ Erro ao salvar despesa:", error);
+      console.error("❌ DEBUG SUBMIT: ERRO CAPTURADO:", error);
+      console.error("❌ DEBUG SUBMIT: Código do erro:", error.code);
+      console.error("❌ DEBUG SUBMIT: Mensagem:", error.message);
+      console.error("❌ DEBUG SUBMIT: Stack:", error.stack);
+      
+      let mensagemErro = "Erro ao salvar despesa. ";
+      if (error.code === 'permission-denied') {
+        mensagemErro += "Verifique as regras de segurança do Firebase.";
+        console.error("🚨 DEBUG SUBMIT: ERRO DE PERMISSÃO - Regras Firebase bloqueando!");
+      } else if (error.code === 'network-request-failed') {
+        mensagemErro += "Problema de conexão.";
+      } else {
+        mensagemErro += "Tente novamente.";
+      }
+      
       setToast({
         show: true,
-        message: "Erro ao salvar despesa. Tente novamente.",
+        message: mensagemErro,
         type: "error",
       });
     } finally {
+      console.log("🏁 DEBUG SUBMIT: Finalizando (loading = false)");
       setLoading(false);
     }
   };
@@ -339,6 +457,54 @@ const DespesaForm = ({
               : "Despesa atualizada"}{" "}
             com sucesso!
           </span>
+        </div>
+      )}
+
+      {/* 🚨 BOTÃO DE TESTE FIREBASE - REMOVER APÓS DEBUG */}
+      {!modoVisualizacao && (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          border: '2px solid #ffc107',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px'
+        }}>
+          <h4 style={{ color: '#856404', margin: '0 0 10px 0' }}>
+            🧪 TESTE DE DIAGNÓSTICO FIREBASE
+          </h4>
+          <p style={{ fontSize: '14px', color: '#856404', margin: '0 0 15px 0' }}>
+            Use este botão para testar se o Firebase está funcionando corretamente:
+          </p>
+          <button
+            type="button"
+            onClick={testarFirebaseDirectly}
+            disabled={testeFirebase.loading}
+            style={{
+              backgroundColor: '#ffc107',
+              color: '#212529',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '10px 20px',
+              fontWeight: 'bold',
+              cursor: testeFirebase.loading ? 'not-allowed' : 'pointer',
+              marginRight: '10px'
+            }}
+          >
+            {testeFirebase.loading ? '🔄 Testando...' : '🧪 Testar Firebase'}
+          </button>
+          {testeFirebase.resultado && (
+            <div style={{
+              marginTop: '10px',
+              padding: '10px',
+              borderRadius: '4px',
+              backgroundColor: testeFirebase.resultado.includes('✅') ? '#d4edda' : '#f8d7da',
+              color: testeFirebase.resultado.includes('✅') ? '#155724' : '#721c24',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}>
+              {testeFirebase.resultado}
+            </div>
+          )}
         </div>
       )}
 
