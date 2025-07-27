@@ -13,7 +13,7 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import Toast from "./Toast";
 import { useIsMounted } from "../hooks/useEmendaDespesa";
-import { useMoedaFormatting, parseValorMonetario } from "../utils/formatters";
+import { useMoedaFormatting, parseValorMonetario, formatarMoedaDisplay } from "../utils/formatters";
 import { useCNPJValidation } from "../utils/validators";
 
 const DespesaForm = ({
@@ -142,19 +142,24 @@ const DespesaForm = ({
 
   const handleInputChange = useCallback(
     (e) => {
-      // ✅ CORREÇÃO: Verificar se isMounted é true (não uma função)
       if (!isMounted) return;
 
       const { name, value } = e.target;
 
-      // Formatação especial para campos específicos
+      // Tratamento especial para valor monetário
       if (name === "valor") {
         handleValorChange(value, emendaInfo, setFormData);
-      } else if (name === "cnpjFornecedor") {
-        handleCNPJChange(value, setFormData);
-      } else {
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        return;
       }
+      
+      // Tratamento especial para CNPJ
+      if (name === "cnpjFornecedor") {
+        handleCNPJChange(value, setFormData);
+        return;
+      }
+
+      // Outros campos
+      setFormData((prev) => ({ ...prev, [name]: value }));
 
       // Limpar erro do campo
       if (errors[name]) {
@@ -204,12 +209,13 @@ const DespesaForm = ({
       }
     }
 
-    // Adicionar erros dos hooks de formatação
+    // ✅ VALIDAÇÃO DE VALOR MELHORADA
     if (valorError) {
       novosErrors.valor = valorError;
     }
 
-    if (cnpjError) {
+    // ✅ VALIDAÇÃO DE CNPJ
+    if (formData.cnpjFornecedor && cnpjError) {
       novosErrors.cnpjFornecedor = cnpjError;
     }
 
@@ -449,13 +455,13 @@ const DespesaForm = ({
                 name="valor"
                 value={formData.valor}
                 onChange={handleInputChange}
-                style={errors.valor ? styles.inputError : styles.input}
+                style={(errors.valor || valorError) ? styles.inputError : styles.input}
                 readOnly={modoVisualizacao}
                 placeholder="0,00"
                 required
               />
-              {errors.valor && (
-                <span style={styles.errorText}>{errors.valor}</span>
+              {(errors.valor || valorError) && (
+                <span style={styles.errorText}>{errors.valor || valorError}</span>
               )}
               <span style={styles.helpText}>
                 Digite apenas números. Ex: 100000 = R$ 1.000,00
@@ -820,12 +826,13 @@ const DespesaForm = ({
                   style={cnpjError ? styles.inputError : styles.input}
                   readOnly={modoVisualizacao}
                   placeholder="00.000.000/0000-00"
+                  maxLength="18"
                 />
                 {cnpjError && (
                   <span style={styles.errorText}>{cnpjError}</span>
                 )}
                 <span style={styles.helpText}>
-                  CNPJ será formatado automaticamente conforme você digita
+                  CNPJ será validado automaticamente
                 </span>
               </div>
 
