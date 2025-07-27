@@ -1,3 +1,4 @@
+
 // src/services/userService.js - VERSÃO DEBUG (SEM TESTE AUTH)
 import {
   collection,
@@ -534,36 +535,6 @@ const userService = {
   diagnoseEmail,
 
   // ✅ FUNÇÕES DE DEBUG
-  async debugCreateUser(formData) {
-    console.log('🐛 === MODO DEBUG - CRIAÇÃO DE USUÁRIO ===');
-
-    try {
-      console.log('1. Dados recebidos:', formData);
-
-      console.log('2. Validando...');
-      const validation = validateFormData(formData);
-      console.log('   Resultado:', validation);
-
-      console.log('3. Verificando email...');
-      const emailExists = await checkEmailExists(formData.email);
-      console.log('   Email existe:', emailExists);
-
-      if (emailExists) {
-        console.log('❌ Parou aqui - email já existe');
-        return { canProceed: false, reason: 'Email já existe' };
-      }
-
-      console.log('✅ Pode prosseguir com criação');
-      return { canProceed: true, reason: 'Tudo validado' };
-
-    } catch (error) {
-      console.error('❌ Erro no debug:', error);
-      return { canProceed: false, reason: error.message };
-    }
-  }
-};
-
-// ✅ FUNÇÕES DE DEBUG
   async debugCreateUser(formData) {
     console.log('🐛 === MODO DEBUG - CRIAÇÃO DE USUÁRIO ===');
 
