@@ -142,7 +142,7 @@ const Administracao = ({ usuario }) => {
       setEditingUser(null);
       setModoVisualizacao(false);
       await carregarUsuarios();
-      
+
     } catch (err) {
       console.error("Erro ao salvar usuário:", err);
       error(err.message || "Erro ao salvar usuário");
@@ -181,6 +181,21 @@ const Administracao = ({ usuario }) => {
       console.error("Erro ao enviar reset:", err);
       error("Erro ao enviar email de reset");
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      email: "",
+      nome: "",
+      role: "user",
+      status: "ativo",
+      departamento: "",
+      telefone: "",
+      municipio: "",
+      uf: "",
+    });
+    setEditingUser(null);
+    setModoVisualizacao(false);
   };
 
   return (

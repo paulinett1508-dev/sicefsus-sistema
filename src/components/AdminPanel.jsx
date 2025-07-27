@@ -436,25 +436,7 @@ const AdminPanel = () => {
         cancelText="Cancelar"
       />
 
-      {/* ✅ PAINEL DE DEBUG */}
-      {process.env.NODE_ENV === 'development' && (
-        <DebugPanel
-          states={{
-            showUserForm,
-            editingUser: !!editingUser,
-            loading,
-            saving,
-            usersCount: users.length,
-            formDataEmail: formData.email,
-            activeTab
-          }}
-          onToggle={() => {
-            console.log("🚀 DEBUG: Forçando abertura do modal via debug");
-            setShowUserForm(true);
-            setEditingUser(null);
-          }}
-        />
-      )}
+      {/* Debug panel removido para evitar loops infinitos */}
     </div>
   );
 };
@@ -636,22 +618,6 @@ const styles = {
   },
 };
 
-// Define DebugPanel here or import it
-function DebugPanel({ states, onToggle }) {
-  return (
-    <div style={{ border: '2px solid red', padding: '10px', margin: '20px' }}>
-      <h3>Debug Panel</h3>
-      <p>showUserForm: {states.showUserForm ? 'true' : 'false'}</p>
-      <p>editingUser: {states.editingUser ? 'true' : 'false'}</p>
-      <p>loading: {states.loading ? 'true' : 'false'}</p>
-      <p>saving: {states.saving ? 'true' : 'false'}</p>
-      <p>usersCount: {states.usersCount}</p>
-      <p>formDataEmail: {states.formDataEmail}</p>
-      <p>activeTab: {states.activeTab}</p>
-      <button onClick={onToggle}>Force Open User Form</button>
-    </div>
-  );
-}
-
+// Debug panel removido para evitar loops infinitos
 
 export default AdminPanel;

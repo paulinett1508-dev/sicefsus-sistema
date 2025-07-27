@@ -11,15 +11,8 @@ const UserForm = ({
   editingUser,
   saving = false,
 }) => {
-  console.log("🎭 DEBUG: UserForm renderizado com props:", {
-    formData,
-    editingUser: !!editingUser,
-    saving
-  });
-
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
-    console.log("🔄 DEBUG: UserForm useEffect executado");
     addFormInteractivity();
   }, []);
 
@@ -46,14 +39,11 @@ const UserForm = ({
 
   return (
     <div style={styles.overlay} onClick={(e) => {
-      console.log("🖱️ DEBUG: Clique no overlay", e.target === e.currentTarget);
       if (e.target === e.currentTarget) {
-        console.log("🚪 DEBUG: Fechando modal via overlay");
         onCancel();
       }
     }}>
       <div style={styles.modal} onClick={(e) => {
-        console.log("🖱️ DEBUG: Clique no modal");
         e.stopPropagation();
       }}>
         {/* ✅ HEADER MINIMALISTA */}
