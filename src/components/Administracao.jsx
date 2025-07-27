@@ -1,10 +1,10 @@
-// src/components/Administracao.jsx - Página Principal de Administração SICEFSUS
+// src/components/Administracao.jsx - CORRIGIDO PARA ESTRUTURA SICEFSUS
 import React, { useState, useEffect, useCallback } from "react";
-import { UserService } from "../services/userService";
+import userService from "../services/userService"; // ✅ Import das funções
 import UserForm from "./UserForm";
 import UsersTable from "./UsersTable";
 import AdminStats from "./AdminStats";
-import { useToast } from "./Toast";
+import Toast from "./Toast";
 import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
 const Administracao = ({ usuario }) => {
@@ -12,40 +12,19 @@ const Administracao = ({ usuario }) => {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [modoVisualizacao, setModoVisualizacao] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const { success, error } = useToast();
-  const userService = new UserService();
+  const [toast, setToast] = useState(null);
 
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
     addFormInteractivity();
   }, []);
 
-  // Carregar usuários
-  const carregarUsuarios = useCallback(async () => {
-    setLoading(true);
-    try {
-      const usuariosData = await userService.loadUsers();
-      setUsers(usuariosData);
-    } catch (err) {
-      console.error("Erro ao carregar usuários:", err);
-      error("Erro ao carregar usuários");
-    } finally {
-      setLoading(false);
-    }
-  }, [error, userService]);
-
-  useEffect(() => {
-    carregarUsuarios();
-  }, [carregarUsuarios]);
-
-  // Estado do formulário
+  // ✅ ESTADO DO FORMULÁRIO PADRONIZADO SICEFSUS
   const [formData, setFormData] = useState({
     email: "",
     nome: "",
-    role: "user",
+    role: "user", // Mantém compatibilidade frontend (convertido no backend)
     status: "ativo",
     departamento: "",
     telefone: "",
@@ -53,136 +32,33 @@ const Administracao = ({ usuario }) => {
     uf: "",
   });
 
-  // Handlers de ação
-  const handleNovoUsuario = () => {
-    setFormData({
-      email: "",
-      nome: "",
-      role: "user",
-      status: "ativo",
-      departamento: "",
-      telefone: "",
-      municipio: "",
-      uf: "",
-    });
-    setEditingUser(null);
-    setModoVisualizacao(false);
-    setShowForm(true);
+  // ✅ MOSTRAR TOAST
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
   };
 
-  const handleEditarUsuario = (user) => {
-    setFormData({
-      email: user.email || "",
-      nome: user.nome || "",
-      role: user.role || "user",
-      status: user.status || "ativo",
-      departamento: user.departamento || "",
-      telefone: user.telefone || "",
-      municipio: user.municipio || "",
-      uf: user.uf || "",
-    });
-    setEditingUser(user);
-    setModoVisualizacao(false);
-    setShowForm(true);
-  };
-
-  const handleVisualizarUsuario = (user) => {
-    setFormData({
-      email: user.email || "",
-      nome: user.nome || "",
-      role: user.role || "user",
-      status: user.status || "ativo",
-      departamento: user.departamento || "",
-      telefone: user.telefone || "",
-      municipio: user.municipio || "",
-      uf: user.uf || "",
-    });
-    setEditingUser(user);
-    setModoVisualizacao(true);
-    setShowForm(true);
-  };
-
-  const handleCancelar = () => {
-    setShowForm(false);
-    setEditingUser(null);
-    setModoVisualizacao(false);
-    setFormData({
-      email: "",
-      nome: "",
-      role: "user",
-      status: "ativo",
-      departamento: "",
-      telefone: "",
-      municipio: "",
-      uf: "",
-    });
-  };
-
-  const handleSalvarUsuario = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
+  // ✅ CARREGAR USUÁRIOS
+  const carregarUsuarios = useCallback(async () => {
+    setLoading(true);
     try {
-      if (editingUser) {
-        // Atualizar usuário existente
-        const result = await userService.updateUser(editingUser.id, formData, editingUser.email);
-        if (result.success) {
-          success(result.message);
-        }
-      } else {
-        // Criar novo usuário
-        const result = await userService.createUser(formData);
-        if (result.success) {
-          success(result.message);
-        }
-      }
-
-      // Fechar formulário e recarregar dados
-      setShowForm(false);
-      setEditingUser(null);
-      setModoVisualizacao(false);
-      await carregarUsuarios();
-
+      console.log('📋 Carregando usuários...');
+      const usuariosData = await userService.loadUsers();
+      setUsers(usuariosData);
+      console.log(`✅ ${usuariosData.length} usuários carregados`);
     } catch (err) {
-      console.error("Erro ao salvar usuário:", err);
-      error(err.message || "Erro ao salvar usuário");
+      console.error("❌ Erro ao carregar usuários:", err);
+      showToast("Erro ao carregar usuários: " + err.message, 'error');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
-  };
+  }, []);
 
-  const handleExcluirUsuario = async (userId) => {
-    if (!window.confirm("Tem certeza que deseja excluir este usuário?")) {
-      return;
-    }
+  useEffect(() => {
+    carregarUsuarios();
+  }, [carregarUsuarios]);
 
-    try {
-      await userService.deleteUser(userId);
-      success("Usuário excluído com sucesso!");
-      await carregarUsuarios();
-    } catch (err) {
-      console.error("Erro ao excluir usuário:", err);
-      error("Erro ao excluir usuário");
-    }
-  };
-
-  const handleResetSenha = async (user) => {
-    if (!window.confirm(`Enviar email de reset de senha para ${user.email}?`)) {
-      return;
-    }
-
-    try {
-      const result = await userService.sendPasswordReset(user);
-      if (result.success) {
-        success(result.message);
-        await carregarUsuarios();
-      }
-    } catch (err) {
-      console.error("Erro ao enviar reset:", err);
-      error("Erro ao enviar email de reset");
-    }
-  };
-
+  // ✅ RESETAR FORMULÁRIO
   const resetForm = () => {
     setFormData({
       email: "",
@@ -195,12 +71,184 @@ const Administracao = ({ usuario }) => {
       uf: "",
     });
     setEditingUser(null);
-    setModoVisualizacao(false);
+  };
+
+  // ✅ NOVO USUÁRIO
+  const handleNovoUsuario = () => {
+    console.log('🆕 Iniciando criação de novo usuário');
+    resetForm();
+    setShowForm(true);
+  };
+
+  // ✅ EDITAR USUÁRIO
+  const handleEditarUsuario = (user) => {
+    console.log('✏️ Editando usuário:', user);
+
+    // ✅ CONVERTER TIPO PARA ROLE (compatibilidade frontend)
+    const roleMap = {
+      'admin': 'admin',
+      'operador': 'user',
+      'administrador': 'admin'
+    };
+
+    setFormData({
+      email: user.email || "",
+      nome: user.nome || "",
+      role: roleMap[user.tipo] || user.role || "user",
+      status: user.status || "ativo",
+      departamento: user.departamento || "",
+      telefone: user.telefone || "",
+      municipio: user.municipio || "",
+      uf: user.uf || "",
+    });
+    setEditingUser(user);
+    setShowForm(true);
+  };
+
+  // ✅ CANCELAR FORMULÁRIO
+  const handleCancelar = () => {
+    console.log('🚪 Cancelando formulário');
+    setShowForm(false);
+    resetForm();
+  };
+
+  // ✅ SALVAR USUÁRIO (CRIAR OU EDITAR)
+  const handleSalvarUsuario = async (e) => {
+    e.preventDefault();
+
+    if (saving) {
+      console.log('⏳ Salvamento já em andamento...');
+      return;
+    }
+
+    setSaving(true);
+    console.log('💾 Salvando usuário...', formData);
+
+    try {
+      // ✅ VALIDAÇÕES BÁSICAS NO FRONTEND
+      if (!formData.email?.trim()) {
+        throw new Error('Email é obrigatório');
+      }
+
+      if (!formData.nome?.trim()) {
+        throw new Error('Nome é obrigatório');
+      }
+
+      // Validação para operadores
+      if (formData.role === 'user') {
+        if (!formData.municipio?.trim()) {
+          throw new Error('Município é obrigatório para operadores');
+        }
+
+        if (!formData.uf?.trim()) {
+          throw new Error('UF é obrigatória para operadores');
+        }
+      }
+
+      let resultado;
+
+      if (editingUser) {
+        // ✏️ ATUALIZAR USUÁRIO EXISTENTE
+        console.log('✏️ Atualizando usuário existente:', editingUser.id);
+        resultado = await userService.updateUser(editingUser.id, formData, editingUser.email);
+
+      } else {
+        // 🆕 CRIAR NOVO USUÁRIO
+        console.log('🆕 Criando novo usuário...');
+        resultado = await userService.createUser(formData);
+      }
+
+      console.log('✅ Operação concluída:', resultado);
+
+      // Mostrar mensagem de sucesso
+      showToast(resultado.message, 'success');
+
+      // 🔄 RECARREGAR LISTA
+      await carregarUsuarios();
+
+      // 🚪 FECHAR FORMULÁRIO
+      setShowForm(false);
+      resetForm();
+
+    } catch (error) {
+      console.error('❌ Erro ao salvar usuário:', error);
+
+      // 🚨 TRATAMENTO DE ERROS ESPECÍFICOS
+      let errorMessage = 'Erro ao salvar usuário';
+
+      if (error.message.includes('já está cadastrado')) {
+        errorMessage = 'Este email já está cadastrado no sistema';
+      } else if (error.message.includes('Email inválido')) {
+        errorMessage = 'Formato de email inválido';
+      } else if (error.message.includes('obrigatório')) {
+        errorMessage = error.message;
+      } else if (error.message.includes('network')) {
+        errorMessage = 'Erro de conexão. Verifique sua internet';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showToast(errorMessage, 'error');
+
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ✅ EXCLUIR USUÁRIO
+  const handleExcluirUsuario = async (userId) => {
+    const user = users.find(u => u.id === userId);
+    const confirmMessage = `Tem certeza que deseja excluir o usuário "${user?.nome}"?\n\nEsta ação não pode ser desfeita.`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Excluindo usuário:', userId);
+
+      const resultado = await userService.deleteUser(userId);
+
+      if (resultado.success) {
+        showToast(resultado.message, 'success');
+
+        // 🔄 RECARREGAR LISTA
+        await carregarUsuarios();
+      }
+
+    } catch (err) {
+      console.error("❌ Erro ao excluir usuário:", err);
+      showToast("Erro ao excluir usuário: " + err.message, 'error');
+    }
+  };
+
+  // ✅ RESET DE SENHA
+  const handleResetSenha = async (user) => {
+    const confirmMessage = `Enviar email de redefinição de senha para:\n${user.email}?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      console.log('📨 Enviando reset de senha para:', user.email);
+
+      const resultado = await userService.sendPasswordReset(user);
+
+      if (resultado.success) {
+        showToast(resultado.message, 'success');
+        await carregarUsuarios();
+      }
+
+    } catch (err) {
+      console.error("❌ Erro ao enviar reset:", err);
+      showToast("Erro ao enviar email de reset: " + err.message, 'error');
+    }
   };
 
   return (
     <div style={styles.container}>
-      {/* ✅ HEADER PADRONIZADO */}
+      {/* ✅ HEADER PADRONIZADO SICEFSUS */}
       <div style={styles.header}>
         <div style={styles.headerContent}>
           <h1 style={styles.headerTitle}>
@@ -231,15 +279,24 @@ const Administracao = ({ usuario }) => {
             <span style={styles.tableIcon}>📋</span>
             Lista de Usuários ({users.length})
           </h2>
+
+          {loading && (
+            <div style={styles.loadingIndicator}>
+              <div style={styles.spinner}></div>
+              Carregando...
+            </div>
+          )}
         </div>
 
-        <UsersTable
+        {!loading && (
+          <UsersTable
             users={users}
             onEdit={handleEditarUsuario}
             onResetPassword={handleResetSenha}
             onDelete={handleExcluirUsuario}
             saving={saving}
           />
+        )}
       </div>
 
       {/* ✅ MODAL DE FORMULÁRIO */}
@@ -251,23 +308,31 @@ const Administracao = ({ usuario }) => {
           onCancel={handleCancelar}
           editingUser={editingUser}
           saving={saving}
-          modoVisualizacao={modoVisualizacao}
+        />
+      )}
+
+      {/* ✅ TOAST NOTIFICATIONS */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>
   );
 };
 
-// ✅ ESTILOS PADRONIZADOS SEGUINDO EMENDAS.JSX
+// ✅ ESTILOS PADRONIZADOS SEGUINDO PADRÃO SICEFSUS
 const styles = {
   container: {
     ...formStyles.container,
     maxWidth: "1400px",
+    padding: "var(--space-6)",
   },
 
-  // ✅ HEADER SEGUINDO PADRÃO EMENDAS
+  // ✅ HEADER SEGUINDO PADRÃO SICEFSUS
   header: {
-    ...formStyles.header,
     background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
     color: "var(--white)",
     border: "none",
@@ -288,13 +353,13 @@ const styles = {
   },
 
   headerTitle: {
-    ...formStyles.headerTitle,
     color: "var(--white)",
     fontSize: "var(--font-size-3xl)",
     display: "flex",
     alignItems: "center",
     gap: "var(--space-3)",
     margin: 0,
+    fontWeight: "600",
   },
 
   headerIcon: {
@@ -303,14 +368,13 @@ const styles = {
   },
 
   headerSubtitle: {
-    ...formStyles.headerSubtitle,
     color: "rgba(255, 255, 255, 0.9)",
     fontSize: "var(--font-size-lg)",
     margin: 0,
+    fontWeight: "400",
   },
 
   addButton: {
-    ...formStyles.submitButton,
     background: "rgba(255, 255, 255, 0.2)",
     backdropFilter: "blur(10px)",
     border: "2px solid rgba(255, 255, 255, 0.3)",
@@ -327,6 +391,7 @@ const styles = {
     minWidth: "fit-content",
     height: "fit-content",
     whiteSpace: "nowrap",
+    cursor: "pointer",
   },
 
   buttonIcon: {
@@ -347,6 +412,9 @@ const styles = {
     background: "linear-gradient(135deg, var(--theme-surface) 0%, var(--theme-surface-secondary) 100%)",
     padding: "var(--space-5) var(--space-6)",
     borderBottom: "2px solid var(--theme-border)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   tableTitle: {
@@ -364,8 +432,29 @@ const styles = {
     opacity: 0.8,
   },
 
+  loadingIndicator: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--space-2)",
+    color: "var(--theme-text-secondary)",
+    fontSize: "var(--font-size-sm)",
+  },
+
+  spinner: {
+    width: "16px",
+    height: "16px",
+    border: "2px solid transparent",
+    borderTop: "2px solid var(--primary)",
+    borderRadius: "50%",
+    animation: "administracaoSpin 1s linear infinite",
+  },
+
   // ✅ RESPONSIVIDADE
   "@media (max-width: 768px)": {
+    container: {
+      padding: "var(--space-4)",
+    },
+
     header: {
       flexDirection: "column",
       gap: "var(--space-4)",
@@ -380,7 +469,27 @@ const styles = {
       width: "100%",
       justifyContent: "center",
     },
+
+    tableHeader: {
+      flexDirection: "column",
+      gap: "var(--space-3)",
+      alignItems: "flex-start",
+    },
   },
 };
+
+// ✅ CSS ANIMATIONS
+if (!document.getElementById('administracao-animations')) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = 'administracao-animations';
+  styleSheet.type = "text/css";
+  styleSheet.innerText = `
+    @keyframes administracaoSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default Administracao;

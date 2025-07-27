@@ -1,6 +1,5 @@
-// src/components/UserForm.jsx - Formulário de Usuário com UX Melhorada
+// src/components/UserForm.jsx - CORRIGIDO PARA ESTRUTURA SICEFSUS
 import React, { useEffect } from "react";
-import { getEstadoNome } from "../utils/validators";
 import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
 const UserForm = ({
@@ -16,40 +15,133 @@ const UserForm = ({
     addFormInteractivity();
   }, []);
 
-  // ✅ LISTA DE UFS (centralizada)
+  // ✅ LISTA DE UFS CONFORME DOCUMENTAÇÃO SICEFSUS
   const UFS_VALIDAS = [
-    "ac", "al", "ap", "am", "ba", "ce", "df", "es", "go", "ma",
-    "mt", "ms", "mg", "pa", "pb", "pr", "pe", "pi", "rj", "rn",
-    "rs", "ro", "rr", "sc", "sp", "se", "to",
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PR",
+    "PE",
+    "PI",
+    "RJ",
+    "RN",
+    "RS",
+    "RO",
+    "RR",
+    "SC",
+    "SP",
+    "SE",
+    "TO",
   ];
 
-  const handleRoleChange = (newRole) => {
+  // ✅ MAPEAMENTO DE NOMES DE ESTADOS
+  const UF_NAMES = {
+    AC: "Acre",
+    AL: "Alagoas",
+    AP: "Amapá",
+    AM: "Amazonas",
+    BA: "Bahia",
+    CE: "Ceará",
+    DF: "Distrito Federal",
+    ES: "Espírito Santo",
+    GO: "Goiás",
+    MA: "Maranhão",
+    MT: "Mato Grosso",
+    MS: "Mato Grosso do Sul",
+    MG: "Minas Gerais",
+    PA: "Pará",
+    PB: "Paraíba",
+    PR: "Paraná",
+    PE: "Pernambuco",
+    PI: "Piauí",
+    RJ: "Rio de Janeiro",
+    RN: "Rio Grande do Norte",
+    RS: "Rio Grande do Sul",
+    RO: "Rondônia",
+    RR: "Roraima",
+    SC: "Santa Catarina",
+    SP: "São Paulo",
+    SE: "Sergipe",
+    TO: "Tocantins",
+  };
+
+  // ✅ HANDLER PARA MUDANÇA DE TIPO DE USUÁRIO (corrigido)
+  const handleTipoChange = (newTipo) => {
+    console.log("🔄 Mudando tipo de usuário para:", newTipo);
+
     setFormData({
       ...formData,
-      role: newRole,
-      municipio: newRole === "admin" ? "" : formData.municipio,
-      uf: newRole === "admin" ? "" : formData.uf,
+      role: newTipo, // Mantém compatibilidade com frontend
+      municipio: newTipo === "admin" ? "" : formData.municipio,
+      uf: newTipo === "admin" ? "" : formData.uf,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // ✅ VALIDAÇÃO ANTES DO ENVIO
+    console.log("📝 Dados do formulário antes do envio:", formData);
+
+    // Validações obrigatórias
+    if (!formData.email?.trim()) {
+      alert("Email é obrigatório");
+      return;
+    }
+
+    if (!formData.nome?.trim()) {
+      alert("Nome é obrigatório");
+      return;
+    }
+
+    // Validação para operadores
+    if (formData.role === "user") {
+      if (!formData.municipio?.trim()) {
+        alert("Município é obrigatório para operadores");
+        return;
+      }
+
+      if (!formData.uf?.trim()) {
+        alert("UF é obrigatória para operadores");
+        return;
+      }
+    }
+
+    console.log("✅ Validações passed, enviando...");
     onSubmit(e);
   };
 
   return (
-    <div style={styles.overlay} onClick={(e) => {
-      if (e.target === e.currentTarget) {
-        onCancel();
-      }
-    }}>
-      <div style={styles.modal} onClick={(e) => {
-        e.stopPropagation();
-      }}>
+    <div
+      style={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onCancel();
+        }
+      }}
+    >
+      <div
+        style={styles.modal}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         {/* ✅ HEADER MINIMALISTA */}
         <div style={styles.header}>
           <h2 style={styles.headerTitle}>
-            {editingUser ? "Editar Usuário" : "Novo Usuário"}
+            {editingUser ? "✏️ Editar Usuário" : "👤 Novo Usuário"}
           </h2>
           <button
             style={styles.closeButton}
@@ -78,7 +170,7 @@ const UserForm = ({
                 <input
                   type="email"
                   style={styles.input}
-                  value={formData.email}
+                  value={formData.email || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
@@ -86,6 +178,11 @@ const UserForm = ({
                   required
                   placeholder="usuario@exemplo.com"
                 />
+                {editingUser && (
+                  <small style={styles.helpText}>
+                    💡 Email não pode ser alterado após criação
+                  </small>
+                )}
               </div>
 
               <div style={styles.formGroup}>
@@ -95,13 +192,15 @@ const UserForm = ({
                 <input
                   type="text"
                   style={styles.input}
-                  value={formData.nome}
+                  value={formData.nome || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, nome: e.target.value })
                   }
                   disabled={saving}
                   required
                   placeholder="Nome completo do usuário"
+                  minLength="3"
+                  maxLength="100"
                 />
               </div>
 
@@ -110,12 +209,13 @@ const UserForm = ({
                 <input
                   type="text"
                   style={styles.input}
-                  value={formData.departamento}
+                  value={formData.departamento || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, departamento: e.target.value })
                   }
                   disabled={saving}
                   placeholder="Ex: Secretaria de Saúde"
+                  maxLength="100"
                 />
               </div>
 
@@ -124,7 +224,7 @@ const UserForm = ({
                 <input
                   type="tel"
                   style={styles.input}
-                  value={formData.telefone}
+                  value={formData.telefone || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, telefone: e.target.value })
                   }
@@ -134,24 +234,26 @@ const UserForm = ({
               </div>
             </div>
 
-            {/* ✅ INFORMAÇÃO SOBRE SEGURANÇA DE SENHA MELHORADA */}
+            {/* ✅ INFORMAÇÃO SOBRE SEGURANÇA DE SENHA CONFORME SICEFSUS */}
             {!editingUser && (
               <div style={styles.emendaInfo}>
                 <h4 style={styles.emendaInfoTitle}>
-                  🔒 Segurança da Senha
+                  🔒 Política de Segurança SICEFSUS
                 </h4>
                 <div style={styles.emendaInfoGrid}>
                   <div style={styles.emendaInfoRow}>
-                    • Uma senha temporária será gerada automaticamente
+                    • Senha temporária será gerada automaticamente (12
+                    caracteres seguros)
                   </div>
                   <div style={styles.emendaInfoRow}>
-                    • O usuário receberá email com instruções de primeiro acesso
+                    • Email com instruções de primeiro acesso será enviado
                   </div>
                   <div style={styles.emendaInfoRow}>
-                    • No primeiro login, será obrigatório alterar a senha
+                    • Obrigatório alterar senha no primeiro login
                   </div>
                   <div style={styles.emendaInfoRow}>
-                    • Conforme LGPD, admins não definem senhas de usuários
+                    • Conforme LGPD: administradores não definem senhas de
+                    usuários
                   </div>
                 </div>
               </div>
@@ -167,57 +269,103 @@ const UserForm = ({
 
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Perfil do Usuário</label>
+                <label style={styles.labelRequired}>
+                  Tipo de Usuário <span style={styles.required}>*</span>
+                </label>
                 <select
                   style={styles.select}
-                  value={formData.role}
-                  onChange={(e) => handleRoleChange(e.target.value)}
+                  value={formData.role || "user"}
+                  onChange={(e) => handleTipoChange(e.target.value)}
                   disabled={saving}
+                  required
                 >
                   <option value="user">👤 Operador</option>
                   <option value="admin">👑 Administrador</option>
                 </select>
                 <small style={styles.helpText}>
                   {formData.role === "admin"
-                    ? "Acesso total ao sistema"
-                    : "Acesso limitado por localização"}
+                    ? "🌐 Acesso total ao sistema (todos os municípios)"
+                    : "📍 Acesso restrito ao município cadastrado"}
                 </small>
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Status</label>
+                <label style={styles.labelRequired}>
+                  Status <span style={styles.required}>*</span>
+                </label>
                 <select
                   style={styles.select}
-                  value={formData.status}
+                  value={formData.status || "ativo"}
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
                   disabled={saving}
+                  required
                 >
                   <option value="ativo">✅ Ativo</option>
                   <option value="inativo">⏸️ Inativo</option>
-                  <option value="bloqueado">🚫 Bloqueado</option>
                 </select>
+                <small style={styles.helpText}>
+                  {formData.status === "ativo"
+                    ? "Usuário pode acessar o sistema"
+                    : "Usuário não pode fazer login"}
+                </small>
               </div>
             </div>
           </fieldset>
 
           {/* ✅ SEÇÃO DE LOCALIZAÇÃO OBRIGATÓRIA (APENAS OPERADORES) */}
           {formData.role === "user" && (
-            <fieldset style={{...styles.fieldset, borderColor: "var(--error)", backgroundColor: "var(--error-light)"}}>
-              <legend style={{...styles.legend, borderColor: "var(--error)", color: "var(--error)"}}>
+            <fieldset
+              style={{
+                ...styles.fieldset,
+                borderColor: "var(--primary)",
+                backgroundColor: "rgba(52, 152, 219, 0.05)",
+              }}
+            >
+              <legend
+                style={{
+                  ...styles.legend,
+                  borderColor: "var(--primary)",
+                  color: "var(--primary)",
+                  fontWeight: "600",
+                }}
+              >
                 <span style={styles.legendIcon}>📍</span>
-                Localização de Acesso (OBRIGATÓRIO)
+                Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
               </legend>
 
-              <div style={{...styles.emendaInfo, backgroundColor: "var(--error-light)", borderColor: "var(--error)"}}>
-                <div style={{margin: 0, color: "var(--error-dark)", fontWeight: "600"}}>
-                  🔒 <strong>IMPORTANTE:</strong> Operadores só podem visualizar e gerenciar emendas do município cadastrado
+              <div
+                style={{
+                  ...styles.emendaInfo,
+                  backgroundColor: "rgba(52, 152, 219, 0.1)",
+                  borderColor: "var(--primary)",
+                }}
+              >
+                <div
+                  style={{
+                    margin: 0,
+                    color: "var(--primary)",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  🔒 <strong>IMPORTANTE - Regras de Acesso SICEFSUS:</strong>
                 </div>
-                <div style={{marginTop: "8px", color: "var(--error-dark)", fontSize: "0.9em"}}>
-                  • O município definido aqui determina quais emendas o usuário poderá acessar<br/>
-                  • Esta configuração não pode ser alterada após a criação do usuário<br/>
-                  • Para mudança de localização, será necessário criar novo usuário
+                <div
+                  style={{
+                    color: "var(--primary)",
+                    fontSize: "0.9em",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  • Operadores só podem visualizar e gerenciar emendas do
+                  município cadastrado
+                  <br />
+                  • Esta configuração determina todas as permissões do usuário
+                  <br />
+                  • Município e UF não podem ser alterados após a criação
+                  <br />• Para mudança de localização, criar novo usuário
                 </div>
               </div>
 
@@ -228,10 +376,21 @@ const UserForm = ({
                   </label>
                   <input
                     type="text"
-                    style={{...styles.input, borderColor: "var(--error)"}}
-                    value={formData.municipio}
+                    style={{
+                      ...styles.input,
+                      borderColor: editingUser
+                        ? "var(--warning)"
+                        : "var(--primary)",
+                      backgroundColor: editingUser
+                        ? "var(--theme-surface-secondary)"
+                        : "white",
+                    }}
+                    value={formData.municipio || ""}
                     onChange={(e) =>
-                      setFormData({ ...formData, municipio: e.target.value.trim() })
+                      setFormData({
+                        ...formData,
+                        municipio: e.target.value.trim(),
+                      })
                     }
                     disabled={saving || editingUser}
                     placeholder="Ex: São Paulo, Rio de Janeiro, Belo Horizonte"
@@ -239,8 +398,15 @@ const UserForm = ({
                     minLength="2"
                     maxLength="100"
                   />
-                  <small style={{...styles.helpText, color: "var(--error-dark)"}}>
-                    {editingUser ? "Localização não pode ser alterada após criação" : "Digite o nome completo do município"}
+                  <small
+                    style={{
+                      ...styles.helpText,
+                      color: editingUser ? "var(--warning)" : "var(--primary)",
+                    }}
+                  >
+                    {editingUser
+                      ? "⚠️ Localização não pode ser alterada após criação"
+                      : "📝 Digite o nome completo do município"}
                   </small>
                 </div>
 
@@ -249,8 +415,16 @@ const UserForm = ({
                     Estado (UF) <span style={styles.required}>*</span>
                   </label>
                   <select
-                    style={{...styles.select, borderColor: "var(--error)"}}
-                    value={formData.uf}
+                    style={{
+                      ...styles.select,
+                      borderColor: editingUser
+                        ? "var(--warning)"
+                        : "var(--primary)",
+                      backgroundColor: editingUser
+                        ? "var(--theme-surface-secondary)"
+                        : "white",
+                    }}
+                    value={formData.uf || ""}
                     onChange={(e) =>
                       setFormData({ ...formData, uf: e.target.value })
                     }
@@ -260,13 +434,131 @@ const UserForm = ({
                     <option value="">Selecione o Estado</option>
                     {UFS_VALIDAS.map((uf) => (
                       <option key={uf} value={uf}>
-                        {uf.toUpperCase()} - {getEstadoNome(uf)}
+                        {uf} - {UF_NAMES[uf]}
                       </option>
                     ))}
                   </select>
-                  <small style={{...styles.helpText, color: "var(--error-dark)"}}>
-                    {editingUser ? "UF não pode ser alterada após criação" : "Selecione o estado do município"}
+                  <small
+                    style={{
+                      ...styles.helpText,
+                      color: editingUser ? "var(--warning)" : "var(--primary)",
+                    }}
+                  >
+                    {editingUser
+                      ? "⚠️ UF não pode ser alterada após criação"
+                      : "🗺️ Selecione o estado do município"}
                   </small>
+                </div>
+              </div>
+
+              {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
+              {formData.municipio && formData.uf && (
+                <div
+                  style={{
+                    ...styles.emendaInfo,
+                    backgroundColor: "rgba(39, 174, 96, 0.1)",
+                    borderColor: "var(--success)",
+                    marginTop: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "var(--success)",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    ✅ <strong>Configuração de Acesso:</strong>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      padding: "12px",
+                      backgroundColor: "rgba(39, 174, 96, 0.05)",
+                      borderRadius: "6px",
+                      fontFamily: "monospace",
+                      fontSize: "0.9em",
+                    }}
+                  >
+                    📍 <strong>Localização:</strong> {formData.municipio} /{" "}
+                    {formData.uf}
+                    <br />
+                    🔍 <strong>Acesso:</strong> Apenas emendas de{" "}
+                    {formData.municipio}
+                    <br />
+                    👤 <strong>Permissões:</strong> Visualizar, criar despesas
+                  </div>
+                </div>
+              )}
+            </fieldset>
+          )}
+
+          {/* ✅ PREVIEW PARA ADMINISTRADORES */}
+          {formData.role === "admin" && (
+            <fieldset
+              style={{
+                ...styles.fieldset,
+                borderColor: "var(--warning)",
+                backgroundColor: "rgba(243, 156, 18, 0.05)",
+              }}
+            >
+              <legend
+                style={{
+                  ...styles.legend,
+                  borderColor: "var(--warning)",
+                  color: "var(--warning)",
+                  fontWeight: "600",
+                }}
+              >
+                <span style={styles.legendIcon}>👑</span>
+                Configuração de Administrador
+              </legend>
+
+              <div
+                style={{
+                  ...styles.emendaInfo,
+                  backgroundColor: "rgba(243, 156, 18, 0.1)",
+                  borderColor: "var(--warning)",
+                }}
+              >
+                <div
+                  style={{
+                    color: "var(--warning)",
+                    fontWeight: "600",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  👑 <strong>Privilégios de Administrador:</strong>
+                </div>
+                <div
+                  style={{
+                    padding: "12px",
+                    backgroundColor: "rgba(243, 156, 18, 0.05)",
+                    borderRadius: "6px",
+                    fontSize: "0.9em",
+                    lineHeight: "1.4",
+                  }}
+                >
+                  🌐 <strong>Acesso:</strong> Todos os municípios e UFs
+                  <br />
+                  📋 <strong>Emendas:</strong> Criar, editar, excluir todas as
+                  emendas
+                  <br />
+                  💰 <strong>Despesas:</strong> Gerenciar despesas de qualquer
+                  emenda
+                  <br />
+                  👥 <strong>Usuários:</strong> Gerenciar todos os usuários do
+                  sistema
+                  <br />
+                  📊 <strong>Relatórios:</strong> Acesso a relatórios
+                  consolidados
+                  <br />
+                  ⚙️ <strong>Sistema:</strong> Configurações administrativas
                 </div>
               </div>
             </fieldset>
@@ -282,23 +574,34 @@ const UserForm = ({
             >
               ❌ Cancelar
             </button>
+
             <button
               type="submit"
               style={{
                 ...styles.submitButton,
                 opacity: saving ? 0.6 : 1,
-                cursor: saving ? "not-allowed" : "pointer"
+                cursor: saving ? "not-allowed" : "pointer",
               }}
               disabled={saving}
             >
               {saving ? (
-                <span>
-                  ⏳ {editingUser ? "Atualizando..." : "Criando..."}
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid transparent",
+                      borderTop: "2px solid currentColor",
+                      borderRadius: "50%",
+                      animation: "userFormSpin 1s linear infinite",
+                    }}
+                  ></div>
+                  {editingUser ? "Atualizando..." : "Criando..."}
                 </span>
               ) : (
-                <span>
-                  {editingUser ? "💾 Atualizar" : "✅ Criar"} Usuário
-                </span>
+                <span>{editingUser ? "💾 Atualizar" : "✅ Criar"} Usuário</span>
               )}
             </button>
           </div>
@@ -308,7 +611,7 @@ const UserForm = ({
   );
 };
 
-// ✅ ESTILOS UNIVERSAIS APLICADOS (seguindo padrão EmendaForm/DespesaForm)
+// ✅ ESTILOS UNIVERSAIS APLICADOS (seguindo padrão SICEFSUS)
 const styles = {
   overlay: {
     position: "fixed",
@@ -323,7 +626,7 @@ const styles = {
     zIndex: 1000,
     padding: "20px",
     backdropFilter: "blur(12px) saturate(180%)",
-    animation: "fadeIn 0.3s ease",
+    animation: "userFormFadeIn 0.3s ease",
   },
 
   modal: {
@@ -336,7 +639,7 @@ const styles = {
     overflowY: "auto",
     border: "2px solid var(--primary)",
     color: "var(--theme-text)",
-    animation: "slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+    animation: "userFormSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
     transition: "all 0.3s ease",
   },
 
@@ -347,6 +650,9 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+    color: "white",
   },
 
   headerTitle: {
@@ -354,12 +660,13 @@ const styles = {
     margin: 0,
     fontSize: "1.4em",
     fontWeight: "600",
+    color: "white",
   },
 
   closeButton: {
-    background: "var(--theme-surface-secondary)",
-    border: "1px solid var(--theme-border)",
-    color: "var(--theme-text-secondary)",
+    background: "rgba(255, 255, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    color: "white",
     width: "32px",
     height: "32px",
     borderRadius: "50%",
@@ -369,6 +676,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     transition: "all 0.2s ease",
+    backdropFilter: "blur(10px)",
   },
 
   // ✅ APLICANDO ESTILOS UNIVERSAIS DO SISTEMA
@@ -392,5 +700,35 @@ const styles = {
   cancelButtonStyle: formStyles.cancelButtonStyle,
   submitButton: formStyles.submitButton,
 };
+
+// ✅ ADICIONAR ANIMAÇÕES CSS GLOBALMENTE (uma única vez)
+if (!document.getElementById("userform-animations")) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "userform-animations";
+  styleSheet.type = "text/css";
+  styleSheet.innerHTML = `
+    @keyframes userFormSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes userFormFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes userFormSlideUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.95); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+      }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default UserForm;
