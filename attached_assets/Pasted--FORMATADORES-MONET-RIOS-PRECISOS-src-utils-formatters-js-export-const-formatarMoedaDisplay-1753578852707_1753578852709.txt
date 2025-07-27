@@ -1,0 +1,78 @@
+// ✅ FORMATADORES MONETÁRIOS PRECISOS - src/utils/formatters.js
+
+export const formatarMoedaDisplay = (valor) => {
+  if (!valor && valor !== 0) return "R$ 0,00";
+  
+  const numero = typeof valor === 'string' 
+    ? parseFloat(valor.replace(/[^\d,]/g, '').replace(',', '.'))
+    : valor;
+    
+  if (isNaN(numero)) return "R$ 0,00";
+  
+  return numero.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+export const formatarMoedaInput = (valor) => {
+  // Remove tudo que não é número
+  let numero = valor.replace(/\D/g, "");
+  
+  if (numero.length === 0) return "";
+  if (numero.length === 1) return `0,0${numero}`;
+  if (numero.length === 2) return `0,${numero}`;
+  
+  // Insere vírgula para centavos
+  numero = numero.replace(/^(\d+)(\d{2})$/, "$1,$2");
+  
+  // Insere pontos para milhares
+  numero = numero.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
+  
+  return numero;
+};
+
+export const parseValorMonetario = (valorFormatado) => {
+  if (!valorFormatado) return 0;
+  
+  const numero = valorFormatado
+    .replace(/[^\d,]/g, '')  // Remove tudo exceto números e vírgula
+    .replace(',', '.');       // Troca vírgula por ponto
+    
+  return parseFloat(numero) || 0;
+};
+
+export const calcularSaldoEmenda = (valorTotal, valorExecutado) => {
+  const total = parseValorMonetario(valorTotal);
+  const executado = parseValorMonetario(valorExecutado);
+  
+  return Math.max(0, total - executado);
+};
+
+// ✅ CORREÇÃO PARA USAR NO DESPESAFORM
+export const useMoedaFormatting = () => {
+  const [valorError, setValorError] = useState('');
+  
+  const handleValorChange = (valor, emendaInfo, setFormData) => {
+    const valorFormatado = formatarMoedaInput(valor);
+    setFormData(prev => ({ ...prev, valor: valorFormatado }));
+    
+    // Validação de saldo
+    if (emendaInfo && valorFormatado) {
+      const valorNumerico = parseValorMonetario(valorFormatado);
+      const saldoDisponivel = emendaInfo.saldoDisponivel || 0;
+      
+      if (valorNumerico > saldoDisponivel) {
+        setValorError(
+          `Valor excede saldo disponível: ${formatarMoedaDisplay(saldoDisponivel)}`
+        );
+      } else {
+        setValorError('');
+      }
+    }
+  };
+  
+  return { valorError, handleValorChange };
+};
