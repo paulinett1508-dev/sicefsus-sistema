@@ -3,14 +3,39 @@
 import React from "react";
 
 const AdminStats = ({ users }) => {
-  // ✅ CALCULAR ESTATÍSTICAS ESSENCIAIS
+  // ✅ CALCULAR ESTATÍSTICAS ESSENCIAIS COM LOCALIZAÇÃO
   const calculateStats = () => {
     const total = users.length;
     const active = users.filter((u) => u.status === "ativo").length;
     const admins = users.filter((u) => u.role === "admin").length;
+    const operators = users.filter((u) => u.role === "user").length;
     const pendingFirstAccess = users.filter((u) => u.primeiroAcesso).length;
+    
+    // ✅ ESTATÍSTICAS DE LOCALIZAÇÃO
+    const operatorsWithLocation = users.filter((u) => 
+      u.role === "user" && u.municipio && u.uf
+    ).length;
+    const operatorsWithoutLocation = operators - operatorsWithLocation;
+    
+    // Contagem por UF
+    const locationStats = users
+      .filter((u) => u.role === "user" && u.uf)
+      .reduce((acc, user) => {
+        const uf = user.uf.toUpperCase();
+        acc[uf] = (acc[uf] || 0) + 1;
+        return acc;
+      }, {});
 
-    return { total, active, admins, pendingFirstAccess };
+    return { 
+      total, 
+      active, 
+      admins, 
+      operators,
+      pendingFirstAccess,
+      operatorsWithLocation,
+      operatorsWithoutLocation,
+      locationStats
+    };
   };
 
   const stats = calculateStats();
@@ -32,7 +57,7 @@ const AdminStats = ({ users }) => {
 
   return (
     <div style={styles.container}>
-      {/* ✅ RESUMO COMPACTO EM UMA LINHA */}
+      {/* ✅ RESUMO COMPACTO COM LOCALIZAÇÃO */}
       <div style={styles.summaryBar}>
         <div style={styles.summaryItem}>
           <span style={styles.summaryLabel}>Total:</span>
@@ -48,6 +73,20 @@ const AdminStats = ({ users }) => {
           <span style={styles.summaryLabel}>Admins:</span>
           <span style={{...styles.summaryValue, color: 'var(--warning)'}}>{stats.admins}</span>
         </div>
+        <div style={styles.summaryDivider}>•</div>
+        <div style={styles.summaryItem}>
+          <span style={styles.summaryLabel}>Operadores:</span>
+          <span style={{...styles.summaryValue, color: 'var(--info)'}}>{stats.operators}</span>
+        </div>
+        {stats.operatorsWithoutLocation > 0 && (
+          <>
+            <div style={styles.summaryDivider}>•</div>
+            <div style={styles.summaryItem}>
+              <span style={styles.summaryLabel}>Sem Localização:</span>
+              <span style={{...styles.summaryValue, color: 'var(--error)'}}>{stats.operatorsWithoutLocation}</span>
+            </div>
+          </>
+        )}
         {stats.pendingFirstAccess > 0 && (
           <>
             <div style={styles.summaryDivider}>•</div>
@@ -59,12 +98,32 @@ const AdminStats = ({ users }) => {
         )}
       </div>
 
-      {/* ✅ ALERTAS IMPORTANTES APENAS QUANDO NECESSÁRIO */}
+      {/* ✅ ALERTAS IMPORTANTES DE LOCALIZAÇÃO E ACESSO */}
+      {stats.operatorsWithoutLocation > 0 && (
+        <div style={{...styles.alertBanner, borderColor: 'var(--error)', backgroundColor: 'var(--error-light)'}}>
+          <span style={styles.alertIcon}>🚨</span>
+          <span style={{...styles.alertText, color: 'var(--error-dark)'}}>
+            <strong>CRÍTICO:</strong> {stats.operatorsWithoutLocation} operador(es) sem localização definida - não poderão acessar emendas
+          </span>
+        </div>
+      )}
+      
       {stats.pendingFirstAccess > 0 && (
         <div style={styles.alertBanner}>
           <span style={styles.alertIcon}>⚠️</span>
           <span style={styles.alertText}>
             {stats.pendingFirstAccess} usuário(s) aguardando primeiro acesso
+          </span>
+        </div>
+      )}
+
+      {Object.keys(stats.locationStats).length > 0 && (
+        <div style={{...styles.alertBanner, borderColor: 'var(--info)', backgroundColor: 'var(--info-light)'}}>
+          <span style={styles.alertIcon}>📍</span>
+          <span style={{...styles.alertText, color: 'var(--info-dark)'}}>
+            Operadores por UF: {Object.entries(stats.locationStats)
+              .map(([uf, count]) => `${uf}(${count})`)
+              .join(', ')}
           </span>
         </div>
       )}

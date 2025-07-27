@@ -212,18 +212,23 @@ const UserForm = ({
             </div>
           </fieldset>
 
-          {/* ✅ SEÇÃO DE LOCALIZAÇÃO MELHORADA (APENAS OPERADORES) */}
+          {/* ✅ SEÇÃO DE LOCALIZAÇÃO OBRIGATÓRIA (APENAS OPERADORES) */}
           {formData.role === "user" && (
-            <fieldset style={{...styles.fieldset, borderColor: "var(--warning)"}}>
-              <legend style={{...styles.legend, borderColor: "var(--warning)", color: "var(--warning)"}}>
+            <fieldset style={{...styles.fieldset, borderColor: "var(--error)", backgroundColor: "var(--error-light)"}}>
+              <legend style={{...styles.legend, borderColor: "var(--error)", color: "var(--error)"}}>
                 <span style={styles.legendIcon}>📍</span>
-                Localização de Acesso
+                Localização de Acesso (OBRIGATÓRIO)
               </legend>
 
-              <div style={{...styles.emendaInfo, backgroundColor: "var(--warning-light)", borderColor: "var(--warning)"}}>
-                <p style={{margin: 0, color: "var(--warning-dark)", fontWeight: "600"}}>
-                  ⚠️ Operadores têm acesso limitado a emendas de sua região
-                </p>
+              <div style={{...styles.emendaInfo, backgroundColor: "var(--error-light)", borderColor: "var(--error)"}}>
+                <div style={{margin: 0, color: "var(--error-dark)", fontWeight: "600"}}>
+                  🔒 <strong>IMPORTANTE:</strong> Operadores só podem visualizar e gerenciar emendas do município cadastrado
+                </div>
+                <div style={{marginTop: "8px", color: "var(--error-dark)", fontSize: "0.9em"}}>
+                  • O município definido aqui determina quais emendas o usuário poderá acessar<br/>
+                  • Esta configuração não pode ser alterada após a criação do usuário<br/>
+                  • Para mudança de localização, será necessário criar novo usuário
+                </div>
               </div>
 
               <div style={styles.formGrid}>
@@ -233,15 +238,20 @@ const UserForm = ({
                   </label>
                   <input
                     type="text"
-                    style={styles.input}
+                    style={{...styles.input, borderColor: "var(--error)"}}
                     value={formData.municipio}
                     onChange={(e) =>
-                      setFormData({ ...formData, municipio: e.target.value })
+                      setFormData({ ...formData, municipio: e.target.value.trim() })
                     }
-                    disabled={saving}
-                    placeholder="Digite o nome do município"
+                    disabled={saving || editingUser}
+                    placeholder="Ex: São Paulo, Rio de Janeiro, Belo Horizonte"
                     required={formData.role === "user"}
+                    minLength="2"
+                    maxLength="100"
                   />
+                  <small style={{...styles.helpText, color: "var(--error-dark)"}}>
+                    {editingUser ? "Localização não pode ser alterada após criação" : "Digite o nome completo do município"}
+                  </small>
                 </div>
 
                 <div style={styles.formGroup}>
@@ -249,12 +259,12 @@ const UserForm = ({
                     Estado (UF) <span style={styles.required}>*</span>
                   </label>
                   <select
-                    style={styles.select}
+                    style={{...styles.select, borderColor: "var(--error)"}}
                     value={formData.uf}
                     onChange={(e) =>
                       setFormData({ ...formData, uf: e.target.value })
                     }
-                    disabled={saving}
+                    disabled={saving || editingUser}
                     required={formData.role === "user"}
                   >
                     <option value="">Selecione o Estado</option>
@@ -264,6 +274,9 @@ const UserForm = ({
                       </option>
                     ))}
                   </select>
+                  <small style={{...styles.helpText, color: "var(--error-dark)"}}>
+                    {editingUser ? "UF não pode ser alterada após criação" : "Selecione o estado do município"}
+                  </small>
                 </div>
               </div>
             </fieldset>

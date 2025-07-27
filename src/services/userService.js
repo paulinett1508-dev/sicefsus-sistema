@@ -66,23 +66,49 @@ export class UserService {
     }
   }
 
-  // ✅ VALIDAR DADOS DO FORMULÁRIO
+  // ✅ VALIDAR DADOS DO FORMULÁRIO COM FOCO EM LOCALIZAÇÃO
   validateFormData(formData, isEditing = false) {
     const errors = [];
 
+    // Validações básicas
     if (!formData.email || !formData.nome) {
       errors.push("Email e nome são obrigatórios");
-    }
-
-    // Validação específica para operadores
-    if (formData.role === "user" && (!formData.municipio || !formData.uf)) {
-      errors.push("Município e UF são obrigatórios para operadores");
     }
 
     // Validação de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       errors.push("Email inválido");
+    }
+
+    // ✅ VALIDAÇÃO RIGOROSA PARA OPERADORES
+    if (formData.role === "user") {
+      // Município obrigatório
+      if (!formData.municipio || formData.municipio.trim().length === 0) {
+        errors.push("Município é obrigatório para operadores");
+      } else if (formData.municipio.trim().length < 2) {
+        errors.push("Município deve ter pelo menos 2 caracteres");
+      } else if (formData.municipio.trim().length > 100) {
+        errors.push("Município não pode ter mais de 100 caracteres");
+      }
+
+      // UF obrigatória
+      if (!formData.uf || formData.uf.trim().length === 0) {
+        errors.push("UF é obrigatória para operadores");
+      }
+
+      // Validação de caracteres especiais no município
+      const municipioRegex = /^[a-zA-ZÀ-ÿ\s\-']+$/;
+      if (formData.municipio && !municipioRegex.test(formData.municipio)) {
+        errors.push("Município contém caracteres inválidos");
+      }
+    }
+
+    // ✅ ADMINS NÃO DEVEM TER LOCALIZAÇÃO
+    if (formData.role === "admin") {
+      if (formData.municipio || formData.uf) {
+        console.warn("⚠️ Admin com localização será limpa automaticamente");
+      }
     }
 
     return {
@@ -134,10 +160,19 @@ export class UserService {
         senhaTemporaria: true,
       };
 
-      // Adicionar localização apenas para operadores
+      // ✅ GERENCIAR LOCALIZAÇÃO BASEADO NO PERFIL
       if (formData.role === "user") {
+        // Operadores: localização obrigatória e normalizada
         userData.municipio = formData.municipio.trim();
         userData.uf = formData.uf.trim().toLowerCase();
+        
+        console.log(`📍 Operador criado com localização: ${userData.municipio}/${userData.uf.toUpperCase()}`);
+      } else {
+        // Admins: sem localização
+        userData.municipio = null;
+        userData.uf = null;
+        
+        console.log(`👑 Admin criado sem restrição de localização`);
       }
 
       // Criar documento no Firestore
