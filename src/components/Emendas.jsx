@@ -453,3 +453,142 @@ const Emendas = ({ usuario }) => {
                     style: "currency",
                     currency: "BRL",
                   })}
+                </h3>
+                <p style={styles.statLabel}>VALOR TOTAL</p>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  const styles = {
+    compactHeader: {
+      backgroundColor: "#f0f0f0",
+      padding: "10px",
+      marginBottom: "20px",
+      borderRadius: "5px",
+    },
+    statusInfo: {
+      display: "flex",
+      alignItems: "center",
+      flexWrap: "wrap",
+    },
+    statusText: {
+      fontWeight: "bold",
+      marginRight: "5px",
+    },
+    statusValue: {
+      color: "green",
+      marginRight: "10px",
+    },
+    versionText: {
+      fontWeight: "bold",
+      marginRight: "5px",
+    },
+    versionValue: {
+      color: "#555",
+      marginRight: "10px",
+    },
+    divider: {
+      margin: "0 5px",
+    },
+    filterInfo: {
+      fontStyle: "italic",
+      color: "#777",
+    },
+    calculating: {
+      fontStyle: "italic",
+      color: "orange",
+    },
+    statsContainer: {
+      display: "flex",
+      justifyContent: "space-around",
+      marginBottom: "20px",
+      flexWrap: "wrap",
+    },
+    statCard: {
+      backgroundColor: "#fff",
+      padding: "15px",
+      borderRadius: "5px",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      textAlign: "center",
+      width: "200px",
+      marginBottom: "15px",
+    },
+    statNumber: {
+      fontSize: "24px",
+      fontWeight: "bold",
+      color: "#333",
+    },
+    statLabel: {
+      fontSize: "14px",
+      color: "#666",
+    },
+    button: {
+      backgroundColor: "#4CAF50",
+      color: "white",
+      padding: "10px 20px",
+      margin: "0 10px",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+    },
+    actionButtons: {
+      marginTop: "20px",
+      textAlign: "center",
+    },
+    warningContainer: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      backgroundColor: "#f9f9f9",
+    },
+    warningCard: {
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+      textAlign: "center",
+      maxWidth: "500px",
+    },
+    warningTitle: {
+      color: "#ff9800",
+      marginBottom: "15px",
+    },
+    warningText: {
+      color: "#555",
+      marginBottom: "10px",
+      fontSize: "16px",
+    },
+    userInfo: {
+      marginTop: "20px",
+      fontSize: "14px",
+      color: "#777",
+    },
+  };
+
+  return (
+    <>
+      {/* Modal UX - Primeira Despesa (IMPLEMENTADO) */}
+      <PrimeiraDespesaModal
+        show={showPrimeiraDespesaModal}
+        onClose={() => setShowPrimeiraDespesaModal(false)}
+        emenda={emendaParaPrimeiraDespesa}
+        onCriarDespesa={() => {
+          console.log(
+            "✅ Modal UX - Criar primeira despesa para",
+            emendaParaPrimeiraDespesa.numero,
+          );
+          setShowPrimeiraDespesaModal(false);
+          setEmendaSelecionada(emendaParaPrimeiraDespesa);
+          setCurrentView("criar-despesa");
+        }}
+      />
+      {renderContent()}
+    </>
+  );
+};
+
+export default Emendas;
