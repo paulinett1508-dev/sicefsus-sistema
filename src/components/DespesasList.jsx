@@ -1,19 +1,11 @@
-// DespesasList.jsx - PADRONIZADO COM EMENDASLIST v1.0
-// ✅ Mesmo padrão visual e estrutural da listagem de emendas
+// DespesasList.jsx - CORRIGIDO SEM useEmendaDespesa
+// ✅ CORREÇÃO: Receber dados via props ao invés do hook conflitante
 
 import React, { useEffect, useState } from "react";
+import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
 import DespesasFilters from "./DespesasFilters";
 import DespesasTable from "./DespesasTable";
-import useEmendaDespesa from "../hooks/useEmendaDespesa";
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
 const PRIMARY = "#154360";
@@ -25,7 +17,11 @@ const WHITE = "#fff";
 const GRAY = "#f4f6f8";
 
 export default function DespesasList({
-  refresh,
+  // ✅ CORREÇÃO: Receber dados via props ao invés do hook
+  despesas = [],
+  emendas = [],
+  loading = false,
+  error = null,
   onEdit,
   onView,
   onDelete,
@@ -34,61 +30,35 @@ export default function DespesasList({
   onExcluirDespesa,
   usuario,
   filtroInicial = null,
+  onRecarregar, // ✅ NOVO: Callback para recarregar dados
 }) {
-  // ✅ Hook integrado para dados em tempo real
-  const {
-    emendas,
-    despesas: despesasHook,
-    loading: hookLoading,
-    error: hookError,
-    obterEstatisticasGerais,
-    atualizarSaldoEmenda,
-    recarregar,
-  } = useEmendaDespesa(null, {
-    carregarTodasEmendas: true,
-    incluirEstatisticas: true,
-    autoRefresh: true,
-  });
-
-  // ✅ Estados locais
-  const [despesas, setDespesas] = useState([]);
+  // ✅ Estados locais simplificados
   const [despesasFiltradas, setDespesasFiltradas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [estatisticasGerais, setEstatisticasGerais] = useState(null);
   const [estatisticasFiltro, setEstatisticasFiltro] = useState(null);
 
-  // ✅ Sincronizar dados do hook com estado local - CORRIGIDO
+  console.log("📊 DespesasList: Recebendo dados via props", {
+    despesasCount: despesas.length,
+    emendasCount: emendas.length,
+    loading,
+    error,
+  });
+
+  // ✅ Sincronizar dados recebidos via props
   useEffect(() => {
-    // ✅ CORREÇÃO: Sempre atualizar dados independente do loading
-    setDespesas(despesasHook || []);
+    console.log("📊 DespesasList: Sincronizando dados", despesas.length);
 
     // Aplicar filtro inicial se existir
     if (filtroInicial?.emendaId) {
-      const filtradas = (despesasHook || []).filter(
+      const filtradas = despesas.filter(
         (d) => d.emendaId === filtroInicial.emendaId,
       );
       setDespesasFiltradas(filtradas);
       calcularEstatisticasFiltro(filtradas);
     } else {
-      setDespesasFiltradas(despesasHook || []);
-      calcularEstatisticasFiltro(despesasHook || []);
+      setDespesasFiltradas(despesas);
+      calcularEstatisticasFiltro(despesas);
     }
-
-    // ✅ CORREÇÃO CRÍTICA: Definir loading baseado no hook loading
-    setLoading(hookLoading);
-    
-    console.log("📊 DespesasList: Dados sincronizados", {
-      hookLoading,
-      despesasCount: (despesasHook || []).length,
-      localLoading: hookLoading
-    });
-  }, [despesasHook, filtroInicial, hookLoading]);
-
-  // ✅ Calcular estatísticas gerais
-  useEffect(() => {
-    const stats = obterEstatisticasGerais();
-    setEstatisticasGerais(stats);
-  }, [obterEstatisticasGerais]);
+  }, [despesas, filtroInicial]);
 
   // ✅ Função para calcular estatísticas dos despesas filtradas
   const calcularEstatisticasFiltro = (despesasList) => {
@@ -102,62 +72,11 @@ export default function DespesasList({
       (sum, d) => sum + (d.valor || 0),
       0,
     );
-    const mediaValorDespesa =
-      totalDespesas > 0 ? valorTotalDespesas / totalDespesas : 0;
-
-    // Estatísticas por natureza
-    const despesasPorNatureza = despesasList.reduce((acc, d) => {
-      const natureza = d.naturezaDespesa || "Não informado";
-      acc[natureza] = (acc[natureza] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Estatísticas por fornecedor
-    const despesasPorFornecedor = despesasList.reduce((acc, d) => {
-      const fornecedor = d.notaFiscalFornecedor || "Não informado";
-      acc[fornecedor] = (acc[fornecedor] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Emendas envolvidas
-    const emendasEnvolvidas = [...new Set(despesasList.map((d) => d.emendaId))]
-      .length;
-
-    // Despesas por mês
-    const despesasPorMes = despesasList.reduce((acc, d) => {
-      if (!d.data) return acc;
-      const mes = new Date(d.data).toLocaleString("pt-BR", {
-        month: "2-digit",
-        year: "numeric",
-      });
-      acc[mes] = (acc[mes] || 0) + 1;
-      return acc;
-    }, {});
-
-    // Valores máximo e mínimo
-    const valores = despesasList.map((d) => d.valor || 0);
-    const maiorDespesa = Math.max(...valores);
-    const menorDespesa = Math.min(...valores.filter((v) => v > 0));
 
     setEstatisticasFiltro({
       totalDespesas,
       valorTotalDespesas,
-      mediaValorDespesa,
-      despesasPorNatureza,
-      despesasPorFornecedor,
-      emendasEnvolvidas,
-      despesasPorMes,
-      maiorDespesa: maiorDespesa > 0 ? maiorDespesa : 0,
-      menorDespesa: menorDespesa < Infinity ? menorDespesa : 0,
     });
-  };
-
-  // ✅ Função para formatar moeda
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
   };
 
   // ✅ Handler para filtros
@@ -192,28 +111,21 @@ export default function DespesasList({
     }
   };
 
-  // ✅ Handler para excluir atualizado com hook
+  // ✅ Handler para excluir simplificado
   const handleDelete = async (despesaId) => {
     if (!window.confirm("Tem certeza que deseja excluir esta despesa?")) {
       return;
     }
 
     try {
-      // Encontrar despesa para obter emendaId
-      const despesa = despesas.find((d) => d.id === despesaId);
-      const emendaId = despesa?.emendaId;
-
       // Excluir do Firebase
       await deleteDoc(doc(db, "despesas", despesaId));
 
-      // Atualizar listas locais
-      setDespesas((prev) => prev.filter((d) => d.id !== despesaId));
-      setDespesasFiltradas((prev) => prev.filter((d) => d.id !== despesaId));
+      console.log("✅ DespesasList: Despesa deletada:", despesaId);
 
-      // Usar hook para atualizar saldo da emenda
-      if (emendaId) {
-        await atualizarSaldoEmenda(emendaId);
-        await recarregar();
+      // Chamar callback para recarregar dados no componente pai
+      if (onRecarregar && typeof onRecarregar === "function") {
+        onRecarregar();
       }
 
       // Chamar handler do componente pai se existir
@@ -223,7 +135,7 @@ export default function DespesasList({
         onDelete(despesaId);
       }
     } catch (error) {
-      console.error("Erro ao excluir despesa:", error);
+      console.error("❌ DespesasList: Erro ao excluir despesa:", error);
       alert("Erro ao excluir despesa. Tente novamente.");
     }
   };
@@ -245,8 +157,8 @@ export default function DespesasList({
     return filtroInicial.emendaId;
   };
 
-  // ✅ Loading combinado - CORRIGIDO
-  if (hookLoading) {
+  // ✅ Loading
+  if (loading) {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.loadingSpinner}></div>
@@ -255,16 +167,18 @@ export default function DespesasList({
     );
   }
 
-  // ✅ Error do hook
-  if (hookError) {
+  // ✅ Error
+  if (error) {
     return (
       <div style={styles.errorContainer}>
         <div style={styles.errorIcon}>❌</div>
         <h3 style={styles.errorTitle}>Erro ao carregar dados</h3>
-        <p style={styles.errorMessage}>{hookError}</p>
-        <button onClick={recarregar} style={styles.retryButton}>
-          🔄 Tentar novamente
-        </button>
+        <p style={styles.errorMessage}>{error}</p>
+        {onRecarregar && (
+          <button onClick={onRecarregar} style={styles.retryButton}>
+            🔄 Tentar novamente
+          </button>
+        )}
       </div>
     );
   }
@@ -276,7 +190,7 @@ export default function DespesasList({
         <div style={styles.emptyContainer}>
           <div style={styles.emptyIcon}>💰</div>
           <h2 style={styles.emptyTitle}>Nenhuma despesa registrada</h2>
-          <p style={styles.emptyText          }>
+          <p style={styles.emptyText}>
             Clique em "Nova Despesa" para começar a registrar suas despesas
             financeiras.
           </p>
@@ -322,7 +236,7 @@ export default function DespesasList({
         despesas={despesasFiltradas}
         emendas={emendas}
         totalDespesas={despesas.length}
-        loading={loading}
+        loading={false}
         usuario={usuario}
         onEdit={handleEdit}
         onView={handleView}
@@ -332,7 +246,7 @@ export default function DespesasList({
   );
 }
 
-// ✅ Estilos padronizados (mesmo padrão do EmendasList)
+// ✅ Estilos mantidos (sem mudanças)
 const styles = {
   container: {
     backgroundColor: GRAY,
@@ -489,203 +403,4 @@ const styles = {
     opacity: 0.8,
     fontWeight: "400",
   },
-
-  statsSection: {
-    backgroundColor: WHITE,
-    borderRadius: 12,
-    padding: "24px",
-    margin: "0 32px 24px 32px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-  },
-
-  statsTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: PRIMARY,
-    margin: "0 0 20px 0",
-    borderBottom: "2px solid #4A90E2",
-    paddingBottom: "8px",
-  },
-
-  statsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "16px",
-  },
-
-  statCard: {
-    backgroundColor: "#f8f9fa",
-    padding: "16px",
-    borderRadius: "10px",
-    border: "1px solid #e9ecef",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    transition: "all 0.3s ease",
-    cursor: "default",
-  },
-
-  statIcon: {
-    fontSize: "24px",
-    width: "40px",
-    height: "40px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(74, 144, 226, 0.1)",
-    borderRadius: "50%",
-    flexShrink: 0,
-  },
-
-  statContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
-    flex: 1,
-    minWidth: 0,
-  },
-
-  statValue: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: PRIMARY,
-    wordBreak: "break-word",
-  },
-
-  statLabel: {
-    fontSize: "11px",
-    color: "#6c757d",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    fontWeight: "600",
-  },
-
-  distributionSection: {
-    backgroundColor: WHITE,
-    borderRadius: 12,
-    padding: "20px",
-    margin: "0 32px 24px 32px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-  },
-
-  distributionTitle: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: PRIMARY,
-    margin: "0 0 16px 0",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  distributionGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "12px",
-  },
-
-  distributionItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    padding: "10px 14px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    border: "1px solid #e9ecef",
-    transition: "all 0.2s ease",
-  },
-
-  distributionCount: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: ACCENT,
-    minWidth: "28px",
-    textAlign: "center",
-    backgroundColor: "rgba(74, 144, 226, 0.1)",
-    borderRadius: "6px",
-    padding: "4px 8px",
-  },
-
-  distributionLabel: {
-    fontSize: "13px",
-    color: "#495057",
-    flex: 1,
-    fontWeight: "500",
-  },
 };
-
-// ✅ CSS adicional para animações
-const additionalCSS = `
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-}
-
-.distribution-item:hover {
-  background-color: #e3f2fd;
-  border-color: #90caf9;
-  transform: translateX(2px);
-}
-
-.empty-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-}
-
-.retry-button:hover {
-  background-color: #357ABD;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px}) {
-  .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-  }
-
-  .stat-card {
-    padding: 12px;
-    flex-direction: column;
-    text-align: center;
-    gap: 8px;
-  }
-
-  .stat-icon {
-    width: 36px;
-    height: 36px;
-    fontSize: 20px;
-  }
-
-  .stat-value {
-    font-size: 14px;
-  }
-
-  .distribution-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .filtro-automatico-info {
-    margin: 0 16px 16px 16px;
-    padding: 12px 16px;
-  }
-
-  .stats-section,
-  .distribution-section {
-    margin: 0 16px 16px 16px;
-    padding: 16px;
-  }
-}
-`;
-
-// Inserir CSS dinamicamente
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = additionalCSS;
-  document.head.appendChild(style);
-}
