@@ -1,0 +1,278 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: {apiKey: '✅ Configurada', authDomain: '✅ Configurada', projectId: '✅ Configurada', storageBucket: '✅ Configurada', messagingSenderId: '✅ Configurada', …}
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+UserContext.jsx:121 🔄 UserContext: Carregando dados completos do usuário...
+UserContext.jsx:123 👤 UserContext: Dados do usuário carregados: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi', …}
+UserContext.jsx:137 ✅ UserContext: Usuário ativo definido no contexto
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: false, emendasTipo: 'object', emendasLength: 0}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:294 ⏳ Aguardando dados: {loading: true, emendasValidas: true, emendasTipo: 'object', emendasLength: 2}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:266 📊 Calculando estatísticas do Dashboard...
+Dashboard.jsx:267 📋 Emendas disponíveis: 2
+Dashboard.jsx:268 💰 Despesas disponíveis: 2
+Dashboard.jsx:292 ✅ Estatísticas calculadas: {totalEmendas: 2, totalDespesas: 2, valorTotalEmendas: 201500, valorTotalDespesas: 2600, saldoDisponivel: 198900, …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Dashboard.jsx:31 🏠 Dashboard iniciado
+Dashboard.jsx:32 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', lastLogin: _Timestamp, municipio: 'Floriano', displayName: 'Paulo Miranda', …}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:222 📊 Carregando despesas do Firebase...
+Despesas.jsx:252 🎯 Sistema SICEFSUS v2.0 - Despesas carregado
+Despesas.jsx:222 📊 Carregando despesas do Firebase...
+Despesas.jsx:252 🎯 Sistema SICEFSUS v2.0 - Despesas carregado
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:236 ✅ Despesas carregadas: 0
+Despesas.jsx:236 ✅ Despesas carregadas: 0
+Despesas.jsx:210 📋 Emendas disponíveis carregadas: 2
+Despesas.jsx:210 📋 Emendas disponíveis carregadas: 2
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Emendas.jsx:155 🎯 Sistema SICEFSUS v2.1 - Modal UX carregado
+useEmendaDespesa.js:473 📊 Carregando todas as emendas...
+Emendas.jsx:155 🎯 Sistema SICEFSUS v2.1 - Modal UX carregado
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:73 📊 Calculando métricas de despesas para 2 emendas
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:125 ✅ Métricas calculadas: 2
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:40 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Emendas.jsx:162 ✅ Emendas com métricas carregadas: 2
+Emendas.jsx:166 💰 Emendas com despesas: 2
+Emendas.jsx:274 💰 Acessando despesas da emenda: EMD001 - Total: 1
+Emendas.jsx:291 📋 Navegando para despesas filtradas: {emendaId: 'g2EFNl56RYBl0YXsSfNH', totalDespesas: 1}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:79 🎯 Aplicando filtro automático da emenda: {emendaId: 'g2EFNl56RYBl0YXsSfNH', numeroEmenda: 'EMD001', parlamentar: 'André Fufuca', valorRecurso: 200000, totalDespesas: 1, …}
+Despesas.jsx:95 🍞 Breadcrumb configurado: {origem: 'Emendas', emenda: 'André Fufuca - EMD001', totalDespesas: 1}
+Despesas.jsx:122 🔍 Carregando despesas com filtros: {emendaId: 'g2EFNl56RYBl0YXsSfNH', numeroEmenda: 'EMD001', parlamentar: 'André Fufuca', valorRecurso: 200000, totalDespesas: 1, …}
+Despesas.jsx:222 📊 Carregando despesas do Firebase...
+Despesas.jsx:252 🎯 Sistema SICEFSUS v2.0 - Despesas carregado
+Despesas.jsx:79 🎯 Aplicando filtro automático da emenda: {emendaId: 'g2EFNl56RYBl0YXsSfNH', numeroEmenda: 'EMD001', parlamentar: 'André Fufuca', valorRecurso: 200000, totalDespesas: 1, …}
+Despesas.jsx:95 🍞 Breadcrumb configurado: {origem: 'Emendas', emenda: 'André Fufuca - EMD001', totalDespesas: 1}
+Despesas.jsx:122 🔍 Carregando despesas com filtros: {emendaId: 'g2EFNl56RYBl0YXsSfNH', numeroEmenda: 'EMD001', parlamentar: 'André Fufuca', valorRecurso: 200000, totalDespesas: 1, …}
+Despesas.jsx:222 📊 Carregando despesas do Firebase...
+Despesas.jsx:252 🎯 Sistema SICEFSUS v2.0 - Despesas carregado
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:170 ✅ Despesas filtradas carregadas: 0
+Despesas.jsx:170 ✅ Despesas filtradas carregadas: 0
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:236 ✅ Despesas carregadas: 0
+Despesas.jsx:236 ✅ Despesas carregadas: 0
+Despesas.jsx:210 📋 Emendas disponíveis carregadas: 2
+Despesas.jsx:210 📋 Emendas disponíveis carregadas: 2
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at button
+    at div
+    at div
+    at div
+    at div
+    at DespesasTable (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesasTable.jsx:29:3)
+    at div
+    at div
+    at Despesas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Despesas.jsx:37:21)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:107:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:177:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:226:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:68:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at ThemeProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/ThemeContext.jsx:20:33)
+    at App
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+validateShorthandPropertyCollisionInDev @ react-dom.development.js:2899
+diffProperties @ react-dom.development.js:10123
+prepareUpdate @ react-dom.development.js:10977
+updateHostComponent$1 @ react-dom.development.js:21786
+completeWork @ react-dom.development.js:22155
+completeUnitOfWork @ react-dom.development.js:26596
+performUnitOfWork @ react-dom.development.js:26568
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at button
+    at div
+    at div
+    at div
+    at div
+    at DespesasTable (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesasTable.jsx:29:3)
+    at div
+    at div
+    at Despesas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Despesas.jsx:37:21)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:107:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:177:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:226:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:68:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at ThemeProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/ThemeContext.jsx:20:33)
+    at App
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+validateShorthandPropertyCollisionInDev @ react-dom.development.js:2899
+diffProperties @ react-dom.development.js:10123
+prepareUpdate @ react-dom.development.js:10977
+updateHostComponent$1 @ react-dom.development.js:21786
+completeWork @ react-dom.development.js:22155
+completeUnitOfWork @ react-dom.development.js:26596
+performUnitOfWork @ react-dom.development.js:26568
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at button
+    at div
+    at div
+    at div
+    at div
+    at DespesasTable (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesasTable.jsx:29:3)
+    at div
+    at div
+    at Despesas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Despesas.jsx:37:21)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:107:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:177:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:226:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:68:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at ThemeProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/ThemeContext.jsx:20:33)
+    at App
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+validateShorthandPropertyCollisionInDev @ react-dom.development.js:2899
+diffProperties @ react-dom.development.js:10123
+prepareUpdate @ react-dom.development.js:10977
+updateHostComponent$1 @ react-dom.development.js:21786
+completeWork @ react-dom.development.js:22155
+completeUnitOfWork @ react-dom.development.js:26596
+performUnitOfWork @ react-dom.development.js:26568
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at button
+    at div
+    at div
+    at div
+    at div
+    at DespesasTable (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesasTable.jsx:29:3)
+    at div
+    at div
+    at Despesas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Despesas.jsx:37:21)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:107:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:177:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:226:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:68:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:70:32)
+    at ThemeProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/ThemeContext.jsx:20:33)
+    at App
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+validateShorthandPropertyCollisionInDev @ react-dom.development.js:2899
+diffProperties @ react-dom.development.js:10123
+prepareUpdate @ react-dom.development.js:10977
+updateHostComponent$1 @ react-dom.development.js:21786
+completeWork @ react-dom.development.js:22155
+completeUnitOfWork @ react-dom.development.js:26596
+performUnitOfWork @ react-dom.development.js:26568
+workLoopSync @ react-dom.development.js:26466
+renderRootSync @ react-dom.development.js:26434
+performSyncWorkOnRoot @ react-dom.development.js:26085
+flushSyncCallbacks @ react-dom.development.js:12042
+(anônimo) @ react-dom.development.js:25651
+Despesas.jsx:284 ➕ Criando nova despesa
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+DespesaForm.jsx:94 🧪 TESTE: Iniciando teste direto do Firebase...
+DespesaForm.jsx:117 🧪 TESTE: Tentando adicionar documento...
+DespesaForm.jsx:119 ✅ TESTE: Documento criado com ID: ysaDLUZCTWv08okNti3P
+DespesaForm.jsx:122 🧪 TESTE: Verificando se documento existe...
+DespesaForm.jsx:126 ✅ TESTE: Documento confirmado: {teste: true, timestamp: _Timestamp, usuario: 'paulinett1508@gmail.com', dados: {…}}
+DespesaForm.jsx:129 🧪 TESTE: Deletando documento de teste...
+DespesaForm.jsx:131 ✅ TESTE: Documento de teste deletado
+Despesas.jsx:290 🔄 Voltando para listagem
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
+Despesas.jsx:51 ✅ Sistema SICEFSUS v2.0 - Despesas - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: 'Floriano', uf: 'pi'}
