@@ -1,0 +1,71 @@
+📋 ARQUIVOS PRIORITÁRIOS IDENTIFICADOS NO HANDOVER:
+🎯 1. FORMULÁRIOS PRINCIPAIS:
+
+src/components/EmendaForm.jsx - Para copiar padrão de formulários
+src/components/DespesaForm.jsx - Para ver estrutura de campos obrigatórios
+src/components/Emendas.jsx - Página principal de listagem
+src/components/Despesas.jsx - Layout e estrutura padrão
+
+📊 2. COMPONENTES DE TABELA/LISTA:
+
+src/components/EmendasTable.jsx - Padrão de tabelas
+src/components/DespesasTable.jsx - Estrutura de colunas e ações
+src/components/EmendasList.jsx - Formato de listas
+src/components/DespesasList.jsx - Layout de cards/items
+
+🎨 3. ESTILOS E COMPONENTES VISUAIS:
+
+src/utils/formStyles.js - "ESTILOS UNIVERSAIS PARA FORMS - COM DARK MODE"
+src/styles/theme.css - Tema e cores do sistema
+src/styles/dashboard.css - Padrões de layout
+src/components/Dashboard.jsx - Para ver padrão de cards e métricas
+
+🔧 4. COMPONENTES AUXILIARES PADRÃO:
+
+src/components/DespesasFilters.jsx - "PADRONIZADO COM EMENDASFILTERS v1.0"
+src/components/EmendasFilters.jsx - Padrão de filtros
+src/components/ConfirmationModal.jsx - Modal padrão do sistema
+src/components/Toast.jsx - Sistema de notificações
+
+
+🎯 FOCO ESPECÍFICO BASEADO NO HANDOVER:
+📐 Padrões a Copiar:
+
+Layout de Páginas - Como Emendas.jsx estrutura header/filtros/tabela
+Formulários - Como EmendaForm usa validações e campos obrigatórios
+Tabelas - Como EmendasTable formata dados e ações
+Estilos Universais - formStyles.js com "DARK MODE COMPLETO"
+
+🎨 Identidade Visual:
+
+Cores definidas em theme.css
+Gradientes e botões do padrão dashboard
+Ícones e badges usados em Emendas/Despesas
+Responsividade mobile/desktop
+
+🔤 Componentes Específicos:
+
+Filtros padronizados (como DespesasFilters)
+Modais de confirmação existentes
+Toast para feedback ao usuário
+Cards de estatísticas como Dashboard
+
+
+📊 RESULTADO ESPERADO:
+Após analisar esses arquivos, vou:
+
+🎨 Replicar cores, tipografia e layout exatos do sistema
+📐 Padronizar estrutura de página como Emendas.jsx
+🔧 Usar formStyles.js para formulários universais
+📱 Garantir responsividade igual aos outros módulos
+✨ Manter identidade visual SICEFSUS 100%
+
+Quais desses arquivos você pode me fornecer primeiro?
+Prioridade máxima:
+
+src/components/Emendas.jsx (estrutura de página)
+src/components/EmendaForm.jsx (padrão de formulário)
+src/utils/formStyles.js (estilos universais)
+src/styles/theme.css (cores e tema)
+
+Com estes 4 arquivos, posso fazer uma padronização completa dos componentes de Usuários seguindo exatamente o mesmo padrão visual do sistema SICEFSUS.
