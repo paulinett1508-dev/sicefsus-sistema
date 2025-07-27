@@ -8,12 +8,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  deleteDoc,
   doc,
-  query,
+  setDoc,
+  updateDoc,
   collection,
+  query,
   where,
   getDocs,
+  addDoc,
+  getDoc,
+  deleteDoc,
   orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -216,11 +220,11 @@ const Despesas = ({ usuario }) => {
       try {
         setLoading(true);
         console.log("📊 Carregando despesas do Firebase...");
-        
+
         // Query para buscar todas as despesas
         const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
         const despesasSnapshot = await getDocs(despesasQuery);
-        
+
         const despesasData = [];
         despesasSnapshot.forEach((doc) => {
           despesasData.push({
@@ -228,10 +232,10 @@ const Despesas = ({ usuario }) => {
             ...doc.data(),
           });
         });
-        
+
         console.log("✅ Despesas carregadas:", despesasData.length);
         setDespesas(despesasData);
-        
+
       } catch (error) {
         console.error("❌ Erro ao carregar despesas:", error);
         setError("Erro ao carregar despesas");
@@ -342,7 +346,7 @@ const Despesas = ({ usuario }) => {
     if (window.confirm("Tem certeza que deseja excluir esta despesa?")) {
       try {
         await deleteDoc(doc(db, "despesas", despesaId));
-        
+
         // Recarregar despesas diretamente
         const despesasQuery = query(collection(db, "despesas"), orderBy("data", "desc"));
         const despesasSnapshot = await getDocs(despesasQuery);
@@ -352,7 +356,7 @@ const Despesas = ({ usuario }) => {
         }));
         setDespesas(despesasData);
         await carregarDespesasFiltradas();
-        
+
         console.log("✅ Despesa deletada com sucesso:", despesaId);
         alert("Despesa deletada com sucesso!");
       } catch (error) {
@@ -636,21 +640,6 @@ const Despesas = ({ usuario }) => {
                 <button onClick={recarregar} style={styles.retryButton}>
                   🔄 Tentar novamente
                 </button>
-              </div>
-            ) : totalDespesas === 0 ? (
-              <div style={styles.emptyContainer}>
-                <p style={styles.emptyText}>
-                  {filtroAutomatico
-                    ? `Nenhuma despesa encontrada para a emenda selecionada.`
-                    : Object.values(filtros).some((v) => v)
-                      ? "Nenhuma despesa encontrada com os filtros aplicados."
-                      : "Nenhuma despesa cadastrada no sistema."}
-                </p>
-                {filtroAutomatico && (
-                  <button onClick={limparFiltros} style={styles.primaryButton}>
-                    Ver todas as despesas
-                  </button>
-                )}
               </div>
             ) : (
               <DespesasTable
