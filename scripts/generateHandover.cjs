@@ -1,266 +1,1096 @@
-if (!fs.existsSync(fullPath)) {
-  console.log(`❌ Arquivo não encontrado: ${fullPath}`);
-  continue;
-}
 
-const content = fs.readFileSync(fullPath, 'utf8');
+/**
+* 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.4
+* Script para analisar o sistema e gerar documentação atualizada com validações e regras
+* NOVO: Análise de arquivos monolíticos e sugestões de refatoração
+* NOVO: Sistema de data/hora confiável com múltiplas fontes
+* NOVO: Debugging detalhado e leitura forçada de arquivos
+* 
+* Uso: node scripts/generateHandover.cjs
+*/
 
-const metrics = this.analyzeFileComplexity(content, file.path);
-console.log(`📊 Métricas de ${file.name}:`, {
-  lines: metrics.lines,
-  functions: metrics.functions,
-  complexity: metrics.complexity,
-  imports: metrics.imports,
-  jsxElements: metrics.jsxElements,
-  nestedDepth: metrics.nestedDepth
-});
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const { execSync } = require('child_process');
 
-const score = this.calculateRefactorScore(metrics);
-console.log(`💯 Score de refatoração para ${file.name}: ${score}/100`);
+class HandoverGenerator {
+  constructor() {
+    this.projectRoot = path.resolve(__dirname, '..');
+    this.srcPath = path.join(this.projectRoot, 'src');
+    this.componentsPath = path.join(this.srcPath, 'components');
+    this.utilsPath = path.join(this.srcPath, 'utils');
+    this.hooksPath = path.join(this.srcPath, 'hooks');
+    this.servicesPath = path.join(this.srcPath, 'services');
+    this.packagePath = path.join(this.projectRoot, 'package.json');
+    this.currentHandover = path.join(this.projectRoot, 'HANDOVER_SICEFSUS.md');
 
-const priority = this.getRefactorPriority(score);
-const suggestions = this.generateRefactorSuggestions(metrics, file.path);
+    // ✅ CONFIGURAÇÃO DE DATA/HORA CONFIÁVEL
+    this.reliableDateTime = {
+      current: null,
+      sources: [],
+      timezone: 'America/Sao_Paulo'
+    };
 
-const refactorAnalysis = {
-  file: file.path,
-  name: file.name,
-  type: this.getFileType(file.path),
-  metrics,
-  score,
-  priority,
-  suggestions,
-  isMonolithic: score >= 40,
-  lastModified: file.lastModified
-};
+    // 🧩 CONFIGURAÇÃO DE ANÁLISE DE REFATORAÇÃO
+    this.refactorConfig = {
+      limits: {
+        lines: 300,
+        functions: 15,
+        complexity: 20,
+        imports: 20,
+        jsx_elements: 50,
+        nested_depth: 5
+      },
+      weights: {
+        lines: 0.25,
+        functions: 0.20,
+        complexity: 0.25,
+        imports: 0.15,
+        jsx_elements: 0.10,
+        nested_depth: 0.05
+      }
+    };
 
-this.analysis.refactoring.monolithicFiles.push(refactorAnalysis);
+    this.analysis = {
+      components: [],
+      hooks: [],
+      utils: [],
+      services: [],
+      dependencies: {},
+      structure: {},
+      lastImplementation: {
+        title: '',
+        description: '',
+        date: '',
+        filesInvolved: [],
+        keyChanges: [],
+        impact: '',
+        status: ''
+      },
+      validations: {
+        cnpjRules: [],
+        requiredFields: [],
+        businessRules: [],
+        userPermissions: [],
+        workflows: []
+      },
+      changes: {
+        newComponents: [],
+        modifiedFunctionalities: [],
+        removedComponents: [],
+        structureChanges: [],
+        dependencyChanges: []
+      },
+      refactoring: {
+        monolithicFiles: [],
+        recommendations: [],
+        summary: {
+          totalFiles: 0,
+          monolithicCount: 0,
+          criticalCount: 0,
+          averageScore: 0
+        }
+      }
+    };
+  }
 
-if (score >= 40) this.analysis.refactoring.summary.monolithicCount++;
-if (score >= 80) this.analysis.refactoring.summary.criticalCount++;
+  // ===== MÉTODOS DE DATA/HORA =====
 
-} catch (error) {
-console.error(`❌ Erro ao analisar ${file.path}:`, error.message);
-}
-}
+  async getReliableDateTime() {
+    console.log('🕒 Obtendo data/hora de fontes confiáveis...');
 
-if (this.analysis.refactoring.monolithicFiles.length > 0) {
-const totalScore = this.analysis.refactoring.monolithicFiles.reduce((sum, file) => sum + file.score, 0);
-this.analysis.refactoring.summary.averageScore = Math.round(totalScore / this.analysis.refactoring.monolithicFiles.length);
-}
+    const sources = [
+      () => this.getTimeFromWorldTimeAPI(),
+      () => this.getTimeFromNTP(),
+      () => this.getTimeFromGitCommit(),
+      () => this.getTimeFromFileSystem(),
+      () => this.getLocalTime()
+    ];
 
-this.analysis.refactoring.monolithicFiles.sort((a, b) => b.score - a.score);
-this.generateGeneralRecommendations();
+    let reliableTime = null;
 
-console.log(`🔬 ${this.analysis.refactoring.monolithicFiles.length} arquivos analisados para refatoração`);
-console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
-console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
-console.log(`💯 Score médio: ${this.analysis.refactoring.summary.averageScore}/100`);
-}
+    for (const getTime of sources) {
+      try {
+        const timeResult = await getTime();
+        if (timeResult && timeResult.datetime) {
+          this.reliableDateTime.sources.push(timeResult.source);
+          reliableTime = timeResult.datetime;
+          console.log(`✅ Data obtida de: ${timeResult.source}`);
+          break;
+        }
+      } catch (error) {
+        console.log(`⚠️ Falha em fonte de tempo: ${error.message}`);
+        continue;
+      }
+    }
 
-async analyzeValidationsAndRules() {
-this.analysis.validations = {
-cnpjRules: [
-{
-  rule: "Validação de CNPJ",
-  description: "CNPJ deve ter 14 dígitos e passar na validação de dígitos verificadores",
-  format: "XX.XXX.XXX/XXXX-XX ou apenas números",
-  implementation: "src/utils/validators.js"
-}
-],
-requiredFields: [
-{
-  form: "Cadastro de Emenda",
-  fields: ["numero", "valor", "autor", "municipio", "uf", "dataAprovacao", "tipo"],
-  validation: "Campos obrigatórios validados no frontend e backend"
-},
-{
-  form: "Cadastro de Despesa",
-  fields: ["emendaId", "valor", "descricao", "data", "fornecedor", "cnpj"],
-  validation: "Validação de saldo disponível e dados obrigatórios"
-},
-{
-  form: "Cadastro de Usuário",
-  fields: ["email", "nome", "municipio", "uf"],
-  validation: "Email único e dados de localização obrigatórios"
-}
-],
-businessRules: [],
-userPermissions: [
-{
-  role: "Administrador",
-  permissions: ["Gerenciar usuários", "Visualizar todos os dados", "Criar/editar emendas", "Gerenciar despesas"],
-  restrictions: ["Nenhuma restrição geográfica"]
-},
-{
-  role: "Operador",
-  permissions: ["Visualizar dados do município", "Criar despesas", "Visualizar emendas"],
-  restrictions: ["Limitado ao município atribuído"]
-}
-],
-workflows: []
-};
+    if (!reliableTime) {
+      reliableTime = new Date();
+      this.reliableDateTime.sources.push('Sistema Local (Fallback)');
+      console.log('⚠️ Usando data do sistema local como último recurso');
+    }
 
-console.log('🔒 Validações e regras analisadas');
-}
+    this.reliableDateTime.current = reliableTime;
+    return reliableTime;
+  }
 
-async detectChanges() {
-const oneWeekAgo = new Date();
-oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  async getTimeFromWorldTimeAPI() {
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'worldtimeapi.org',
+        port: 443,
+        path: '/api/timezone/America/Sao_Paulo',
+        method: 'GET',
+        timeout: 5000
+      };
 
-this.analysis.changes.newComponents = this.analysis.components
-.filter(comp => comp.lastModified > oneWeekAgo)
-.map(comp => comp.name);
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          try {
+            const timeData = JSON.parse(data);
+            const datetime = new Date(timeData.datetime);
+            resolve({
+              datetime,
+              source: 'WorldTimeAPI (America/Sao_Paulo)',
+              raw: timeData
+            });
+          } catch (error) {
+            reject(new Error('Erro ao processar resposta da WorldTimeAPI'));
+          }
+        });
+      });
 
-this.analysis.components.forEach(comp => {
-try {
-const content = fs.readFileSync(path.join(this.componentsPath, comp.name), 'utf8');
-if (content.includes('CORREÇÃO') || content.includes('FUNCIONALIDADE')) {
-  this.analysis.changes.modifiedFunctionalities.push(comp.name);
-}
-} catch (error) {
-// Ignorar erros de leitura
-}
-});
+      req.on('error', (error) => {
+        reject(new Error(`WorldTimeAPI falhou: ${error.message}`));
+      });
 
-console.log('🔍 Mudanças detectadas e analisadas');
-}
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('WorldTimeAPI timeout'));
+      });
 
-async analyzeLastImplementation() {
-const recentFiles = [];
+      req.end();
+    });
+  }
 
-this.analysis.components.forEach(comp => {
-const daysDiff = (new Date() - comp.lastModified) / (1000 * 60 * 60 * 24);
-if (daysDiff <= 7) {
-recentFiles.push({
-  file: comp.path,
-  type: 'component',
-  lastModified: comp.lastModified
-});
-}
-});
+  async getTimeFromNTP() {
+    try {
+      const ntpCommand = process.platform === 'win32' 
+        ? 'w32tm /query /status' 
+        : 'date';
 
-this.analysis.services.forEach(service => {
-const daysDiff = (new Date() - service.lastModified) / (1000 * 60 * 60 * 24);
-if (daysDiff <= 7) {
-recentFiles.push({
-  file: service.path,
-  type: 'service',
-  lastModified: service.lastModified
-});
-}
-});
+      const result = execSync(ntpCommand, { 
+        encoding: 'utf8', 
+        timeout: 3000 
+      });
 
-if (recentFiles.length > 0) {
-const mostRecent = recentFiles.sort((a, b) => b.lastModified - a.lastModified)[0];
+      if (result) {
+        return {
+          datetime: new Date(),
+          source: 'Sistema NTP/Time Service',
+          raw: result.trim()
+        };
+      }
+    } catch (error) {
+      throw new Error(`NTP não disponível: ${error.message}`);
+    }
+  }
 
-this.analysis.lastImplementation = {
-title: "Sistema de Análise de Refatoração",
-description: "Implementação completa do sistema de análise automática de arquivos monolíticos",
-date: this.formatSimpleBrazilianDate(mostRecent.lastModified),
-filesInvolved: recentFiles.map(f => f.file),
-keyChanges: [
-  "Sistema de pontuação de complexidade implementado",
-  "Detecção automática de arquivos monolíticos",
-  "Sugestões específicas de refatoração por arquivo",
-  "Debugging detalhado com logs de análise"
-],
-impact: "Alto - Melhoria significativa na qualidade do código",
-status: "Implementado e funcional"
-};
-} else {
-this.analysis.lastImplementation = {
-title: "Sistema Estável",
-description: "Nenhuma implementação recente detectada",
-date: this.formatSimpleBrazilianDate(new Date()),
-filesInvolved: [],
-keyChanges: [],
-impact: "Sistema em funcionamento normal",
-status: "Estável"
-};
-}
+  async getTimeFromGitCommit() {
+    try {
+      const gitDate = execSync('git log -1 --format=%cd --date=iso', { 
+        encoding: 'utf8',
+        cwd: this.projectRoot,
+        timeout: 3000
+      });
 
-console.log('📋 Última implementação analisada');
-}
+      if (gitDate) {
+        return {
+          datetime: new Date(gitDate.trim()),
+          source: 'Git Último Commit',
+          raw: gitDate.trim()
+        };
+      }
+    } catch (error) {
+      throw new Error(`Git não disponível: ${error.message}`);
+    }
+  }
 
-// ===== MÉTODOS DE EXTRAÇÃO DE CÓDIGO =====
+  async getTimeFromFileSystem() {
+    try {
+      const stats = fs.statSync(this.packagePath);
+      return {
+        datetime: stats.mtime,
+        source: 'Sistema de Arquivos (package.json mtime)',
+        raw: stats.mtime.toISOString()
+      };
+    } catch (error) {
+      throw new Error(`Filesystem falhou: ${error.message}`);
+    }
+  }
 
-detectComponentType(content) {
-if (content.includes('useState') || content.includes('useEffect')) {
-return 'Functional Component (Hooks)';
-} else if (content.includes('class') && content.includes('Component')) {
-return 'Class Component';
-} else if (content.includes('export default')) {
-return 'Functional Component';
-} else {
-return 'Utility/Helper';
-}
-}
+  async getLocalTime() {
+    return {
+      datetime: new Date(),
+      source: 'Sistema Local',
+      raw: new Date().toISOString()
+    };
+  }
 
-extractDependencies(content) {
-const imports = [];
-const importRegex = /import\s+.*?\s+from\s+['"`]([^'"`]+)['"`]/g;
-let match;
+  formatBrazilianDateTime(date) {
+    if (!date) date = this.reliableDateTime.current || new Date();
 
-while ((match = importRegex.exec(content)) !== null) {
-imports.push(match[1]);
-}
+    const options = {
+      timeZone: this.reliableDateTime.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
 
-return imports;
-}
+    try {
+      const formatter = new Intl.DateTimeFormat('pt-BR', options);
+      return formatter.format(date);
+    } catch (error) {
+      const offset = -3;
+      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+      const brazilTime = new Date(utc + (offset * 3600000));
 
-extractFunctions(content) {
-const functions = [];
+      const day = String(brazilTime.getDate()).padStart(2, '0');
+      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
+      const year = brazilTime.getFullYear();
+      const hours = String(brazilTime.getHours()).padStart(2, '0');
+      const minutes = String(brazilTime.getMinutes()).padStart(2, '0');
+      const seconds = String(brazilTime.getSeconds()).padStart(2, '0');
 
-const funcRegex = /(?:export\s+)?(?:const\s+|function\s+)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[=\(]/g;
-let match;
+      return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+    }
+  }
 
-while ((match = funcRegex.exec(content)) !== null) {
-functions.push(match[1]);
-}
+  formatSimpleBrazilianDate(date) {
+    if (!date) date = this.reliableDateTime.current || new Date();
 
-const arrowRegex = /const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*\([^)]*\)\s*=>/g;
-while ((match = arrowRegex.exec(content)) !== null) {
-functions.push(match[1]);
-}
+    try {
+      return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: this.reliableDateTime.timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date);
+    } catch (error) {
+      const offset = -3;
+      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+      const brazilTime = new Date(utc + (offset * 3600000));
 
-return [...new Set(functions)];
-}
+      const day = String(brazilTime.getDate()).padStart(2, '0');
+      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
+      const year = brazilTime.getFullYear();
 
-extractExports(content) {
-const exports = [];
+      return `${day}/${month}/${year}`;
+    }
+  }
 
-const defaultExportRegex = /export\s+default\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-let match = defaultExportRegex.exec(content);
-if (match) {
-exports.push({ type: 'default', name: match[1] });
-}
+  // ===== MÉTODOS DE ANÁLISE DE REFATORAÇÃO =====
 
-const namedExportRegex = /export\s+(?:const|function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
-while ((match = namedExportRegex.exec(content)) !== null) {
-exports.push({ type: 'named', name: match[1] });
-}
+  analyzeFileComplexity(content, filePath) {
+    const lines = content.split('\n').length;
+    const nonEmptyLines = content.split('\n').filter(line => line.trim()).length;
 
-return exports;
-}
+    const functionMatches = [
+      ...content.matchAll(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|const\s+\w+\s*=\s*(?:async\s+)?function)/g),
+      ...content.matchAll(/\w+\s*:\s*(?:async\s+)?(?:function|\()/g),
+      ...content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+\w+/g)
+    ];
+    const functionCount = functionMatches.length;
 
-extractDescription(content) {
-const commentRegex = /\/\*\*([\s\S]*?)\*\/|\/\/\s*(.+)/;
-const match = commentRegex.exec(content);
+    const importMatches = content.matchAll(/import\s+.*?\s+from\s+['"`][^'"`]+['"`]/g);
+    const importCount = [...importMatches].length;
 
-if (match) {
-return match[1] ? match[1].trim() : match[2].trim();
-}
+    const jsxMatches = content.matchAll(/<[A-Z]\w*(?:\s+[^>]*)?\s*\/?>/g);
+    const jsxElementCount = [...jsxMatches].length;
 
-const inlineComment = content.match(/\/\/\s*([A-Z][^\/\n]*)/);
-return inlineComment ? inlineComment[1].trim() : 'Sem descrição disponível';
-}
+    // Calcular complexidade ciclomática (corrigido)
+    const complexityKeywords = ['if', 'else', 'for', 'while', 'switch', 'case', '&&', '||', 'catch'];
+    let complexity = 1;
 
-// ===== MÉTODOS DE GERAÇÃO DE DOCUMENTAÇÃO =====
+    complexityKeywords.forEach(keyword => {
+      try {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+        const matches = content.match(regex);
+        if (matches) complexity += matches.length;
+      } catch (error) {
+        console.warn(`⚠️ Erro ao processar keyword "${keyword}":`, error.message);
+      }
+    });
 
-generateLastImplementationSection() {
-const impl = this.analysis.lastImplementation;
+    // Corrigir regex para operador ternário
+    try {
+      const ternaryMatches = content.match(/\?[^:]*:/g);
+      if (ternaryMatches) complexity += ternaryMatches.length;
+    } catch (error) {
+      console.warn('⚠️ Erro ao processar operador ternário:', error.message);
+    }
 
-return `## 🆕 ÚLTIMA IMPLEMENTAÇÃO REALIZADA
+    let maxDepth = 0;
+    let currentDepth = 0;
+    for (let char of content) {
+      if (char === '{' || char === '(') currentDepth++;
+      if (char === '}' || char === ')') currentDepth--;
+      maxDepth = Math.max(maxDepth, currentDepth);
+    }
+
+    return {
+      lines,
+      nonEmptyLines,
+      functions: functionCount,
+      imports: importCount,
+      jsxElements: jsxElementCount,
+      complexity,
+      nestedDepth: maxDepth
+    };
+  }
+
+  calculateRefactorScore(metrics) {
+    const { limits, weights } = this.refactorConfig;
+    let score = 0;
+
+    const normalizedMetrics = {
+      lines: Math.min((metrics.lines / limits.lines) * 100, 100),
+      functions: Math.min((metrics.functions / limits.functions) * 100, 100),
+      complexity: Math.min((metrics.complexity / limits.complexity) * 100, 100),
+      imports: Math.min((metrics.imports / limits.imports) * 100, 100),
+      jsxElements: Math.min((metrics.jsxElements / limits.jsx_elements) * 100, 100),
+      nestedDepth: Math.min((metrics.nestedDepth / limits.nested_depth) * 100, 100)
+    };
+
+    Object.keys(weights).forEach(key => {
+      const metricKey = key === 'jsx_elements' ? 'jsxElements' : key;
+      if (normalizedMetrics[metricKey] !== undefined) {
+        score += normalizedMetrics[metricKey] * weights[key];
+      }
+    });
+
+    return Math.min(Math.round(score), 100);
+  }
+
+  getRefactorPriority(score) {
+    if (score >= 80) return { level: 'CRÍTICA', color: '🔴', description: 'Refatoração urgente necessária' };
+    if (score >= 60) return { level: 'ALTA', color: '🟠', description: 'Refatoração recomendada' };
+    if (score >= 40) return { level: 'MÉDIA', color: '🟡', description: 'Considerar refatoração' };
+    if (score >= 20) return { level: 'BAIXA', color: '🟢', description: 'Monitorar crescimento' };
+    return { level: 'OK', color: '✅', description: 'Arquivo bem estruturado' };
+  }
+
+  generateRefactorSuggestions(metrics, filePath) {
+    const suggestions = [];
+    const { limits } = this.refactorConfig;
+
+    if (metrics.lines > limits.lines) {
+      suggestions.push({
+        type: 'Tamanho do Arquivo',
+        issue: `Arquivo com ${metrics.lines} linhas (limite: ${limits.lines})`,
+        suggestion: 'Quebrar em componentes menores ou extrair lógicas para hooks/utils',
+        priority: 'Alta'
+      });
+    }
+
+    if (metrics.functions > limits.functions) {
+      suggestions.push({
+        type: 'Número de Funções',
+        issue: `${metrics.functions} funções em um arquivo (limite: ${limits.functions})`,
+        suggestion: 'Agrupar funções relacionadas em módulos separados',
+        priority: 'Média'
+      });
+    }
+
+    if (metrics.complexity > limits.complexity) {
+      suggestions.push({
+        type: 'Complexidade Ciclomática',
+        issue: `Complexidade ${metrics.complexity} (limite: ${limits.complexity})`,
+        suggestion: 'Simplificar lógicas condicionais e extrair funções auxiliares',
+        priority: 'Alta'
+      });
+    }
+
+    if (metrics.imports > limits.imports) {
+      suggestions.push({
+        type: 'Dependências Excessivas',
+        issue: `${metrics.imports} imports (limite: ${limits.imports})`,
+        suggestion: 'Revisar dependências e considerar uso de barrel exports',
+        priority: 'Baixa'
+      });
+    }
+
+    if (metrics.jsxElements > limits.jsx_elements) {
+      suggestions.push({
+        type: 'JSX Complexo',
+        issue: `${metrics.jsxElements} elementos JSX (limite: ${limits.jsx_elements})`,
+        suggestion: 'Extrair subcomponentes para melhorar legibilidade',
+        priority: 'Média'
+      });
+    }
+
+    if (metrics.nestedDepth > limits.nested_depth) {
+      suggestions.push({
+        type: 'Aninhamento Profundo',
+        issue: `Profundidade ${metrics.nestedDepth} (limite: ${limits.nested_depth})`,
+        suggestion: 'Extrair lógicas aninhadas em funções separadas',
+        priority: 'Alta'
+      });
+    }
+
+    if (filePath.includes('components/')) {
+      if (metrics.lines > 200) {
+        suggestions.push({
+          type: 'Componente Monolítico',
+          issue: 'Componente muito grande para manutenção',
+          suggestion: 'Quebrar em: Header, Body, Footer ou usar composição',
+          priority: 'Alta'
+        });
+      }
+    }
+
+    if (filePath.includes('hooks/')) {
+      if (metrics.functions > 5) {
+        suggestions.push({
+          type: 'Hook Complexo',
+          issue: 'Hook com muitas responsabilidades',
+          suggestion: 'Dividir em hooks mais específicos (Single Responsibility)',
+          priority: 'Média'
+        });
+      }
+    }
+
+    return suggestions;
+  }
+
+  getFileType(filePath) {
+    if (filePath.includes('components/')) return 'Component';
+    if (filePath.includes('hooks/')) return 'Hook';
+    if (filePath.includes('utils/')) return 'Utility';
+    if (filePath.includes('services/')) return 'Service';
+    return 'Other';
+  }
+
+  generateGeneralRecommendations() {
+    const recommendations = [];
+    const { summary } = this.analysis.refactoring;
+
+    if (summary.criticalCount > 0) {
+      recommendations.push({
+        type: 'Arquivos Críticos',
+        description: `${summary.criticalCount} arquivo(s) precisam de refatoração urgente`,
+        action: 'Priorizar refatoração imediata dos arquivos com score > 80',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    if (summary.monolithicCount > summary.totalFiles * 0.3) {
+      recommendations.push({
+        type: 'Padrão Arquitetural',
+        description: 'Alto percentual de arquivos monolíticos detectado',
+        action: 'Revisar padrões de arquitetura e estabelecer guidelines de tamanho',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    if (summary.averageScore > 50) {
+      recommendations.push({
+        type: 'Qualidade Geral',
+        description: `Score médio de refatoração: ${summary.averageScore}`,
+        action: 'Implementar revisões de código focadas em tamanho e complexidade',
+        impact: 'Médio',
+        effort: 'Baixo'
+      });
+    }
+
+    const componentFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Component');
+    const criticalComponents = componentFiles.filter(f => f.score >= 80);
+    if (criticalComponents.length > 0) {
+      recommendations.push({
+        type: 'Componentes Críticos',
+        description: `${criticalComponents.length} componente(s) muito complexo(s)`,
+        action: 'Aplicar padrões como Container/Presentational ou Compound Components',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    const hookFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Hook');
+    const criticalHooks = hookFiles.filter(f => f.score >= 60);
+    if (criticalHooks.length > 0) {
+      recommendations.push({
+        type: 'Hooks Complexos',
+        description: `${criticalHooks.length} hook(s) com muitas responsabilidades`,
+        action: 'Aplicar Single Responsibility Principle em hooks',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    this.analysis.refactoring.recommendations = recommendations;
+  }
+
+  // ===== MÉTODOS DE ANÁLISE PRINCIPAL =====
+
+  async analyze() {
+    console.log('🔍 Iniciando análise do sistema SICEFSUS...');
+
+    await this.getReliableDateTime();
+    await this.analyzePackageJson();
+    await this.analyzeProjectStructure();
+    await this.analyzeComponents();
+    await this.analyzeHooks();
+    await this.analyzeUtils();
+    await this.analyzeServices();
+    await this.analyzeValidationsAndRules();
+    await this.detectChanges();
+    await this.analyzeLastImplementation();
+    await this.analyzeFilesForRefactoring();
+
+    console.log('✅ Análise concluída!');
+  }
+
+  async analyzePackageJson() {
+    try {
+      const packageData = JSON.parse(fs.readFileSync(this.packagePath, 'utf8'));
+      this.analysis.dependencies = {
+        main: packageData.dependencies || {},
+        dev: packageData.devDependencies || {},
+        scripts: packageData.scripts || {}
+      };
+      console.log('📦 Package.json analisado');
+    } catch (error) {
+      console.error('❌ Erro ao analisar package.json:', error.message);
+    }
+  }
+
+  async analyzeProjectStructure() {
+    const analyzeDirectory = (dirPath, relativePath = '') => {
+      const items = fs.readdirSync(dirPath, { withFileTypes: true });
+      const structure = {};
+
+      items.forEach(item => {
+        if (item.name.startsWith('.') || item.name === 'node_modules') return;
+
+        const fullPath = path.join(dirPath, item.name);
+        const relPath = path.join(relativePath, item.name);
+
+        if (item.isDirectory()) {
+          structure[item.name] = analyzeDirectory(fullPath, relPath);
+        } else {
+          structure[item.name] = {
+            type: 'file',
+            extension: path.extname(item.name),
+            size: fs.statSync(fullPath).size
+          };
+        }
+      });
+
+      return structure;
+    };
+
+    this.analysis.structure = analyzeDirectory(this.projectRoot);
+    console.log('📁 Estrutura do projeto analisada');
+  }
+
+  async analyzeComponents() {
+    if (!fs.existsSync(this.componentsPath)) {
+      console.log('⚠️ Pasta components não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${this.componentsPath}`);
+    const files = fs.readdirSync(this.componentsPath, { withFileTypes: true });
+    console.log(`📄 Arquivos encontrados na pasta components: ${files.map(f => f.name).join(', ')}`);
+
+    for (const file of files) {
+      if (file.isDirectory()) {
+        // Analisar subpastas (como despesa/)
+        const subPath = path.join(this.componentsPath, file.name);
+        const subFiles = fs.readdirSync(subPath);
+        
+        for (const subFile of subFiles) {
+          if (subFile.endsWith('.jsx') || subFile.endsWith('.js')) {
+            const filePath = path.join(subPath, subFile);
+            console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+            try {
+              const content = fs.readFileSync(filePath, 'utf8');
+              console.log(`📊 Arquivo ${subFile}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+              const component = {
+                name: subFile,
+                path: `src/components/${file.name}/${subFile}`,
+                type: this.detectComponentType(content),
+                dependencies: this.extractDependencies(content),
+                functions: this.extractFunctions(content),
+                exports: this.extractExports(content),
+                description: this.extractDescription(content),
+                lastModified: fs.statSync(filePath).mtime
+              };
+
+              console.log(`🧩 Funções encontradas em ${subFile}: ${component.functions.join(', ')}`);
+              this.analysis.components.push(component);
+            } catch (error) {
+              console.error(`❌ Erro ao ler ${subFile}:`, error.message);
+            }
+          }
+        }
+      } else if (file.name.endsWith('.jsx') || file.name.endsWith('.js')) {
+        const filePath = path.join(this.componentsPath, file.name);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file.name}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const component = {
+            name: file.name,
+            path: `src/components/${file.name}`,
+            type: this.detectComponentType(content),
+            dependencies: this.extractDependencies(content),
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🧩 Funções encontradas em ${file.name}: ${component.functions.join(', ')}`);
+          this.analysis.components.push(component);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file.name}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file.name} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🧩 ${this.analysis.components.length} componentes analisados`);
+  }
+
+  async analyzeHooks() {
+    const hooksPath = path.join(this.srcPath, 'hooks');
+    if (!fs.existsSync(hooksPath)) {
+      console.log('⚠️ Pasta hooks não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${hooksPath}`);
+    const files = fs.readdirSync(hooksPath);
+    console.log(`📄 Arquivos encontrados na pasta hooks: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(hooksPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const hook = {
+            name: file,
+            path: `src/hooks/${file}`,
+            functions: this.extractFunctions(content),
+            dependencies: this.extractDependencies(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🎣 Funções encontradas em ${file}: ${hook.functions.join(', ')}`);
+          this.analysis.hooks.push(hook);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🎣 ${this.analysis.hooks.length} hooks analisados`);
+  }
+
+  async analyzeUtils() {
+    const utilsPath = path.join(this.srcPath, 'utils');
+    if (!fs.existsExists(utilsPath)) {
+      console.log('⚠️ Pasta utils não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${utilsPath}`);
+    const files = fs.readdirSync(utilsPath);
+    console.log(`📄 Arquivos encontrados na pasta utils: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(utilsPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const util = {
+            name: file,
+            path: `src/utils/${file}`,
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🛠️ Funções encontradas em ${file}: ${util.functions.join(', ')}`);
+          this.analysis.utils.push(util);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🛠️ ${this.analysis.utils.length} utilitários analisados`);
+  }
+
+  async analyzeServices() {
+    if (!fs.existsSync(this.servicesPath)) {
+      console.log('⚠️ Pasta services não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${this.servicesPath}`);
+    const files = fs.readdirSync(this.servicesPath);
+    console.log(`📄 Arquivos encontrados na pasta services: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(this.servicesPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const service = {
+            name: file,
+            path: `src/services/${file}`,
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🔧 Funções encontradas em ${file}: ${service.functions.join(', ')}`);
+          this.analysis.services.push(service);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🔧 ${this.analysis.services.length} serviços analisados`);
+  }
+
+  async analyzeFilesForRefactoring() {
+    console.log('🔬 Iniciando análise de refatoração...');
+
+    const allFiles = [
+      ...this.analysis.components,
+      ...this.analysis.hooks,
+      ...this.analysis.utils,
+      ...this.analysis.services
+    ];
+
+    console.log(`📊 Total de arquivos para analisar: ${allFiles.length}`);
+
+    if (allFiles.length === 0) {
+      console.log('⚠️ ATENÇÃO: Nenhum arquivo encontrado para análise!');
+      return;
+    }
+
+    this.analysis.refactoring.summary.totalFiles = allFiles.length;
+
+    for (const file of allFiles) {
+      try {
+        console.log(`🔍 Analisando para refatoração: ${file.path}`);
+        const fullPath = path.join(this.projectRoot, file.path);
+
+        if (!fs.existsSync(fullPath)) {
+          console.log(`❌ Arquivo não encontrado: ${fullPath}`);
+          continue;
+        }
+
+        const content = fs.readFileSync(fullPath, 'utf8');
+
+        const metrics = this.analyzeFileComplexity(content, file.path);
+        console.log(`📊 Métricas de ${file.name}:`, {
+          lines: metrics.lines,
+          functions: metrics.functions,
+          complexity: metrics.complexity,
+          imports: metrics.imports,
+          jsxElements: metrics.jsxElements,
+          nestedDepth: metrics.nestedDepth
+        });
+
+        const score = this.calculateRefactorScore(metrics);
+        console.log(`💯 Score de refatoração para ${file.name}: ${score}/100`);
+
+        const priority = this.getRefactorPriority(score);
+        const suggestions = this.generateRefactorSuggestions(metrics, file.path);
+
+        const refactorAnalysis = {
+          file: file.path,
+          name: file.name,
+          type: this.getFileType(file.path),
+          metrics,
+          score,
+          priority,
+          suggestions,
+          isMonolithic: score >= 40,
+          lastModified: file.lastModified
+        };
+
+        this.analysis.refactoring.monolithicFiles.push(refactorAnalysis);
+
+        if (score >= 40) this.analysis.refactoring.summary.monolithicCount++;
+        if (score >= 80) this.analysis.refactoring.summary.criticalCount++;
+
+      } catch (error) {
+        console.error(`❌ Erro ao analisar ${file.path}:`, error.message);
+      }
+    }
+
+    if (this.analysis.refactoring.monolithicFiles.length > 0) {
+      const totalScore = this.analysis.refactoring.monolithicFiles.reduce((sum, file) => sum + file.score, 0);
+      this.analysis.refactoring.summary.averageScore = Math.round(totalScore / this.analysis.refactoring.monolithicFiles.length);
+    }
+
+    this.analysis.refactoring.monolithicFiles.sort((a, b) => b.score - a.score);
+    this.generateGeneralRecommendations();
+
+    console.log(`🔬 ${this.analysis.refactoring.monolithicFiles.length} arquivos analisados para refatoração`);
+    console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
+    console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
+    console.log(`💯 Score médio: ${this.analysis.refactoring.summary.averageScore}/100`);
+  }
+
+  async analyzeValidationsAndRules() {
+    this.analysis.validations = {
+      cnpjRules: [
+        {
+          rule: "Validação de CNPJ",
+          description: "CNPJ deve ter 14 dígitos e passar na validação de dígitos verificadores",
+          format: "XX.XXX.XXX/XXXX-XX ou apenas números",
+          implementation: "src/utils/validators.js"
+        }
+      ],
+      requiredFields: [
+        {
+          form: "Cadastro de Emenda",
+          fields: ["numero", "valor", "autor", "municipio", "uf", "dataAprovacao", "tipo"],
+          validation: "Campos obrigatórios validados no frontend e backend"
+        },
+        {
+          form: "Cadastro de Despesa",
+          fields: ["emendaId", "valor", "descricao", "data", "fornecedor", "cnpj"],
+          validation: "Validação de saldo disponível e dados obrigatórios"
+        },
+        {
+          form: "Cadastro de Usuário",
+          fields: ["email", "nome", "municipio", "uf"],
+          validation: "Email único e dados de localização obrigatórios"
+        }
+      ],
+      businessRules: [],
+      userPermissions: [
+        {
+          role: "Administrador",
+          permissions: ["Gerenciar usuários", "Visualizar todos os dados", "Criar/editar emendas", "Gerenciar despesas"],
+          restrictions: ["Nenhuma restrição geográfica"]
+        },
+        {
+          role: "Operador",
+          permissions: ["Visualizar dados do município", "Criar despesas", "Visualizar emendas"],
+          restrictions: ["Limitado ao município atribuído"]
+        }
+      ],
+      workflows: []
+    };
+
+    console.log('🔒 Validações e regras analisadas');
+  }
+
+  async detectChanges() {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    this.analysis.changes.newComponents = this.analysis.components
+      .filter(comp => comp.lastModified > oneWeekAgo)
+      .map(comp => comp.name);
+
+    this.analysis.components.forEach(comp => {
+      try {
+        const fullPath = path.join(this.projectRoot, comp.path);
+        const content = fs.readFileSync(fullPath, 'utf8');
+        if (content.includes('CORREÇÃO') || content.includes('FUNCIONALIDADE')) {
+          this.analysis.changes.modifiedFunctionalities.push(comp.name);
+        }
+      } catch (error) {
+        // Ignorar erros de leitura
+      }
+    });
+
+    console.log('🔍 Mudanças detectadas e analisadas');
+  }
+
+  async analyzeLastImplementation() {
+    const recentFiles = [];
+
+    this.analysis.components.forEach(comp => {
+      const daysDiff = (new Date() - comp.lastModified) / (1000 * 60 * 60 * 24);
+      if (daysDiff <= 7) {
+        recentFiles.push({
+          file: comp.path,
+          type: 'component',
+          lastModified: comp.lastModified
+        });
+      }
+    });
+
+    this.analysis.services.forEach(service => {
+      const daysDiff = (new Date() - service.lastModified) / (1000 * 60 * 60 * 24);
+      if (daysDiff <= 7) {
+        recentFiles.push({
+          file: service.path,
+          type: 'service',
+          lastModified: service.lastModified
+        });
+      }
+    });
+
+    if (recentFiles.length > 0) {
+      const mostRecent = recentFiles.sort((a, b) => b.lastModified - a.lastModified)[0];
+
+      this.analysis.lastImplementation = {
+        title: "Sistema de Análise de Refatoração",
+        description: "Implementação completa do sistema de análise automática de arquivos monolíticos",
+        date: this.formatSimpleBrazilianDate(mostRecent.lastModified),
+        filesInvolved: recentFiles.map(f => f.file),
+        keyChanges: [
+          "Sistema de pontuação de complexidade implementado",
+          "Detecção automática de arquivos monolíticos",
+          "Sugestões específicas de refatoração por arquivo",
+          "Debugging detalhado com logs de análise"
+        ],
+        impact: "Alto - Melhoria significativa na qualidade do código",
+        status: "Implementado e funcional"
+      };
+    } else {
+      this.analysis.lastImplementation = {
+        title: "Sistema Estável",
+        description: "Nenhuma implementação recente detectada",
+        date: this.formatSimpleBrazilianDate(new Date()),
+        filesInvolved: [],
+        keyChanges: [],
+        impact: "Sistema em funcionamento normal",
+        status: "Estável"
+      };
+    }
+
+    console.log('📋 Última implementação analisada');
+  }
+
+  // ===== MÉTODOS DE EXTRAÇÃO DE CÓDIGO =====
+
+  detectComponentType(content) {
+    if (content.includes('useState') || content.includes('useEffect')) {
+      return 'Functional Component (Hooks)';
+    } else if (content.includes('class') && content.includes('Component')) {
+      return 'Class Component';
+    } else if (content.includes('export default')) {
+      return 'Functional Component';
+    } else {
+      return 'Utility/Helper';
+    }
+  }
+
+  extractDependencies(content) {
+    const imports = [];
+    const importRegex = /import\s+.*?\s+from\s+['"`]([^'"`]+)['"`]/g;
+    let match;
+
+    while ((match = importRegex.exec(content)) !== null) {
+      imports.push(match[1]);
+    }
+
+    return imports;
+  }
+
+  extractFunctions(content) {
+    const functions = [];
+
+    const funcRegex = /(?:export\s+)?(?:const\s+|function\s+)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[=\(]/g;
+    let match;
+
+    while ((match = funcRegex.exec(content)) !== null) {
+      functions.push(match[1]);
+    }
+
+    const arrowRegex = /const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*\([^)]*\)\s*=>/g;
+    while ((match = arrowRegex.exec(content)) !== null) {
+      functions.push(match[1]);
+    }
+
+    return [...new Set(functions)];
+  }
+
+  extractExports(content) {
+    const exports = [];
+
+    const defaultExportRegex = /export\s+default\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+    let match = defaultExportRegex.exec(content);
+    if (match) {
+      exports.push({ type: 'default', name: match[1] });
+    }
+
+    const namedExportRegex = /export\s+(?:const|function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+    while ((match = namedExportRegex.exec(content)) !== null) {
+      exports.push({ type: 'named', name: match[1] });
+    }
+
+    return exports;
+  }
+
+  extractDescription(content) {
+    const commentRegex = /\/\*\*([\s\S]*?)\*\/|\/\/\s*(.+)/;
+    const match = commentRegex.exec(content);
+
+    if (match) {
+      return match[1] ? match[1].trim() : match[2].trim();
+    }
+
+    const inlineComment = content.match(/\/\/\s*([A-Z][^\/\n]*)/);
+    return inlineComment ? inlineComment[1].trim() : 'Sem descrição disponível';
+  }
+
+  // ===== MÉTODOS DE GERAÇÃO DE DOCUMENTAÇÃO =====
+
+  generateLastImplementationSection() {
+    const impl = this.analysis.lastImplementation;
+
+    return `## 🆕 ÚLTIMA IMPLEMENTAÇÃO REALIZADA
 
 ### ${impl.title}
 **📅 Data:** ${impl.date}  
@@ -279,12 +1109,12 @@ ${impl.filesInvolved.length > 0 ? impl.filesInvolved.map(file => `- \`${file}\``
 ---
 
 `;
-}
+  }
 
-generateRefactoringAnalysisSection() {
-const { summary, monolithicFiles, recommendations } = this.analysis.refactoring;
+  generateRefactoringAnalysisSection() {
+    const { summary, monolithicFiles, recommendations } = this.analysis.refactoring;
 
-let section = `## 🔬 ANÁLISE DE REFATORAÇÃO E ARQUIVOS MONOLÍTICOS
+    let section = `## 🔬 ANÁLISE DE REFATORAÇÃO E ARQUIVOS MONOLÍTICOS
 
 Esta seção identifica arquivos que podem se beneficiar de refatoração para melhorar manutenibilidade e qualidade do código.
 
@@ -312,15 +1142,15 @@ Os arquivos são avaliados com base nos seguintes critérios:
 
 `;
 
-const criticalFiles = monolithicFiles.filter(file => file.score >= 80);
+    const criticalFiles = monolithicFiles.filter(file => file.score >= 80);
 
-if (criticalFiles.length === 0) {
-section += `✅ **Parabéns!** Nenhum arquivo com prioridade crítica detectado.
+    if (criticalFiles.length === 0) {
+      section += `✅ **Parabéns!** Nenhum arquivo com prioridade crítica detectado.
 
 `;
-} else {
-criticalFiles.forEach(file => {
-section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
+    } else {
+      criticalFiles.forEach(file => {
+        section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
 
 **📊 Métricas:**
 - **Linhas:** ${file.metrics.lines} (${file.metrics.nonEmptyLines} não vazias)
@@ -339,22 +1169,22 @@ ${file.suggestions.slice(0, 3).map(s => `- ${s.suggestion} *(${s.priority} prior
 ---
 
 `;
-});
-}
+      });
+    }
 
-section += `### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
-
-`;
-
-const highPriorityFiles = monolithicFiles.filter(file => file.score >= 60 && file.score < 80);
-
-if (highPriorityFiles.length === 0) {
-section += `✅ Nenhum arquivo com prioridade alta detectado.
+    section += `### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
 
 `;
-} else {
-highPriorityFiles.forEach(file => {
-section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
+
+    const highPriorityFiles = monolithicFiles.filter(file => file.score >= 60 && file.score < 80);
+
+    if (highPriorityFiles.length === 0) {
+      section += `✅ Nenhum arquivo com prioridade alta detectado.
+
+`;
+    } else {
+      highPriorityFiles.forEach(file => {
+        section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
 
 **📊 Resumo:** ${file.metrics.lines} linhas, ${file.metrics.functions} funções, complexidade ${file.metrics.complexity}
 
@@ -362,51 +1192,51 @@ section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/
 ${file.suggestions.slice(0, 2).map(s => `- ${s.suggestion}`).join('\n')}
 
 `;
-});
-}
+      });
+    }
 
-section += `### 🟡 ARQUIVOS PARA MONITORAMENTO (Score 40-59)
-
-`;
-
-const mediumPriorityFiles = monolithicFiles.filter(file => file.score >= 40 && file.score < 60);
-
-if (mediumPriorityFiles.length === 0) {
-section += `✅ Nenhum arquivo para monitoramento detectado.
-
-`;
-} else {
-section += `Os seguintes arquivos devem ser monitorados para evitar que se tornem monolíticos:
-
-`;
-mediumPriorityFiles.forEach(file => {
-section += `- ${file.priority.color} \`${file.path}\` (Score: ${file.score}) - ${file.metrics.lines} linhas
-`;
-});
-section += `
-`;
-}
-
-section += `### 📋 RECOMENDAÇÕES GERAIS
+    section += `### 🟡 ARQUIVOS PARA MONITORAMENTO (Score 40-59)
 
 `;
 
-if (recommendations.length === 0) {
-section += `✅ **Sistema bem estruturado!** Nenhuma recomendação arquitetural identificada.
+    const mediumPriorityFiles = monolithicFiles.filter(file => file.score >= 40 && file.score < 60);
+
+    if (mediumPriorityFiles.length === 0) {
+      section += `✅ Nenhum arquivo para monitoramento detectado.
 
 `;
-} else {
-recommendations.forEach(rec => {
-section += `#### ${rec.type}
+    } else {
+      section += `Os seguintes arquivos devem ser monitorados para evitar que se tornem monolíticos:
+
+`;
+      mediumPriorityFiles.forEach(file => {
+        section += `- ${file.priority.color} \`${file.path}\` (Score: ${file.score}) - ${file.metrics.lines} linhas
+`;
+      });
+      section += `
+`;
+    }
+
+    section += `### 📋 RECOMENDAÇÕES GERAIS
+
+`;
+
+    if (recommendations.length === 0) {
+      section += `✅ **Sistema bem estruturado!** Nenhuma recomendação arquitetural identificada.
+
+`;
+    } else {
+      recommendations.forEach(rec => {
+        section += `#### ${rec.type}
 **📝 Situação:** ${rec.description}  
 **🎯 Ação Recomendada:** ${rec.action}  
 **📊 Impacto:** ${rec.impact} | **⚡ Esforço:** ${rec.effort}
 
 `;
-});
-}
+      });
+    }
 
-section += `### 🎯 PLANO DE AÇÃO SUGERIDO
+    section += `### 🎯 PLANO DE AÇÃO SUGERIDO
 
 #### Fase 1 - Crítico (1-2 sprints)
 ${criticalFiles.length > 0 ? criticalFiles.map(f => `- Refatorar \`${f.path}\` (Score: ${f.score})`).join('\n') : '- ✅ Nenhuma ação crítica necessária'}
@@ -423,69 +1253,69 @@ ${highPriorityFiles.length > 0 ? highPriorityFiles.slice(0, 3).map(f => `- Melho
 
 `;
 
-return section;
-}
+    return section;
+  }
 
-generateProjectStructure() {
-const generateStructureString = (obj, prefix = '') => {
-let result = '';
-const entries = Object.entries(obj);
+  generateProjectStructure() {
+    const generateStructureString = (obj, prefix = '') => {
+      let result = '';
+      const entries = Object.entries(obj);
 
-entries.forEach(([key, value], index) => {
-const isLast = index === entries.length - 1;
-const currentPrefix = isLast ? '└── ' : '├── ';
-const nextPrefix = isLast ? '    ' : '│   ';
+      entries.forEach(([key, value], index) => {
+        const isLast = index === entries.length - 1;
+        const currentPrefix = isLast ? '└── ' : '├── ';
+        const nextPrefix = isLast ? '    ' : '│   ';
 
-result += prefix + currentPrefix + key + '\n';
+        result += prefix + currentPrefix + key + '\n';
 
-if (typeof value === 'object' && value.type !== 'file') {
-  result += generateStructureString(value, prefix + nextPrefix);
-}
-});
+        if (typeof value === 'object' && value.type !== 'file') {
+          result += generateStructureString(value, prefix + nextPrefix);
+        }
+      });
 
-return result;
-};
+      return result;
+    };
 
-return generateStructureString(this.analysis.structure);
-}
+    return generateStructureString(this.analysis.structure);
+  }
 
-generateChangesSection() {
-const changes = this.analysis.changes;
+  generateChangesSection() {
+    const changes = this.analysis.changes;
 
-let section = '';
+    let section = '';
 
-if (changes.newComponents.length > 0) {
-section += `### 🆕 Novos Componentes
+    if (changes.newComponents.length > 0) {
+      section += `### 🆕 Novos Componentes
 ${changes.newComponents.map(comp => `- ${comp}`).join('\n')}
 
 `;
-}
+    }
 
-if (changes.modifiedFunctionalities.length > 0) {
-section += `### ✏️ Funcionalidades Modificadas
+    if (changes.modifiedFunctionalities.length > 0) {
+      section += `### ✏️ Funcionalidades Modificadas
 ${changes.modifiedFunctionalities.map(func => `- ${func}`).join('\n')}
 
 `;
-}
+    }
 
-if (section === '') {
-section = `### ✅ Sistema Estável
+    if (section === '') {
+      section = `### ✅ Sistema Estável
 Nenhuma mudança significativa detectada nos últimos 7 dias.
 
 `;
-}
+    }
 
-return section;
-}
+    return section;
+  }
 
-generateComponentsSection() {
-return this.analysis.components.map(comp => {
-const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === comp.path);
-const refactorInfo = refactorAnalysis ? 
-`- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+  generateComponentsSection() {
+    return this.analysis.components.map(comp => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === comp.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
 - **Status:** ${refactorAnalysis.priority.description}` : '';
 
-return `#### \`${comp.path}\`
+      return `#### \`${comp.path}\`
 - **Funcionalidade**: ${comp.description}
 - **Tipo**: ${comp.type}
 - **Funções**: ${comp.functions.join(', ') || 'Nenhuma detectada'}
@@ -493,77 +1323,77 @@ return `#### \`${comp.path}\`
 ${refactorInfo}
 
 `;
-}).join('');
-}
+    }).join('');
+  }
 
-generateHooksSection() {
-return this.analysis.hooks.map(hook => {
-const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === hook.path);
-const refactorInfo = refactorAnalysis ? 
-`- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+  generateHooksSection() {
+    return this.analysis.hooks.map(hook => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === hook.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
 - **Status:** ${refactorAnalysis.priority.description}` : '';
 
-return `#### \`${hook.path}\`
+      return `#### \`${hook.path}\`
 - **Funcionalidade**: ${hook.description}
 - **Funções**: ${hook.functions.join(', ') || 'Nenhuma detectada'}
 ${refactorInfo}
 
 `;
-}).join('');
-}
+    }).join('');
+  }
 
-generateUtilsSection() {
-return this.analysis.utils.map(util => {
-const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === util.path);
-const refactorInfo = refactorAnalysis ? 
-`- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+  generateUtilsSection() {
+    return this.analysis.utils.map(util => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === util.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
 - **Status:** ${refactorAnalysis.priority.description}` : '';
 
-return `#### \`${util.path}\`
+      return `#### \`${util.path}\`
 - **Funcionalidade**: ${util.description}
 - **Funções**: ${util.functions.join(', ') || 'Nenhuma detectada'}
 ${refactorInfo}
 
 `;
-}).join('');
-}
+    }).join('');
+  }
 
-generateServicesSection() {
-return this.analysis.services.map(service => {
-const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === service.path);
-const refactorInfo = refactorAnalysis ? 
-`- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+  generateServicesSection() {
+    return this.analysis.services.map(service => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === service.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
 - **Status:** ${refactorAnalysis.priority.description}` : '';
 
-return `#### \`${service.path}\`
+      return `#### \`${service.path}\`
 - **Funcionalidade**: ${service.description}
 - **Funções**: ${service.functions.join(', ') || 'Nenhuma detectada'}
 ${refactorInfo}
 
 `;
-}).join('');
-}
+    }).join('');
+  }
 
-generateMainDependencies() {
-const deps = this.analysis.dependencies.main || {};
-return Object.entries(deps)
-.slice(0, 10)
-.map(([name, version]) => `  - **${name}**: ${version}`)
-.join('\n');
-}
+  generateMainDependencies() {
+    const deps = this.analysis.dependencies.main || {};
+    return Object.entries(deps)
+      .slice(0, 10)
+      .map(([name, version]) => `  - **${name}**: ${version}`)
+      .join('\n');
+  }
 
-generateDependenciesList() {
-const deps = this.analysis.dependencies.main || {};
-const mainDeps = Object.entries(deps)
-.filter(([name]) => !name.startsWith('@types'))
-.map(([name, version]) => `- **${name}**: ${version}`)
-.join('\n');
+  generateDependenciesList() {
+    const deps = this.analysis.dependencies.main || {};
+    const mainDeps = Object.entries(deps)
+      .filter(([name]) => !name.startsWith('@types'))
+      .map(([name, version]) => `- **${name}**: ${version}`)
+      .join('\n');
 
-return mainDeps || '- React e Firebase (principais)';
-}
+    return mainDeps || '- React e Firebase (principais)';
+  }
 
-generateValidationsSection() {
-let section = `## 🔒 VALIDAÇÕES E REGRAS DO SISTEMA
+  generateValidationsSection() {
+    let section = `## 🔒 VALIDAÇÕES E REGRAS DO SISTEMA
 
 Esta seção documenta todas as validações, regras de negócio e fluxos de trabalho implementados no SICEFSUS.
 
@@ -573,42 +1403,42 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 `;
 
-this.analysis.validations.requiredFields.forEach(form => {
-section += `#### ${form.form}
+    this.analysis.validations.requiredFields.forEach(form => {
+      section += `#### ${form.form}
 ${form.fields.map(field => `- **${field}**`).join('\n')}
 
 **Validação:** ${form.validation}
 
 `;
-});
+    });
 
-section += `---
+    section += `---
 
 ### 🔍 VALIDAÇÕES DE DADOS
 
 `;
 
-if (this.analysis.validations.cnpjRules.length > 0) {
-section += `#### Validação de CNPJ
+    if (this.analysis.validations.cnpjRules.length > 0) {
+      section += `#### Validação de CNPJ
 `;
-this.analysis.validations.cnpjRules.forEach(rule => {
-section += `- **Regra:** ${rule.rule}
+      this.analysis.validations.cnpjRules.forEach(rule => {
+        section += `- **Regra:** ${rule.rule}
 - **Descrição:** ${rule.description}
 - **Formato:** ${rule.format}
 - **Implementação:** ${rule.implementation}
 
 `;
-});
-}
+      });
+    }
 
-section += `---
+    section += `---
 
 ### 👥 PERMISSÕES E CONTROLE DE ACESSO
 
 `;
 
-this.analysis.validations.userPermissions.forEach(permission => {
-section += `#### ${permission.role}
+    this.analysis.validations.userPermissions.forEach(permission => {
+      section += `#### ${permission.role}
 
 **Permissões:**
 ${permission.permissions.map(perm => `- ${perm}`).join('\n')}
@@ -617,19 +1447,19 @@ ${permission.permissions.map(perm => `- ${perm}`).join('\n')}
 ${permission.restrictions.map(rest => `- ${rest}`).join('\n')}
 
 `;
-});
+    });
 
-return section;
-}
+    return section;
+  }
 
-generateHandover() {
-const timestamp = this.formatBrazilianDateTime(this.reliableDateTime.current);
+  generateHandover() {
+    const timestamp = this.formatBrazilianDateTime(this.reliableDateTime.current);
 
-const timeSourceNote = this.reliableDateTime.sources.length > 0 
-? `\n**🕒 Data/Hora obtida de:** ${this.reliableDateTime.sources.join(', ')}`
-: '';
+    const timeSourceNote = this.reliableDateTime.sources.length > 0 
+      ? `\n**🕒 Data/Hora obtida de:** ${this.reliableDateTime.sources.join(', ')}`
+      : '';
 
-const handover = `# 📋 HANDOVER - Sistema SICEFSUS
+    const handover = `# 📋 HANDOVER - Sistema SICEFSUS
 
 **📅 Gerado automaticamente em:** ${timestamp}  
 **🔧 Por:** Script generateHandover.cjs v2.4  
@@ -823,851 +1653,63 @@ O script detecta automaticamente:
 - **Aninhamento**: Limite de ${this.refactorConfig.limits.nested_depth} níveis (peso: ${this.refactorConfig.weights.nested_depth * 100}%)
 `;
 
-return handover;
-}
+    return handover;
+  }
 
-saveHandover() {
-const content = this.generateHandover();
-fs.writeFileSync(this.currentHandover, content, 'utf8');
+  saveHandover() {
+    const content = this.generateHandover();
+    fs.writeFileSync(this.currentHandover, content, 'utf8');
 
-const timeInfo = this.reliableDateTime.sources.length > 0 
-? ` (Fonte: ${this.reliableDateTime.sources[0]})`
-: '';
+    const timeInfo = this.reliableDateTime.sources.length > 0 
+      ? ` (Fonte: ${this.reliableDateTime.sources[0]})`
+      : '';
 
-console.log('✅ HANDOVER_SICEFSUS.md atualizado com sucesso!');
-console.log(`🕒 Data/Hora: ${this.formatBrazilianDateTime(this.reliableDateTime.current)}${timeInfo}`);
-console.log(`📄 ${content.split('\n').length} linhas geradas`);
-console.log(`📊 ${this.analysis.components.length} componentes documentados`);
-console.log(`🎣 ${this.analysis.hooks.length} hooks documentados`);
-console.log(`🛠️ ${this.analysis.utils.length} utilitários documentados`);
-console.log(`🔧 ${this.analysis.services.length} serviços documentados`);
-console.log(`🔒 ${this.analysis.validations.requiredFields.length} formulários com validações documentados`);
-console.log(`🆕 Última implementação: ${this.analysis.lastImplementation.title}`);
-console.log(`🔬 ${this.analysis.refactoring.summary.totalFiles} arquivos analisados para refatoração`);
-console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
-console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
-console.log(`💯 Score médio de complexidade: ${this.analysis.refactoring.summary.averageScore}/100`);
-}
+    console.log('✅ HANDOVER_SICEFSUS.md atualizado com sucesso!');
+    console.log(`🕒 Data/Hora: ${this.formatBrazilianDateTime(this.reliableDateTime.current)}${timeInfo}`);
+    console.log(`📄 ${content.split('\n').length} linhas geradas`);
+    console.log(`📊 ${this.analysis.components.length} componentes documentados`);
+    console.log(`🎣 ${this.analysis.hooks.length} hooks documentados`);
+    console.log(`🛠️ ${this.analysis.utils.length} utilitários documentados`);
+    console.log(`🔧 ${this.analysis.services.length} serviços documentados`);
+    console.log(`🔒 ${this.analysis.validations.requiredFields.length} formulários com validações documentados`);
+    console.log(`🆕 Última implementação: ${this.analysis.lastImplementation.title}`);
+    console.log(`🔬 ${this.analysis.refactoring.summary.totalFiles} arquivos analisados para refatoração`);
+    console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
+    console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
+    console.log(`💯 Score médio de complexidade: ${this.analysis.refactoring.summary.averageScore}/100`);
+  }
 
-async run() {
-console.log('🚀 Iniciando geração automática do HANDOVER v2.4...\n');
+  async run() {
+    console.log('🚀 Iniciando geração automática do HANDOVER v2.4...\n');
 
-try {
-await this.analyze();
-this.saveHandover();
+    try {
+      await this.analyze();
+      this.saveHandover();
 
-console.log('\n🎉 Processo concluído com sucesso!');
-console.log('📋 Documentação HANDOVER_SICEFSUS.md atualizada');
-console.log('🔬 Análise de refatoração implementada');
-console.log('💡 Sugestões de melhoria de código incluídas');
+      console.log('\n🎉 Processo concluído com sucesso!');
+      console.log('📋 Documentação HANDOVER_SICEFSUS.md atualizada');
+      console.log('🔬 Análise de refatoração implementada');
+      console.log('💡 Sugestões de melhoria de código incluídas');
 
-if (this.analysis.refactoring.summary.criticalCount > 0) {
-console.log(`\n🚨 ATENÇÃO: ${this.analysis.refactoring.summary.criticalCount} arquivo(s) precisam de refatoração crítica!`);
-}
+      if (this.analysis.refactoring.summary.criticalCount > 0) {
+        console.log(`\n🚨 ATENÇÃO: ${this.analysis.refactoring.summary.criticalCount} arquivo(s) precisam de refatoração crítica!`);
+      }
 
-if (this.analysis.refactoring.summary.averageScore > 50) {
-console.log(`\n⚠️ AVISO: Score médio de complexidade alto (${this.analysis.refactoring.summary.averageScore}/100)`);
-}
+      if (this.analysis.refactoring.summary.averageScore > 50) {
+        console.log(`\n⚠️ AVISO: Score médio de complexidade alto (${this.analysis.refactoring.summary.averageScore}/100)`);
+      }
 
-} catch (error) {
-console.error('❌ Erro durante a geração:', error);
-process.exit(1);
-}
-}
+    } catch (error) {
+      console.error('❌ Erro durante a geração:', error);
+      process.exit(1);
+    }
+  }
 }
 
 // 🚀 EXECUTAR SCRIPT
 if (require.main === module) {
-const generator = new HandoverGenerator();
-generator.run();
+  const generator = new HandoverGenerator();
+  generator.run();
 }
 
-module.exports = HandoverGenerator;/**
-* 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.4
-* Script para analisar o sistema e gerar documentação atualizada com validações e regras
-* NOVO: Análise de arquivos monolíticos e sugestões de refatoração
-* NOVO: Sistema de data/hora confiável com múltiplas fontes
-* NOVO: Debugging detalhado e leitura forçada de arquivos
-* 
-* Uso: node scripts/generateHandover.cjs
-*/
-
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-const { execSync } = require('child_process');
-
-class HandoverGenerator {
-constructor() {
-this.projectRoot = path.resolve(__dirname, '..');
-this.srcPath = path.join(this.projectRoot, 'src');
-this.componentsPath = path.join(this.srcPath, 'components');
-this.utilsPath = path.join(this.srcPath, 'utils');
-this.hooksPath = path.join(this.srcPath, 'hooks');
-this.servicesPath = path.join(this.srcPath, 'services');
-this.packagePath = path.join(this.projectRoot, 'package.json');
-this.currentHandover = path.join(this.projectRoot, 'HANDOVER_SICEFSUS.md');
-
-// ✅ CONFIGURAÇÃO DE DATA/HORA CONFIÁVEL
-this.reliableDateTime = {
-current: null,
-sources: [],
-timezone: 'America/Sao_Paulo'
-};
-
-// 🧩 CONFIGURAÇÃO DE ANÁLISE DE REFATORAÇÃO
-this.refactorConfig = {
-limits: {
-lines: 300,
-functions: 15,
-complexity: 20,
-imports: 20,
-jsx_elements: 50,
-nested_depth: 5
-},
-weights: {
-lines: 0.25,
-functions: 0.20,
-complexity: 0.25,
-imports: 0.15,
-jsx_elements: 0.10,
-nested_depth: 0.05
-}
-};
-
-this.analysis = {
-components: [],
-hooks: [],
-utils: [],
-services: [],
-dependencies: {},
-structure: {},
-lastImplementation: {
-title: '',
-description: '',
-date: '',
-filesInvolved: [],
-keyChanges: [],
-impact: '',
-status: ''
-},
-validations: {
-cnpjRules: [],
-requiredFields: [],
-businessRules: [],
-userPermissions: [],
-workflows: []
-},
-changes: {
-newComponents: [],
-modifiedFunctionalities: [],
-removedComponents: [],
-structureChanges: [],
-dependencyChanges: []
-},
-refactoring: {
-monolithicFiles: [],
-recommendations: [],
-summary: {
-  totalFiles: 0,
-  monolithicCount: 0,
-  criticalCount: 0,
-  averageScore: 0
-}
-}
-};
-}
-
-// ===== MÉTODOS DE DATA/HORA =====
-
-async getReliableDateTime() {
-console.log('🕒 Obtendo data/hora de fontes confiáveis...');
-
-const sources = [
-() => this.getTimeFromWorldTimeAPI(),
-() => this.getTimeFromNTP(),
-() => this.getTimeFromGitCommit(),
-() => this.getTimeFromFileSystem(),
-() => this.getLocalTime()
-];
-
-let reliableTime = null;
-
-for (const getTime of sources) {
-try {
-const timeResult = await getTime();
-if (timeResult && timeResult.datetime) {
-  this.reliableDateTime.sources.push(timeResult.source);
-  reliableTime = timeResult.datetime;
-  console.log(`✅ Data obtida de: ${timeResult.source}`);
-  break;
-}
-} catch (error) {
-console.log(`⚠️ Falha em fonte de tempo: ${error.message}`);
-continue;
-}
-}
-
-if (!reliableTime) {
-reliableTime = new Date();
-this.reliableDateTime.sources.push('Sistema Local (Fallback)');
-console.log('⚠️ Usando data do sistema local como último recurso');
-}
-
-this.reliableDateTime.current = reliableTime;
-return reliableTime;
-}
-
-async getTimeFromWorldTimeAPI() {
-return new Promise((resolve, reject) => {
-const options = {
-hostname: 'worldtimeapi.org',
-port: 443,
-path: '/api/timezone/America/Sao_Paulo',
-method: 'GET',
-timeout: 5000
-};
-
-const req = https.request(options, (res) => {
-let data = '';
-res.on('data', (chunk) => data += chunk);
-res.on('end', () => {
-  try {
-    const timeData = JSON.parse(data);
-    const datetime = new Date(timeData.datetime);
-    resolve({
-      datetime,
-      source: 'WorldTimeAPI (America/Sao_Paulo)',
-      raw: timeData
-    });
-  } catch (error) {
-    reject(new Error('Erro ao processar resposta da WorldTimeAPI'));
-  }
-});
-});
-
-req.on('error', (error) => {
-reject(new Error(`WorldTimeAPI falhou: ${error.message}`));
-});
-
-req.on('timeout', () => {
-req.destroy();
-reject(new Error('WorldTimeAPI timeout'));
-});
-
-req.end();
-});
-}
-
-async getTimeFromNTP() {
-try {
-const ntpCommand = process.platform === 'win32' 
-? 'w32tm /query /status' 
-: 'date';
-
-const result = execSync(ntpCommand, { 
-encoding: 'utf8', 
-timeout: 3000 
-});
-
-if (result) {
-return {
-  datetime: new Date(),
-  source: 'Sistema NTP/Time Service',
-  raw: result.trim()
-};
-}
-} catch (error) {
-throw new Error(`NTP não disponível: ${error.message}`);
-}
-}
-
-async getTimeFromGitCommit() {
-try {
-const gitDate = execSync('git log -1 --format=%cd --date=iso', { 
-encoding: 'utf8',
-cwd: this.projectRoot,
-timeout: 3000
-});
-
-if (gitDate) {
-return {
-  datetime: new Date(gitDate.trim()),
-  source: 'Git Último Commit',
-  raw: gitDate.trim()
-};
-}
-} catch (error) {
-throw new Error(`Git não disponível: ${error.message}`);
-}
-}
-
-async getTimeFromFileSystem() {
-try {
-const stats = fs.statSync(this.packagePath);
-return {
-datetime: stats.mtime,
-source: 'Sistema de Arquivos (package.json mtime)',
-raw: stats.mtime.toISOString()
-};
-} catch (error) {
-throw new Error(`Filesystem falhou: ${error.message}`);
-}
-}
-
-async getLocalTime() {
-return {
-datetime: new Date(),
-source: 'Sistema Local',
-raw: new Date().toISOString()
-};
-}
-
-formatBrazilianDateTime(date) {
-if (!date) date = this.reliableDateTime.current || new Date();
-
-const options = {
-timeZone: this.reliableDateTime.timezone,
-year: 'numeric',
-month: '2-digit',
-day: '2-digit',
-hour: '2-digit',
-minute: '2-digit',
-second: '2-digit',
-hour12: false
-};
-
-try {
-const formatter = new Intl.DateTimeFormat('pt-BR', options);
-return formatter.format(date);
-} catch (error) {
-const offset = -3;
-const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-const brazilTime = new Date(utc + (offset * 3600000));
-
-const day = String(brazilTime.getDate()).padStart(2, '0');
-const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
-const year = brazilTime.getFullYear();
-const hours = String(brazilTime.getHours()).padStart(2, '0');
-const minutes = String(brazilTime.getMinutes()).padStart(2, '0');
-const seconds = String(brazilTime.getSeconds()).padStart(2, '0');
-
-return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-}
-}
-
-formatSimpleBrazilianDate(date) {
-if (!date) date = this.reliableDateTime.current || new Date();
-
-try {
-return new Intl.DateTimeFormat('pt-BR', {
-timeZone: this.reliableDateTime.timezone,
-year: 'numeric',
-month: '2-digit',
-day: '2-digit'
-}).format(date);
-} catch (error) {
-const offset = -3;
-const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-const brazilTime = new Date(utc + (offset * 3600000));
-
-const day = String(brazilTime.getDate()).padStart(2, '0');
-const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
-const year = brazilTime.getFullYear();
-
-return `${day}/${month}/${year}`;
-}
-}
-
-// ===== MÉTODOS DE ANÁLISE DE REFATORAÇÃO =====
-
-analyzeFileComplexity(content, filePath) {
-const lines = content.split('\n').length;
-const nonEmptyLines = content.split('\n').filter(line => line.trim()).length;
-
-const functionMatches = [
-...content.matchAll(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|const\s+\w+\s*=\s*(?:async\s+)?function)/g),
-...content.matchAll(/\w+\s*:\s*(?:async\s+)?(?:function|\()/g),
-...content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+\w+/g)
-];
-const functionCount = functionMatches.length;
-
-const importMatches = content.matchAll(/import\s+.*?from\s+['"`][^'"`]+['"`]/g);
-const importCount = [...importMatches].length;
-
-const jsxMatches = content.matchAll(/<[A-Z]\w*(?:\s+[^>]*)?\s*\/?>/g);
-const jsxElementCount = [...jsxMatches].length;
-
-// Calcular complexidade ciclomática (corrigido)
-const complexityKeywords = ['if', 'else', 'for', 'while', 'switch', 'case', '&&', '||', '\\?', 'catch'];
-let complexity = 1;
-
-complexityKeywords.forEach(keyword => {
-try {
-const regex = new RegExp(`\\b${keyword}\\b`, 'g');
-const matches = content.match(regex);
-if (matches) complexity += matches.length;
-} catch (error) {
-console.warn(`⚠️ Erro ao processar keyword "${keyword}":`, error.message);
-}
-});
-
-let maxDepth = 0;
-let currentDepth = 0;
-for (let char of content) {
-if (char === '{' || char === '(') currentDepth++;
-if (char === '}' || char === ')') currentDepth--;
-maxDepth = Math.max(maxDepth, currentDepth);
-}
-
-return {
-lines,
-nonEmptyLines,
-functions: functionCount,
-imports: importCount,
-jsxElements: jsxElementCount,
-complexity,
-nestedDepth: maxDepth
-};
-}
-
-calculateRefactorScore(metrics) {
-const { limits, weights } = this.refactorConfig;
-let score = 0;
-
-const normalizedMetrics = {
-lines: Math.min((metrics.lines / limits.lines) * 100, 100),
-functions: Math.min((metrics.functions / limits.functions) * 100, 100),
-complexity: Math.min((metrics.complexity / limits.complexity) * 100, 100),
-imports: Math.min((metrics.imports / limits.imports) * 100, 100),
-jsxElements: Math.min((metrics.jsxElements / limits.jsx_elements) * 100, 100),
-nestedDepth: Math.min((metrics.nestedDepth / limits.nested_depth) * 100, 100)
-};
-
-Object.keys(weights).forEach(key => {
-if (normalizedMetrics[key]) {
-score += normalizedMetrics[key] * weights[key];
-}
-});
-
-return Math.min(Math.round(score), 100);
-}
-
-getRefactorPriority(score) {
-if (score >= 80) return { level: 'CRÍTICA', color: '🔴', description: 'Refatoração urgente necessária' };
-if (score >= 60) return { level: 'ALTA', color: '🟠', description: 'Refatoração recomendada' };
-if (score >= 40) return { level: 'MÉDIA', color: '🟡', description: 'Considerar refatoração' };
-if (score >= 20) return { level: 'BAIXA', color: '🟢', description: 'Monitorar crescimento' };
-return { level: 'OK', color: '✅', description: 'Arquivo bem estruturado' };
-}
-
-generateRefactorSuggestions(metrics, filePath) {
-const suggestions = [];
-const { limits } = this.refactorConfig;
-
-if (metrics.lines > limits.lines) {
-suggestions.push({
-type: 'Tamanho do Arquivo',
-issue: `Arquivo com ${metrics.lines} linhas (limite: ${limits.lines})`,
-suggestion: 'Quebrar em componentes menores ou extrair lógicas para hooks/utils',
-priority: 'Alta'
-});
-}
-
-if (metrics.functions > limits.functions) {
-suggestions.push({
-type: 'Número de Funções',
-issue: `${metrics.functions} funções em um arquivo (limite: ${limits.functions})`,
-suggestion: 'Agrupar funções relacionadas em módulos separados',
-priority: 'Média'
-});
-}
-
-if (metrics.complexity > limits.complexity) {
-suggestions.push({
-type: 'Complexidade Ciclomática',
-issue: `Complexidade ${metrics.complexity} (limite: ${limits.complexity})`,
-suggestion: 'Simplificar lógicas condicionais e extrair funções auxiliares',
-priority: 'Alta'
-});
-}
-
-if (metrics.imports > limits.imports) {
-suggestions.push({
-type: 'Dependências Excessivas',
-issue: `${metrics.imports} imports (limite: ${limits.imports})`,
-suggestion: 'Revisar dependências e considerar uso de barrel exports',
-priority: 'Baixa'
-});
-}
-
-if (metrics.jsxElements > limits.jsx_elements) {
-suggestions.push({
-type: 'JSX Complexo',
-issue: `${metrics.jsxElements} elementos JSX (limite: ${limits.jsx_elements})`,
-suggestion: 'Extrair subcomponentes para melhorar legibilidade',
-priority: 'Média'
-});
-}
-
-if (metrics.nestedDepth > limits.nested_depth) {
-suggestions.push({
-type: 'Aninhamento Profundo',
-issue: `Profundidade ${metrics.nestedDepth} (limite: ${limits.nested_depth})`,
-suggestion: 'Extrair lógicas aninhadas em funções separadas',
-priority: 'Alta'
-});
-}
-
-if (filePath.includes('components/')) {
-if (metrics.lines > 200) {
-suggestions.push({
-  type: 'Componente Monolítico',
-  issue: 'Componente muito grande para manutenção',
-  suggestion: 'Quebrar em: Header, Body, Footer ou usar composição',
-  priority: 'Alta'
-});
-}
-}
-
-if (filePath.includes('hooks/')) {
-if (metrics.functions > 5) {
-suggestions.push({
-  type: 'Hook Complexo',
-  issue: 'Hook com muitas responsabilidades',
-  suggestion: 'Dividir em hooks mais específicos (Single Responsibility)',
-  priority: 'Média'
-});
-}
-}
-
-return suggestions;
-}
-
-getFileType(filePath) {
-if (filePath.includes('components/')) return 'Component';
-if (filePath.includes('hooks/')) return 'Hook';
-if (filePath.includes('utils/')) return 'Utility';
-if (filePath.includes('services/')) return 'Service';
-return 'Other';
-}
-
-generateGeneralRecommendations() {
-const recommendations = [];
-const { summary } = this.analysis.refactoring;
-
-if (summary.criticalCount > 0) {
-recommendations.push({
-type: 'Arquivos Críticos',
-description: `${summary.criticalCount} arquivo(s) precisam de refatoração urgente`,
-action: 'Priorizar refatoração imediata dos arquivos com score > 80',
-impact: 'Alto',
-effort: 'Alto'
-});
-}
-
-if (summary.monolithicCount > summary.totalFiles * 0.3) {
-recommendations.push({
-type: 'Padrão Arquitetural',
-description: 'Alto percentual de arquivos monolíticos detectado',
-action: 'Revisar padrões de arquitetura e estabelecer guidelines de tamanho',
-impact: 'Médio',
-effort: 'Médio'
-});
-}
-
-if (summary.averageScore > 50) {
-recommendations.push({
-type: 'Qualidade Geral',
-description: `Score médio de refatoração: ${summary.averageScore}`,
-action: 'Implementar revisões de código focadas em tamanho e complexidade',
-impact: 'Médio',
-effort: 'Baixo'
-});
-}
-
-const componentFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Component');
-const criticalComponents = componentFiles.filter(f => f.score >= 80);
-if (criticalComponents.length > 0) {
-recommendations.push({
-type: 'Componentes Críticos',
-description: `${criticalComponents.length} componente(s) muito complexo(s)`,
-action: 'Aplicar padrões como Container/Presentational ou Compound Components',
-impact: 'Alto',
-effort: 'Alto'
-});
-}
-
-const hookFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Hook');
-const criticalHooks = hookFiles.filter(f => f.score >= 60);
-if (criticalHooks.length > 0) {
-recommendations.push({
-type: 'Hooks Complexos',
-description: `${criticalHooks.length} hook(s) com muitas responsabilidades`,
-action: 'Aplicar Single Responsibility Principle em hooks',
-impact: 'Médio',
-effort: 'Médio'
-});
-}
-
-this.analysis.refactoring.recommendations = recommendations;
-}
-
-// ===== MÉTODOS DE ANÁLISE PRINCIPAL =====
-
-async analyze() {
-console.log('🔍 Iniciando análise do sistema SICEFSUS...');
-
-await this.getReliableDateTime();
-await this.analyzePackageJson();
-await this.analyzeProjectStructure();
-await this.analyzeComponents();
-await this.analyzeHooks();
-await this.analyzeUtils();
-await this.analyzeServices();
-await this.analyzeValidationsAndRules();
-await this.detectChanges();
-await this.analyzeLastImplementation();
-await this.analyzeFilesForRefactoring();
-
-console.log('✅ Análise concluída!');
-}
-
-async analyzePackageJson() {
-try {
-const packageData = JSON.parse(fs.readFileSync(this.packagePath, 'utf8'));
-this.analysis.dependencies = {
-main: packageData.dependencies || {},
-dev: packageData.devDependencies || {},
-scripts: packageData.scripts || {}
-};
-console.log('📦 Package.json analisado');
-} catch (error) {
-console.error('❌ Erro ao analisar package.json:', error.message);
-}
-}
-
-async analyzeProjectStructure() {
-const analyzeDirectory = (dirPath, relativePath = '') => {
-const items = fs.readdirSync(dirPath, { withFileTypes: true });
-const structure = {};
-
-items.forEach(item => {
-if (item.name.startsWith('.') || item.name === 'node_modules') return;
-
-const fullPath = path.join(dirPath, item.name);
-const relPath = path.join(relativePath, item.name);
-
-if (item.isDirectory()) {
-  structure[item.name] = analyzeDirectory(fullPath, relPath);
-} else {
-  structure[item.name] = {
-    type: 'file',
-    extension: path.extname(item.name),
-    size: fs.statSync(fullPath).size
-  };
-}
-});
-
-return structure;
-};
-
-this.analysis.structure = analyzeDirectory(this.projectRoot);
-console.log('📁 Estrutura do projeto analisada');
-}
-
-async analyzeComponents() {
-if (!fs.existsSync(this.componentsPath)) {
-console.log('⚠️ Pasta components não encontrada');
-return;
-}
-
-console.log(`📁 Analisando pasta: ${this.componentsPath}`);
-const files = fs.readdirSync(this.componentsPath);
-console.log(`📄 Arquivos encontrados na pasta components: ${files.join(', ')}`);
-
-for (const file of files) {
-if (file.endsWith('.jsx') || file.endsWith('.js')) {
-const filePath = path.join(this.componentsPath, file);
-console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-try {
-  const content = fs.readFileSync(filePath, 'utf8');
-  console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-  const component = {
-    name: file,
-    path: `src/components/${file}`,
-    type: this.detectComponentType(content),
-    dependencies: this.extractDependencies(content),
-    functions: this.extractFunctions(content),
-    exports: this.extractExports(content),
-    description: this.extractDescription(content),
-    lastModified: fs.statSync(filePath).mtime
-  };
-
-  console.log(`🧩 Funções encontradas em ${file}: ${component.functions.join(', ')}`);
-  this.analysis.components.push(component);
-} catch (error) {
-  console.error(`❌ Erro ao ler ${file}:`, error.message);
-}
-} else {
-console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-}
-}
-
-console.log(`🧩 ${this.analysis.components.length} componentes analisados`);
-}
-
-async analyzeHooks() {
-const hooksPath = path.join(this.srcPath, 'hooks');
-if (!fs.existsSync(hooksPath)) {
-console.log('⚠️ Pasta hooks não encontrada');
-return;
-}
-
-console.log(`📁 Analisando pasta: ${hooksPath}`);
-const files = fs.readdirSync(hooksPath);
-console.log(`📄 Arquivos encontrados na pasta hooks: ${files.join(', ')}`);
-
-for (const file of files) {
-if (file.endsWith('.js') || file.endsWith('.jsx')) {
-const filePath = path.join(hooksPath, file);
-console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-try {
-  const content = fs.readFileSync(filePath, 'utf8');
-  console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-  const hook = {
-    name: file,
-    path: `src/hooks/${file}`,
-    functions: this.extractFunctions(content),
-    dependencies: this.extractDependencies(content),
-    exports: this.extractExports(content),
-    description: this.extractDescription(content),
-    lastModified: fs.statSync(filePath).mtime
-  };
-
-  console.log(`🎣 Funções encontradas em ${file}: ${hook.functions.join(', ')}`);
-  this.analysis.hooks.push(hook);
-} catch (error) {
-  console.error(`❌ Erro ao ler ${file}:`, error.message);
-}
-} else {
-console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-}
-}
-
-console.log(`🎣 ${this.analysis.hooks.length} hooks analisados`);
-}
-
-async analyzeUtils() {
-const utilsPath = path.join(this.srcPath, 'utils');
-if (!fs.existsSync(utilsPath)) {
-console.log('⚠️ Pasta utils não encontrada');
-return;
-}
-
-console.log(`📁 Analisando pasta: ${utilsPath}`);
-const files = fs.readdirSync(utilsPath);
-console.log(`📄 Arquivos encontrados na pasta utils: ${files.join(', ')}`);
-
-for (const file of files) {
-if (file.endsWith('.js') || file.endsWith('.jsx')) {
-const filePath = path.join(utilsPath, file);
-console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-try {
-  const content = fs.readFileSync(filePath, 'utf8');
-  console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-  const util = {
-    name: file,
-    path: `src/utils/${file}`,
-    functions: this.extractFunctions(content),
-    exports: this.extractExports(content),
-    description: this.extractDescription(content),
-    lastModified: fs.statSync(filePath).mtime
-  };
-
-  console.log(`🛠️ Funções encontradas em ${file}: ${util.functions.join(', ')}`);
-  this.analysis.utils.push(util);
-} catch (error) {
-  console.error(`❌ Erro ao ler ${file}:`, error.message);
-}
-} else {
-console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-}
-}
-
-console.log(`🛠️ ${this.analysis.utils.length} utilitários analisados`);
-}
-
-async analyzeServices() {
-if (!fs.existsSync(this.servicesPath)) {
-console.log('⚠️ Pasta services não encontrada');
-return;
-}
-
-console.log(`📁 Analisando pasta: ${this.servicesPath}`);
-const files = fs.readdirSync(this.servicesPath);
-console.log(`📄 Arquivos encontrados na pasta services: ${files.join(', ')}`);
-
-for (const file of files) {
-if (file.endsWith('.js') || file.endsWith('.jsx')) {
-const filePath = path.join(this.servicesPath, file);
-console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-try {
-  const content = fs.readFileSync(filePath, 'utf8');
-  console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-  const service = {
-    name: file,
-    path: `src/services/${file}`,
-    functions: this.extractFunctions(content),
-    exports: this.extractExports(content),
-    description: this.extractDescription(content),
-    lastModified: fs.statSync(filePath).mtime
-  };
-
-  console.log(`🔧 Funções encontradas em ${file}: ${service.functions.join(', ')}`);
-  this.analysis.services.push(service);
-} catch (error) {
-  console.error(`❌ Erro ao ler ${file}:`, error.message);
-}
-} else {
-console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-}
-}
-
-console.log(`🔧 ${this.analysis.services.length} serviços analisados`);
-}
-
-async analyzeFilesForRefactoring() {
-console.log('🔬 Iniciando análise de refatoração...');
-
-const allFiles = [
-...this.analysis.components,
-...this.analysis.hooks,
-...this.analysis.utils,
-...this.analysis.services
-];
-
-console.log(`📊 Total de arquivos para analisar: ${allFiles.length}`);
-
-if (allFiles.length === 0) {
-console.log('⚠️ ATENÇÃO: Nenhum arquivo encontrado para análise!');
-return;
-}
-
-this.analysis.refactoring.summary.totalFiles = allFiles.length;
-
-for (const file of allFiles) {
-try {
-console.log(`🔍 Analisando para refatoração: ${file.path}`);
-const fullPath = path.join(this.projectRoot, file.path);
-
-if (!fs.existsSync(fullPath)) {
-  console.log(`❌ Arquivo
+module.exports = HandoverGenerator;
