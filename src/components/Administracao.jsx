@@ -195,7 +195,30 @@ const Administracao = ({ usuario }) => {
     }
   };
 
-  // ✅ EXCLUIR USUÁRIO
+  // ✅ FUNÇÃO PARA CRIAR ADMIN DIRETO
+  const handleCreateAdminDirect = async () => {
+    try {
+      setLoading(true);
+
+      const result = await userService.createAdminUser(
+        "paulinett@live.com",
+        "123456", 
+        "Paulinette Administrador"
+      );
+
+      showToast(`✅ ${result.message}`, "success");
+
+      // Recarregar lista de usuários
+      await carregarUsuarios();
+
+    } catch (error) {
+      console.error("❌ Erro ao criar admin:", error);
+      showToast(`❌ Erro: ${error.message}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleExcluirUsuario = async (userId) => {
     const user = users.find(u => u.id === userId);
     const confirmMessage = `Tem certeza que deseja excluir o usuário "${user?.nome}"?\n\nEsta ação não pode ser desfeita.`;
@@ -266,6 +289,13 @@ const Administracao = ({ usuario }) => {
         >
           <span style={styles.buttonIcon}>➕</span>
           Novo Usuário
+        </button>
+        <button // Added button to call handleCreateAdminDirect
+          style={styles.addButton}
+          onClick={handleCreateAdminDirect}
+          disabled={loading}
+        >
+          Criar Admin
         </button>
       </div>
 
