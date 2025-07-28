@@ -215,7 +215,7 @@ function AppContent() {
               createdAt: new Date(),
             };
 
-            await setDoc(doc(db, "users", firebaseUser.uid), basicUserData);
+            await setDoc(doc(db, "usuarios", firebaseUser.uid), basicUserData);
 
             setUsuario({
               uid: firebaseUser.uid,

@@ -30,7 +30,7 @@ export default function Login({ onLoginSuccess }) {
       if (modoCadastro) {
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
         // Cria o documento do usuário no Firestore (sempre como operador)
-        await setDoc(doc(db, "usarios", cred.user.uid), {
+        await setDoc(doc(db, "usuarios", cred.user.uid), {
           uid: cred.user.uid,
           email: cred.user.email,
           role: "user", // Sempre operador no auto-registro
