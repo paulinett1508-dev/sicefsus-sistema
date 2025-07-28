@@ -23,7 +23,7 @@ function App() {
             <div className="App">
               <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+                <Route path="/" element={<Home />} />
                 <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                 <Route path="/emendas" element={<PrivateRoute><Emendas /></PrivateRoute>} />
                 <Route path="/despesas" element={<PrivateRoute><Despesas /></PrivateRoute>} />

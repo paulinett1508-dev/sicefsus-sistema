@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import { useUser } from "../context/UserContext";
+import Login from "./Login";
+import Dashboard from "./Dashboard";
 import Logo from "../images/logo-sicefsus.png";
 
 const PRIMARY = "#154360"; // Azul petróleo principal
@@ -8,7 +11,23 @@ const WHITE = "#fff";
 const GRAY = "#f4f6f8";
 const TEXT = "#222";
 
-export default function Home({ onLoginClick }) {
+export default function Home() {
+  const { usuario, loading } = useUser();
+  const [showLogin, setShowLogin] = useState(false);
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <p>Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (usuario) {
+    return <Dashboard />;
+  }
   return (
     <div style={styles.container}>
       <div style={styles.card}>
@@ -19,12 +38,16 @@ export default function Home({ onLoginClick }) {
         </p>
         <button
           style={styles.button}
-          onClick={onLoginClick}
+          onClick={() => setShowLogin(true)}
           onMouseOver={(e) => (e.currentTarget.style.background = ACCENT)}
           onMouseOut={(e) => (e.currentTarget.style.background = PRIMARY)}
         >
           Entrar / Login
         </button>
+        
+        {showLogin && (
+          <Login onLoginSuccess={() => setShowLogin(false)} />
+        )}
       </div>
       <footer style={styles.footer}>
         <span>© {new Date().getFullYear()} SICEFSUSM</span>

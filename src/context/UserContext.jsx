@@ -155,4 +155,4 @@ export const UserProvider = ({ children }) => {
 };
 
 export { UserContext };
-export default UserProvider;
+export default UserContext;

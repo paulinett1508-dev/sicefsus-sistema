@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
@@ -20,10 +19,10 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     console.log('🎨 Tema aplicado:', theme);
     localStorage.setItem('sicefsus_theme', theme);
-    
+
     // Aplicar tema ao documento
     document.documentElement.setAttribute('data-theme', theme);
-    
+
     // Para compatibility com CSS antigo
     if (theme === 'dark') {
       document.body.classList.add('dark-theme');
