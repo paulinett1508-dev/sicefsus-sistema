@@ -13,7 +13,6 @@ export default function Login({ onLoginSuccess }) {
   const [erro, setErro] = useState("");
   const [modoCadastro, setModoCadastro] = useState(false);
   const [lembrarEmail, setLembrarEmail] = useState(false);
-  
 
   // Ao carregar, verifica se há e-mail salvo
   useEffect(() => {
@@ -31,7 +30,7 @@ export default function Login({ onLoginSuccess }) {
       if (modoCadastro) {
         const cred = await createUserWithEmailAndPassword(auth, email, senha);
         // Cria o documento do usuário no Firestore (sempre como operador)
-        await setDoc(doc(db, "users", cred.user.uid), {
+        await setDoc(doc(db, "usarios", cred.user.uid), {
           uid: cred.user.uid,
           email: cred.user.email,
           role: "user", // Sempre operador no auto-registro
@@ -90,7 +89,7 @@ export default function Login({ onLoginSuccess }) {
             required
             style={styles.input}
           />
-          
+
           <div style={styles.checkboxContainer}>
             <input
               type="checkbox"

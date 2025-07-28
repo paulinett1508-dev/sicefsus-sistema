@@ -1,93 +1,70 @@
-
-import React from 'react';
-import { useTheme } from '../context/ThemeContext';
+// src/components/ThemeToggle.jsx - Versão sem contexto
+import React, { useState, useEffect } from "react";
 
 export default function ThemeToggle({ compact = false }) {
-  const { isDarkMode, toggleTheme } = useTheme();
+  const [theme, setTheme] = useState("light");
 
-  if (compact) {
-    return (
-      <button
-        onClick={toggleTheme}
-        style={styles.compactButton}
-        className="theme-toggle-button"
-        title={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
-        aria-label={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'scale(1.1)';
-          e.target.style.boxShadow = '0 4px 12px var(--theme-shadow)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'scale(1)';
-          e.target.style.boxShadow = '0 2px 8px var(--theme-shadow)';
-        }}
-      >
-        {isDarkMode ? '☀️' : '🌙'}
-      </button>
-    );
-  }
+  // Carregar tema salvo
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("sicefsus-theme") || "light";
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
+
+  // Aplicar tema ao documento
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("sicefsus-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  const isDark = theme === "dark";
 
   return (
     <button
       onClick={toggleTheme}
-      style={styles.toggleButton}
-      title={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
-      aria-label={isDarkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
+      style={compact ? styles.compactButton : styles.button}
+      title={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
     >
-      <span style={styles.icon}>
-        {isDarkMode ? '☀️' : '🌙'}
-      </span>
-      <span style={styles.text}>
-        {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
-      </span>
+      {isDark ? "☀️" : "🌙"}
     </button>
   );
 }
 
 const styles = {
+  button: {
+    background: "var(--theme-surface, #ffffff)",
+    border: "2px solid var(--theme-border, #dee2e6)",
+    color: "var(--theme-text, #212529)",
+    borderRadius: "50%",
+    padding: "12px",
+    cursor: "pointer",
+    fontSize: "18px",
+    width: "48px",
+    height: "48px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+  },
   compactButton: {
-    width: 42,
-    height: 42,
-    borderRadius: '50%',
-    border: '2px solid var(--theme-border)',
-    background: 'var(--theme-surface)',
-    color: 'var(--theme-text)',
-    fontSize: 18,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 8px var(--theme-shadow)',
-    transition: 'all 0.3s ease',
-    zIndex: 'var(--z-theme-toggle)',
-    position: 'relative',
-  },
-  
-  toggleButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 16px',
-    borderRadius: 8,
-    border: '2px solid var(--theme-border)',
-    background: 'var(--theme-surface)',
-    color: 'var(--theme-text)',
-    cursor: 'pointer',
-    fontSize: 14,
-    fontWeight: 500,
-    boxShadow: '0 2px 8px var(--theme-shadow)',
-    transition: 'all 0.3s ease',
-    fontFamily: 'var(--font-family)',
-  },
-  
-  icon: {
-    fontSize: 16,
-    display: 'flex',
-    alignItems: 'center',
-  },
-  
-  text: {
-    fontSize: 14,
-    fontWeight: 500,
+    background: "var(--theme-surface, #ffffff)",
+    border: "2px solid var(--theme-border, #dee2e6)",
+    color: "var(--theme-text, #212529)",
+    borderRadius: "50%",
+    padding: "8px",
+    cursor: "pointer",
+    fontSize: "16px",
+    width: "36px",
+    height: "36px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
   },
 };

@@ -1,8 +1,4 @@
-// App.jsx - VERSÃO CORRIGIDA COMPLETA v5.6 - CORREÇÃO DE RE-RENDERS
-// ✅ CORREÇÃO 1: Prop usuario adicionada na rota /administracao (linha 332)
-// ✅ CORREÇÃO 2: Normalização UF na função criarUsuarioSeNaoExiste (linha 98)
-// ✅ CORREÇÃO 3: Memoização do objeto usuário para evitar re-renders em cascata
-
+// App.jsx - VERSÃO ORIGINAL LIMPA (SEM CONTEXTOS)
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -12,6 +8,8 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { ToastProvider } from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import Home from "./components/Home";
@@ -20,21 +18,15 @@ import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Emendas from "./components/Emendas";
 import Despesas from "./components/Despesas";
-// As configurações de Firebase e a lógica de autenticação foram movidas para
-// o UserContext. Portanto, não importamos mais auth, db ou métodos de
-// firestore aqui. Veja src/context/UserContext.jsx para detalhes.
-
-import { UserProvider, useUser } from "./context/UserContext";
-import { ThemeProvider } from "./context/ThemeContext";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
-import { auth } from "./firebase/firebaseConfig";
+import { auth, db } from "./firebase/firebaseConfig";
 import ThemeToggle from "./components/ThemeToggle";
 
-// ✨ Context para proteção de navegação (MANTIDO)
+// Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
   isFormActive: false,
   setFormActive: () => {},
@@ -43,7 +35,7 @@ const NavigationProtectionContext = React.createContext({
   hasChanges: false,
 });
 
-// ✨ Hook para proteção de navegação (MANTIDO)
+// Hook para proteção de navegação
 export const useNavigationProtection = () => {
   const context = React.useContext(NavigationProtectionContext);
   if (!context) {
@@ -58,7 +50,7 @@ export const useNavigationProtection = () => {
   return context;
 };
 
-// ✨ Provider para proteção de navegação (MANTIDO)
+// Provider para proteção de navegação
 function NavigationProtectionProvider({ children }) {
   const [isFormActive, setIsFormActive] = useState(false);
   const [formComponent, setFormComponent] = useState(null);
@@ -105,16 +97,14 @@ function NavigationProtectionProvider({ children }) {
   );
 }
 
-// ✅ Componente wrapper (MANTIDO)
+// Componente wrapper
 function ProtectedRouteWrapper({ children, usuario }) {
-  const { isFormActive, hasChanges } = useNavigationProtection();
-
   return <div style={{ position: "relative" }}>{children}</div>;
 }
 
-// ✅ Sidebar com proteção (MANTIDO)
+// Sidebar com proteção
 function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
-  const { canNavigate, isFormActive, hasChanges } = useNavigationProtection();
+  const { canNavigate } = useNavigationProtection();
 
   const handleNavigate = (path) => {
     if (canNavigate()) {
@@ -139,7 +129,7 @@ function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
   );
 }
 
-// Componente de loading (MANTIDO)
+// Componente de loading
 function LoadingSpinner() {
   return (
     <div style={styles.loadingContainer}>
@@ -149,7 +139,7 @@ function LoadingSpinner() {
   );
 }
 
-// Error boundary (MANTIDO)
+// Error boundary
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -186,24 +176,77 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// A função criarUsuarioSeNaoExiste foi removida. A criação e atualização do
-// documento do usuário agora é responsabilidade do UserContext, que garante
-// que os dados completos estejam disponíveis sem duplicar consultas.
-
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
-  // Obtém o usuário, estado de carregamento e função de logout a partir do
-  // UserContext. Isso elimina a necessidade de gerenciar auth localmente.
-  const { user: usuario, loading, logout } = useUser();
+  const [usuario, setUsuario] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
 
-  // Se o usuário não estiver autenticado e não estivermos na home ou login,
-  // redireciona para a página inicial. Isto substitui a navegação que
-  // acontecia no onAuthStateChanged e garante que rotas protegidas não
-  // fiquem acessíveis quando não há usuário.
+  // Gerenciar autenticação
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          // Buscar dados do usuário no Firestore
+          const userDoc = await getDoc(doc(db, "usuarios", firebaseUser.uid));
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUsuario({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              role: userData.role || "user",
+              municipio: userData.municipio,
+              uf: userData.uf,
+              isActive: userData.isActive !== false,
+              ...userData,
+            });
+          } else {
+            // Criar documento básico se não existir
+            const basicUserData = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              role: "user",
+              isActive: true,
+              createdAt: new Date(),
+            };
+
+            await setDoc(doc(db, "users", firebaseUser.uid), basicUserData);
+
+            setUsuario({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              role: "user",
+              isActive: true,
+              ...basicUserData,
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao carregar dados do usuário:", error);
+          // Fallback básico
+          setUsuario({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            role: "user",
+            isActive: true,
+          });
+        }
+      } else {
+        setUsuario(null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Redirecionamento
   useEffect(() => {
     if (
       !usuario &&
@@ -215,13 +258,14 @@ function AppContent() {
     }
   }, [usuario, location.pathname, navigate, showLogin]);
 
-  // ✅ CORREÇÃO: Memoizar função handleLogout para evitar re-renders
+  // Função de logout corrigida
   const handleLogout = useCallback(async () => {
     if (!canNavigate()) {
       return;
     }
     try {
-      await logout();
+      await signOut(auth);
+      setUsuario(null);
       setShowLogin(false);
       setAuthError(null);
       navigate("/");
@@ -229,9 +273,8 @@ function AppContent() {
       console.error("Erro ao fazer logout:", error);
       setAuthError("Erro ao fazer logout. Tente novamente.");
     }
-  }, [canNavigate, logout, navigate]);
+  }, [canNavigate, navigate]);
 
-  // ✅ CORREÇÃO: Memoizar função handleNavigate para evitar re-renders
   const handleNavigate = useCallback(
     (path) => {
       if (canNavigate()) {
@@ -241,7 +284,6 @@ function AppContent() {
     [canNavigate, navigate],
   );
 
-  // ✅ CORREÇÃO: Memoizar funções de login para evitar re-renders
   const handleShowLogin = useCallback(() => {
     setShowLogin(true);
     setAuthError(null);
@@ -258,15 +300,16 @@ function AppContent() {
     setAuthError(null);
   }, []);
 
-  // ✅ CORREÇÃO: Memoizar estado de autenticação
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
 
-  // ✅ Estilo dinâmico para o botão de tema baseado na sidebar
-  const themeToggleStyle = useMemo(() => ({
-    ...styles.themeToggleContainer,
-    right: isAuthenticated ? "235px" : "15px", // Ajuste quando sidebar estiver presente
-    display: location.pathname === "/" && !isAuthenticated ? "none" : "block", // Ocultar apenas na home quando não autenticado
-  }), [isAuthenticated, location.pathname]);
+  const themeToggleStyle = useMemo(
+    () => ({
+      ...styles.themeToggleContainer,
+      right: isAuthenticated ? "235px" : "15px",
+      display: location.pathname === "/" && !isAuthenticated ? "none" : "block",
+    }),
+    [isAuthenticated, location.pathname],
+  );
 
   if (loading) {
     return <LoadingSpinner />;
@@ -274,7 +317,7 @@ function AppContent() {
 
   return (
     <div style={styles.app}>
-      {/* Modal de Login (PRESERVADO) */}
+      {/* Modal de Login */}
       {showLogin && (
         <div style={styles.overlay}>
           <div style={styles.modal}>
@@ -286,7 +329,7 @@ function AppContent() {
         </div>
       )}
 
-      {/* Erro de autenticação (PRESERVADO) */}
+      {/* Erro de autenticação */}
       {authError && (
         <div style={styles.authErrorContainer}>
           <div style={styles.authError}>
@@ -313,7 +356,7 @@ function AppContent() {
           />
         )}
 
-        {/* Botão de tema no canto superior direito - sempre visível quando autenticado */}
+        {/* Botão de tema */}
         <div style={themeToggleStyle}>
           <ThemeToggle compact={true} />
         </div>
@@ -339,7 +382,7 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTAS com usuário completo */}
+              {/* Rotas protegidas */}
               <Route
                 path="/dashboard"
                 element={
@@ -406,14 +449,12 @@ function AppContent() {
                 path="/admin"
                 element={<Navigate to="/administracao" replace />}
               />
-              {/* ✅ CORREÇÃO CRÍTICA: PROP USUARIO ADICIONADA */}
               <Route
                 path="/administracao"
                 element={
                   <PrivateRoute usuario={usuario} requiredRole="admin">
                     <ProtectedRouteWrapper usuario={usuario}>
-                      <Administracao usuario={usuario} />{" "}
-                      {/* ✅ PROP ADICIONADA */}
+                      <Administracao usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -468,49 +509,30 @@ function AppContent() {
   );
 }
 
-function AppRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/emendas" element={<Emendas />} />
-      <Route path="/despesas" element={<Despesas />} />
-      <Route path="/relatorios" element={<Relatorios />} />
-      <Route path="/administracao" element={<Administracao />} />
-    </Routes>
-  );
-}
-
 // Componente principal
 export default function App() {
-  // ✅ Verificar se Firebase está configurado
   if (!auth) {
     return <FirebaseError />;
   }
 
   return (
-    <ThemeProvider>
-      <UserProvider>
-        <ToastProvider>
-          <Router>
-            <NavigationProtectionProvider>
-              <AppContent />
-            </NavigationProtectionProvider>
-          </Router>
-        </ToastProvider>
-      </UserProvider>
-    </ThemeProvider>
+    <ToastProvider>
+      <Router>
+        <NavigationProtectionProvider>
+          <AppContent />
+        </NavigationProtectionProvider>
+      </Router>
+    </ToastProvider>
   );
 }
 
-// Estilos (MANTIDOS EXATAMENTE IGUAIS)
+// Estilos
 const styles = {
   app: {
-    fontFamily: "var(--font-family)",
+    fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
     minHeight: "100vh",
-    backgroundColor: "var(--theme-bg)",
-    color: "var(--theme-text)",
+    backgroundColor: "var(--theme-bg, #f4f6f8)",
+    color: "var(--theme-text, #212529)",
     transition: "background-color 0.3s ease, color 0.3s ease",
   },
   container: {
@@ -528,14 +550,14 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
-    backgroundColor: "var(--theme-bg)",
-    color: "var(--primary)",
+    backgroundColor: "var(--theme-bg, #f4f6f8)",
+    color: "#154360",
   },
   loadingSpinner: {
     width: 50,
     height: 50,
-    border: "4px solid var(--theme-border)",
-    borderTop: "4px solid var(--primary)",
+    border: "4px solid #e2e8f0",
+    borderTop: "4px solid #154360",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 20,
@@ -574,8 +596,8 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
-    backgroundColor: "var(--theme-bg)",
-    color: "var(--theme-text)",
+    backgroundColor: "#f4f6f8",
+    color: "#212529",
     padding: 32,
     textAlign: "center",
   },
@@ -592,8 +614,8 @@ const styles = {
     maxWidth: 400,
   },
   errorButton: {
-    backgroundColor: "var(--error)",
-    color: "var(--white)",
+    backgroundColor: "#E74C3C",
+    color: "white",
     border: "none",
     padding: "12px 24px",
     borderRadius: 6,
@@ -682,8 +704,8 @@ const styles = {
     maxWidth: 400,
   },
   button: {
-    backgroundColor: "var(--primary)",
-    color: "var(--white)",
+    backgroundColor: "#154360",
+    color: "white",
     border: "none",
     padding: "12px 24px",
     borderRadius: 6,
@@ -700,7 +722,7 @@ const styles = {
   },
 };
 
-// CSS para animações (MANTIDO EXATAMENTE IGUAL)
+// CSS para animações
 const additionalCSS = `
 @keyframes spin {
   0% { transform: rotate(0deg); }

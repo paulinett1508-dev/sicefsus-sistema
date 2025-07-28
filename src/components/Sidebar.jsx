@@ -16,6 +16,40 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
 
   const isAdmin = usuario?.role === "admin";
 
+  // ✅ FUNÇÃO PARA OBTER NOME DE EXIBIÇÃO CORRETO
+  const getDisplayName = (usuario) => {
+    // Primeiro: tentar campo 'nome' (padrão do sistema)
+    if (usuario?.nome && usuario.nome.trim()) {
+      return usuario.nome;
+    }
+
+    // Segundo: tentar campo 'name' (alternativo)
+    if (usuario?.name && usuario.name.trim()) {
+      return usuario.name;
+    }
+
+    // Terceiro: tentar displayName do Firebase
+    if (usuario?.displayName && usuario.displayName.trim()) {
+      return usuario.displayName;
+    }
+
+    // Quarto: extrair nome do email
+    if (usuario?.email) {
+      const nameFromEmail = usuario.email.split("@")[0];
+      // Capitalizar primeira letra e limpar caracteres especiais
+      return nameFromEmail
+        .replace(/[._-]/g, " ")
+        .split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join(" ");
+    }
+
+    // Fallback final
+    return "Usuário";
+  };
+
   const handleSearchNavigate = (path) => {
     onNavigate(path);
   };
@@ -255,7 +289,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
                 whiteSpace: "nowrap",
               }}
             >
-              {usuario.displayName || usuario.email}
+              {/* ✅ CORREÇÃO PRINCIPAL: Usar função que busca nome correto */}
+              {getDisplayName(usuario)}
             </div>
             <div
               style={{

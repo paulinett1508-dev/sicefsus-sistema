@@ -1,4 +1,3 @@
-
 // src/components/UsersTable.jsx - Tabela de Usuários com UX Melhorada
 import React from "react";
 
@@ -40,11 +39,7 @@ const UsersTable = ({
     };
 
     const statusInfo = statusMap[status] || statusMap.ativo;
-    return (
-      <span style={statusInfo.style}>
-        {statusInfo.label}
-      </span>
-    );
+    return <span style={statusInfo.style}>{statusInfo.label}</span>;
   };
 
   const formatRole = (role) => {
@@ -89,7 +84,7 @@ const UsersTable = ({
                 key={user.id}
                 style={{
                   ...styles.row,
-                  ...(user.primeiroAcesso ? styles.firstAccessRow : {})
+                  ...(user.primeiroAcesso ? styles.firstAccessRow : {}),
                 }}
               >
                 <td style={styles.td}>

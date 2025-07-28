@@ -1,6 +1,6 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 28/07/2025, 09:46:14  
+**📅 Gerado automaticamente em:** 28/07/2025, 16:38:14  
 **🔧 Por:** Script generateHandover.cjs v2.4  
 **📊 Status:** Sistema em Produção Ativa
 **🕒 Data/Hora obtida de:** Sistema NTP/Time Service
@@ -9,25 +9,38 @@
 
 ## 🆕 ÚLTIMA IMPLEMENTAÇÃO REALIZADA
 
-### Sistema de Usuários Corrigido
+### Sistema de Análise de Refatoração
 **📅 Data:** 28/07/2025  
-**📊 Status:** Implementado e testado  
-**⚡ Impacto:** Crítico - Sistema de administração de usuários funcional
+**📊 Status:** Implementado e funcional  
+**⚡ Impacto:** Alto - Melhoria significativa na qualidade do código
 
 **📝 Descrição:**  
-Correção do sistema de importação de userService e detecção de usuários órfãos
+Implementação completa do sistema de análise automática de arquivos monolíticos
 
 **🔧 Principais Alterações:**
-- Adicionado export default ao userService.js
-- Corrigido método analyzeServices no generateHandover.cjs
-- Sistema de usuários órfãos implementado
-- Validações em tempo real adicionadas
+- Sistema de pontuação de complexidade implementado
+- Detecção automática de arquivos monolíticos
+- Sugestões específicas de refatoração por arquivo
+- Debugging detalhado com logs de análise
 
 **📁 Arquivos Envolvidos:**
+- `src/components/ThemeToggle.jsx`
+- `src/services/userService.js`
+- `src/components/Login.jsx`
+- `src/components/Sidebar.jsx`
+- `src/components/UsersTable.jsx`
 - `src/components/DespesaForm.jsx`
 - `src/components/Despesas.jsx`
 - `src/services/emendasService.js`
-- `src/services/userService.js`
+- `src/components/despesa/DespesaFormHeader.jsx`
+- `src/components/despesa/DespesaFormBanners.jsx`
+- `src/components/despesa/DespesaFormEmendaInfo.jsx`
+- `src/components/despesa/DespesaFormBasicFields.jsx`
+- `src/components/despesa/DespesaFormEmpenhoFields.jsx`
+- `src/components/despesa/DespesaFormDateFields.jsx`
+- `src/components/despesa/DespesaFormOrcamentoFields.jsx`
+- `src/components/despesa/DespesaFormAdvancedFields.jsx`
+- `src/components/despesa/DespesaFormActions.jsx`
 - `src/components/UserForm.jsx`
 - `src/components/Administracao.jsx`
 - `src/components/Dashboard.jsx`
@@ -35,17 +48,13 @@ Correção do sistema de importação de userService e detecção de usuários �
 - `src/components/EmendaForm.jsx`
 - `src/components/AdminPanel.jsx`
 - `src/components/DebugPanel.jsx`
-- `src/components/UsersTable.jsx`
 - `src/components/DespesasList.jsx`
 - `src/components/DespesasTable.jsx`
 - `src/components/Emendas.jsx`
 - `src/components/PrimeiraDespesaModal.jsx`
-- `src/components/Sidebar.jsx`
-- `src/components/ThemeToggle.jsx`
 - `src/components/Relatorios.jsx`
 - `src/components/Home.jsx`
 - `src/components/ErrorBoundary.jsx`
-- `src/components/Login.jsx`
 - `src/components/FirebaseError.jsx`
 - `src/components/EmendasTable.jsx`
 - `src/components/DataManager.jsx`
@@ -63,10 +72,10 @@ Esta seção identifica arquivos que podem se beneficiar de refatoração para m
 
 ### 📊 RESUMO EXECUTIVO
 
-- **Total de Arquivos Analisados:** 56
-- **Arquivos que Precisam de Refatoração:** 0 (0%)
+- **Total de Arquivos Analisados:** 65
+- **Arquivos que Precisam de Refatoração:** 50 (77%)
 - **Arquivos com Prioridade Crítica:** 0
-- **Score Médio de Complexidade:** 0/100
+- **Score Médio de Complexidade:** 53/100
 
 ### 🎯 CRITÉRIOS DE ANÁLISE
 
@@ -87,55 +96,280 @@ Os arquivos são avaliados com base nos seguintes critérios:
 
 ### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
 
-✅ Nenhum arquivo com prioridade alta detectado.
+#### 🟠 `undefined` - Score: 73/100
+
+**📊 Resumo:** 623 linhas, 13 funções, complexidade 16513
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 73/100
+
+**📊 Resumo:** 941 linhas, 15 funções, complexidade 25638
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 73/100
+
+**📊 Resumo:** 963 linhas, 11 funções, complexidade 28248
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 72/100
+
+**📊 Resumo:** 747 linhas, 11 funções, complexidade 22668
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 72/100
+
+**📊 Resumo:** 662 linhas, 14 funções, complexidade 18588
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 71/100
+
+**📊 Resumo:** 562 linhas, 34 funções, complexidade 14895
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Agrupar funções relacionadas em módulos separados
+
+#### 🟠 `undefined` - Score: 71/100
+
+**📊 Resumo:** 484 linhas, 20 funções, complexidade 12992
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Agrupar funções relacionadas em módulos separados
+
+#### 🟠 `undefined` - Score: 70/100
+
+**📊 Resumo:** 1088 linhas, 14 funções, complexidade 29212
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 69/100
+
+**📊 Resumo:** 968 linhas, 12 funções, complexidade 27563
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 69/100
+
+**📊 Resumo:** 685 linhas, 11 funções, complexidade 17129
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 69/100
+
+**📊 Resumo:** 334 linhas, 14 funções, complexidade 7909
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 68/100
+
+**📊 Resumo:** 495 linhas, 9 funções, complexidade 12964
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 68/100
+
+**📊 Resumo:** 860 linhas, 12 funções, complexidade 19780
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 68/100
+
+**📊 Resumo:** 931 linhas, 9 funções, complexidade 28305
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 67/100
+
+**📊 Resumo:** 711 linhas, 12 funções, complexidade 21006
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 66/100
+
+**📊 Resumo:** 407 linhas, 9 funções, complexidade 10043
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 64/100
+
+**📊 Resumo:** 668 linhas, 9 funções, complexidade 18237
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 64/100
+
+**📊 Resumo:** 1292 linhas, 8 funções, complexidade 35541
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 64/100
+
+**📊 Resumo:** 404 linhas, 10 funções, complexidade 10255
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 63/100
+
+**📊 Resumo:** 251 linhas, 12 funções, complexidade 5631
+
+**🔧 Principais Sugestões:**
+- Simplificar lógicas condicionais e extrair funções auxiliares
+- Extrair lógicas aninhadas em funções separadas
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 590 linhas, 4 funções, complexidade 19190
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 937 linhas, 8 funções, complexidade 26603
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 736 linhas, 8 funções, complexidade 19421
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 604 linhas, 8 funções, complexidade 14314
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 654 linhas, 7 funções, complexidade 18423
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 61/100
+
+**📊 Resumo:** 203 linhas, 14 funções, complexidade 5721
+
+**🔧 Principais Sugestões:**
+- Simplificar lógicas condicionais e extrair funções auxiliares
+- Extrair lógicas aninhadas em funções separadas
+
+#### 🟠 `undefined` - Score: 60/100
+
+**📊 Resumo:** 1404 linhas, 4 funções, complexidade 44253
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 60/100
+
+**📊 Resumo:** 1486 linhas, 5 funções, complexidade 45614
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `undefined` - Score: 60/100
+
+**📊 Resumo:** 340 linhas, 6 funções, complexidade 10907
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
 
 ### 🟡 ARQUIVOS PARA MONITORAMENTO (Score 40-59)
 
-✅ Nenhum arquivo para monitoramento detectado.
+Os seguintes arquivos devem ser monitorados para evitar que se tornem monolíticos:
+
+- 🟡 `undefined` (Score: 58) - 328 linhas
+- 🟡 `undefined` (Score: 58) - 209 linhas
+- 🟡 `undefined` (Score: 57) - 598 linhas
+- 🟡 `undefined` (Score: 57) - 368 linhas
+- 🟡 `undefined` (Score: 57) - 351 linhas
+- 🟡 `undefined` (Score: 56) - 735 linhas
+- 🟡 `undefined` (Score: 53) - 315 linhas
+- 🟡 `undefined` (Score: 53) - 286 linhas
+- 🟡 `undefined` (Score: 52) - 356 linhas
+- 🟡 `undefined` (Score: 52) - 643 linhas
+- 🟡 `undefined` (Score: 51) - 189 linhas
+- 🟡 `undefined` (Score: 51) - 164 linhas
+- 🟡 `undefined` (Score: 49) - 260 linhas
+- 🟡 `undefined` (Score: 48) - 240 linhas
+- 🟡 `undefined` (Score: 48) - 203 linhas
+- 🟡 `undefined` (Score: 48) - 247 linhas
+- 🟡 `undefined` (Score: 42) - 148 linhas
+- 🟡 `undefined` (Score: 42) - 183 linhas
+- 🟡 `undefined` (Score: 41) - 40 linhas
+- 🟡 `undefined` (Score: 40) - 173 linhas
+- 🟡 `undefined` (Score: 40) - 153 linhas
 
 ### 📋 RECOMENDAÇÕES GERAIS
 
-✅ **Sistema bem estruturado!** Nenhuma recomendação arquitetural identificada.
+#### Padrão Arquitetural
+**📝 Situação:** Alto percentual de arquivos monolíticos detectado  
+**🎯 Ação Recomendada:** Revisar padrões de arquitetura e estabelecer guidelines de tamanho  
+**📊 Impacto:** Médio | **⚡ Esforço:** Médio
 
-### 🛠️ ESTRATÉGIAS DE REFATORAÇÃO RECOMENDADAS
+#### Qualidade Geral
+**📝 Situação:** Score médio de refatoração: 53  
+**🎯 Ação Recomendada:** Implementar revisões de código focadas em tamanho e complexidade  
+**📊 Impacto:** Médio | **⚡ Esforço:** Baixo
 
-#### Para Componentes React
-1. **Composição de Componentes**
-   - Quebrar componentes grandes em subcomponentes
-   - Usar padrão Container/Presentational
-   - Implementar Compound Components para componentes complexos
-
-2. **Extração de Lógica**
-   - Mover lógica de negócio para hooks customizados
-   - Extrair funções auxiliares para utilitários
-   - Usar Context API para estado compartilhado
-
-3. **Simplificação de JSX**
-   - Extrair blocos condicionais complexos
-   - Criar componentes para listas e mapeamentos
-   - Usar render props para lógica reutilizável
-
-#### Para Hooks Customizados
-1. **Single Responsibility**
-   - Um hook = uma responsabilidade específica
-   - Dividir hooks complexos em hooks menores
-   - Compor hooks para funcionalidades complexas
-
-2. **Extração de Lógica**
-   - Mover validações para funções puras
-   - Extrair transformações de dados
-   - Separar side effects de lógica de estado
-
-#### Para Utilitários e Serviços
-1. **Modularização**
-   - Agrupar funções relacionadas em módulos
-   - Usar barrel exports para organização
-   - Separar constantes e configurações
-
-2. **Especialização**
-   - Criar módulos específicos por domínio
-   - Separar validações, formatações e transformações
-   - Implementar padrão Repository para serviços
+#### Hooks Complexos
+**📝 Situação:** 3 hook(s) com muitas responsabilidades  
+**🎯 Ação Recomendada:** Aplicar Single Responsibility Principle em hooks  
+**📊 Impacto:** Médio | **⚡ Esforço:** Médio
 
 ### 🎯 PLANO DE AÇÃO SUGERIDO
 
@@ -143,7 +377,9 @@ Os arquivos são avaliados com base nos seguintes critérios:
 - ✅ Nenhuma ação crítica necessária
 
 #### Fase 2 - Alto Impacto (2-4 sprints)
-- ✅ Nenhuma ação de alto impacto necessária
+- Melhorar `undefined` (Score: 73)
+- Melhorar `undefined` (Score: 73)
+- Melhorar `undefined` (Score: 73)
 
 #### Fase 3 - Monitoramento Contínuo
 - Implementar limites de complexidade no CI/CD
@@ -317,6 +553,7 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 │   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-DespesaForm-jsx-Unexpected-token-e-1753657024688_1753657024690.txt
 │   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-DespesaForm-jsx-Unexpected-token-e-1753702486084_1753702486085.txt
 │   ├── Pasted-2react-dom-development-js-86-Warning-Removing-a-style-property-during-rerender-borderColor-when--1753581457278_1753581457279.txt
+│   ├── Pasted-Node-js-v20-19-3-workspace-node-scripts-generateHandover-cjs-Iniciando-gera-o-autom-tica-do-1753708588864_1753708588865.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753621700217_1753621700222.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753622321240_1753622321242.txt
 │   └── image_1753618363807.png
@@ -386,8 +623,6 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 │   ├── config
 │   │   └── constants.js
 │   ├── context
-│   │   ├── ThemeContext.jsx
-│   │   └── UserContext.jsx
 │   ├── firebase
 │   │   └── firebaseConfig.js
 │   ├── hooks
@@ -452,6 +687,15 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - UserForm.jsx
 - UsersTable.jsx
 - VisualizacaoEmendaDespesas.js
+- DespesaFormActions.jsx
+- DespesaFormAdvancedFields.jsx
+- DespesaFormBanners.jsx
+- DespesaFormBasicFields.jsx
+- DespesaFormDateFields.jsx
+- DespesaFormEmendaInfo.jsx
+- DespesaFormEmpenhoFields.jsx
+- DespesaFormHeader.jsx
+- DespesaFormOrcamentoFields.jsx
 
 ### ✏️ Funcionalidades Modificadas
 - Dashboard.jsx
@@ -467,26 +711,6 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 ---
 
 ## 📄 DESCRIÇÃO DETALHADA DOS ARQUIVOS
-
-### 🏗️ **Arquivos Principais**
-
-#### `src/App.jsx`
-- **Funcionalidade**: Componente raiz da aplicação
-- **Responsabilidades**: Roteamento, autenticação, navegação
-- **Dependências**: UserContext, componentes de página, Firebase
-- **Características**: Error boundary, proteção de rotas, gerenciamento de estado global
-
-#### `src/index.jsx`
-- **Funcionalidade**: Entry point da aplicação
-- **Responsabilidades**: Renderização do componente App no DOM
-- **Dependências**: React, ReactDOM, App.jsx
-
-#### `index.html`
-- **Funcionalidade**: Template HTML principal
-- **Responsabilidades**: Estrutura base, meta tags, favicon
-- **Características**: PWA ready, SEO otimizado
-
----
 
 ### 🧩 **Componentes Principais**
 
@@ -729,10 +953,10 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 
 #### `src/components/ThemeToggle.jsx`
-- **Funcionalidade**: Sem descrição disponível
-- **Tipo**: Functional Component
-- **Funções**: ThemeToggle, styles
-- **Dependências**: react, ../context/ThemeContext
+- **Funcionalidade**: src/components/ThemeToggle.jsx - Versão sem contexto
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: ThemeToggle, savedTheme, toggleTheme, isDark, styles
+- **Dependências**: react
 
 
 #### `src/components/Toast.jsx`
@@ -768,6 +992,69 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: WorkflowManager, showToast, auth, currentUser, loadWorkflowHistory, q, querySnapshot, workflowData, createWorkflowEntry, handleStatusChange, getStatusIcon, getStatusColor, getActionIcon, canApprove, canReject, canMarkAsPaid, canCancel
 - **Dependências**: react, firebase/auth, ../firebase/firebaseConfig...
+
+
+#### `src/components/despesa/DespesaFormActions.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormActions.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormActions, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormAdvancedFields.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormAdvancedFields.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormAdvancedFields, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormBanners.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormBanners.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormBanners, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormBasicFields.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormBasicFields.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormBasicFields, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormDateFields.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormDateFields.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormDateFields, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormEmendaInfo.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormEmendaInfo.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormEmendaInfo, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormEmpenhoFields.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormEmpenhoFields.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormEmpenhoFields, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormHeader.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormHeader.jsx
+- **Tipo**: Functional Component
+- **Funções**: DespesaFormHeader, styles
+- **Dependências**: react
+
+
+#### `src/components/despesa/DespesaFormOrcamentoFields.jsx`
+- **Funcionalidade**: src/components/despesa/DespesaFormOrcamentoFields.jsx
+- **Tipo**: Class Component
+- **Funções**: DespesaFormOrcamentoFields, styles
+- **Dependências**: react
 
 
 
@@ -872,46 +1159,17 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 ---
 
-### 🔥 **Firebase**
+## 📊 **ESTATÍSTICAS DO SISTEMA**
 
-#### `src/firebase/firebaseConfig.js`
-- **Funcionalidade**: Configuração Firebase
-- **Responsabilidades**: Inicialização, conexão com services
-- **Dependências**: Variáveis de ambiente (Secrets)
-- **Services**: Auth, Firestore, Storage
-
----
-
-### ⚙️ **Configuração**
-
-#### `package.json`
-- **Dependências principais**:
-  - **@babel/parser**: ^7.28.0
-  - **@babel/traverse**: ^7.28.0
-  - **firebase**: ^11.9.1
-  - **firebase-admin**: ^13.4.0
-  - **react-router-dom**: ^7.6.3
-  - **recharts**: ^3.0.2
-
-#### `vite.config.js`
-- **Configurações**: Build, dev server, plugins React
-- **Port**: 5173 (desenvolvimento)
-
----
-
-## 🔗 **DEPENDÊNCIAS E INTEGRAÇÕES**
-
-### Fluxo Principal
-1. **App.jsx** → **UserContext** → **Autenticação**
-2. **Dashboard** → **useEmendaDespesa** → **Firebase**
-3. **Emendas** → **EmendaForm/EmendasTable** → **Despesas**
-4. **Administracao** → **AdminPanel** → **Gestão de usuários**
-
-### Integrações Críticas
-- **Firebase Auth** ↔ **UserContext** ↔ **Todos os componentes**
-- **useEmendaDespesa** ↔ **Emendas/Despesas** ↔ **Dashboard**
-- **React Router** ↔ **Navegação** ↔ **Proteção de rotas**
-- **userService** ↔ **Administração** ↔ **Gestão de usuários órfãos**
+- **Total de Componentes**: 49
+- **Total de Hooks**: 6
+- **Total de Utilitários**: 8
+- **Total de Serviços**: 2
+- **Dependências Principais**: 6
+- **Dependências de Desenvolvimento**: 7
+- **Arquivos Analisados para Refatoração**: 65
+- **Arquivos que Precisam de Refatoração**: 50
+- **Score Médio de Complexidade**: 53/100
 
 ---
 
@@ -936,155 +1194,8 @@ node scripts/generateHandover.cjs
 
 ---
 
-## 📊 **ESTATÍSTICAS DO SISTEMA**
-
-- **Total de Componentes**: 40
-- **Total de Hooks**: 6
-- **Total de Utilitários**: 8
-- **Total de Serviços**: 2
-- **Dependências Principais**: 6
-- **Dependências de Desenvolvimento**: 7
-- **Arquivos Analisados para Refatoração**: 56
-- **Arquivos que Precisam de Refatoração**: 0
-- **Score Médio de Complexidade**: 0/100
-
----
-
-## 📝 **OBSERVAÇÕES IMPORTANTES**
-
-1. **Variáveis de Ambiente**: Configuradas no Secrets do Replit
-2. **Permissões**: Sistema de roles (admin/operador) com filtros por município
-3. **Estado**: Gerenciado via Context API e hooks customizados
-4. **Responsividade**: Interface adaptada para mobile e desktop
-5. **Segurança**: Regras de segurança Firebase configuradas
-6. **Performance**: Lazy loading e otimizações implementadas
-7. **Documentação**: Atualizada automaticamente via script
-8. **Sistema de Usuários**: Tratamento automático de usuários órfãos
-9. **Validações**: Validação em tempo real e tratamento robusto de erros
-10. **Data/Hora**: Sistema confiável com múltiplas fontes (WorldTimeAPI, NTP, Git, FileSystem)
-11. **🆕 Análise de Código**: Sistema automático de detecção de arquivos monolíticos
-12. **🆕 Refatoração**: Sugestões automáticas baseadas em métricas de complexidade
-
----
-
-## 🔧 **TROUBLESHOOTING E RESOLUÇÃO DE PROBLEMAS**
-
-### Problemas Comuns
-
-#### 🚨 Erro de Validação de CNPJ
-**Sintoma:** Mensagem "CNPJ inválido" mesmo com CNPJ correto
-**Causa:** Formato incorreto ou dígitos verificadores inválidos
-**Solução:** 
-- Verificar se CNPJ tem exatamente 14 dígitos
-- Usar apenas números ou formato XX.XXX.XXX/XXXX-XX
-- Validar dígitos verificadores com algoritmo oficial
-
-#### 🚨 Usuário Órfão Detectado
-**Sintoma:** Erro "auth/email-already-in-use" mas email não existe no sistema
-**Causa:** Usuário criado no Firebase Auth mas não no Firestore
-**Solução:** 
-- Sistema detecta automaticamente e recupera usuário órfão
-- Processo transparente para o usuário final
-- Logs detalhados no console para debugging
-
-#### 🚨 Arquivo Monolítico Detectado
-**Sintoma:** Warning na documentação sobre arquivo com alta complexidade
-**Causa:** Arquivo ultrapassou limites de linhas, funções ou complexidade
-**Solução:**
-- Consultar seção "Análise de Refatoração" nesta documentação
-- Seguir sugestões específicas para o arquivo
-- Implementar refatoração gradual durante desenvolvimento
-
-#### 🚨 Performance Degradada
-**Sintoma:** Sistema lento ou travando
-**Causa:** Possível arquivo monolítico ou componente complexo sendo renderizado
-**Solução:**
-- Verificar arquivos com score de refatoração > 60
-- Implementar lazy loading para componentes pesados
-- Quebrar componentes grandes em subcomponentes
-
----
-
-## 📚 **GUIA DE MANUTENÇÃO**
-
-### Atualizações Regulares
-
-#### Mensal
-- [ ] Verificar atualizações de dependências
-- [ ] Executar testes de funcionalidades críticas
-- [ ] Backup dos dados do Firebase
-- [ ] Revisar logs de erros
-- [ ] Verificar usuários órfãos no sistema
-- [ ] Validar sincronização de data/hora
-- [ ] **🆕 Executar análise de refatoração e revisar arquivos críticos**
-
-#### Trimestral
-- [ ] Análise de performance do sistema
-- [ ] Revisão de permissões de usuários
-- [ ] Limpeza de dados obsoletos
-- [ ] Atualização da documentação
-- [ ] Auditoria de segurança
-- [ ] **🆕 Refatoração de arquivos com score > 60**
-
-#### Anual
-- [ ] Auditoria completa de segurança
-- [ ] Revisão de regras de negócio
-- [ ] Planejamento de melhorias
-- [ ] Renovação de certificados
-- [ ] Análise de usuários órfãos históricos
-- [ ] **🆕 Revisão arquitetural completa baseada em métricas de complexidade**
-
-### Monitoramento
-
-#### Métricas Importantes
-- **Performance**: Tempo de carregamento < 3 segundos
-- **Disponibilidade**: Uptime > 99.5%
-- **Usuários Ativos**: Monitoramento diário
-- **Erros**: Taxa < 1% das operações
-- **Recuperação de Órfãos**: Sucesso > 95%
-- **Precisão de Data/Hora**: Sincronização < 1 segundo
-- [ ] **🆕 Qualidade de Código**: Score médio de refatoração < 40
-- [ ] **🆕 Arquivos Críticos**: Zero arquivos com score > 80
-
-#### Alertas Configurados
-- Falhas de autenticação em massa
-- Erros de validação acima do normal
-- Problemas de conectividade com Firebase
-- Tentativas de acesso não autorizado
-- Detecção frequente de usuários órfãos
-- Falhas na sincronização de tempo
-- [ ] **🆕 Detecção de arquivos com complexidade crítica (score > 80)**
-- [ ] **🆕 Aumento súbito no score médio de refatoração**
-
-### 🔬 **Processo de Refatoração Contínua**
-
-#### Workflow de Refatoração
-1. **Detecção Automática**
-   - Executar `node scripts/generateHandover.cjs` semanalmente
-   - Revisar seção "Análise de Refatoração"
-   - Identificar arquivos com score > 40
-
-2. **Priorização**
-   - **Crítico (Score ≥ 80)**: Refatoração imediata
-   - **Alto (Score 60-79)**: Refatoração em 2-4 sprints
-   - **Médio (Score 40-59)**: Monitoramento e refatoração gradual
-
-3. **Execução**
-   - Seguir sugestões específicas do arquivo
-   - Aplicar padrões de design apropriados
-   - Manter testes durante refatoração
-   - Validar performance pós-refatoração
-
-4. **Validação**
-   - Re-executar análise após refatoração
-   - Confirmar redução do score
-   - Testar funcionalidades afetadas
-   - Documentar mudanças realizadas
-
----
-
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 28/07/2025, 09:46:14  
+**🔄 Última Atualização**: 28/07/2025, 16:38:14  
 **📊 Versão**: 2.4  
 **💻 Desenvolvido em**: Replit  
 **✅ Status**: Produção Ativa com Sistema de Análise de Refatoração
@@ -1099,30 +1210,12 @@ node scripts/generateHandover.cjs
 ```
 
 O script detecta automaticamente:
-- ✅ Novos componentes adicionados
-- ✅ Funcionalidades modificadas ou removidas  
-- ✅ Estrutura de pastas alterada
-- ✅ Dependências atualizadas no package.json
-- ✅ Mudanças significativas no fluxo da aplicação
-- ✅ Validações e regras de negócio detalhadas
-- ✅ Fluxos de trabalho documentados
-- ✅ Permissões e controle de acesso
-- ✅ Guia de troubleshooting e manutenção
-- ✅ Detecção automática da última implementação
-- ✅ Análise de arquivos modificados recentemente
-- ✅ Documentação de sistemas corrigidos
-- ✅ Sistema de data/hora confiável com múltiplas fontes
-- ✅ Timestamps precisos no timezone brasileiro
-- ✅ Fallback automático para fontes de tempo alternativas
-- ✅ **🆕 ANÁLISE AVANÇADA DE REFATORAÇÃO:**
-  - 🔬 Detecção automática de arquivos monolíticos
-  - 📊 Métricas de complexidade (linhas, funções, complexidade ciclomática)
-  - 💡 Sugestões específicas de refatoração por arquivo
-  - 🎯 Sistema de priorização (Crítico/Alto/Médio/Baixo/OK)
-  - 📋 Recomendações arquiteturais gerais
-  - 🛠️ Estratégias detalhadas de refatoração
-  - 📈 Plano de ação estruturado por fases
-  - 🔄 Integração com workflow de manutenção
+- ✅ Arquivos monolíticos e sugestões de refatoração
+- ✅ Métricas de complexidade detalhadas
+- ✅ Sistema de priorização automática
+- ✅ Plano de ação estruturado
+- ✅ Data/hora confiável com múltiplas fontes
+- ✅ Debugging detalhado de cada arquivo
 
 ### 🔬 **Critérios de Análise de Refatoração:**
 - **Linhas de Código**: Limite de 300 linhas (peso: 25%)
@@ -1131,12 +1224,3 @@ O script detecta automaticamente:
 - **Dependências**: Limite de 20 imports (peso: 15%)
 - **Elementos JSX**: Limite de 50 elementos (peso: 10%)
 - **Aninhamento**: Limite de 5 níveis (peso: 5%)
-
-### 🕒 **Fontes de Data/Hora Utilizadas (em ordem de prioridade):**
-1. **WorldTimeAPI** - API externa confiável (America/Sao_Paulo)
-2. **Sistema NTP** - Serviço de tempo do sistema operacional
-3. **Git Commit** - Timestamp do último commit
-4. **Sistema de Arquivos** - Timestamp de modificação de arquivos
-5. **Sistema Local** - Hora local como último recurso
-
-O script automaticamente tenta cada fonte até obter uma data/hora confiável, garantindo máxima precisão na documentação e agora inclui análise avançada de refatoração para manter a qualidade e manutenibilidade do código.

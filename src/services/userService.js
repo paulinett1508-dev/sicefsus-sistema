@@ -1,4 +1,3 @@
-
 // src/services/userService.js - VERSÃO DEBUG (SEM TESTE AUTH)
 import {
   collection,
@@ -45,7 +44,10 @@ const generateTempPassword = () => {
   }
 
   // Embaralhar a senha
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split("")
+    .sort(() => Math.random() - 0.5)
+    .join("");
 };
 
 // ✅ VERIFICAR SE EMAIL JÁ EXISTE (APENAS FIRESTORE)
@@ -56,37 +58,36 @@ const checkEmailExists = async (email) => {
     }
 
     const emailToCheck = email.toLowerCase().trim();
-    console.log('🔍 === VERIFICAÇÃO SIMPLES DE EMAIL (APENAS FIRESTORE) ===');
-    console.log('📧 Email a verificar:', emailToCheck);
+    console.log("🔍 === VERIFICAÇÃO SIMPLES DE EMAIL (APENAS FIRESTORE) ===");
+    console.log("📧 Email a verificar:", emailToCheck);
 
     const q = query(
       collection(db, COLLECTION_NAME),
-      where("email", "==", emailToCheck)
+      where("email", "==", emailToCheck),
     );
 
     const querySnapshot = await getDocs(q);
     const exists = !querySnapshot.empty;
 
-    console.log('📊 Existe no Firestore:', exists);
+    console.log("📊 Existe no Firestore:", exists);
 
     if (exists) {
-      console.log('🚨 EMAIL JÁ CADASTRADO!');
+      console.log("🚨 EMAIL JÁ CADASTRADO!");
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log('👤 Usuário encontrado:', {
+        console.log("👤 Usuário encontrado:", {
           id: doc.id,
           nome: userData.nome,
           email: userData.email,
           tipo: userData.tipo,
-          status: userData.status
+          status: userData.status,
         });
       });
     } else {
-      console.log('✅ Email disponível');
+      console.log("✅ Email disponível");
     }
 
     return exists;
-
   } catch (error) {
     console.error("❌ Erro ao verificar email no Firestore:", error);
     // Em caso de erro, ser conservador e assumir que existe
@@ -97,17 +98,17 @@ const checkEmailExists = async (email) => {
 // ✅ CONVERTER ROLE PARA TIPO
 const convertRoleToTipo = (role) => {
   const roleMap = {
-    'admin': 'admin',
-    'user': 'operador',
-    'operador': 'operador',
-    'administrador': 'admin'
+    admin: "admin",
+    user: "operador",
+    operador: "operador",
+    administrador: "admin",
   };
-  return roleMap[role] || 'operador';
+  return roleMap[role] || "operador";
 };
 
 // ✅ VALIDAR DADOS
 const validateFormData = (formData) => {
-  console.log('🔍 Validando dados:', formData);
+  console.log("🔍 Validando dados:", formData);
   const errors = [];
 
   // Validações básicas obrigatórias
@@ -139,42 +140,42 @@ const validateFormData = (formData) => {
   }
 
   const isValid = errors.length === 0;
-  console.log('✅ Validação concluída:', { isValid, errors });
+  console.log("✅ Validação concluída:", { isValid, errors });
 
   return { isValid, errors };
 };
 
 // ✅ TRATAR ERROS FIREBASE
 const handleFirebaseError = (error) => {
-  console.error('🔥 Firebase Error:', error.code, error.message);
+  console.error("🔥 Firebase Error:", error.code, error.message);
 
   if (error.code) {
     switch (error.code) {
-      case 'auth/email-already-in-use':
-        return 'Este email já está sendo usado por outro usuário';
-      case 'auth/invalid-email':
-        return 'Email inválido. Verifique o formato';
-      case 'auth/weak-password':
-        return 'Senha muito fraca. Use pelo menos 6 caracteres';
-      case 'auth/operation-not-allowed':
-        return 'Operação não permitida. Contate o administrador';
-      case 'auth/network-request-failed':
-        return 'Erro de conexão. Verifique sua internet';
+      case "auth/email-already-in-use":
+        return "Este email já está sendo usado por outro usuário";
+      case "auth/invalid-email":
+        return "Email inválido. Verifique o formato";
+      case "auth/weak-password":
+        return "Senha muito fraca. Use pelo menos 6 caracteres";
+      case "auth/operation-not-allowed":
+        return "Operação não permitida. Contate o administrador";
+      case "auth/network-request-failed":
+        return "Erro de conexão. Verifique sua internet";
       default:
-        return error.message || 'Erro interno do sistema';
+        return error.message || "Erro interno do sistema";
     }
   }
 
-  return error.message || 'Erro interno do sistema';
+  return error.message || "Erro interno do sistema";
 };
 
 // ✅ CARREGAR USUÁRIOS
 const loadUsers = async () => {
   try {
-    console.log('📋 Carregando usuários da collection:', COLLECTION_NAME);
+    console.log("📋 Carregando usuários da collection:", COLLECTION_NAME);
     const q = query(
-      collection(db, COLLECTION_NAME), 
-      orderBy("dataCriacao", "desc")
+      collection(db, COLLECTION_NAME),
+      orderBy("dataCriacao", "desc"),
     );
     const querySnapshot = await getDocs(q);
     const users = querySnapshot.docs.map((doc) => ({
@@ -191,60 +192,60 @@ const loadUsers = async () => {
 
 // ✅ DETECTAR E RESOLVER USUÁRIOS ÓRFÃOS
 const handleOrphanedUser = async (email, formData) => {
-  console.log('🔍 === DETECTANDO USUÁRIO ÓRFÃO ===');
-  console.log('📧 Email:', email);
+  console.log("🔍 === DETECTANDO USUÁRIO ÓRFÃO ===");
+  console.log("📧 Email:", email);
 
   try {
     // Verificar se realmente existe no Firestore
     const firestoreExists = await checkEmailExists(email);
 
     if (!firestoreExists) {
-      console.log('🎯 USUÁRIO ÓRFÃO DETECTADO!');
-      console.log('- Existe no Firebase Auth ✅');
-      console.log('- NÃO existe no Firestore ❌');
-      console.log('');
-      console.log('🔧 Tentando completar criação do usuário órfão...');
+      console.log("🎯 USUÁRIO ÓRFÃO DETECTADO!");
+      console.log("- Existe no Firebase Auth ✅");
+      console.log("- NÃO existe no Firestore ❌");
+      console.log("");
+      console.log("🔧 Tentando completar criação do usuário órfão...");
 
       // Tentar encontrar o UID do usuário no Auth
       // Como não podemos listar usuários do Auth diretamente no cliente,
       // vamos completar a criação usando dados do formulário
 
       const userData = {
-        uid: 'recuperado-' + Date.now(), // UID temporário
+        uid: "recuperado-" + Date.now(), // UID temporário
         email: email.toLowerCase().trim(),
         nome: formData.nome.trim(),
         tipo: convertRoleToTipo(formData.role),
-        status: formData.status || 'ativo',
-        departamento: formData.departamento?.trim() || '',
-        telefone: formData.telefone?.trim() || '',
+        status: formData.status || "ativo",
+        departamento: formData.departamento?.trim() || "",
+        telefone: formData.telefone?.trim() || "",
         dataCriacao: new Date().toISOString(),
         dataAtualizacao: new Date().toISOString(),
-        criadoPor: auth.currentUser?.uid || 'sistema',
+        criadoPor: auth.currentUser?.uid || "sistema",
         ultimoAcesso: null,
         primeiroAcesso: true,
         senhaTemporaria: true,
-        observacao: 'Usuário órfão recuperado automaticamente'
+        observacao: "Usuário órfão recuperado automaticamente",
       };
 
       // Localização baseado no tipo
       if (userData.tipo === "operador") {
-        userData.municipio = formData.municipio?.trim() || '';
-        userData.uf = formData.uf?.trim().toUpperCase() || '';
+        userData.municipio = formData.municipio?.trim() || "";
+        userData.uf = formData.uf?.trim().toUpperCase() || "";
       } else {
-        userData.municipio = '';
-        userData.uf = '';
+        userData.municipio = "";
+        userData.uf = "";
       }
 
-      console.log('💾 Criando documento no Firestore para usuário órfão...');
+      console.log("💾 Criando documento no Firestore para usuário órfão...");
       const docRef = await addDoc(collection(db, COLLECTION_NAME), userData);
 
-      console.log('✅ Usuário órfão recuperado:', docRef.id);
-      console.log('📨 Enviando email de redefinição de senha...');
+      console.log("✅ Usuário órfão recuperado:", docRef.id);
+      console.log("📨 Enviando email de redefinição de senha...");
 
       // Enviar email de reset
       await sendPasswordResetEmail(auth, email);
 
-      console.log('🎉 USUÁRIO ÓRFÃO RECUPERADO COM SUCESSO!');
+      console.log("🎉 USUÁRIO ÓRFÃO RECUPERADO COM SUCESSO!");
 
       return {
         success: true,
@@ -253,56 +254,54 @@ const handleOrphanedUser = async (email, formData) => {
         id: docRef.id,
         message: `Usuário órfão recuperado com sucesso! Email de redefinição enviado para ${email}`,
       };
-
     } else {
-      console.log('❌ Email existe tanto no Auth quanto no Firestore');
-      throw new Error('Este email já está completamente cadastrado no sistema');
+      console.log("❌ Email existe tanto no Auth quanto no Firestore");
+      throw new Error("Este email já está completamente cadastrado no sistema");
     }
-
   } catch (error) {
-    console.error('❌ Erro ao recuperar usuário órfão:', error);
+    console.error("❌ Erro ao recuperar usuário órfão:", error);
     throw error;
   }
 };
 
 // ✅ CRIAR USUÁRIO (COM DETECÇÃO DE ÓRFÃOS)
 const createUser = async (formData) => {
-  console.log('🚀 === CRIAÇÃO DE USUÁRIO (COM DETECÇÃO DE ÓRFÃOS) ===');
-  console.log('📝 Dados recebidos:', formData);
+  console.log("🚀 === CRIAÇÃO DE USUÁRIO (COM DETECÇÃO DE ÓRFÃOS) ===");
+  console.log("📝 Dados recebidos:", formData);
 
   // 1. Validar formulário
   const validation = validateFormData(formData);
   if (!validation.isValid) {
     const errorMsg = validation.errors.join(", ");
-    console.error('❌ Dados inválidos:', errorMsg);
+    console.error("❌ Dados inválidos:", errorMsg);
     throw new Error(errorMsg);
   }
-  console.log('✅ Formulário válido');
+  console.log("✅ Formulário válido");
 
   // 2. Verificar email no Firestore
   const emailExists = await checkEmailExists(formData.email);
   if (emailExists) {
     const errorMsg = "Este email já está cadastrado no sistema";
-    console.error('❌ Email duplicado no Firestore:', errorMsg);
+    console.error("❌ Email duplicado no Firestore:", errorMsg);
     throw new Error(errorMsg);
   }
-  console.log('✅ Email disponível no Firestore');
+  console.log("✅ Email disponível no Firestore");
 
   let userCredential = null;
 
   try {
     // 3. Gerar senha
     const senhaTemporaria = generateTempPassword();
-    console.log('🔐 Senha gerada');
+    console.log("🔐 Senha gerada");
 
     // 4. Tentar criar no Firebase Auth
-    console.log('📧 Tentando criar no Firebase Auth...');
+    console.log("📧 Tentando criar no Firebase Auth...");
     userCredential = await createUserWithEmailAndPassword(
       auth,
       formData.email.trim(),
-      senhaTemporaria
+      senhaTemporaria,
     );
-    console.log('✅ Criado no Auth:', userCredential.user.uid);
+    console.log("✅ Criado no Auth:", userCredential.user.uid);
 
     // 5. Preparar dados
     const userData = {
@@ -310,12 +309,12 @@ const createUser = async (formData) => {
       email: formData.email.trim().toLowerCase(),
       nome: formData.nome.trim(),
       tipo: convertRoleToTipo(formData.role),
-      status: formData.status || 'ativo',
-      departamento: formData.departamento?.trim() || '',
-      telefone: formData.telefone?.trim() || '',
+      status: formData.status || "ativo",
+      departamento: formData.departamento?.trim() || "",
+      telefone: formData.telefone?.trim() || "",
       dataCriacao: new Date().toISOString(),
       dataAtualizacao: new Date().toISOString(),
-      criadoPor: auth.currentUser?.uid || 'sistema',
+      criadoPor: auth.currentUser?.uid || "sistema",
       ultimoAcesso: null,
       primeiroAcesso: true,
       senhaTemporaria: true,
@@ -326,51 +325,52 @@ const createUser = async (formData) => {
       userData.municipio = formData.municipio.trim();
       userData.uf = formData.uf.trim().toUpperCase();
     } else {
-      userData.municipio = '';
-      userData.uf = '';
+      userData.municipio = "";
+      userData.uf = "";
     }
 
     // 7. Salvar no Firestore
-    console.log('💾 Salvando no Firestore...');
+    console.log("💾 Salvando no Firestore...");
     const docRef = await addDoc(collection(db, COLLECTION_NAME), userData);
-    console.log('✅ Salvo no Firestore:', docRef.id);
+    console.log("✅ Salvo no Firestore:", docRef.id);
 
     // 8. Enviar email
-    console.log('📨 Enviando email...');
+    console.log("📨 Enviando email...");
     await sendPasswordResetEmail(auth, formData.email.trim());
-    console.log('✅ Email enviado');
+    console.log("✅ Email enviado");
 
-    console.log('🎉 USUÁRIO CRIADO COM SUCESSO!');
+    console.log("🎉 USUÁRIO CRIADO COM SUCESSO!");
     return {
       success: true,
       user: userData,
       id: docRef.id,
       message: `Usuário criado com sucesso! Email enviado para ${formData.email}`,
     };
-
   } catch (error) {
-    console.error('❌ ERRO na criação:', error);
+    console.error("❌ ERRO na criação:", error);
 
     // ✅ VERIFICAR SE É USUÁRIO ÓRFÃO
-    if (error.code === 'auth/email-already-in-use') {
-      console.log('🔍 Erro de email já em uso - verificando se é usuário órfão...');
+    if (error.code === "auth/email-already-in-use") {
+      console.log(
+        "🔍 Erro de email já em uso - verificando se é usuário órfão...",
+      );
 
       try {
         return await handleOrphanedUser(formData.email, formData);
       } catch (orphanError) {
-        console.error('❌ Falha ao recuperar usuário órfão:', orphanError);
-        throw new Error('Este email já está cadastrado no sistema');
+        console.error("❌ Falha ao recuperar usuário órfão:", orphanError);
+        throw new Error("Este email já está cadastrado no sistema");
       }
     }
 
     // Rollback para outros erros
     if (userCredential?.user) {
       try {
-        console.log('🔄 Fazendo rollback...');
+        console.log("🔄 Fazendo rollback...");
         await deleteUser(userCredential.user);
-        console.log('✅ Rollback feito');
+        console.log("✅ Rollback feito");
       } catch (rollbackError) {
-        console.error('❌ Erro no rollback:', rollbackError);
+        console.error("❌ Erro no rollback:", rollbackError);
       }
     }
 
@@ -381,7 +381,7 @@ const createUser = async (formData) => {
 
 // ✅ ATUALIZAR USUÁRIO
 const updateUser = async (userId, formData, originalEmail) => {
-  console.log('✏️ Atualizando usuário:', userId);
+  console.log("✏️ Atualizando usuário:", userId);
 
   const validation = validateFormData(formData);
   if (!validation.isValid) {
@@ -399,19 +399,19 @@ const updateUser = async (userId, formData, originalEmail) => {
     const updateData = {
       nome: formData.nome.trim(),
       tipo: convertRoleToTipo(formData.role),
-      status: formData.status || 'ativo',
-      departamento: formData.departamento?.trim() || '',
-      telefone: formData.telefone?.trim() || '',
+      status: formData.status || "ativo",
+      departamento: formData.departamento?.trim() || "",
+      telefone: formData.telefone?.trim() || "",
       dataAtualizacao: new Date().toISOString(),
-      atualizadoPor: auth.currentUser?.uid || 'sistema'
+      atualizadoPor: auth.currentUser?.uid || "sistema",
     };
 
     if (updateData.tipo === "admin") {
-      updateData.municipio = '';
-      updateData.uf = '';
+      updateData.municipio = "";
+      updateData.uf = "";
     } else if (updateData.tipo === "operador") {
-      updateData.municipio = formData.municipio?.trim() || '';
-      updateData.uf = formData.uf?.trim().toUpperCase() || '';
+      updateData.municipio = formData.municipio?.trim() || "";
+      updateData.uf = formData.uf?.trim().toUpperCase() || "";
     }
 
     await updateDoc(doc(db, COLLECTION_NAME, userId), updateData);
@@ -429,9 +429,9 @@ const updateUser = async (userId, formData, originalEmail) => {
 // ✅ EXCLUIR USUÁRIO
 const deleteUserById = async (userId) => {
   try {
-    console.log('🗑️ Excluindo usuário:', userId);
+    console.log("🗑️ Excluindo usuário:", userId);
     await deleteDoc(doc(db, COLLECTION_NAME, userId));
-    console.log('✅ Usuário excluído do Firestore');
+    console.log("✅ Usuário excluído do Firestore");
 
     return {
       success: true,
@@ -446,7 +446,7 @@ const deleteUserById = async (userId) => {
 // ✅ ENVIAR RESET DE SENHA
 const sendPasswordReset = async (user) => {
   try {
-    console.log('📨 Enviando reset de senha para:', user.email);
+    console.log("📨 Enviando reset de senha para:", user.email);
 
     await sendPasswordResetEmail(auth, user.email);
 
@@ -458,7 +458,7 @@ const sendPasswordReset = async (user) => {
       });
     }
 
-    console.log('✅ Email de reset enviado');
+    console.log("✅ Email de reset enviado");
 
     return {
       success: true,
@@ -472,30 +472,30 @@ const sendPasswordReset = async (user) => {
 
 // ✅ DIAGNÓSTICO DE EMAIL
 const diagnoseEmail = async (email) => {
-  console.log('🔍 === DIAGNÓSTICO DE EMAIL ===');
-  console.log('📧 Email:', email);
+  console.log("🔍 === DIAGNÓSTICO DE EMAIL ===");
+  console.log("📧 Email:", email);
 
   try {
     // Verificar Firestore
     const firestoreExists = await checkEmailExists(email);
-    console.log('📊 Firestore:', firestoreExists ? 'EXISTE' : 'DISPONÍVEL');
+    console.log("📊 Firestore:", firestoreExists ? "EXISTE" : "DISPONÍVEL");
 
     // Verificar qual seria o problema
     if (firestoreExists) {
       const q = query(
         collection(db, COLLECTION_NAME),
-        where("email", "==", email.toLowerCase().trim())
+        where("email", "==", email.toLowerCase().trim()),
       );
       const querySnapshot = await getDocs(q);
 
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log('👤 Dados do usuário existente:', {
+        console.log("👤 Dados do usuário existente:", {
           id: doc.id,
           nome: userData.nome,
           tipo: userData.tipo,
           status: userData.status,
-          dataCriacao: userData.dataCriacao
+          dataCriacao: userData.dataCriacao,
         });
       });
     }
@@ -504,18 +504,17 @@ const diagnoseEmail = async (email) => {
       email: email,
       firestoreExists,
       canCreate: !firestoreExists,
-      message: firestoreExists ? 
-        'Email já cadastrado - escolha outro email' : 
-        'Email disponível para criação'
+      message: firestoreExists
+        ? "Email já cadastrado - escolha outro email"
+        : "Email disponível para criação",
     };
-
   } catch (error) {
-    console.error('❌ Erro no diagnóstico:', error);
+    console.error("❌ Erro no diagnóstico:", error);
     return {
       email: email,
       error: error.message,
       canCreate: false,
-      message: 'Erro ao verificar email - tente novamente'
+      message: "Erro ao verificar email - tente novamente",
     };
   }
 };
@@ -536,78 +535,78 @@ const userService = {
 
   // ✅ FUNÇÕES DE DEBUG
   async debugCreateUser(formData) {
-    console.log('🐛 === MODO DEBUG - CRIAÇÃO DE USUÁRIO ===');
+    console.log("🐛 === MODO DEBUG - CRIAÇÃO DE USUÁRIO ===");
 
     try {
-      console.log('1. Dados recebidos:', formData);
+      console.log("1. Dados recebidos:", formData);
 
-      console.log('2. Validando...');
+      console.log("2. Validando...");
       const validation = validateFormData(formData);
-      console.log('   Resultado:', validation);
+      console.log("   Resultado:", validation);
 
-      console.log('3. Verificando email...');
+      console.log("3. Verificando email...");
       const emailExists = await checkEmailExists(formData.email);
-      console.log('   Email existe:', emailExists);
+      console.log("   Email existe:", emailExists);
 
       if (emailExists) {
-        console.log('❌ Parou aqui - email já existe');
-        return { canProceed: false, reason: 'Email já existe' };
+        console.log("❌ Parou aqui - email já existe");
+        return { canProceed: false, reason: "Email já existe" };
       }
 
-      console.log('✅ Pode prosseguir com criação');
-      return { canProceed: true, reason: 'Tudo validado' };
-
+      console.log("✅ Pode prosseguir com criação");
+      return { canProceed: true, reason: "Tudo validado" };
     } catch (error) {
-      console.error('❌ Erro no debug:', error);
+      console.error("❌ Erro no debug:", error);
       return { canProceed: false, reason: error.message };
     }
   },
 
   // ✅ LISTAR TODOS OS EMAILS CADASTRADOS
   async listAllEmails() {
-    console.log('📋 === LISTANDO TODOS OS EMAILS CADASTRADOS ===');
+    console.log("📋 === LISTANDO TODOS OS EMAILS CADASTRADOS ===");
 
     try {
       const users = await loadUsers();
-      const emails = users.map(user => ({
+      const emails = users.map((user) => ({
         id: user.id,
         email: user.email,
         nome: user.nome,
         tipo: user.tipo,
-        status: user.status
+        status: user.status,
       }));
 
-      console.log('📧 Emails cadastrados:');
+      console.log("📧 Emails cadastrados:");
       emails.forEach((user, index) => {
-        console.log(`${index + 1}. ${user.email} (${user.nome} - ${user.tipo})`);
+        console.log(
+          `${index + 1}. ${user.email} (${user.nome} - ${user.tipo})`,
+        );
       });
 
       return emails;
-
     } catch (error) {
-      console.error('❌ Erro ao listar emails:', error);
+      console.error("❌ Erro ao listar emails:", error);
       return [];
     }
   },
 
   // ✅ RESOLVER USUÁRIO ÓRFÃO MANUALMENTE
   async recoverOrphanedUser(email, userData) {
-    console.log('🔧 === RECUPERAÇÃO MANUAL DE USUÁRIO ÓRFÃO ===');
-    console.log('📧 Email:', email);
+    console.log("🔧 === RECUPERAÇÃO MANUAL DE USUÁRIO ÓRFÃO ===");
+    console.log("📧 Email:", email);
 
     try {
       return await handleOrphanedUser(email, userData);
     } catch (error) {
-      console.error('❌ Erro na recuperação manual:', error);
+      console.error("❌ Erro na recuperação manual:", error);
       throw error;
     }
   },
 
   // ✅ SOLUÇÃO TEMPORÁRIA - USAR EMAIL DIFERENTE
   async suggestAlternativeEmail(baseEmail) {
-    console.log('💡 === SUGERINDO EMAIL ALTERNATIVO ===');
+    console.log("💡 === SUGERINDO EMAIL ALTERNATIVO ===");
 
-    const [localPart, domain] = baseEmail.split('@');
+    const [localPart, domain] = baseEmail.split("@");
     const alternatives = [];
 
     for (let i = 1; i <= 5; i++) {
@@ -626,67 +625,66 @@ const userService = {
       console.log(`💡 Sugestão: Use ${alternatives[0]}`);
       return alternatives[0];
     } else {
-      console.log('❌ Nenhuma alternativa simples encontrada');
+      console.log("❌ Nenhuma alternativa simples encontrada");
       return null;
     }
   },
 
   // ✅ DIAGNÓSTICO COMPLETO
   async fullDiagnosis(email) {
-    console.log('🔍 === DIAGNÓSTICO COMPLETO ===');
-    console.log('📧 Email:', email);
+    console.log("🔍 === DIAGNÓSTICO COMPLETO ===");
+    console.log("📧 Email:", email);
 
     try {
       // 1. Verificar Firestore
       const firestoreExists = await checkEmailExists(email);
-      console.log('📊 Firestore:', firestoreExists ? 'EXISTE' : 'DISPONÍVEL');
+      console.log("📊 Firestore:", firestoreExists ? "EXISTE" : "DISPONÍVEL");
 
       // 2. Testar Auth
-      let authTest = 'INDETERMINADO';
+      let authTest = "INDETERMINADO";
       try {
         const tempPassword = generateTempPassword();
         const testCredential = await createUserWithEmailAndPassword(
           auth,
           email,
-          tempPassword
+          tempPassword,
         );
 
         // Se chegou aqui, está disponível no Auth
-        authTest = 'DISPONÍVEL';
+        authTest = "DISPONÍVEL";
 
         // Remover teste
         await deleteUser(testCredential.user);
-        console.log('🧹 Usuário de teste removido');
-
+        console.log("🧹 Usuário de teste removido");
       } catch (authError) {
-        if (authError.code === 'auth/email-already-in-use') {
-          authTest = 'EXISTE (ÓRFÃO!)';
+        if (authError.code === "auth/email-already-in-use") {
+          authTest = "EXISTE (ÓRFÃO!)";
         } else {
           authTest = `ERRO: ${authError.code}`;
         }
       }
 
-      console.log('🔥 Firebase Auth:', authTest);
+      console.log("🔥 Firebase Auth:", authTest);
 
       // 3. Determinar situação
       let situacao, solucao;
 
-      if (!firestoreExists && authTest === 'DISPONÍVEL') {
-        situacao = '✅ EMAIL TOTALMENTE DISPONÍVEL';
-        solucao = 'Pode criar usuário normalmente';
-      } else if (firestoreExists && authTest === 'EXISTE (ÓRFÃO!)') {
-        situacao = '✅ USUÁRIO COMPLETO';
-        solucao = 'Email já cadastrado - use outro email';
-      } else if (!firestoreExists && authTest === 'EXISTE (ÓRFÃO!)') {
-        situacao = '🚨 USUÁRIO ÓRFÃO DETECTADO';
-        solucao = 'Usar função de recuperação automática';
+      if (!firestoreExists && authTest === "DISPONÍVEL") {
+        situacao = "✅ EMAIL TOTALMENTE DISPONÍVEL";
+        solucao = "Pode criar usuário normalmente";
+      } else if (firestoreExists && authTest === "EXISTE (ÓRFÃO!)") {
+        situacao = "✅ USUÁRIO COMPLETO";
+        solucao = "Email já cadastrado - use outro email";
+      } else if (!firestoreExists && authTest === "EXISTE (ÓRFÃO!)") {
+        situacao = "🚨 USUÁRIO ÓRFÃO DETECTADO";
+        solucao = "Usar função de recuperação automática";
       } else {
-        situacao = '⚠️ SITUAÇÃO INCONSISTENTE';
-        solucao = 'Verificar manualmente no Firebase Console';
+        situacao = "⚠️ SITUAÇÃO INCONSISTENTE";
+        solucao = "Verificar manualmente no Firebase Console";
       }
 
-      console.log('📋 SITUAÇÃO:', situacao);
-      console.log('💡 SOLUÇÃO:', solucao);
+      console.log("📋 SITUAÇÃO:", situacao);
+      console.log("💡 SOLUÇÃO:", solucao);
 
       return {
         email,
@@ -694,19 +692,18 @@ const userService = {
         auth: authTest,
         situacao,
         solucao,
-        canCreate: !firestoreExists && authTest === 'DISPONÍVEL'
+        canCreate: !firestoreExists && authTest === "DISPONÍVEL",
       };
-
     } catch (error) {
-      console.error('❌ Erro no diagnóstico completo:', error);
+      console.error("❌ Erro no diagnóstico completo:", error);
       return {
         email,
         error: error.message,
-        situacao: 'ERRO',
-        solucao: 'Tentar novamente'
+        situacao: "ERRO",
+        solucao: "Tentar novamente",
       };
     }
-  }
+  },
 };
 
 // ✅ EXPORTAR COMO DEFAULT
