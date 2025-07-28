@@ -1,16 +1,16 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 27/07/2025, 19:35:05  
-**🔧 Por:** Script generateHandover.cjs v2.3  
+**📅 Gerado automaticamente em:** 28/07/2025, 09:23:19  
+**🔧 Por:** Script generateHandover.cjs v2.4  
 **📊 Status:** Sistema em Produção Ativa
-**🕒 Data/Hora obtida de:** WorldTimeAPI (America/Sao_Paulo)
+**🕒 Data/Hora obtida de:** Sistema NTP/Time Service
 
 ---
 
 ## 🆕 ÚLTIMA IMPLEMENTAÇÃO REALIZADA
 
 ### Sistema de Usuários Corrigido
-**📅 Data:** 27/07/2025  
+**📅 Data:** 28/07/2025  
 **📊 Status:** Implementado e testado  
 **⚡ Impacto:** Crítico - Sistema de administração de usuários funcional
 
@@ -24,6 +24,9 @@ Correção do sistema de importação de userService e detecção de usuários �
 - Validações em tempo real adicionadas
 
 **📁 Arquivos Envolvidos:**
+- `src/components/DespesaForm.jsx`
+- `src/components/Despesas.jsx`
+- `src/services/emendasService.js`
 - `src/services/userService.js`
 - `src/components/UserForm.jsx`
 - `src/components/Administracao.jsx`
@@ -34,9 +37,7 @@ Correção do sistema de importação de userService e detecção de usuários �
 - `src/components/DebugPanel.jsx`
 - `src/components/UsersTable.jsx`
 - `src/components/DespesasList.jsx`
-- `src/components/Despesas.jsx`
 - `src/components/DespesasTable.jsx`
-- `src/components/DespesaForm.jsx`
 - `src/components/Emendas.jsx`
 - `src/components/PrimeiraDespesaModal.jsx`
 - `src/components/Sidebar.jsx`
@@ -51,6 +52,103 @@ Correção do sistema de importação de userService e detecção de usuários �
 - `src/components/Toast.jsx`
 - `src/components/SaldoEmendaWidget.jsx`
 - `src/components/VisualizacaoEmendaDespesas.js`
+
+---
+
+
+
+## 🔬 ANÁLISE DE REFATORAÇÃO E ARQUIVOS MONOLÍTICOS
+
+Esta seção identifica arquivos que podem se beneficiar de refatoração para melhorar manutenibilidade e qualidade do código.
+
+### 📊 RESUMO EXECUTIVO
+
+- **Total de Arquivos Analisados:** 56
+- **Arquivos que Precisam de Refatoração:** 0 (0%)
+- **Arquivos com Prioridade Crítica:** 0
+- **Score Médio de Complexidade:** NaN/100
+
+### 🎯 CRITÉRIOS DE ANÁLISE
+
+Os arquivos são avaliados com base nos seguintes critérios:
+
+| Métrica | Limite | Peso | Descrição |
+|---------|--------|------|-----------|
+| **Linhas de Código** | 300 | 25% | Número total de linhas |
+| **Número de Funções** | 15 | 20% | Funções por arquivo |
+| **Complexidade Ciclomática** | 20 | 25% | Complexidade do código |
+| **Dependências (Imports)** | 20 | 15% | Número de imports |
+| **Elementos JSX** | 50 | 10% | Elementos JSX no arquivo |
+| **Profundidade de Aninhamento** | 5 | 5% | Níveis de aninhamento |
+
+### 🔴 ARQUIVOS COM PRIORIDADE CRÍTICA (Score ≥ 80)
+
+✅ **Parabéns!** Nenhum arquivo com prioridade crítica detectado.
+
+### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
+
+✅ Nenhum arquivo com prioridade alta detectado.
+
+### 🟡 ARQUIVOS PARA MONITORAMENTO (Score 40-59)
+
+✅ Nenhum arquivo para monitoramento detectado.
+
+### 📋 RECOMENDAÇÕES GERAIS
+
+✅ **Sistema bem estruturado!** Nenhuma recomendação arquitetural identificada.
+
+### 🛠️ ESTRATÉGIAS DE REFATORAÇÃO RECOMENDADAS
+
+#### Para Componentes React
+1. **Composição de Componentes**
+   - Quebrar componentes grandes em subcomponentes
+   - Usar padrão Container/Presentational
+   - Implementar Compound Components para componentes complexos
+
+2. **Extração de Lógica**
+   - Mover lógica de negócio para hooks customizados
+   - Extrair funções auxiliares para utilitários
+   - Usar Context API para estado compartilhado
+
+3. **Simplificação de JSX**
+   - Extrair blocos condicionais complexos
+   - Criar componentes para listas e mapeamentos
+   - Usar render props para lógica reutilizável
+
+#### Para Hooks Customizados
+1. **Single Responsibility**
+   - Um hook = uma responsabilidade específica
+   - Dividir hooks complexos em hooks menores
+   - Compor hooks para funcionalidades complexas
+
+2. **Extração de Lógica**
+   - Mover validações para funções puras
+   - Extrair transformações de dados
+   - Separar side effects de lógica de estado
+
+#### Para Utilitários e Serviços
+1. **Modularização**
+   - Agrupar funções relacionadas em módulos
+   - Usar barrel exports para organização
+   - Separar constantes e configurações
+
+2. **Especialização**
+   - Criar módulos específicos por domínio
+   - Separar validações, formatações e transformações
+   - Implementar padrão Repository para serviços
+
+### 🎯 PLANO DE AÇÃO SUGERIDO
+
+#### Fase 1 - Crítico (1-2 sprints)
+- ✅ Nenhuma ação crítica necessária
+
+#### Fase 2 - Alto Impacto (2-4 sprints)
+- ✅ Nenhuma ação de alto impacto necessária
+
+#### Fase 3 - Monitoramento Contínuo
+- Implementar limites de complexidade no CI/CD
+- Revisões de código focadas em tamanho e complexidade
+- Refactoring incremental durante desenvolvimento de features
 
 ---
 
@@ -144,53 +242,6 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 **Restrições:**
 - Limitado ao município atribuído
 
----
-
-### ⚡ REGRAS CRÍTICAS DO SISTEMA
-
-#### Criação de Despesas
-1. **Saldo Disponível:** Toda despesa deve ter saldo suficiente na emenda vinculada
-2. **CNPJ Obrigatório:** Fornecedor deve ter CNPJ válido (14 dígitos + validação)
-3. **Data Válida:** Data da despesa não pode ser futura
-4. **Documento Fiscal:** Obrigatório para todas as despesas
-5. **Autorização:** Usuário deve ter permissão para o município da emenda
-
-#### Criação de Emendas
-1. **Unicidade:** Número da emenda deve ser único no sistema
-2. **Valor Positivo:** Valor deve ser maior que zero
-3. **Município Válido:** Deve existir na UF selecionada
-4. **Deputado/Senador:** Campo obrigatório e deve ser válido
-5. **Tipo de Emenda:** Deve seguir classificação oficial do SUS
-
-#### Gestão de Usuários
-1. **Email Único:** Cada email só pode ter um usuário no sistema
-2. **UF Válida:** Deve ser uma das 27 UFs brasileiras
-3. **Município Obrigatório:** Operadores devem ter município definido
-4. **Hierarquia:** Admins podem gerenciar todos; Operadores apenas seu município
-5. **Recuperação de Órfãos:** Sistema detecta e corrige usuários órfãos automaticamente
-
----
-
-### 🚨 VALIDAÇÕES DE SEGURANÇA
-
-#### Autenticação
-- Login obrigatório para acessar o sistema
-- Sessão expira automaticamente por inatividade
-- Logout automático em caso de erro de autenticação
-- Senhas geradas automaticamente com critérios seguros
-
-#### Autorização
-- Verificação de permissões a cada operação
-- Filtros automáticos por município para operadores
-- Logs de auditoria para ações administrativas
-- Detecção automática de usuários órfãos
-
-#### Dados Sensíveis
-- Valores monetários sempre validados
-- CNPJs verificados com algoritmo oficial
-- Datas validadas contra regras de negócio
-- Emails validados em tempo real
-
 
 
 ## ⚙️ FUNCIONALIDADES PRINCIPAIS
@@ -265,6 +316,8 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 ├── attached_assets
 │   ├── Pasted--ARQUIVOS-PRIORIT-RIOS-IDENTIFICADOS-NO-HANDOVER-1-FORMUL-RIOS-PRINCIPAIS-src-components-Em-1753618922803_1753618922804.txt
 │   ├── Pasted--Download-the-React-DevTools-for-a-better-development-experience-https-reactjs-org-link-react-dev-1753581395313_1753581395315.txt
+│   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-DespesaForm-jsx-Unexpected-token-e-1753657024688_1753657024690.txt
+│   ├── Pasted--plugin-vite-react-babel-home-runner-workspace-src-components-DespesaForm-jsx-Unexpected-token-e-1753702486084_1753702486085.txt
 │   ├── Pasted-2react-dom-development-js-86-Warning-Removing-a-style-property-during-rerender-borderColor-when--1753581457278_1753581457279.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753621700217_1753621700222.txt
 │   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753622321240_1753622321242.txt
@@ -321,7 +374,17 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 │   │   ├── UserForm.jsx
 │   │   ├── UsersTable.jsx
 │   │   ├── VisualizacaoEmendaDespesas.js
-│   │   └── WorkflowManager.jsx
+│   │   ├── WorkflowManager.jsx
+│   │   └── despesa
+│   │       ├── DespesaFormActions.jsx
+│   │       ├── DespesaFormAdvancedFields.jsx
+│   │       ├── DespesaFormBanners.jsx
+│   │       ├── DespesaFormBasicFields.jsx
+│   │       ├── DespesaFormDateFields.jsx
+│   │       ├── DespesaFormEmendaInfo.jsx
+│   │       ├── DespesaFormEmpenhoFields.jsx
+│   │       ├── DespesaFormHeader.jsx
+│   │       └── DespesaFormOrcamentoFields.jsx
 │   ├── config
 │   │   └── constants.js
 │   ├── context
@@ -340,12 +403,14 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 │   │   └── logo-sicefsus.png
 │   ├── index.jsx
 │   ├── services
+│   │   ├── emendasService.js
 │   │   └── userService.js
 │   ├── styles
 │   │   ├── adminStyles.css
 │   │   ├── dashboard.css
 │   │   └── theme.css
 │   └── utils
+│       ├── despesaValidators.js
 │       ├── errorHandlers.js
 │       ├── exportImport.js
 │       ├── firebaseCollections.js
@@ -392,7 +457,6 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 ### ✏️ Funcionalidades Modificadas
 - Dashboard.jsx
-- DespesaForm.jsx
 - Despesas.jsx
 - DespesasList.jsx
 - EmendaForm.jsx
@@ -434,11 +498,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: AdminPanel, userService, loadInitialData, loadUsers, loadedUsers, loadLogs, logsData, handleCreateUser, result, handleUpdateUser, handleDeleteUser, handleResetPassword, resetForm, handleNovoUsuario, handleEditarUsuario, handleConfirmarExclusao, getFilteredLogs, inicio, fim, styles
 - **Dependências**: react, ./Toast, ./ConfirmationModal...
 
+
 #### `src/components/AdminStats.jsx`
 - **Funcionalidade**: src/components/AdminStats.jsx - Estatísticas Padronizadas SICEFSUS
 - **Tipo**: Functional Component
 - **Funções**: AdminStats, stats, total, active, admins, operators, pendingFirstAccess, operatorsWithLocation, operatorsWithoutLocation, locationStats, uf, CompactCard, styles
 - **Dependências**: react
+
 
 #### `src/components/Administracao.jsx`
 - **Funcionalidade**: src/components/Administracao.jsx - CORRIGIDO PARA ESTRUTURA SICEFSUS
@@ -446,11 +512,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: Administracao, showToast, carregarUsuarios, usuariosData, resetForm, handleNovoUsuario, handleEditarUsuario, roleMap, handleCancelar, handleSalvarUsuario, handleExcluirUsuario, user, confirmMessage, resultado, handleResetSenha, styles, styleSheet
 - **Dependências**: react, ../services/userService, ./UserForm...
 
+
 #### `src/components/ConfirmationModal.jsx`
 - **Funcionalidade**: src/components/ConfirmationModal.jsx - Modal de Confirmação Personalizado
 - **Tipo**: Functional Component
 - **Funções**: ConfirmationModal, getIconByType, getColorByType, handleOverlayClick, styles, modalCSS, existingStyle, style
 - **Dependências**: react
+
 
 #### `src/components/ContextPanel.jsx`
 - **Funcionalidade**: ContextPanel.jsx - Painel de Contexto da Emenda
@@ -458,11 +526,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: ContextPanel, loadContextData, despesasQuery, despesasSnapshot, despesas, totalDespesas, valorExecutado, saldoRestante, valorTotal, percentualExecutado, atividades, formatCurrency, formatDate, renderTabContent, renderResumoTab, renderDespesasTab, renderAtividadesTab, styles
 - **Dependências**: react, ../firebase/firebaseConfig
 
+
 #### `src/components/Dashboard.jsx`
 - **Funcionalidade**: Dashboard.jsx - CORREÇÃO CRÍTICA IMPLEMENTADA
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: CHART_COLORS, Dashboard, calcularEstatisticasLocais, totalEmendas, totalDespesas, valorTotalEmendas, valorTotalDespesas, saldoDisponivel, percentualExecutado, emendasPorStatus, status, existing, valorSeguro, despesasPorStatus, evolucaoMensal, hoje, mes, mesNome, emendasMes, dataEmenda, despesasMes, dataDespesa, valorEmendasMes, valorDespesasMes, municipiosMap, municipio, topMunicipios, hookStats, formatCurrency, numericValue, formatNumber
 - **Dependências**: react, ../hooks/useEmendaDespesa
+
 
 #### `src/components/DataManager.jsx`
 - **Funcionalidade**: Exportar emendas
@@ -470,23 +540,27 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: DataManager, fileInputRef, showToast, loadBackups, querySnapshot, backupsData, checkAutoBackupSetting, autoBackup, handleExport, exportData, emendasSnapshot, despesasSnapshot, usersSnapshot, logsSnapshot, blob, url, link, handleFileUpload, file, reader, data, generateImportPreview, preview, handleImport, batch, docRef, createBackup, backupData, collections, snapshot, downloadBackup, deleteBackup, toggleAutoBackup, newValue, exportToCSV, headers, csvContent
 - **Dependências**: react, ../firebase/firebaseConfig, ./Toast...
 
+
 #### `src/components/DebugPanel.jsx`
 - **Funcionalidade**: Sem descrição disponível
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: DebugPanel
 - **Dependências**: react
 
+
 #### `src/components/DespesaForm.jsx`
-- **Funcionalidade**: Estado inicial com campos obrigatórios conforme print oficial
+- **Funcionalidade**: Dados do usuário para filtro por município
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: DespesaForm, isMounted, navigate, testarFirebaseDirectly, dadosTeste, docRef, docSnapshot, configModo, carregarEmendas, q, querySnapshot, emendasData, handleInputChange, validarFormulario, novosErrors, camposObrigatorios, valor, handleSubmit, dadosParaSalvar, despesaRef, collectionRef, docCheck, styles
+- **Funções**: DespesaForm, isMounted, navigate, userRole, userMunicipio, userUf, configModo, carregarEmendas, querySnapshot, emendasData, handleInputChange, validarFormulario, novosErrors, camposObrigatorios, valor, handleSubmit, dadosParaSalvar, despesaRef, collectionRef, docRef, docCheck, styles
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
 
+
 #### `src/components/Despesas.jsx`
-- **Funcionalidade**: Despesas.jsx - Sistema SICEFSUS v2.0 - LAYOUT ORIGINAL COM CORREÇÕES
+- **Funcionalidade**: Despesas.jsx - Sistema SICEFSUS v2.1 - COM FILTRO POR MUNICÍPIO
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: Despesas, navigate, location, userRole, userMunicipio, userUf, carregarDados, despesasQuery, despesasSnapshot, despesasData, emendasQuery, emendasSnapshot, emendasData, filtro, carregarDespesasComFiltro, recarregar, handleVisualizar, handleEditar, handleCriar, handleVoltar, handleSalvarDespesa, handleDeletarDespesa, handleLimparFiltros, despesasParaExibir, totalDespesas, valorTotal, valor, renderContent, styles
+- **Funções**: Despesas, navigate, location, userRole, userMunicipio, userUf, carregarDados, emendasQuery, emendasSnapshot, emendaData, batchSize, batch, despesasQuery, despesasSnapshot, filtro, carregarDespesasComFiltro, despesasData, recarregar, handleVisualizar, handleEditar, handleCriar, handleVoltar, handleSalvarDespesa, handleDeletarDespesa, handleLimparFiltros, despesasParaExibir, totalDespesas, valorTotal, valor, estatisticasPermissao, renderContent, styles
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
+
 
 #### `src/components/DespesasFilters.jsx`
 - **Funcionalidade**: DespesasFilters.jsx - PADRONIZADO COM EMENDASFILTERS v1.0
@@ -494,11 +568,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PRIMARY, ACCENT, ERROR, SUCCESS, WARNING, WHITE, DespesasFilters, aplicarFiltros, termoBusca, emendasDoParlamentar, valorMin, valorMax, dataDespesa, dataNf, hoje, fimMesAnterior, getEmendaInfo, emenda, formatarDataParaComparacao, d, limparFiltros, filtrosLimpos, contarFiltrosAtivos, aplicarPeriodo, styles, additionalCSS, style
 - **Dependências**: react
 
+
 #### `src/components/DespesasList.jsx`
 - **Funcionalidade**: DespesasList.jsx - CORRIGIDO SEM useEmendaDespesa
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: PRIMARY, ACCENT, SUCCESS, WARNING, ERROR, WHITE, GRAY, DespesasList, filtradas, calcularEstatisticasFiltro, totalDespesas, valorTotalDespesas, handleFilter, handleClearFilters, handleEdit, handleView, handleDelete, getEmendaDisplayName, emenda, styles
 - **Dependências**: react, firebase/firestore, ../firebase/firebaseConfig...
+
 
 #### `src/components/DespesasTable.jsx`
 - **Funcionalidade**: DespesasTable.jsx - ATUALIZADA CONFORME PRINT OFICIAL
@@ -506,11 +582,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PRIMARY, ACCENT, WHITE, ERROR, SUCCESS, WARNING, DespesasTable, navigate, formatarDataFirestore, getEmendaInfo, emenda, calcularTotalPorNatureza, natureza, valor, totaisPorNatureza, handleExcluir, emendaRef, emendaDoc, saldoAtual, novoSaldo, despesaRef, handleEditar, handleVisualizar, confirmarExclusao, styles
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
 
+
 #### `src/components/EmendaForm.jsx`
 - **Funcionalidade**: EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS OBRIGATÓRIOS CONFORME PRINT
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: useIsMounted, isMountedRef, EmendaForm, navigate, isMounted, configModo, readOnly, formatarValorMonetario, apenasNumeros, numero, valorDecimal, formatarCNPJ, numeros, formatCurrency, formatarParaExibicao, calcularSaldo, parseValue, valorRecurso, valorExecutado, saldo, timeoutId, novoSaldo, handleInputChange, validarFormulario, camposObrigatorios, camposVazios, validarCNPJ, handleSubmit, dadosParaSalvar, novaEmendaRef, estados, valorFormatado, novaAcao, valor, styles
 - **Dependências**: react-router-dom, firebase/firestore, ../firebase/firebaseConfig...
+
 
 #### `src/components/Emendas.jsx`
 - **Funcionalidade**: Emendas.jsx - Sistema SICEFSUS v2.1 - COM PRIMEIRADESPESAMODAL INTEGRADO
@@ -518,11 +596,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: Emendas, navigate, userRole, userMunicipio, userUf, calcularMetricasComDespesas, emendasComMetricas, despesasQuery, despesasSnapshot, totalDespesas, valorExecutado, valorRecurso, saldoDisponivel, percentualExecutado, calcularMetricas, emendasAtualizadas, emendasLength, comDespesas, handleVisualizar, handleEditar, handleCriar, handleVoltar, handleVoltarParaListagem, handleSalvarEmenda, handleDeletar, handleModalConfirm, handleModalCancel, handleDespesas, totalEmendas, emendasComRecursos, emendasComDespesas, valorTotal, valorExecutadoTotal, renderContent, styles
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
 
+
 #### `src/components/EmendasFilters.jsx`
 - **Funcionalidade**: Estados dos filtros
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: EmendasFilters, filterEmendas, termoBusca, municipio, uf, combinado, filtered, clearFilters, clearedFilters, updateFilter, getUniqueValues, values, styles
 - **Dependências**: react
+
 
 #### `src/components/EmendasList.jsx`
 - **Funcionalidade**: EmendasList.jsx - ORIGINAL CORRIGIDO
@@ -530,11 +610,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: EmendasList, filtradas, stats, formatCurrency, formatDate, getEmendaStatus, validade, saldo, handleAbrirEmenda, handleVerDespesas, handleFiltroChange, limparFiltros, parlamentaresUnicos, tiposUnicos, renderTableRow, status, percentualExecutado, totalDespesas, styles
 - **Dependências**: react, ../hooks/useEmendaDespesa
 
+
 #### `src/components/EmendasTable.jsx`
 - **Funcionalidade**: EmendasTable.jsx - Com integração para Despesas
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: EmendasTable, calcularExecucao, valorRecurso, valorExecutado, percentual, valorFormatado, renderIconeDespesas, temDespesas, calcularStatus, execucao, hoje, dataInicio, dataFim, getProgressColor, emendasProcessadas, statusInfo, handleSort, direction, emendasOrdenadas, aStr, bStr, formatCurrency, styles
 - **Dependências**: react
+
 
 #### `src/components/ErrorBoundary.jsx`
 - **Funcionalidade**: Log para monitoramento
@@ -542,11 +624,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: errorReport, existingErrors, recentErrors, styles
 - **Dependências**: react
 
+
 #### `src/components/FirebaseError.jsx`
 - **Funcionalidade**: Sem descrição disponível
 - **Tipo**: Functional Component
 - **Funções**: FirebaseError, styles
 - **Dependências**: react
+
 
 #### `src/components/FluxoEmenda.jsx`
 - **Funcionalidade**: src/components/FluxoEmenda.jsx - CORRIGIDO com fallback para onClose
@@ -554,11 +638,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PRIMARY, ACCENT, SUCCESS, WARNING, ERROR, WHITE, FluxoEmenda, navigate, handleClose, formatCurrency, formatDate, displayCNPJ, cleanCNPJ, handleEditClick, valorTotal, outrasComposicoes, saldoTotal, saldoDisponivel, valorExecutado, percentualExecutado, isAtiva, isProximaVencimento, hoje, vencimento, diasRestantes, isVencida, styles
 - **Dependências**: react, react-router-dom
 
+
 #### `src/components/GlobalSearch.jsx`
 - **Funcionalidade**: src/components/GlobalSearch.jsx
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: PRIMARY, ACCENT, WHITE, GRAY, GlobalSearch, searchRef, resultsRef, inputRef, toast, handleClickOutside, searchTimeout, loadAllData, startTime, emendas, despesas, performSearch, normalizedTerm, searchResults, score, emendaRelacionada, calculateRelevanceScore, getHighlights, highlights, getMatchedFields, fields, truncateText, handleResultClick, path, handleKeyDown, handleClear, formatCurrency, formatDate, date, containerStyle, inputStyle, styles
 - **Dependências**: react, firebase/firestore, ../firebase/firebaseConfig...
+
 
 #### `src/components/Home.jsx`
 - **Funcionalidade**: Azul petróleo principal
@@ -566,11 +652,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PRIMARY, SECONDARY, ACCENT, WHITE, GRAY, TEXT, Home, styles
 - **Dependências**: react, ../images/logo-sicefsus.png
 
+
 #### `src/components/Login.jsx`
 - **Funcionalidade**: Ao carregar, verifica se há e-mail salvo
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: Login, emailSalvo, handleSubmit, cred, traduzirErroFirebase, styles
 - **Dependências**: react, ../firebase/firebaseConfig, firebase/firestore
+
 
 #### `src/components/PaginatedTable.jsx`
 - **Funcionalidade**: Sem descrição disponível
@@ -578,11 +666,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: Nenhuma detectada
 - **Dependências**: 
 
+
 #### `src/components/Pagination.jsx`
 - **Funcionalidade**: src/components/Pagination.jsx
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: PRIMARY, ACCENT, WHITE, GRAY, SUCCESS, Pagination, handleJumpToPage, page, handlePageSizeChange, newSize, pageRange, sizeStyles, currentSizeStyles, QuickPagination, PaginationInfo, styles, paginationCSS
 - **Dependências**: react
+
 
 #### `src/components/PrimeiraDespesaModal.jsx`
 - **Funcionalidade**: src/components/PrimeiraDespesaModal.jsx
@@ -590,11 +680,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PrimeiraDespesaModal, styles
 - **Dependências**: react
 
+
 #### `src/components/PrintButton.jsx`
 - **Funcionalidade**: src/components/PrintButton.jsx
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: PrintButton, handlePrint, style
 - **Dependências**: react, ../utils/printUtils
+
 
 #### `src/components/PrivateRoute.jsx`
 - **Funcionalidade**: Não autenticado
@@ -602,11 +694,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: PrivateRoute
 - **Dependências**: react, react-router-dom
 
+
 #### `src/components/Relatorios.jsx`
 - **Funcionalidade**: src/components/Relatorios.jsx
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: PRIMARY, ACCENT, SUCCESS, WARNING, ERROR, WHITE, GRAY, COLORS, Relatorios, userRole, userMunicipio, userUf, loadData, emendasSnapshot, emendasData, despesasSnapshot, allowedEmendaIds, formatCurrency, formatDate, getOverviewData, totalEmendas, valorTotalEmendas, valorExecutado, saldoDisponivel, percentualExecutado, emendasVencidas, getExecucaoPorAutor, execucaoPorAutor, autor, despesasAutor, getExecucaoPorTipo, execucaoPorTipo, tipo, despesasTipo, getFornecedores, fornecedores, fornecedor, dataDespesa, getEmendasProximasVencimento, hoje, em30Dias, vencimento, overview, topFornecedores, emendasVencimento, reportTypes, diasRestantes, isUrgente, styles, spinnerCSS, style
 - **Dependências**: react, ../firebase/firebaseConfig, firebase/firestore...
+
 
 #### `src/components/SaldoEmendaWidget.jsx`
 - **Funcionalidade**: ✅ Carregar dados da emenda
@@ -614,11 +708,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: SaldoEmendaWidget, carregarEmenda, emendaDoc, emendaData, formatCurrency, valorTotal, valorExecutado, saldoAtual, saldoAposNovaDesp, percentualExecutado, getStatusSaldo, status, styles, style
 - **Dependências**: react, firebase/firestore, ../firebase/firebaseConfig
 
+
 #### `src/components/Sidebar.jsx`
 - **Funcionalidade**: ✅ NAVEGAÇÃO INTELIGENTE PARA EMENDAS
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: menuItems, adminItems, Sidebar, isAdmin, handleSearchNavigate, handleSearchResultSelect, handleEmendasClick, handleItemClick
 - **Dependências**: react, ./GlobalSearch
+
 
 #### `src/components/Sobre.jsx`
 - **Funcionalidade**: Hook local para título da página
@@ -626,11 +722,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: Sobre
 - **Dependências**: react, ../images/logo-sicefsus.png
 
+
 #### `src/components/TemporaryBanner.jsx`
 - **Funcionalidade**: src/components/TemporaryBanner.jsx - Banner Temporário que Aparece e Desaparece
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: TemporaryBanner, timer, handleHide, getStylesByType, typeStyles, styles
 - **Dependências**: react
+
 
 #### `src/components/ThemeToggle.jsx`
 - **Funcionalidade**: Sem descrição disponível
@@ -638,11 +736,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: ThemeToggle, styles
 - **Dependências**: react, ../context/ThemeContext
 
+
 #### `src/components/Toast.jsx`
 - **Funcionalidade**: Toast.jsx - SISTEMA CORRIGIDO v2.0
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: ToastContext, ToastProvider, showToast, id, newToast, hideToast, success, error, warning, info, value, useToast, context, ToastContainer, Toast, getIcon, getStyles, baseStyle, styles, toastCSS, existingStyle, style
 - **Dependências**: react
+
 
 #### `src/components/UserForm.jsx`
 - **Funcionalidade**: src/components/UserForm.jsx - CORRIGIDO PARA ESTRUTURA SICEFSUS
@@ -650,11 +750,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: UserForm, UFS_VALIDAS, UF_NAMES, handleTipoChange, handleSubmit, styles, styleSheet
 - **Dependências**: react, ../utils/formStyles
 
+
 #### `src/components/UsersTable.jsx`
 - **Funcionalidade**: src/components/UsersTable.jsx - Tabela de Usuários com UX Melhorada
 - **Tipo**: Functional Component
 - **Funções**: UsersTable, formatLastAccess, formatLocation, formatStatus, statusMap, statusInfo, formatRole, styles
 - **Dependências**: react
+
 
 #### `src/components/VisualizacaoEmendaDespesas.js`
 - **Funcionalidade**: ✅ Dados simulados para demonstração
@@ -662,11 +764,13 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funções**: VisualizacaoEmendaDespesas, timer, COLORS, PRIMARY, ACCENT, SUCCESS, WARNING, ERROR, formatCurrency, formatDate, getStatusEmenda, validade, saldo, dadosExecucao, despesasPorMes, mes, dadosLinha, handleNovaDespesa, handleEditarDespesa, handleSalvarDespesa, handleCancelarDespesa, status, styles, spinnerCSS, style
 - **Dependências**: react
 
+
 #### `src/components/WorkflowManager.jsx`
 - **Funcionalidade**: Atualizar status da despesa
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: WorkflowManager, showToast, auth, currentUser, loadWorkflowHistory, q, querySnapshot, workflowData, createWorkflowEntry, handleStatusChange, getStatusIcon, getStatusColor, getActionIcon, canApprove, canReject, canMarkAsPaid, canCancel
 - **Dependências**: react, firebase/auth, ../firebase/firebaseConfig...
+
 
 
 
@@ -678,21 +782,26 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Funcionalidade**: src/hooks/useEmendaDespesa.js - VERSÃO CORRIGIDA v2.0
 - **Funções**: useEmendaDespesa, isMountedRef, determinarPermissoes, permissoesLiberadas, calcularMetricasEmenda, valorTotal, despesasValidas, valorExecutado, saldoDisponivel, percentualExecutado, despesasPorStatus, status, carregarEmenda, emendaDoc, emendaData, carregarDespesasEmenda, q, snapshot, despesasData, carregarTodasEmendasComMetricas, emendasData, emendasComMetricas, metricasEmenda, validarNovaDespesa, metricas, atualizarSaldoEmenda, obterEstatisticasGerais, totalEmendas, valorTotalGeral, valorExecutadoGeral, saldoDisponivelGeral, emendasComSaldo, emendasEsgotadas, emendasSemDespesas, mediaExecucao, filtrarEmendas, busca, recarregar, metricasCalculadas, carregarDadosIniciais, despesasQuery, useIsMounted
 
+
 #### `src/hooks/useNavigationProtection.js`
 - **Funcionalidade**: hooks/useNavigationProtection.js - Hook Completo para Proteção de Navegação
 - **Funções**: useNavigationProtection, navigate, location, handleBeforeUnload, safeNavigate, shouldNavigate, navigateWithConfirmation, canNavigate, confirmMessage, navigateWithSave, choice, createLinkHandler, createButtonHandler, useFormNavigation, navigateToRelated, shouldSave, cancelForm, shouldDiscard, useModuleNavigation, goToEmendaDespesas, returnToEmenda, createDespesaForEmenda, getNavigationSource
+
 
 #### `src/hooks/usePageTitle.js`
 - **Funcionalidade**: src/hooks/usePageTitle.js
 - **Funções**: usePageTitle, baseTitle, Dashboard, Relatorios, Despesas
 
+
 #### `src/hooks/usePagination.js`
 - **Funcionalidade**: src/hooks/usePagination.js
 - **Funções**: usePagination, totalItems, totalPages, paginatedData, startIndex, endIndex, hasNextPage, hasPreviousPage, isFirstPage, isLastPage, goToPage, goToNextPage, goToPreviousPage, goToFirstPage, goToLastPage, changePageSize, getPageRange, delta, range, rangeWithDots, reset, getSummary, goToItemPage, page, isItemInCurrentPage, itemPage, usePaginationWithFilter, filteredData, itemValue, term, pagination, setFilter, clearFilters, clearFilter, newFilters, usePaginationWithSort, sortedData, aStr, bStr, handleSort, clearSort
 
+
 #### `src/hooks/usePermissions.js`
 - **Funcionalidade**: src/hooks/usePermissions.js - HOOK CENTRALIZADO DE PERMISSÕES
 - **Funções**: usePermissions, calcularPermissoes, municipio, uf, localizacao, novasPermissoes, methods
+
 
 #### `src/hooks/useValidation.js`
 - **Funcionalidade**: src/hooks/useValidation.js
@@ -700,33 +809,45 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 
 
+
 ---
 
 ### 🛠️ **Utilitários**
+
+#### `src/utils/despesaValidators.js`
+- **Funcionalidade**: src/components/despesa/DespesaFormHeader.jsx
+- **Funções**: DespesaFormHeader, styles
+
 
 #### `src/utils/errorHandlers.js`
 - **Funcionalidade**: src/utils/errorHandlers.js - Centralized Error Handling
 - **Funções**: handleFirebaseError, errorReport, existingErrors, handleValidationError, errors, handleNetworkError, showUserError, getStoredErrors, clearStoredErrors, createErrorReport
 
+
 #### `src/utils/exportImport.js`
 - **Funcionalidade**: Sem descrição disponível
 - **Funções**: Nenhuma detectada
+
 
 #### `src/utils/firebaseCollections.js`
 - **Funcionalidade**: src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
 - **Funções**: COLLECTIONS, EMENDA_SCHEMA, USER_SCHEMA, DESPESA_SCHEMA, ACAO_SERVICO_SCHEMA, META_SCHEMA, validateDocumentStructure, requiredFields, normalizeDocument, normalized, validateAcaoServico, validateMeta, calcularValorTotalAcoesServicos, validateEmendaCompleta, erros, camposObrigatorios, ufsValidas, validarCNPJ
 
+
 #### `src/utils/formStyles.js`
 - **Funcionalidade**: ✅ ESTILOS UNIVERSAIS PARA FORMS - COM DARK MODE COMPLETO
 - **Funções**: formStyles, addFormInteractivity, css, style, styles
+
 
 #### `src/utils/formatters.js`
 - **Funcionalidade**: ✅ FORMATADORES MONETÁRIOS PRECISOS - src/utils/formatters.js
 - **Funções**: formatarMoedaDisplay, numero, formatarMoedaInput, parseValorMonetario, calcularSaldoEmenda, total, executado, useMoedaFormatting, handleValorChange, valorFormatado, valorNumerico, saldoDisponivel, formatarNumero, formatarPercentual, formatarCNPJDisplay, numeros, formatarTelefone, formatarData, dataObj, formatarDataHora, validarValorMonetario, calcularEstatisticas, totalDespesas, totalEmendas, saldoTotal, percentualExecutado
 
+
 #### `src/utils/printUtils.js`
 - **Funcionalidade**: src/utils/printUtils.js
 - **Funções**: formatCurrency, formatDate, printReport, reportElement, printWindow, contentClone, elementsToRemove, printContent
+
 
 #### `src/utils/validators.js`
 - **Funcionalidade**: src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
@@ -734,13 +855,20 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 
 
+
 ---
 
 ### 🔧 **Serviços**
 
+#### `src/services/emendasService.js`
+- **Funcionalidade**: src/services/emendasService.js
+- **Funções**: carregarEmendasPorPermissao, querySnapshot, emendasData
+
+
 #### `src/services/userService.js`
 - **Funcionalidade**: src/services/userService.js - VERSÃO DEBUG (SEM TESTE AUTH)
 - **Funções**: auth, COLLECTION_NAME, generateTempPassword, uppercase, lowercase, numbers, specials, allChars, checkEmailExists, emailToCheck, q, querySnapshot, exists, userData, convertRoleToTipo, roleMap, validateFormData, errors, emailRegex, tipoUsuario, isValid, handleFirebaseError, loadUsers, users, handleOrphanedUser, firestoreExists, docRef, createUser, validation, errorMsg, emailExists, senhaTemporaria, errorMessage, updateUser, updateData, deleteUserById, sendPasswordReset, diagnoseEmail, userService, emails, alternatives, altEmail, tempPassword, testCredential
+
 
 
 
@@ -814,10 +942,13 @@ node scripts/generateHandover.cjs
 
 - **Total de Componentes**: 40
 - **Total de Hooks**: 6
-- **Total de Utilitários**: 7
-- **Total de Serviços**: 1
+- **Total de Utilitários**: 8
+- **Total de Serviços**: 2
 - **Dependências Principais**: 6
 - **Dependências de Desenvolvimento**: 7
+- **Arquivos Analisados para Refatoração**: 56
+- **Arquivos que Precisam de Refatoração**: 0
+- **Score Médio de Complexidade**: NaN/100
 
 ---
 
@@ -833,6 +964,8 @@ node scripts/generateHandover.cjs
 8. **Sistema de Usuários**: Tratamento automático de usuários órfãos
 9. **Validações**: Validação em tempo real e tratamento robusto de erros
 10. **Data/Hora**: Sistema confiável com múltiplas fontes (WorldTimeAPI, NTP, Git, FileSystem)
+11. **🆕 Análise de Código**: Sistema automático de detecção de arquivos monolíticos
+12. **🆕 Refatoração**: Sugestões automáticas baseadas em métricas de complexidade
 
 ---
 
@@ -855,6 +988,22 @@ node scripts/generateHandover.cjs
 - Sistema detecta automaticamente e recupera usuário órfão
 - Processo transparente para o usuário final
 - Logs detalhados no console para debugging
+
+#### 🚨 Arquivo Monolítico Detectado
+**Sintoma:** Warning na documentação sobre arquivo com alta complexidade
+**Causa:** Arquivo ultrapassou limites de linhas, funções ou complexidade
+**Solução:**
+- Consultar seção "Análise de Refatoração" nesta documentação
+- Seguir sugestões específicas para o arquivo
+- Implementar refatoração gradual durante desenvolvimento
+
+#### 🚨 Performance Degradada
+**Sintoma:** Sistema lento ou travando
+**Causa:** Possível arquivo monolítico ou componente complexo sendo renderizado
+**Solução:**
+- Verificar arquivos com score de refatoração > 60
+- Implementar lazy loading para componentes pesados
+- Quebrar componentes grandes em subcomponentes
 
 #### 🚨 Saldo Insuficiente para Despesa
 **Sintoma:** Não consegue criar despesa mesmo com saldo aparentemente disponível
@@ -893,6 +1042,7 @@ node scripts/generateHandover.cjs
 - [ ] Revisar logs de erros
 - [ ] Verificar usuários órfãos no sistema
 - [ ] Validar sincronização de data/hora
+- [ ] **🆕 Executar análise de refatoração e revisar arquivos críticos**
 
 #### Trimestral
 - [ ] Análise de performance do sistema
@@ -900,6 +1050,7 @@ node scripts/generateHandover.cjs
 - [ ] Limpeza de dados obsoletos
 - [ ] Atualização da documentação
 - [ ] Auditoria de segurança
+- [ ] **🆕 Refatoração de arquivos com score > 60**
 
 #### Anual
 - [ ] Auditoria completa de segurança
@@ -907,6 +1058,7 @@ node scripts/generateHandover.cjs
 - [ ] Planejamento de melhorias
 - [ ] Renovação de certificados
 - [ ] Análise de usuários órfãos históricos
+- [ ] **🆕 Revisão arquitetural completa baseada em métricas de complexidade**
 
 ### Monitoramento
 
@@ -917,6 +1069,8 @@ node scripts/generateHandover.cjs
 - **Erros**: Taxa < 1% das operações
 - **Recuperação de Órfãos**: Sucesso > 95%
 - **Precisão de Data/Hora**: Sincronização < 1 segundo
+- **🆕 Qualidade de Código**: Score médio de refatoração < 40
+- **🆕 Arquivos Críticos**: Zero arquivos com score > 80
 
 #### Alertas Configurados
 - Falhas de autenticação em massa
@@ -925,14 +1079,41 @@ node scripts/generateHandover.cjs
 - Tentativas de acesso não autorizado
 - Detecção frequente de usuários órfãos
 - Falhas na sincronização de tempo
+- **🆕 Detecção de arquivos com complexidade crítica (score > 80)**
+- **🆕 Aumento súbito no score médio de refatoração**
+
+### 🔬 **Processo de Refatoração Contínua**
+
+#### Workflow de Refatoração
+1. **Detecção Automática**
+   - Executar `node scripts/generateHandover.cjs` semanalmente
+   - Revisar seção "Análise de Refatoração"
+   - Identificar arquivos com score > 40
+
+2. **Priorização**
+   - **Crítico (Score ≥ 80)**: Refatoração imediata
+   - **Alto (Score 60-79)**: Refatoração em 2-4 sprints
+   - **Médio (Score 40-59)**: Monitoramento e refatoração gradual
+
+3. **Execução**
+   - Seguir sugestões específicas do arquivo
+   - Aplicar padrões de design apropriados
+   - Manter testes durante refatoração
+   - Validar performance pós-refatoração
+
+4. **Validação**
+   - Re-executar análise após refatoração
+   - Confirmar redução do score
+   - Testar funcionalidades afetadas
+   - Documentar mudanças realizadas
 
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 27/07/2025, 19:35:05  
-**📊 Versão**: 2.3  
+**🔄 Última Atualização**: 28/07/2025, 09:23:19  
+**📊 Versão**: 2.4  
 **💻 Desenvolvido em**: Replit  
-**✅ Status**: Produção Ativa com Sistema de Usuários Corrigido e Data/Hora Confiável
+**✅ Status**: Produção Ativa com Sistema de Análise de Refatoração
 
 ---
 
@@ -956,9 +1137,26 @@ O script detecta automaticamente:
 - ✅ Detecção automática da última implementação
 - ✅ Análise de arquivos modificados recentemente
 - ✅ Documentação de sistemas corrigidos
-- ✅ **NOVO:** Sistema de data/hora confiável com múltiplas fontes
-- ✅ **NOVO:** Timestamps precisos no timezone brasileiro
-- ✅ **NOVO:** Fallback automático para fontes de tempo alternativas
+- ✅ Sistema de data/hora confiável com múltiplas fontes
+- ✅ Timestamps precisos no timezone brasileiro
+- ✅ Fallback automático para fontes de tempo alternativas
+- ✅ **🆕 ANÁLISE AVANÇADA DE REFATORAÇÃO:**
+  - 🔬 Detecção automática de arquivos monolíticos
+  - 📊 Métricas de complexidade (linhas, funções, complexidade ciclomática)
+  - 💡 Sugestões específicas de refatoração por arquivo
+  - 🎯 Sistema de priorização (Crítico/Alto/Médio/Baixo/OK)
+  - 📋 Recomendações arquiteturais gerais
+  - 🛠️ Estratégias detalhadas de refatoração
+  - 📈 Plano de ação estruturado por fases
+  - 🔄 Integração com workflow de manutenção
+
+### 🔬 **Critérios de Análise de Refatoração:**
+- **Linhas de Código**: Limite de 300 linhas (peso: 25%)
+- **Número de Funções**: Limite de 15 funções (peso: 20%)
+- **Complexidade Ciclomática**: Limite de 20 (peso: 25%)
+- **Dependências**: Limite de 20 imports (peso: 15%)
+- **Elementos JSX**: Limite de 50 elementos (peso: 10%)
+- **Aninhamento**: Limite de 5 níveis (peso: 5%)
 
 ### 🕒 **Fontes de Data/Hora Utilizadas (em ordem de prioridade):**
 1. **WorldTimeAPI** - API externa confiável (America/Sao_Paulo)
@@ -967,4 +1165,4 @@ O script detecta automaticamente:
 4. **Sistema de Arquivos** - Timestamp de modificação de arquivos
 5. **Sistema Local** - Hora local como último recurso
 
-O script automaticamente tenta cada fonte até obter uma data/hora confiável, garantindo máxima precisão na documentação.
+O script automaticamente tenta cada fonte até obter uma data/hora confiável, garantindo máxima precisão na documentação e agora inclui análise avançada de refatoração para manter a qualidade e manutenibilidade do código.
