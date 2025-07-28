@@ -15,7 +15,11 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import Toast from "./Toast";
 import { useIsMounted } from "../hooks/useEmendaDespesa";
-import { useMoedaFormatting, parseValorMonetario, formatarMoedaDisplay } from "../utils/formatters";
+import {
+  useMoedaFormatting,
+  parseValorMonetario,
+  formatarMoedaDisplay,
+} from "../utils/formatters";
 import { useCNPJValidation } from "../utils/validators";
 
 const DespesaForm = ({
@@ -35,8 +39,8 @@ const DespesaForm = ({
   const isMounted = useIsMounted();
   const navigate = useNavigate();
 
-  // ✅ DADOS DO USUÁRIO PARA FILTRO POR MUNICÍPIO
-  const userRole = usuario?.role || usuario?.tipo; // Fallback para 'tipo' se 'role' não existir
+  // Dados do usuário para filtro por município
+  const userRole = usuario?.role || usuario?.tipo;
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
@@ -49,7 +53,7 @@ const DespesaForm = ({
     uf: userUf,
   });
 
-  // Estado inicial com campos obrigatórios conforme print oficial
+  // Estado inicial com campos obrigatórios
   const [formData, setFormData] = useState({
     emendaId: emendaPreSelecionada || emendaId || "",
     discriminacao: "",
@@ -94,83 +98,12 @@ const DespesaForm = ({
   const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
   const [emendas, setEmendas] = useState(emendasDisponiveis);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [testeFirebase, setTesteFirebase] = useState({ loading: false, resultado: null });
 
-  // ✅ Hooks de formatação
+  // Hooks de formatação
   const { valorError, handleValorChange } = useMoedaFormatting();
   const { cnpjError, handleCNPJChange } = useCNPJValidation();
 
-  // 🚨 FUNÇÃO DE TESTE FIREBASE
-  const testarFirebaseDirectly = async () => {
-    setTesteFirebase({ loading: true, resultado: null });
-
-    try {
-      console.log("🧪 TESTE: Iniciando teste direto do Firebase...");
-
-      // Teste 1: Criar documento de teste
-      const dadosTeste = {
-        teste: true,
-        timestamp: new Date(),
-        usuario: usuario?.email || 'teste',
-        dados: {
-          discriminacao: "TESTE DE CONEXÃO FIREBASE",
-          fornecedor: "Fornecedor Teste",
-          valor: 100,
-          numeroEmpenho: "TESTE001",
-          numeroNota: "NF-TESTE-001",
-          dataEmpenho: new Date().toISOString().split('T')[0],
-          dataLiquidacao: new Date().toISOString().split('T')[0],
-          dataPagamento: new Date().toISOString().split('T')[0],
-          acao: "TESTE",
-          dotacaoOrcamentaria: "TESTE",
-          classificacaoFuncional: "TESTE",
-          status: "teste"
-        }
-      };
-
-      console.log("🧪 TESTE: Tentando adicionar documento...");
-      const docRef = await addDoc(collection(db, "despesas"), dadosTeste);
-      console.log("✅ TESTE: Documento criado com ID:", docRef.id);
-
-      // Teste 2: Verificar se foi criado
-      console.log("🧪 TESTE: Verificando se documento existe...");
-      const docSnapshot = await getDoc(doc(db, "despesas", docRef.id));
-
-      if (docSnapshot.exists()) {
-        console.log("✅ TESTE: Documento confirmado:", docSnapshot.data());
-
-        // Teste 3: Deletar documento de teste
-        console.log("🧪 TESTE: Deletando documento de teste...");
-        await deleteDoc(doc(db, "despesas", docRef.id));
-        console.log("✅ TESTE: Documento de teste deletado");
-
-        setTesteFirebase({ 
-          loading: false, 
-          resultado: "✅ SUCESSO: Firebase funcionando - coleção despesas criada!" 
-        });
-      } else {
-        throw new Error("Documento não foi encontrado após criação");
-      }
-
-    } catch (error) {
-      console.error("❌ TESTE: Erro no Firebase:", error);
-      console.error("❌ TESTE: Código do erro:", error.code);
-      console.error("❌ TESTE: Mensagem:", error.message);
-
-      let mensagemErro = "❌ ERRO: ";
-      if (error.code === 'permission-denied') {
-        mensagemErro += "REGRAS FIREBASE BLOQUEANDO - Configure as regras de segurança!";
-      } else if (error.code === 'network-request-failed') {
-        mensagemErro += "ERRO DE REDE - Verifique conexão com Firebase";
-      } else {
-        mensagemErro += `${error.code || 'unknown'}: ${error.message}`;
-      }
-
-      setTesteFirebase({ loading: false, resultado: mensagemErro });
-    }
-  };
-
-  // Configuração de modo simplificada (seguindo padrão do EmendaForm)
+  // Configuração de modo
   const configModo = {
     modo: modoVisualizacao
       ? "visualizar"
@@ -180,7 +113,7 @@ const DespesaForm = ({
     readOnly: modoVisualizacao,
   };
 
-  // ✅ CORREÇÃO: Carregar emendas COM FILTRO POR MUNICÍPIO
+  // Carregar emendas se não foram fornecidas
   useEffect(() => {
     if (emendas.length === 0 && !emendaPreSelecionada) {
       carregarEmendas();
@@ -208,7 +141,7 @@ const DespesaForm = ({
     }
   }, [emendaPreSelecionada, emendaInfo, despesaParaEditar]);
 
-  // ✅ CORREÇÃO PRINCIPAL: carregarEmendas COM FILTRO POR MUNICÍPIO
+  // Carregar emendas com filtro por município
   const carregarEmendas = async () => {
     try {
       console.log("🔍 Carregando emendas com filtro por município...");
@@ -216,23 +149,34 @@ const DespesaForm = ({
       let q;
 
       if (userRole === "admin") {
-        // ✅ Admin vê todas as emendas
         console.log("👑 Usuário ADMIN - carregando todas as emendas");
         q = query(collection(db, "emendas"));
-      } else if ((userRole === "operador" || userRole === "user") && userMunicipio) {
-        // ✅ CORREÇÃO: Verificar tanto 'operador' quanto 'user' + município obrigatório
-        console.log(`🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`);
+      } else if (
+        (userRole === "operador" || userRole === "user") &&
+        userMunicipio
+      ) {
+        console.log(
+          `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`,
+        );
         q = query(
           collection(db, "emendas"),
-          where("municipio", "==", userMunicipio)
+          where("municipio", "==", userMunicipio),
         );
       } else {
-        console.warn("⚠️ Usuário sem permissões definidas ou município não informado");
-        console.warn("Dados do usuário:", { userRole, userMunicipio, userUf, usuario });
+        console.warn(
+          "⚠️ Usuário sem permissões definidas ou município não informado",
+        );
+        console.warn("Dados do usuário:", {
+          userRole,
+          userMunicipio,
+          userUf,
+          usuario,
+        });
         setEmendas([]);
         setToast({
           show: true,
-          message: "Configuração de usuário incompleta. Entre em contato com o administrador.",
+          message:
+            "Configuração de usuário incompleta. Entre em contato com o administrador.",
           type: "error",
         });
         return;
@@ -248,14 +192,20 @@ const DespesaForm = ({
         });
       });
 
-      console.log(`✅ Emendas carregadas para ${userRole} (${userMunicipio}):`, emendasData.length);
-      console.log("📋 Emendas encontradas:", emendasData.map(e => ({
-        id: e.id,
-        numero: e.numero || e.numeroEmenda,
-        parlamentar: e.parlamentar,
-        municipio: e.municipio,
-        uf: e.uf
-      })));
+      console.log(
+        `✅ Emendas carregadas para ${userRole} (${userMunicipio}):`,
+        emendasData.length,
+      );
+      console.log(
+        "📋 Emendas encontradas:",
+        emendasData.map((e) => ({
+          id: e.id,
+          numero: e.numero || e.numeroEmenda,
+          parlamentar: e.parlamentar,
+          municipio: e.municipio,
+          uf: e.uf,
+        })),
+      );
 
       setEmendas(emendasData);
     } catch (error) {
@@ -297,8 +247,6 @@ const DespesaForm = ({
     [isMounted, errors, emendaInfo, handleValorChange, handleCNPJChange],
   );
 
-
-
   const validarFormulario = () => {
     const novosErrors = {};
 
@@ -337,12 +285,12 @@ const DespesaForm = ({
       }
     }
 
-    // ✅ VALIDAÇÃO DE VALOR MELHORADA
+    // Validação de valor melhorada
     if (valorError) {
       novosErrors.valor = valorError;
     }
 
-    // ✅ VALIDAÇÃO DE CNPJ
+    // Validação de CNPJ
     if (formData.cnpjFornecedor && cnpjError) {
       novosErrors.cnpjFornecedor = cnpjError;
     }
@@ -384,10 +332,16 @@ const DespesaForm = ({
         criadoEm: despesaParaEditar?.criadoEm || new Date(),
       };
 
-      console.log("🔄 DEBUG SUBMIT: Dados preparados para salvar:", dadosParaSalvar);
+      console.log(
+        "🔄 DEBUG SUBMIT: Dados preparados para salvar:",
+        dadosParaSalvar,
+      );
 
       if (despesaParaEditar) {
-        console.log("📝 DEBUG SUBMIT: Modo EDIÇÃO - atualizando documento:", despesaParaEditar.id);
+        console.log(
+          "📝 DEBUG SUBMIT: Modo EDIÇÃO - atualizando documento:",
+          despesaParaEditar.id,
+        );
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
         await updateDoc(despesaRef, dadosParaSalvar);
         console.log("✅ DEBUG SUBMIT: Documento atualizado com sucesso");
@@ -398,7 +352,9 @@ const DespesaForm = ({
           type: "success",
         });
       } else {
-        console.log("🆕 DEBUG SUBMIT: Modo CRIAR - adicionando novo documento...");
+        console.log(
+          "🆕 DEBUG SUBMIT: Modo CRIAR - adicionando novo documento...",
+        );
         console.log("🆕 DEBUG SUBMIT: Coletando referência...");
 
         const collectionRef = collection(db, "despesas");
@@ -409,12 +365,19 @@ const DespesaForm = ({
         console.log("✅ DEBUG SUBMIT: Documento criado com ID:", docRef.id);
 
         // Verificar se realmente foi criado
-        console.log("🔍 DEBUG SUBMIT: Verificando se documento foi realmente criado...");
+        console.log(
+          "🔍 DEBUG SUBMIT: Verificando se documento foi realmente criado...",
+        );
         const docCheck = await getDoc(docRef);
         if (docCheck.exists()) {
-          console.log("✅ DEBUG SUBMIT: Documento confirmado no Firestore:", docCheck.data());
+          console.log(
+            "✅ DEBUG SUBMIT: Documento confirmado no Firestore:",
+            docCheck.data(),
+          );
         } else {
-          console.error("❌ DEBUG SUBMIT: Documento NÃO encontrado após criação!");
+          console.error(
+            "❌ DEBUG SUBMIT: Documento NÃO encontrado após criação!",
+          );
         }
 
         setToast({
@@ -426,7 +389,7 @@ const DespesaForm = ({
 
       console.log("🎉 DEBUG SUBMIT: Operação concluída com sucesso");
 
-      // ✅ CORREÇÃO: Verificar isMounted sem função
+      // Verificar isMounted sem função
       if (isMounted) {
         setShowSuccessMessage(true);
         setTimeout(() => {
@@ -446,10 +409,12 @@ const DespesaForm = ({
       console.error("❌ DEBUG SUBMIT: Stack:", error.stack);
 
       let mensagemErro = "Erro ao salvar despesa. ";
-      if (error.code === 'permission-denied') {
+      if (error.code === "permission-denied") {
         mensagemErro += "Verifique as regras de segurança do Firebase.";
-        console.error("🚨 DEBUG SUBMIT: ERRO DE PERMISSÃO - Regras Firebase bloqueando!");
-      } else if (error.code === 'network-request-failed') {
+        console.error(
+          "🚨 DEBUG SUBMIT: ERRO DE PERMISSÃO - Regras Firebase bloqueando!",
+        );
+      } else if (error.code === "network-request-failed") {
         mensagemErro += "Problema de conexão.";
       } else {
         mensagemErro += "Tente novamente.";
@@ -503,13 +468,17 @@ const DespesaForm = ({
         </p>
       </div>
 
-      {/* ✅ BANNER DE INFORMAÇÃO DE PERMISSÕES */}
+      {/* Banner de Informação de Permissões */}
       {(userRole === "operador" || userRole === "user") && userMunicipio && (
         <div style={styles.permissaoInfo}>
           <span style={styles.permissaoIcon}>🔒</span>
           <div style={styles.permissaoContent}>
             <span style={styles.permissaoTexto}>
-              <strong>Operador:</strong> Você pode criar despesas apenas para emendas do município <strong>{userMunicipio}/{userUf || 'UF não informada'}</strong>
+              <strong>Operador:</strong> Você pode criar despesas apenas para
+              emendas do município{" "}
+              <strong>
+                {userMunicipio}/{userUf || "UF não informada"}
+              </strong>
             </span>
             <span style={styles.permissaoSubtexto}>
               {emendas.length} emenda(s) disponível(is) para seu município
@@ -518,13 +487,14 @@ const DespesaForm = ({
         </div>
       )}
 
-      {/* ✅ BANNER DE AVISO - Usuário sem Município */}
+      {/* Banner de Aviso - Usuário sem Município */}
       {(userRole === "operador" || userRole === "user") && !userMunicipio && (
         <div style={styles.avisoMunicipio}>
           <span style={styles.avisoIcon}>⚠️</span>
           <div style={styles.avisoContent}>
             <span style={styles.avisoTexto}>
-              <strong>Configuração Pendente:</strong> Seu usuário não possui município/UF cadastrado no sistema.
+              <strong>Configuração Pendente:</strong> Seu usuário não possui
+              município/UF cadastrado no sistema.
             </span>
             <span style={styles.avisoSubtexto}>
               Entre em contato com o administrador para configurar seu acesso.
@@ -542,54 +512,6 @@ const DespesaForm = ({
               : "Despesa atualizada"}{" "}
             com sucesso!
           </span>
-        </div>
-      )}
-
-      {/* 🚨 BOTÃO DE TESTE FIREBASE - REMOVER APÓS DEBUG */}
-      {!modoVisualizacao && (
-        <div style={{
-          backgroundColor: '#fff3cd',
-          border: '2px solid #ffc107',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px'
-        }}>
-          <h4 style={{ color: '#856404', margin: '0 0 10px 0' }}>
-            🧪 TESTE DE DIAGNÓSTICO FIREBASE
-          </h4>
-          <p style={{ fontSize: '14px', color: '#856404', margin: '0 0 15px 0' }}>
-            Use este botão para testar se o Firebase está funcionando corretamente:
-          </p>
-          <button
-            type="button"
-            onClick={testarFirebaseDirectly}
-            disabled={testeFirebase.loading}
-            style={{
-              backgroundColor: '#ffc107',
-              color: '#212529',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '10px 20px',
-              fontWeight: 'bold',
-              cursor: testeFirebase.loading ? 'not-allowed' : 'pointer',
-              marginRight: '10px'
-            }}
-          >
-            {testeFirebase.loading ? '🔄 Testando...' : '🧪 Testar Firebase'}
-          </button>
-          {testeFirebase.resultado && (
-            <div style={{
-              marginTop: '10px',
-              padding: '10px',
-              borderRadius: '4px',
-              backgroundColor: testeFirebase.resultado.includes('✅') ? '#d4edda' : '#f8d7da',
-              color: testeFirebase.resultado.includes('✅') ? '#155724' : '#721c24',
-              fontSize: '14px',
-              fontWeight: 'bold'
-            }}>
-              {testeFirebase.resultado}
-            </div>
-          )}
         </div>
       )}
 
@@ -633,6 +555,140 @@ const DespesaForm = ({
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📋</span>
             Dados Básicos da Despesa
+          </legend>
+
+          <div style={styles.formGrid}>
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>Emenda *</label>
+              {emendaPreSelecionada && emendaInfo ? (
+                <>
+                  <input
+                    type="text"
+                    value={`${emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
+                    style={styles.inputReadonly}
+                    readOnly
+                  />
+                  <input
+                    type="hidden"
+                    name="emendaId"
+                    value={formData.emendaId}
+                  />
+                  <span style={styles.helpText}>
+                    Emenda pré-selecionada do fluxo anterior
+                  </span>
+                </>
+              ) : (
+                <>
+                  <select
+                    name="emendaId"
+                    value={formData.emendaId}
+                    onChange={handleInputChange}
+                    style={
+                      errors.emendaId
+                        ? { ...styles.select, borderColor: "#dc3545" }
+                        : styles.select
+                    }
+                    disabled={modoVisualizacao}
+                    required
+                  >
+                    <option value="">
+                      {emendas.length === 0
+                        ? userRole === "operador"
+                          ? `Nenhuma emenda encontrada para ${userMunicipio}`
+                          : "Carregando emendas..."
+                        : "Selecione uma emenda..."}
+                    </option>
+                    {emendas.map((emenda) => (
+                      <option key={emenda.id} value={emenda.id}>
+                        {emenda.parlamentar} -{" "}
+                        {emenda.numero || emenda.numeroEmenda} -{" "}
+                        {emenda.municipio}/{emenda.uf}
+                      </option>
+                    ))}
+                  </select>
+                  {userRole === "operador" && emendas.length === 0 && (
+                    <span style={styles.helpText}>
+                      ⚠️ Nenhuma emenda disponível para o município{" "}
+                      {userMunicipio || "não cadastrado"}. Entre em contato com
+                      o administrador.
+                    </span>
+                  )}
+                </>
+              )}
+              {errors.emendaId && (
+                <span style={styles.errorText}>{errors.emendaId}</span>
+              )}
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>Fornecedor *</label>
+              <input
+                type="text"
+                name="fornecedor"
+                value={formData.fornecedor}
+                onChange={handleInputChange}
+                style={errors.fornecedor ? styles.inputError : styles.input}
+                readOnly={modoVisualizacao}
+                placeholder="Nome completo do fornecedor"
+                required
+              />
+              {errors.fornecedor && (
+                <span style={styles.errorText}>{errors.fornecedor}</span>
+              )}
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>Valor *</label>
+              <input
+                type="text"
+                name="valor"
+                value={formData.valor}
+                onChange={handleInputChange}
+                style={
+                  errors.valor || valorError ? styles.inputError : styles.input
+                }
+                readOnly={modoVisualizacao}
+                placeholder="0,00"
+                required
+              />
+              {(errors.valor || valorError) && (
+                <span style={styles.errorText}>
+                  {errors.valor || valorError}
+                </span>
+              )}
+              <span style={styles.helpText}>
+                Digite apenas números. Ex: 100000 = R$ 1.000,00
+              </span>
+            </div>
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.labelRequired}>Discriminação *</label>
+            <textarea
+              name="discriminacao"
+              value={formData.discriminacao}
+              onChange={handleInputChange}
+              style={
+                errors.discriminacao
+                  ? { ...styles.textarea, borderColor: "#dc3545" }
+                  : styles.textarea
+              }
+              readOnly={modoVisualizacao}
+              placeholder="Descreva detalhadamente a discriminação da despesa..."
+              rows={3}
+              required
+            />
+            {errors.discriminacao && (
+              <span style={styles.errorText}>{errors.discriminacao}</span>
+            )}
+          </div>
+        </fieldset>
+
+        {/* Dados do Empenho e Nota Fiscal */}
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legend}>
+            <span style={styles.legendIcon}>📄</span>
+            Dados do Empenho e Nota Fiscal
           </legend>
 
           <div style={styles.formGrid}>
@@ -965,9 +1021,7 @@ const DespesaForm = ({
                   placeholder="00.000.000/0000-00"
                   maxLength="18"
                 />
-                {cnpjError && (
-                  <span style={styles.errorText}>{cnpjError}</span>
-                )}
+                {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}
                 <span style={styles.helpText}>
                   CNPJ será validado automaticamente
                 </span>
@@ -1087,7 +1141,6 @@ const styles = {
     fontSize: "14px",
     opacity: 0.8,
   },
-  // ✅ NOVOS ESTILOS PARA BANNER DE PERMISSÕES
   permissaoInfo: {
     display: "flex",
     alignItems: "flex-start",
@@ -1122,7 +1175,6 @@ const styles = {
     opacity: 0.8,
     fontWeight: "400",
   },
-  // ✅ NOVOS ESTILOS PARA AVISO DE MUNICÍPIO
   avisoMunicipio: {
     display: "flex",
     alignItems: "flex-start",
@@ -1348,132 +1400,4 @@ const styles = {
   },
 };
 
-export default DespesaForm; style={styles.labelRequired}>Emenda *</label>
-              {emendaPreSelecionada && emendaInfo ? (
-                <>
-                  <input
-                    type="text"
-                    value={`${emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
-                    style={styles.inputReadonly}
-                    readOnly
-                  />
-                  <input
-                    type="hidden"
-                    name="emendaId"
-                    value={formData.emendaId}
-                  />
-                  <span style={styles.helpText}>
-                    Emenda pré-selecionada do fluxo anterior
-                  </span>
-                </>
-              ) : (
-                <>
-                  <select
-                    name="emendaId"
-                    value={formData.emendaId}
-                    onChange={handleInputChange}
-                    style={
-                      errors.emendaId
-                        ? { ...styles.select, borderColor: "#dc3545" }
-                        : styles.select
-                    }
-                    disabled={modoVisualizacao}
-                    required
-                  >
-                    <option value="">
-                      {emendas.length === 0 
-                        ? (userRole === "operador" 
-                            ? `Nenhuma emenda encontrada para ${userMunicipio}`
-                            : "Carregando emendas...")
-                        : "Selecione uma emenda..."
-                      }
-                    </option>
-                    {emendas.map((emenda) => (
-                      <option key={emenda.id} value={emenda.id}>
-                        {emenda.parlamentar} - {emenda.numero || emenda.numeroEmenda} -{" "}
-                        {emenda.municipio}/{emenda.uf}
-                      </option>
-                    ))}
-                  </select>
-                  {userRole === "operador" && emendas.length === 0 && (
-                    <span style={styles.helpText}>
-                      ⚠️ Nenhuma emenda disponível para o município {userMunicipio || 'não cadastrado'}. Entre em contato com o administrador.
-                    </span>
-                  )}
-                </>
-              )}
-              {errors.emendaId && (
-                <span style={styles.errorText}>{errors.emendaId}</span>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.labelRequired}>Fornecedor *</label>
-              <input
-                type="text"
-                name="fornecedor"
-                value={formData.fornecedor}
-                onChange={handleInputChange}
-                style={errors.fornecedor ? styles.inputError : styles.input}
-                readOnly={modoVisualizacao}
-                placeholder="Nome completo do fornecedor"
-                required
-              />
-              {errors.fornecedor && (
-                <span style={styles.errorText}>{errors.fornecedor}</span>
-              )}
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.labelRequired}>Valor *</label>
-              <input
-                type="text"
-                name="valor"
-                value={formData.valor}
-                onChange={handleInputChange}
-                style={(errors.valor || valorError) ? styles.inputError : styles.input}
-                readOnly={modoVisualizacao}
-                placeholder="0,00"
-                required
-              />
-              {(errors.valor || valorError) && (
-                <span style={styles.errorText}>{errors.valor || valorError}</span>
-              )}
-              <span style={styles.helpText}>
-                Digite apenas números. Ex: 100000 = R$ 1.000,00
-              </span>
-            </div>
-          </div>
-
-          <div style={styles.formGroup}>
-            <label style={styles.labelRequired}>Discriminação *</label>
-            <textarea
-              name="discriminacao"
-              value={formData.discriminacao}
-              onChange={handleInputChange}
-              style={
-                errors.discriminacao
-                  ? { ...styles.textarea, borderColor: "#dc3545" }
-                  : styles.textarea
-              }
-              readOnly={modoVisualizacao}
-              placeholder="Descreva detalhadamente a discriminação da despesa..."
-              rows={3}
-              required
-            />
-            {errors.discriminacao && (
-              <span style={styles.errorText}>{errors.discriminacao}</span>
-            )}
-          </div>
-        </fieldset>
-
-        {/* Dados do Empenho e Nota Fiscal */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>📄</span>
-            Dados do Empenho e Nota Fiscal
-          </legend>
-
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label
+export default DespesaForm;

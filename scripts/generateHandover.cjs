@@ -1,6 +1,7 @@
 /**
- * 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.3
+ * 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.4
  * Script para analisar o sistema e gerar documentação atualizada com validações e regras
+ * NOVO: Análise de arquivos monolíticos e sugestões de refatoração
  * NOVO: Sistema de data/hora confiável com múltiplas fontes
  * 
  * Uso: node scripts/generateHandover.cjs
@@ -27,6 +28,28 @@ class HandoverGenerator {
       current: null,
       sources: [],
       timezone: 'America/Sao_Paulo'
+    };
+
+    // 🧩 CONFIGURAÇÃO DE ANÁLISE DE REFATORAÇÃO
+    this.refactorConfig = {
+      // Limites para consideração de arquivo monolítico
+      limits: {
+        lines: 300,           // Mais de 300 linhas = monolítico
+        functions: 15,        // Mais de 15 funções = complexo
+        complexity: 20,       // Complexidade ciclomática alta
+        imports: 20,          // Muitas dependências
+        jsx_elements: 50,     // Muitos elementos JSX
+        nested_depth: 5       // Aninhamento profundo
+      },
+      // Pesos para cálculo de score de refatoração
+      weights: {
+        lines: 0.25,
+        functions: 0.20,
+        complexity: 0.25,
+        imports: 0.15,
+        jsx_elements: 0.10,
+        nested_depth: 0.05
+      }
     };
 
     this.analysis = {
@@ -58,6 +81,17 @@ class HandoverGenerator {
         removedComponents: [],
         structureChanges: [],
         dependencyChanges: []
+      },
+      // 🆕 NOVA SEÇÃO: Análise de Refatoração
+      refactoring: {
+        monolithicFiles: [],
+        recommendations: [],
+        summary: {
+          totalFiles: 0,
+          monolithicCount: 0,
+          criticalCount: 0,
+          averageScore: 0
+        }
       }
     };
   }
@@ -152,7 +186,6 @@ class HandoverGenerator {
    */
   async getTimeFromNTP() {
     try {
-      // Tentar usar ntpdate se estiver disponível no sistema
       const ntpCommand = process.platform === 'win32' 
         ? 'w32tm /query /status' 
         : 'date';
@@ -202,7 +235,6 @@ class HandoverGenerator {
    */
   async getTimeFromFileSystem() {
     try {
-      // Usar timestamp do arquivo package.json como referência
       const stats = fs.statSync(this.packagePath);
       return {
         datetime: stats.mtime,
@@ -246,8 +278,7 @@ class HandoverGenerator {
       const formatter = new Intl.DateTimeFormat('pt-BR', options);
       return formatter.format(date);
     } catch (error) {
-      // Fallback manual se Intl falhar
-      const offset = -3; // UTC-3 para horário de Brasília
+      const offset = -3;
       const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
       const brazilTime = new Date(utc + (offset * 3600000));
 
@@ -276,8 +307,7 @@ class HandoverGenerator {
         day: '2-digit'
       }).format(date);
     } catch (error) {
-      // Fallback manual
-      const offset = -3; // UTC-3
+      const offset = -3;
       const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
       const brazilTime = new Date(utc + (offset * 3600000));
 
@@ -290,14 +320,335 @@ class HandoverGenerator {
   }
 
   /**
+   * 🧮 ANALISAR COMPLEXIDADE DE ARQUIVO
+   */
+  analyzeFileComplexity(content, filePath) {
+    const lines = content.split('\n').length;
+    const nonEmptyLines = content.split('\n').filter(line => line.trim()).length;
+
+    // Contar funções
+    const functionMatches = [
+      ...content.matchAll(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|const\s+\w+\s*=\s*(?:async\s+)?function)/g),
+      ...content.matchAll(/\w+\s*:\s*(?:async\s+)?(?:function|\()/g), // Métodos de objeto
+      ...content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+\w+/g) // Funções exportadas
+    ];
+    const functionCount = functionMatches.length;
+
+    // Contar imports
+    const importMatches = content.matchAll(/import\s+.*?from\s+['"`][^'"`]+['"`]/g);
+    const importCount = [...importMatches].length;
+
+    // Contar elementos JSX
+    const jsxMatches = content.matchAll(/<[A-Z]\w*(?:\s+[^>]*)?\s*\/?>/g);
+    const jsxElementCount = [...jsxMatches].length;
+
+    // Calcular complexidade ciclomática (aproximada)
+    const complexityKeywords = ['if', 'else', 'for', 'while', 'switch', 'case', '&&', '||', '?', 'catch'];
+    let complexity = 1; // Base complexity
+    complexityKeywords.forEach(keyword => {
+      const matches = content.match(new RegExp(`\\b${keyword}\\b`, 'g'));
+      if (matches) complexity += matches.length;
+    });
+
+    // Calcular profundidade de aninhamento (aproximada)
+    let maxDepth = 0;
+    let currentDepth = 0;
+    for (let char of content) {
+      if (char === '{' || char === '(') currentDepth++;
+      if (char === '}' || char === ')') currentDepth--;
+      maxDepth = Math.max(maxDepth, currentDepth);
+    }
+
+    return {
+      lines,
+      nonEmptyLines,
+      functions: functionCount,
+      imports: importCount,
+      jsxElements: jsxElementCount,
+      complexity,
+      nestedDepth: maxDepth
+    };
+  }
+
+  /**
+   * 📊 CALCULAR SCORE DE REFATORAÇÃO
+   */
+  calculateRefactorScore(metrics) {
+    const { limits, weights } = this.refactorConfig;
+    let score = 0;
+
+    // Normalizar cada métrica (0-100)
+    const normalizedMetrics = {
+      lines: Math.min((metrics.lines / limits.lines) * 100, 100),
+      functions: Math.min((metrics.functions / limits.functions) * 100, 100),
+      complexity: Math.min((metrics.complexity / limits.complexity) * 100, 100),
+      imports: Math.min((metrics.imports / limits.imports) * 100, 100),
+      jsxElements: Math.min((metrics.jsxElements / limits.jsx_elements) * 100, 100),
+      nestedDepth: Math.min((metrics.nestedDepth / limits.nested_depth) * 100, 100)
+    };
+
+    // Calcular score ponderado
+    Object.keys(weights).forEach(key => {
+      if (normalizedMetrics[key]) {
+        score += normalizedMetrics[key] * weights[key];
+      }
+    });
+
+    return Math.min(Math.round(score), 100);
+  }
+
+  /**
+   * 🔍 DETERMINAR PRIORIDADE DE REFATORAÇÃO
+   */
+  getRefactorPriority(score) {
+    if (score >= 80) return { level: 'CRÍTICA', color: '🔴', description: 'Refatoração urgente necessária' };
+    if (score >= 60) return { level: 'ALTA', color: '🟠', description: 'Refatoração recomendada' };
+    if (score >= 40) return { level: 'MÉDIA', color: '🟡', description: 'Considerar refatoração' };
+    if (score >= 20) return { level: 'BAIXA', color: '🟢', description: 'Monitorar crescimento' };
+    return { level: 'OK', color: '✅', description: 'Arquivo bem estruturado' };
+  }
+
+  /**
+   * 💡 GERAR SUGESTÕES DE REFATORAÇÃO
+   */
+  generateRefactorSuggestions(metrics, filePath) {
+    const suggestions = [];
+    const { limits } = this.refactorConfig;
+
+    // Sugestões baseadas em linhas de código
+    if (metrics.lines > limits.lines) {
+      suggestions.push({
+        type: 'Tamanho do Arquivo',
+        issue: `Arquivo com ${metrics.lines} linhas (limite: ${limits.lines})`,
+        suggestion: 'Quebrar em componentes menores ou extrair lógicas para hooks/utils',
+        priority: 'Alta'
+      });
+    }
+
+    // Sugestões baseadas em número de funções
+    if (metrics.functions > limits.functions) {
+      suggestions.push({
+        type: 'Número de Funções',
+        issue: `${metrics.functions} funções em um arquivo (limite: ${limits.functions})`,
+        suggestion: 'Agrupar funções relacionadas em módulos separados',
+        priority: 'Média'
+      });
+    }
+
+    // Sugestões baseadas em complexidade
+    if (metrics.complexity > limits.complexity) {
+      suggestions.push({
+        type: 'Complexidade Ciclomática',
+        issue: `Complexidade ${metrics.complexity} (limite: ${limits.complexity})`,
+        suggestion: 'Simplificar lógicas condicionais e extrair funções auxiliares',
+        priority: 'Alta'
+      });
+    }
+
+    // Sugestões baseadas em imports
+    if (metrics.imports > limits.imports) {
+      suggestions.push({
+        type: 'Dependências Excessivas',
+        issue: `${metrics.imports} imports (limite: ${limits.imports})`,
+        suggestion: 'Revisar dependências e considerar uso de barrel exports',
+        priority: 'Baixa'
+      });
+    }
+
+    // Sugestões baseadas em elementos JSX
+    if (metrics.jsxElements > limits.jsx_elements) {
+      suggestions.push({
+        type: 'JSX Complexo',
+        issue: `${metrics.jsxElements} elementos JSX (limite: ${limits.jsx_elements})`,
+        suggestion: 'Extrair subcomponentes para melhorar legibilidade',
+        priority: 'Média'
+      });
+    }
+
+    // Sugestões baseadas em aninhamento
+    if (metrics.nestedDepth > limits.nested_depth) {
+      suggestions.push({
+        type: 'Aninhamento Profundo',
+        issue: `Profundidade ${metrics.nestedDepth} (limite: ${limits.nested_depth})`,
+        suggestion: 'Extrair lógicas aninhadas em funções separadas',
+        priority: 'Alta'
+      });
+    }
+
+    // Sugestões específicas por tipo de arquivo
+    if (filePath.includes('components/')) {
+      if (metrics.lines > 200) {
+        suggestions.push({
+          type: 'Componente Monolítico',
+          issue: 'Componente muito grande para manutenção',
+          suggestion: 'Quebrar em: Header, Body, Footer ou usar composição',
+          priority: 'Alta'
+        });
+      }
+    }
+
+    if (filePath.includes('hooks/')) {
+      if (metrics.functions > 5) {
+        suggestions.push({
+          type: 'Hook Complexo',
+          issue: 'Hook com muitas responsabilidades',
+          suggestion: 'Dividir em hooks mais específicos (Single Responsibility)',
+          priority: 'Média'
+        });
+      }
+    }
+
+    return suggestions;
+  }
+
+  /**
+   * 🔬 ANALISAR ARQUIVOS PARA REFATORAÇÃO
+   */
+  async analyzeFilesForRefactoring() {
+    console.log('🔬 Iniciando análise de refatoração...');
+
+    const allFiles = [
+      ...this.analysis.components,
+      ...this.analysis.hooks,
+      ...this.analysis.utils,
+      ...this.analysis.services
+    ];
+
+    this.analysis.refactoring.summary.totalFiles = allFiles.length;
+
+    for (const file of allFiles) {
+      try {
+        const fullPath = path.join(this.projectRoot, file.path);
+        const content = fs.readFileSync(fullPath, 'utf8');
+
+        const metrics = this.analyzeFileComplexity(content, file.path);
+        const score = this.calculateRefactorScore(metrics);
+        const priority = this.getRefactorPriority(score);
+        const suggestions = this.generateRefactorSuggestions(metrics, file.path);
+
+        const refactorAnalysis = {
+          file: file.path,
+          name: file.name,
+          type: this.getFileType(file.path),
+          metrics,
+          score,
+          priority,
+          suggestions,
+          isMonolithic: score >= 40,
+          lastModified: file.lastModified
+        };
+
+        this.analysis.refactoring.monolithicFiles.push(refactorAnalysis);
+
+        // Contadores para summary
+        if (score >= 40) this.analysis.refactoring.summary.monolithicCount++;
+        if (score >= 80) this.analysis.refactoring.summary.criticalCount++;
+
+      } catch (error) {
+        console.warn(`⚠️ Erro ao analisar ${file.path}: ${error.message}`);
+      }
+    }
+
+    // Calcular score médio
+    const totalScore = this.analysis.refactoring.monolithicFiles.reduce((sum, file) => sum + file.score, 0);
+    this.analysis.refactoring.summary.averageScore = Math.round(totalScore / this.analysis.refactoring.monolithicFiles.length);
+
+    // Ordenar por score (maior primeiro)
+    this.analysis.refactoring.monolithicFiles.sort((a, b) => b.score - a.score);
+
+    // Gerar recomendações gerais
+    this.generateGeneralRecommendations();
+
+    console.log(`🔬 ${this.analysis.refactoring.monolithicFiles.length} arquivos analisados`);
+    console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
+    console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
+  }
+
+  /**
+   * 📝 GERAR RECOMENDAÇÕES GERAIS
+   */
+  generateGeneralRecommendations() {
+    const recommendations = [];
+    const { summary } = this.analysis.refactoring;
+
+    if (summary.criticalCount > 0) {
+      recommendations.push({
+        type: 'Arquivos Críticos',
+        description: `${summary.criticalCount} arquivo(s) precisam de refatoração urgente`,
+        action: 'Priorizar refatoração imediata dos arquivos com score > 80',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    if (summary.monolithicCount > summary.totalFiles * 0.3) {
+      recommendations.push({
+        type: 'Padrão Arquitetural',
+        description: 'Alto percentual de arquivos monolíticos detectado',
+        action: 'Revisar padrões de arquitetura e estabelecer guidelines de tamanho',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    if (summary.averageScore > 50) {
+      recommendations.push({
+        type: 'Qualidade Geral',
+        description: `Score médio de refatoração: ${summary.averageScore}`,
+        action: 'Implementar revisões de código focadas em tamanho e complexidade',
+        impact: 'Médio',
+        effort: 'Baixo'
+      });
+    }
+
+    // Análise por tipo de arquivo
+    const componentFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Component');
+    const hookFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Hook');
+    const utilFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Utility');
+
+    const criticalComponents = componentFiles.filter(f => f.score >= 80);
+    if (criticalComponents.length > 0) {
+      recommendations.push({
+        type: 'Componentes Críticos',
+        description: `${criticalComponents.length} componente(s) muito complexo(s)`,
+        action: 'Aplicar padrões como Container/Presentational ou Compound Components',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    const criticalHooks = hookFiles.filter(f => f.score >= 60);
+    if (criticalHooks.length > 0) {
+      recommendations.push({
+        type: 'Hooks Complexos',
+        description: `${criticalHooks.length} hook(s) com muitas responsabilidades`,
+        action: 'Aplicar Single Responsibility Principle em hooks',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    this.analysis.refactoring.recommendations = recommendations;
+  }
+
+  /**
+   * 📁 DETERMINAR TIPO DE ARQUIVO
+   */
+  getFileType(filePath) {
+    if (filePath.includes('components/')) return 'Component';
+    if (filePath.includes('hooks/')) return 'Hook';
+    if (filePath.includes('utils/')) return 'Utility';
+    if (filePath.includes('services/')) return 'Service';
+    return 'Other';
+  }
+
+  /**
    * 🔍 ANÁLISE PRINCIPAL
    */
   async analyze() {
     console.log('🔍 Iniciando análise do sistema SICEFSUS...');
 
-    // ✅ OBTER DATA/HORA CONFIÁVEL PRIMEIRO
     await this.getReliableDateTime();
-
     await this.analyzePackageJson();
     await this.analyzeProjectStructure();
     await this.analyzeComponents();
@@ -307,6 +658,9 @@ class HandoverGenerator {
     await this.analyzeValidationsAndRules();
     await this.detectChanges();
     await this.analyzeLastImplementation();
+
+    // 🆕 NOVA ANÁLISE: Refatoração
+    await this.analyzeFilesForRefactoring();
 
     console.log('✅ Análise concluída!');
   }
@@ -344,7 +698,6 @@ class HandoverGenerator {
    * 🔒 ANALISAR VALIDAÇÕES E REGRAS
    */
   async analyzeValidationsAndRules() {
-    // Análise básica de validações encontradas no código
     this.analysis.validations = {
       cnpjRules: [
         {
@@ -394,10 +747,8 @@ class HandoverGenerator {
    * 📋 ANALISAR ÚLTIMA IMPLEMENTAÇÃO
    */
   async analyzeLastImplementation() {
-    // Detectar a última implementação baseada em timestamps de arquivos
     const recentFiles = [];
-    
-    // Analisar componentes modificados recentemente
+
     this.analysis.components.forEach(comp => {
       const daysDiff = (new Date() - comp.lastModified) / (1000 * 60 * 60 * 24);
       if (daysDiff <= 7) {
@@ -409,7 +760,6 @@ class HandoverGenerator {
       }
     });
 
-    // Analisar serviços modificados recentemente
     this.analysis.services.forEach(service => {
       const daysDiff = (new Date() - service.lastModified) / (1000 * 60 * 60 * 24);
       if (daysDiff <= 7) {
@@ -423,22 +773,7 @@ class HandoverGenerator {
 
     if (recentFiles.length > 0) {
       const mostRecent = recentFiles.sort((a, b) => b.lastModified - a.lastModified)[0];
-      
-      this.analysis.lastImplementation = {
-        title: "Sistema de Usuários Corrigido",
-        description: "Correção do sistema de importação de userService e detecção de usuários órfãos",
-        date: this.formatSimpleBrazilianDate(mostRecent.lastModified),
-        filesInvolved: recentFiles.map(f => f.file),
-        keyChanges: [
-          "Adicionado export default ao userService.js",
-          "Corrigido método analyzeServices no generateHandover.cjs",
-          "Sistema de usuários órfãos implementado",
-          "Validações em tempo real adicionadas"
-        ],
-        impact: "Crítico - Sistema de administração de usuários funcional",
-        status: "Implementado e testado"
-      };
-    } else {
+
       this.analysis.lastImplementation = {
         title: "Sistema Estável",
         description: "Nenhuma implementação recente detectada",
@@ -458,7 +793,7 @@ class HandoverGenerator {
    */
   generateLastImplementationSection() {
     const impl = this.analysis.lastImplementation;
-    
+
     return `## 🆕 ÚLTIMA IMPLEMENTAÇÃO REALIZADA
 
 ### ${impl.title}
@@ -481,25 +816,213 @@ ${impl.filesInvolved.length > 0 ? impl.filesInvolved.map(file => `- \`${file}\``
   }
 
   /**
+   * 🔬 GERAR SEÇÃO DE ANÁLISE DE REFATORAÇÃO
+   */
+  generateRefactoringAnalysisSection() {
+    const { summary, monolithicFiles, recommendations } = this.analysis.refactoring;
+
+    let section = `## 🔬 ANÁLISE DE REFATORAÇÃO E ARQUIVOS MONOLÍTICOS
+
+Esta seção identifica arquivos que podem se beneficiar de refatoração para melhorar manutenibilidade e qualidade do código.
+
+### 📊 RESUMO EXECUTIVO
+
+- **Total de Arquivos Analisados:** ${summary.totalFiles}
+- **Arquivos que Precisam de Refatoração:** ${summary.monolithicCount} (${Math.round((summary.monolithicCount / summary.totalFiles) * 100)}%)
+- **Arquivos com Prioridade Crítica:** ${summary.criticalCount}
+- **Score Médio de Complexidade:** ${summary.averageScore}/100
+
+### 🎯 CRITÉRIOS DE ANÁLISE
+
+Os arquivos são avaliados com base nos seguintes critérios:
+
+| Métrica | Limite | Peso | Descrição |
+|---------|--------|------|-----------|
+| **Linhas de Código** | ${this.refactorConfig.limits.lines} | ${this.refactorConfig.weights.lines * 100}% | Número total de linhas |
+| **Número de Funções** | ${this.refactorConfig.limits.functions} | ${this.refactorConfig.weights.functions * 100}% | Funções por arquivo |
+| **Complexidade Ciclomática** | ${this.refactorConfig.limits.complexity} | ${this.refactorConfig.weights.complexity * 100}% | Complexidade do código |
+| **Dependências (Imports)** | ${this.refactorConfig.limits.imports} | ${this.refactorConfig.weights.imports * 100}% | Número de imports |
+| **Elementos JSX** | ${this.refactorConfig.limits.jsx_elements} | ${this.refactorConfig.weights.jsx_elements * 100}% | Elementos JSX no arquivo |
+| **Profundidade de Aninhamento** | ${this.refactorConfig.limits.nested_depth} | ${this.refactorConfig.weights.nested_depth * 100}% | Níveis de aninhamento |
+
+### 🔴 ARQUIVOS COM PRIORIDADE CRÍTICA (Score ≥ 80)
+
+`;
+
+    const criticalFiles = monolithicFiles.filter(file => file.score >= 80);
+
+    if (criticalFiles.length === 0) {
+      section += `✅ **Parabéns!** Nenhum arquivo com prioridade crítica detectado.
+
+`;
+    } else {
+      criticalFiles.forEach(file => {
+        section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
+
+**📊 Métricas:**
+- **Linhas:** ${file.metrics.lines} (${file.metrics.nonEmptyLines} não vazias)
+- **Funções:** ${file.metrics.functions}
+- **Complexidade:** ${file.metrics.complexity}
+- **Imports:** ${file.metrics.imports}
+- **Elementos JSX:** ${file.metrics.jsxElements}
+- **Profundidade:** ${file.metrics.nestedDepth}
+
+**💡 Principais Problemas Identificados:**
+${file.suggestions.slice(0, 3).map(s => `- **${s.type}:** ${s.issue}`).join('\n')}
+
+**🔧 Sugestões de Refatoração:**
+${file.suggestions.slice(0, 3).map(s => `- ${s.suggestion} *(${s.priority} prioridade)*`).join('\n')}
+
+---
+
+`;
+      });
+    }
+
+    section += `### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
+
+`;
+
+    const highPriorityFiles = monolithicFiles.filter(file => file.score >= 60 && file.score < 80);
+
+    if (highPriorityFiles.length === 0) {
+      section += `✅ Nenhum arquivo com prioridade alta detectado.
+
+`;
+    } else {
+      highPriorityFiles.forEach(file => {
+        section += `#### ${file.priority.color} \`${file.path}\` - Score: ${file.score}/100
+
+**📊 Resumo:** ${file.metrics.lines} linhas, ${file.metrics.functions} funções, complexidade ${file.metrics.complexity}
+
+**🔧 Principais Sugestões:**
+${file.suggestions.slice(0, 2).map(s => `- ${s.suggestion}`).join('\n')}
+
+`;
+      });
+    }
+
+    section += `### 🟡 ARQUIVOS PARA MONITORAMENTO (Score 40-59)
+
+`;
+
+    const mediumPriorityFiles = monolithicFiles.filter(file => file.score >= 40 && file.score < 60);
+
+    if (mediumPriorityFiles.length === 0) {
+      section += `✅ Nenhum arquivo para monitoramento detectado.
+
+`;
+    } else {
+      section += `Os seguintes arquivos devem ser monitorados para evitar que se tornem monolíticos:
+
+`;
+      mediumPriorityFiles.forEach(file => {
+        section += `- ${file.priority.color} \`${file.path}\` (Score: ${file.score}) - ${file.metrics.lines} linhas
+`;
+      });
+      section += `
+`;
+    }
+
+    section += `### 📋 RECOMENDAÇÕES GERAIS
+
+`;
+
+    if (recommendations.length === 0) {
+      section += `✅ **Sistema bem estruturado!** Nenhuma recomendação arquitetural identificada.
+
+`;
+    } else {
+      recommendations.forEach(rec => {
+        section += `#### ${rec.type}
+**📝 Situação:** ${rec.description}  
+**🎯 Ação Recomendada:** ${rec.action}  
+**📊 Impacto:** ${rec.impact} | **⚡ Esforço:** ${rec.effort}
+
+`;
+      });
+    }
+
+    section += `### 🛠️ ESTRATÉGIAS DE REFATORAÇÃO RECOMENDADAS
+
+#### Para Componentes React
+1. **Composição de Componentes**
+   - Quebrar componentes grandes em subcomponentes
+   - Usar padrão Container/Presentational
+   - Implementar Compound Components para componentes complexos
+
+2. **Extração de Lógica**
+   - Mover lógica de negócio para hooks customizados
+   - Extrair funções auxiliares para utilitários
+   - Usar Context API para estado compartilhado
+
+3. **Simplificação de JSX**
+   - Extrair blocos condicionais complexos
+   - Criar componentes para listas e mapeamentos
+   - Usar render props para lógica reutilizável
+
+#### Para Hooks Customizados
+1. **Single Responsibility**
+   - Um hook = uma responsabilidade específica
+   - Dividir hooks complexos em hooks menores
+   - Compor hooks para funcionalidades complexas
+
+2. **Extração de Lógica**
+   - Mover validações para funções puras
+   - Extrair transformações de dados
+   - Separar side effects de lógica de estado
+
+#### Para Utilitários e Serviços
+1. **Modularização**
+   - Agrupar funções relacionadas em módulos
+   - Usar barrel exports para organização
+   - Separar constantes e configurações
+
+2. **Especialização**
+   - Criar módulos específicos por domínio
+   - Separar validações, formatações e transformações
+   - Implementar padrão Repository para serviços
+
+### 🎯 PLANO DE AÇÃO SUGERIDO
+
+#### Fase 1 - Crítico (1-2 sprints)
+${criticalFiles.length > 0 ? criticalFiles.map(f => `- Refatorar \`${f.path}\` (Score: ${f.score})`).join('\n') : '- ✅ Nenhuma ação crítica necessária'}
+
+#### Fase 2 - Alto Impacto (2-4 sprints)
+${highPriorityFiles.length > 0 ? highPriorityFiles.slice(0, 3).map(f => `- Melhorar \`${f.path}\` (Score: ${f.score})`).join('\n') : '- ✅ Nenhuma ação de alto impacto necessária'}
+
+#### Fase 3 - Monitoramento Contínuo
+- Implementar limites de complexidade no CI/CD
+- Revisões de código focadas em tamanho e complexidade
+- Refactoring incremental durante desenvolvimento de features
+
+---
+
+`;
+
+    return section;
+  }
+
+  /**
    * 📁 GERAR ESTRUTURA DO PROJETO
    */
   generateProjectStructure() {
     const generateStructureString = (obj, prefix = '') => {
       let result = '';
       const entries = Object.entries(obj);
-      
+
       entries.forEach(([key, value], index) => {
         const isLast = index === entries.length - 1;
         const currentPrefix = isLast ? '└── ' : '├── ';
         const nextPrefix = isLast ? '    ' : '│   ';
-        
+
         result += prefix + currentPrefix + key + '\n';
-        
+
         if (typeof value === 'object' && value.type !== 'file') {
           result += generateStructureString(value, prefix + nextPrefix);
         }
       });
-      
+
       return result;
     };
 
@@ -511,9 +1034,9 @@ ${impl.filesInvolved.length > 0 ? impl.filesInvolved.map(file => `- \`${file}\``
    */
   generateChangesSection() {
     const changes = this.analysis.changes;
-    
+
     let section = '';
-    
+
     if (changes.newComponents.length > 0) {
       section += `### 🆕 Novos Componentes
 ${changes.newComponents.map(comp => `- ${comp}`).join('\n')}
@@ -543,11 +1066,18 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    */
   generateComponentsSection() {
     return this.analysis.components.map(comp => {
+      // Buscar análise de refatoração correspondente
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === comp.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+- **Status:** ${refactorAnalysis.priority.description}` : '';
+
       return `#### \`${comp.path}\`
 - **Funcionalidade**: ${comp.description}
 - **Tipo**: ${comp.type}
 - **Funções**: ${comp.functions.join(', ') || 'Nenhuma detectada'}
 - **Dependências**: ${comp.dependencies.slice(0, 3).join(', ')}${comp.dependencies.length > 3 ? '...' : ''}
+${refactorInfo}
 
 `;
     }).join('');
@@ -558,9 +1088,15 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    */
   generateHooksSection() {
     return this.analysis.hooks.map(hook => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === hook.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+- **Status:** ${refactorAnalysis.priority.description}` : '';
+
       return `#### \`${hook.path}\`
 - **Funcionalidade**: ${hook.description}
 - **Funções**: ${hook.functions.join(', ') || 'Nenhuma detectada'}
+${refactorInfo}
 
 `;
     }).join('');
@@ -571,9 +1107,15 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    */
   generateUtilsSection() {
     return this.analysis.utils.map(util => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === util.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+- **Status:** ${refactorAnalysis.priority.description}` : '';
+
       return `#### \`${util.path}\`
 - **Funcionalidade**: ${util.description}
 - **Funções**: ${util.functions.join(', ') || 'Nenhuma detectada'}
+${refactorInfo}
 
 `;
     }).join('');
@@ -584,9 +1126,15 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    */
   generateServicesSection() {
     return this.analysis.services.map(service => {
+      const refactorAnalysis = this.analysis.refactoring.monolithicFiles.find(f => f.path === service.path);
+      const refactorInfo = refactorAnalysis ? 
+        `- **Score de Refatoração:** ${refactorAnalysis.score}/100 ${refactorAnalysis.priority.color}
+- **Status:** ${refactorAnalysis.priority.description}` : '';
+
       return `#### \`${service.path}\`
 - **Funcionalidade**: ${service.description}
 - **Funções**: ${service.functions.join(', ') || 'Nenhuma detectada'}
+${refactorInfo}
 
 `;
     }).join('');
@@ -748,16 +1296,13 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    * 🔍 DETECTAR MUDANÇAS
    */
   async detectChanges() {
-    // Simular detecção de mudanças baseada em timestamps e análise
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    // Novos componentes (modificados recentemente)
     this.analysis.changes.newComponents = this.analysis.components
       .filter(comp => comp.lastModified > oneWeekAgo)
       .map(comp => comp.name);
 
-    // Análise de funcionalidades baseada em comentários de código
     this.analysis.components.forEach(comp => {
       try {
         const content = fs.readFileSync(path.join(this.componentsPath, comp.name), 'utf8');
@@ -808,7 +1353,6 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
   extractFunctions(content) {
     const functions = [];
 
-    // Funções normais
     const funcRegex = /(?:export\s+)?(?:const\s+|function\s+)([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[=\(]/g;
     let match;
 
@@ -816,13 +1360,12 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
       functions.push(match[1]);
     }
 
-    // Arrow functions
     const arrowRegex = /const\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*\([^)]*\)\s*=>/g;
     while ((match = arrowRegex.exec(content)) !== null) {
       functions.push(match[1]);
     }
 
-    return [...new Set(functions)]; // Remove duplicatas
+    return [...new Set(functions)];
   }
 
   /**
@@ -831,14 +1374,12 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
   extractExports(content) {
     const exports = [];
 
-    // Default exports
     const defaultExportRegex = /export\s+default\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
     let match = defaultExportRegex.exec(content);
     if (match) {
       exports.push({ type: 'default', name: match[1] });
     }
 
-    // Named exports
     const namedExportRegex = /export\s+(?:const|function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
     while ((match = namedExportRegex.exec(content)) !== null) {
       exports.push({ type: 'named', name: match[1] });
@@ -851,7 +1392,6 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
    * 📝 EXTRAIR DESCRIÇÃO
    */
   extractDescription(content) {
-    // Procurar comentários no início do arquivo ou antes do export
     const commentRegex = /\/\*\*([\s\S]*?)\*\/|\/\/\s*(.+)/;
     const match = commentRegex.exec(content);
 
@@ -859,7 +1399,6 @@ Nenhuma mudança significativa detectada nos últimos 7 dias.
       return match[1] ? match[1].trim() : match[2].trim();
     }
 
-    // Tentar extrair de comentários inline
     const inlineComment = content.match(/\/\/\s*([A-Z][^\/\n]*)/);
     return inlineComment ? inlineComment[1].trim() : 'Sem descrição disponível';
   }
@@ -878,7 +1417,6 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 `;
 
-    // Campos obrigatórios por formulário
     this.analysis.validations.requiredFields.forEach(form => {
       section += `#### ${form.form}
 ${form.fields.map(field => `- **${field}**`).join('\n')}
@@ -894,7 +1432,6 @@ ${form.fields.map(field => `- **${field}**`).join('\n')}
 
 `;
 
-    // Validações específicas
     if (this.analysis.validations.cnpjRules.length > 0) {
       section += `#### Validação de CNPJ
 `;
@@ -908,7 +1445,6 @@ ${form.fields.map(field => `- **${field}**`).join('\n')}
       });
     }
 
-    // Outras regras de negócio
     this.analysis.validations.businessRules.forEach(rule => {
       section += `#### ${rule.rule}
 - **Descrição:** ${rule.description}
@@ -936,7 +1472,6 @@ ${rule.conditions.map(condition => `  - ${condition}`).join('\n')}
 
 `;
 
-    // Fluxos de trabalho
     this.analysis.validations.workflows.forEach(workflow => {
       section += `#### ${workflow.name}
 **Descrição:** ${workflow.description}
@@ -957,7 +1492,6 @@ ${rule.conditions.map(condition => `  - ${condition}`).join('\n')}
 
 `;
 
-    // Permissões de usuário
     this.analysis.validations.userPermissions.forEach(permission => {
       section += `#### ${permission.role}
 
@@ -970,66 +1504,16 @@ ${permission.restrictions.map(rest => `- ${rest}`).join('\n')}
 `;
     });
 
-    section += `---
-
-### ⚡ REGRAS CRÍTICAS DO SISTEMA
-
-#### Criação de Despesas
-1. **Saldo Disponível:** Toda despesa deve ter saldo suficiente na emenda vinculada
-2. **CNPJ Obrigatório:** Fornecedor deve ter CNPJ válido (14 dígitos + validação)
-3. **Data Válida:** Data da despesa não pode ser futura
-4. **Documento Fiscal:** Obrigatório para todas as despesas
-5. **Autorização:** Usuário deve ter permissão para o município da emenda
-
-#### Criação de Emendas
-1. **Unicidade:** Número da emenda deve ser único no sistema
-2. **Valor Positivo:** Valor deve ser maior que zero
-3. **Município Válido:** Deve existir na UF selecionada
-4. **Deputado/Senador:** Campo obrigatório e deve ser válido
-5. **Tipo de Emenda:** Deve seguir classificação oficial do SUS
-
-#### Gestão de Usuários
-1. **Email Único:** Cada email só pode ter um usuário no sistema
-2. **UF Válida:** Deve ser uma das 27 UFs brasileiras
-3. **Município Obrigatório:** Operadores devem ter município definido
-4. **Hierarquia:** Admins podem gerenciar todos; Operadores apenas seu município
-5. **Recuperação de Órfãos:** Sistema detecta e corrige usuários órfãos automaticamente
-
----
-
-### 🚨 VALIDAÇÕES DE SEGURANÇA
-
-#### Autenticação
-- Login obrigatório para acessar o sistema
-- Sessão expira automaticamente por inatividade
-- Logout automático em caso de erro de autenticação
-- Senhas geradas automaticamente com critérios seguros
-
-#### Autorização
-- Verificação de permissões a cada operação
-- Filtros automáticos por município para operadores
-- Logs de auditoria para ações administrativas
-- Detecção automática de usuários órfãos
-
-#### Dados Sensíveis
-- Valores monetários sempre validados
-- CNPJs verificados com algoritmo oficial
-- Datas validadas contra regras de negócio
-- Emails validados em tempo real
-
-`;
-
     return section;
   }
 
   /**
-   * 📋 GERAR HANDOVER COMPLETO (com data/hora confiável)
+   * 📋 GERAR HANDOVER COMPLETO (com análise de refatoração)
    */
   generateHandover() {
     const timestamp = this.formatBrazilianDateTime(this.reliableDateTime.current);
     const simpleDate = this.formatSimpleBrazilianDate(this.reliableDateTime.current);
 
-    // Informações sobre a fonte de data/hora
     const timeSourceNote = this.reliableDateTime.sources.length > 0 
       ? `\n**🕒 Data/Hora obtida de:** ${this.reliableDateTime.sources.join(', ')}`
       : '';
@@ -1037,12 +1521,14 @@ ${permission.restrictions.map(rest => `- ${rest}`).join('\n')}
     const handover = `# 📋 HANDOVER - Sistema SICEFSUS
 
 **📅 Gerado automaticamente em:** ${timestamp}  
-**🔧 Por:** Script generateHandover.cjs v2.3  
+**🔧 Por:** Script generateHandover.cjs v2.4  
 **📊 Status:** Sistema em Produção Ativa${timeSourceNote}
 
 ---
 
 ${this.generateLastImplementationSection()}
+
+${this.generateRefactoringAnalysisSection()}
 
 ## 🎯 O QUE É O SISTEMA
 
@@ -1246,6 +1732,9 @@ node scripts/generateHandover.cjs
 - **Total de Serviços**: ${this.analysis.services.length}
 - **Dependências Principais**: ${Object.keys(this.analysis.dependencies.main || {}).length}
 - **Dependências de Desenvolvimento**: ${Object.keys(this.analysis.dependencies.dev || {}).length}
+- **Arquivos Analisados para Refatoração**: ${this.analysis.refactoring.summary.totalFiles}
+- **Arquivos que Precisam de Refatoração**: ${this.analysis.refactoring.summary.monolithicCount}
+- **Score Médio de Complexidade**: ${this.analysis.refactoring.summary.averageScore}/100
 
 ---
 
@@ -1261,6 +1750,8 @@ node scripts/generateHandover.cjs
 8. **Sistema de Usuários**: Tratamento automático de usuários órfãos
 9. **Validações**: Validação em tempo real e tratamento robusto de erros
 10. **Data/Hora**: Sistema confiável com múltiplas fontes (WorldTimeAPI, NTP, Git, FileSystem)
+11. **🆕 Análise de Código**: Sistema automático de detecção de arquivos monolíticos
+12. **🆕 Refatoração**: Sugestões automáticas baseadas em métricas de complexidade
 
 ---
 
@@ -1283,6 +1774,22 @@ node scripts/generateHandover.cjs
 - Sistema detecta automaticamente e recupera usuário órfão
 - Processo transparente para o usuário final
 - Logs detalhados no console para debugging
+
+#### 🚨 Arquivo Monolítico Detectado
+**Sintoma:** Warning na documentação sobre arquivo com alta complexidade
+**Causa:** Arquivo ultrapassou limites de linhas, funções ou complexidade
+**Solução:**
+- Consultar seção "Análise de Refatoração" nesta documentação
+- Seguir sugestões específicas para o arquivo
+- Implementar refatoração gradual durante desenvolvimento
+
+#### 🚨 Performance Degradada
+**Sintoma:** Sistema lento ou travando
+**Causa:** Possível arquivo monolítico ou componente complexo sendo renderizado
+**Solução:**
+- Verificar arquivos com score de refatoração > 60
+- Implementar lazy loading para componentes pesados
+- Quebrar componentes grandes em subcomponentes
 
 #### 🚨 Saldo Insuficiente para Despesa
 **Sintoma:** Não consegue criar despesa mesmo com saldo aparentemente disponível
@@ -1321,6 +1828,7 @@ node scripts/generateHandover.cjs
 - [ ] Revisar logs de erros
 - [ ] Verificar usuários órfãos no sistema
 - [ ] Validar sincronização de data/hora
+- [ ] **🆕 Executar análise de refatoração e revisar arquivos críticos**
 
 #### Trimestral
 - [ ] Análise de performance do sistema
@@ -1328,6 +1836,7 @@ node scripts/generateHandover.cjs
 - [ ] Limpeza de dados obsoletos
 - [ ] Atualização da documentação
 - [ ] Auditoria de segurança
+- [ ] **🆕 Refatoração de arquivos com score > 60**
 
 #### Anual
 - [ ] Auditoria completa de segurança
@@ -1335,6 +1844,7 @@ node scripts/generateHandover.cjs
 - [ ] Planejamento de melhorias
 - [ ] Renovação de certificados
 - [ ] Análise de usuários órfãos históricos
+- [ ] **🆕 Revisão arquitetural completa baseada em métricas de complexidade**
 
 ### Monitoramento
 
@@ -1345,6 +1855,8 @@ node scripts/generateHandover.cjs
 - **Erros**: Taxa < 1% das operações
 - **Recuperação de Órfãos**: Sucesso > 95%
 - **Precisão de Data/Hora**: Sincronização < 1 segundo
+- **🆕 Qualidade de Código**: Score médio de refatoração < 40
+- **🆕 Arquivos Críticos**: Zero arquivos com score > 80
 
 #### Alertas Configurados
 - Falhas de autenticação em massa
@@ -1353,14 +1865,41 @@ node scripts/generateHandover.cjs
 - Tentativas de acesso não autorizado
 - Detecção frequente de usuários órfãos
 - Falhas na sincronização de tempo
+- **🆕 Detecção de arquivos com complexidade crítica (score > 80)**
+- **🆕 Aumento súbito no score médio de refatoração**
+
+### 🔬 **Processo de Refatoração Contínua**
+
+#### Workflow de Refatoração
+1. **Detecção Automática**
+   - Executar \`node scripts/generateHandover.cjs\` semanalmente
+   - Revisar seção "Análise de Refatoração"
+   - Identificar arquivos com score > 40
+
+2. **Priorização**
+   - **Crítico (Score ≥ 80)**: Refatoração imediata
+   - **Alto (Score 60-79)**: Refatoração em 2-4 sprints
+   - **Médio (Score 40-59)**: Monitoramento e refatoração gradual
+
+3. **Execução**
+   - Seguir sugestões específicas do arquivo
+   - Aplicar padrões de design apropriados
+   - Manter testes durante refatoração
+   - Validar performance pós-refatoração
+
+4. **Validação**
+   - Re-executar análise após refatoração
+   - Confirmar redução do score
+   - Testar funcionalidades afetadas
+   - Documentar mudanças realizadas
 
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
 **🔄 Última Atualização**: ${timestamp}  
-**📊 Versão**: 2.3  
+**📊 Versão**: 2.4  
 **💻 Desenvolvido em**: Replit  
-**✅ Status**: Produção Ativa com Sistema de Usuários Corrigido e Data/Hora Confiável
+**✅ Status**: Produção Ativa com Sistema de Análise de Refatoração
 
 ---
 
@@ -1384,9 +1923,26 @@ O script detecta automaticamente:
 - ✅ Detecção automática da última implementação
 - ✅ Análise de arquivos modificados recentemente
 - ✅ Documentação de sistemas corrigidos
-- ✅ **NOVO:** Sistema de data/hora confiável com múltiplas fontes
-- ✅ **NOVO:** Timestamps precisos no timezone brasileiro
-- ✅ **NOVO:** Fallback automático para fontes de tempo alternativas
+- ✅ Sistema de data/hora confiável com múltiplas fontes
+- ✅ Timestamps precisos no timezone brasileiro
+- ✅ Fallback automático para fontes de tempo alternativas
+- ✅ **🆕 ANÁLISE AVANÇADA DE REFATORAÇÃO:**
+  - 🔬 Detecção automática de arquivos monolíticos
+  - 📊 Métricas de complexidade (linhas, funções, complexidade ciclomática)
+  - 💡 Sugestões específicas de refatoração por arquivo
+  - 🎯 Sistema de priorização (Crítico/Alto/Médio/Baixo/OK)
+  - 📋 Recomendações arquiteturais gerais
+  - 🛠️ Estratégias detalhadas de refatoração
+  - 📈 Plano de ação estruturado por fases
+  - 🔄 Integração com workflow de manutenção
+
+### 🔬 **Critérios de Análise de Refatoração:**
+- **Linhas de Código**: Limite de ${this.refactorConfig.limits.lines} linhas (peso: ${this.refactorConfig.weights.lines * 100}%)
+- **Número de Funções**: Limite de ${this.refactorConfig.limits.functions} funções (peso: ${this.refactorConfig.weights.functions * 100}%)
+- **Complexidade Ciclomática**: Limite de ${this.refactorConfig.limits.complexity} (peso: ${this.refactorConfig.weights.complexity * 100}%)
+- **Dependências**: Limite de ${this.refactorConfig.limits.imports} imports (peso: ${this.refactorConfig.weights.imports * 100}%)
+- **Elementos JSX**: Limite de ${this.refactorConfig.limits.jsx_elements} elementos (peso: ${this.refactorConfig.weights.jsx_elements * 100}%)
+- **Aninhamento**: Limite de ${this.refactorConfig.limits.nested_depth} níveis (peso: ${this.refactorConfig.weights.nested_depth * 100}%)
 
 ### 🕒 **Fontes de Data/Hora Utilizadas (em ordem de prioridade):**
 1. **WorldTimeAPI** - API externa confiável (America/Sao_Paulo)
@@ -1395,7 +1951,7 @@ O script detecta automaticamente:
 4. **Sistema de Arquivos** - Timestamp de modificação de arquivos
 5. **Sistema Local** - Hora local como último recurso
 
-O script automaticamente tenta cada fonte até obter uma data/hora confiável, garantindo máxima precisão na documentação.
+O script automaticamente tenta cada fonte até obter uma data/hora confiável, garantindo máxima precisão na documentação e agora inclui análise avançada de refatoração para manter a qualidade e manutenibilidade do código.
 `;
 
     return handover;
@@ -1415,7 +1971,7 @@ O script automaticamente tenta cada fonte até obter uma data/hora confiável, g
   }
 
   /**
-   * 💾 SALVAR HANDOVER (com informações de tempo confiável)
+   * 💾 SALVAR HANDOVER (com informações de refatoração)
    */
   saveHandover() {
     const content = this.generateHandover();
@@ -1435,13 +1991,17 @@ O script automaticamente tenta cada fonte até obter uma data/hora confiável, g
     console.log(`🔒 ${this.analysis.validations.requiredFields.length} formulários com validações documentados`);
     console.log(`🔄 ${this.analysis.validations.workflows.length} fluxos de trabalho documentados`);
     console.log(`🆕 Última implementação: ${this.analysis.lastImplementation.title}`);
+    console.log(`🔬 ${this.analysis.refactoring.summary.totalFiles} arquivos analisados para refatoração`);
+    console.log(`📊 ${this.analysis.refactoring.summary.monolithicCount} arquivos precisam de refatoração`);
+    console.log(`🔴 ${this.analysis.refactoring.summary.criticalCount} arquivos com prioridade crítica`);
+    console.log(`💯 Score médio de complexidade: ${this.analysis.refactoring.summary.averageScore}/100`);
   }
 
   /**
-   * 🚀 EXECUTAR ANÁLISE COMPLETA (com sistema de tempo confiável)
+   * 🚀 EXECUTAR ANÁLISE COMPLETA (com sistema de refatoração)
    */
   async run() {
-    console.log('🚀 Iniciando geração automática do HANDOVER v2.3...\n');
+    console.log('🚀 Iniciando geração automática do HANDOVER v2.4...\n');
 
     try {
       await this.analyze();
@@ -1454,6 +2014,17 @@ O script automaticamente tenta cada fonte até obter uma data/hora confiável, g
       console.log('🔒 Seção de validações e regras atualizada');
       console.log('🔧 Guia de troubleshooting incluído');
       console.log('📚 Seção de manutenção documentada');
+      console.log('🔬 Análise de refatoração implementada');
+      console.log('💡 Sugestões de melhoria de código incluídas');
+
+      // Alertas baseados na análise
+      if (this.analysis.refactoring.summary.criticalCount > 0) {
+        console.log(`\n🚨 ATENÇÃO: ${this.analysis.refactoring.summary.criticalCount} arquivo(s) precisam de refatoração crítica!`);
+      }
+
+      if (this.analysis.refactoring.summary.averageScore > 50) {
+        console.log(`\n⚠️ AVISO: Score médio de complexidade alto (${this.analysis.refactoring.summary.averageScore}/100)`);
+      }
 
     } catch (error) {
       console.error('❌ Erro durante a geração:', error);
@@ -1469,3 +2040,18 @@ if (require.main === module) {
 }
 
 module.exports = HandoverGenerator;
+        title: "Sistema de Usuários Corrigido",
+        description: "Correção do sistema de importação de userService e detecção de usuários órfãos",
+        date: this.formatSimpleBrazilianDate(mostRecent.lastModified),
+        filesInvolved: recentFiles.map(f => f.file),
+        keyChanges: [
+          "Adicionado export default ao userService.js",
+          "Corrigido método analyzeServices no generateHandover.cjs",
+          "Sistema de usuários órfãos implementado",
+          "Validações em tempo real adicionadas"
+        ],
+        impact: "Crítico - Sistema de administração de usuários funcional",
+        status: "Implementado e testado"
+      };
+    } else {
+      this.analysis.lastImplementation
