@@ -31,27 +31,6 @@ const generateTempPassword = () => {
 
   let password = "";
 
-  const trackUserAccess = async (userId) => {
-    try {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, {
-        ultimoAcesso: new Date(),
-        totalAcessos: increment(1),
-      });
-
-      // Log de auditoria
-      await addDoc(collection(db, "logs"), {
-        tipo: "LOGIN",
-        userId: userId,
-        timestamp: new Date(),
-        detalhes: "Acesso ao sistema registrado",
-      });
-
-      console.log("✅ Acesso do usuário registrado:", userId);
-    } catch (error) {
-      console.error("❌ Erro ao registrar acesso:", error);
-    }
-  };
   // Garantir pelo menos um de cada tipo
   password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
   password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
