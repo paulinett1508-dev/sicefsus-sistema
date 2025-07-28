@@ -510,21 +510,8 @@ function AppContent() {
 }
 
 // Componente principal
-export default function App() {
-  if (!auth) {
-    return <FirebaseError />;
-  }
-
-  return (
-    <ToastProvider>
-      <Router>
-        <NavigationProtectionProvider>
-          <AppContent />
-        </NavigationProtectionProvider>
-      </Router>
-    </ToastProvider>
-  );
-}
+// ✅ EXPORTAR COMO DEFAULT
+export default App;
 
 // Estilos
 const styles = {
