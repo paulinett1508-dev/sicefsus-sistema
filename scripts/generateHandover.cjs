@@ -722,7 +722,7 @@ class HandoverGenerator {
 
   async analyzeUtils() {
     const utilsPath = path.join(this.srcPath, 'utils');
-    if (!fs.existsExists(utilsPath)) {
+    if (!fs.existsSync(utilsPath)) {
       console.log('⚠️ Pasta utils não encontrada');
       return;
     }
