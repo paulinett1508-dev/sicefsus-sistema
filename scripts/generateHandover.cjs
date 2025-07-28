@@ -1,4 +1,783 @@
-return;
+/**
+ * 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.4
+ * Script para analisar o sistema e gerar documentação atualizada com validações e regras
+ * NOVO: Análise de arquivos monolíticos e sugestões de refatoração
+ * NOVO: Sistema de data/hora confiável com múltiplas fontes
+ * NOVO: Debugging detalhado e leitura forçada de arquivos
+ * 
+ * Uso: node scripts/generateHandover.cjs
+ */
+
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+const { execSync } = require('child_process');
+
+class HandoverGenerator {
+  constructor() {
+    this.projectRoot = path.resolve(__dirname, '..');
+    this.srcPath = path.join(this.projectRoot, 'src');
+    this.componentsPath = path.join(this.srcPath, 'components');
+    this.utilsPath = path.join(this.srcPath, 'utils');
+    this.hooksPath = path.join(this.srcPath, 'hooks');
+    this.servicesPath = path.join(this.srcPath, 'services');
+    this.packagePath = path.join(this.projectRoot, 'package.json');
+    this.currentHandover = path.join(this.projectRoot, 'HANDOVER_SICEFSUS.md');
+
+    // ✅ CONFIGURAÇÃO DE DATA/HORA CONFIÁVEL
+    this.reliableDateTime = {
+      current: null,
+      sources: [],
+      timezone: 'America/Sao_Paulo'
+    };
+
+    // 🧩 CONFIGURAÇÃO DE ANÁLISE DE REFATORAÇÃO
+    this.refactorConfig = {
+      limits: {
+        lines: 300,
+        functions: 15,
+        complexity: 20,
+        imports: 20,
+        jsx_elements: 50,
+        nested_depth: 5
+      },
+      weights: {
+        lines: 0.25,
+        functions: 0.20,
+        complexity: 0.25,
+        imports: 0.15,
+        jsx_elements: 0.10,
+        nested_depth: 0.05
+      }
+    };
+
+    this.analysis = {
+      components: [],
+      hooks: [],
+      utils: [],
+      services: [],
+      dependencies: {},
+      structure: {},
+      lastImplementation: {
+        title: '',
+        description: '',
+        date: '',
+        filesInvolved: [],
+        keyChanges: [],
+        impact: '',
+        status: ''
+      },
+      validations: {
+        cnpjRules: [],
+        requiredFields: [],
+        businessRules: [],
+        userPermissions: [],
+        workflows: []
+      },
+      changes: {
+        newComponents: [],
+        modifiedFunctionalities: [],
+        removedComponents: [],
+        structureChanges: [],
+        dependencyChanges: []
+      },
+      refactoring: {
+        monolithicFiles: [],
+        recommendations: [],
+        summary: {
+          totalFiles: 0,
+          monolithicCount: 0,
+          criticalCount: 0,
+          averageScore: 0
+        }
+      }
+    };
+  }
+
+  // ===== MÉTODOS DE DATA/HORA =====
+
+  async getReliableDateTime() {
+    console.log('🕒 Obtendo data/hora de fontes confiáveis...');
+
+    const sources = [
+      () => this.getTimeFromWorldTimeAPI(),
+      () => this.getTimeFromNTP(),
+      () => this.getTimeFromGitCommit(),
+      () => this.getTimeFromFileSystem(),
+      () => this.getLocalTime()
+    ];
+
+    let reliableTime = null;
+
+    for (const getTime of sources) {
+      try {
+        const timeResult = await getTime();
+        if (timeResult && timeResult.datetime) {
+          this.reliableDateTime.sources.push(timeResult.source);
+          reliableTime = timeResult.datetime;
+          console.log(`✅ Data obtida de: ${timeResult.source}`);
+          break;
+        }
+      } catch (error) {
+        console.log(`⚠️ Falha em fonte de tempo: ${error.message}`);
+        continue;
+      }
+    }
+
+    if (!reliableTime) {
+      reliableTime = new Date();
+      this.reliableDateTime.sources.push('Sistema Local (Fallback)');
+      console.log('⚠️ Usando data do sistema local como último recurso');
+    }
+
+    this.reliableDateTime.current = reliableTime;
+    return reliableTime;
+  }
+
+  async getTimeFromWorldTimeAPI() {
+    return new Promise((resolve, reject) => {
+      const options = {
+        hostname: 'worldtimeapi.org',
+        port: 443,
+        path: '/api/timezone/America/Sao_Paulo',
+        method: 'GET',
+        timeout: 5000
+      };
+
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => data += chunk);
+        res.on('end', () => {
+          try {
+            const timeData = JSON.parse(data);
+            const datetime = new Date(timeData.datetime);
+            resolve({
+              datetime,
+              source: 'WorldTimeAPI (America/Sao_Paulo)',
+              raw: timeData
+            });
+          } catch (error) {
+            reject(new Error('Erro ao processar resposta da WorldTimeAPI'));
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        reject(new Error(`WorldTimeAPI falhou: ${error.message}`));
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('WorldTimeAPI timeout'));
+      });
+
+      req.end();
+    });
+  }
+
+  async getTimeFromNTP() {
+    try {
+      const ntpCommand = process.platform === 'win32'
+        ? 'w32tm /query /status'
+        : 'date';
+
+      const result = execSync(ntpCommand, {
+        encoding: 'utf8',
+        timeout: 3000
+      });
+
+      if (result) {
+        return {
+          datetime: new Date(),
+          source: 'Sistema NTP/Time Service',
+          raw: result.trim()
+        };
+      }
+    } catch (error) {
+      throw new Error(`NTP não disponível: ${error.message}`);
+    }
+  }
+
+  async getTimeFromGitCommit() {
+    try {
+      const gitDate = execSync('git log -1 --format=%cd --date=iso', {
+        encoding: 'utf8',
+        cwd: this.projectRoot,
+        timeout: 3000
+      });
+
+      if (gitDate) {
+        return {
+          datetime: new Date(gitDate.trim()),
+          source: 'Git Último Commit',
+          raw: gitDate.trim()
+        };
+      }
+    } catch (error) {
+      throw new Error(`Git não disponível: ${error.message}`);
+    }
+  }
+
+  async getTimeFromFileSystem() {
+    try {
+      const stats = fs.statSync(this.packagePath);
+      return {
+        datetime: stats.mtime,
+        source: 'Sistema de Arquivos (package.json mtime)',
+        raw: stats.mtime.toISOString()
+      };
+    } catch (error) {
+      throw new Error(`Filesystem falhou: ${error.message}`);
+    }
+  }
+
+  async getLocalTime() {
+    return {
+      datetime: new Date(),
+      source: 'Sistema Local',
+      raw: new Date().toISOString()
+    };
+  }
+
+  formatBrazilianDateTime(date) {
+    if (!date) date = this.reliableDateTime.current || new Date();
+
+    const options = {
+      timeZone: this.reliableDateTime.timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+
+    try {
+      const formatter = new Intl.DateTimeFormat('pt-BR', options);
+      return formatter.format(date);
+    } catch (error) {
+      const offset = -3;
+      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+      const brazilTime = new Date(utc + (offset * 3600000));
+
+      const day = String(brazilTime.getDate()).padStart(2, '0');
+      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
+      const year = brazilTime.getFullYear();
+      const hours = String(brazilTime.getHours()).padStart(2, '0');
+      const minutes = String(brazilTime.getMinutes()).padStart(2, '0');
+      const seconds = String(brazilTime.getSeconds()).padStart(2, '0');
+
+      return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+    }
+  }
+
+  formatSimpleBrazilianDate(date) {
+    if (!date) date = this.reliableDateTime.current || new Date();
+
+    try {
+      return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: this.reliableDateTime.timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date);
+    } catch (error) {
+      const offset = -3;
+      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+      const brazilTime = new Date(utc + (offset * 3600000));
+
+      const day = String(brazilTime.getDate()).padStart(2, '0');
+      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
+      const year = brazilTime.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    }
+  }
+
+  // ===== MÉTODOS DE ANÁLISE DE REFATORAÇÃO =====
+
+  analyzeFileComplexity(content, filePath) {
+    const lines = content.split('\n').length;
+    const nonEmptyLines = content.split('\n').filter(line => line.trim()).length;
+
+    const functionMatches = [
+      ...content.matchAll(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|const\s+\w+\s*=\s*(?:async\s+)?function)/g),
+      ...content.matchAll(/\w+\s*:\s*(?:async\s+)?(?:function|\()/g),
+      ...content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+\w+/g)
+    ];
+    const functionCount = functionMatches.length;
+
+    const importMatches = content.matchAll(/import\s+.*?from\s+['"`][^'"`]+['"`]/g);
+    const importCount = [...importMatches].length;
+
+    const jsxMatches = content.matchAll(/<[A-Z]\w*(?:\s+[^>]*)?\s*\/?>/g);
+    const jsxElementCount = [...jsxMatches].length;
+
+    const complexityKeywords = ['if', 'else', 'for', 'while', 'switch', 'case', '&&', '||', '?', 'catch'];
+    let complexity = 1;
+    complexityKeywords.forEach(keyword => {
+      const matches = content.match(new RegExp(`\\b${keyword}\\b`, 'g'));
+      if (matches) complexity += matches.length;
+    });
+
+    let maxDepth = 0;
+    let currentDepth = 0;
+    for (let char of content) {
+      if (char === '{' || char === '(') currentDepth++;
+      if (char === '}' || char === ')') currentDepth--;
+      maxDepth = Math.max(maxDepth, currentDepth);
+    }
+
+    return {
+      lines,
+      nonEmptyLines,
+      functions: functionCount,
+      imports: importCount,
+      jsxElements: jsxElementCount,
+      complexity,
+      nestedDepth: maxDepth
+    };
+  }
+
+  calculateRefactorScore(metrics) {
+    const { limits, weights } = this.refactorConfig;
+    let score = 0;
+
+    const normalizedMetrics = {
+      lines: Math.min((metrics.lines / limits.lines) * 100, 100),
+      functions: Math.min((metrics.functions / limits.functions) * 100, 100),
+      complexity: Math.min((metrics.complexity / limits.complexity) * 100, 100),
+      imports: Math.min((metrics.imports / limits.imports) * 100, 100),
+      jsxElements: Math.min((metrics.jsxElements / limits.jsx_elements) * 100, 100),
+      nestedDepth: Math.min((metrics.nestedDepth / limits.nested_depth) * 100, 100)
+    };
+
+    Object.keys(weights).forEach(key => {
+      if (normalizedMetrics[key]) {
+        score += normalizedMetrics[key] * weights[key];
+      }
+    });
+
+    return Math.min(Math.round(score), 100);
+  }
+
+  getRefactorPriority(score) {
+    if (score >= 80) return { level: 'CRÍTICA', color: '🔴', description: 'Refatoração urgente necessária' };
+    if (score >= 60) return { level: 'ALTA', color: '🟠', description: 'Refatoração recomendada' };
+    if (score >= 40) return { level: 'MÉDIA', color: '🟡', description: 'Considerar refatoração' };
+    if (score >= 20) return { level: 'BAIXA', color: '🟢', description: 'Monitorar crescimento' };
+    return { level: 'OK', color: '✅', description: 'Arquivo bem estruturado' };
+  }
+
+  generateRefactorSuggestions(metrics, filePath) {
+    const suggestions = [];
+    const { limits } = this.refactorConfig;
+
+    if (metrics.lines > limits.lines) {
+      suggestions.push({
+        type: 'Tamanho do Arquivo',
+        issue: `Arquivo com ${metrics.lines} linhas (limite: ${limits.lines})`,
+        suggestion: 'Quebrar em componentes menores ou extrair lógicas para hooks/utils',
+        priority: 'Alta'
+      });
+    }
+
+    if (metrics.functions > limits.functions) {
+      suggestions.push({
+        type: 'Número de Funções',
+        issue: `${metrics.functions} funções em um arquivo (limite: ${limits.functions})`,
+        suggestion: 'Agrupar funções relacionadas em módulos separados',
+        priority: 'Média'
+      });
+    }
+
+    if (metrics.complexity > limits.complexity) {
+      suggestions.push({
+        type: 'Complexidade Ciclomática',
+        issue: `Complexidade ${metrics.complexity} (limite: ${limits.complexity})`,
+        suggestion: 'Simplificar lógicas condicionais e extrair funções auxiliares',
+        priority: 'Alta'
+      });
+    }
+
+    if (metrics.imports > limits.imports) {
+      suggestions.push({
+        type: 'Dependências Excessivas',
+        issue: `${metrics.imports} imports (limite: ${limits.imports})`,
+        suggestion: 'Revisar dependências e considerar uso de barrel exports',
+        priority: 'Baixa'
+      });
+    }
+
+    if (metrics.jsxElements > limits.jsx_elements) {
+      suggestions.push({
+        type: 'JSX Complexo',
+        issue: `${metrics.jsxElements} elementos JSX (limite: ${limits.jsx_elements})`,
+        suggestion: 'Extrair subcomponentes para melhorar legibilidade',
+        priority: 'Média'
+      });
+    }
+
+    if (metrics.nestedDepth > limits.nested_depth) {
+      suggestions.push({
+        type: 'Aninhamento Profundo',
+        issue: `Profundidade ${metrics.nestedDepth} (limite: ${limits.nested_depth})`,
+        suggestion: 'Extrair lógicas aninhadas em funções separadas',
+        priority: 'Alta'
+      });
+    }
+
+    if (filePath.includes('components/')) {
+      if (metrics.lines > 200) {
+        suggestions.push({
+          type: 'Componente Monolítico',
+          issue: 'Componente muito grande para manutenção',
+          suggestion: 'Quebrar em: Header, Body, Footer ou usar composição',
+          priority: 'Alta'
+        });
+      }
+    }
+
+    if (filePath.includes('hooks/')) {
+      if (metrics.functions > 5) {
+        suggestions.push({
+          type: 'Hook Complexo',
+          issue: 'Hook com muitas responsabilidades',
+          suggestion: 'Dividir em hooks mais específicos (Single Responsibility)',
+          priority: 'Média'
+        });
+      }
+    }
+
+    return suggestions;
+  }
+
+  getFileType(filePath) {
+    if (filePath.includes('components/')) return 'Component';
+    if (filePath.includes('hooks/')) return 'Hook';
+    if (filePath.includes('utils/')) return 'Utility';
+    if (filePath.includes('services/')) return 'Service';
+    return 'Other';
+  }
+
+  generateGeneralRecommendations() {
+    const recommendations = [];
+    const { summary } = this.analysis.refactoring;
+
+    if (summary.criticalCount > 0) {
+      recommendations.push({
+        type: 'Arquivos Críticos',
+        description: `${summary.criticalCount} arquivo(s) precisam de refatoração urgente`,
+        action: 'Priorizar refatoração imediata dos arquivos com score > 80',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    if (summary.monolithicCount > summary.totalFiles * 0.3) {
+      recommendations.push({
+        type: 'Padrão Arquitetural',
+        description: 'Alto percentual de arquivos monolíticos detectado',
+        action: 'Revisar padrões de arquitetura e estabelecer guidelines de tamanho',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    if (summary.averageScore > 50) {
+      recommendations.push({
+        type: 'Qualidade Geral',
+        description: `Score médio de refatoração: ${summary.averageScore}`,
+        action: 'Implementar revisões de código focadas em tamanho e complexidade',
+        impact: 'Médio',
+        effort: 'Baixo'
+      });
+    }
+
+    const componentFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Component');
+    const criticalComponents = componentFiles.filter(f => f.score >= 80);
+    if (criticalComponents.length > 0) {
+      recommendations.push({
+        type: 'Componentes Críticos',
+        description: `${criticalComponents.length} componente(s) muito complexo(s)`,
+        action: 'Aplicar padrões como Container/Presentational ou Compound Components',
+        impact: 'Alto',
+        effort: 'Alto'
+      });
+    }
+
+    const hookFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Hook');
+    const criticalHooks = hookFiles.filter(f => f.score >= 60);
+    if (criticalHooks.length > 0) {
+      recommendations.push({
+        type: 'Hooks Complexos',
+        description: `${criticalHooks.length} hook(s) com muitas responsabilidades`,
+        action: 'Aplicar Single Responsibility Principle em hooks',
+        impact: 'Médio',
+        effort: 'Médio'
+      });
+    }
+
+    this.analysis.refactoring.recommendations = recommendations;
+  }
+
+  // ===== MÉTODOS DE ANÁLISE PRINCIPAL =====
+
+  async analyze() {
+    console.log('🔍 Iniciando análise do sistema SICEFSUS...');
+
+    await this.getReliableDateTime();
+    await this.analyzePackageJson();
+    await this.analyzeProjectStructure();
+    await this.analyzeComponents();
+    await this.analyzeHooks();
+    await this.analyzeUtils();
+    await this.analyzeServices();
+    await this.analyzeValidationsAndRules();
+    await this.detectChanges();
+    await this.analyzeLastImplementation();
+    await this.analyzeFilesForRefactoring();
+
+    console.log('✅ Análise concluída!');
+  }
+
+  async analyzePackageJson() {
+    try {
+      const packageData = JSON.parse(fs.readFileSync(this.packagePath, 'utf8'));
+      this.analysis.dependencies = {
+        main: packageData.dependencies || {},
+        dev: packageData.devDependencies || {},
+        scripts: packageData.scripts || {}
+      };
+      console.log('📦 Package.json analisado');
+    } catch (error) {
+      console.error('❌ Erro ao analisar package.json:', error.message);
+    }
+  }
+
+  async analyzeProjectStructure() {
+    const analyzeDirectory = (dirPath, relativePath = '') => {
+      const items = fs.readdirSync(dirPath, { withFileTypes: true });
+      const structure = {};
+
+      items.forEach(item => {
+        if (item.name.startsWith('.') || item.name === 'node_modules') return;
+
+        const fullPath = path.join(dirPath, item.name);
+        const relPath = path.join(relativePath, item.name);
+
+        if (item.isDirectory()) {
+          structure[item.name] = analyzeDirectory(fullPath, relPath);
+        } else {
+          structure[item.name] = {
+            type: 'file',
+            extension: path.extname(item.name),
+            size: fs.statSync(fullPath).size
+          };
+        }
+      });
+
+      return structure;
+    };
+
+    this.analysis.structure = analyzeDirectory(this.projectRoot);
+    console.log('📁 Estrutura do projeto analisada');
+  }
+
+  async analyzeComponents() {
+    if (!fs.existsSync(this.componentsPath)) {
+      console.log('⚠️ Pasta components não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${this.componentsPath}`);
+    const files = fs.readdirSync(this.componentsPath);
+    console.log(`📄 Arquivos encontrados na pasta components: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.jsx') || file.endsWith('.js')) {
+        const filePath = path.join(this.componentsPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const component = {
+            name: file,
+            path: `src/components/${file}`,
+            type: this.detectComponentType(content),
+            dependencies: this.extractDependencies(content),
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🧩 Funções encontradas em ${file}: ${component.functions.join(', ')}`);
+          this.analysis.components.push(component);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🧩 ${this.analysis.components.length} componentes analisados`);
+  }
+
+  async analyzeHooks() {
+    const hooksPath = path.join(this.srcPath, 'hooks');
+    if (!fs.existsSync(hooksPath)) {
+      console.log('⚠️ Pasta hooks não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${hooksPath}`);
+    const files = fs.readdirSync(hooksPath);
+    console.log(`📄 Arquivos encontrados na pasta hooks: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(hooksPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const hook = {
+            name: file,
+            path: `src/hooks/${file}`,
+            functions: this.extractFunctions(content),
+            dependencies: this.extractDependencies(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🎣 Funções encontradas em ${file}: ${hook.functions.join(', ')}`);
+          this.analysis.hooks.push(hook);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🎣 ${this.analysis.hooks.length} hooks analisados`);
+  }
+
+  async analyzeUtils() {
+    const utilsPath = path.join(this.srcPath, 'utils');
+    if (!fs.existsSync(utilsPath)) {
+      console.log('⚠️ Pasta utils não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${utilsPath}`);
+    const files = fs.readdirSync(utilsPath);
+    console.log(`📄 Arquivos encontrados na pasta utils: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(utilsPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const util = {
+            name: file,
+            path: `src/utils/${file}`,
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🛠️ Funções encontradas em ${file}: ${util.functions.join(', ')}`);
+          this.analysis.utils.push(util);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🛠️ ${this.analysis.utils.length} utilitários analisados`);
+  }
+
+  async analyzeServices() {
+    if (!fs.existsSync(this.servicesPath)) {
+      console.log('⚠️ Pasta services não encontrada');
+      return;
+    }
+
+    console.log(`📁 Analisando pasta: ${this.servicesPath}`);
+    const files = fs.readdirSync(this.servicesPath);
+    console.log(`📄 Arquivos encontrados na pasta services: ${files.join(', ')}`);
+
+    for (const file of files) {
+      if (file.endsWith('.js') || file.endsWith('.jsx')) {
+        const filePath = path.join(this.servicesPath, file);
+        console.log(`🔍 Lendo arquivo: ${filePath}`);
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
+
+          const service = {
+            name: file,
+            path: `src/services/${file}`,
+            functions: this.extractFunctions(content),
+            exports: this.extractExports(content),
+            description: this.extractDescription(content),
+            lastModified: fs.statSync(filePath).mtime
+          };
+
+          console.log(`🔧 Funções encontradas em ${file}: ${service.functions.join(', ')}`);
+          this.analysis.services.push(service);
+        } catch (error) {
+          console.error(`❌ Erro ao ler ${file}:`, error.message);
+        }
+      } else {
+        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
+      }
+    }
+
+    console.log(`🔧 ${this.analysis.services.length} serviços analisados`);
+  }
+
+  async analyzeFilesForRefactoring() {
+    console.log('🔬 Iniciando análise de refatoração...');
+
+    const allFiles = [
+      ...this.analysis.components,
+      ...this.analysis.hooks,
+      ...this.analysis.utils,
+      ...this.analysis.services
+    ];
+
+    console.log(`📊 Total de arquivos para analisar: ${allFiles.length}`);
+
+    if (allFiles.length === 0) {
+      console.log('⚠️ ATENÇÃO: Nenhum arquivo encontrado para análise!');
+      console.log('🔍 Verificando estrutura de pastas...');
+      console.log(`📁 Components: ${fs.existsSync(this.componentsPath) ? 'EXISTS' : 'NOT FOUND'}`);
+      console.log(`📁 Hooks: ${fs.existsSync(path.join(this.srcPath, 'hooks')) ? 'EXISTS' : 'NOT FOUND'}`);
+      console.log(`📁 Utils: ${fs.existsSync(path.join(this.srcPath, 'utils')) ? 'EXISTS' : 'NOT FOUND'}`);
+      console.log(`📁 Services: ${fs.existsSync(this.servicesPath) ? 'EXISTS' : 'NOT FOUND'}`);
+
+      if (fs.existsSync(this.srcPath)) {
+        const srcContents = fs.readdirSync(this.srcPath);
+        console.log(`📁 Conteúdo da pasta src: ${srcContents.join(', ')}`);
+      }
     }
 
 this.analysis.refactoring.summary.totalFiles = allFiles.length;
@@ -992,8 +1771,8 @@ node scripts/generateHandover.cjs
 - **Erros**: Taxa < 1% das operações
 - **Recuperação de Órfãos**: Sucesso > 95%
 - **Precisão de Data/Hora**: Sincronização < 1 segundo
-- **🆕 Qualidade de Código**: Score médio de refatoração < 40
-- **🆕 Arquivos Críticos**: Zero arquivos com score > 80
+- [ ] **🆕 Qualidade de Código**: Score médio de refatoração < 40
+- [ ] **🆕 Arquivos Críticos**: Zero arquivos com score > 80
 
 #### Alertas Configurados
 - Falhas de autenticação em massa
@@ -1002,8 +1781,8 @@ node scripts/generateHandover.cjs
 - Tentativas de acesso não autorizado
 - Detecção frequente de usuários órfãos
 - Falhas na sincronização de tempo
-- **🆕 Detecção de arquivos com complexidade crítica (score > 80)**
-- **🆕 Aumento súbito no score médio de refatoração**
+- [ ] **🆕 Detecção de arquivos com complexidade crítica (score > 80)**
+- [ ] **🆕 Aumento súbito no score médio de refatoração**
 
 ### 🔬 **Processo de Refatoração Contínua**
 
@@ -1156,783 +1935,4 @@ if (require.main === module) {
   generator.run();
 }
 
-module.exports = HandoverGenerator;/**
- * 📋 GERADOR AUTOMÁTICO DE HANDOVER - SICEFSUS v2.4
- * Script para analisar o sistema e gerar documentação atualizada com validações e regras
- * NOVO: Análise de arquivos monolíticos e sugestões de refatoração
- * NOVO: Sistema de data/hora confiável com múltiplas fontes
- * NOVO: Debugging detalhado e leitura forçada de arquivos
- * 
- * Uso: node scripts/generateHandover.cjs
- */
-
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-const { execSync } = require('child_process');
-
-class HandoverGenerator {
-  constructor() {
-    this.projectRoot = path.resolve(__dirname, '..');
-    this.srcPath = path.join(this.projectRoot, 'src');
-    this.componentsPath = path.join(this.srcPath, 'components');
-    this.utilsPath = path.join(this.srcPath, 'utils');
-    this.hooksPath = path.join(this.srcPath, 'hooks');
-    this.servicesPath = path.join(this.srcPath, 'services');
-    this.packagePath = path.join(this.projectRoot, 'package.json');
-    this.currentHandover = path.join(this.projectRoot, 'HANDOVER_SICEFSUS.md');
-
-    // ✅ CONFIGURAÇÃO DE DATA/HORA CONFIÁVEL
-    this.reliableDateTime = {
-      current: null,
-      sources: [],
-      timezone: 'America/Sao_Paulo'
-    };
-
-    // 🧩 CONFIGURAÇÃO DE ANÁLISE DE REFATORAÇÃO
-    this.refactorConfig = {
-      limits: {
-        lines: 300,
-        functions: 15,
-        complexity: 20,
-        imports: 20,
-        jsx_elements: 50,
-        nested_depth: 5
-      },
-      weights: {
-        lines: 0.25,
-        functions: 0.20,
-        complexity: 0.25,
-        imports: 0.15,
-        jsx_elements: 0.10,
-        nested_depth: 0.05
-      }
-    };
-
-    this.analysis = {
-      components: [],
-      hooks: [],
-      utils: [],
-      services: [],
-      dependencies: {},
-      structure: {},
-      lastImplementation: {
-        title: '',
-        description: '',
-        date: '',
-        filesInvolved: [],
-        keyChanges: [],
-        impact: '',
-        status: ''
-      },
-      validations: {
-        cnpjRules: [],
-        requiredFields: [],
-        businessRules: [],
-        userPermissions: [],
-        workflows: []
-      },
-      changes: {
-        newComponents: [],
-        modifiedFunctionalities: [],
-        removedComponents: [],
-        structureChanges: [],
-        dependencyChanges: []
-      },
-      refactoring: {
-        monolithicFiles: [],
-        recommendations: [],
-        summary: {
-          totalFiles: 0,
-          monolithicCount: 0,
-          criticalCount: 0,
-          averageScore: 0
-        }
-      }
-    };
-  }
-
-  // ===== MÉTODOS DE DATA/HORA =====
-
-  async getReliableDateTime() {
-    console.log('🕒 Obtendo data/hora de fontes confiáveis...');
-
-    const sources = [
-      () => this.getTimeFromWorldTimeAPI(),
-      () => this.getTimeFromNTP(),
-      () => this.getTimeFromGitCommit(),
-      () => this.getTimeFromFileSystem(),
-      () => this.getLocalTime()
-    ];
-
-    let reliableTime = null;
-
-    for (const getTime of sources) {
-      try {
-        const timeResult = await getTime();
-        if (timeResult && timeResult.datetime) {
-          this.reliableDateTime.sources.push(timeResult.source);
-          reliableTime = timeResult.datetime;
-          console.log(`✅ Data obtida de: ${timeResult.source}`);
-          break;
-        }
-      } catch (error) {
-        console.log(`⚠️ Falha em fonte de tempo: ${error.message}`);
-        continue;
-      }
-    }
-
-    if (!reliableTime) {
-      reliableTime = new Date();
-      this.reliableDateTime.sources.push('Sistema Local (Fallback)');
-      console.log('⚠️ Usando data do sistema local como último recurso');
-    }
-
-    this.reliableDateTime.current = reliableTime;
-    return reliableTime;
-  }
-
-  async getTimeFromWorldTimeAPI() {
-    return new Promise((resolve, reject) => {
-      const options = {
-        hostname: 'worldtimeapi.org',
-        port: 443,
-        path: '/api/timezone/America/Sao_Paulo',
-        method: 'GET',
-        timeout: 5000
-      };
-
-      const req = https.request(options, (res) => {
-        let data = '';
-        res.on('data', (chunk) => data += chunk);
-        res.on('end', () => {
-          try {
-            const timeData = JSON.parse(data);
-            const datetime = new Date(timeData.datetime);
-            resolve({
-              datetime,
-              source: 'WorldTimeAPI (America/Sao_Paulo)',
-              raw: timeData
-            });
-          } catch (error) {
-            reject(new Error('Erro ao processar resposta da WorldTimeAPI'));
-          }
-        });
-      });
-
-      req.on('error', (error) => {
-        reject(new Error(`WorldTimeAPI falhou: ${error.message}`));
-      });
-
-      req.on('timeout', () => {
-        req.destroy();
-        reject(new Error('WorldTimeAPI timeout'));
-      });
-
-      req.end();
-    });
-  }
-
-  async getTimeFromNTP() {
-    try {
-      const ntpCommand = process.platform === 'win32'
-        ? 'w32tm /query /status'
-        : 'date';
-
-      const result = execSync(ntpCommand, {
-        encoding: 'utf8',
-        timeout: 3000
-      });
-
-      if (result) {
-        return {
-          datetime: new Date(),
-          source: 'Sistema NTP/Time Service',
-          raw: result.trim()
-        };
-      }
-    } catch (error) {
-      throw new Error(`NTP não disponível: ${error.message}`);
-    }
-  }
-
-  async getTimeFromGitCommit() {
-    try {
-      const gitDate = execSync('git log -1 --format=%cd --date=iso', {
-        encoding: 'utf8',
-        cwd: this.projectRoot,
-        timeout: 3000
-      });
-
-      if (gitDate) {
-        return {
-          datetime: new Date(gitDate.trim()),
-          source: 'Git Último Commit',
-          raw: gitDate.trim()
-        };
-      }
-    } catch (error) {
-      throw new Error(`Git não disponível: ${error.message}`);
-    }
-  }
-
-  async getTimeFromFileSystem() {
-    try {
-      const stats = fs.statSync(this.packagePath);
-      return {
-        datetime: stats.mtime,
-        source: 'Sistema de Arquivos (package.json mtime)',
-        raw: stats.mtime.toISOString()
-      };
-    } catch (error) {
-      throw new Error(`Filesystem falhou: ${error.message}`);
-    }
-  }
-
-  async getLocalTime() {
-    return {
-      datetime: new Date(),
-      source: 'Sistema Local',
-      raw: new Date().toISOString()
-    };
-  }
-
-  formatBrazilianDateTime(date) {
-    if (!date) date = this.reliableDateTime.current || new Date();
-
-    const options = {
-      timeZone: this.reliableDateTime.timezone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    };
-
-    try {
-      const formatter = new Intl.DateTimeFormat('pt-BR', options);
-      return formatter.format(date);
-    } catch (error) {
-      const offset = -3;
-      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-      const brazilTime = new Date(utc + (offset * 3600000));
-
-      const day = String(brazilTime.getDate()).padStart(2, '0');
-      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
-      const year = brazilTime.getFullYear();
-      const hours = String(brazilTime.getHours()).padStart(2, '0');
-      const minutes = String(brazilTime.getMinutes()).padStart(2, '0');
-      const seconds = String(brazilTime.getSeconds()).padStart(2, '0');
-
-      return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
-    }
-  }
-
-  formatSimpleBrazilianDate(date) {
-    if (!date) date = this.reliableDateTime.current || new Date();
-
-    try {
-      return new Intl.DateTimeFormat('pt-BR', {
-        timeZone: this.reliableDateTime.timezone,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      }).format(date);
-    } catch (error) {
-      const offset = -3;
-      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-      const brazilTime = new Date(utc + (offset * 3600000));
-
-      const day = String(brazilTime.getDate()).padStart(2, '0');
-      const month = String(brazilTime.getMonth() + 1).padStart(2, '0');
-      const year = brazilTime.getFullYear();
-
-      return `${day}/${month}/${year}`;
-    }
-  }
-
-  // ===== MÉTODOS DE ANÁLISE DE REFATORAÇÃO =====
-
-  analyzeFileComplexity(content, filePath) {
-    const lines = content.split('\n').length;
-    const nonEmptyLines = content.split('\n').filter(line => line.trim()).length;
-
-    const functionMatches = [
-      ...content.matchAll(/(?:function\s+\w+|const\s+\w+\s*=\s*(?:async\s+)?\(|const\s+\w+\s*=\s*(?:async\s+)?function)/g),
-      ...content.matchAll(/\w+\s*:\s*(?:async\s+)?(?:function|\()/g),
-      ...content.matchAll(/(?:export\s+)?(?:async\s+)?function\s+\w+/g)
-    ];
-    const functionCount = functionMatches.length;
-
-    const importMatches = content.matchAll(/import\s+.*?from\s+['"`][^'"`]+['"`]/g);
-    const importCount = [...importMatches].length;
-
-    const jsxMatches = content.matchAll(/<[A-Z]\w*(?:\s+[^>]*)?\s*\/?>/g);
-    const jsxElementCount = [...jsxMatches].length;
-
-    const complexityKeywords = ['if', 'else', 'for', 'while', 'switch', 'case', '&&', '||', '?', 'catch'];
-    let complexity = 1;
-    complexityKeywords.forEach(keyword => {
-      const matches = content.match(new RegExp(`\\b${keyword}\\b`, 'g'));
-      if (matches) complexity += matches.length;
-    });
-
-    let maxDepth = 0;
-    let currentDepth = 0;
-    for (let char of content) {
-      if (char === '{' || char === '(') currentDepth++;
-      if (char === '}' || char === ')') currentDepth--;
-      maxDepth = Math.max(maxDepth, currentDepth);
-    }
-
-    return {
-      lines,
-      nonEmptyLines,
-      functions: functionCount,
-      imports: importCount,
-      jsxElements: jsxElementCount,
-      complexity,
-      nestedDepth: maxDepth
-    };
-  }
-
-  calculateRefactorScore(metrics) {
-    const { limits, weights } = this.refactorConfig;
-    let score = 0;
-
-    const normalizedMetrics = {
-      lines: Math.min((metrics.lines / limits.lines) * 100, 100),
-      functions: Math.min((metrics.functions / limits.functions) * 100, 100),
-      complexity: Math.min((metrics.complexity / limits.complexity) * 100, 100),
-      imports: Math.min((metrics.imports / limits.imports) * 100, 100),
-      jsxElements: Math.min((metrics.jsxElements / limits.jsx_elements) * 100, 100),
-      nestedDepth: Math.min((metrics.nestedDepth / limits.nested_depth) * 100, 100)
-    };
-
-    Object.keys(weights).forEach(key => {
-      if (normalizedMetrics[key]) {
-        score += normalizedMetrics[key] * weights[key];
-      }
-    });
-
-    return Math.min(Math.round(score), 100);
-  }
-
-  getRefactorPriority(score) {
-    if (score >= 80) return { level: 'CRÍTICA', color: '🔴', description: 'Refatoração urgente necessária' };
-    if (score >= 60) return { level: 'ALTA', color: '🟠', description: 'Refatoração recomendada' };
-    if (score >= 40) return { level: 'MÉDIA', color: '🟡', description: 'Considerar refatoração' };
-    if (score >= 20) return { level: 'BAIXA', color: '🟢', description: 'Monitorar crescimento' };
-    return { level: 'OK', color: '✅', description: 'Arquivo bem estruturado' };
-  }
-
-  generateRefactorSuggestions(metrics, filePath) {
-    const suggestions = [];
-    const { limits } = this.refactorConfig;
-
-    if (metrics.lines > limits.lines) {
-      suggestions.push({
-        type: 'Tamanho do Arquivo',
-        issue: `Arquivo com ${metrics.lines} linhas (limite: ${limits.lines})`,
-        suggestion: 'Quebrar em componentes menores ou extrair lógicas para hooks/utils',
-        priority: 'Alta'
-      });
-    }
-
-    if (metrics.functions > limits.functions) {
-      suggestions.push({
-        type: 'Número de Funções',
-        issue: `${metrics.functions} funções em um arquivo (limite: ${limits.functions})`,
-        suggestion: 'Agrupar funções relacionadas em módulos separados',
-        priority: 'Média'
-      });
-    }
-
-    if (metrics.complexity > limits.complexity) {
-      suggestions.push({
-        type: 'Complexidade Ciclomática',
-        issue: `Complexidade ${metrics.complexity} (limite: ${limits.complexity})`,
-        suggestion: 'Simplificar lógicas condicionais e extrair funções auxiliares',
-        priority: 'Alta'
-      });
-    }
-
-    if (metrics.imports > limits.imports) {
-      suggestions.push({
-        type: 'Dependências Excessivas',
-        issue: `${metrics.imports} imports (limite: ${limits.imports})`,
-        suggestion: 'Revisar dependências e considerar uso de barrel exports',
-        priority: 'Baixa'
-      });
-    }
-
-    if (metrics.jsxElements > limits.jsx_elements) {
-      suggestions.push({
-        type: 'JSX Complexo',
-        issue: `${metrics.jsxElements} elementos JSX (limite: ${limits.jsx_elements})`,
-        suggestion: 'Extrair subcomponentes para melhorar legibilidade',
-        priority: 'Média'
-      });
-    }
-
-    if (metrics.nestedDepth > limits.nested_depth) {
-      suggestions.push({
-        type: 'Aninhamento Profundo',
-        issue: `Profundidade ${metrics.nestedDepth} (limite: ${limits.nested_depth})`,
-        suggestion: 'Extrair lógicas aninhadas em funções separadas',
-        priority: 'Alta'
-      });
-    }
-
-    if (filePath.includes('components/')) {
-      if (metrics.lines > 200) {
-        suggestions.push({
-          type: 'Componente Monolítico',
-          issue: 'Componente muito grande para manutenção',
-          suggestion: 'Quebrar em: Header, Body, Footer ou usar composição',
-          priority: 'Alta'
-        });
-      }
-    }
-
-    if (filePath.includes('hooks/')) {
-      if (metrics.functions > 5) {
-        suggestions.push({
-          type: 'Hook Complexo',
-          issue: 'Hook com muitas responsabilidades',
-          suggestion: 'Dividir em hooks mais específicos (Single Responsibility)',
-          priority: 'Média'
-        });
-      }
-    }
-
-    return suggestions;
-  }
-
-  getFileType(filePath) {
-    if (filePath.includes('components/')) return 'Component';
-    if (filePath.includes('hooks/')) return 'Hook';
-    if (filePath.includes('utils/')) return 'Utility';
-    if (filePath.includes('services/')) return 'Service';
-    return 'Other';
-  }
-
-  generateGeneralRecommendations() {
-    const recommendations = [];
-    const { summary } = this.analysis.refactoring;
-
-    if (summary.criticalCount > 0) {
-      recommendations.push({
-        type: 'Arquivos Críticos',
-        description: `${summary.criticalCount} arquivo(s) precisam de refatoração urgente`,
-        action: 'Priorizar refatoração imediata dos arquivos com score > 80',
-        impact: 'Alto',
-        effort: 'Alto'
-      });
-    }
-
-    if (summary.monolithicCount > summary.totalFiles * 0.3) {
-      recommendations.push({
-        type: 'Padrão Arquitetural',
-        description: 'Alto percentual de arquivos monolíticos detectado',
-        action: 'Revisar padrões de arquitetura e estabelecer guidelines de tamanho',
-        impact: 'Médio',
-        effort: 'Médio'
-      });
-    }
-
-    if (summary.averageScore > 50) {
-      recommendations.push({
-        type: 'Qualidade Geral',
-        description: `Score médio de refatoração: ${summary.averageScore}`,
-        action: 'Implementar revisões de código focadas em tamanho e complexidade',
-        impact: 'Médio',
-        effort: 'Baixo'
-      });
-    }
-
-    const componentFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Component');
-    const criticalComponents = componentFiles.filter(f => f.score >= 80);
-    if (criticalComponents.length > 0) {
-      recommendations.push({
-        type: 'Componentes Críticos',
-        description: `${criticalComponents.length} componente(s) muito complexo(s)`,
-        action: 'Aplicar padrões como Container/Presentational ou Compound Components',
-        impact: 'Alto',
-        effort: 'Alto'
-      });
-    }
-
-    const hookFiles = this.analysis.refactoring.monolithicFiles.filter(f => f.type === 'Hook');
-    const criticalHooks = hookFiles.filter(f => f.score >= 60);
-    if (criticalHooks.length > 0) {
-      recommendations.push({
-        type: 'Hooks Complexos',
-        description: `${criticalHooks.length} hook(s) com muitas responsabilidades`,
-        action: 'Aplicar Single Responsibility Principle em hooks',
-        impact: 'Médio',
-        effort: 'Médio'
-      });
-    }
-
-    this.analysis.refactoring.recommendations = recommendations;
-  }
-
-  // ===== MÉTODOS DE ANÁLISE PRINCIPAL =====
-
-  async analyze() {
-    console.log('🔍 Iniciando análise do sistema SICEFSUS...');
-
-    await this.getReliableDateTime();
-    await this.analyzePackageJson();
-    await this.analyzeProjectStructure();
-    await this.analyzeComponents();
-    await this.analyzeHooks();
-    await this.analyzeUtils();
-    await this.analyzeServices();
-    await this.analyzeValidationsAndRules();
-    await this.detectChanges();
-    await this.analyzeLastImplementation();
-    await this.analyzeFilesForRefactoring();
-
-    console.log('✅ Análise concluída!');
-  }
-
-  async analyzePackageJson() {
-    try {
-      const packageData = JSON.parse(fs.readFileSync(this.packagePath, 'utf8'));
-      this.analysis.dependencies = {
-        main: packageData.dependencies || {},
-        dev: packageData.devDependencies || {},
-        scripts: packageData.scripts || {}
-      };
-      console.log('📦 Package.json analisado');
-    } catch (error) {
-      console.error('❌ Erro ao analisar package.json:', error.message);
-    }
-  }
-
-  async analyzeProjectStructure() {
-    const analyzeDirectory = (dirPath, relativePath = '') => {
-      const items = fs.readdirSync(dirPath, { withFileTypes: true });
-      const structure = {};
-
-      items.forEach(item => {
-        if (item.name.startsWith('.') || item.name === 'node_modules') return;
-
-        const fullPath = path.join(dirPath, item.name);
-        const relPath = path.join(relativePath, item.name);
-
-        if (item.isDirectory()) {
-          structure[item.name] = analyzeDirectory(fullPath, relPath);
-        } else {
-          structure[item.name] = {
-            type: 'file',
-            extension: path.extname(item.name),
-            size: fs.statSync(fullPath).size
-          };
-        }
-      });
-
-      return structure;
-    };
-
-    this.analysis.structure = analyzeDirectory(this.projectRoot);
-    console.log('📁 Estrutura do projeto analisada');
-  }
-
-  async analyzeComponents() {
-    if (!fs.existsSync(this.componentsPath)) {
-      console.log('⚠️ Pasta components não encontrada');
-      return;
-    }
-
-    console.log(`📁 Analisando pasta: ${this.componentsPath}`);
-    const files = fs.readdirSync(this.componentsPath);
-    console.log(`📄 Arquivos encontrados na pasta components: ${files.join(', ')}`);
-
-    for (const file of files) {
-      if (file.endsWith('.jsx') || file.endsWith('.js')) {
-        const filePath = path.join(this.componentsPath, file);
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-          const component = {
-            name: file,
-            path: `src/components/${file}`,
-            type: this.detectComponentType(content),
-            dependencies: this.extractDependencies(content),
-            functions: this.extractFunctions(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: fs.statSync(filePath).mtime
-          };
-
-          console.log(`🧩 Funções encontradas em ${file}: ${component.functions.join(', ')}`);
-          this.analysis.components.push(component);
-        } catch (error) {
-          console.error(`❌ Erro ao ler ${file}:`, error.message);
-        }
-      } else {
-        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-      }
-    }
-
-    console.log(`🧩 ${this.analysis.components.length} componentes analisados`);
-  }
-
-  async analyzeHooks() {
-    const hooksPath = path.join(this.srcPath, 'hooks');
-    if (!fs.existsSync(hooksPath)) {
-      console.log('⚠️ Pasta hooks não encontrada');
-      return;
-    }
-
-    console.log(`📁 Analisando pasta: ${hooksPath}`);
-    const files = fs.readdirSync(hooksPath);
-    console.log(`📄 Arquivos encontrados na pasta hooks: ${files.join(', ')}`);
-
-    for (const file of files) {
-      if (file.endsWith('.js') || file.endsWith('.jsx')) {
-        const filePath = path.join(hooksPath, file);
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-          const hook = {
-            name: file,
-            path: `src/hooks/${file}`,
-            functions: this.extractFunctions(content),
-            dependencies: this.extractDependencies(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: fs.statSync(filePath).mtime
-          };
-
-          console.log(`🎣 Funções encontradas em ${file}: ${hook.functions.join(', ')}`);
-          this.analysis.hooks.push(hook);
-        } catch (error) {
-          console.error(`❌ Erro ao ler ${file}:`, error.message);
-        }
-      } else {
-        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-      }
-    }
-
-    console.log(`🎣 ${this.analysis.hooks.length} hooks analisados`);
-  }
-
-  async analyzeUtils() {
-    const utilsPath = path.join(this.srcPath, 'utils');
-    if (!fs.existsSync(utilsPath)) {
-      console.log('⚠️ Pasta utils não encontrada');
-      return;
-    }
-
-    console.log(`📁 Analisando pasta: ${utilsPath}`);
-    const files = fs.readdirSync(utilsPath);
-    console.log(`📄 Arquivos encontrados na pasta utils: ${files.join(', ')}`);
-
-    for (const file of files) {
-      if (file.endsWith('.js') || file.endsWith('.jsx')) {
-        const filePath = path.join(utilsPath, file);
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-          const util = {
-            name: file,
-            path: `src/utils/${file}`,
-            functions: this.extractFunctions(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: fs.statSync(filePath).mtime
-          };
-
-          console.log(`🛠️ Funções encontradas em ${file}: ${util.functions.join(', ')}`);
-          this.analysis.utils.push(util);
-        } catch (error) {
-          console.error(`❌ Erro ao ler ${file}:`, error.message);
-        }
-      } else {
-        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-      }
-    }
-
-    console.log(`🛠️ ${this.analysis.utils.length} utilitários analisados`);
-  }
-
-  async analyzeServices() {
-    if (!fs.existsSync(this.servicesPath)) {
-      console.log('⚠️ Pasta services não encontrada');
-      return;
-    }
-
-    console.log(`📁 Analisando pasta: ${this.servicesPath}`);
-    const files = fs.readdirSync(this.servicesPath);
-    console.log(`📄 Arquivos encontrados na pasta services: ${files.join(', ')}`);
-
-    for (const file of files) {
-      if (file.endsWith('.js') || file.endsWith('.jsx')) {
-        const filePath = path.join(this.servicesPath, file);
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
-
-        try {
-          const content = fs.readFileSync(filePath, 'utf8');
-          console.log(`📊 Arquivo ${file}: ${content.length} caracteres, ${content.split('\n').length} linhas`);
-
-          const service = {
-            name: file,
-            path: `src/services/${file}`,
-            functions: this.extractFunctions(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: fs.statSync(filePath).mtime
-          };
-
-          console.log(`🔧 Funções encontradas em ${file}: ${service.functions.join(', ')}`);
-          this.analysis.services.push(service);
-        } catch (error) {
-          console.error(`❌ Erro ao ler ${file}:`, error.message);
-        }
-      } else {
-        console.log(`⏭️ Ignorando arquivo: ${file} (não é .js/.jsx)`);
-      }
-    }
-
-    console.log(`🔧 ${this.analysis.services.length} serviços analisados`);
-  }
-
-  async analyzeFilesForRefactoring() {
-    console.log('🔬 Iniciando análise de refatoração...');
-
-    const allFiles = [
-      ...this.analysis.components,
-      ...this.analysis.hooks,
-      ...this.analysis.utils,
-      ...this.analysis.services
-    ];
-
-    console.log(`📊 Total de arquivos para analisar: ${allFiles.length}`);
-
-    if (allFiles.length === 0) {
-      console.log('⚠️ ATENÇÃO: Nenhum arquivo encontrado para análise!');
-      console.log('🔍 Verificando estrutura de pastas...');
-      console.log(`📁 Components: ${fs.existsSync(this.componentsPath) ? 'EXISTS' : 'NOT FOUND'}`);
-      console.log(`📁 Hooks: ${fs.existsSync(path.join(this.srcPath, 'hooks')) ? 'EXISTS' : 'NOT FOUND'}`);
-      console.log(`📁 Utils: ${fs.existsSync(path.join(this.srcPath, 'utils')) ? 'EXISTS' : 'NOT FOUND'}`);
-      console.log(`📁 Services: ${fs.existsSync(this.servicesPath) ? 'EXISTS' : 'NOT FOUND'}`);
-
-      if (fs.existsSync(this.srcPath)) {
-        const srcContents = fs.readdirSync(this.srcPath);
-        console.log(`📁 Conteúdo da pasta src: ${srcContents.join(', ')}`);
-      }
+module.exports = HandoverGenerator;
