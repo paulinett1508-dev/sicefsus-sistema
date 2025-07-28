@@ -199,6 +199,7 @@ const Administracao = ({ usuario }) => {
   const handleCreateAdminDirect = async () => {
     try {
       setLoading(true);
+      console.log("🚀 Iniciando criação de administrador...");
 
       const result = await userService.createAdminUser(
         "paulinett@live.com",
@@ -206,6 +207,7 @@ const Administracao = ({ usuario }) => {
         "Paulinette Administrador"
       );
 
+      console.log("✅ Admin criado:", result);
       showToast(`✅ ${result.message}`, "success");
 
       // Recarregar lista de usuários

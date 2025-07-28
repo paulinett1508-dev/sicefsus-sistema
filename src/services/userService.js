@@ -532,6 +532,10 @@ const userService = {
   convertRoleToTipo,
   handleFirebaseError,
   diagnoseEmail,
+  createAdminUser: async (email, password, nome) => {
+    const { createAdminUser } = await import('./createAdminUser.js');
+    return createAdminUser(email, password, nome);
+  },
 
   // ✅ FUNÇÕES DE DEBUG
   async debugCreateUser(formData) {
