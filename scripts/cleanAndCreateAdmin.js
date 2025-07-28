@@ -1,27 +1,27 @@
 
 // scripts/cleanAndCreateAdmin.js - Limpar usuários e criar admin
-import { initializeApp } from "firebase/app";
-import { 
+const { initializeApp } = require("firebase/app");
+const { 
   getFirestore, 
   collection, 
   getDocs, 
   deleteDoc, 
   doc, 
   addDoc 
-} from "firebase/firestore";
-import { 
+} = require("firebase/firestore");
+const { 
   getAuth, 
   createUserWithEmailAndPassword 
-} from "firebase/auth";
+} = require("firebase/auth");
 
-// Configuração do Firebase (mesmo do projeto)
+// Configuração do Firebase
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyA9kE_rZXMnb7pJbVj5wuCwjbKqZYp4jnQ",
+  authDomain: "sicefsus-dev.firebaseapp.com",
+  projectId: "sicefsus-dev",
+  storageBucket: "sicefsus-dev.firebasestorage.app",
+  messagingSenderId: "537816203988",
+  appId: "1:537816203988:web:a123456789abcdef123456"
 };
 
 const app = initializeApp(firebaseConfig);
