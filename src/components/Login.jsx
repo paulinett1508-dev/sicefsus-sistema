@@ -33,11 +33,21 @@ export default function Login({ onLoginSuccess }) {
         await setDoc(doc(db, "usuarios", cred.user.uid), {
           uid: cred.user.uid,
           email: cred.user.email,
-          role: "user", // Sempre operador no auto-registro
-          isActive: true,
-          municipio: null, // Será definido pelo admin
-          uf: null, // Será definido pelo admin
-          createdAt: serverTimestamp(),
+          nome: cred.user.email.split('@')[0], // Nome baseado no email
+          tipo: "operador", // Sempre operador no auto-registro
+          role: "user", // Para compatibilidade
+          status: "ativo",
+          municipio: "", // Será definido pelo admin
+          uf: "", // Será definido pelo admin
+          departamento: "",
+          telefone: "",
+          dataCriacao: new Date().toISOString(),
+          dataAtualizacao: new Date().toISOString(),
+          criadoPor: "auto-registro",
+          ultimoAcesso: null,
+          primeiroAcesso: true,
+          senhaTemporaria: false,
+          observacao: "Usuário criado via auto-registro"
         });
       } else {
         await signInWithEmailAndPassword(auth, email, senha);

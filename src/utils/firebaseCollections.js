@@ -2,7 +2,7 @@
 // ✅ Sincronizado com os campos mostrados nas imagens
 
 export const COLLECTIONS = {
-  USERS: "users",
+  USERS: "usuarios", // Corrigido para usar a coleção correta
   EMENDAS: "emendas",
   DESPESAS: "despesas",
   LOGS: "logs",
