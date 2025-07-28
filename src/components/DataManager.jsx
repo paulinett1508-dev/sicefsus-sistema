@@ -91,7 +91,7 @@ const DataManager = () => {
 
       // Exportar usuários (apenas admins)
       if (exportOptions.users) {
-        const usersSnapshot = await getDocs(collection(db, "users"));
+        const usersSnapshot = await getDocs(collection(db, "usuarios"));
         exportData.collections.users = usersSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
