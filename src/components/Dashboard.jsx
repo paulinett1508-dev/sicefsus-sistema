@@ -19,16 +19,17 @@ export default function Dashboard({ usuario }) {
   const { emendas, despesas, loading, error, estatisticasGerais, recarregar } =
     useEmendaDespesa(usuario);
 
-  // ✅ APLICAR FILTRO POR MUNICÍPIO PARA OPERADORES
+  // ✅ APLICAR FILTRO POR MUNICÍPIO PARA OPERADORES E USERS
   const dadosFiltrados = useMemo(() => {
     console.log("🔍 Aplicando filtro de município para Dashboard...");
     console.log("👤 Tipo de usuário:", usuario?.tipo);
+    console.log("👤 Role do usuário:", usuario?.role);
     console.log("📍 Município do usuário:", usuario?.municipio);
     console.log("📋 Total de emendas recebidas:", emendas?.length || 0);
     console.log("💰 Total de despesas recebidas:", despesas?.length || 0);
 
-    // ✅ ADMIN VÊ TUDO
-    if (usuario?.tipo === "admin") {
+    // ✅ ADMIN VÊ TUDO (verificar tanto tipo quanto role)
+    if (usuario?.tipo === "admin" || usuario?.role === "admin") {
       console.log("👑 Admin: Exibindo todos os dados");
       return {
         emendasFiltradas: emendas || [],
@@ -37,7 +38,15 @@ export default function Dashboard({ usuario }) {
     }
 
     // ✅ OPERADOR/USER VÊ APENAS SEU MUNICÍPIO
-    if ((usuario?.tipo === "operador" || usuario?.tipo === "user") && usuario?.municipio) {
+    const isOperadorOuUser = 
+      usuario?.tipo === "operador" || 
+      usuario?.tipo === "user" || 
+      usuario?.role === "operador" || 
+      usuario?.role === "user";
+
+    if (isOperadorOuUser && usuario?.municipio && usuario.municipio.trim() !== "") {
+      console.log(`🏘️ Usuário ${usuario.tipo || usuario.role}: Filtrando por município ${usuario.municipio}`);
+      
       const emendasFiltradas = (emendas || []).filter((emenda) => {
         const municipioEmenda = emenda.municipio?.toLowerCase().trim();
         const municipioUsuario = usuario.municipio?.toLowerCase().trim();
@@ -45,7 +54,7 @@ export default function Dashboard({ usuario }) {
 
         if (!match) {
           console.log(
-            `🚫 Emenda filtrada: ${emenda.numero} (${emenda.municipio}) != ${usuario.municipio}`,
+            `🚫 Emenda filtrada: ${emenda.numero || emenda.id} (${emenda.municipio}) != ${usuario.municipio}`,
           );
         }
 
@@ -55,14 +64,25 @@ export default function Dashboard({ usuario }) {
       const despesasFiltradas = (despesas || []).filter((despesa) => {
         // Buscar emenda associada à despesa
         const emendaAssociada = emendas?.find((e) => e.id === despesa.emendaId);
-        if (!emendaAssociada) return false;
+        if (!emendaAssociada) {
+          console.log(`⚠️ Despesa sem emenda associada: ${despesa.id}`);
+          return false;
+        }
 
         const municipioEmenda = emendaAssociada.municipio?.toLowerCase().trim();
         const municipioUsuario = usuario.municipio?.toLowerCase().trim();
-        return municipioEmenda === municipioUsuario;
+        const match = municipioEmenda === municipioUsuario;
+
+        if (!match) {
+          console.log(
+            `🚫 Despesa filtrada: ${despesa.id} - emenda ${emendaAssociada.numero} (${emendaAssociada.municipio}) != ${usuario.municipio}`,
+          );
+        }
+
+        return match;
       });
 
-      console.log(`✅ Filtro aplicado para ${usuario.municipio}:`);
+      console.log(`✅ Filtro aplicado para município ${usuario.municipio}:`);
       console.log(
         `   📋 Emendas: ${emendasFiltradas.length}/${emendas?.length || 0}`,
       );
@@ -76,11 +96,20 @@ export default function Dashboard({ usuario }) {
       };
     }
 
-    // ✅ FALLBACK: SEM DADOS SE NÃO TEM MUNICÍPIO DEFINIDO
-    console.log("⚠️ Usuário sem município definido - sem dados filtrados");
+    // ✅ FALLBACK: OPERADOR/USER SEM MUNICÍPIO DEFINIDO - DADOS VAZIOS
+    if (isOperadorOuUser) {
+      console.log("⚠️ Usuário operador/user sem município definido - sem dados filtrados");
+      return {
+        emendasFiltradas: [],
+        despesasFiltradas: [],
+      };
+    }
+
+    // ✅ FALLBACK GERAL: EXIBIR TODOS OS DADOS (para outros tipos de usuário)
+    console.log("🔄 Tipo de usuário não reconhecido - exibindo todos os dados");
     return {
-      emendasFiltradas: [],
-      despesasFiltradas: [],
+      emendasFiltradas: emendas || [],
+      despesasFiltradas: despesas || [],
     };
   }, [emendas, despesas, usuario]);
 
@@ -298,7 +327,8 @@ export default function Dashboard({ usuario }) {
           <h1 style={styles.title}>📊 Dashboard SICEFSUS</h1>
           <p style={styles.subtitle}>
             Visão geral das emendas e despesas
-            {(usuario?.tipo === "operador" || usuario?.tipo === "user") && usuario?.municipio && (
+            {((usuario?.tipo === "operador" || usuario?.tipo === "user" || usuario?.role === "operador" || usuario?.role === "user") && 
+              usuario?.municipio && usuario.municipio.trim() !== "") && (
               <span style={styles.filterBadge}>
                 📍 Filtrado para: {usuario.municipio}{usuario.uf ? `/${usuario.uf}` : ''}
               </span>
