@@ -311,7 +311,6 @@ export default function Dashboard({ usuario }) {
       <div style={styles.cardsGrid}>
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{
               ...styles.cardIcon,
               backgroundColor: CHART_COLORS.primary,
@@ -329,7 +328,6 @@ export default function Dashboard({ usuario }) {
 
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{
               ...styles.cardIcon,
               backgroundColor: CHART_COLORS.success,
@@ -347,7 +345,6 @@ export default function Dashboard({ usuario }) {
 
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{
               ...styles.cardIcon,
               backgroundColor: CHART_COLORS.warning,
@@ -395,7 +392,6 @@ export default function Dashboard({ usuario }) {
 
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{
               ...styles.cardIcon,
               backgroundColor: CHART_COLORS.secondary,
