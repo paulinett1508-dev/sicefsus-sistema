@@ -362,7 +362,6 @@ export default function Dashboard({ usuario }) {
 
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{ ...styles.cardIcon, backgroundColor: CHART_COLORS.error }}
           >
             💸
@@ -377,7 +376,6 @@ export default function Dashboard({ usuario }) {
 
         <div style={styles.card}>
           <div
-            style={styles.cardIcon}
             style={{ ...styles.cardIcon, backgroundColor: CHART_COLORS.info }}
           >
             💳
