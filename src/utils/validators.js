@@ -1,6 +1,6 @@
 // src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
 // ✅ Funções utilitárias para normalização e validação
-import { useState } from 'react';
+import { useState } from "react";
 
 // Lista oficial de UFs brasileiras
 const UFS_VALIDAS = [
@@ -87,11 +87,11 @@ export const validateMunicipio = (municipio) => {
 export const validateLocation = (municipio, uf) => {
   const erros = [];
 
-  if (!municipio || typeof municipio !== 'string' || municipio.trim() === "") {
+  if (!municipio || typeof municipio !== "string" || municipio.trim() === "") {
     erros.push("Município é obrigatório e deve ser um texto válido");
   }
 
-  if (!uf || typeof uf !== 'string' || uf.trim() === "") {
+  if (!uf || typeof uf !== "string" || uf.trim() === "") {
     erros.push("UF é obrigatória e deve ser um texto válido");
   }
 
@@ -106,7 +106,7 @@ export const validateLocation = (municipio, uf) => {
 
   const ufNormalizada = normalizeUF(uf);
   if (ufNormalizada && !UFS_VALIDAS.includes(ufNormalizada)) {
-    erros.push(`UF inválida: ${uf}. UFs válidas: ${UFS_VALIDAS.join(', ')}`);
+    erros.push(`UF inválida: ${uf}. UFs válidas: ${UFS_VALIDAS.join(", ")}`);
   }
 
   // Validação contra caracteres especiais maliciosos
@@ -156,12 +156,12 @@ export const validatePassword = (senha) => {
 };
 
 /**
- * ✅ VALIDAR role de usuário
+ * ✅ VALIDAR role de usuário (CORRIGIDO)
  * @param {string} role - Role a ser validada
  * @returns {boolean} - true se válida
  */
 export const validateUserRole = (role) => {
-  const rolesValidas = ["admin", "user"];
+  const rolesValidas = ["admin", "user", "operador"]; // ✅ INCLUIR "user" e "operador"
   return rolesValidas.includes(role);
 };
 
@@ -279,7 +279,7 @@ export const getEstadoNome = (uf) => {
 };
 
 /**
- * ✅ VALIDAR dados completos de usuário para criação
+ * ✅ VALIDAR dados completos de usuário para criação (CORRIGIDO)
  * @param {Object} userData - Dados do usuário
  * @returns {Object} - Resultado da validação completa
  */
@@ -310,15 +310,23 @@ export const validateUserData = (userData) => {
     dadosNormalizados.nome = nomeValidacao.nomeNormalizado;
   }
 
-  // Validar localização
-  const localizacao = validateLocation(userData.municipio, userData.uf);
-  if (!localizacao.valido) {
-    if (localizacao.erros.municipio)
-      erros.municipio = localizacao.erros.municipio;
-    if (localizacao.erros.uf) erros.uf = localizacao.erros.uf;
-  } else {
-    dadosNormalizados.municipio = localizacao.municipio;
-    dadosNormalizados.uf = localizacao.uf;
+  // ✅ VALIDAÇÃO DE LOCALIZAÇÃO CORRIGIDA
+  // Para operadores, município/UF são obrigatórios
+  if (userData.role === "user" || userData.role === "operador") {
+    const localizacao = validateLocation(userData.municipio, userData.uf);
+    if (!localizacao.valido) {
+      localizacao.erros.forEach((erro) => {
+        if (erro.includes("Município")) erros.municipio = erro;
+        if (erro.includes("UF")) erros.uf = erro;
+      });
+    } else {
+      dadosNormalizados.municipio = localizacao.municipio;
+      dadosNormalizados.uf = localizacao.uf;
+    }
+  } else if (userData.role === "admin") {
+    // Para admins, limpar localização
+    dadosNormalizados.municipio = "";
+    dadosNormalizados.uf = "";
   }
 
   // Validar role
@@ -383,20 +391,18 @@ export const logValidation = (operacao, dados, resultado) => {
 export const createErrorReport = (context, error, additionalData = {}) => {
   return {
     context,
-    message: error.message || 'Erro desconhecido',
+    message: error.message || "Erro desconhecido",
     stack: error.stack,
     timestamp: new Date().toISOString(),
-    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
-    url: typeof window !== 'undefined' ? window.location.href : 'N/A',
+    userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "N/A",
+    url: typeof window !== "undefined" ? window.location.href : "N/A",
     additionalData,
     errorName: error.name,
     fileName: error.fileName,
     lineNumber: error.lineNumber,
-    columnNumber: error.columnNumber
+    columnNumber: error.columnNumber,
   };
 };
-
-// src/utils/validators.js - VALIDADORES COMPLETOS PARA SICEFSUS
 
 // ✅ CNPJ Validators
 export const formatarCNPJ = (valor) => {
@@ -408,7 +414,7 @@ export const formatarCNPJ = (valor) => {
   // Aplica máscara XX.XXX.XXX/XXXX-XX
   return numeros.replace(
     /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-    "$1.$2.$3/$4-$5"
+    "$1.$2.$3/$4-$5",
   );
 };
 
@@ -454,7 +460,10 @@ export const validarCNPJ = (cnpj) => {
 
   // Verifica se os dígitos calculados conferem
   if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
-    return { valido: false, erro: "CNPJ inválido - dígitos verificadores incorretos" };
+    return {
+      valido: false,
+      erro: "CNPJ inválido - dígitos verificadores incorretos",
+    };
   }
 
   return { valido: true, erro: null };
@@ -462,21 +471,21 @@ export const validarCNPJ = (cnpj) => {
 
 // ✅ HOOK PARA USO NO DESPESAFORM
 export const useCNPJValidation = () => {
-  const [cnpjError, setCnpjError] = useState('');
+  const [cnpjError, setCnpjError] = useState("");
 
   const handleCNPJChange = (valor, setFormData) => {
     // Formata o CNPJ
     const cnpjFormatado = formatarCNPJ(valor);
 
     // Atualiza o form
-    setFormData(prev => ({ ...prev, cnpjFornecedor: cnpjFormatado }));
+    setFormData((prev) => ({ ...prev, cnpjFornecedor: cnpjFormatado }));
 
     // Valida apenas se tem 14 dígitos
-    if (cnpjFormatado.replace(/\D/g, '').length === 14) {
+    if (cnpjFormatado.replace(/\D/g, "").length === 14) {
       const validacao = validarCNPJ(cnpjFormatado);
-      setCnpjError(validacao.valido ? '' : validacao.erro);
+      setCnpjError(validacao.valido ? "" : validacao.erro);
     } else {
-      setCnpjError('');
+      setCnpjError("");
     }
   };
 

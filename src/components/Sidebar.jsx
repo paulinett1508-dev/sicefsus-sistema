@@ -14,7 +14,7 @@ const adminItems = [{ label: "Usuários", icon: "👥", path: "/administracao" }
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
 
-  const isAdmin = usuario?.role === "admin";
+  const isAdmin = usuario?.tipo === "admin";
 
   // ✅ FUNÇÃO PARA OBTER NOME DE EXIBIÇÃO CORRETO
   const getDisplayName = (usuario) => {

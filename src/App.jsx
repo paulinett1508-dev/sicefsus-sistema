@@ -1,4 +1,4 @@
-// App.jsx - VERSÃO ORIGINAL LIMPA (SEM CONTEXTOS)
+// App.jsx - VERSÃO CORRIGIDA PARA SICEFSUS
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -9,7 +9,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { ToastProvider } from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import Home from "./components/Home";
@@ -185,66 +185,112 @@ function AppContent() {
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
 
-  // Gerenciar autenticação
+  // ✅ GERENCIAR AUTENTICAÇÃO - CORREÇÃO PRINCIPAL
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        try {
-          // Buscar dados do usuário no Firestore
-          const userDoc = await getDoc(doc(db, "usuarios", firebaseUser.uid));
+        // ✅ SÓ BUSCAR DADOS SE NÃO TEMOS USUÁRIO AINDA (evita conflito com Login.jsx)
+        if (!usuario) {
+          try {
+            console.log(
+              "🔍 onAuthStateChanged: Carregando dados do usuário:",
+              firebaseUser.uid,
+            );
+            console.log("📧 Email:", firebaseUser.email);
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUsuario({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              role: userData.role || "user",
-              municipio: userData.municipio,
-              uf: userData.uf,
-              isActive: userData.isActive !== false,
-              ...userData,
-            });
-          } else {
-            // Criar documento básico se não existir
-            const basicUserData = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              role: "user",
-              isActive: true,
-              createdAt: new Date(),
-            };
+            // ✅ CORREÇÃO CRÍTICA: Buscar apenas em "usuarios"
+            const userDoc = await getDoc(doc(db, "usuarios", firebaseUser.uid));
 
-            await setDoc(doc(db, "users", firebaseUser.uid), basicUserData);
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              console.log(
+                "✅ Dados encontrados na coleção 'usuarios':",
+                userData,
+              );
 
-            setUsuario({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName,
-              role: "user",
-              isActive: true,
-              ...basicUserData,
-            });
+              // ✅ MAPEAMENTO CORRETO DOS CAMPOS SICEFSUS
+              const usuario = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+
+                // ✅ CAMPOS PRINCIPAIS DO SICEFSUS
+                nome:
+                  userData.nome ||
+                  userData.name ||
+                  firebaseUser.email?.split("@")[0] ||
+                  "Usuário",
+                tipo: userData.tipo || "operador", // admin | operador
+                status: userData.status || "ativo", // ativo | inativo
+                municipio: userData.municipio || "",
+                uf: userData.uf || "",
+
+                // ✅ CAMPOS DE COMPATIBILIDADE (MAPEAMENTO CRÍTICO)
+                displayName:
+                  userData.nome || userData.name || firebaseUser.displayName,
+                role: userData.tipo === "admin" ? "admin" : "user", // ✅ MAPEAMENTO: operador → user
+                isActive: userData.status === "ativo",
+
+                // ✅ DADOS ADICIONAIS
+                departamento: userData.departamento || "",
+                telefone: userData.telefone || "",
+                dataCriacao: userData.dataCriacao,
+                dataAtualizacao: userData.dataAtualizacao,
+                ultimoAcesso: userData.ultimoAcesso,
+                primeiroAcesso: userData.primeiroAcesso || false,
+                totalAcessos: userData.totalAcessos || 0,
+                criadoPor: userData.criadoPor,
+
+                // ✅ PRESERVAR TODOS OS CAMPOS ORIGINAIS
+                ...userData,
+              };
+
+              setUsuario(usuario);
+
+              console.log("👤 Usuário configurado via onAuthStateChanged:", {
+                nome: usuario.nome,
+                tipo: usuario.tipo,
+                role: usuario.role,
+                municipio: usuario.municipio,
+                uf: usuario.uf,
+                status: usuario.status,
+                isAdmin: usuario.tipo === "admin",
+              });
+            } else {
+              console.log("❌ Usuário não encontrado na coleção 'usuarios'");
+              console.log("🚨 USUÁRIO ÓRFÃO DETECTADO!");
+              console.log("   - Existe no Firebase Auth ✅");
+              console.log("   - NÃO existe no Firestore ❌");
+              console.log(
+                "   - Precisa ser criado via interface de administração",
+              );
+
+              // ✅ LOGOUT FORÇADO - NÃO CRIAR AUTOMATICAMENTE
+              await signOut(auth);
+              setUsuario(null);
+              setAuthError(
+                "Usuário não encontrado no sistema. Entre em contato com o administrador.",
+              );
+            }
+          } catch (error) {
+            console.error("❌ Erro ao carregar dados do usuário:", error);
+
+            // ✅ EM CASO DE ERRO, NÃO CRIAR USUÁRIO FANTASMA
+            setAuthError("Erro ao carregar dados do usuário. Tente novamente.");
+            await signOut(auth);
+            setUsuario(null);
           }
-        } catch (error) {
-          console.error("Erro ao carregar dados do usuário:", error);
-          // Fallback básico
-          setUsuario({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            role: "user",
-            isActive: true,
-          });
+        } else {
+          console.log("👤 Usuário já definido, pulando onAuthStateChanged");
         }
       } else {
+        console.log("🚪 Usuário deslogado");
         setUsuario(null);
       }
       setLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, []); // ✅ SEM 'usuario' nas dependências para evitar loops
 
   // Redirecionamento
   useEffect(() => {
@@ -289,11 +335,32 @@ function AppContent() {
     setAuthError(null);
   }, []);
 
-  const handleLoginSuccess = useCallback(() => {
-    setShowLogin(false);
-    setAuthError(null);
-    navigate("/dashboard");
-  }, [navigate]);
+  // ✅ FUNÇÃO CORRIGIDA PARA RECEBER DADOS COMPLETOS DO LOGIN
+  const handleLoginSuccess = useCallback(
+    (dadosUsuario) => {
+      console.log("✅ handleLoginSuccess chamado:", dadosUsuario);
+
+      // Se recebeu dados do usuário (login com dados), usar diretamente
+      if (dadosUsuario && dadosUsuario.uid) {
+        console.log(
+          "📋 Definindo usuário com dados completos do Login.jsx:",
+          dadosUsuario,
+        );
+        setUsuario(dadosUsuario);
+        setShowLogin(false);
+        setAuthError(null);
+        navigate("/dashboard");
+        return;
+      }
+
+      // Caso contrário (auto-registro), só fechar modal e navegar
+      console.log("📋 Login sem dados - deixar onAuthStateChanged carregar");
+      setShowLogin(false);
+      setAuthError(null);
+      navigate("/dashboard");
+    },
+    [navigate],
+  );
 
   const handleLoginClose = useCallback(() => {
     setShowLogin(false);
@@ -444,7 +511,7 @@ function AppContent() {
                 }
               />
 
-              {/* Rotas administrativas */}
+              {/* ✅ ROTAS ADMINISTRATIVAS - CORRIGIDAS */}
               <Route
                 path="/admin"
                 element={<Navigate to="/administracao" replace />}
@@ -511,6 +578,10 @@ function AppContent() {
 
 // Componente principal
 function App() {
+  if (!auth) {
+    return <FirebaseError />;
+  }
+
   return (
     <ToastProvider>
       <Router>
