@@ -37,12 +37,14 @@ export default function Dashboard({ usuario }) {
       };
     }
 
-    // ✅ OPERADOR/USER VÊ APENAS SEU MUNICÍPIO
+    // ✅ OPERADOR/USER VÊ APENAS SEU MUNICÍPIO - CORREÇÃO CRÍTICA
     const isOperadorOuUser = 
       usuario?.tipo === "operador" || 
       usuario?.tipo === "user" || 
       usuario?.role === "operador" || 
-      usuario?.role === "user";
+      usuario?.role === "user" ||
+      // ✅ CORREÇÃO: Considerar usuários sem role definido como operadores
+      (!usuario?.role && usuario?.tipo !== "admin");
 
     if (isOperadorOuUser && usuario?.municipio && usuario.municipio.trim() !== "") {
       console.log(`🏘️ Usuário ${usuario.tipo || usuario.role}: Filtrando por município ${usuario.municipio}`);
@@ -327,7 +329,7 @@ export default function Dashboard({ usuario }) {
           <h1 style={styles.title}>📊 Dashboard SICEFSUS</h1>
           <p style={styles.subtitle}>
             Visão geral das emendas e despesas
-            {((usuario?.tipo === "operador" || usuario?.tipo === "user" || usuario?.role === "operador" || usuario?.role === "user") && 
+            {((usuario?.tipo === "operador" || usuario?.tipo === "user" || usuario?.role === "operador" || usuario?.role === "user" || (!usuario?.role && usuario?.tipo !== "admin")) && 
               usuario?.municipio && usuario.municipio.trim() !== "") && (
               <span style={styles.filterBadge}>
                 📍 Filtrado para: {usuario.municipio}{usuario.uf ? `/${usuario.uf}` : ''}

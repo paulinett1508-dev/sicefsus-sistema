@@ -48,8 +48,8 @@ export const UserProvider = ({ children }) => {
               nome: nome,
               displayName: nome, // Para compatibilidade com Sidebar
 
-              // ✅ MAPEAMENTO DE TIPOS:
-              role: tipo === "admin" ? "admin" : "user", // Para compatibilidade
+              // ✅ MAPEAMENTO DE TIPOS CORRIGIDO:
+              role: tipo === "admin" ? "admin" : tipo === "operador" ? "operador" : "user", // Mapear corretamente
               tipo: tipo, // Campo original do sistema
 
               // ✅ MAPEAMENTO DE STATUS:
@@ -102,7 +102,7 @@ export const UserProvider = ({ children }) => {
               email: firebaseUser.email,
               nome: nomeBasico,
               displayName: nomeBasico,
-              role: "user",
+              role: "operador", // ✅ CORREÇÃO: Usar "operador" consistentemente
               tipo: "operador",
               isActive: true,
               status: "ativo",
@@ -122,7 +122,7 @@ export const UserProvider = ({ children }) => {
             email: firebaseUser.email,
             nome: fallbackName,
             displayName: fallbackName,
-            role: "user",
+            role: "operador", // ✅ CORREÇÃO: Usar "operador" como padrão
             tipo: "operador",
             isActive: true,
             status: "ativo",
