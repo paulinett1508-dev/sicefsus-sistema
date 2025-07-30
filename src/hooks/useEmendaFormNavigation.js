@@ -12,32 +12,60 @@ export const useEmendaFormNavigation = (hasUnsavedChanges = false) => {
   const { navigateWithConfirmation, createLinkHandler } =
     useNavigationProtection();
 
-  // ✅ NAVEGAÇÃO ESPECÍFICA PARA EMENDAS (SEMPRE PARA /emendas)
+  // ✅ NAVEGAÇÃO ESPECÍFICA PARA EMENDAS (SEMPRE PARA /emendas) - CORRIGIDA
   const navegarParaListaEmendas = useCallback(() => {
     console.log("🎯 Navegando especificamente para /emendas");
     console.log("📍 Localização atual:", location.pathname);
 
-    try {
-      // 1ª tentativa: navigate do React Router
-      navigate("/emendas", { replace: true });
-      console.log("✅ Navegação via React Router realizada");
-      
-      // Verificação de segurança após pequeno delay
-      setTimeout(() => {
-        if (window.location.pathname !== "/emendas") {
-          console.log("🔄 Fallback: Forçando navegação com window.location");
-          window.location.href = "/emendas";
-        }
-      }, 100);
-    } catch (error) {
-      console.error("❌ Erro na navegação React Router:", error);
-      // Fallback: navegação direta
-      try {
-        window.location.href = "/emendas";
-      } catch (fallbackError) {
-        console.error("❌ Erro crítico na navegação:", fallbackError);
-      }
+    // Se já estamos em /emendas, não fazer nada
+    if (location.pathname === "/emendas") {
+      console.log("✅ Já estamos em /emendas - não é necessário navegar");
+      return;
     }
+
+    // Múltiplas tentativas de navegação com delays progressivos
+    const tentarNavegacao = (tentativa = 1) => {
+      console.log(`🎯 Tentativa ${tentativa} de navegação`);
+      
+      try {
+        if (tentativa === 1) {
+          // 1ª tentativa: navigate com replace
+          navigate("/emendas", { replace: true });
+          console.log("✅ Tentativa 1: navigate com replace");
+        } else if (tentativa === 2) {
+          // 2ª tentativa: navigate sem replace
+          navigate("/emendas");
+          console.log("✅ Tentativa 2: navigate sem replace");
+        } else {
+          // 3ª tentativa: window.location
+          console.log("✅ Tentativa 3: window.location (fallback final)");
+          window.location.href = "/emendas";
+          return;
+        }
+
+        // Verificar se a navegação foi bem-sucedida após delay
+        setTimeout(() => {
+          const currentPath = window.location.pathname;
+          console.log(`📍 Verificação pós-navegação (tentativa ${tentativa}):`, currentPath);
+          
+          if (currentPath !== "/emendas" && tentativa < 3) {
+            console.log(`⚠️ Navegação tentativa ${tentativa} falhou, tentando próxima...`);
+            tentarNavegacao(tentativa + 1);
+          } else if (currentPath === "/emendas") {
+            console.log(`✅ Navegação bem-sucedida na tentativa ${tentativa}!`);
+          }
+        }, tentativa * 100); // Delay progressivo: 100ms, 200ms, 300ms
+
+      } catch (error) {
+        console.error(`❌ Erro na tentativa ${tentativa}:`, error);
+        if (tentativa < 3) {
+          tentarNavegacao(tentativa + 1);
+        }
+      }
+    };
+
+    // Iniciar processo de navegação
+    tentarNavegacao(1);
   }, [navigate, location.pathname]);
 
   // ✅ NAVEGAÇÃO COM CONFIRMAÇÃO (se há alterações não salvas)
