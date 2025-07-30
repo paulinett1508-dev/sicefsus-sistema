@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/firebaseConfig';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebaseConfig";
 
 const UserContext = createContext();
 
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
@@ -49,7 +49,12 @@ export const UserProvider = ({ children }) => {
               displayName: nome, // Para compatibilidade com Sidebar
 
               // ✅ MAPEAMENTO DE TIPOS CORRIGIDO:
-              role: tipo === "admin" ? "admin" : tipo === "operador" ? "operador" : "user", // Mapear corretamente
+              role:
+                tipo === "admin"
+                  ? "admin"
+                  : tipo === "operador"
+                    ? "operador"
+                    : "user", // Mapear corretamente
               tipo: tipo, // Campo original do sistema
 
               // ✅ MAPEAMENTO DE STATUS:
@@ -75,6 +80,11 @@ export const UserProvider = ({ children }) => {
               "⚠️ Documento do usuário não encontrado, criando básico...",
             );
 
+            // ✅ DETERMINAR TIPO BASEADO NO EMAIL
+            const emailDomain = firebaseUser.email?.split("@")[1] || "";
+            const isAdminEmail =
+              firebaseUser.email === "paulinett1508@gmail.com";
+
             // ✅ CRIAR DOCUMENTO BÁSICO se não existir
             const nomeBasico =
               firebaseUser.displayName ||
@@ -85,12 +95,26 @@ export const UserProvider = ({ children }) => {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               nome: nomeBasico,
-              tipo: "operador",
+              tipo: isAdminEmail ? "admin" : "operador",
               status: "ativo",
+
+              // ✅ CORREÇÃO CRÍTICA: Operadores precisam de município
+              municipio: isAdminEmail ? "" : "Floriano", // Município padrão para operadores
+              uf: isAdminEmail ? "" : "PI", // UF padrão para operadores
+
               primeiroAcesso: true,
               criadoPor: "sistema",
               dataCriacao: new Date(),
               dataAtualizacao: new Date(),
+
+              // ✅ CAMPOS ESPECÍFICOS PARA OPERADORES
+              ...(isAdminEmail
+                ? {}
+                : {
+                    permissoes: ["visualizar_emendas", "criar_despesas"],
+                    observacoes:
+                      "Usuário criado automaticamente - Definir município correto",
+                  }),
             };
 
             // ✅ CRIAR NA COLEÇÃO CORRETA "usuarios"
@@ -102,30 +126,43 @@ export const UserProvider = ({ children }) => {
               email: firebaseUser.email,
               nome: nomeBasico,
               displayName: nomeBasico,
-              role: "operador", // ✅ CORREÇÃO: Usar "operador" consistentemente
-              tipo: "operador",
+              role: isAdminEmail ? "admin" : "operador",
+              tipo: isAdminEmail ? "admin" : "operador",
               isActive: true,
               status: "ativo",
+              municipio: basicUserData.municipio,
+              uf: basicUserData.uf,
               ...basicUserData,
             });
+
+            // ✅ AVISO PARA OPERADORES SEM MUNICÍPIO DEFINIDO
+            if (!isAdminEmail) {
+              console.warn(
+                "⚠️ Operador criado com município padrão (Floriano/PI). Configure o município correto no perfil.",
+              );
+            }
           }
         } catch (error) {
           console.error("❌ Erro ao carregar dados do usuário:", error);
 
           // ✅ FALLBACK robusto em caso de erro
+          const isAdminEmail = firebaseUser.email === "paulinett1508@gmail.com";
           const fallbackName =
             firebaseUser.displayName ||
             firebaseUser.email?.split("@")[0] ||
             "Usuário";
+
           setUsuario({
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             nome: fallbackName,
             displayName: fallbackName,
-            role: "operador", // ✅ CORREÇÃO: Usar "operador" como padrão
-            tipo: "operador",
+            role: isAdminEmail ? "admin" : "operador",
+            tipo: isAdminEmail ? "admin" : "operador",
             isActive: true,
             status: "ativo",
+            municipio: isAdminEmail ? "" : "Floriano", // Fallback com município
+            uf: isAdminEmail ? "" : "PI",
           });
         }
       } else {
@@ -143,14 +180,10 @@ export const UserProvider = ({ children }) => {
     setUsuario,
     loading,
     isAuthenticated: !!usuario,
-    isAdmin: usuario?.role === 'admin' || usuario?.tipo === 'admin',
+    isAdmin: usuario?.role === "admin" || usuario?.tipo === "admin",
   };
 
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export { UserContext };

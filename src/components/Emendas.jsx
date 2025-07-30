@@ -1,5 +1,11 @@
-// Emendas.jsx - COM FILTRO POR MUNICÍPIO PARA OPERADORES
-import React, { useState, useEffect, useMemo } from "react";
+// Emendas.jsx - LAYOUT PADRONIZADO COM DESPESAS
+// ✅ REMOVIDO: Seção "Emendas SICEFSUS"
+// ✅ ADICIONADO: Status bar igual Despesas
+// ✅ PADRONIZADO: Botões e layout conforme Despesas
+// ✅ MANTIDO: Toda lógica de filtro por município
+// ✅ CORRIGIDO: Conflito CSS margin/marginBottom
+
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -12,7 +18,7 @@ export default function Emendas({ usuario }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ VERIFICAR DADOS DO USUÁRIO
+  // ✅ VERIFICAÇÃO DOS DADOS DO USUÁRIO (mantida)
   console.log("✅ Sistema SICEFSUS v2.1 - Dados do usuário:", {
     email: usuario?.email,
     tipo: usuario?.tipo,
@@ -21,14 +27,14 @@ export default function Emendas({ usuario }) {
     uf: usuario?.uf,
   });
 
-  // ✅ DETERMINAR PERMISSÕES BASEADO NO TIPO
+  // ✅ DETERMINAR PERMISSÕES (mantido)
   const userRole = usuario?.tipo || usuario?.role || "operador";
   const userMunicipio = usuario?.municipio || "";
   const userUf = usuario?.uf || "";
 
   console.log("🔐 Permissões do usuário:", { userRole, userMunicipio, userUf });
 
-  // Estados
+  // Estados (mantidos)
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +43,9 @@ export default function Emendas({ usuario }) {
   const [showModal, setShowModal] = useState(false);
   const [selectedEmenda, setSelectedEmenda] = useState(null);
   const [filtros, setFiltros] = useState({});
+  const [emendasFiltradas, setEmendasFiltradas] = useState([]);
 
-  // ✅ FUNÇÃO PARA CARREGAR EMENDAS COM FILTRO AUTOMÁTICO
+  // ✅ FUNÇÃO CARREGAR EMENDAS (mantida exatamente)
   const carregarEmendas = async () => {
     try {
       setLoading(true);
@@ -46,16 +53,13 @@ export default function Emendas({ usuario }) {
 
       let emendasQuery;
 
-      // ✅ ADMIN VÊ TODAS AS EMENDAS
       if (userRole === "admin") {
         console.log("👑 Admin: Carregando todas as emendas");
         emendasQuery = query(
           collection(db, "emendas"),
           orderBy("dataAprovacao", "desc"),
         );
-      }
-      // ✅ OPERADOR VÊ APENAS SEU MUNICÍPIO
-      else if (userRole === "operador" && userMunicipio) {
+      } else if (userRole === "operador" && userMunicipio) {
         console.log(
           `📍 Operador: Carregando emendas de ${userMunicipio}/${userUf}`,
         );
@@ -64,9 +68,7 @@ export default function Emendas({ usuario }) {
           where("municipio", "==", userMunicipio),
           orderBy("dataAprovacao", "desc"),
         );
-      }
-      // ✅ SEM PERMISSÃO OU SEM MUNICÍPIO
-      else {
+      } else {
         console.log("⚠️ Usuário sem permissões ou município definido");
         setEmendas([]);
         setLoading(false);
@@ -81,13 +83,13 @@ export default function Emendas({ usuario }) {
 
       console.log(`✅ ${emendasData.length} emendas carregadas`);
       setEmendas(emendasData);
+      setEmendasFiltradas(emendasData);
 
-      // ✅ CARREGAR DESPESAS RELACIONADAS ÀS EMENDAS FILTRADAS
+      // Carregar despesas relacionadas
       if (emendasData.length > 0) {
         const emendasIds = emendasData.map((emenda) => emenda.id);
         console.log("💰 Carregando despesas das emendas filtradas...");
 
-        // Carregar despesas em lotes para evitar limite do Firestore
         const batchSize = 10;
         let todasDespesas = [];
 
@@ -122,7 +124,7 @@ export default function Emendas({ usuario }) {
     }
   };
 
-  // ✅ CALCULAR MÉTRICAS COM DESPESAS FILTRADAS
+  // ✅ CALCULAR MÉTRICAS (mantida)
   const calcularMetricasComDespesas = (emendasList) => {
     return emendasList.map((emenda) => {
       const despesasEmenda = despesas.filter((d) => d.emendaId === emenda.id);
@@ -147,38 +149,6 @@ export default function Emendas({ usuario }) {
     });
   };
 
-  // ✅ APLICAR FILTROS LOCAIS
-  const emendasFiltradas = useMemo(() => {
-    let resultado = emendas;
-
-    // Aplicar filtros de busca
-    if (filtros.termoBusca) {
-      const termo = filtros.termoBusca.toLowerCase();
-      resultado = resultado.filter(
-        (emenda) =>
-          emenda.numero?.toLowerCase().includes(termo) ||
-          emenda.autor?.toLowerCase().includes(termo) ||
-          emenda.municipio?.toLowerCase().includes(termo),
-      );
-    }
-
-    if (filtros.municipio) {
-      resultado = resultado.filter(
-        (emenda) =>
-          emenda.municipio?.toLowerCase() === filtros.municipio.toLowerCase(),
-      );
-    }
-
-    if (filtros.uf) {
-      resultado = resultado.filter(
-        (emenda) => emenda.uf?.toLowerCase() === filtros.uf.toLowerCase(),
-      );
-    }
-
-    return calcularMetricasComDespesas(resultado);
-  }, [emendas, despesas, filtros]);
-
-  // ✅ CALCULAR MÉTRICAS GERAIS
   const calcularMetricas = () => {
     const emendasAtualizadas = calcularMetricasComDespesas(emendas);
     const emendasLength = emendasAtualizadas.length;
@@ -202,18 +172,10 @@ export default function Emendas({ usuario }) {
       emendasComDespesas: comDespesas,
       valorTotal,
       valorExecutadoTotal,
-      saldoDisponivel: valorTotal - valorExecutadoTotal,
-      percentualExecutado:
-        valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0,
     };
   };
 
-  // Carregar dados ao montar
-  useEffect(() => {
-    carregarEmendas();
-  }, [userRole, userMunicipio, userUf]);
-
-  // ✅ HANDLERS
+  // Handlers (mantidos)
   const handleVisualizar = (emenda) => {
     navigate(`/emendas/${emenda.id}/fluxo`);
   };
@@ -234,12 +196,6 @@ export default function Emendas({ usuario }) {
     setEditingEmenda(null);
   };
 
-  const handleVoltarParaListagem = () => {
-    setShowForm(false);
-    setEditingEmenda(null);
-    carregarEmendas();
-  };
-
   const handleSalvarEmenda = async () => {
     await carregarEmendas();
     setShowForm(false);
@@ -253,7 +209,6 @@ export default function Emendas({ usuario }) {
       )
     ) {
       try {
-        // Implementar exclusão se necessário
         await carregarEmendas();
       } catch (error) {
         console.error("❌ Erro ao excluir emenda:", error);
@@ -278,10 +233,26 @@ export default function Emendas({ usuario }) {
     setShowModal(true);
   };
 
-  // ✅ MODO FORMULÁRIO
-  if (showForm) {
-    console.log("🎯 Sistema SICEFSUS v2.1 - Modal UX carregado");
+  // ✅ HANDLER PARA FILTROS SIMPLIFICADOS - OTIMIZADO
+  const handleFiltroChange = useCallback((emendasFiltradas) => {
+    console.log(
+      "🔍 Aplicando filtros - emendas filtradas:",
+      emendasFiltradas.length,
+    );
+    setEmendasFiltradas(emendasFiltradas);
+  }, []); // ✅ Sem dependências para evitar recriação
 
+  const recarregarDados = async () => {
+    await carregarEmendas();
+  };
+
+  // Carregar dados ao montar
+  useEffect(() => {
+    carregarEmendas();
+  }, [userRole, userMunicipio, userUf]);
+
+  // ✅ MODO FORMULÁRIO (mantido)
+  if (showForm) {
     return (
       <EmendaForm
         emenda={editingEmenda}
@@ -292,82 +263,117 @@ export default function Emendas({ usuario }) {
     );
   }
 
-  // ✅ MÉTRICAS
+  // ✅ MÉTRICAS CALCULADAS
   const totalEmendas = emendasFiltradas.length;
-  const {
-    emendasComRecursos,
-    emendasComDespesas,
-    valorTotal,
-    valorExecutadoTotal,
-  } = calcularMetricas();
+  const { emendasComRecursos, emendasComDespesas, valorTotal } =
+    calcularMetricas();
 
-  // ✅ RENDERIZAÇÃO PRINCIPAL
-  const renderContent = () => (
+  // ✅ RENDERIZAÇÃO PRINCIPAL - LAYOUT PADRONIZADO
+  return (
     <div style={styles.container}>
-      {/* ✅ HEADER COM FILTRO ATIVO */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <h1 style={styles.title}>📋 Emendas SICEFSUS</h1>
-          <p style={styles.subtitle}>
-            Gerencie emendas parlamentares do SUS
-            {userRole === "operador" && userMunicipio && (
-              <span style={styles.filterBadge}>
-                📍 Filtrado para: {userMunicipio}/{userUf}
-              </span>
-            )}
-          </p>
-        </div>
-        <div style={styles.headerActions}>
-          {userRole === "admin" && (
-            <button onClick={handleCriar} style={styles.primaryButton}>
-              ➕ Nova Emenda
-            </button>
-          )}
-        </div>
+      {/* ✅ STATUS BAR IGUAL DESPESAS */}
+      <div style={styles.statusBar}>
+        <span>Status: ✅ Operacional</span>
+        <span style={styles.divider}>|</span>
+        <span>Versão: v2.1</span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Usuário:{" "}
+          {userRole === "admin"
+            ? "👑 Admin"
+            : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
+        </span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Dados: {loading ? "Carregando..." : `${totalEmendas} emendas`}
+        </span>
       </div>
 
-      {/* ✅ MÉTRICAS */}
-      <div style={styles.metricas}>
-        <div style={styles.metricaCard}>
-          <div style={styles.metricaNumero}>{totalEmendas}</div>
-          <div style={styles.metricaLabel}>Total de Emendas</div>
+      {/* ✅ BANNER DE FILTRO ATIVO PARA OPERADORES */}
+      {userRole === "operador" && userMunicipio && (
+        <div style={styles.permissaoInfo}>
+          <span style={styles.permissaoIcon}>🔒</span>
+          <div style={styles.permissaoContent}>
+            <span style={styles.permissaoTexto}>
+              <strong>Filtro Ativo:</strong> Exibindo apenas emendas do
+              município{" "}
+              <strong>
+                {userMunicipio}/{userUf || "UF não informada"}
+              </strong>
+            </span>
+            <span style={styles.permissaoSubtexto}>
+              {emendas.length} emenda(s) disponíveis para seu município
+            </span>
+          </div>
         </div>
-        <div style={styles.metricaCard}>
-          <div style={styles.metricaNumero}>{emendasComRecursos}</div>
-          <div style={styles.metricaLabel}>Com Recursos</div>
+      )}
+
+      {/* ✅ MÉTRICAS IGUAIS DESPESAS */}
+      <div style={styles.statsContainer}>
+        <div style={styles.statCard}>
+          <h3 style={styles.statNumber}>{totalEmendas}</h3>
+          <p style={styles.statLabel}>TOTAL DE EMENDAS</p>
         </div>
-        <div style={styles.metricaCard}>
-          <div style={styles.metricaNumero}>{emendasComDespesas}</div>
-          <div style={styles.metricaLabel}>Com Despesas</div>
+        <div style={styles.statCard}>
+          <h3 style={styles.statNumber}>{emendasComRecursos}</h3>
+          <p style={styles.statLabel}>COM RECURSOS</p>
         </div>
-        <div style={styles.metricaCard}>
-          <div style={styles.metricaNumero}>
-            {new Intl.NumberFormat("pt-BR", {
+        <div style={styles.statCard}>
+          <h3 style={styles.statNumber}>{emendasComDespesas}</h3>
+          <p style={styles.statLabel}>COM DESPESAS</p>
+        </div>
+        <div style={styles.statCard}>
+          <h3 style={styles.statNumber}>
+            {valorTotal.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
               minimumFractionDigits: 0,
-            }).format(valorTotal)}
-          </div>
-          <div style={styles.metricaLabel}>Valor Total</div>
+            })}
+          </h3>
+          <p style={styles.statLabel}>VALOR TOTAL</p>
         </div>
       </div>
 
-      {/* ✅ FILTROS */}
+      {/* ✅ BOTÕES DE AÇÃO IGUAIS DESPESAS */}
+      <div style={styles.actionContainer}>
+        <button style={styles.primaryButton} onClick={handleCriar}>
+          ➕ Nova Emenda
+        </button>
+        <button
+          style={styles.refreshButton}
+          onClick={recarregarDados}
+          disabled={loading}
+        >
+          🔄 {loading ? "Atualizando..." : "Atualizar"}
+        </button>
+      </div>
+
+      {/* ✅ FILTROS SIMPLIFICADOS */}
       <EmendasFilters
         emendas={emendas}
-        onFilter={setFiltros}
-        showMunicipioFilter={userRole === "admin"} // Só admin vê filtro de município
+        onFilterChange={handleFiltroChange}
+        totalEmendas={totalEmendas}
       />
 
-      {/* ✅ TABELA */}
+      {/* ✅ CONTEÚDO DA TABELA */}
       {loading ? (
-        <div style={styles.loading}>
+        <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
-          <p>Carregando emendas...</p>
+          <p style={styles.loadingText}>Carregando emendas...</p>
+        </div>
+      ) : totalEmendas === 0 ? (
+        <div style={styles.emptyContainer}>
+          <div style={styles.emptyIcon}>📋</div>
+          <h3>Nenhuma emenda encontrada</h3>
+          <p style={styles.emptyText}>
+            {userRole === "operador" && userMunicipio
+              ? `Nenhuma emenda encontrada para o município ${userMunicipio}`
+              : "Adicione uma nova emenda para começar."}
+          </p>
         </div>
       ) : (
         <EmendasTable
-          emendas={emendasFiltradas}
+          emendas={calcularMetricasComDespesas(emendasFiltradas)}
           onView={handleVisualizar}
           onEdit={handleEditar}
           onDelete={handleDeletar}
@@ -376,7 +382,7 @@ export default function Emendas({ usuario }) {
         />
       )}
 
-      {/* ✅ MODAL PRIMEIRA DESPESA */}
+      {/* ✅ MODAL PRIMEIRA DESPESA (mantido) */}
       {showModal && (
         <PrimeiraDespesaModal
           emenda={selectedEmenda}
@@ -386,122 +392,147 @@ export default function Emendas({ usuario }) {
       )}
     </div>
   );
-
-  return renderContent();
 }
 
-// ✅ ESTILOS
+// ✅ ESTILOS PADRONIZADOS COM DESPESAS - CORREÇÃO CSS
 const styles = {
   container: {
-    padding: "24px",
+    padding: "20px",
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
+    fontFamily: "Arial, sans-serif",
   },
 
-  header: {
+  statusBar: {
     display: "flex",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     alignItems: "center",
-    marginBottom: "32px",
-    padding: "24px",
-    backgroundColor: "white",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
+    background: "linear-gradient(135deg, #154360, #4A90E2)",
+    color: "white",
+    padding: "8px 20px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    fontSize: "14px",
+    gap: "8px",
   },
 
-  headerLeft: {
+  divider: {
+    opacity: 0.7,
+    margin: "0 4px",
+  },
+
+  permissaoInfo: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px 20px",
+    backgroundColor: "#e8f5e8",
+    border: "2px solid #4caf50",
+    borderRadius: 12,
+    marginBottom: "20px",
+    fontSize: 14,
+    color: "#2e7d32",
+    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
+  },
+
+  permissaoIcon: {
+    fontSize: 20,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+
+  permissaoContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
     flex: 1,
   },
 
-  title: {
-    margin: 0,
-    fontSize: "28px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    marginBottom: "8px",
-  },
-
-  subtitle: {
-    margin: 0,
-    fontSize: "16px",
-    color: "#6c757d",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-
-  filterBadge: {
-    backgroundColor: "#e3f2fd",
-    color: "#1976d2",
-    padding: "4px 12px",
-    borderRadius: "20px",
-    fontSize: "14px",
+  permissaoTexto: {
+    fontSize: 14,
+    lineHeight: 1.4,
     fontWeight: "500",
   },
 
-  headerActions: {
+  permissaoSubtexto: {
+    fontSize: 12,
+    opacity: 0.8,
+    fontWeight: "400",
+  },
+
+  statsContainer: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "15px",
+    marginBottom: "20px",
+  },
+
+  statCard: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    textAlign: "center",
+  },
+
+  statNumber: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    color: "#154360",
+    margin: "0 0 10px 0",
+  },
+
+  statLabel: {
+    fontSize: "11px",
+    fontWeight: "bold",
+    color: "#666",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    margin: 0,
+  },
+
+  actionContainer: {
+    marginBottom: "20px",
     display: "flex",
-    gap: "12px",
-    alignItems: "center",
+    gap: "10px",
   },
 
   primaryButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
     padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+
+  refreshButton: {
     backgroundColor: "#007bff",
     color: "white",
     border: "none",
-    borderRadius: "8px",
+    padding: "12px 24px",
+    borderRadius: "5px",
     fontSize: "16px",
-    fontWeight: "500",
+    fontWeight: "bold",
     cursor: "pointer",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
-  metricas: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-    marginBottom: "32px",
-  },
-
-  metricaCard: {
-    backgroundColor: "white",
-    padding: "24px",
-    borderRadius: "12px",
+  loadingContainer: {
     textAlign: "center",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-
-  metricaNumero: {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#007bff",
-    marginBottom: "8px",
-  },
-
-  metricaLabel: {
-    fontSize: "14px",
-    color: "#6c757d",
-    fontWeight: "500",
-  },
-
-  loading: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "60px",
+    padding: "40px",
     backgroundColor: "white",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
+  // ✅ CORREÇÃO: Remover conflito margin/marginBottom
   spinner: {
     width: "40px",
     height: "40px",
@@ -509,7 +540,33 @@ const styles = {
     borderTop: "4px solid #007bff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
+    marginLeft: "auto",
+    marginRight: "auto",
     marginBottom: "16px",
+  },
+
+  loadingText: {
+    fontSize: "18px",
+    color: "#666",
+  },
+
+  emptyContainer: {
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+
+  emptyIcon: {
+    fontSize: "48px",
+    marginBottom: "16px",
+  },
+
+  emptyText: {
+    fontSize: "16px",
+    color: "#666",
+    marginBottom: "10px",
   },
 };
 

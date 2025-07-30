@@ -1,155 +1,260 @@
-// Dashboard.jsx - COM FILTRO POR MUNICÍPIO PARA OPERADORES
-import React, { useMemo } from "react";
-import { useEmendaDespesa } from "../hooks/useEmendaDespesa";
+// Dashboard.jsx - CORREÇÃO CRÍTICA - Admin não deve ter filtro de município
+// ✅ PROBLEMA: Admin estava sendo filtrado por município (incorreto)
+// ✅ SOLUÇÃO: Admin vê TODOS os dados sem qualquer filtro
 
-const CHART_COLORS = {
-  primary: "#3498db",
-  success: "#27ae60",
-  warning: "#f39c12",
-  error: "#e74c3c",
-  info: "#9b59b6",
-  secondary: "#95a5a6",
-};
+import React, { useState, useEffect } from "react";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import { useUser } from "../context/UserContext";
 
-export default function Dashboard({ usuario }) {
+const Dashboard = ({ usuario }) => {
+  const user = usuario;
+  const userLoading = !usuario;
+
+  // Estados
+  const [emendas, setEmendas] = useState([]);
+  const [despesas, setDespesas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   console.log("🏠 Dashboard iniciado");
-  console.log("👤 Dados do usuário carregados para Dashboard:", usuario);
+  console.log("👤 Dados do usuário carregados para Dashboard:", user);
 
-  // ✅ HOOK PARA CARREGAR DADOS COM FILTRO AUTOMÁTICO
-  const { emendas, despesas, loading, error, estatisticasGerais, recarregar } =
-    useEmendaDespesa(usuario);
+  // ✅ VERIFICAÇÃO MAIS ESPECÍFICA: Verificar campos essenciais
+  if (userLoading || !user || !user.email || !user.tipo) {
+    console.log("⏳ Aguardando dados completos do usuário...", {
+      userLoading,
+      hasUser: !!user,
+      hasEmail: !!user?.email,
+      hasTipo: !!user?.tipo,
+      user: user,
+    });
 
-  // ✅ APLICAR FILTRO POR MUNICÍPIO PARA OPERADORES E USERS
-  const dadosFiltrados = useMemo(() => {
-    console.log("🔍 Aplicando filtro de município para Dashboard...");
-    console.log("👤 Tipo de usuário:", usuario?.tipo);
-    console.log("👤 Role do usuário:", usuario?.role);
-    console.log("📍 Município do usuário:", usuario?.municipio);
-    console.log("📋 Total de emendas recebidas:", emendas?.length || 0);
-    console.log("💰 Total de despesas recebidas:", despesas?.length || 0);
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>
+            Status: ⏳{" "}
+            {userLoading ? "Carregando usuário..." : "Verificando dados..."}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+        </div>
 
-    // ✅ ADMIN VÊ TUDO (verificar tanto tipo quanto role)
-    if (usuario?.tipo === "admin" || usuario?.role === "admin") {
-      console.log("👑 Admin: Exibindo todos os dados");
-      return {
-        emendasFiltradas: emendas || [],
-        despesasFiltradas: despesas || [],
-      };
-    }
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p>
+            ⏳{" "}
+            {userLoading
+              ? "Carregando dados do usuário..."
+              : "Aguardando autenticação..."}
+          </p>
+          <p style={styles.loadingSubtext}>
+            Verificando permissões do usuário...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-    // ✅ OPERADOR/USER VÊ APENAS SEU MUNICÍPIO - CORREÇÃO CRÍTICA
-    const isOperadorOuUser = 
-      usuario?.tipo === "operador" || 
-      usuario?.tipo === "user" || 
-      usuario?.role === "operador" || 
-      usuario?.role === "user" ||
-      // ✅ CORREÇÃO: Considerar usuários sem role definido como operadores
-      (!usuario?.role && usuario?.tipo !== "admin");
+  // ✅ DETERMINAR PERMISSÕES CORRETAS
+  const userRole = user.tipo || user.role || "operador";
+  const userMunicipio = user.municipio || "";
+  const userUf = user.uf || "";
 
-    if (isOperadorOuUser && usuario?.municipio && usuario.municipio.trim() !== "") {
-      console.log(`🏘️ Usuário ${usuario.tipo || usuario.role}: Filtrando por município ${usuario.municipio}`);
-      
-      const emendasFiltradas = (emendas || []).filter((emenda) => {
-        const municipioEmenda = emenda.municipio?.toLowerCase().trim();
-        const municipioUsuario = usuario.municipio?.toLowerCase().trim();
-        const match = municipioEmenda === municipioUsuario;
+  console.log("🔐 Permissões detectadas:", { userRole, userMunicipio, userUf });
 
-        if (!match) {
-          console.log(
-            `🚫 Emenda filtrada: ${emenda.numero || emenda.id} (${emenda.municipio}) != ${usuario.municipio}`,
+  // ✅ FUNÇÃO PARA CARREGAR DADOS SEM FILTRO DESNECESSÁRIO
+  const carregarDados = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("📊 Iniciando carregamento de dados...");
+      console.log("👤 Tipo de usuário:", userRole);
+
+      let emendasData = [];
+      let despesasData = [];
+
+      // ✅ ADMIN: Carrega TODOS os dados sem filtro
+      if (userRole === "admin") {
+        console.log("👑 ADMIN: Carregando TODOS os dados (sem filtro)");
+
+        // Carregar TODAS as emendas
+        try {
+          const emendasRef = collection(db, "emendas");
+          const emendasQuery = query(
+            emendasRef,
+            orderBy("dataAprovacao", "desc"),
           );
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            emendasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          console.log(`✅ Admin - Emendas carregadas: ${emendasData.length}`);
+        } catch (error) {
+          console.error("❌ Erro ao carregar emendas para admin:", error);
         }
 
-        return match;
-      });
+        // Carregar TODAS as despesas
+        try {
+          const despesasRef = collection(db, "despesas");
+          const despesasQuery = query(despesasRef, orderBy("data", "desc"));
+          const despesasSnapshot = await getDocs(despesasQuery);
 
-      const despesasFiltradas = (despesas || []).filter((despesa) => {
-        // Buscar emenda associada à despesa
-        const emendaAssociada = emendas?.find((e) => e.id === despesa.emendaId);
-        if (!emendaAssociada) {
-          console.log(`⚠️ Despesa sem emenda associada: ${despesa.id}`);
-          return false;
+          despesasSnapshot.forEach((doc) => {
+            despesasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          console.log(`✅ Admin - Despesas carregadas: ${despesasData.length}`);
+        } catch (error) {
+          console.error("❌ Erro ao carregar despesas para admin:", error);
         }
+      }
 
-        const municipioEmenda = emendaAssociada.municipio?.toLowerCase().trim();
-        const municipioUsuario = usuario.municipio?.toLowerCase().trim();
-        const match = municipioEmenda === municipioUsuario;
+      // ✅ OPERADOR: Carrega apenas do município
+      else if (userRole === "operador" && userMunicipio) {
+        console.log(
+          `🏘️ OPERADOR: Carregando dados do município ${userMunicipio}`,
+        );
 
-        if (!match) {
-          console.log(
-            `🚫 Despesa filtrada: ${despesa.id} - emenda ${emendaAssociada.numero} (${emendaAssociada.municipio}) != ${usuario.municipio}`,
+        // Carregar emendas do município
+        try {
+          const emendasRef = collection(db, "emendas");
+          const emendasQuery = query(
+            emendasRef,
+            where("municipio", "==", userMunicipio),
+            orderBy("dataAprovacao", "desc"),
           );
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            emendasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          console.log(
+            `✅ Operador - Emendas do município carregadas: ${emendasData.length}`,
+          );
+        } catch (error) {
+          console.error("❌ Erro ao carregar emendas para operador:", error);
         }
 
-        return match;
+        // Carregar despesas das emendas do município
+        try {
+          if (emendasData.length > 0) {
+            const emendasIds = emendasData.map((e) => e.id);
+
+            // Carregar em lotes devido ao limite do Firestore
+            const batchSize = 10;
+            for (let i = 0; i < emendasIds.length; i += batchSize) {
+              const batch = emendasIds.slice(i, i + batchSize);
+
+              const despesasRef = collection(db, "despesas");
+              const despesasQuery = query(
+                despesasRef,
+                where("emendaId", "in", batch),
+                orderBy("data", "desc"),
+              );
+              const despesasSnapshot = await getDocs(despesasQuery);
+
+              despesasSnapshot.forEach((doc) => {
+                despesasData.push({
+                  id: doc.id,
+                  ...doc.data(),
+                });
+              });
+            }
+          }
+
+          console.log(
+            `✅ Operador - Despesas do município carregadas: ${despesasData.length}`,
+          );
+        } catch (error) {
+          console.error("❌ Erro ao carregar despesas para operador:", error);
+        }
+      }
+
+      // ✅ USUÁRIO SEM PERMISSÕES ADEQUADAS
+      else {
+        console.warn("⚠️ Usuário sem permissões adequadas:", {
+          userRole,
+          userMunicipio,
+        });
+        setError("Usuário sem permissões adequadas para acessar o dashboard.");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ ATUALIZAR ESTADOS
+      setEmendas(emendasData);
+      setDespesas(despesasData);
+
+      console.log("✅ Carregamento concluído:", {
+        emendas: emendasData.length,
+        despesas: despesasData.length,
       });
-
-      console.log(`✅ Filtro aplicado para município ${usuario.municipio}:`);
-      console.log(
-        `   📋 Emendas: ${emendasFiltradas.length}/${emendas?.length || 0}`,
-      );
-      console.log(
-        `   💰 Despesas: ${despesasFiltradas.length}/${despesas?.length || 0}`,
-      );
-
-      return {
-        emendasFiltradas,
-        despesasFiltradas,
-      };
+    } catch (error) {
+      console.error("❌ Erro geral no carregamento:", error);
+      setError(`Erro ao carregar dados: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // ✅ FALLBACK: OPERADOR/USER SEM MUNICÍPIO DEFINIDO - DADOS VAZIOS
-    if (isOperadorOuUser) {
-      console.log("⚠️ Usuário operador/user sem município definido - sem dados filtrados");
-      return {
-        emendasFiltradas: [],
-        despesasFiltradas: [],
-      };
-    }
-
-    // ✅ FALLBACK GERAL: EXIBIR TODOS OS DADOS (para outros tipos de usuário)
-    console.log("🔄 Tipo de usuário não reconhecido - exibindo todos os dados");
-    return {
-      emendasFiltradas: emendas || [],
-      despesasFiltradas: despesas || [],
-    };
-  }, [emendas, despesas, usuario]);
-
-  // ✅ CALCULAR ESTATÍSTICAS FILTRADAS
-  const estatisticasLocais = useMemo(() => {
-    if (!dadosFiltrados.emendasFiltradas || !dadosFiltrados.despesasFiltradas) {
-      return {
-        totalEmendas: 0,
-        totalDespesas: 0,
-        valorTotalEmendas: 0,
-        valorTotalDespesas: 0,
-        saldoDisponivel: 0,
-        percentualExecutado: 0,
-        emendasPorStatus: {},
-        despesasPorStatus: {},
-        evolucaoMensal: [],
-        topMunicipios: [],
-      };
-    }
-
-    const totalEmendas = dadosFiltrados.emendasFiltradas.length;
-    const totalDespesas = dadosFiltrados.despesasFiltradas.length;
-
-    const valorTotalEmendas = dadosFiltrados.emendasFiltradas.reduce(
-      (acc, emenda) => {
-        const valor = parseFloat(emenda.valorRecurso || emenda.valor || 0);
-        return acc + (isNaN(valor) ? 0 : valor);
-      },
-      0,
+  // ✅ EFFECT PARA CARREGAR DADOS
+  useEffect(() => {
+    console.log(
+      "🔄 useEffect Dashboard - Verificando necessidade de carregar dados",
+    );
+    console.log("👤 User disponível:", !!user);
+    console.log("📧 Email:", user?.email);
+    console.log("🔐 Tipo:", user?.tipo);
+    console.log(
+      "📊 Dados atuais - emendas:",
+      emendas.length,
+      "despesas:",
+      despesas.length,
     );
 
-    const valorTotalDespesas = dadosFiltrados.despesasFiltradas.reduce(
-      (acc, despesa) => {
-        const valor = parseFloat(despesa.valor || 0);
-        return acc + (isNaN(valor) ? 0 : valor);
-      },
-      0,
-    );
+    // Verificar se tem os dados essenciais
+    if (user && user.email && user.tipo) {
+      console.log("🚀 Iniciando carregamento de dados para:", userRole);
+      carregarDados();
+    } else {
+      console.log("⏳ Aguardando dados completos do usuário...");
+      console.log("Dados recebidos:", {
+        user,
+        email: user?.email,
+        tipo: user?.tipo,
+      });
+    }
+  }, [user?.email, user?.tipo]); // Dependências mais específicas
+
+  // ✅ CALCULAR MÉTRICAS
+  const calcularEstatisticas = () => {
+    const totalEmendas = emendas.length;
+    const totalDespesas = despesas.length;
+
+    const valorTotalEmendas = emendas.reduce((total, emenda) => {
+      const valor = parseFloat(emenda.valor || emenda.valorRecurso || 0);
+      return total + (isNaN(valor) ? 0 : valor);
+    }, 0);
+
+    const valorTotalDespesas = despesas.reduce((total, despesa) => {
+      const valor = parseFloat(despesa.valor || 0);
+      return total + (isNaN(valor) ? 0 : valor);
+    }, 0);
 
     const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
     const percentualExecutado =
@@ -157,630 +262,325 @@ export default function Dashboard({ usuario }) {
         ? (valorTotalDespesas / valorTotalEmendas) * 100
         : 0;
 
-    // Status das emendas
-    const emendasPorStatus = dadosFiltrados.emendasFiltradas.reduce(
-      (acc, emenda) => {
-        const status = emenda.status || "ativa";
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      },
-      {},
-    );
-
-    // Status das despesas
-    const despesasPorStatus = dadosFiltrados.despesasFiltradas.reduce(
-      (acc, despesa) => {
-        const status = despesa.status || "processada";
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      },
-      {},
-    );
-
-    // Evolução mensal
-    const evolucaoMensal = [];
-    const hoje = new Date();
-
-    for (let i = 5; i >= 0; i--) {
-      const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-      const mesNome = mes.toLocaleDateString("pt-BR", {
-        month: "short",
-        year: "numeric",
-      });
-
-      const emendasMes = dadosFiltrados.emendasFiltradas.filter((emenda) => {
-        if (!emenda.dataAprovacao) return false;
-        const dataEmenda = new Date(emenda.dataAprovacao);
-        return (
-          dataEmenda.getMonth() === mes.getMonth() &&
-          dataEmenda.getFullYear() === mes.getFullYear()
-        );
-      });
-
-      const despesasMes = dadosFiltrados.despesasFiltradas.filter((despesa) => {
-        if (!despesa.data) return false;
-        const dataDespesa = new Date(despesa.data);
-        return (
-          dataDespesa.getMonth() === mes.getMonth() &&
-          dataDespesa.getFullYear() === mes.getFullYear()
-        );
-      });
-
-      const valorEmendasMes = emendasMes.reduce(
-        (acc, e) => acc + parseFloat(e.valorRecurso || e.valor || 0),
-        0,
-      );
-      const valorDespesasMes = despesasMes.reduce(
-        (acc, d) => acc + parseFloat(d.valor || 0),
-        0,
-      );
-
-      evolucaoMensal.push({
-        mes: mesNome,
-        emendas: valorEmendasMes,
-        despesas: valorDespesasMes,
-      });
-    }
-
-    // Top municípios (apenas para admin - operadores veem apenas seu município)
-    const topMunicipios =
-      usuario?.tipo === "admin"
-        ? Object.entries(
-            dadosFiltrados.emendasFiltradas.reduce((acc, emenda) => {
-              const municipio = emenda.municipio || "Não informado";
-              acc[municipio] =
-                (acc[municipio] || 0) +
-                parseFloat(emenda.valorRecurso || emenda.valor || 0);
-              return acc;
-            }, {}),
-          )
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 5)
-            .map(([municipio, valor]) => ({ municipio, valor }))
-        : [];
-
     return {
       totalEmendas,
       totalDespesas,
       valorTotalEmendas,
       valorTotalDespesas,
       saldoDisponivel,
-      percentualExecutado,
-      emendasPorStatus,
-      despesasPorStatus,
-      evolucaoMensal,
-      topMunicipios,
+      percentualExecutado: Math.round(percentualExecutado * 100) / 100,
     };
-  }, [dadosFiltrados, usuario]);
+  };
 
-  // ✅ FUNÇÃO PARA FORMATAR MOEDA
+  const stats = calcularEstatisticas();
+
+  // ✅ FORMATADOR DE MOEDA
   const formatCurrency = (valor) => {
-    const numericValue =
-      typeof valor === "string" ? parseFloat(valor) || 0 : valor || 0;
-    return new Intl.NumberFormat("pt-BR", {
+    const numericValue = parseFloat(valor) || 0;
+    return numericValue.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(numericValue);
-  };
-
-  const formatNumber = (valor) => {
-    return new Intl.NumberFormat("pt-BR").format(valor || 0);
-  };
-
-  // Debug logs
-  console.log("🔍 Debug Dashboard:", {
-    loading,
-    emendasValidas: Array.isArray(emendas),
-    emendasTipo: typeof emendas,
-    emendasLength: emendas?.length || 0,
-    despesasLength: despesas?.length || 0,
-    emendasFiltradasLength: dadosFiltrados.emendasFiltradas?.length || 0,
-    despesasFiltradasLength: dadosFiltrados.despesasFiltradas?.length || 0,
-  });
-
-  if (loading) {
-    console.log("⏳ Aguardando dados:", {
-      loading,
-      emendasValidas: Array.isArray(emendas),
-      emendasTipo: typeof emendas,
-      emendasLength: emendas?.length || 0,
+      minimumFractionDigits: 0,
     });
+  };
 
+  // ✅ RENDERIZAÇÃO CONDICIONAL
+  if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingSpinner}></div>
-        <p style={styles.loadingText}>Carregando dados do dashboard...</p>
+      <div style={styles.container}>
+        {/* Status Bar */}
+        <div style={styles.statusBar}>
+          <span>Status: 🔄 Carregando...</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+          <span style={styles.divider}>|</span>
+          <span>
+            Usuário: {userRole === "admin" ? "👑 Admin" : `🏘️ ${userMunicipio}`}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span>Dados: Carregando...</span>
+        </div>
+
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Carregando dados do dashboard...</p>
+          <p style={styles.loadingSubtext}>
+            {userRole === "admin"
+              ? "Carregando todos os dados do sistema..."
+              : `Carregando dados do município ${userMunicipio}...`}
+          </p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.errorContainer}>
-        <h3 style={styles.errorTitle}>❌ Erro ao carregar dados</h3>
-        <p style={styles.errorMessage}>{error}</p>
-        <button onClick={recarregar} style={styles.retryButton}>
-          🔄 Tentar novamente
-        </button>
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>Status: ❌ Erro</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+        </div>
+
+        <div style={styles.errorContainer}>
+          <h2>❌ Erro no Dashboard</h2>
+          <p>{error}</p>
+          <button onClick={carregarDados} style={styles.retryButton}>
+            🔄 Tentar Novamente
+          </button>
+        </div>
       </div>
     );
   }
 
-  console.log("📊 Calculando estatísticas do Dashboard...");
-  console.log(
-    "📋 Emendas disponíveis:",
-    dadosFiltrados.emendasFiltradas?.length || 0,
-  );
-  console.log(
-    "💰 Despesas disponíveis:",
-    dadosFiltrados.despesasFiltradas?.length || 0,
-  );
-
-  const stats = estatisticasLocais;
-  console.log("✅ Estatísticas calculadas:", stats);
-
+  // ✅ RENDERIZAÇÃO PRINCIPAL
   return (
     <div style={styles.container}>
-      {/* ✅ HEADER COM FILTRO ATIVO */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <h1 style={styles.title}>📊 Dashboard SICEFSUS</h1>
-          <p style={styles.subtitle}>
-            Visão geral das emendas e despesas
-            {((usuario?.tipo === "operador" || usuario?.tipo === "user" || usuario?.role === "operador" || usuario?.role === "user" || (!usuario?.role && usuario?.tipo !== "admin")) && 
-              usuario?.municipio && usuario.municipio.trim() !== "") && (
-              <span style={styles.filterBadge}>
-                📍 Filtrado para: {usuario.municipio}{usuario.uf ? `/${usuario.uf}` : ''}
-              </span>
-            )}
+      {/* Status Bar */}
+      <div style={styles.statusBar}>
+        <span>Status: ✅ Operacional</span>
+        <span style={styles.divider}>|</span>
+        <span>Versão: v2.1</span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Usuário:{" "}
+          {userRole === "admin"
+            ? "👑 Admin"
+            : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
+        </span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Dados: {stats.totalEmendas} emendas • {stats.totalDespesas} despesas
+        </span>
+      </div>
+
+      {/* Banner Informativo */}
+      {userRole === "operador" && userMunicipio && (
+        <div style={styles.infoBar}>
+          <span style={styles.infoIcon}>🔒</span>
+          <div style={styles.infoContent}>
+            <span style={styles.infoText}>
+              <strong>Filtro Ativo:</strong> Exibindo dados do município{" "}
+              <strong>
+                {userMunicipio}/{userUf || "UF não informada"}
+              </strong>
+            </span>
+            <span style={styles.infoSubtext}>
+              {stats.totalEmendas} emenda(s) • {stats.totalDespesas} despesa(s)
+              disponíveis
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Métricas Principais */}
+      <div style={styles.metricsGrid}>
+        <div style={styles.metricCard}>
+          <div style={styles.metricNumber}>{stats.totalEmendas}</div>
+          <div style={styles.metricLabel}>EMENDAS CADASTRADAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricNumber}>{stats.totalDespesas}</div>
+          <div style={styles.metricLabel}>DESPESAS REGISTRADAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.valorTotalEmendas)}
+          </div>
+          <div style={styles.metricLabel}>VALOR TOTAL EMENDAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.valorTotalDespesas)}
+          </div>
+          <div style={styles.metricLabel}>VALOR EXECUTADO</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.saldoDisponivel)}
+          </div>
+          <div style={styles.metricLabel}>SALDO DISPONÍVEL</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricPercentage}>
+            {stats.percentualExecutado}%
+          </div>
+          <div style={styles.metricLabel}>PERCENTUAL EXECUTADO</div>
+        </div>
+      </div>
+
+      {/* Estado Vazio */}
+      {stats.totalEmendas === 0 && stats.totalDespesas === 0 && (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>📊</div>
+          <h3>Sistema Limpo</h3>
+          <p>
+            {userRole === "admin"
+              ? "Não há emendas ou despesas cadastradas no sistema."
+              : `Não há dados cadastrados para o município ${userMunicipio || "não informado"}.`}
+          </p>
+          <p style={styles.emptySubtext}>
+            Os dados aparecerão aqui conforme forem sendo cadastrados.
           </p>
         </div>
-      </div>
-
-      {/* ✅ CARDS PRINCIPAIS */}
-      <div style={styles.cardsGrid}>
-        <div style={styles.card}>
-          <div
-            style={{
-              ...styles.cardIcon,
-              backgroundColor: CHART_COLORS.primary,
-            }}
-          >
-            📋
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {formatNumber(stats.totalEmendas)}
-            </div>
-            <div style={styles.cardLabel}>Emendas</div>
-          </div>
-        </div>
-
-        <div style={styles.card}>
-          <div
-            style={{
-              ...styles.cardIcon,
-              backgroundColor: CHART_COLORS.success,
-            }}
-          >
-            💰
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {formatNumber(stats.totalDespesas)}
-            </div>
-            <div style={styles.cardLabel}>Despesas</div>
-          </div>
-        </div>
-
-        <div style={styles.card}>
-          <div
-            style={{
-              ...styles.cardIcon,
-              backgroundColor: CHART_COLORS.warning,
-            }}
-          >
-            💵
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {formatCurrency(stats.valorTotalEmendas)}
-            </div>
-            <div style={styles.cardLabel}>Valor Total Emendas</div>
-          </div>
-        </div>
-
-        <div style={styles.card}>
-          <div
-            style={{ ...styles.cardIcon, backgroundColor: CHART_COLORS.error }}
-          >
-            💸
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {formatCurrency(stats.valorTotalDespesas)}
-            </div>
-            <div style={styles.cardLabel}>Valor Executado</div>
-          </div>
-        </div>
-
-        <div style={styles.card}>
-          <div
-            style={{ ...styles.cardIcon, backgroundColor: CHART_COLORS.info }}
-          >
-            💳
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {formatCurrency(stats.saldoDisponivel)}
-            </div>
-            <div style={styles.cardLabel}>Saldo Disponível</div>
-          </div>
-        </div>
-
-        <div style={styles.card}>
-          <div
-            style={{
-              ...styles.cardIcon,
-              backgroundColor: CHART_COLORS.secondary,
-            }}
-          >
-            📈
-          </div>
-          <div style={styles.cardContent}>
-            <div style={styles.cardValue}>
-              {stats.percentualExecutado.toFixed(1)}%
-            </div>
-            <div style={styles.cardLabel}>Percentual Executado</div>
-          </div>
-        </div>
-      </div>
-
-      {/* ✅ SEÇÃO DE GRÁFICOS */}
-      <div style={styles.chartsGrid}>
-        {/* Status das Emendas */}
-        <div style={styles.chartCard}>
-          <h3 style={styles.chartTitle}>📋 Status das Emendas</h3>
-          <div style={styles.statusList}>
-            {Object.entries(stats.emendasPorStatus).map(([status, count]) => (
-              <div key={status} style={styles.statusItem}>
-                <span style={styles.statusLabel}>{status}</span>
-                <span style={styles.statusValue}>{count}</span>
-              </div>
-            ))}
-            {Object.keys(stats.emendasPorStatus).length === 0 && (
-              <p style={styles.noData}>Nenhuma emenda encontrada</p>
-            )}
-          </div>
-        </div>
-
-        {/* Status das Despesas */}
-        <div style={styles.chartCard}>
-          <h3 style={styles.chartTitle}>💰 Status das Despesas</h3>
-          <div style={styles.statusList}>
-            {Object.entries(stats.despesasPorStatus).map(([status, count]) => (
-              <div key={status} style={styles.statusItem}>
-                <span style={styles.statusLabel}>{status}</span>
-                <span style={styles.statusValue}>{count}</span>
-              </div>
-            ))}
-            {Object.keys(stats.despesasPorStatus).length === 0 && (
-              <p style={styles.noData}>Nenhuma despesa encontrada</p>
-            )}
-          </div>
-        </div>
-
-        {/* Evolução Mensal */}
-        <div style={styles.chartCard}>
-          <h3 style={styles.chartTitle}>📈 Evolução dos Últimos 6 Meses</h3>
-          <div style={styles.evolutionChart}>
-            {stats.evolucaoMensal.map((item, index) => (
-              <div key={index} style={styles.evolutionItem}>
-                <div style={styles.evolutionMonth}>{item.mes}</div>
-                <div style={styles.evolutionValues}>
-                  <div style={styles.evolutionEmendas}>
-                    {formatCurrency(item.emendas)}
-                  </div>
-                  <div style={styles.evolutionDespesas}>
-                    {formatCurrency(item.despesas)}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top Municípios (apenas para admin) */}
-        {usuario?.tipo === "admin" && (
-          <div style={styles.chartCard}>
-            <h3 style={styles.chartTitle}>🏆 Top 5 Municípios</h3>
-            <div style={styles.topMunicipios}>
-              {stats.topMunicipios.map((item, index) => (
-                <div key={index} style={styles.municipioItem}>
-                  <span style={styles.municipioPosition}>{index + 1}º</span>
-                  <span style={styles.municipioName}>{item.municipio}</span>
-                  <span style={styles.municipioValue}>
-                    {formatCurrency(item.valor)}
-                  </span>
-                </div>
-              ))}
-              {stats.topMunicipios.length === 0 && (
-                <p style={styles.noData}>Nenhum dado de município disponível</p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
-}
+};
 
 // ✅ ESTILOS
 const styles = {
   container: {
-    padding: "24px",
+    padding: "20px",
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
+    fontFamily: "Arial, sans-serif",
   },
 
-  header: {
-    marginBottom: "32px",
-  },
-
-  headerContent: {
-    backgroundColor: "white",
-    padding: "32px",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-
-  title: {
-    margin: "0 0 8px 0",
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#2c3e50",
-  },
-
-  subtitle: {
-    margin: 0,
-    fontSize: "16px",
-    color: "#6c757d",
+  statusBar: {
     display: "flex",
+    justifyContent: "flex-start",
     alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-
-  filterBadge: {
-    backgroundColor: "#e3f2fd",
-    color: "#1976d2",
-    padding: "4px 12px",
-    borderRadius: "20px",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-
-  cardsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-    gap: "24px",
-    marginBottom: "32px",
-  },
-
-  card: {
-    backgroundColor: "white",
-    padding: "24px",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-
-  cardIcon: {
-    width: "48px",
-    height: "48px",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "24px",
+    background: "linear-gradient(135deg, #154360, #4A90E2)",
     color: "white",
+    padding: "8px 20px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    fontSize: "14px",
+    gap: "8px",
   },
 
-  cardContent: {
+  divider: {
+    opacity: 0.7,
+    margin: "0 4px",
+  },
+
+  infoBar: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px 20px",
+    backgroundColor: "#e8f5e8",
+    border: "2px solid #4caf50",
+    borderRadius: 12,
+    marginBottom: "20px",
+    fontSize: 14,
+    color: "#2e7d32",
+    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
+  },
+
+  infoIcon: {
+    fontSize: 20,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+
+  infoContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
     flex: 1,
   },
 
-  cardValue: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#2c3e50",
-    lineHeight: 1,
-    marginBottom: "4px",
-  },
-
-  cardLabel: {
-    fontSize: "14px",
-    color: "#6c757d",
+  infoText: {
+    fontSize: 14,
+    lineHeight: 1.4,
     fontWeight: "500",
   },
 
-  chartsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "24px",
+  infoSubtext: {
+    fontSize: 12,
+    opacity: 0.8,
+    fontWeight: "400",
   },
 
-  chartCard: {
+  metricsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "20px",
+    marginBottom: "30px",
+  },
+
+  metricCard: {
     backgroundColor: "white",
     padding: "24px",
     borderRadius: "12px",
+    textAlign: "center",
     boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     border: "1px solid #e9ecef",
   },
 
-  chartTitle: {
-    margin: "0 0 20px 0",
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#2c3e50",
+  metricNumber: {
+    fontSize: "32px",
+    fontWeight: "bold",
+    color: "#007bff",
+    marginBottom: "8px",
   },
 
-  statusList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
+  metricValue: {
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#28a745",
+    marginBottom: "8px",
   },
 
-  statusItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
+  metricPercentage: {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "#ffc107",
+    marginBottom: "8px",
   },
 
-  statusLabel: {
-    fontSize: "14px",
-    color: "#495057",
-    fontWeight: "500",
-    textTransform: "capitalize",
-  },
-
-  statusValue: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: "#2c3e50",
-  },
-
-  evolutionChart: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-
-  evolutionItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-  },
-
-  evolutionMonth: {
-    fontSize: "14px",
-    fontWeight: "500",
+  metricLabel: {
+    fontSize: "12px",
     color: "#6c757d",
-    minWidth: "80px",
-  },
-
-  evolutionValues: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-    gap: "4px",
-  },
-
-  evolutionEmendas: {
-    fontSize: "14px",
-    color: CHART_COLORS.primary,
     fontWeight: "500",
-  },
-
-  evolutionDespesas: {
-    fontSize: "14px",
-    color: CHART_COLORS.success,
-    fontWeight: "500",
-  },
-
-  topMunicipios: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-
-  municipioItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "12px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-  },
-
-  municipioPosition: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#6c757d",
-    minWidth: "30px",
-  },
-
-  municipioName: {
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#495057",
-    flex: 1,
-  },
-
-  municipioValue: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#2c3e50",
-  },
-
-  noData: {
-    textAlign: "center",
-    color: "#6c757d",
-    fontStyle: "italic",
-    margin: "20px 0",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
   },
 
   loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "60vh",
-    gap: "20px",
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
 
-  loadingSpinner: {
+  spinner: {
     width: "50px",
     height: "50px",
-    border: "4px solid #e9ecef",
+    border: "4px solid #f3f3f3",
     borderTop: "4px solid #007bff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
+    margin: "0 auto 20px",
   },
 
   loadingText: {
-    fontSize: "16px",
-    color: "#6c757d",
-    margin: 0,
+    fontSize: "18px",
+    color: "#333",
+    marginBottom: "8px",
+  },
+
+  loadingSubtext: {
+    fontSize: "14px",
+    color: "#666",
   },
 
   errorContainer: {
     textAlign: "center",
     padding: "40px",
-    color: "#721c24",
-  },
-
-  errorTitle: {
-    fontSize: "24px",
-    fontWeight: "600",
-    marginBottom: "12px",
-  },
-
-  errorMessage: {
-    fontSize: "16px",
-    marginBottom: "20px",
+    backgroundColor: "#f8d7da",
+    borderRadius: "8px",
+    border: "1px solid #f5c6cb",
   },
 
   retryButton: {
@@ -789,12 +589,33 @@ const styles = {
     border: "none",
     padding: "12px 24px",
     borderRadius: "6px",
-    fontSize: "16px",
     cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
+  },
+
+  emptyState: {
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    marginBottom: "20px",
+  },
+
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "20px",
+  },
+
+  emptySubtext: {
+    color: "#666",
+    fontSize: "14px",
+    fontStyle: "italic",
   },
 };
 
-// CSS para animação
+// ✅ CSS PARA ANIMAÇÃO
 if (!document.getElementById("dashboard-animations")) {
   const styleSheet = document.createElement("style");
   styleSheet.id = "dashboard-animations";
@@ -806,3 +627,5 @@ if (!document.getElementById("dashboard-animations")) {
   `;
   document.head.appendChild(styleSheet);
 }
+
+export default Dashboard;

@@ -1,678 +1,440 @@
-// Despesas.jsx - Sistema SICEFSUS v2.1 - COM FILTRO POR MUNICÍPIO
-// ✅ CORREÇÃO PRINCIPAL: Implementação de filtro por município para operadores
-// ✅ MANTIDO: Layout e interface originais
-// ✅ MANTIDO: Toda a estrutura de componentes existente
-// ✅ NOVA LÓGICA: Despesas filtradas por município do usuário operador
+// Dashboard.jsx - CORREÇÃO CRÍTICA - Admin não deve ter filtro de município
+// ✅ PROBLEMA: Admin estava sendo filtrado por município (incorreto)
+// ✅ SOLUÇÃO: Admin vê TODOS os dados sem qualquer filtro
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-  deleteDoc,
-  doc,
-  query,
-  collection,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import DespesaForm from "./DespesaForm";
-import DespesasList from "./DespesasList";
-import Toast from "./Toast";
+import { useUser } from "../context/UserContext";
 
-const Despesas = ({ usuario }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [currentView, setCurrentView] = useState("listagem");
-  const [despesaSelecionada, setDespesaSelecionada] = useState(null);
-  const [filtroAutomatico, setFiltroAutomatico] = useState(null);
-  const [breadcrumb, setBreadcrumb] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+const Dashboard = ({ usuario }) => {
+  const user = usuario;
+  const userLoading = !usuario;
 
-  // Estados locais para dados
-  const [despesas, setDespesas] = useState([]);
+  // Estados
   const [emendas, setEmendas] = useState([]);
+  const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [despesasFiltradas, setDespesasFiltradas] = useState([]);
 
-  // Dados do usuário para filtro por município
-  const userRole = usuario?.role || usuario?.tipo;
-  const userMunicipio = usuario?.municipio;
-  const userUf = usuario?.uf;
+  console.log("🏠 Dashboard iniciado");
+  console.log("👤 Dados do usuário carregados para Dashboard:", user);
 
-  console.log("🔒 Despesas.jsx v2.1 - Dados do usuário completos:", {
-    usuario: usuario,
-    email: usuario?.email,
-    role: userRole,
-    tipo: usuario?.tipo,
-    municipio: userMunicipio,
-    uf: userUf,
-  });
+  // ✅ VERIFICAÇÃO MAIS ESPECÍFICA: Verificar campos essenciais
+  if (userLoading || !user || !user.email || !user.tipo) {
+    console.log("⏳ Aguardando dados completos do usuário...", {
+      userLoading,
+      hasUser: !!user,
+      hasEmail: !!user?.email,
+      hasTipo: !!user?.tipo,
+      user: user,
+    });
 
-  // Validação crítica: Verificar se dados essenciais existem
-  if (!usuario) {
-    console.error("❌ ERRO CRÍTICO: Usuario não definido!");
-    return <div>Erro: Usuário não encontrado</div>;
-  }
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>
+            Status: ⏳{" "}
+            {userLoading ? "Carregando usuário..." : "Verificando dados..."}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+        </div>
 
-  if (!userRole) {
-    console.error(
-      "❌ ERRO CRÍTICO: Role/Tipo do usuário não definido!",
-      usuario,
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p>
+            ⏳{" "}
+            {userLoading
+              ? "Carregando dados do usuário..."
+              : "Aguardando autenticação..."}
+          </p>
+          <p style={styles.loadingSubtext}>
+            Verificando permissões do usuário...
+          </p>
+        </div>
+      </div>
     );
-    return <div>Erro: Permissões do usuário não definidas</div>;
   }
 
-  // Carregamento com filtro por município
-  useEffect(() => {
-    const carregarDados = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        console.log("📊 Carregando dados com filtro por município...");
+  // ✅ DETERMINAR PERMISSÕES CORRETAS
+  const userRole = user.tipo || user.role || "operador";
+  const userMunicipio = user.municipio || "";
+  const userUf = user.uf || "";
 
-        // STEP 1: Carregar emendas baseado no role do usuário
-        let emendasPermitidas = [];
-        let emendasData = [];
+  console.log("🔐 Permissões detectadas:", { userRole, userMunicipio, userUf });
 
-        if (userRole === "admin") {
-          // Admin vê todas as emendas
-          console.log("👑 Usuário ADMIN - carregando todas as emendas");
-          const emendasQuery = query(collection(db, "emendas"));
-          const emendasSnapshot = await getDocs(emendasQuery);
-
-          emendasSnapshot.forEach((doc) => {
-            const emendaData = { id: doc.id, ...doc.data() };
-            emendasData.push(emendaData);
-            emendasPermitidas.push(doc.id);
-          });
-        } else if (
-          (userRole === "operador" || userRole === "user") &&
-          userMunicipio
-        ) {
-          // Operador vê apenas emendas do seu município
-          console.log(
-            `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`,
-          );
-          const emendasQuery = query(
-            collection(db, "emendas"),
-            where("municipio", "==", userMunicipio),
-          );
-          const emendasSnapshot = await getDocs(emendasQuery);
-
-          emendasSnapshot.forEach((doc) => {
-            const emendaData = { id: doc.id, ...doc.data() };
-            emendasData.push(emendaData);
-            emendasPermitidas.push(doc.id);
-          });
-
-          if (emendasPermitidas.length === 0) {
-            console.warn(
-              `⚠️ Nenhuma emenda encontrada para o município: ${userMunicipio}`,
-            );
-            setError(
-              `Nenhuma emenda encontrada para o município ${userMunicipio}. Entre em contato com o administrador.`,
-            );
-            setEmendas([]);
-            setDespesas([]);
-            setDespesasFiltradas([]);
-            setLoading(false);
-            return;
-          }
-        } else {
-          console.error("❌ CONFIGURAÇÃO INVÁLIDA DO USUÁRIO:", {
-            userRole,
-            userMunicipio,
-            userUf,
-            usuarioCompleto: usuario,
-          });
-
-          let mensagemErro = "Configuração de usuário inválida. ";
-          if (!userMunicipio && userRole !== "admin") {
-            mensagemErro =
-              "Usuário operador sem município cadastrado. Entre em contato com o administrador.";
-          } else {
-            mensagemErro =
-              "Tipo de usuário não reconhecido. Entre em contato com o administrador.";
-          }
-
-          setError(mensagemErro);
-          setEmendas([]);
-          setDespesas([]);
-          setDespesasFiltradas([]);
-          setLoading(false);
-          return;
-        }
-
-        console.log(
-          `✅ Emendas permitidas carregadas: ${emendasPermitidas.length}`,
-        );
-        console.log("📋 IDs das emendas permitidas:", emendasPermitidas);
-        setEmendas(emendasData);
-
-        // STEP 2: Carregar despesas das emendas permitidas
-        let despesasData = [];
-
-        if (emendasPermitidas.length > 0) {
-          // Firebase tem limitação de 'in' para 10 itens, fazemos em lotes
-          const batchSize = 10;
-
-          for (let i = 0; i < emendasPermitidas.length; i += batchSize) {
-            const batch = emendasPermitidas.slice(i, i + batchSize);
-            console.log(
-              `📦 Processando lote ${Math.floor(i / batchSize) + 1} - IDs:`,
-              batch,
-            );
-
-            const despesasQuery = query(
-              collection(db, "despesas"),
-              where("emendaId", "in", batch),
-            );
-            const despesasSnapshot = await getDocs(despesasQuery);
-
-            despesasSnapshot.forEach((doc) => {
-              despesasData.push({
-                id: doc.id,
-                ...doc.data(),
-              });
-            });
-          }
-        }
-
-        console.log(`✅ Despesas filtradas carregadas: ${despesasData.length}`);
-        console.log(
-          "💰 Amostra de despesas:",
-          despesasData.slice(0, 3).map((d) => ({
-            id: d.id,
-            emendaId: d.emendaId,
-            fornecedor: d.fornecedor,
-            valor: d.valor,
-          })),
-        );
-
-        setDespesas(despesasData);
-        setDespesasFiltradas(despesasData);
-      } catch (error) {
-        console.error("❌ Erro ao carregar dados:", error);
-        setError(`Erro ao carregar despesas: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    carregarDados();
-  }, [userRole, userMunicipio]);
-
-  console.log(
-    "🎯 Sistema SICEFSUS v2.1 - Despesas carregado com filtro por município",
-  );
-
-  // Aplicar filtro automático da emenda (mantido original)
-  useEffect(() => {
-    if (location.state?.filtroAutomatico) {
-      const filtro = location.state.filtroAutomatico;
-      console.log("🎯 Aplicando filtro automático da emenda:", filtro);
-
-      setFiltroAutomatico(filtro);
-
-      if (filtro.breadcrumb) {
-        console.log("🍞 Breadcrumb configurado:", filtro.breadcrumb);
-        setBreadcrumb(filtro.breadcrumb);
-      }
-
-      // Aplicar filtro quando dados estiverem carregados
-      if (despesas.length > 0) {
-        carregarDespesasComFiltro(filtro);
-      }
-    }
-  }, [location.state, despesas]);
-
-  // Função para carregar despesas com filtro (mantida original)
-  const carregarDespesasComFiltro = useCallback(async (filtro) => {
-    if (!filtro) return;
-
-    try {
-      console.log("🔍 Carregando despesas com filtros:", filtro);
-
-      const despesasQuery = query(
-        collection(db, "despesas"),
-        where("emendaId", "==", filtro.emendaId),
-      );
-
-      const despesasSnapshot = await getDocs(despesasQuery);
-      const despesasData = [];
-
-      despesasSnapshot.forEach((doc) => {
-        despesasData.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-
-      console.log("✅ Despesas filtradas carregadas:", despesasData.length);
-      setDespesasFiltradas(despesasData);
-    } catch (error) {
-      console.error("❌ Erro ao carregar despesas filtradas:", error);
-    }
-  }, []);
-
-  // Função de recarregamento atualizada com filtro por município
-  const recarregar = useCallback(async () => {
+  // ✅ FUNÇÃO PARA CARREGAR DADOS SEM FILTRO DESNECESSÁRIO
+  const carregarDados = async () => {
     try {
       setLoading(true);
-      console.log("🔄 Recarregando dados com filtro por município...");
+      setError(null);
 
-      // Recarregar emendas baseado no role
-      let emendasPermitidas = [];
+      console.log("📊 Iniciando carregamento de dados...");
+      console.log("👤 Tipo de usuário:", userRole);
+
       let emendasData = [];
-
-      if (userRole === "admin") {
-        const emendasQuery = query(collection(db, "emendas"));
-        const emendasSnapshot = await getDocs(emendasQuery);
-
-        emendasSnapshot.forEach((doc) => {
-          const emendaData = { id: doc.id, ...doc.data() };
-          emendasData.push(emendaData);
-          emendasPermitidas.push(doc.id);
-        });
-      } else if (
-        (userRole === "operador" || userRole === "user") &&
-        userMunicipio
-      ) {
-        const emendasQuery = query(
-          collection(db, "emendas"),
-          where("municipio", "==", userMunicipio),
-        );
-        const emendasSnapshot = await getDocs(emendasQuery);
-
-        emendasSnapshot.forEach((doc) => {
-          const emendaData = { id: doc.id, ...doc.data() };
-          emendasData.push(emendaData);
-          emendasPermitidas.push(doc.id);
-        });
-      }
-
-      setEmendas(emendasData);
-
-      // Recarregar despesas das emendas permitidas
       let despesasData = [];
 
-      if (emendasPermitidas.length > 0) {
-        const batchSize = 10;
-        for (let i = 0; i < emendasPermitidas.length; i += batchSize) {
-          const batch = emendasPermitidas.slice(i, i + batchSize);
-          const despesasQuery = query(
-            collection(db, "despesas"),
-            where("emendaId", "in", batch),
+      // ✅ ADMIN: Carrega TODOS os dados sem filtro
+      if (userRole === "admin") {
+        console.log("👑 ADMIN: Carregando TODOS os dados (sem filtro)");
+
+        // Carregar TODAS as emendas
+        try {
+          const emendasRef = collection(db, "emendas");
+          const emendasQuery = query(
+            emendasRef,
+            orderBy("dataAprovacao", "desc"),
           );
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            emendasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          console.log(`✅ Admin - Emendas carregadas: ${emendasData.length}`);
+        } catch (error) {
+          console.error("❌ Erro ao carregar emendas para admin:", error);
+        }
+
+        // Carregar TODAS as despesas
+        try {
+          const despesasRef = collection(db, "despesas");
+          const despesasQuery = query(despesasRef, orderBy("data", "desc"));
           const despesasSnapshot = await getDocs(despesasQuery);
 
           despesasSnapshot.forEach((doc) => {
-            despesasData.push({ id: doc.id, ...doc.data() });
+            despesasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
           });
+
+          console.log(`✅ Admin - Despesas carregadas: ${despesasData.length}`);
+        } catch (error) {
+          console.error("❌ Erro ao carregar despesas para admin:", error);
         }
       }
 
-      setDespesas(despesasData);
+      // ✅ OPERADOR: Carrega apenas do município
+      else if (userRole === "operador" && userMunicipio) {
+        console.log(
+          `🏘️ OPERADOR: Carregando dados do município ${userMunicipio}`,
+        );
 
-      if (filtroAutomatico) {
-        carregarDespesasComFiltro(filtroAutomatico);
-      } else {
-        setDespesasFiltradas(despesasData);
+        // Carregar emendas do município
+        try {
+          const emendasRef = collection(db, "emendas");
+          const emendasQuery = query(
+            emendasRef,
+            where("municipio", "==", userMunicipio),
+            orderBy("dataAprovacao", "desc"),
+          );
+          const emendasSnapshot = await getDocs(emendasQuery);
+
+          emendasSnapshot.forEach((doc) => {
+            emendasData.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+
+          console.log(
+            `✅ Operador - Emendas do município carregadas: ${emendasData.length}`,
+          );
+        } catch (error) {
+          console.error("❌ Erro ao carregar emendas para operador:", error);
+        }
+
+        // Carregar despesas das emendas do município
+        try {
+          if (emendasData.length > 0) {
+            const emendasIds = emendasData.map((e) => e.id);
+
+            // Carregar em lotes devido ao limite do Firestore
+            const batchSize = 10;
+            for (let i = 0; i < emendasIds.length; i += batchSize) {
+              const batch = emendasIds.slice(i, i + batchSize);
+
+              const despesasRef = collection(db, "despesas");
+              const despesasQuery = query(
+                despesasRef,
+                where("emendaId", "in", batch),
+                orderBy("data", "desc"),
+              );
+              const despesasSnapshot = await getDocs(despesasQuery);
+
+              despesasSnapshot.forEach((doc) => {
+                despesasData.push({
+                  id: doc.id,
+                  ...doc.data(),
+                });
+              });
+            }
+          }
+
+          console.log(
+            `✅ Operador - Despesas do município carregadas: ${despesasData.length}`,
+          );
+        } catch (error) {
+          console.error("❌ Erro ao carregar despesas para operador:", error);
+        }
       }
 
-      console.log("✅ Dados recarregados com sucesso");
+      // ✅ USUÁRIO SEM PERMISSÕES ADEQUADAS
+      else {
+        console.warn("⚠️ Usuário sem permissões adequadas:", {
+          userRole,
+          userMunicipio,
+        });
+        setError("Usuário sem permissões adequadas para acessar o dashboard.");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ ATUALIZAR ESTADOS
+      setEmendas(emendasData);
+      setDespesas(despesasData);
+
+      console.log("✅ Carregamento concluído:", {
+        emendas: emendasData.length,
+        despesas: despesasData.length,
+      });
     } catch (error) {
-      console.error("❌ Erro ao recarregar:", error);
-      setError(`Erro ao recarregar: ${error.message}`);
+      console.error("❌ Erro geral no carregamento:", error);
+      setError(`Erro ao carregar dados: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  }, [filtroAutomatico, carregarDespesasComFiltro, userRole, userMunicipio]);
-
-  // Handlers (mantidos originais)
-  const handleVisualizar = (despesa) => {
-    console.log("👁️ Visualizando despesa:", despesa.id);
-    setDespesaSelecionada(despesa);
-    setCurrentView("visualizar");
   };
 
-  const handleEditar = (despesa) => {
-    console.log("✏️ Editando despesa:", despesa.id);
-    setDespesaSelecionada(despesa);
-    setCurrentView("editar");
-  };
+  // ✅ EFFECT PARA CARREGAR DADOS
+  useEffect(() => {
+    console.log(
+      "🔄 useEffect Dashboard - Verificando necessidade de carregar dados",
+    );
+    console.log("👤 User disponível:", !!user);
+    console.log("📧 Email:", user?.email);
+    console.log("🔐 Tipo:", user?.tipo);
+    console.log(
+      "📊 Dados atuais - emendas:",
+      emendas.length,
+      "despesas:",
+      despesas.length,
+    );
 
-  const handleCriar = () => {
-    console.log("➕ Criando nova despesa");
-    setDespesaSelecionada(null);
-    setCurrentView("criar");
-  };
-
-  const handleVoltar = () => {
-    console.log("🔄 Voltando para listagem");
-    setCurrentView("listagem");
-    setDespesaSelecionada(null);
-  };
-
-  const handleSalvarDespesa = useCallback(
-    async (dadosSalvos) => {
-      console.log("📝 handleSalvarDespesa chamado com:", dadosSalvos);
-
-      try {
-        // Usar função de recarregamento atualizada
-        await recarregar();
-        console.log("✅ Dados recarregados após salvamento");
-
-        handleVoltar();
-      } catch (error) {
-        console.error("❌ Erro no handleSalvarDespesa:", error);
-      }
-    },
-    [recarregar],
-  );
-
-  const handleDeletarDespesa = async (despesaId) => {
-    console.log("🗑️ Deletar despesa ID:", despesaId);
-
-    if (!despesaId) {
-      alert("ID da despesa não encontrado!");
-      return;
+    // Verificar se tem os dados essenciais
+    if (user && user.email && user.tipo) {
+      console.log("🚀 Iniciando carregamento de dados para:", userRole);
+      carregarDados();
+    } else {
+      console.log("⏳ Aguardando dados completos do usuário...");
+      console.log("Dados recebidos:", {
+        user,
+        email: user?.email,
+        tipo: user?.tipo,
+      });
     }
+  }, [user?.email, user?.tipo]); // Dependências mais específicas
 
-    if (window.confirm("Tem certeza que deseja excluir esta despesa?")) {
-      try {
-        await deleteDoc(doc(db, "despesas", despesaId));
-        await recarregar();
-        console.log("✅ Despesa deletada com sucesso:", despesaId);
+  // ✅ CALCULAR MÉTRICAS
+  const calcularEstatisticas = () => {
+    const totalEmendas = emendas.length;
+    const totalDespesas = despesas.length;
 
-        setToast({
-          show: true,
-          message: "Despesa deletada com sucesso!",
-          type: "success",
-        });
-      } catch (error) {
-        console.error("❌ Erro ao deletar despesa:", error);
-        setToast({
-          show: true,
-          message: "Erro ao deletar despesa. Tente novamente.",
-          type: "error",
-        });
-      }
-    }
+    const valorTotalEmendas = emendas.reduce((total, emenda) => {
+      const valor = parseFloat(emenda.valor || emenda.valorRecurso || 0);
+      return total + (isNaN(valor) ? 0 : valor);
+    }, 0);
+
+    const valorTotalDespesas = despesas.reduce((total, despesa) => {
+      const valor = parseFloat(despesa.valor || 0);
+      return total + (isNaN(valor) ? 0 : valor);
+    }, 0);
+
+    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
+    const percentualExecutado =
+      valorTotalEmendas > 0
+        ? (valorTotalDespesas / valorTotalEmendas) * 100
+        : 0;
+
+    return {
+      totalEmendas,
+      totalDespesas,
+      valorTotalEmendas,
+      valorTotalDespesas,
+      saldoDisponivel,
+      percentualExecutado: Math.round(percentualExecutado * 100) / 100,
+    };
   };
 
-  const handleLimparFiltros = () => {
-    console.log("🧹 Limpando filtros");
-    setFiltroAutomatico(null);
-    setBreadcrumb(null);
-    setDespesasFiltradas(despesas);
+  const stats = calcularEstatisticas();
 
-    // Limpar state da navegação
-    navigate(location.pathname, { replace: true });
+  // ✅ FORMATADOR DE MOEDA
+  const formatCurrency = (valor) => {
+    const numericValue = parseFloat(valor) || 0;
+    return numericValue.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 0,
+    });
   };
 
-  // Calcular estatísticas (mantido original)
-  const despesasParaExibir = filtroAutomatico ? despesasFiltradas : despesas;
-  const totalDespesas = despesasParaExibir.length;
-  const valorTotal = despesasParaExibir.reduce((sum, despesa) => {
-    const valor = parseFloat(despesa.valor) || 0;
-    return sum + valor;
-  }, 0);
+  // ✅ RENDERIZAÇÃO CONDICIONAL
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        {/* Status Bar */}
+        <div style={styles.statusBar}>
+          <span>Status: 🔄 Carregando...</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+          <span style={styles.divider}>|</span>
+          <span>
+            Usuário: {userRole === "admin" ? "👑 Admin" : `🏘️ ${userMunicipio}`}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span>Dados: Carregando...</span>
+        </div>
 
-  // Estatísticas de permissão para exibição
-  const estatisticasPermissao = {
-    totalEmendas: emendas.length,
-    totalDespesas: despesas.length,
-    municipioFiltrado: userRole === "operador" ? userMunicipio : null,
-    tipoUsuario: userRole,
-  };
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p style={styles.loadingText}>Carregando dados do dashboard...</p>
+          <p style={styles.loadingSubtext}>
+            {userRole === "admin"
+              ? "Carregando todos os dados do sistema..."
+              : `Carregando dados do município ${userMunicipio}...`}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  // Renderização condicional (mantida original)
-  const renderContent = () => {
-    switch (currentView) {
-      case "criar":
-        return (
-          <DespesaForm
-            usuario={usuario}
-            onCancelar={handleVoltar}
-            onSalvar={handleSalvarDespesa}
-            emendasDisponiveis={emendas}
-            emendaPreSelecionada={filtroAutomatico?.emendaId}
-            emendaInfo={filtroAutomatico}
-            isPrimeiraDespesa={false}
-          />
-        );
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>Status: ❌ Erro</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.1</span>
+        </div>
 
-      case "editar":
-        return (
-          <DespesaForm
-            usuario={usuario}
-            despesaParaEditar={despesaSelecionada}
-            onCancelar={handleVoltar}
-            onSalvar={handleSalvarDespesa}
-            emendasDisponiveis={emendas}
-          />
-        );
+        <div style={styles.errorContainer}>
+          <h2>❌ Erro no Dashboard</h2>
+          <p>{error}</p>
+          <button onClick={carregarDados} style={styles.retryButton}>
+            🔄 Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-      case "visualizar":
-        return (
-          <DespesaForm
-            usuario={usuario}
-            despesaParaEditar={despesaSelecionada}
-            onCancelar={handleVoltar}
-            onSalvar={handleVoltar}
-            modoVisualizacao={true}
-            emendasDisponiveis={emendas}
-          />
-        );
-
-      default:
-        return (
-          <div>
-            {/* Header com informações (atualizado com dados de permissão) */}
-            <div style={styles.compactHeader}>
-              <div style={styles.statusInfo}>
-                <span style={styles.statusText}>Status:</span>
-                <span style={styles.statusValue}>✅ Operacional</span>
-                <span style={styles.divider}>|</span>
-                <span style={styles.versionText}>Versão:</span>
-                <span style={styles.versionValue}>v2.1</span>
-                <span style={styles.divider}>|</span>
-                <span style={styles.statusText}>Usuário:</span>
-                <span style={styles.versionValue}>
-                  {userRole === "admin"
-                    ? "👑 Admin"
-                    : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
-                </span>
-                <span style={styles.divider}>|</span>
-                <span style={styles.statusText}>Dados:</span>
-                <span style={styles.versionValue}>
-                  {loading ? "Carregando..." : `${totalDespesas} despesas`}
-                </span>
-              </div>
-            </div>
-
-            {/* Banner de Informação de Permissões */}
-            {(userRole === "operador" || userRole === "user") &&
-              userMunicipio && (
-                <div style={styles.permissaoInfo}>
-                  <span style={styles.permissaoIcon}>🔒</span>
-                  <div style={styles.permissaoContent}>
-                    <span style={styles.permissaoTexto}>
-                      <strong>Filtro Ativo:</strong> Exibindo apenas despesas de
-                      emendas do município{" "}
-                      <strong>
-                        {userMunicipio}/{userUf || "UF não informada"}
-                      </strong>
-                    </span>
-                    <span style={styles.permissaoSubtexto}>
-                      {estatisticasPermissao.totalEmendas} emenda(s) •{" "}
-                      {estatisticasPermissao.totalDespesas} despesa(s)
-                      disponíveis para seu município
-                    </span>
-                  </div>
-                </div>
-              )}
-
-            {/* Banner de Aviso - Usuário sem Município */}
-            {(userRole === "operador" || userRole === "user") &&
-              !userMunicipio && (
-                <div style={styles.avisoMunicipio}>
-                  <span style={styles.avisoIcon}>⚠️</span>
-                  <div style={styles.avisoContent}>
-                    <span style={styles.avisoTexto}>
-                      <strong>Configuração Pendente:</strong> Seu usuário não
-                      possui município/UF cadastrado no sistema.
-                    </span>
-                    <span style={styles.avisoSubtexto}>
-                      Entre em contato com o administrador para configurar seu
-                      acesso.
-                    </span>
-                  </div>
-                </div>
-              )}
-
-            {/* Breadcrumb (mantido original) */}
-            {breadcrumb && (
-              <div style={styles.breadcrumbContainer}>
-                <div style={styles.breadcrumbContent}>
-                  <span style={styles.breadcrumbItem}>
-                    📋 {breadcrumb.origem}
-                  </span>
-                  <span style={styles.breadcrumbSeparator}>→</span>
-                  <span style={styles.breadcrumbItem}>
-                    📄 {breadcrumb.emenda}
-                  </span>
-                  <span style={styles.breadcrumbSeparator}>→</span>
-                  <span style={styles.breadcrumbCurrent}>
-                    💰 Despesas ({breadcrumb.totalDespesas})
-                  </span>
-                </div>
-                <button
-                  onClick={handleLimparFiltros}
-                  style={styles.breadcrumbClearButton}
-                >
-                  🧹 Limpar Filtro
-                </button>
-              </div>
-            )}
-
-            {/* Estatísticas (mantidas originais) */}
-            <div style={styles.statsContainer}>
-              <div style={styles.statCard}>
-                <h3 style={styles.statNumber}>{totalDespesas}</h3>
-                <p style={styles.statLabel}>
-                  {filtroAutomatico
-                    ? "DESPESAS DA EMENDA"
-                    : userRole === "operador" || userRole === "user"
-                      ? `DESPESAS - ${userMunicipio || "SEM MUNICÍPIO"}`
-                      : "TOTAL DE DESPESAS"}
-                </p>
-              </div>
-              <div style={styles.statCard}>
-                <h3 style={styles.statNumber}>
-                  {despesasParaExibir.filter((d) => d.status === "pago").length}
-                </h3>
-                <p style={styles.statLabel}>DESPESAS PAGAS</p>
-              </div>
-              <div style={styles.statCard}>
-                <h3 style={styles.statNumber}>
-                  {
-                    despesasParaExibir.filter((d) => d.status === "pendente")
-                      .length
-                  }
-                </h3>
-                <p style={styles.statLabel}>DESPESAS PENDENTES</p>
-              </div>
-              <div style={styles.statCard}>
-                <h3 style={styles.statNumber}>
-                  {valorTotal.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </h3>
-                <p style={styles.statLabel}>VALOR TOTAL</p>
-              </div>
-            </div>
-
-            {/* Botões de Ação (mantidos originais) */}
-            <div style={styles.actionContainer}>
-              <button style={styles.primaryButton} onClick={handleCriar}>
-                ➕ Nova Despesa
-              </button>
-              <button
-                style={styles.refreshButton}
-                onClick={recarregar}
-                disabled={loading}
-              >
-                🔄 {loading ? "Atualizando..." : "Atualizar"}
-              </button>
-            </div>
-
-            {/* Lista de Despesas (mantida original) */}
-            {loading ? (
-              <div style={styles.loadingContainer}>
-                <p style={styles.loadingText}>Carregando despesas...</p>
-              </div>
-            ) : error ? (
-              <div style={styles.errorContainer}>
-                <p style={styles.errorText}>❌ {error}</p>
-                <button onClick={recarregar} style={styles.retryButton}>
-                  🔄 Tentar novamente
-                </button>
-              </div>
-            ) : totalDespesas === 0 ? (
-              <div style={styles.emptyContainer}>
-                <p style={styles.emptyText}>
-                  {filtroAutomatico
-                    ? "Esta emenda ainda não possui despesas cadastradas."
-                    : userRole === "operador" || userRole === "user"
-                      ? `Nenhuma despesa encontrada para o município ${userMunicipio || "não cadastrado"}.`
-                      : "Nenhuma despesa cadastrada no sistema."}
-                </p>
-                {(userRole === "operador" || userRole === "user") &&
-                  totalDespesas === 0 && (
-                    <p style={styles.emptySubtext}>
-                      💡 Dica: Despesas são vinculadas a emendas. Verifique se
-                      existem emendas cadastradas para seu município.
-                    </p>
-                  )}
-              </div>
-            ) : (
-              <DespesasList
-                despesas={despesasParaExibir}
-                emendas={emendas}
-                loading={loading}
-                error={error}
-                onEdit={handleEditar}
-                onView={handleVisualizar}
-                onDelete={handleDeletarDespesa}
-                onRecarregar={recarregar}
-                usuario={usuario}
-                filtroInicial={filtroAutomatico}
-              />
-            )}
-          </div>
-        );
-    }
-  };
-
+  // ✅ RENDERIZAÇÃO PRINCIPAL
   return (
     <div style={styles.container}>
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: "", type: "" })}
-        />
+      {/* Status Bar */}
+      <div style={styles.statusBar}>
+        <span>Status: ✅ Operacional</span>
+        <span style={styles.divider}>|</span>
+        <span>Versão: v2.1</span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Usuário:{" "}
+          {userRole === "admin"
+            ? "👑 Admin"
+            : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
+        </span>
+        <span style={styles.divider}>|</span>
+        <span>
+          Dados: {stats.totalEmendas} emendas • {stats.totalDespesas} despesas
+        </span>
+      </div>
+
+      {/* Banner Informativo */}
+      {userRole === "operador" && userMunicipio && (
+        <div style={styles.infoBar}>
+          <span style={styles.infoIcon}>🔒</span>
+          <div style={styles.infoContent}>
+            <span style={styles.infoText}>
+              <strong>Filtro Ativo:</strong> Exibindo dados do município{" "}
+              <strong>
+                {userMunicipio}/{userUf || "UF não informada"}
+              </strong>
+            </span>
+            <span style={styles.infoSubtext}>
+              {stats.totalEmendas} emenda(s) • {stats.totalDespesas} despesa(s)
+              disponíveis
+            </span>
+          </div>
+        </div>
       )}
-      {renderContent()}
+
+      {/* Métricas Principais */}
+      <div style={styles.metricsGrid}>
+        <div style={styles.metricCard}>
+          <div style={styles.metricNumber}>{stats.totalEmendas}</div>
+          <div style={styles.metricLabel}>EMENDAS CADASTRADAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricNumber}>{stats.totalDespesas}</div>
+          <div style={styles.metricLabel}>DESPESAS REGISTRADAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.valorTotalEmendas)}
+          </div>
+          <div style={styles.metricLabel}>VALOR TOTAL EMENDAS</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.valorTotalDespesas)}
+          </div>
+          <div style={styles.metricLabel}>VALOR EXECUTADO</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricValue}>
+            {formatCurrency(stats.saldoDisponivel)}
+          </div>
+          <div style={styles.metricLabel}>SALDO DISPONÍVEL</div>
+        </div>
+
+        <div style={styles.metricCard}>
+          <div style={styles.metricPercentage}>
+            {stats.percentualExecutado}%
+          </div>
+          <div style={styles.metricLabel}>PERCENTUAL EXECUTADO</div>
+        </div>
+      </div>
+
+      {/* Estado Vazio */}
+      {stats.totalEmendas === 0 && stats.totalDespesas === 0 && (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>📊</div>
+          <h3>Sistema Limpo</h3>
+          <p>
+            {userRole === "admin"
+              ? "Não há emendas ou despesas cadastradas no sistema."
+              : `Não há dados cadastrados para o município ${userMunicipio || "não informado"}.`}
+          </p>
+          <p style={styles.emptySubtext}>
+            Os dados aparecerão aqui conforme forem sendo cadastrados.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
-// Estilos originais + novos estilos para permissões
+// ✅ ESTILOS
 const styles = {
   container: {
     padding: "20px",
@@ -680,7 +442,8 @@ const styles = {
     minHeight: "100vh",
     fontFamily: "Arial, sans-serif",
   },
-  compactHeader: {
+
+  statusBar: {
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "center",
@@ -690,32 +453,16 @@ const styles = {
     borderRadius: "8px",
     marginBottom: "20px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    width: "100%",
-  },
-  statusInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
     fontSize: "14px",
-    fontFamily: "Arial, sans-serif",
+    gap: "8px",
   },
-  statusText: {
-    fontWeight: "normal",
-  },
-  statusValue: {
-    fontWeight: "500",
-  },
-  versionText: {
-    fontWeight: "normal",
-  },
-  versionValue: {
-    fontWeight: "500",
-  },
+
   divider: {
     opacity: 0.7,
     margin: "0 4px",
   },
-  permissaoInfo: {
+
+  infoBar: {
     display: "flex",
     alignItems: "flex-start",
     gap: "12px",
@@ -728,165 +475,106 @@ const styles = {
     color: "#2e7d32",
     boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
   },
-  permissaoIcon: {
+
+  infoIcon: {
     fontSize: 20,
     flexShrink: 0,
     marginTop: 2,
   },
-  permissaoContent: {
+
+  infoContent: {
     display: "flex",
     flexDirection: "column",
     gap: 4,
     flex: 1,
   },
-  permissaoTexto: {
+
+  infoText: {
     fontSize: 14,
     lineHeight: 1.4,
     fontWeight: "500",
   },
-  permissaoSubtexto: {
+
+  infoSubtext: {
     fontSize: 12,
     opacity: 0.8,
     fontWeight: "400",
   },
-  avisoMunicipio: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "16px 20px",
-    backgroundColor: "#fff3cd",
-    border: "2px solid #ffc107",
-    borderRadius: 12,
-    marginBottom: "20px",
-    fontSize: 14,
-    color: "#856404",
-    boxShadow: "0 4px 12px rgba(255, 193, 7, 0.15)",
-  },
-  avisoIcon: {
-    fontSize: 20,
-    flexShrink: 0,
-    marginTop: 2,
-  },
-  avisoContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-    flex: 1,
-  },
-  avisoTexto: {
-    fontSize: 14,
-    lineHeight: 1.4,
-    fontWeight: "500",
-  },
-  avisoSubtexto: {
-    fontSize: 12,
-    opacity: 0.8,
-    fontWeight: "400",
-  },
-  breadcrumbContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#e3f2fd",
-    padding: "15px 20px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    border: "2px solid #2196f3",
-  },
-  breadcrumbContent: {
-    display: "flex",
-    alignItems: "center",
-    flex: 1,
-  },
-  breadcrumbItem: {
-    color: "#1565c0",
-    fontWeight: "500",
-    fontSize: "14px",
-  },
-  breadcrumbSeparator: {
-    margin: "0 10px",
-    color: "#1565c0",
-    fontWeight: "bold",
-  },
-  breadcrumbCurrent: {
-    color: "#1565c0",
-    fontWeight: "bold",
-    fontSize: "14px",
-  },
-  breadcrumbClearButton: {
-    backgroundColor: "#f44336",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "bold",
-  },
-  statsContainer: {
+
+  metricsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "15px",
-    marginBottom: "20px",
+    gap: "20px",
+    marginBottom: "30px",
   },
-  statCard: {
+
+  metricCard: {
     backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    padding: "24px",
+    borderRadius: "12px",
     textAlign: "center",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    border: "1px solid #e9ecef",
   },
-  statNumber: {
-    fontSize: "24px",
+
+  metricNumber: {
+    fontSize: "32px",
     fontWeight: "bold",
-    color: "#154360",
-    margin: "0 0 10px 0",
+    color: "#007bff",
+    marginBottom: "8px",
   },
-  statLabel: {
-    fontSize: "11px",
+
+  metricValue: {
+    fontSize: "20px",
     fontWeight: "bold",
-    color: "#666",
+    color: "#28a745",
+    marginBottom: "8px",
+  },
+
+  metricPercentage: {
+    fontSize: "28px",
+    fontWeight: "bold",
+    color: "#ffc107",
+    marginBottom: "8px",
+  },
+
+  metricLabel: {
+    fontSize: "12px",
+    color: "#6c757d",
+    fontWeight: "500",
     textTransform: "uppercase",
-    letterSpacing: "1px",
-    margin: 0,
+    letterSpacing: "0.5px",
   },
-  actionContainer: {
-    marginBottom: "20px",
-    display: "flex",
-    gap: "10px",
-  },
-  primaryButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-  refreshButton: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
+
   loadingContainer: {
     textAlign: "center",
-    padding: "40px",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
+
+  spinner: {
+    width: "50px",
+    height: "50px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #007bff",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 20px",
+  },
+
   loadingText: {
     fontSize: "18px",
+    color: "#333",
+    marginBottom: "8px",
+  },
+
+  loadingSubtext: {
+    fontSize: "14px",
     color: "#666",
   },
+
   errorContainer: {
     textAlign: "center",
     padding: "40px",
@@ -894,37 +582,50 @@ const styles = {
     borderRadius: "8px",
     border: "1px solid #f5c6cb",
   },
-  errorText: {
-    fontSize: "16px",
-    color: "#721c24",
-    marginBottom: "15px",
-  },
+
   retryButton: {
     backgroundColor: "#007bff",
     color: "white",
     border: "none",
-    padding: "10px 20px",
-    borderRadius: "5px",
-    fontSize: "14px",
+    padding: "12px 24px",
+    borderRadius: "6px",
     cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "bold",
   },
-  emptyContainer: {
+
+  emptyState: {
     textAlign: "center",
     padding: "60px 20px",
     backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    marginBottom: "20px",
   },
-  emptyText: {
-    fontSize: "16px",
-    color: "#666",
-    marginBottom: "10px",
+
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "20px",
   },
+
   emptySubtext: {
+    color: "#666",
     fontSize: "14px",
-    color: "#888",
     fontStyle: "italic",
   },
 };
 
-export default Despesas;
+// ✅ CSS PARA ANIMAÇÃO
+if (!document.getElementById("dashboard-animations")) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "dashboard-animations";
+  styleSheet.innerHTML = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
+
+export default Dashboard;

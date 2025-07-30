@@ -1,7 +1,8 @@
-
-// EmendaForm.jsx - CORREÇÃO DEFINITIVA - CAMPOS OBRIGATÓRIOS CONFORME PRINT
-// ✅ CORREÇÃO: Baseado no arquivo original funcional
-// ✅ CORREÇÃO: Apenas campos obrigatórios adicionados conforme print oficial
+// EmendaForm.jsx - ALTERAÇÕES CONFORME SOLICITAÇÃO
+// ✅ REMOVIDO: Seção "Dados Técnicos"
+// ✅ MOVIDO: Seção "Identificação" para baixo de "Dados Básicos"
+// ✅ REMOVIDO: Campo "CNPJ Beneficiário" da seção Identificação
+// ✅ REMOVIDO: Campo "Beneficiário" da seção Dados do Beneficiário
 
 import React, {
   useState,
@@ -16,17 +17,22 @@ import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
 import useEmendaDespesa from "../hooks/useEmendaDespesa";
 
-// Hook para verificar se componente está montado
+// ✅ CORREÇÃO: Hook useIsMounted corrigido
 const useIsMounted = () => {
   const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true; // ✅ Garantir que inicia como true
     return () => {
       isMountedRef.current = false;
     };
   }, []);
 
-  return useCallback(() => isMountedRef.current, []);
+  // ✅ CORREÇÃO: Retornar função que acessa o valor atual
+  return useCallback(() => {
+    console.log("🔍 isMounted check:", isMountedRef.current);
+    return isMountedRef.current;
+  }, []);
 };
 
 const EmendaForm = ({
@@ -59,8 +65,9 @@ const EmendaForm = ({
 
   const [loading, setLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  // ✅ CORREÇÃO: Estado inicial com campos obrigatórios conforme print oficial
+  // ✅ Estado inicial atualizado - valorExecutado será calculado automaticamente
   const [formData, setFormData] = useState({
     // Campos obrigatórios conforme print
     parlamentar: "",
@@ -71,7 +78,7 @@ const EmendaForm = ({
     objetoProposta: "",
     programa: "",
     cnpj: "",
-    beneficiario: "",
+    // ✅ REMOVIDO: beneficiario (conforme solicitação)
     numeroProposta: "",
     funcional: "",
     banco: "",
@@ -80,18 +87,19 @@ const EmendaForm = ({
     // Campos existentes mantidos
     tipo: "Individual",
     cnpjMunicipio: "",
-    beneficiarioCnpj: "",
+    // ✅ REMOVIDO: beneficiarioCnpj (será removido da seção Identificação)
     outrosValores: "",
-    valorExecutado: "",
+    valorExecutado: 0, // ✅ ALTERADO: Agora será calculado automaticamente
     saldo: "",
     dataValidada: "",
     dataOb: "",
     inicioExecucao: "",
     finalExecucao: "",
-    gnd: "",
-    acaoOrcamentaria: "",
-    dotacaoOrcamentaria: "",
-    contrato: "",
+    // ✅ REMOVIDOS: Campos da seção "Dados Técnicos"
+    // gnd: "",
+    // acaoOrcamentaria: "",
+    // dotacaoOrcamentaria: "",
+    // contrato: "",
     acoesServicos: [],
   });
 
@@ -137,7 +145,7 @@ const EmendaForm = ({
     });
   }, []);
 
-  // ✅ CORREÇÃO: Formatação de CNPJ
+  // Formatação de CNPJ
   const formatarCNPJ = useCallback((cnpj) => {
     if (!cnpj) return "";
     const numeros = cnpj.replace(/[^\d]/g, "");
@@ -158,10 +166,11 @@ const EmendaForm = ({
     }).format(value || 0);
   }, []);
 
-  // Carregar dados para edição
+  // ✅ CORREÇÃO: Usar métricas do hook para valor executado
   useEffect(() => {
-    if (emendaParaEditar && isMounted()) {
+    if (emendaParaEditar && metricas && isMounted()) {
       console.log("📝 Carregando dados para edição:", emendaParaEditar);
+      console.log("💰 Métricas carregadas:", metricas);
 
       const formatarParaExibicao = (valor) => {
         if (typeof valor === "number") {
@@ -177,14 +186,17 @@ const EmendaForm = ({
         ...emendaParaEditar,
         valorRecurso: formatarParaExibicao(emendaParaEditar.valorRecurso),
         outrosValores: formatarParaExibicao(emendaParaEditar.outrosValores),
-        valorExecutado: formatarParaExibicao(emendaParaEditar.valorExecutado),
-        saldo: formatarParaExibicao(emendaParaEditar.saldo),
+        // ✅ CORREÇÃO: Usar valor executado das métricas (calculado com base nas despesas)
+        valorExecutado: metricas.valorExecutado || 0,
+        saldo: formatarParaExibicao(
+          metricas.saldoDisponivel || emendaParaEditar.saldo,
+        ),
         acoesServicos: emendaParaEditar.acoesServicos || [],
       });
     }
-  }, [emendaParaEditar, isMounted]);
+  }, [emendaParaEditar, metricas, isMounted]); // ✅ Adicionar metricas como dependência
 
-  // Calcular saldo automaticamente
+  // ✅ CORREÇÃO: Calcular saldo usando valor executado das métricas
   const calcularSaldo = useCallback(() => {
     const parseValue = (value) => {
       if (typeof value === "number") return value;
@@ -195,11 +207,13 @@ const EmendaForm = ({
     };
 
     const valorRecurso = parseValue(formData.valorRecurso);
-    const valorExecutado = parseValue(formData.valorExecutado);
+    // ✅ Para edição, usar métricas; para criação, usar 0
+    const valorExecutado =
+      emendaParaEditar && metricas ? metricas.valorExecutado : 0;
     const saldo = valorRecurso - valorExecutado;
 
     return saldo;
-  }, [formData.valorRecurso, formData.valorExecutado]);
+  }, [formData.valorRecurso, emendaParaEditar, metricas]);
 
   // useEffect com debounce para cálculo de saldo
   useEffect(() => {
@@ -216,29 +230,47 @@ const EmendaForm = ({
     return () => clearTimeout(timeoutId);
   }, [calcularSaldo, isMounted]);
 
-  // Handler com formatação automática fluida
+  // ✅ CORREÇÃO: Handler com limpeza de erros visuais
   const handleInputChange = useCallback(
     (e) => {
       const { name, value } = e.target;
 
       let valorFormatado = value;
 
-      // Formatação específica para campos monetários
+      // Formatação específica para campos monetários (exceto valorExecutado)
       if (
         name === "valorRecurso" ||
-        name === "outrosValores" ||
-        name === "valorExecutado"
+        name === "outrosValores"
+        // ✅ REMOVIDO: valorExecutado da formatação pois não é mais editável
       ) {
         valorFormatado = formatarValorMonetario(value);
       }
 
-      // ✅ CORREÇÃO: Formatação específica para CNPJ
-      if (
-        name === "cnpj" ||
-        name === "cnpjMunicipio" ||
-        name === "beneficiarioCnpj"
-      ) {
+      // Formatação específica para CNPJ
+      if (name === "cnpj" || name === "cnpjMunicipio") {
         valorFormatado = formatarCNPJ(value);
+
+        // ✅ NOVO: Limpar erro visual ao digitar
+        if (fieldErrors[name]) {
+          setFieldErrors((prev) => ({ ...prev, [name]: false }));
+        }
+      }
+
+      // ✅ NOVO: Limpar erro visual de datas ao alterar
+      if (name.includes("data") || name.includes("Data")) {
+        const camposData = [
+          "dataValidada",
+          "dataOb",
+          "inicioExecucao",
+          "finalExecucao",
+        ];
+        const novosErros = { ...fieldErrors };
+        camposData.forEach((campo) => {
+          if (novosErros[campo]) {
+            novosErros[campo] = false;
+          }
+        });
+        setFieldErrors(novosErros);
       }
 
       setFormData((prev) => ({
@@ -246,11 +278,14 @@ const EmendaForm = ({
         [name]: valorFormatado,
       }));
     },
-    [formatarValorMonetario, formatarCNPJ],
+    [formatarValorMonetario, formatarCNPJ, fieldErrors],
   );
 
-  // ✅ CORREÇÃO: Validação com campos obrigatórios conforme print
+  // ✅ CORREÇÃO: Validação com datas e CNPJ obrigatório
   const validarFormulario = useCallback(() => {
+    console.log("🔍 INICIANDO VALIDAÇÃO DO FORMULÁRIO");
+    console.log("📋 Dados do formulário:", formData);
+
     const camposObrigatorios = [
       "parlamentar",
       "numeroEmenda",
@@ -260,33 +295,106 @@ const EmendaForm = ({
       "objetoProposta",
       "programa",
       "cnpj",
-      "beneficiario",
       "numeroProposta",
       "funcional",
       "banco",
       "agencia",
       "conta",
+      "cnpjMunicipio", // ✅ NOVO: CNPJ do município obrigatório
+      "dataValidada", // ✅ NOVO: Data de validade obrigatória
     ];
 
-    const camposVazios = camposObrigatorios.filter(
-      (campo) => !formData[campo] || formData[campo].toString().trim() === "",
-    );
+    console.log("📝 Campos obrigatórios:", camposObrigatorios);
+
+    const camposVazios = camposObrigatorios.filter((campo) => {
+      const valor = formData[campo];
+      const isEmpty = !valor || valor.toString().trim() === "";
+      if (isEmpty) {
+        console.log(`❌ Campo vazio encontrado: ${campo} = "${valor}"`);
+      } else {
+        console.log(`✅ Campo preenchido: ${campo} = "${valor}"`);
+      }
+      return isEmpty;
+    });
+
+    console.log("📊 Campos vazios encontrados:", camposVazios);
+
+    // ✅ Limpar erros visuais anteriores
+    setFieldErrors({});
+    const novosErros = {};
 
     if (camposVazios.length > 0) {
-      error(`Campos obrigatórios não preenchidos: ${camposVazios.join(", ")}`);
+      const mensagem = `Campos obrigatórios não preenchidos: ${camposVazios.join(", ")}`;
+      console.log("❌ VALIDAÇÃO FALHOU:", mensagem);
+      error(mensagem);
       return false;
     }
 
-    // ✅ Validação CNPJ
+    // ✅ NOVO: Validação CNPJ com destaque visual
     if (formData.cnpj && !validarCNPJ(formData.cnpj)) {
-      error("CNPJ inválido");
+      console.log("❌ CNPJ inválido:", formData.cnpj);
+      novosErros.cnpj = true;
+      setFieldErrors(novosErros);
+      error("CNPJ do beneficiário inválido");
       return false;
     }
 
+    // ✅ NOVO: Validação CNPJ do município com destaque visual
+    if (formData.cnpjMunicipio && !validarCNPJ(formData.cnpjMunicipio)) {
+      console.log("❌ CNPJ do município inválido:", formData.cnpjMunicipio);
+      novosErros.cnpjMunicipio = true;
+      setFieldErrors(novosErros);
+      error("CNPJ do município inválido");
+      return false;
+    }
+
+    // ✅ NOVO: Validação de datas
+    if (formData.dataValidada) {
+      const dataValidade = new Date(formData.dataValidada);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      // Data de validade deve ser futura
+      if (dataValidade <= hoje) {
+        console.log(
+          "❌ Data de validade deve ser futura:",
+          formData.dataValidada,
+        );
+        novosErros.dataValidada = true;
+        setFieldErrors(novosErros);
+        error("Data de validade deve ser futura");
+        return false;
+      }
+
+      // ✅ NOVO: Outras datas não podem ser maiores que data de validade
+      const datasParaValidar = [
+        { campo: "dataOb", label: "Data OB" },
+        { campo: "inicioExecucao", label: "Início da Execução" },
+        { campo: "finalExecucao", label: "Final da Execução" },
+      ];
+
+      for (const { campo, label } of datasParaValidar) {
+        if (formData[campo]) {
+          const dataComparacao = new Date(formData[campo]);
+          if (dataComparacao > dataValidade) {
+            console.log(
+              `❌ ${label} não pode ser maior que data de validade:`,
+              formData[campo],
+            );
+            novosErros[campo] = true;
+            setFieldErrors(novosErros);
+            error(`${label} não pode ser maior que a data de validade`);
+            return false;
+          }
+        }
+      }
+    }
+
+    console.log("✅ VALIDAÇÃO PASSOU - Todos os campos estão corretos");
     return true;
   }, [formData, error]);
 
-  // ✅ Validação de CNPJ
+  // Validação de CNPJ
   const validarCNPJ = (cnpj) => {
     cnpj = cnpj.replace(/[^\d]/g, "");
     if (cnpj.length !== 14) return false;
@@ -315,40 +423,84 @@ const EmendaForm = ({
     return parseInt(cnpj.charAt(13)) === digito2;
   };
 
-  // Submissão simplificada
+  // ✅ CORREÇÃO: Submissão com verificação melhorada de montagem
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+      console.log("🚀 SUBMIT INICIADO");
+      console.log("📋 FormData atual:", formData);
+      console.log("🔧 Modo visualização:", modoVisualizacao);
+      console.log("🏗️ Emenda para editar:", emendaParaEditar);
 
-      if (!isMounted()) return;
+      // ✅ CORREÇÃO: Verificação de montagem melhorada
+      const componenteMontado = isMounted();
+      console.log("🔍 Componente montado?", componenteMontado);
+
+      if (!componenteMontado) {
+        console.log("❌ Componente não está montado");
+        return;
+      }
+
       if (modoVisualizacao) {
+        console.log("❌ Modo visualização ativo");
         error("Modo apenas visualização - não é possível salvar");
         return;
       }
 
-      if (!validarFormulario()) return;
+      console.log("🔍 Iniciando validação...");
+      const validacao = validarFormulario();
+      console.log("✅ Resultado da validação:", validacao);
 
+      if (!validacao) {
+        console.log("❌ Validação falhou");
+        return;
+      }
+
+      console.log("⏳ Iniciando salvamento...");
       setLoading(true);
 
       try {
-        // Preparar dados para salvar
+        // ✅ CORREÇÃO: Preparar dados com logs detalhados
         const dadosParaSalvar = {
-          ...formData,
+          // Campos básicos obrigatórios
+          parlamentar: formData.parlamentar,
+          numeroEmenda: formData.numeroEmenda,
+          municipio: formData.municipio,
+          uf: formData.uf,
           valorRecurso:
             parseFloat(
               formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", "."),
             ) || 0,
+          objetoProposta: formData.objetoProposta,
+          programa: formData.programa,
+          cnpj: formData.cnpj,
+          numeroProposta: formData.numeroProposta,
+          funcional: formData.funcional,
+          banco: formData.banco,
+          agencia: formData.agencia,
+          conta: formData.conta,
+
+          // Campos opcionais
+          tipo: formData.tipo || "Individual",
+          cnpjMunicipio: formData.cnpjMunicipio || "",
           outrosValores:
             parseFloat(
               formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", "."),
             ) || 0,
+
+          // Campos calculados
           valorExecutado:
-            parseFloat(
-              formData.valorExecutado?.replace(/[^\d,]/g, "").replace(",", "."),
-            ) || 0,
+            emendaParaEditar && metricas ? metricas.valorExecutado : 0,
           saldo: parseFloat(formData.saldo) || 0,
-          updatedAt: Timestamp.now().toDate().toISOString(),
-          acoesServicos: formData.acoesServicos.map((item) => ({
+
+          // Datas
+          dataValidada: formData.dataValidada || "",
+          dataOb: formData.dataOb || "",
+          inicioExecucao: formData.inicioExecucao || "",
+          finalExecucao: formData.finalExecucao || "",
+
+          // Ações e serviços
+          acoesServicos: (formData.acoesServicos || []).map((item) => ({
             ...item,
             valor: item.valor
               ? parseFloat(
@@ -356,53 +508,97 @@ const EmendaForm = ({
                 ) || 0
               : 0,
           })),
+
+          // Metadados
+          updatedAt: new Date().toISOString(),
         };
 
-        if (!isMounted()) return;
+        console.log("💾 Dados preparados para salvar:", dadosParaSalvar);
+
+        // ✅ CORREÇÃO: Verificação de montagem antes de Firebase
+        if (!isMounted()) {
+          console.log("❌ Componente desmontado durante preparação");
+          return;
+        }
 
         if (emendaParaEditar) {
+          console.log("✏️ Atualizando emenda existente:", emendaParaEditar.id);
           await updateDoc(
             doc(db, "emendas", emendaParaEditar.id),
             dadosParaSalvar,
           );
-          console.log("✅ Emenda atualizada:", emendaParaEditar.id);
+          console.log("✅ Emenda atualizada com sucesso");
 
           if (isMounted()) {
             success("Emenda atualizada com sucesso!");
           }
         } else {
-          const novaEmendaRef = doc(db, "emendas", `emenda_${Date.now()}`);
-          await setDoc(novaEmendaRef, {
+          console.log("➕ Criando nova emenda...");
+          const timestamp = Date.now();
+          const emendaId = `emenda_${timestamp}`;
+          console.log("🆔 ID da nova emenda:", emendaId);
+
+          const novaEmenda = {
             ...dadosParaSalvar,
-            id: novaEmendaRef.id,
-            numero: `EMD${String(Date.now()).slice(-6)}`,
-            createdAt: Timestamp.now().toDate().toISOString(),
-          });
-          console.log("✅ Nova emenda criada:", novaEmendaRef.id);
+            id: emendaId,
+            numero:
+              formData.numeroEmenda || `EMD${String(timestamp).slice(-6)}`,
+            createdAt: new Date().toISOString(),
+            status: "ativa",
+          };
+
+          console.log("📝 Objeto completo da nova emenda:", novaEmenda);
+
+          const novaEmendaRef = doc(db, "emendas", emendaId);
+          console.log("📄 Referência do documento:", novaEmendaRef);
+
+          await setDoc(novaEmendaRef, novaEmenda);
+          console.log("✅ Nova emenda criada com sucesso:", emendaId);
 
           if (isMounted()) {
             success("Emenda criada com sucesso!");
           }
         }
 
+        // ✅ NOVO: Navegação automática para lista após salvar
         if (isMounted()) {
+          console.log("🎉 Mostrando mensagem de sucesso...");
           setShowSuccessMessage(true);
+
           setTimeout(() => {
             if (isMounted()) {
+              console.log("🔄 Executando navegação de volta...");
               setShowSuccessMessage(false);
+
+              // ✅ CORREÇÃO: Sempre navegar de volta para lista
               if (onSalvar && typeof onSalvar === "function") {
+                console.log("📞 Chamando onSalvar...");
                 onSalvar();
+              } else if (onCancelar && typeof onCancelar === "function") {
+                console.log("📞 Chamando onCancelar para voltar à lista...");
+                onCancelar();
+              } else {
+                // ✅ FALLBACK: Navegar diretamente se callbacks não funcionarem
+                console.log("🔄 Navegando diretamente para /emendas");
+                navigate("/emendas");
               }
             }
           }, 1500);
         }
       } catch (err) {
-        console.error("❌ Erro ao salvar emenda:", err);
+        console.error("❌ ERRO DETALHADO ao salvar emenda:", err);
+        console.error("❌ Stack trace:", err.stack);
+        console.error("❌ Código do erro:", err.code);
+        console.error("❌ Mensagem:", err.message);
+
         if (isMounted()) {
-          error("Erro ao salvar emenda. Tente novamente.");
+          error(
+            `Erro ao salvar emenda: ${err.message || "Erro desconhecido. Verifique o console."}`,
+          );
         }
       } finally {
         if (isMounted()) {
+          console.log("🏁 Finalizando processo de salvamento...");
           setLoading(false);
         }
       }
@@ -410,9 +606,11 @@ const EmendaForm = ({
     [
       formData,
       emendaParaEditar,
+      metricas,
       error,
       success,
       onSalvar,
+      onCancelar,
       isMounted,
       modoVisualizacao,
       validarFormulario,
@@ -488,7 +686,7 @@ const EmendaForm = ({
       )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* ✅ CORREÇÃO: Dados Básicos Obrigatórios */}
+        {/* ✅ SEÇÃO 1: Dados Básicos Obrigatórios (mantida) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📋</span>
@@ -628,7 +826,93 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ CORREÇÃO: Dados do Beneficiário */}
+        {/* ✅ SEÇÃO 2: Identificação (MOVIDA para baixo de Dados Básicos) */}
+        <fieldset style={styles.fieldset}>
+          <legend style={styles.legend}>
+            <span style={styles.legendIcon}>🏛️</span>
+            Identificação
+          </legend>
+
+          <div style={styles.formGrid}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                CNPJ do Município <span style={styles.required}>*</span>
+              </label>
+              <input
+                type="text"
+                name="cnpjMunicipio"
+                value={formData.cnpjMunicipio || ""}
+                onChange={handleInputChange}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.cnpjMunicipio && styles.inputError),
+                }}
+                disabled={modoVisualizacao}
+                placeholder="00.000.000/0000-00"
+                required
+              />
+              {fieldErrors.cnpjMunicipio && (
+                <small style={styles.errorText}>CNPJ inválido</small>
+              )}
+            </div>
+
+            {/* ✅ REMOVIDO: Campo "CNPJ Beneficiário" conforme solicitação */}
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Outros Valores</label>
+              <input
+                type="text"
+                name="outrosValores"
+                value={formData.outrosValores || ""}
+                onChange={handleInputChange}
+                style={styles.input}
+                disabled={modoVisualizacao}
+                placeholder="0,00"
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Valor Executado (Automático)</label>
+              <input
+                type="text"
+                name="valorExecutado"
+                value={
+                  emendaParaEditar && metricas
+                    ? formatCurrency(metricas.valorExecutado || 0)
+                    : "R$ 0,00"
+                }
+                style={{
+                  ...styles.input,
+                  backgroundColor: "#f8f9fa",
+                  color: "#6c757d",
+                }}
+                disabled={true}
+                placeholder="Calculado automaticamente com base nas despesas"
+                title="Este valor é calculado automaticamente com base nas despesas cadastradas para esta emenda"
+              />
+              <small
+                style={{ color: "#6c757d", fontSize: "12px", marginTop: "4px" }}
+              >
+                💡 Valor calculado automaticamente com base nas despesas
+                lançadas
+              </small>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Saldo (Calculado)</label>
+              <input
+                type="text"
+                name="saldo"
+                value={formData.saldo || ""}
+                style={{ ...styles.input, backgroundColor: "#f8f9fa" }}
+                disabled={true}
+                placeholder="0,00"
+              />
+            </div>
+          </div>
+        </fieldset>
+
+        {/* ✅ SEÇÃO 3: Dados do Beneficiário (sem campo Beneficiário) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>🏢</span>
@@ -645,27 +929,20 @@ const EmendaForm = ({
                 name="cnpj"
                 value={formData.cnpj || ""}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.cnpj && styles.inputError),
+                }}
                 disabled={modoVisualizacao}
                 placeholder="00.000.000/0000-00"
                 required
               />
+              {fieldErrors.cnpj && (
+                <small style={styles.errorText}>CNPJ inválido</small>
+              )}
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Beneficiário <span style={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                name="beneficiario"
-                value={formData.beneficiario || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-                required
-              />
-            </div>
+            {/* ✅ REMOVIDO: Campo "Beneficiário" conforme solicitação */}
 
             <div style={styles.formGroup}>
               <label style={styles.label}>
@@ -684,7 +961,7 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ CORREÇÃO: Dados Bancários */}
+        {/* ✅ SEÇÃO 4: Dados Bancários (mantida) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>🏦</span>
@@ -742,7 +1019,7 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ CORREÇÃO: Classificação Técnica */}
+        {/* ✅ SEÇÃO 5: Classificação Técnica (mantida) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>🔧</span>
@@ -782,7 +1059,7 @@ const EmendaForm = ({
           </div>
         </fieldset>
 
-        {/* ✅ NOVA SEÇÃO: AÇÕES E SERVIÇOS */}
+        {/* ✅ SEÇÃO 6: Ações e Serviços (mantida) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📊</span>
@@ -804,19 +1081,33 @@ const EmendaForm = ({
               </select>
             </div>
 
-            <div style={styles.acoesFormGrid}>
+            <div
+              style={
+                window.innerWidth <= 768
+                  ? styles.smallScreenAcoesFormGrid
+                  : styles.acoesFormGrid
+              }
+            >
               <div style={styles.formGroup}>
                 <label style={styles.label}>
-                  {tipoAcaoServico === "Metas Quantitativas" ? "Estratégia" : "Título da Meta"}
+                  {tipoAcaoServico === "Metas Quantitativas"
+                    ? "Estratégia"
+                    : "Título da Meta"}
                 </label>
                 <input
                   type="text"
                   value={novaAcaoServico.descricao}
-                  onChange={(e) => setNovaAcaoServico(prev => ({ ...prev, descricao: e.target.value }))}
+                  onChange={(e) =>
+                    setNovaAcaoServico((prev) => ({
+                      ...prev,
+                      descricao: e.target.value,
+                    }))
+                  }
                   style={styles.input}
-                  placeholder={tipoAcaoServico === "Metas Quantitativas" 
-                    ? "Ex: Estratégia de Rastreamento e Controle de Condições Crônicas"
-                    : "Ex: Oferta de medicamentos da Atenção Básica"
+                  placeholder={
+                    tipoAcaoServico === "Metas Quantitativas"
+                      ? "Ex: Estratégia de Rastreamento e Controle de Condições Crônicas"
+                      : "Ex: Oferta de medicamentos da Atenção Básica"
                   }
                   disabled={modoVisualizacao}
                 />
@@ -824,15 +1115,23 @@ const EmendaForm = ({
 
               <div style={styles.formGroup}>
                 <label style={styles.label}>
-                  {tipoAcaoServico === "Metas Quantitativas" ? "Descrição Detalhada" : "Detalhamento"}
+                  {tipoAcaoServico === "Metas Quantitativas"
+                    ? "Descrição Detalhada"
+                    : "Detalhamento"}
                 </label>
                 <textarea
                   value={novaAcaoServico.complemento}
-                  onChange={(e) => setNovaAcaoServico(prev => ({ ...prev, complemento: e.target.value }))}
+                  onChange={(e) =>
+                    setNovaAcaoServico((prev) => ({
+                      ...prev,
+                      complemento: e.target.value,
+                    }))
+                  }
                   style={{ ...styles.textarea, minHeight: "80px" }}
-                  placeholder={tipoAcaoServico === "Metas Quantitativas"
-                    ? "Aquisição de Insumos e Materiais de Uso Contínuo para Acompanhamento de Pessoas com Condições Crônicas"
-                    : "Manutenção da oferta de medicamentos, insumos e materiais de forma regular para os estabelecimentos de saúde"
+                  placeholder={
+                    tipoAcaoServico === "Metas Quantitativas"
+                      ? "Aquisição de Insumos e Materiais de Uso Contínuo para Acompanhamento de Pessoas com Condições Crônicas"
+                      : "Manutenção da oferta de medicamentos, insumos e materiais de forma regular para os estabelecimentos de saúde"
                   }
                   disabled={modoVisualizacao}
                 />
@@ -845,8 +1144,13 @@ const EmendaForm = ({
                     type="text"
                     value={novaAcaoServico.valor}
                     onChange={(e) => {
-                      const valorFormatado = formatarValorMonetario(e.target.value);
-                      setNovaAcaoServico(prev => ({ ...prev, valor: valorFormatado }));
+                      const valorFormatado = formatarValorMonetario(
+                        e.target.value,
+                      );
+                      setNovaAcaoServico((prev) => ({
+                        ...prev,
+                        valor: valorFormatado,
+                      }));
                     }}
                     style={styles.input}
                     placeholder="200.000,00"
@@ -867,7 +1171,11 @@ const EmendaForm = ({
                       error("Preencha o detalhamento");
                       return;
                     }
-                    if (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00")) {
+                    if (
+                      tipoAcaoServico === "Metas Quantitativas" &&
+                      (!novaAcaoServico.valor ||
+                        novaAcaoServico.valor === "0,00")
+                    ) {
                       error("Preencha o valor para Metas Quantitativas");
                       return;
                     }
@@ -876,13 +1184,16 @@ const EmendaForm = ({
                       tipo: tipoAcaoServico,
                       estrategia: novaAcaoServico.descricao,
                       descricao: novaAcaoServico.complemento,
-                      valor: tipoAcaoServico === "Metas Quantitativas" ? novaAcaoServico.valor : "",
-                      id: Date.now() // ID temporário para edição
+                      valor:
+                        tipoAcaoServico === "Metas Quantitativas"
+                          ? novaAcaoServico.valor
+                          : "",
+                      id: Date.now(), // ID temporário para edição
                     };
 
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      acoesServicos: [...(prev.acoesServicos || []), novaAcao]
+                      acoesServicos: [...(prev.acoesServicos || []), novaAcao],
                     }));
 
                     // Limpar formulário
@@ -890,19 +1201,27 @@ const EmendaForm = ({
                       tipo: tipoAcaoServico,
                       descricao: "",
                       complemento: "",
-                      valor: ""
+                      valor: "",
                     });
 
                     success(`${tipoAcaoServico} adicionada com sucesso!`);
                   }}
                   style={{
                     ...styles.addButton,
-                    ...((!novaAcaoServico.descricao.trim() || !novaAcaoServico.complemento.trim() || 
-                        (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00"))) 
-                        && styles.addButtonDisabled)
+                    ...((!novaAcaoServico.descricao.trim() ||
+                      !novaAcaoServico.complemento.trim() ||
+                      (tipoAcaoServico === "Metas Quantitativas" &&
+                        (!novaAcaoServico.valor ||
+                          novaAcaoServico.valor === "0,00"))) &&
+                      styles.addButtonDisabled),
                   }}
-                  disabled={!novaAcaoServico.descricao.trim() || !novaAcaoServico.complemento.trim() || 
-                           (tipoAcaoServico === "Metas Quantitativas" && (!novaAcaoServico.valor || novaAcaoServico.valor === "0,00"))}
+                  disabled={
+                    !novaAcaoServico.descricao.trim() ||
+                    !novaAcaoServico.complemento.trim() ||
+                    (tipoAcaoServico === "Metas Quantitativas" &&
+                      (!novaAcaoServico.valor ||
+                        novaAcaoServico.valor === "0,00"))
+                  }
                 >
                   ➕ Adicionar {tipoAcaoServico}
                 </button>
@@ -913,28 +1232,44 @@ const EmendaForm = ({
           {/* Lista de ações/serviços adicionadas */}
           <div style={styles.acoesListContainer}>
             <h4 style={{ margin: "0 0 15px 0", color: "#154360" }}>
-              Ações/Serviços Cadastradas ({(formData.acoesServicos || []).length})
+              Ações/Serviços Cadastradas (
+              {(formData.acoesServicos || []).length})
             </h4>
 
-            {(!formData.acoesServicos || formData.acoesServicos.length === 0) ? (
+            {!formData.acoesServicos || formData.acoesServicos.length === 0 ? (
               <div style={styles.emptyState}>
                 Nenhuma ação/serviço cadastrada ainda.
                 <br />
-                <small>Use o formulário acima para adicionar metas quantitativas ou metas.</small>
+                <small>
+                  Use o formulário acima para adicionar metas quantitativas ou
+                  metas.
+                </small>
               </div>
             ) : (
               <div style={styles.acoesList}>
                 {formData.acoesServicos.map((acao, index) => (
                   <div key={acao.id || index} style={styles.acaoItem}>
-                    <div style={window.innerWidth <= 768 ? styles.smallScreenAcaoHeader : styles.acaoHeader}>
-                      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                    <div
+                      style={
+                        window.innerWidth <= 768
+                          ? styles.smallScreenAcaoHeader
+                          : styles.acaoHeader
+                      }
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                        }}
+                      >
                         <span style={styles.acaoTipo}>{acao.tipo}</span>
                         {acao.tipo === "Metas Quantitativas" && acao.valor && (
                           <span style={styles.acaoValor}>
-                            {typeof acao.valor === 'string' && acao.valor.includes(',') 
+                            {typeof acao.valor === "string" &&
+                            acao.valor.includes(",")
                               ? `R$ ${acao.valor}`
-                              : formatCurrency(parseFloat(acao.valor) || 0)
-                            }
+                              : formatCurrency(parseFloat(acao.valor) || 0)}
                           </span>
                         )}
                       </div>
@@ -942,17 +1277,29 @@ const EmendaForm = ({
                         <button
                           type="button"
                           onClick={() => {
-                            if (window.confirm("Tem certeza que deseja remover esta ação/serviço?")) {
-                              setFormData(prev => ({
+                            if (
+                              window.confirm(
+                                "Tem certeza que deseja remover esta ação/serviço?",
+                              )
+                            ) {
+                              setFormData((prev) => ({
                                 ...prev,
-                                acoesServicos: prev.acoesServicos.filter((_, i) => i !== index)
+                                acoesServicos: prev.acoesServicos.filter(
+                                  (_, i) => i !== index,
+                                ),
                               }));
                               success("Ação/Serviço removida!");
                             }
                           }}
                           style={styles.removeButton}
-                          onMouseEnter={(e) => e.target.style.background = styles.removeButtonHover.background}
-                          onMouseLeave={(e) => e.target.style.background = styles.removeButton.background}
+                          onMouseEnter={(e) =>
+                            (e.target.style.background =
+                              styles.removeButtonHover.background)
+                          }
+                          onMouseLeave={(e) =>
+                            (e.target.style.background =
+                              styles.removeButton.background)
+                          }
                         >
                           🗑️ Remover
                         </button>
@@ -963,112 +1310,44 @@ const EmendaForm = ({
                       <strong>{acao.estrategia}</strong>
                     </div>
 
-                    <div style={styles.acaoComplemento}>
-                      {acao.descricao}
-                    </div>
+                    <div style={styles.acaoComplemento}>{acao.descricao}</div>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Resumo total apenas para Metas Quantitativas */}
-            {formData.acoesServicos && formData.acoesServicos.some(a => a.tipo === "Metas Quantitativas" && a.valor) && (
-              <div style={styles.resumoTotal}>
-                <strong>
-                  Valor Total das Metas Quantitativas: {
-                    formatCurrency(
+            {formData.acoesServicos &&
+              formData.acoesServicos.some(
+                (a) => a.tipo === "Metas Quantitativas" && a.valor,
+              ) && (
+                <div style={styles.resumoTotal}>
+                  <strong>
+                    Valor Total das Metas Quantitativas:{" "}
+                    {formatCurrency(
                       formData.acoesServicos
-                        .filter(a => a.tipo === "Metas Quantitativas" && a.valor)
+                        .filter(
+                          (a) => a.tipo === "Metas Quantitativas" && a.valor,
+                        )
                         .reduce((total, a) => {
-                          const valor = typeof a.valor === 'string' && a.valor.includes(',')
-                            ? parseFloat(a.valor.replace(/[^\d,]/g, '').replace(',', '.'))
-                            : parseFloat(a.valor);
+                          const valor =
+                            typeof a.valor === "string" && a.valor.includes(",")
+                              ? parseFloat(
+                                  a.valor
+                                    .replace(/[^\d,]/g, "")
+                                    .replace(",", "."),
+                                )
+                              : parseFloat(a.valor);
                           return total + (valor || 0);
-                        }, 0)
-                    )
-                  }
-                </strong>
-              </div>
-            )}
+                        }, 0),
+                    )}
+                  </strong>
+                </div>
+              )}
           </div>
         </fieldset>
 
-        
-        {/* Identificação (mantida do original) */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>🏛️</span>
-            Identificação
-          </legend>
-
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>CNPJ do Município</label>
-              <input
-                type="text"
-                name="cnpjMunicipio"
-                value={formData.cnpjMunicipio || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-                placeholder="00.000.000/0000-00"
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>CNPJ Beneficiário</label>
-              <input
-                type="text"
-                name="beneficiarioCnpj"
-                value={formData.beneficiarioCnpj || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-                placeholder="00.000.000/0000-00"
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Outros Valores</label>
-              <input
-                type="text"
-                name="outrosValores"
-                value={formData.outrosValores || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-                placeholder="0,00"
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Valor Executado</label>
-              <input
-                type="text"
-                name="valorExecutado"
-                value={formData.valorExecutado || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-                placeholder="0,00"
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Saldo (Calculado)</label>
-              <input
-                type="text"
-                name="saldo"
-                value={formData.saldo || ""}
-                style={{ ...styles.input, backgroundColor: "#f8f9fa" }}
-                disabled={true}
-                placeholder="0,00"
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Cronograma (mantido do original) */}
+        {/* ✅ SEÇÃO 7: Cronograma (mantida) */}
         <fieldset style={styles.fieldset}>
           <legend style={styles.legend}>
             <span style={styles.legendIcon}>📅</span>
@@ -1077,15 +1356,27 @@ const EmendaForm = ({
 
           <div style={styles.formGrid}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Data de Validade</label>
+              <label style={styles.label}>
+                Data de Validade <span style={styles.required}>*</span>
+              </label>
               <input
                 type="date"
                 name="dataValidada"
                 value={formData.dataValidada || ""}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.dataValidada && styles.inputError),
+                }}
                 disabled={modoVisualizacao}
+                required
               />
+              {fieldErrors.dataValidada && (
+                <small style={styles.errorText}>Data deve ser futura</small>
+              )}
+              <small style={{ color: "#6c757d", fontSize: "12px" }}>
+                💡 Outras datas não podem ser posteriores a esta
+              </small>
             </div>
 
             <div style={styles.formGroup}>
@@ -1095,9 +1386,17 @@ const EmendaForm = ({
                 name="dataOb"
                 value={formData.dataOb || ""}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.dataOb && styles.inputError),
+                }}
                 disabled={modoVisualizacao}
               />
+              {fieldErrors.dataOb && (
+                <small style={styles.errorText}>
+                  Não pode ser maior que data de validade
+                </small>
+              )}
             </div>
 
             <div style={styles.formGroup}>
@@ -1107,9 +1406,17 @@ const EmendaForm = ({
                 name="inicioExecucao"
                 value={formData.inicioExecucao || ""}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.inicioExecucao && styles.inputError),
+                }}
                 disabled={modoVisualizacao}
               />
+              {fieldErrors.inicioExecucao && (
+                <small style={styles.errorText}>
+                  Não pode ser maior que data de validade
+                </small>
+              )}
             </div>
 
             <div style={styles.formGroup}>
@@ -1119,97 +1426,86 @@ const EmendaForm = ({
                 name="finalExecucao"
                 value={formData.finalExecucao || ""}
                 onChange={handleInputChange}
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.finalExecucao && styles.inputError),
+                }}
                 disabled={modoVisualizacao}
               />
+              {fieldErrors.finalExecucao && (
+                <small style={styles.errorText}>
+                  Não pode ser maior que data de validade
+                </small>
+              )}
             </div>
           </div>
         </fieldset>
 
-        {/* Dados Técnicos (mantido do original) */}
-        <fieldset style={styles.fieldset}>
-          <legend style={styles.legend}>
-            <span style={styles.legendIcon}>🔧</span>
-            Dados Técnicos
-          </legend>
+        {/* ✅ REMOVIDO: Seção "Dados Técnicos" conforme solicitação */}
 
-          <div style={styles.formGrid}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>GND</label>
-              <input
-                type="text"
-                name="gnd"
-                value={formData.gnd || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Ação Orçamentária</label>
-              <input
-                type="text"
-                name="acaoOrcamentaria"
-                value={formData.acaoOrcamentaria || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Dotação Orçamentária</label>
-              <input
-                type="text"
-                name="dotacaoOrcamentaria"
-                value={formData.dotacaoOrcamentaria || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-              />
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Contrato</label>
-              <input
-                type="text"
-                name="contrato"
-                value={formData.contrato || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-                disabled={modoVisualizacao}
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        {/* Botões */}
+        {/* Botões corrigidos - Voltar apenas na edição */}
         <div style={styles.buttonContainer}>
-          <button
-            type="button"
-            onClick={onCancelar}
-            style={styles.cancelButtonStyle}
-          >
-            ← Voltar
-          </button>
+          {/* Botão Voltar apenas no modo edição */}
+          {configModo.modo === "editar" && (
+            <button
+              type="button"
+              onClick={() => {
+                console.log("🔙 Botão Voltar clicado (modo edição)");
+                navigate("/emendas");
+              }}
+              style={styles.backButton}
+            >
+              ← Voltar
+            </button>
+          )}
 
           {!modoVisualizacao && (
-            <button
-              type="submit"
-              style={{
-                ...styles.submitButton,
-                opacity: loading ? 0.6 : 1,
-                cursor: loading ? "not-allowed" : "pointer",
-              }}
-              disabled={loading}
-            >
-              {loading
-                ? "Salvando..."
-                : configModo.modo === "criar"
-                  ? "✅ Criar Emenda"
-                  : "✅ Atualizar Emenda"}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("❌ Botão Cancelar clicado");
+                  if (
+                    window.confirm(
+                      "Tem certeza que deseja cancelar? Todas as alterações serão perdidas.",
+                    )
+                  ) {
+                    console.log(
+                      "✅ Usuário confirmou cancelamento - navegando para /emendas",
+                    );
+                    navigate("/emendas");
+                  } else {
+                    console.log("❌ Usuário cancelou o cancelamento");
+                  }
+                }}
+                style={styles.cancelButton}
+              >
+                ❌ Cancelar
+              </button>
+
+              <button
+                type="submit"
+                onClick={(e) => {
+                  console.log("🖱️ Botão Submit clicado!");
+                  console.log("📋 Evento:", e);
+                  console.log("🔧 Loading atual:", loading);
+                  console.log("👁️ Modo visualização:", modoVisualizacao);
+                  handleSubmit(e);
+                }}
+                style={{
+                  ...styles.submitButton,
+                  opacity: loading ? 0.6 : 1,
+                  cursor: loading ? "not-allowed" : "pointer",
+                }}
+                disabled={loading}
+              >
+                {loading
+                  ? "Salvando..."
+                  : configModo.modo === "criar"
+                    ? "✅ Criar Emenda"
+                    : "✅ Atualizar Emenda"}
+              </button>
+            </>
           )}
         </div>
       </form>
@@ -1338,6 +1634,39 @@ const styles = {
     paddingTop: "20px",
     borderTop: "1px solid #dee2e6",
   },
+  inputError: {
+    borderColor: "#dc3545",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  errorText: {
+    color: "#dc3545",
+    fontSize: "12px",
+    marginTop: "4px",
+    display: "block",
+  },
+  backButton: {
+    padding: "12px 24px",
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
+  cancelButton: {
+    padding: "12px 24px",
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
   cancelButtonStyle: {
     padding: "12px 24px",
     backgroundColor: "#6c757d",
@@ -1370,20 +1699,11 @@ const styles = {
   tipoSelector: {
     marginBottom: "15px",
   },
-  novaAcaoForm: {
-    display: "grid",
-    gridTemplateColumns: "2fr 3fr 1fr auto",
-    gap: "15px",
-    alignItems: "end",
-  },
   acoesFormGrid: {
     display: "grid",
     gridTemplateColumns: "1fr 2fr 200px",
     gap: "20px",
     alignItems: "start",
-    "@media screen and (max-width: 768px)": {
-      gridTemplateColumns: "1fr",
-    },
   },
   addButton: {
     background: "#28a745",
@@ -1472,8 +1792,11 @@ const styles = {
     textAlign: "center",
     color: "#154360",
   },
-  smallScreenNovaAcaoForm: {
+  smallScreenAcoesFormGrid: {
+    display: "grid",
     gridTemplateColumns: "1fr",
+    gap: "20px",
+    alignItems: "start",
   },
   smallScreenAcaoHeader: {
     flexDirection: "column",
