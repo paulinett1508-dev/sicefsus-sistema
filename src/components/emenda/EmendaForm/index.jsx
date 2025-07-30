@@ -1,6 +1,7 @@
 // src/components/emenda/EmendaForm/index.jsx
 // VERSÃO REFATORADA - De 1891 linhas para ~200 linhas
 // Reutiliza hooks/utils existentes + componentes extraídos
+// ✅ CORRIGIDO: Cancelamento com fallback robusto
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +41,7 @@ const EmendaForm = ({
 }) => {
   // ✅ HOOKS REUTILIZADOS
   const { success, error } = useToast();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // ✅ Hook direto para fallback
   const { validateForm } = useValidation();
   const { navegarAposSalvar, cancelarFormulario } = useEmendaFormNavigation();
 
@@ -242,15 +243,48 @@ const EmendaForm = ({
 
   // ✅ HANDLERS DE MODAL
   const handleCancelClick = () => {
+    console.log("🖱️ handleCancelClick - abrindo modal");
     setShowCancelModal(true);
   };
 
+  // ✅ CORRIGIDO: handleConfirmCancel com fallbacks robustos
   const handleConfirmCancel = () => {
+    console.log("✅ handleConfirmCancel - confirmando cancelamento");
     setShowCancelModal(false);
-    cancelarFormulario();
+
+    try {
+      // 1ª opção: usar onCancelar prop se fornecido
+      if (onCancelar && typeof onCancelar === "function") {
+        console.log("🔧 Usando onCancelar prop");
+        onCancelar();
+        return;
+      }
+
+      // 2ª opção: usar cancelarFormulario do hook
+      if (cancelarFormulario && typeof cancelarFormulario === "function") {
+        console.log("🔧 Usando cancelarFormulario do hook");
+        cancelarFormulario();
+        return;
+      }
+
+      // 3ª opção: navegação direta (fallback final)
+      console.log("⚠️ Usando navegação direta como fallback");
+      navigate("/emendas");
+    } catch (error) {
+      console.error("❌ Erro no cancelamento:", error);
+      // Fallback de emergência
+      try {
+        navigate("/emendas");
+      } catch (navError) {
+        console.error("❌ Erro crítico na navegação:", navError);
+        // Último recurso
+        window.location.href = "/emendas";
+      }
+    }
   };
 
   const handleCancelModalClose = () => {
+    console.log("❌ handleCancelModalClose - fechando modal sem cancelar");
     setShowCancelModal(false);
   };
 
@@ -299,6 +333,13 @@ const EmendaForm = ({
           fieldErrors={fieldErrors}
         />
 
+        <Cronograma
+          formData={formData}
+          onChange={handleInputChange}
+          disabled={modoVisualizacao}
+          fieldErrors={fieldErrors}
+        />
+
         <DadosBancarios
           formData={formData}
           onChange={handleInputChange}
@@ -320,13 +361,6 @@ const EmendaForm = ({
           fieldErrors={fieldErrors}
         />
 
-        <Cronograma
-          formData={formData}
-          onChange={handleInputChange}
-          disabled={modoVisualizacao}
-          fieldErrors={fieldErrors}
-        />
-
         {/* ✅ AÇÕES EXTRAÍDAS */}
         <EmendaFormActions
           modo={configModo.modo}
@@ -338,7 +372,7 @@ const EmendaForm = ({
         />
       </form>
 
-      {/* ✅ MODAL EXTRAÍDA */}
+      {/* ✅ MODAL EXTRAÍDA - usando handleConfirmCancel diretamente */}
       <EmendaFormCancelModal
         show={showCancelModal}
         onClose={handleCancelModalClose}

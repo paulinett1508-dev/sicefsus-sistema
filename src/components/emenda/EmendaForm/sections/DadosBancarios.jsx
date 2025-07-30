@@ -52,6 +52,12 @@ const DadosBancarios = ({
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Banco <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Código de 3 dígitos do banco (ex: 001 - Banco do Brasil)"
+            >
+              ℹ️
+            </span>
           </label>
           <input
             type="text"
@@ -70,15 +76,18 @@ const DadosBancarios = ({
           {fieldErrors.banco && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
-          <small style={styles.helpText}>
-            💡 Código de 3 dígitos do banco (ex: 001 - Banco do Brasil)
-          </small>
         </div>
 
         {/* Agência */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Agência <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Número da agência (sem dígito verificador)"
+            >
+              ℹ️
+            </span>
           </label>
           <input
             type="text"
@@ -97,15 +106,18 @@ const DadosBancarios = ({
           {fieldErrors.agencia && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
-          <small style={styles.helpText}>
-            💡 Número da agência (sem dígito verificador)
-          </small>
         </div>
 
         {/* Conta */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Conta <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Número da conta (com dígito verificador se houver)"
+            >
+              ℹ️
+            </span>
           </label>
           <input
             type="text"
@@ -124,9 +136,6 @@ const DadosBancarios = ({
           {fieldErrors.conta && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
-          <small style={styles.helpText}>
-            💡 Número da conta (com dígito verificador se houver)
-          </small>
         </div>
       </div>
 
@@ -187,6 +196,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
@@ -206,12 +218,6 @@ const styles = {
   },
   errorText: {
     color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-  },
-  helpText: {
-    color: "#6c757d",
     fontSize: "12px",
     marginTop: "4px",
     display: "block",
@@ -244,6 +250,12 @@ const styles = {
     fontSize: "13px",
     color: "#6c757d",
     padding: "4px 0",
+  },
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

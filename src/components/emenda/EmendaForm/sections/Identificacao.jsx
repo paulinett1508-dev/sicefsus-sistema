@@ -114,7 +114,15 @@ const Identificacao = ({
 
         {/* Valor Executado (Automático) */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Valor Executado (Automático)</label>
+          <label style={styles.label}>
+            Valor Executado (Automático)
+            <span
+              style={styles.infoIcon}
+              title="Valor calculado automaticamente com base nas despesas lançadas"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="text"
             name="valorExecutado"
@@ -128,14 +136,19 @@ const Identificacao = ({
             placeholder="Calculado automaticamente com base nas despesas"
             title="Este valor é calculado automaticamente com base nas despesas cadastradas para esta emenda"
           />
-          <small style={styles.helpText}>
-            💡 Valor calculado automaticamente com base nas despesas lançadas
-          </small>
         </div>
 
         {/* Saldo (Calculado) */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Saldo (Calculado)</label>
+          <label style={styles.label}>
+            Saldo (Calculado)
+            <span
+              style={styles.infoIcon}
+              title="Saldo = Valor do Recurso - Valor Executado"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="text"
             name="saldo"
@@ -149,9 +162,6 @@ const Identificacao = ({
             placeholder="0,00"
             title="Saldo = Valor do Recurso - Valor Executado"
           />
-          <small style={styles.helpText}>
-            💡 Saldo = Valor do Recurso - Valor Executado
-          </small>
         </div>
       </div>
     </fieldset>
@@ -197,6 +207,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
@@ -220,11 +233,11 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

@@ -95,7 +95,15 @@ const DespesaFormAdvancedFields = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>CNPJ do Fornecedor</label>
+          <label style={styles.label}>
+            CNPJ do Fornecedor
+            <span
+              style={styles.infoIcon}
+              title="CNPJ será validado automaticamente"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="text"
             name="cnpjFornecedor"
@@ -107,9 +115,6 @@ const DespesaFormAdvancedFields = ({
             maxLength="18"
           />
           {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}
-          <span style={styles.helpText}>
-            CNPJ será validado automaticamente
-          </span>
         </div>
 
         <div style={styles.formGroup}>
@@ -206,6 +211,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   input: {
     padding: "12px",
@@ -249,10 +257,11 @@ const styles = {
     fontSize: "12px",
     marginTop: "5px",
   },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "5px",
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

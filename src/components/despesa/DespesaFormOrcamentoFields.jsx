@@ -77,6 +77,9 @@ const DespesaFormOrcamentoFields = ({
         <div style={styles.formGroup}>
           <label style={styles.labelRequired}>
             Classificação Funcional-Programática *
+            <span style={styles.infoIcon} title="Ex: 10.302.0002.20AD.0001">
+              ℹ️
+            </span>
           </label>
           <input
             type="text"
@@ -95,7 +98,6 @@ const DespesaFormOrcamentoFields = ({
               {errors.classificacaoFuncional}
             </span>
           )}
-          <span style={styles.helpText}>Ex: 10.302.0002.20AD.0001</span>
         </div>
       </div>
     </fieldset>
@@ -139,6 +141,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   input: {
     padding: "12px",
@@ -172,10 +177,11 @@ const styles = {
     fontSize: "12px",
     marginTop: "5px",
   },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "5px",
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

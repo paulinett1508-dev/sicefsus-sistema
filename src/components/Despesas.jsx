@@ -1,15 +1,18 @@
 // Dashboard.jsx - CORREÇÃO CRÍTICA - Admin não deve ter filtro de município
 // ✅ PROBLEMA: Admin estava sendo filtrado por município (incorreto)
 // ✅ SOLUÇÃO: Admin vê TODOS os dados sem qualquer filtro
+// ✅ ADICIONADO: Botões Nova Despesa e Atualizar (padrão Emendas.jsx)
 
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { useNavigate } from "react-router-dom"; // ✅ ADICIONADO para navegação
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 
 const Dashboard = ({ usuario }) => {
   const user = usuario;
   const userLoading = !usuario;
+  const navigate = useNavigate(); // ✅ ADICIONADO para navegação
 
   // Estados
   const [emendas, setEmendas] = useState([]);
@@ -210,6 +213,17 @@ const Dashboard = ({ usuario }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ NOVOS HANDLERS PARA BOTÕES (baseado em Emendas.jsx)
+  const handleCriarDespesa = () => {
+    console.log("➕ Criando nova despesa");
+    navigate("/despesas/criar");
+  };
+
+  const recarregarDados = async () => {
+    console.log("🔄 Recarregando dados...");
+    await carregarDados();
   };
 
   // ✅ EFFECT PARA CARREGAR DADOS
@@ -415,6 +429,20 @@ const Dashboard = ({ usuario }) => {
         </div>
       </div>
 
+      {/* ✅ ADICIONADO: BOTÕES DE AÇÃO (baseado em Emendas.jsx) */}
+      <div style={styles.actionContainer}>
+        <button style={styles.primaryButton} onClick={handleCriarDespesa}>
+          ➕ Nova Despesa
+        </button>
+        <button
+          style={styles.refreshButton}
+          onClick={recarregarDados}
+          disabled={loading}
+        >
+          🔄 {loading ? "Atualizando..." : "Atualizar"}
+        </button>
+      </div>
+
       {/* Estado Vazio */}
       {stats.totalEmendas === 0 && stats.totalDespesas === 0 && (
         <div style={styles.emptyState}>
@@ -434,7 +462,7 @@ const Dashboard = ({ usuario }) => {
   );
 };
 
-// ✅ ESTILOS
+// ✅ ESTILOS (adicionados estilos dos botões baseados em Emendas.jsx)
 const styles = {
   container: {
     padding: "20px",
@@ -544,6 +572,39 @@ const styles = {
     fontWeight: "500",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
+  },
+
+  // ✅ ADICIONADO: Estilos dos botões (copiados de Emendas.jsx)
+  actionContainer: {
+    marginBottom: "20px",
+    display: "flex",
+    gap: "10px",
+  },
+
+  primaryButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+
+  refreshButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: "5px",
+    fontSize: "16px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
   loadingContainer: {

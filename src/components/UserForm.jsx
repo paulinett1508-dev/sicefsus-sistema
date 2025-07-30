@@ -180,7 +180,13 @@ const UserForm = ({
                 />
                 {editingUser && (
                   <small style={styles.helpText}>
-                    💡 Email não pode ser alterado após criação
+                    <span
+                      style={styles.infoIcon}
+                      title="Email não pode ser alterado após criação"
+                    >
+                      ℹ️
+                    </span>
+                    Email não pode ser alterado após criação
                   </small>
                 )}
               </div>
@@ -239,6 +245,12 @@ const UserForm = ({
               <div style={styles.emendaInfo}>
                 <h4 style={styles.emendaInfoTitle}>
                   🔒 Política de Segurança SICEFSUS
+                  <span
+                    style={styles.infoIcon}
+                    title="Conforme LGPD: administradores não definem senhas de usuários"
+                  >
+                    ℹ️
+                  </span>
                 </h4>
                 <div style={styles.emendaInfoGrid}>
                   <div style={styles.emendaInfoRow}>
@@ -250,10 +262,6 @@ const UserForm = ({
                   </div>
                   <div style={styles.emendaInfoRow}>
                     • Obrigatório alterar senha no primeiro login
-                  </div>
-                  <div style={styles.emendaInfoRow}>
-                    • Conforme LGPD: administradores não definem senhas de
-                    usuários
                   </div>
                 </div>
               </div>
@@ -333,46 +341,26 @@ const UserForm = ({
               >
                 <span style={styles.legendIcon}>📍</span>
                 Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
+                <span
+                  style={styles.infoIcon}
+                  title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
+                >
+                  ℹ️
+                </span>
               </legend>
-
-              <div
-                style={{
-                  ...styles.emendaInfo,
-                  backgroundColor: "rgba(52, 152, 219, 0.1)",
-                  borderColor: "var(--primary)",
-                }}
-              >
-                <div
-                  style={{
-                    margin: 0,
-                    color: "var(--primary)",
-                    fontWeight: "600",
-                    marginBottom: "8px",
-                  }}
-                >
-                  🔒 <strong>IMPORTANTE - Regras de Acesso SICEFSUS:</strong>
-                </div>
-                <div
-                  style={{
-                    color: "var(--primary)",
-                    fontSize: "0.9em",
-                    lineHeight: "1.4",
-                  }}
-                >
-                  • Operadores só podem visualizar e gerenciar emendas do
-                  município cadastrado
-                  <br />
-                  • Esta configuração determina todas as permissões do usuário
-                  <br />
-                  • Município e UF não podem ser alterados após a criação
-                  <br />• Para mudança de localização, criar novo usuário
-                </div>
-              </div>
 
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
                   <label style={styles.labelRequired}>
                     Município <span style={styles.required}>*</span>
+                    {editingUser && (
+                      <span
+                        style={styles.infoIcon}
+                        title="Localização não pode ser alterada após criação"
+                      >
+                        ℹ️
+                      </span>
+                    )}
                   </label>
                   <input
                     type="text"
@@ -398,21 +386,19 @@ const UserForm = ({
                     minLength="2"
                     maxLength="100"
                   />
-                  <small
-                    style={{
-                      ...styles.helpText,
-                      color: editingUser ? "var(--warning)" : "var(--primary)",
-                    }}
-                  >
-                    {editingUser
-                      ? "⚠️ Localização não pode ser alterada após criação"
-                      : "📝 Digite o nome completo do município"}
-                  </small>
                 </div>
 
                 <div style={styles.formGroup}>
                   <label style={styles.labelRequired}>
                     Estado (UF) <span style={styles.required}>*</span>
+                    {editingUser && (
+                      <span
+                        style={styles.infoIcon}
+                        title="UF não pode ser alterada após criação"
+                      >
+                        ℹ️
+                      </span>
+                    )}
                   </label>
                   <select
                     style={{
@@ -438,16 +424,6 @@ const UserForm = ({
                       </option>
                     ))}
                   </select>
-                  <small
-                    style={{
-                      ...styles.helpText,
-                      color: editingUser ? "var(--warning)" : "var(--primary)",
-                    }}
-                  >
-                    {editingUser
-                      ? "⚠️ UF não pode ser alterada após criação"
-                      : "🗺️ Selecione o estado do município"}
-                  </small>
                 </div>
               </div>
 
@@ -699,6 +675,13 @@ const styles = {
   buttonContainer: formStyles.buttonContainer,
   cancelButtonStyle: formStyles.cancelButtonStyle,
   submitButton: formStyles.submitButton,
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
+    marginLeft: "5px",
+  },
 };
 
 // ✅ ADICIONAR ANIMAÇÕES CSS GLOBALMENTE (uma única vez)

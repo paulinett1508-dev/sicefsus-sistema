@@ -1,6 +1,7 @@
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx
 // Seção "Cronograma" extraída do EmendaForm
 // ÚLTIMA SEÇÃO - Datas de validade, OB, execução
+// ✅ REMOVIDO: Seção "Informações sobre Cronograma" (já existem ícones informativos)
 
 import React from "react";
 
@@ -67,6 +68,12 @@ const Cronograma = ({
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Data de Validade <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Outras datas não podem ser posteriores a esta"
+            >
+              ℹ️
+            </span>
           </label>
           <input
             type="date"
@@ -85,9 +92,6 @@ const Cronograma = ({
               {getDataErrorMessage("dataValidada")}
             </small>
           )}
-          <small style={styles.helpText}>
-            💡 Outras datas não podem ser posteriores a esta
-          </small>
 
           {/* Indicador de dias restantes */}
           {diasRestantes !== null && (
@@ -109,7 +113,12 @@ const Cronograma = ({
 
         {/* Data OB */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Data OB</label>
+          <label style={styles.label}>
+            Data OB
+            <span style={styles.infoIcon} title="Data da Ordem Bancária">
+              ℹ️
+            </span>
+          </label>
           <input
             type="date"
             name="dataOb"
@@ -126,12 +135,19 @@ const Cronograma = ({
               {getDataErrorMessage("dataOb")}
             </small>
           )}
-          <small style={styles.helpText}>💡 Data da Ordem Bancária</small>
         </div>
 
         {/* Início da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Início da Execução</label>
+          <label style={styles.label}>
+            Início da Execução
+            <span
+              style={styles.infoIcon}
+              title="Data prevista para início da execução"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="date"
             name="inicioExecucao"
@@ -148,14 +164,19 @@ const Cronograma = ({
               {getDataErrorMessage("inicioExecucao")}
             </small>
           )}
-          <small style={styles.helpText}>
-            💡 Data prevista para início da execução
-          </small>
         </div>
 
         {/* Final da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Final da Execução</label>
+          <label style={styles.label}>
+            Final da Execução
+            <span
+              style={styles.infoIcon}
+              title="Data prevista para conclusão da execução"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="date"
             name="finalExecucao"
@@ -172,9 +193,6 @@ const Cronograma = ({
               {getDataErrorMessage("finalExecucao")}
             </small>
           )}
-          <small style={styles.helpText}>
-            💡 Data prevista para conclusão da execução
-          </small>
         </div>
       </div>
 
@@ -248,31 +266,7 @@ const Cronograma = ({
         </div>
       )}
 
-      {/* Informações sobre o cronograma */}
-      <div style={styles.infoBox}>
-        <div style={styles.infoTitle}>
-          <span style={styles.infoIcon}>📋</span>
-          Informações sobre Cronograma
-        </div>
-        <div style={styles.infoContent}>
-          <div style={styles.infoItem}>
-            <strong>Data de Validade:</strong> Data limite para utilização dos
-            recursos (obrigatório)
-          </div>
-          <div style={styles.infoItem}>
-            <strong>Data OB:</strong> Data da Ordem Bancária de liberação dos
-            recursos
-          </div>
-          <div style={styles.infoItem}>
-            <strong>Período de Execução:</strong> Cronograma previsto para
-            implementação da emenda
-          </div>
-          <div style={styles.infoItem}>
-            <strong>Regra:</strong> Todas as datas devem ser anteriores ou
-            iguais à data de validade
-          </div>
-        </div>
-      </div>
+      {/* ✅ REMOVIDO: Seção "Informações sobre Cronograma" - já existem ícones informativos */}
     </fieldset>
   );
 };
@@ -323,6 +317,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
@@ -342,12 +339,6 @@ const styles = {
   },
   errorText: {
     color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-  },
-  helpText: {
-    color: "#6c757d",
     fontSize: "12px",
     marginTop: "4px",
     display: "block",
@@ -415,34 +406,11 @@ const styles = {
     fontSize: "12px",
     color: "#6c757d",
   },
-  infoBox: {
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #dee2e6",
-    borderRadius: "8px",
-    padding: "15px",
-    marginTop: "20px",
-  },
-  infoTitle: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontWeight: "bold",
-    color: "#495057",
-    marginBottom: "12px",
-    fontSize: "14px",
-  },
   infoIcon: {
-    fontSize: "16px",
-  },
-  infoContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  infoItem: {
-    fontSize: "13px",
-    color: "#6c757d",
-    lineHeight: "1.4",
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

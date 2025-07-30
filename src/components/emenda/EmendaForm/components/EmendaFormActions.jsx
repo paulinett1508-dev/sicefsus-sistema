@@ -1,8 +1,10 @@
 // src/components/emenda/EmendaForm/components/EmendaFormActions.jsx
 // Botões de ação do formulário extraídos
 // Baseado no padrão DespesaFormActions.jsx
+// ✅ CORRIGIDO: Botão Cancelar com fallback robusto
 
 import React from "react";
+import { useNavigate } from "react-router-dom"; // ✅ ADICIONADO: Import direto para navegação
 import { useEmendaFormNavigation } from "../../../../hooks/useEmendaFormNavigation";
 
 const EmendaFormActions = ({
@@ -13,24 +15,75 @@ const EmendaFormActions = ({
   onCancel,
   hasUnsavedChanges = false,
 }) => {
+  const navigate = useNavigate(); // ✅ ADICIONADO: Navegação direta como fallback
   const { navegarParaListaEmendas, cancelarFormulario } =
     useEmendaFormNavigation(hasUnsavedChanges);
 
-  // ✅ HANDLER DE CANCELAMENTO
+  // ✅ HANDLER DE CANCELAMENTO CORRIGIDO - com múltiplos fallbacks
   const handleCancel = () => {
-    if (onCancel && typeof onCancel === "function") {
-      onCancel();
-    } else {
-      cancelarFormulario();
+    console.log("🖱️ Botão Cancelar clicado!");
+    console.log("📊 Estado:", { hasUnsavedChanges, onCancel: !!onCancel });
+
+    try {
+      // 1ª opção: usar onCancel se fornecido
+      if (onCancel && typeof onCancel === "function") {
+        console.log("✅ Usando onCancel fornecido");
+        onCancel();
+        return;
+      }
+
+      // 2ª opção: usar hook de navegação
+      if (cancelarFormulario && typeof cancelarFormulario === "function") {
+        console.log("✅ Usando cancelarFormulario do hook");
+        cancelarFormulario();
+        return;
+      }
+
+      // 3ª opção: usar navegarParaListaEmendas do hook
+      if (
+        navegarParaListaEmendas &&
+        typeof navegarParaListaEmendas === "function"
+      ) {
+        console.log("✅ Usando navegarParaListaEmendas do hook");
+        navegarParaListaEmendas();
+        return;
+      }
+
+      // 4ª opção: navegação direta (fallback final)
+      console.log("⚠️ Usando navegação direta como fallback");
+      navigate("/emendas");
+    } catch (error) {
+      console.error("❌ Erro no cancelamento:", error);
+      // Fallback de emergência
+      try {
+        navigate("/emendas");
+      } catch (navError) {
+        console.error("❌ Erro crítico na navegação:", navError);
+        // Último recurso: recarregar página para /emendas
+        window.location.href = "/emendas";
+      }
     }
   };
 
   // ✅ HANDLER DE VOLTAR (apenas no modo edição)
   const handleVoltar = () => {
-    navegarParaListaEmendas();
+    console.log("🖱️ Botão Voltar clicado!");
+    try {
+      if (
+        navegarParaListaEmendas &&
+        typeof navegarParaListaEmendas === "function"
+      ) {
+        navegarParaListaEmendas();
+      } else {
+        navigate("/emendas");
+      }
+    } catch (error) {
+      console.error("❌ Erro ao voltar:", error);
+      navigate("/emendas");
+    }
   };
 
-  // ✅ HANDLER DE SUBMIT
+  // ✅ HANDLER DE SUBMIT (mantido igual)
   const handleSubmit = (e) => {
     console.log("🖱️ Botão Submit clicado!");
     if (onSubmit && typeof onSubmit === "function") {
@@ -88,7 +141,7 @@ const EmendaFormActions = ({
   );
 };
 
-// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
+// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL (mantidos iguais)
 const styles = {
   buttonContainer: {
     display: "flex",

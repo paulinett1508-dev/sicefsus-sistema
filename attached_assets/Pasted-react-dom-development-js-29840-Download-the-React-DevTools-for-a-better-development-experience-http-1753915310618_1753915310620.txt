@@ -1,0 +1,90 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: {apiKey: '✅ Configurada', authDomain: '✅ Configurada', projectId: '✅ Configurada', storageBucket: '✅ Configurada', messagingSenderId: '✅ Configurada', …}
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+App.jsx:195 🔍 onAuthStateChanged: Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+App.jsx:199 📧 Email: paulinett1508@gmail.com
+UserContext.jsx:24 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+App.jsx:206 ✅ Dados encontrados na coleção 'usuarios': {telefone: '89999128436', primeiroAcesso: false, status: 'ativo', uf: '', nome: 'Paulinett Miranda', …}
+App.jsx:249 👤 Usuário configurado via onAuthStateChanged: {nome: 'Paulinett Miranda', tipo: 'admin', role: 'admin', municipio: '', uf: '', …}
+UserContext.jsx:31 ✅ Dados do usuário encontrados: {telefone: '89999128436', primeiroAcesso: false, status: 'ativo', uf: '', nome: 'Paulinett Miranda', …}
+UserContext.jsx:72 👤 Usuário configurado: {nome: 'Paulinett Miranda', tipo: 'admin', municipio: '', uf: ''}
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', requiredRole: undefined, …}
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', requiredRole: undefined, …}
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', nome: 'Paulinett Miranda', tipo: 'admin', status: 'ativo', …}
+Dashboard.jsx:65 🔐 Permissões detectadas: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', nome: 'Paulinett Miranda', tipo: 'admin', status: 'ativo', …}
+Dashboard.jsx:65 🔐 Permissões detectadas: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Dashboard.jsx:217 🔄 useEffect Dashboard - Verificando necessidade de carregar dados
+Dashboard.jsx:220 👤 User disponível: true
+Dashboard.jsx:221 📧 Email: paulinett1508@gmail.com
+Dashboard.jsx:222 🔐 Tipo: admin
+Dashboard.jsx:223 📊 Dados atuais - emendas: 0 despesas: 0
+Dashboard.jsx:232 🚀 Iniciando carregamento de dados para: admin
+Dashboard.jsx:73 📊 Iniciando carregamento de dados...
+Dashboard.jsx:74 👤 Tipo de usuário: admin
+Dashboard.jsx:81 👑 ADMIN: Carregando TODOS os dados (sem filtro)
+Dashboard.jsx:217 🔄 useEffect Dashboard - Verificando necessidade de carregar dados
+Dashboard.jsx:220 👤 User disponível: true
+Dashboard.jsx:221 📧 Email: paulinett1508@gmail.com
+Dashboard.jsx:222 🔐 Tipo: admin
+Dashboard.jsx:223 📊 Dados atuais - emendas: 0 despesas: 0
+Dashboard.jsx:232 🚀 Iniciando carregamento de dados para: admin
+Dashboard.jsx:73 📊 Iniciando carregamento de dados...
+Dashboard.jsx:74 👤 Tipo de usuário: admin
+Dashboard.jsx:81 👑 ADMIN: Carregando TODOS os dados (sem filtro)
+Dashboard.jsx:99 ✅ Admin - Emendas carregadas: 0
+Dashboard.jsx:99 ✅ Admin - Emendas carregadas: 0
+Dashboard.jsx:117 ✅ Admin - Despesas carregadas: 0
+Dashboard.jsx:203 ✅ Carregamento concluído: {emendas: 0, despesas: 0}
+Dashboard.jsx:117 ✅ Admin - Despesas carregadas: 0
+Dashboard.jsx:203 ✅ Carregamento concluído: {emendas: 0, despesas: 0}
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', nome: 'Paulinett Miranda', tipo: 'admin', status: 'ativo', …}
+Dashboard.jsx:65 🔐 Permissões detectadas: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: {uid: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', email: 'paulinett1508@gmail.com', nome: 'Paulinett Miranda', tipo: 'admin', status: 'ativo', …}
+Dashboard.jsx:65 🔐 Permissões detectadas: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Sidebar.jsx:76 🔍 Tentativa de navegação para Emendas: {currentPath: '/dashboard', isInFormMode: false, isCreatingEmenda: false, isEditingEmenda: false}
+Sidebar.jsx:97 ✅ Navegação normal para Emendas
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', requiredRole: undefined, …}
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', requiredRole: undefined, …}
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:238 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:52 📋 Carregando emendas...
+Emendas.jsx:57 👑 Admin: Carregando todas as emendas
+Emendas.jsx:238 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:52 📋 Carregando emendas...
+Emendas.jsx:57 👑 Admin: Carregando todas as emendas
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:84 ✅ 0 emendas carregadas
+Emendas.jsx:84 ✅ 0 emendas carregadas
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:238 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:189 ➕ Criando nova emenda
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: {email: 'paulinett1508@gmail.com', tipo: 'admin', role: 'admin', municipio: '', uf: ''}
+Emendas.jsx:35 🔐 Permissões do usuário: {userRole: 'admin', userMunicipio: '', userUf: ''}
+EmendaFormActions.jsx:24 🖱️ Botão Cancelar clicado!
+EmendaFormActions.jsx:25 📊 Estado: {hasUnsavedChanges: true, onCancel: true}
+EmendaFormActions.jsx:30 ✅ Usando onCancel fornecido
+index.jsx:246 🖱️ handleCancelClick - abrindo modal

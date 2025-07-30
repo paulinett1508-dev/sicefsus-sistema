@@ -1,6 +1,6 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 30/07/2025, 17:23:30  
+**📅 Gerado automaticamente em:** 30/07/2025, 19:08:54  
 **🔧 Por:** Script generateHandover.cjs v2.5  
 **📊 Status:** Sistema em Produção Ativa
 **🕒 Data/Hora obtida de:** Sistema NTP/Time Service
@@ -24,7 +24,23 @@ Correção completa do sistema de análise com forçar leitura de arquivos e eli
 - Melhoria no debugging e logs detalhados
 
 **📁 Arquivos Envolvidos:**
+- `src/components/DespesaForm.jsx`
+- `src/components/UserForm.jsx`
+- `src/components/despesa/DespesaFormEmpenhoFields.jsx`
+- `src/components/despesa/DespesaFormOrcamentoFields.jsx`
+- `src/components/despesa/DespesaFormAdvancedFields.jsx`
+- `src/components/emenda/EmendaForm/sections/DadosBancarios.jsx`
+- `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx`
+- `src/components/emenda/EmendaForm/sections/Cronograma.jsx`
+- `src/components/emenda/EmendaForm/sections/Identificacao.jsx`
+- `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx`
+- `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx`
+- `src/components/emenda/EmendaForm/index.jsx`
+- `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx`
+- `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx`
+- `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx`
 - `src/components/Emendas.jsx`
+- `src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx`
 - `src/components/Sidebar.jsx`
 - `src/components/Sobre.jsx`
 - `src/components/Dashboard.jsx`
@@ -40,18 +56,13 @@ Correção completa do sistema de análise com forçar leitura de arquivos e eli
 - `src/components/DataManager.jsx`
 - `src/components/Home.jsx`
 - `src/components/ThemeToggle.jsx`
-- `src/components/DespesaForm.jsx`
 - `src/services/emendasService.js`
 - `src/components/despesa/DespesaFormHeader.jsx`
 - `src/components/despesa/DespesaFormBanners.jsx`
 - `src/components/despesa/DespesaFormEmendaInfo.jsx`
 - `src/components/despesa/DespesaFormBasicFields.jsx`
-- `src/components/despesa/DespesaFormEmpenhoFields.jsx`
 - `src/components/despesa/DespesaFormDateFields.jsx`
-- `src/components/despesa/DespesaFormOrcamentoFields.jsx`
-- `src/components/despesa/DespesaFormAdvancedFields.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- `src/components/UserForm.jsx`
 - `src/components/AdminStats.jsx`
 - `src/components/AdminPanel.jsx`
 - `src/components/DebugPanel.jsx`
@@ -74,8 +85,8 @@ Esta seção identifica arquivos que podem se beneficiar de refatoração para m
 
 ### 📊 RESUMO EXECUTIVO
 
-- **Total de Arquivos Analisados:** 64
-- **Arquivos que Precisam de Refatoração:** 50 (78%)
+- **Total de Arquivos Analisados:** 75
+- **Arquivos que Precisam de Refatoração:** 60 (80%)
 - **Arquivos com Prioridade Crítica:** 0
 - **Score Médio de Complexidade:** 54/100
 
@@ -97,6 +108,14 @@ Os arquivos são avaliados com base nos seguintes critérios:
 ✅ **Parabéns!** Nenhum arquivo com prioridade crítica detectado.
 
 ### 🟠 ARQUIVOS COM PRIORIDADE ALTA (Score 60-79)
+
+#### 🟠 `src/components/emenda/EmendaForm/index.jsx` - Score: 78/100
+
+**📊 Resumo:** 368 linhas, 8 funções, complexidade 10344
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
 
 #### 🟠 `src/components/Emendas.jsx` - Score: 77/100
 
@@ -210,6 +229,14 @@ Os arquivos são avaliados com base nos seguintes critérios:
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
 - Simplificar lógicas condicionais e extrair funções auxiliares
 
+#### 🟠 `src/components/DespesaForm.jsx` - Score: 66/100
+
+**📊 Resumo:** 487 linhas, 2 funções, complexidade 14351
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
 #### 🟠 `src/components/DespesasList.jsx` - Score: 66/100
 
 **📊 Resumo:** 407 linhas, 9 funções, complexidade 10043
@@ -229,6 +256,14 @@ Os arquivos são avaliados com base nos seguintes critérios:
 #### 🟠 `src/components/VisualizacaoEmendaDespesas.js` - Score: 64/100
 
 **📊 Resumo:** 1292 linhas, 8 funções, complexidade 35541
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
+#### 🟠 `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx` - Score: 64/100
+
+**📊 Resumo:** 529 linhas, 9 funções, complexidade 15010
 
 **🔧 Principais Sugestões:**
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
@@ -298,9 +333,9 @@ Os arquivos são avaliados com base nos seguintes critérios:
 - Simplificar lógicas condicionais e extrair funções auxiliares
 - Extrair lógicas aninhadas em funções separadas
 
-#### 🟠 `src/components/DespesaForm.jsx` - Score: 60/100
+#### 🟠 `src/components/emenda/EmendaForm/sections/Cronograma.jsx` - Score: 60/100
 
-**📊 Resumo:** 1404 linhas, 4 funções, complexidade 44253
+**📊 Resumo:** 470 linhas, 7 funções, complexidade 12875
 
 **🔧 Principais Sugestões:**
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
@@ -318,22 +353,29 @@ Os seguintes arquivos devem ser monitorados para evitar que se tornem monolític
 - 🟡 `src/hooks/usePermissions.js` (Score: 58) - 209 linhas
 - 🟡 `src/components/EmendasFilters.jsx` (Score: 57) - 292 linhas
 - 🟡 `src/hooks/useNavigationProtection.js` (Score: 57) - 351 linhas
-- 🟡 `src/components/UserForm.jsx` (Score: 56) - 735 linhas
+- 🟡 `src/components/UserForm.jsx` (Score: 56) - 718 linhas
 - 🟡 `src/components/Sobre.jsx` (Score: 54) - 419 linhas
+- 🟡 `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx` (Score: 54) - 315 linhas
+- 🟡 `src/components/emenda/EmendaForm/sections/Identificacao.jsx` (Score: 54) - 245 linhas
 - 🟡 `src/utils/printUtils.js` (Score: 53) - 286 linhas
 - 🟡 `src/components/PrimeiraDespesaModal.jsx` (Score: 52) - 356 linhas
 - 🟡 `src/utils/formStyles.js` (Score: 52) - 643 linhas
 - 🟡 `src/utils/errorHandlers.js` (Score: 51) - 164 linhas
-- 🟡 `src/components/despesa/DespesaFormAdvancedFields.jsx` (Score: 49) - 260 linhas
+- 🟡 `src/components/despesa/DespesaFormAdvancedFields.jsx` (Score: 50) - 269 linhas
+- 🟡 `src/components/emenda/EmendaForm/sections/DadosBancarios.jsx` (Score: 50) - 263 linhas
 - 🟡 `src/components/AdminStats.jsx` (Score: 48) - 240 linhas
 - 🟡 `src/components/ConfirmationModal.jsx` (Score: 48) - 203 linhas
 - 🟡 `src/components/despesa/DespesaFormBasicFields.jsx` (Score: 48) - 247 linhas
+- 🟡 `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx` (Score: 48) - 229 linhas
+- 🟡 `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx` (Score: 44) - 179 linhas
+- 🟡 `src/components/despesa/DespesaFormOrcamentoFields.jsx` (Score: 43) - 189 linhas
+- 🟡 `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx` (Score: 43) - 137 linhas
 - 🟡 `src/components/TemporaryBanner.jsx` (Score: 42) - 148 linhas
-- 🟡 `src/components/despesa/DespesaFormOrcamentoFields.jsx` (Score: 42) - 183 linhas
 - 🟡 `src/hooks/usePageTitle.js` (Score: 41) - 40 linhas
 - 🟡 `src/services/createAdminUser.js` (Score: 41) - 146 linhas
 - 🟡 `src/components/ErrorBoundary.jsx` (Score: 40) - 173 linhas
 - 🟡 `src/components/despesa/DespesaFormDateFields.jsx` (Score: 40) - 153 linhas
+- 🟡 `src/components/despesa/DespesaFormEmpenhoFields.jsx` (Score: 40) - 160 linhas
 
 ### 📋 RECOMENDAÇÕES GERAIS
 
@@ -358,9 +400,9 @@ Os seguintes arquivos devem ser monitorados para evitar que se tornem monolític
 - ✅ Nenhuma ação crítica necessária
 
 #### Fase 2 - Alto Impacto (2-4 sprints)
+- Melhorar `src/components/emenda/EmendaForm/index.jsx` (Score: 78)
 - Melhorar `src/components/Emendas.jsx` (Score: 77)
 - Melhorar `src/components/AdminPanel.jsx` (Score: 73)
-- Melhorar `src/components/DespesasTable.jsx` (Score: 73)
 
 #### Fase 3 - Monitoramento Contínuo
 - Implementar limites de complexidade no CI/CD
@@ -688,6 +730,17 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - DespesaFormEmpenhoFields.jsx
 - DespesaFormHeader.jsx
 - DespesaFormOrcamentoFields.jsx
+- EmendaFormActions.jsx
+- EmendaFormCancelModal.jsx
+- EmendaFormHeader.jsx
+- index.jsx
+- AcoesServicos.jsx
+- ClassificacaoTecnica.jsx
+- Cronograma.jsx
+- DadosBancarios.jsx
+- DadosBasicos.jsx
+- DadosBeneficiario.jsx
+- Identificacao.jsx
 
 ### ✏️ Funcionalidades Modificadas
 - Dashboard.jsx
@@ -771,11 +824,11 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Status:** Monitorar crescimento
 
 #### `src/components/DespesaForm.jsx`
-- **Funcionalidade**: Dados do usuário para filtro por município
+- **Funcionalidade**: src/components/DespesaForm.jsx
 - **Tipo**: Functional Component (Hooks)
 - **Funções**: DespesaForm, isMounted, navigate, userRole, userMunicipio, userUf, configModo, carregarEmendas, querySnapshot, emendasData, handleInputChange, validarFormulario, novosErrors, camposObrigatorios, valor, handleSubmit, dadosParaSalvar, despesaRef, collectionRef, docRef, docCheck, styles
 - **Dependências**: react, react-router-dom, ../firebase/firebaseConfig...
-- **Score de Refatoração:** 60/100 🟠
+- **Score de Refatoração:** 66/100 🟠
 - **Status:** Refatoração recomendada
 
 #### `src/components/Despesas.jsx`
@@ -1023,7 +1076,7 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Tipo**: Functional Component
 - **Funções**: DespesaFormAdvancedFields, styles
 - **Dependências**: react
-- **Score de Refatoração:** 49/100 🟡
+- **Score de Refatoração:** 50/100 🟡
 - **Status:** Considerar refatoração
 
 #### `src/components/despesa/DespesaFormBanners.jsx`
@@ -1063,8 +1116,8 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Tipo**: Functional Component
 - **Funções**: DespesaFormEmpenhoFields, styles
 - **Dependências**: react
-- **Score de Refatoração:** 39/100 🟢
-- **Status:** Monitorar crescimento
+- **Score de Refatoração:** 40/100 🟡
+- **Status:** Considerar refatoração
 
 #### `src/components/despesa/DespesaFormHeader.jsx`
 - **Funcionalidade**: src/components/despesa/DespesaFormHeader.jsx
@@ -1079,7 +1132,95 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Tipo**: Class Component
 - **Funções**: DespesaFormOrcamentoFields, styles
 - **Dependências**: react
-- **Score de Refatoração:** 42/100 🟡
+- **Score de Refatoração:** 43/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormActions.jsx
+- **Tipo**: Functional Component
+- **Funções**: EmendaFormActions, handleCancel, handleVoltar, handleSubmit, styles
+- **Dependências**: react, ../../../../hooks/useEmendaFormNavigation
+- **Score de Refatoração:** 43/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx
+- **Tipo**: Functional Component
+- **Funções**: EmendaFormCancelModal, handleConfirm, handleCancel, modalConfig
+- **Dependências**: react, ../../../ConfirmationModal, ../../../../hooks/useEmendaFormNavigation
+- **Score de Refatoração:** 36/100 🟢
+- **Status:** Monitorar crescimento
+
+#### `src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx
+- **Tipo**: Functional Component
+- **Funções**: EmendaFormHeader, configuracao, config, styles
+- **Dependências**: react
+- **Score de Refatoração:** 36/100 🟢
+- **Status:** Monitorar crescimento
+
+#### `src/components/emenda/EmendaForm/index.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/index.jsx
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: EmendaForm, navigate, formatCurrency, configModo, handleInputChange, validarFormulario, camposObrigatorios, validation, handleSubmit, dadosParaSalvar, timestamp, emendaId, novaEmenda, handleCancelClick, handleConfirmCancel, handleCancelModalClose, hasUnsavedChanges, styles
+- **Dependências**: react, react-router-dom, firebase/firestore...
+- **Score de Refatoração:** 78/100 🟠
+- **Status:** Refatoração recomendada
+
+#### `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/AcoesServicos.jsx
+- **Tipo**: Functional Component (Hooks)
+- **Funções**: AcoesServicos, formatCurrency, tiposAcao, handleTipoChange, novoTipo, handleNovaAcaoChange, adicionarAcaoServico, novaAcao, acoesAtualizadas, removerAcaoServico, calcularTotalMetasQuantitativas, valor, podeAdicionarAcao, temDescricao, temComplemento, temValor, styles
+- **Dependências**: react, ../../../../utils/formatters, ../../../Toast
+- **Score de Refatoração:** 64/100 🟠
+- **Status:** Refatoração recomendada
+
+#### `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx
+- **Tipo**: Functional Component
+- **Funções**: ClassificacaoTecnica, tiposEmenda, handleInputChange, styles
+- **Dependências**: react
+- **Score de Refatoração:** 48/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/sections/Cronograma.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/Cronograma.jsx
+- **Tipo**: Functional Component
+- **Funções**: Cronograma, handleInputChange, isDataFutura, dataInput, hoje, isDataValidaComparacao, dataValidadeInput, getDataErrorMessage, calcularDiasRestantes, dataValidade, diffTime, diffDays, diasRestantes, formatDateBR, date, styles
+- **Dependências**: react
+- **Score de Refatoração:** 60/100 🟠
+- **Status:** Refatoração recomendada
+
+#### `src/components/emenda/EmendaForm/sections/DadosBancarios.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/DadosBancarios.jsx
+- **Tipo**: Functional Component
+- **Funções**: DadosBancarios, handleInputChange, bancosComuns, styles
+- **Dependências**: react
+- **Score de Refatoração:** 50/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/DadosBasicos.jsx
+- **Tipo**: Functional Component
+- **Funções**: DadosBasicos, estados, programas, handleInputChange, styles
+- **Dependências**: react, ../../../../utils/formatters
+- **Score de Refatoração:** 54/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
+- **Tipo**: Functional Component
+- **Funções**: DadosBeneficiario, handleInputChange, styles
+- **Dependências**: react, ../../../../utils/validators
+- **Score de Refatoração:** 44/100 🟡
+- **Status:** Considerar refatoração
+
+#### `src/components/emenda/EmendaForm/sections/Identificacao.jsx`
+- **Funcionalidade**: src/components/emenda/EmendaForm/sections/Identificacao.jsx
+- **Tipo**: Functional Component
+- **Funções**: Identificacao, handleInputChange, formatCurrency, getValorExecutado, getSaldo, valorRecurso, valorExecutado, saldo, styles
+- **Dependências**: react, ../../../../utils/formatters, ../../../../utils/validators
+- **Score de Refatoração:** 54/100 🟡
 - **Status:** Considerar refatoração
 
 
@@ -1208,14 +1349,14 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 ## 📊 **ESTATÍSTICAS DO SISTEMA**
 
-- **Total de Componentes**: 47
+- **Total de Componentes**: 58
 - **Total de Hooks**: 7
 - **Total de Utilitários**: 7
 - **Total de Serviços**: 3
 - **Dependências Principais**: 6
 - **Dependências de Desenvolvimento**: 7
-- **Arquivos Analisados para Refatoração**: 64
-- **Arquivos que Precisam de Refatoração**: 50
+- **Arquivos Analisados para Refatoração**: 75
+- **Arquivos que Precisam de Refatoração**: 60
 - **Score Médio de Complexidade**: 54/100
 
 ---
@@ -1242,7 +1383,7 @@ node scripts/generateHandover.cjs
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 30/07/2025, 17:23:30  
+**🔄 Última Atualização**: 30/07/2025, 19:08:54  
 **📊 Versão**: 2.5  
 **💻 Desenvolvido em**: Replit  
 **✅ Status**: Produção Ativa com Sistema de Análise de Refatoração Corrigido

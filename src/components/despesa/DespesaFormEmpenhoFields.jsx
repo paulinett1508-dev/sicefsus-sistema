@@ -35,7 +35,15 @@ const DespesaFormEmpenhoFields = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Nº da Nota Fiscal *</label>
+          <label style={styles.labelRequired}>
+            Nº da Nota Fiscal *
+            <span
+              style={styles.infoIcon}
+              title="Obrigatório - toda despesa deve ter nota fiscal"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="text"
             name="numeroNota"
@@ -49,9 +57,6 @@ const DespesaFormEmpenhoFields = ({
           {errors.numeroNota && (
             <span style={styles.errorText}>{errors.numeroNota}</span>
           )}
-          <span style={styles.helpText}>
-            Obrigatório - toda despesa deve ter nota fiscal
-          </span>
         </div>
 
         <div style={styles.formGroup}>
@@ -108,11 +113,17 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   labelRequired: {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   input: {
     padding: "12px",
@@ -137,10 +148,11 @@ const styles = {
     fontSize: "12px",
     marginTop: "5px",
   },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "5px",
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

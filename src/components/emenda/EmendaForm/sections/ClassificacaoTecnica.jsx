@@ -35,6 +35,12 @@ const ClassificacaoTecnica = ({
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Funcional <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Classificação funcional programática da emenda"
+            >
+              ℹ️
+            </span>
           </label>
           <input
             type="text"
@@ -52,14 +58,19 @@ const ClassificacaoTecnica = ({
           {fieldErrors.funcional && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
-          <small style={styles.helpText}>
-            💡 Classificação funcional programática da emenda
-          </small>
         </div>
 
         {/* Tipo de Emenda */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Tipo de Emenda</label>
+          <label style={styles.label}>
+            Tipo de Emenda
+            <span
+              style={styles.infoIcon}
+              title="Tipo de emenda conforme origem parlamentar"
+            >
+              ℹ️
+            </span>
+          </label>
           <select
             name="tipo"
             value={formData.tipo || "Individual"}
@@ -76,9 +87,6 @@ const ClassificacaoTecnica = ({
               </option>
             ))}
           </select>
-          <small style={styles.helpText}>
-            💡 Tipo de emenda conforme origem parlamentar
-          </small>
         </div>
       </div>
 
@@ -149,6 +157,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
@@ -180,12 +191,6 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-  },
   infoBox: {
     backgroundColor: "#f8f9fa",
     border: "1px solid #dee2e6",
@@ -203,7 +208,10 @@ const styles = {
     fontSize: "14px",
   },
   infoIcon: {
-    fontSize: "16px",
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
   infoContent: {
     display: "flex",
