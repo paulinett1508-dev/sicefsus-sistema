@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import EmendaForm from "./EmendaForm";
+import EmendaForm from "./emenda/EmendaForm";
 import EmendasTable from "./EmendasTable";
 import EmendasFilters from "./EmendasFilters";
 import PrimeiraDespesaModal from "./PrimeiraDespesaModal";
