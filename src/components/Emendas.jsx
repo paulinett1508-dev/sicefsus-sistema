@@ -192,14 +192,28 @@ export default function Emendas({ usuario }) {
   };
 
   const handleVoltar = () => {
+    console.log("🔙 Emendas.jsx: handleVoltar executado");
     setShowForm(false);
     setEditingEmenda(null);
   };
 
   const handleSalvarEmenda = async () => {
+    console.log("💾 Emendas.jsx: handleSalvarEmenda executado");
     await carregarEmendas();
     setShowForm(false);
     setEditingEmenda(null);
+  };
+
+  // ✅ NOVO: Handler específico para cancelamento do modal
+  const handleCancelarFormulario = () => {
+    console.log("❌ Emendas.jsx: handleCancelarFormulario executado - voltando para listagem");
+    setShowForm(false);
+    setEditingEmenda(null);
+    // Garantir que voltamos para a listagem sem interferências
+    if (window.location.pathname !== "/emendas") {
+      console.log("🔄 Emendas.jsx: Forçando navegação para /emendas");
+      window.location.href = "/emendas";
+    }
   };
 
   const handleDeletar = async (emenda) => {
@@ -257,7 +271,7 @@ export default function Emendas({ usuario }) {
       <EmendaForm
         emenda={editingEmenda}
         onSave={handleSalvarEmenda}
-        onCancel={handleVoltar}
+        onCancel={handleCancelarFormulario}
         usuario={usuario}
       />
     );
