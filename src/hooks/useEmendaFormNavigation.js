@@ -17,11 +17,14 @@ export const useEmendaFormNavigation = (hasUnsavedChanges = false) => {
     console.log("🎯 Navegando especificamente para /emendas");
     console.log("📍 Localização atual:", location.pathname);
 
-    // Se já estamos em /emendas, não fazer nada
+    // Verificar se já estamos EXATAMENTE em /emendas (listagem)
+    // Não apenas se contém /emendas (que inclui /emendas/criar, /emendas/editar/id)
     if (location.pathname === "/emendas") {
-      console.log("✅ Já estamos em /emendas - não é necessário navegar");
+      console.log("✅ Já estamos na listagem /emendas - não é necessário navegar");
       return;
     }
+
+    console.log("🔄 Estamos em uma subpágina de emendas, navegando para listagem...");
 
     // Múltiplas tentativas de navegação com delays progressivos
     const tentarNavegacao = (tentativa = 1) => {
