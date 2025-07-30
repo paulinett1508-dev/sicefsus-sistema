@@ -679,20 +679,32 @@ class HandoverGenerator {
 
     console.log(`📁 Analisando pasta: ${this.componentsPath}`);
 
+    // Função recursiva para analisar todas as subpastas
+    const analyzeDirectoryRecursively = async (dirPath, relativeDirPath) => {
+      const files = this.validateAndReadDirectory(dirPath, relativeDirPath);
+      
+      for (const file of files) {
+        if (file.isDirectory()) {
+          // Analisar subpasta recursivamente
+          const subPath = path.join(dirPath, file.name);
+          const subRelativePath = `${relativeDirPath}/${file.name}`;
+          await analyzeDirectoryRecursively(subPath, subRelativePath);
+        } else if (file.name.endsWith('.jsx') || file.name.endsWith('.js')) {
+          const filePath = path.join(dirPath, file.name);
+          const relativePath = `src/${relativeDirPath}/${file.name}`;
+
+          await this.analyzeComponentFile(filePath, relativePath, file.name);
+        }
+      }
+    };
+
+    // Analisar arquivos diretamente na pasta components
     for (const file of files) {
       if (file.isDirectory()) {
-        // Analisar subpastas (como despesa/)
+        // Analisar subpasta recursivamente
         const subPath = path.join(this.componentsPath, file.name);
-        const subFiles = this.validateAndReadDirectory(subPath, `components/${file.name}`);
-
-        for (const subFile of subFiles) {
-          if (!subFile.isDirectory() && (subFile.name.endsWith('.jsx') || subFile.name.endsWith('.js'))) {
-            const filePath = path.join(subPath, subFile.name);
-            const relativePath = `src/components/${file.name}/${subFile.name}`;
-
-            await this.analyzeComponentFile(filePath, relativePath, subFile.name);
-          }
-        }
+        const subRelativePath = `components/${file.name}`;
+        await analyzeDirectoryRecursively(subPath, subRelativePath);
       } else if (file.name.endsWith('.jsx') || file.name.endsWith('.js')) {
         const filePath = path.join(this.componentsPath, file.name);
         const relativePath = `src/components/${file.name}`;
@@ -736,37 +748,49 @@ class HandoverGenerator {
     const files = this.validateAndReadDirectory(this.hooksPath, 'hooks');
     if (files.length === 0) return;
 
-    for (const file of files) {
-      if (!file.isDirectory() && (file.name.endsWith('.js') || file.name.endsWith('.jsx'))) {
-        const filePath = path.join(this.hooksPath, file.name);
-        const relativePath = `src/hooks/${file.name}`;
+    // Função recursiva para analisar hooks em subpastas
+    const analyzeHooksRecursively = async (dirPath, relativeDirPath) => {
+      const files = this.validateAndReadDirectory(dirPath, relativeDirPath);
+      
+      for (const file of files) {
+        if (file.isDirectory()) {
+          const subPath = path.join(dirPath, file.name);
+          const subRelativePath = `${relativeDirPath}/${file.name}`;
+          await analyzeHooksRecursively(subPath, subRelativePath);
+        } else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) {
+          const filePath = path.join(dirPath, file.name);
+          const relativePath = `src/${relativeDirPath}/${file.name}`;
 
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
+          console.log(`🔍 Lendo arquivo: ${filePath}`);
 
-        const content = this.forceReadFile(filePath);
-        if (!content) continue;
+          const content = this.forceReadFile(filePath);
+          if (!content) continue;
 
-        try {
-          const stats = fs.statSync(filePath);
+          try {
+            const stats = fs.statSync(filePath);
 
-          const hook = {
-            name: file.name,
-            path: relativePath,
-            fullPath: filePath, // CORREÇÃO: Adicionado fullPath
-            functions: this.extractFunctions(content),
-            dependencies: this.extractDependencies(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: stats.mtime
-          };
+            const hook = {
+              name: file.name,
+              path: relativePath,
+              fullPath: filePath,
+              functions: this.extractFunctions(content),
+              dependencies: this.extractDependencies(content),
+              exports: this.extractExports(content),
+              description: this.extractDescription(content),
+              lastModified: stats.mtime
+            };
 
-          console.log(`🎣 Funções encontradas em ${file.name}: ${hook.functions.join(', ')}`);
-          this.analysis.hooks.push(hook);
-        } catch (error) {
-          console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+            console.log(`🎣 Funções encontradas em ${file.name}: ${hook.functions.join(', ')}`);
+            this.analysis.hooks.push(hook);
+          } catch (error) {
+            console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+          }
         }
       }
-    }
+    };
+
+    // Analisar arquivos diretamente e em subpastas
+    await analyzeHooksRecursively(this.hooksPath, 'hooks');
 
     console.log(`🎣 ${this.analysis.hooks.length} hooks analisados`);
   }
@@ -775,36 +799,48 @@ class HandoverGenerator {
     const files = this.validateAndReadDirectory(this.utilsPath, 'utils');
     if (files.length === 0) return;
 
-    for (const file of files) {
-      if (!file.isDirectory() && (file.name.endsWith('.js') || file.name.endsWith('.jsx'))) {
-        const filePath = path.join(this.utilsPath, file.name);
-        const relativePath = `src/utils/${file.name}`;
+    // Função recursiva para analisar utils em subpastas
+    const analyzeUtilsRecursively = async (dirPath, relativeDirPath) => {
+      const files = this.validateAndReadDirectory(dirPath, relativeDirPath);
+      
+      for (const file of files) {
+        if (file.isDirectory()) {
+          const subPath = path.join(dirPath, file.name);
+          const subRelativePath = `${relativeDirPath}/${file.name}`;
+          await analyzeUtilsRecursively(subPath, subRelativePath);
+        } else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) {
+          const filePath = path.join(dirPath, file.name);
+          const relativePath = `src/${relativeDirPath}/${file.name}`;
 
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
+          console.log(`🔍 Lendo arquivo: ${filePath}`);
 
-        const content = this.forceReadFile(filePath);
-        if (!content) continue;
+          const content = this.forceReadFile(filePath);
+          if (!content) continue;
 
-        try {
-          const stats = fs.statSync(filePath);
+          try {
+            const stats = fs.statSync(filePath);
 
-          const util = {
-            name: file.name,
-            path: relativePath,
-            fullPath: filePath, // CORREÇÃO: Adicionado fullPath
-            functions: this.extractFunctions(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: stats.mtime
-          };
+            const util = {
+              name: file.name,
+              path: relativePath,
+              fullPath: filePath,
+              functions: this.extractFunctions(content),
+              exports: this.extractExports(content),
+              description: this.extractDescription(content),
+              lastModified: stats.mtime
+            };
 
-          console.log(`🛠️ Funções encontradas em ${file.name}: ${util.functions.join(', ')}`);
-          this.analysis.utils.push(util);
-        } catch (error) {
-          console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+            console.log(`🛠️ Funções encontradas em ${file.name}: ${util.functions.join(', ')}`);
+            this.analysis.utils.push(util);
+          } catch (error) {
+            console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+          }
         }
       }
-    }
+    };
+
+    // Analisar arquivos diretamente e em subpastas
+    await analyzeUtilsRecursively(this.utilsPath, 'utils');
 
     console.log(`🛠️ ${this.analysis.utils.length} utilitários analisados`);
   }
@@ -813,36 +849,48 @@ class HandoverGenerator {
     const files = this.validateAndReadDirectory(this.servicesPath, 'services');
     if (files.length === 0) return;
 
-    for (const file of files) {
-      if (!file.isDirectory() && (file.name.endsWith('.js') || file.name.endsWith('.jsx'))) {
-        const filePath = path.join(this.servicesPath, file.name);
-        const relativePath = `src/services/${file.name}`;
+    // Função recursiva para analisar services em subpastas
+    const analyzeServicesRecursively = async (dirPath, relativeDirPath) => {
+      const files = this.validateAndReadDirectory(dirPath, relativeDirPath);
+      
+      for (const file of files) {
+        if (file.isDirectory()) {
+          const subPath = path.join(dirPath, file.name);
+          const subRelativePath = `${relativeDirPath}/${file.name}`;
+          await analyzeServicesRecursively(subPath, subRelativePath);
+        } else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) {
+          const filePath = path.join(dirPath, file.name);
+          const relativePath = `src/${relativeDirPath}/${file.name}`;
 
-        console.log(`🔍 Lendo arquivo: ${filePath}`);
+          console.log(`🔍 Lendo arquivo: ${filePath}`);
 
-        const content = this.forceReadFile(filePath);
-        if (!content) continue;
+          const content = this.forceReadFile(filePath);
+          if (!content) continue;
 
-        try {
-          const stats = fs.statSync(filePath);
+          try {
+            const stats = fs.statSync(filePath);
 
-          const service = {
-            name: file.name,
-            path: relativePath,
-            fullPath: filePath, // CORREÇÃO: Adicionado fullPath
-            functions: this.extractFunctions(content),
-            exports: this.extractExports(content),
-            description: this.extractDescription(content),
-            lastModified: stats.mtime
-          };
+            const service = {
+              name: file.name,
+              path: relativePath,
+              fullPath: filePath,
+              functions: this.extractFunctions(content),
+              exports: this.extractExports(content),
+              description: this.extractDescription(content),
+              lastModified: stats.mtime
+            };
 
-          console.log(`🔧 Funções encontradas em ${file.name}: ${service.functions.join(', ')}`);
-          this.analysis.services.push(service);
-        } catch (error) {
-          console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+            console.log(`🔧 Funções encontradas em ${file.name}: ${service.functions.join(', ')}`);
+            this.analysis.services.push(service);
+          } catch (error) {
+            console.error(`❌ Erro ao analisar ${file.name}:`, error.message);
+          }
         }
       }
-    }
+    };
+
+    // Analisar arquivos diretamente e em subpastas
+    await analyzeServicesRecursively(this.servicesPath, 'services');
 
     console.log(`🔧 ${this.analysis.services.length} serviços analisados`);
   }
