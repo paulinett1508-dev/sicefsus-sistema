@@ -79,7 +79,7 @@ const EmendaFormCancelModal = ({
 
   // ✅ USAR MODAL EXISTENTE
   return (
-    <ConfirmationModal show={show} onClose={handleCancel} {...modalConfig} />
+    <ConfirmationModal isVisible={show} onClose={handleCancel} {...modalConfig} />
   );
 };
 
