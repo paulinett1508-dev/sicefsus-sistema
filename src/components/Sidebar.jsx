@@ -207,7 +207,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
         {menuItems.map((item) => (
           <div
             key={item.path}
-            onClick={() => handleItemClick(item)} {/* ✅ ALTERADO: Usar handleItemClick com proteção */}
+            onClick={() => handleItemClick(item)}
             style={{
               display: "flex",
               alignItems: "center",
