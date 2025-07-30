@@ -12,29 +12,33 @@ export const useEmendaFormNavigation = (hasUnsavedChanges = false) => {
   const { navigateWithConfirmation, createLinkHandler } =
     useNavigationProtection();
 
-  // ✅ NAVEGAÇÃO ESPECÍFICA PARA EMENDAS (RESOLVE PROBLEMA DASHBOARD)
+  // ✅ NAVEGAÇÃO ESPECÍFICA PARA EMENDAS (SEMPRE PARA /emendas)
   const navegarParaListaEmendas = useCallback(() => {
     console.log("🎯 Navegando especificamente para /emendas");
     console.log("📍 Localização atual:", location.pathname);
 
-    // Método mais direto e confiável
     try {
-      // Primeira tentativa: window.location.assign
-      window.location.assign("/emendas");
-
-      // Verificação de segurança
+      // 1ª tentativa: navigate do React Router
+      navigate("/emendas", { replace: true });
+      console.log("✅ Navegação via React Router realizada");
+      
+      // Verificação de segurança após pequeno delay
       setTimeout(() => {
         if (window.location.pathname !== "/emendas") {
-          console.log("🔄 Fallback: Forçando navegação");
+          console.log("🔄 Fallback: Forçando navegação com window.location");
           window.location.href = "/emendas";
         }
       }, 100);
     } catch (error) {
-      console.error("❌ Erro na navegação:", error);
-      // Fallback final
-      window.location.href = "/emendas";
+      console.error("❌ Erro na navegação React Router:", error);
+      // Fallback: navegação direta
+      try {
+        window.location.href = "/emendas";
+      } catch (fallbackError) {
+        console.error("❌ Erro crítico na navegação:", fallbackError);
+      }
     }
-  }, [location.pathname]);
+  }, [navigate, location.pathname]);
 
   // ✅ NAVEGAÇÃO COM CONFIRMAÇÃO (se há alterações não salvas)
   const navegarComConfirmacao = useCallback(

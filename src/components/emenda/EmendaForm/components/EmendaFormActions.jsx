@@ -19,49 +19,18 @@ const EmendaFormActions = ({
   const { navegarParaListaEmendas, cancelarFormulario } =
     useEmendaFormNavigation(hasUnsavedChanges);
 
-  // ✅ HANDLER DE CANCELAMENTO CORRIGIDO - com múltiplos fallbacks
+  // ✅ HANDLER DE CANCELAMENTO SIMPLIFICADO - sempre aciona modal
   const handleCancel = () => {
     console.log("🖱️ Botão Cancelar clicado!");
     console.log("📊 Estado:", { hasUnsavedChanges, onCancel: !!onCancel });
 
-    try {
-      // 1ª opção: usar onCancel se fornecido
-      if (onCancel && typeof onCancel === "function") {
-        console.log("✅ Usando onCancel fornecido");
-        onCancel();
-        return;
-      }
-
-      // 2ª opção: usar hook de navegação
-      if (cancelarFormulario && typeof cancelarFormulario === "function") {
-        console.log("✅ Usando cancelarFormulario do hook");
-        cancelarFormulario();
-        return;
-      }
-
-      // 3ª opção: usar navegarParaListaEmendas do hook
-      if (
-        navegarParaListaEmendas &&
-        typeof navegarParaListaEmendas === "function"
-      ) {
-        console.log("✅ Usando navegarParaListaEmendas do hook");
-        navegarParaListaEmendas();
-        return;
-      }
-
-      // 4ª opção: navegação direta (fallback final)
-      console.log("⚠️ Usando navegação direta como fallback");
-      navigate("/emendas");
-    } catch (error) {
-      console.error("❌ Erro no cancelamento:", error);
-      // Fallback de emergência
-      try {
-        navigate("/emendas");
-      } catch (navError) {
-        console.error("❌ Erro crítico na navegação:", navError);
-        // Último recurso: recarregar página para /emendas
-        window.location.href = "/emendas";
-      }
+    // Sempre usar onCancel para abrir o modal de confirmação
+    if (onCancel && typeof onCancel === "function") {
+      console.log("✅ Abrindo modal de confirmação");
+      onCancel();
+    } else {
+      console.log("⚠️ onCancel não fornecido - navegando diretamente");
+      navegarParaListaEmendas();
     }
   };
 

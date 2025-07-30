@@ -15,44 +15,18 @@ const EmendaFormCancelModal = ({
   const navigate = useNavigate(); // ✅ ADICIONADO: Navegação direta como fallback
   const { navegarParaListaEmendas } = useEmendaFormNavigation();
 
-  // ✅ HANDLER DE CONFIRMAÇÃO CORRIGIDO - com múltiplos fallbacks
+  // ✅ HANDLER DE CONFIRMAÇÃO SIMPLIFICADO - sempre para /emendas
   const handleConfirm = () => {
-    console.log(
-      "✅ Modal: Usuário confirmou cancelamento - iniciando navegação",
-    );
+    console.log("✅ Modal: Usuário confirmou cancelamento - navegando para /emendas");
 
-    try {
-      console.log("🔧 Modal: Fechando modal...");
-      onClose?.(); // Fechar modal primeiro
+    // Fechar modal primeiro
+    onClose?.();
 
-      // Delay pequeno para garantir que modal feche antes da navegação
-      setTimeout(() => {
-        try {
-          // 1ª opção: usar hook de navegação
-          if (
-            navegarParaListaEmendas &&
-            typeof navegarParaListaEmendas === "function"
-          ) {
-            console.log("🔧 Modal: Usando navegarParaListaEmendas do hook");
-            navegarParaListaEmendas();
-            return;
-          }
-
-          // 2ª opção: navegação direta (fallback)
-          console.log("⚠️ Modal: Usando navegação direta como fallback");
-          navigate("/emendas");
-        } catch (error) {
-          console.error("❌ Modal: Erro no cancelamento:", error);
-          // Fallback de emergência
-          console.log("🚨 Modal: Tentando fallback de emergência");
-          window.location.href = "/emendas";
-        }
-      }, 100);
-    } catch (error) {
-      console.error("❌ Modal: Erro crítico:", error);
-      // Último recurso imediato
-      window.location.href = "/emendas";
-    }
+    // Navegar para /emendas usando o hook
+    setTimeout(() => {
+      console.log("🎯 Modal: Executando navegação para /emendas");
+      navegarParaListaEmendas();
+    }, 100);
   };
 
   // ✅ HANDLER DE CANCELAMENTO DA MODAL
