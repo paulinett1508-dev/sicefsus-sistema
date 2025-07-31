@@ -368,7 +368,7 @@ const Dashboard = ({ usuario }) => {
   const [error, setError] = useState(null);
 
   // ✅ VERIFICAÇÃO DE USUÁRIO
-  if (userLoading || !user || !user.email || !user.tipo) {
+  if (userLoading || !user || !user.email || (!user.tipo && !user.role)) {
     return (
       <div style={styles.container}>
         <div style={styles.statusBar}>

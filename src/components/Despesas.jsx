@@ -24,7 +24,7 @@ const Dashboard = ({ usuario }) => {
   console.log("👤 Dados do usuário carregados para Dashboard:", user);
 
   // ✅ VERIFICAÇÃO MAIS ESPECÍFICA: Verificar campos essenciais
-  if (userLoading || !user || !user.email || !user.tipo) {
+    if (userLoading || !user || !user.email || (!user.tipo && !user.role)) {if (userLoading || !user || !user.email || (!user.tipo && !user.role)) {
     console.log("⏳ Aguardando dados completos do usuário...", {
       userLoading,
       hasUser: !!user,
@@ -243,7 +243,7 @@ const Dashboard = ({ usuario }) => {
     );
 
     // Verificar se tem os dados essenciais
-    if (user && user.email && user.tipo) {
+    if (user && user.email && (user.tipo || user.role)) {
       console.log("🚀 Iniciando carregamento de dados para:", userRole);
       carregarDados();
     } else {

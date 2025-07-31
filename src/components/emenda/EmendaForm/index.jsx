@@ -2,25 +2,32 @@
 // ✅ PRESERVA: Toda estrutura modular existente (seções + componentes)
 // ✅ CORRIGE: Incompatibilidade de contexto de usuário com Dashboard
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../../firebase/firebaseConfig';
-import { useUser } from '../../../context/UserContext'; // ✅ MESMO IMPORT DO DASHBOARD
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../../../firebase/firebaseConfig";
+import { useUser } from "../../../context/UserContext"; // ✅ MESMO IMPORT DO DASHBOARD
 
 // ✅ IMPORTS DAS SEÇÕES EXISTENTES (PRESERVADOS)
-import Identificacao from './sections/Identificacao';
-import DadosBasicos from './sections/DadosBasicos';
-import DadosBeneficiario from './sections/DadosBeneficiario';
-import ClassificacaoTecnica from './sections/ClassificacaoTecnica';
-import DadosBancarios from './sections/DadosBancarios';
-import Cronograma from './sections/Cronograma';
-import AcoesServicos from './sections/AcoesServicos';
+import Identificacao from "./sections/Identificacao";
+import DadosBasicos from "./sections/DadosBasicos";
+import DadosBeneficiario from "./sections/DadosBeneficiario";
+import ClassificacaoTecnica from "./sections/ClassificacaoTecnica";
+import DadosBancarios from "./sections/DadosBancarios";
+import Cronograma from "./sections/Cronograma";
+import AcoesServicos from "./sections/AcoesServicos";
 
 // ✅ IMPORTS DOS COMPONENTES EXISTENTES (PRESERVADOS)
-import EmendaFormHeader from './components/EmendaFormHeader';
-import EmendaFormActions from './components/EmendaFormActions';
-import EmendaFormCancelModal from './components/EmendaFormCancelModal';
+import EmendaFormHeader from "./components/EmendaFormHeader";
+import EmendaFormActions from "./components/EmendaFormActions";
+import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
 
 // ✅ HOOKS EXISTENTES (SE HOUVER)
 // import { useValidation } from '../../../hooks/useValidation';
@@ -42,41 +49,41 @@ const EmendaForm = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [formData, setFormData] = useState({
     // Identificação
-    numero: '',
-    autor: '',
+    numero: "",
+    autor: "",
 
-    // Dados Básicos  
-    municipio: '',
-    uf: '',
-    valor: '',
-    valorRecurso: '', // ✅ COMPATÍVEL COM DASHBOARD
-    programa: '',
+    // Dados Básicos
+    municipio: "",
+    uf: "",
+    valor: "",
+    valorRecurso: "", // ✅ COMPATÍVEL COM DASHBOARD
+    programa: "",
 
     // Beneficiário
-    beneficiario: '',
-    cnpjBeneficiario: '',
+    beneficiario: "",
+    cnpjBeneficiario: "",
 
     // Classificação
-    tipo: 'Individual',
-    modalidade: '',
-    objeto: '',
+    tipo: "Individual",
+    modalidade: "",
+    objeto: "",
 
     // Bancários
-    banco: '',
-    agencia: '',
-    conta: '',
+    banco: "",
+    agencia: "",
+    conta: "",
 
     // Cronograma
-    dataAprovacao: '',
-    dataValidade: '', // ✅ COMPATÍVEL COM CRONOGRAMA
-    inicioExecucao: '',
-    finalExecucao: '',
+    dataAprovacao: "",
+    dataValidade: "", // ✅ COMPATÍVEL COM CRONOGRAMA
+    inicioExecucao: "",
+    finalExecucao: "",
 
     // Ações e Serviços
     acoesServicos: [],
 
     // Observações
-    observacoes: ''
+    observacoes: "",
   });
 
   const mountedRef = useRef(true);
@@ -93,44 +100,32 @@ const EmendaForm = () => {
     };
   }, []);
 
-  // ✅ VERIFICAÇÃO DE USUÁRIO CORRIGIDA PARA ADMIN
-  if (userLoading || !user || !user.email) {
+  // ✅ VERIFICAÇÃO DE USUÁRIO (IGUAL DASHBOARD)
+  if (userLoading || !user || !user.email || (!user.tipo && !user.role)) {
     return (
       <div style={styles.container}>
-        <EmendaFormHeader 
+        <EmendaFormHeader
           isEdicao={isEdicao}
-          onBack={() => navigate('/emendas')}
+          onBack={() => navigate("/emendas")}
         />
 
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
           <p>⏳ Aguardando dados do usuário...</p>
-          <p style={styles.loadingSubtext}>Verificando permissões do usuário...</p>
+          <p style={styles.loadingSubtext}>
+            Verificando permissões do usuário...
+          </p>
         </div>
       </div>
     );
   }
 
-  // ✅ VERIFICAÇÃO ADICIONAL: Se não tem tipo definido, assumir operador por padrão
-  if (!user.tipo && !user.role) {
-    console.warn("⚠️ Usuário sem tipo definido, assumindo operador");
-  }
-
-  // ✅ PERMISSÕES CORRIGIDAS - DETECTAR ADMIN CORRETAMENTE
-  const userRole = user.role === "admin" || user.tipo === "admin" || 
-                   user.email === "paulinett1508@gmail.com" ? "admin" : 
-                   (user.tipo || user.role || "operador");
+  // ✅ PERMISSÕES (IGUAL DASHBOARD)
+  const userRole = user.tipo || user.role || "operador";
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
 
-  console.log("🔐 Permissões EmendaForm:", { 
-    userRole, 
-    userMunicipio, 
-    userUf,
-    userEmail: user.email,
-    originalTipo: user.tipo,
-    originalRole: user.role 
-  });
+  console.log("🔐 Permissões EmendaForm:", { userRole, userMunicipio, userUf });
 
   // ✅ CARREGAMENTO INICIAL COM TIMEOUT
   useEffect(() => {
@@ -139,23 +134,17 @@ const EmendaForm = () => {
         setLoading(true);
         setError(null);
 
-        console.log('📝 Iniciando carregamento EmendaForm...');
-        console.log('👤 Dados do usuário no carregamento:', {
-          email: user?.email,
-          tipo: user?.tipo,
-          role: user?.role,
-          userRole,
-          isEdicao,
-          emendaId: id
-        });
+        console.log("📝 Iniciando carregamento EmendaForm...");
 
         // Timeout de segurança - 10 segundos
         timeoutRef.current = setTimeout(() => {
           if (mountedRef.current) {
-            console.warn('⏰ Timeout: Carregamento EmendaForm demorou mais que 10s');
+            console.warn(
+              "⏰ Timeout: Carregamento EmendaForm demorou mais que 10s",
+            );
             setLoading(false);
             if (isEdicao) {
-              setError('Timeout ao carregar dados da emenda. Tente novamente.');
+              setError("Timeout ao carregar dados da emenda. Tente novamente.");
             }
           }
         }, 10000);
@@ -164,72 +153,71 @@ const EmendaForm = () => {
           // ✅ CARREGAR EMENDA EXISTENTE
           console.log(`📖 Carregando emenda ${id}...`);
 
-          const emendaDoc = await getDoc(doc(db, 'emendas', id));
+          const emendaDoc = await getDoc(doc(db, "emendas", id));
 
           if (!emendaDoc.exists()) {
-            throw new Error('Emenda não encontrada');
+            throw new Error("Emenda não encontrada");
           }
 
           const emendaData = emendaDoc.data();
 
-          // ✅ VERIFICAR PERMISSÕES PARA EDIÇÃO (ADMIN PODE EDITAR TUDO)
-          if (userRole === "operador" && emendaData.municipio !== userMunicipio) {
-            throw new Error('Você não tem permissão para editar esta emenda');
-          }
-          
-          if (userRole === "admin") {
-            console.log("👑 Administrador pode editar qualquer emenda");
+          // ✅ VERIFICAR PERMISSÕES PARA EDIÇÃO
+          if (
+            userRole === "operador" &&
+            emendaData.municipio !== userMunicipio
+          ) {
+            throw new Error("Você não tem permissão para editar esta emenda");
           }
 
           if (mountedRef.current) {
             // ✅ MAPEAR DADOS PARA FORMULÁRIO (COMPATÍVEL)
             setFormData({
               // Identificação
-              numero: emendaData.numero || '',
-              autor: emendaData.autor || emendaData.parlamentar || '',
+              numero: emendaData.numero || "",
+              autor: emendaData.autor || emendaData.parlamentar || "",
 
               // Dados Básicos
-              municipio: emendaData.municipio || '',
-              uf: emendaData.uf || '',
-              valor: emendaData.valor || emendaData.valorRecurso || '',
-              valorRecurso: emendaData.valorRecurso || emendaData.valor || '',
-              programa: emendaData.programa || '',
+              municipio: emendaData.municipio || "",
+              uf: emendaData.uf || "",
+              valor: emendaData.valor || emendaData.valorRecurso || "",
+              valorRecurso: emendaData.valorRecurso || emendaData.valor || "",
+              programa: emendaData.programa || "",
 
-              // Beneficiário  
-              beneficiario: emendaData.beneficiario || '',
-              cnpjBeneficiario: emendaData.cnpjBeneficiario || '',
+              // Beneficiário
+              beneficiario: emendaData.beneficiario || "",
+              cnpjBeneficiario: emendaData.cnpjBeneficiario || "",
 
               // Classificação
-              tipo: emendaData.tipo || 'Individual',
-              modalidade: emendaData.modalidade || '',
-              objeto: emendaData.objeto || '',
+              tipo: emendaData.tipo || "Individual",
+              modalidade: emendaData.modalidade || "",
+              objeto: emendaData.objeto || "",
 
               // Bancários
-              banco: emendaData.banco || '',
-              agencia: emendaData.agencia || '',
-              conta: emendaData.conta || '',
+              banco: emendaData.banco || "",
+              agencia: emendaData.agencia || "",
+              conta: emendaData.conta || "",
 
               // Cronograma
-              dataAprovacao: emendaData.dataAprovacao || '',
-              dataValidade: emendaData.dataValidade || emendaData.dataValidada || '',
-              inicioExecucao: emendaData.inicioExecucao || '',
-              finalExecucao: emendaData.finalExecucao || '',
+              dataAprovacao: emendaData.dataAprovacao || "",
+              dataValidade:
+                emendaData.dataValidade || emendaData.dataValidada || "",
+              inicioExecucao: emendaData.inicioExecucao || "",
+              finalExecucao: emendaData.finalExecucao || "",
 
               // Ações e Serviços
               acoesServicos: emendaData.acoesServicos || [],
 
               // Observações
-              observacoes: emendaData.observacoes || ''
+              observacoes: emendaData.observacoes || "",
             });
           }
-
         } else {
           // ✅ NOVA EMENDA - PRÉ-PREENCHER DADOS DO OPERADOR
           if (userRole === "operador" && userMunicipio) {
-            setFormData(prev => ({
+            setFormData((prev) => ({
               ...prev,
               municipio: userMunicipio,
-              uf: userUf
+              uf: userUf,
             }));
           }
         }
@@ -237,11 +225,10 @@ const EmendaForm = () => {
         if (mountedRef.current) {
           clearTimeout(timeoutRef.current);
           setLoading(false);
-          console.log('✅ EmendaForm carregado com sucesso');
+          console.log("✅ EmendaForm carregado com sucesso");
         }
-
       } catch (error) {
-        console.error('❌ Erro ao carregar EmendaForm:', error);
+        console.error("❌ Erro ao carregar EmendaForm:", error);
 
         if (mountedRef.current) {
           clearTimeout(timeoutRef.current);
@@ -251,35 +238,40 @@ const EmendaForm = () => {
       }
     };
 
-    // ✅ CARREGAR DADOS - SIMPLIFICADO PARA ADMIN
-    if (user && user.email) {
+    // ✅ CARREGAR APENAS SE USUÁRIO COMPLETO
+    if (user && user.email && (user.tipo || user.role)) {
       console.log("🚀 Iniciando carregamento para usuário:", user.email);
-      console.log("👤 Dados do usuário:", {
-        email: user.email,
-        tipo: user.tipo,
-        role: user.role,
-        isAdmin: userRole === "admin"
-      });
       carregarDados();
     } else {
       console.log("⏳ Aguardando dados completos do usuário...");
-      // Fallback: se não tem dados após 3s para admin, mostrar erro
+      // Fallback: se não tem dados após 5s, mostrar erro
       const fallbackTimeout = setTimeout(() => {
         if (mountedRef.current && !user?.email) {
-          setError("Dados do usuário não carregaram. Tente fazer login novamente.");
+          setError(
+            "Dados do usuário não carregaram. Tente fazer login novamente.",
+          );
           setLoading(false);
         }
-      }, 3000); // Reduzido para 3s
+      }, 5000);
 
       return () => clearTimeout(fallbackTimeout);
     }
-  }, [id, user?.email, user?.tipo, user?.role, isEdicao, userRole, userMunicipio, userUf]);
+  }, [
+    id,
+    user?.email,
+    user?.tipo,
+    user?.role,
+    isEdicao,
+    userRole,
+    userMunicipio,
+    userUf,
+  ]);
 
   // ✅ HANDLE INPUT CHANGE
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -288,18 +280,25 @@ const EmendaForm = () => {
     const errors = [];
 
     // Campos obrigatórios básicos
-    if (!formData.numero?.trim()) errors.push('Número da emenda é obrigatório');
-    if (!formData.autor?.trim()) errors.push('Autor/Parlamentar é obrigatório');
-    if (!formData.municipio?.trim()) errors.push('Município é obrigatório');
-    if (!formData.uf?.trim()) errors.push('UF é obrigatória');
-    if (!formData.valor?.toString().trim()) errors.push('Valor é obrigatório');
-    if (!formData.dataAprovacao?.trim()) errors.push('Data de aprovação é obrigatória');
-    if (!formData.dataValidade?.trim()) errors.push('Data de validade é obrigatória');
+    if (!formData.numero?.trim()) errors.push("Número da emenda é obrigatório");
+    if (!formData.autor?.trim()) errors.push("Autor/Parlamentar é obrigatório");
+    if (!formData.municipio?.trim()) errors.push("Município é obrigatório");
+    if (!formData.uf?.trim()) errors.push("UF é obrigatória");
+    if (!formData.valor?.toString().trim()) errors.push("Valor é obrigatório");
+    if (!formData.dataAprovacao?.trim())
+      errors.push("Data de aprovação é obrigatória");
+    if (!formData.dataValidade?.trim())
+      errors.push("Data de validade é obrigatória");
 
     // Validar valor numérico
-    const valorNumerico = parseFloat(formData.valor?.toString().replace(/[^\d,.-]/g, '').replace(',', '.'));
+    const valorNumerico = parseFloat(
+      formData.valor
+        ?.toString()
+        .replace(/[^\d,.-]/g, "")
+        .replace(",", "."),
+    );
     if (isNaN(valorNumerico) || valorNumerico <= 0) {
-      errors.push('Valor deve ser um número positivo');
+      errors.push("Valor deve ser um número positivo");
     }
 
     return errors;
@@ -309,7 +308,7 @@ const EmendaForm = () => {
   const handleSubmit = async () => {
     const errors = validarFormulario();
     if (errors.length > 0) {
-      setError(errors.join('. '));
+      setError(errors.join(". "));
       return;
     }
 
@@ -317,10 +316,17 @@ const EmendaForm = () => {
       setSaving(true);
       setError(null);
 
-      console.log(isEdicao ? '💾 Salvando alterações...' : '➕ Criando nova emenda...');
+      console.log(
+        isEdicao ? "💾 Salvando alterações..." : "➕ Criando nova emenda...",
+      );
 
       // ✅ PREPARAR DADOS COMPATÍVEIS COM DASHBOARD
-      const valorNumerico = parseFloat(formData.valor?.toString().replace(/[^\d,.-]/g, '').replace(',', '.'));
+      const valorNumerico = parseFloat(
+        formData.valor
+          ?.toString()
+          .replace(/[^\d,.-]/g, "")
+          .replace(",", "."),
+      );
 
       const dadosParaSalvar = {
         // Dados básicos
@@ -362,31 +368,30 @@ const EmendaForm = () => {
 
         // ✅ METADADOS PARA DASHBOARD/CRONOGRAMA
         valorExecutado: 0, // Compatível com cronograma
-        status: 'Ativa',
+        status: "Ativa",
 
         // Auditoria
         atualizadoEm: serverTimestamp(),
-        atualizadoPor: user.uid || user.email
+        atualizadoPor: user.uid || user.email,
       };
 
       if (isEdicao) {
         // Atualizar emenda existente
-        await updateDoc(doc(db, 'emendas', id), dadosParaSalvar);
-        console.log('✅ Emenda atualizada');
+        await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
+        console.log("✅ Emenda atualizada");
       } else {
         // Criar nova emenda
         dadosParaSalvar.criadoEm = serverTimestamp();
         dadosParaSalvar.criadoPor = user.uid || user.email;
 
-        await addDoc(collection(db, 'emendas'), dadosParaSalvar);
-        console.log('✅ Emenda criada');
+        await addDoc(collection(db, "emendas"), dadosParaSalvar);
+        console.log("✅ Emenda criada");
       }
 
       // Navegar de volta
-      navigate('/emendas');
-
+      navigate("/emendas");
     } catch (error) {
-      console.error('❌ Erro ao salvar:', error);
+      console.error("❌ Erro ao salvar:", error);
       setError(`Erro ao salvar emenda: ${error.message}`);
     } finally {
       setSaving(false);
@@ -399,7 +404,9 @@ const EmendaForm = () => {
     clearTimeout(timeoutRef.current);
     setLoading(false);
     if (isEdicao) {
-      setError("Carregamento interrompido pelo usuário. Clique em 'Tentar Novamente' para recarregar.");
+      setError(
+        "Carregamento interrompido pelo usuário. Clique em 'Tentar Novamente' para recarregar.",
+      );
     }
   };
 
@@ -413,17 +420,17 @@ const EmendaForm = () => {
   if (loading) {
     return (
       <div style={styles.container}>
-        <EmendaFormHeader 
+        <EmendaFormHeader
           isEdicao={isEdicao}
-          onBack={() => navigate('/emendas')}
+          onBack={() => navigate("/emendas")}
         />
 
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
           <h3>Carregando formulário...</h3>
           <p style={styles.loadingText}>
-            {isEdicao 
-              ? "Carregando dados da emenda..." 
+            {isEdicao
+              ? "Carregando dados da emenda..."
               : "Preparando formulário para nova emenda..."}
           </p>
 
@@ -433,7 +440,8 @@ const EmendaForm = () => {
               🛑 Parar Carregamento
             </button>
             <p style={styles.emergencyText}>
-              Se o carregamento está demorando muito, clique acima para interromper
+              Se o carregamento está demorando muito, clique acima para
+              interromper
             </p>
           </div>
         </div>
@@ -445,9 +453,9 @@ const EmendaForm = () => {
   if (error) {
     return (
       <div style={styles.container}>
-        <EmendaFormHeader 
+        <EmendaFormHeader
           isEdicao={isEdicao}
-          onBack={() => navigate('/emendas')}
+          onBack={() => navigate("/emendas")}
         />
 
         <div style={styles.errorContainer}>
@@ -459,7 +467,10 @@ const EmendaForm = () => {
             <button onClick={tentarNovamente} style={styles.retryButton}>
               🔄 Tentar Novamente
             </button>
-            <button onClick={() => navigate('/emendas')} style={styles.backButton}>
+            <button
+              onClick={() => navigate("/emendas")}
+              style={styles.backButton}
+            >
               ← Voltar para Lista
             </button>
           </div>
@@ -468,14 +479,18 @@ const EmendaForm = () => {
             <details>
               <summary>Informações de Debug</summary>
               <pre style={styles.debugText}>
-                {JSON.stringify({
-                  user: user?.email || 'não logado',
-                  tipo: user?.tipo || user?.role || 'indefinido',
-                  municipio: user?.municipio || 'não informado',
-                  isEdicao,
-                  emendaId: id,
-                  timestamp: new Date().toISOString()
-                }, null, 2)}
+                {JSON.stringify(
+                  {
+                    user: user?.email || "não logado",
+                    tipo: user?.tipo || user?.role || "indefinido",
+                    municipio: user?.municipio || "não informado",
+                    isEdicao,
+                    emendaId: id,
+                    timestamp: new Date().toISOString(),
+                  },
+                  null,
+                  2,
+                )}
               </pre>
             </details>
           </div>
@@ -487,9 +502,9 @@ const EmendaForm = () => {
   // ✅ FORMULÁRIO PRINCIPAL - USANDO SEÇÕES EXISTENTES
   return (
     <div style={styles.container}>
-      <EmendaFormHeader 
+      <EmendaFormHeader
         isEdicao={isEdicao}
-        onBack={() => navigate('/emendas')}
+        onBack={() => navigate("/emendas")}
       />
 
       <form onSubmit={(e) => e.preventDefault()} style={styles.form}>
@@ -553,7 +568,7 @@ const EmendaForm = () => {
       {showCancelModal && (
         <EmendaFormCancelModal
           isOpen={showCancelModal}
-          onConfirm={() => navigate('/emendas')}
+          onConfirm={() => navigate("/emendas")}
           onCancel={() => setShowCancelModal(false)}
         />
       )}
@@ -564,28 +579,29 @@ const EmendaForm = () => {
 // ✅ ESTILOS CONSISTENTES COM DASHBOARD v2.4
 const styles = {
   container: {
-    padding: '16px',
-    backgroundColor: '#f8f9fa',
-    minHeight: '100vh',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    padding: "16px",
+    backgroundColor: "#f8f9fa",
+    minHeight: "100vh",
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   },
   form: {
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    padding: '24px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-    border: '1px solid #e9ecef',
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "24px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    border: "1px solid #e9ecef",
     display: "flex",
     flexDirection: "column",
     gap: "30px",
   },
   loadingContainer: {
-    textAlign: 'center',
-    padding: '60px 20px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-    margin: '20px 0',
+    textAlign: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    margin: "20px 0",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -594,99 +610,99 @@ const styles = {
     gap: "20px",
   },
   spinner: {
-    width: '50px',
-    height: '50px',
-    border: '4px solid #f3f3f3',
-    borderTop: '4px solid #007bff',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-    margin: '0 auto 20px'
+    width: "50px",
+    height: "50px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #007bff",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 20px",
   },
   loadingText: {
-    color: '#666',
-    fontSize: '14px',
-    marginBottom: '30px'
+    color: "#666",
+    fontSize: "14px",
+    marginBottom: "30px",
   },
   loadingSubtext: {
-    fontSize: '13px',
-    color: '#666',
-    marginTop: '8px'
+    fontSize: "13px",
+    color: "#666",
+    marginTop: "8px",
   },
   emergencyControls: {
-    marginTop: '30px',
-    padding: '20px',
-    backgroundColor: '#fff3cd',
-    borderRadius: '6px',
-    border: '1px solid #ffeaa7'
+    marginTop: "30px",
+    padding: "20px",
+    backgroundColor: "#fff3cd",
+    borderRadius: "6px",
+    border: "1px solid #ffeaa7",
   },
   stopButton: {
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    marginBottom: '10px'
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    marginBottom: "10px",
   },
   emergencyText: {
-    fontSize: '12px',
-    color: '#856404',
-    margin: 0
+    fontSize: "12px",
+    color: "#856404",
+    margin: 0,
   },
   errorContainer: {
-    textAlign: 'center',
-    padding: '40px 20px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-    margin: '20px 0'
+    textAlign: "center",
+    padding: "40px 20px",
+    backgroundColor: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    margin: "20px 0",
   },
   errorIcon: {
-    fontSize: '48px',
-    marginBottom: '16px'
+    fontSize: "48px",
+    marginBottom: "16px",
   },
   errorMessage: {
-    color: '#dc3545',
-    fontSize: '14px',
-    marginBottom: '20px'
+    color: "#dc3545",
+    fontSize: "14px",
+    marginBottom: "20px",
   },
   errorActions: {
-    display: 'flex',
-    gap: '12px',
-    justifyContent: 'center',
-    marginBottom: '20px'
+    display: "flex",
+    gap: "12px",
+    justifyContent: "center",
+    marginBottom: "20px",
   },
   retryButton: {
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    padding: '10px 16px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px'
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
   },
   backButton: {
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    padding: '10px 16px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px'
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
   },
   debugInfo: {
-    marginTop: '20px',
-    textAlign: 'left'
+    marginTop: "20px",
+    textAlign: "left",
   },
   debugText: {
-    backgroundColor: '#f8f9fa',
-    padding: '10px',
-    borderRadius: '4px',
-    fontSize: '11px',
-    overflow: 'auto'
-  }
+    backgroundColor: "#f8f9fa",
+    padding: "10px",
+    borderRadius: "4px",
+    fontSize: "11px",
+    overflow: "auto",
+  },
 };
 
 // ✅ KEYFRAMES PARA SPINNER
