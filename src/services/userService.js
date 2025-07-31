@@ -718,8 +718,37 @@ const cleanupBrokenUsers = async () => {
           reason: "Recuperado como órfão",
         });
       }
+    }
 
-      // Se o UID não parece ser do Firebase
+    return brokenUsers;
+  } catch (error) {
+    console.error("❌ Erro na limpeza:", error);
+    return [];
+  }
+};
+
+// ✅ EXPORTAÇÕES CORRIGIDAS
+export const UserService = {
+  createUser,
+  getAllUsers,
+  updateUser,
+  deleteUser,
+  getCurrentUserData,
+  diagnoseEmail,
+  cleanupBrokenUsers
+};
+
+export {
+  createUser,
+  getAllUsers,
+  updateUser,
+  deleteUser,
+  getCurrentUserData,
+  diagnoseEmail,
+  cleanupBrokenUsers
+};
+
+export default UserService;o Firebase
       if (userData.uid?.startsWith("recuperado-")) {
         console.log(`⚠️ Usuário com UID inválido: ${email}`);
         brokenUsers.push({
