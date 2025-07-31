@@ -367,4 +367,5 @@ if (typeof document !== "undefined" && !document.getElementById("dashboard-style
   document.head.appendChild(styleSheet);
 }
 
+// Exportar o componente
 export default Dashboard;

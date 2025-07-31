@@ -749,9 +749,6 @@ const cleanupBrokenUsers = async () => {
     throw error;
   }
 };
-          id: doc.id,
-          email: email,
-          nome: userData.nome,
           tipo: userData.tipo,
           reason: "UID inválido",
         });

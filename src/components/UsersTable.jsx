@@ -358,8 +358,7 @@ const styles = {
     fontSize: "14px",
     transition: "all 0.2s ease",
     backgroundColor: "#f8f9fa",
-    color: "#495057",
-    border: "1px solid #dee2e6",
+    color: "#495057"
   },
 
   // ✅ BOTÃO DESATIVAR (LARANJA)
