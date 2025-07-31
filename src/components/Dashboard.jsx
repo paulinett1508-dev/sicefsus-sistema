@@ -14,7 +14,22 @@ const CronogramaWidget = ({ emendas = [] }) => {
     vencidas: [],
     emAndamento: [],
     concluidas: []
-  });
+};
+
+// ✅ CSS PARA ANIMAÇÃO - PRESERVADO
+if (!document.getElementById("dashboard-animations")) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "dashboard-animations";
+  styleSheet.innerHTML = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
+
+export default Dashboard;);
 
   // ✅ PROCESSAR dados das emendas
   useEffect(() => {
@@ -1019,3 +1034,4 @@ const cronogramaStyles = {
     fontWeight: '700',
     color: '#212529'
   }
+}
