@@ -1,0 +1,952 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: Object
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+App.jsx:196 🔍 onAuthStateChanged: Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+App.jsx:200 📧 Email: paulinett1508@gmail.com
+UserContext.jsx:24 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+App.jsx:207 ✅ Dados encontrados na coleção 'usuarios': Object
+App.jsx:250 👤 Usuário configurado via onAuthStateChanged: Object
+UserContext.jsx:31 ✅ Dados do usuário encontrados: Object
+UserContext.jsx:72 👤 Usuário configurado: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: Object
+Dashboard.jsx:65 🔐 Permissões detectadas: Object
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: Object
+Dashboard.jsx:65 🔐 Permissões detectadas: Object
+Dashboard.jsx:217 🔄 useEffect Dashboard - Verificando necessidade de carregar dados
+Dashboard.jsx:220 👤 User disponível: true
+Dashboard.jsx:221 📧 Email: paulinett1508@gmail.com
+Dashboard.jsx:222 🔐 Tipo: admin
+Dashboard.jsx:223 📊 Dados atuais - emendas: 0 despesas: 0
+Dashboard.jsx:232 🚀 Iniciando carregamento de dados para: admin
+Dashboard.jsx:73 📊 Iniciando carregamento de dados...
+Dashboard.jsx:74 👤 Tipo de usuário: admin
+Dashboard.jsx:81 👑 ADMIN: Carregando TODOS os dados (sem filtro)
+Dashboard.jsx:217 🔄 useEffect Dashboard - Verificando necessidade de carregar dados
+Dashboard.jsx:220 👤 User disponível: true
+Dashboard.jsx:221 📧 Email: paulinett1508@gmail.com
+Dashboard.jsx:222 🔐 Tipo: admin
+Dashboard.jsx:223 📊 Dados atuais - emendas: 0 despesas: 0
+Dashboard.jsx:232 🚀 Iniciando carregamento de dados para: admin
+Dashboard.jsx:73 📊 Iniciando carregamento de dados...
+Dashboard.jsx:74 👤 Tipo de usuário: admin
+Dashboard.jsx:81 👑 ADMIN: Carregando TODOS os dados (sem filtro)
+Dashboard.jsx:99 ✅ Admin - Emendas carregadas: 0
+Dashboard.jsx:99 ✅ Admin - Emendas carregadas: 0
+Dashboard.jsx:117 ✅ Admin - Despesas carregadas: 0
+Dashboard.jsx:203 ✅ Carregamento concluído: Object
+Dashboard.jsx:117 ✅ Admin - Despesas carregadas: 0
+Dashboard.jsx:203 ✅ Carregamento concluído: Object
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: Object
+Dashboard.jsx:65 🔐 Permissões detectadas: Object
+Dashboard.jsx:20 🏠 Dashboard iniciado
+Dashboard.jsx:21 👤 Dados do usuário carregados para Dashboard: Object
+Dashboard.jsx:65 🔐 Permissões detectadas: Object
+Sidebar.jsx:76 🔍 Tentativa de navegação para Emendas: Object
+Sidebar.jsx:97 ✅ Navegação normal para Emendas
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:81 ✅ PrivateRoute: Acesso autorizado
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:252 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:52 📋 Carregando emendas...
+Emendas.jsx:57 👑 Admin: Carregando todas as emendas
+Emendas.jsx:252 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:52 📋 Carregando emendas...
+Emendas.jsx:57 👑 Admin: Carregando todas as emendas
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:84 ✅ 0 emendas carregadas
+Emendas.jsx:84 ✅ 0 emendas carregadas
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:252 🔍 Aplicando filtros - emendas filtradas: 0
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:189 ➕ Criando nova emenda
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+Emendas.jsx:22 ✅ Sistema SICEFSUS v2.1 - Dados do usuário: Object
+Emendas.jsx:35 🔐 Permissões do usuário: Object
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at input
+    at div
+    at div
+    at fieldset
+    at ClassificacaoTecnica (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx:19:3)
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:39:3)
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:26:35)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+printWarning @ react-dom.development.js:86
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at input
+    at div
+    at div
+    at fieldset
+    at Cronograma (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/Cronograma.jsx:19:3)
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:39:3)
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:26:35)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+printWarning @ react-dom.development.js:86
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at input
+    at div
+    at div
+    at fieldset
+    at DadosBancarios (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/DadosBancarios.jsx:19:3)
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:39:3)
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:26:35)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+printWarning @ react-dom.development.js:86
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at input
+    at div
+    at div
+    at fieldset
+    at DadosBancarios (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/DadosBancarios.jsx:19:3)
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:39:3)
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:26:35)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+printWarning @ react-dom.development.js:86
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+react-dom.development.js:86  Warning: Removing a style property during rerender (borderColor) when a conflicting property is set (border) can lead to styling bugs. To avoid this, don't mix shorthand and non-shorthand properties for the same value; instead, replace the shorthand with separate values.
+    at input
+    at div
+    at div
+    at fieldset
+    at DadosBancarios (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/DadosBancarios.jsx:19:3)
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:39:3)
+    at Emendas (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Emendas.jsx:26:35)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+printWarning @ react-dom.development.js:86
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormActions.jsx:58 🖱️ Botão Submit clicado!
+index.jsx:182 🚀 Iniciando submissão
+index.jsx:141 🔍 Iniciando validação do formulário
+useValidation.js:271  ⚠️ Schema inválido ou não fornecido para validação
+(anônimo) @ useValidation.js:271
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+index.jsx:378 🔍 Renderizando EmendaFormCancelModal com showCancelModal = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
+EmendaFormCancelModal.jsx:19 🔍 EmendaFormCancelModal renderizado: Object
+EmendaFormCancelModal.jsx:65 🎯 Modal: Renderizando modal simples com show = false
