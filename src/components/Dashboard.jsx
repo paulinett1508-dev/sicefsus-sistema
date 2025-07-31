@@ -369,3 +369,4 @@ if (typeof document !== "undefined" && !document.getElementById("dashboard-style
 
 // Exportar o componente
 export default Dashboard;
+export { Dashboard };

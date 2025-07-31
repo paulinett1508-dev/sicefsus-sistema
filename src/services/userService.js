@@ -749,29 +749,6 @@ const cleanupBrokenUsers = async () => {
     throw error;
   }
 };
-          tipo: userData.tipo,
-          reason: "UID inválido",
-        });
-      }
-    }
-
-    console.log(`🎯 Encontrados ${brokenUsers.length} usuários problemáticos:`);
-    brokenUsers.forEach((user, index) => {
-      console.log(
-        `${index + 1}. ${user.email} (${user.nome}) - ${user.reason}`,
-      );
-    });
-
-    return {
-      total: usuariosSnapshot.size,
-      broken: brokenUsers.length,
-      users: brokenUsers,
-    };
-  } catch (error) {
-    console.error("❌ Erro na limpeza:", error);
-    throw error;
-  }
-};
 
 // 🔧 FUNÇÃO PARA CORRIGIR USUÁRIO ESPECÍFICO
 const fixBrokenUser = async (userId, email, correctUserData) => {
@@ -937,6 +914,14 @@ export const UserService = {
   getCurrentUserData: () => null,
   diagnoseEmail,
   cleanupBrokenUsers,
+  trackUserAccess,
+  sendPasswordReset,
+  checkEmailExists,
+  validateFormData,
+  generateTempPassword,
+  convertRoleToTipo,
+  handleFirebaseError,
+  fixBrokenUser,
 };
 
 // Exportações nomeadas
