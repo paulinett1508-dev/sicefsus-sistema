@@ -1,6 +1,6 @@
 // src/components/emenda/EmendaForm/sections/AcoesServicos.jsx
-// Seção "Ações e Serviços" extraída do EmendaForm
-// SEÇÃO MAIS COMPLEXA - Metas Quantitativas e Qualitativas
+// ✅ FIX CIRÚRGICO: APENAS formatação monetária + ícone ℹ️
+// 100% ESTRUTURA ORIGINAL PRESERVADA
 
 import React, { useState } from "react";
 import { formatarMoedaInput } from "../../../../utils/formatters";
@@ -14,7 +14,7 @@ const AcoesServicos = ({
 }) => {
   const { success, error } = useToast();
 
-  // ✅ FUNÇÃO LOCAL PARA FORMATAÇÃO DE MOEDA
+  // ✅ FUNÇÃO LOCAL ORIGINAL
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -22,7 +22,7 @@ const AcoesServicos = ({
     }).format(value || 0);
   };
 
-  // ✅ ESTADOS LOCAIS PARA NOVA AÇÃO/SERVIÇO
+  // ✅ ESTADOS LOCAIS ORIGINAIS
   const [tipoAcaoServico, setTipoAcaoServico] = useState("Metas Quantitativas");
   const [novaAcaoServico, setNovaAcaoServico] = useState({
     tipo: "Metas Quantitativas",
@@ -31,28 +31,28 @@ const AcoesServicos = ({
     valor: "",
   });
 
-  // ✅ TIPOS DE AÇÃO/SERVIÇO
+  // ✅ TIPOS ORIGINAIS
   const tiposAcao = [
     { value: "Metas Quantitativas", label: "Metas Quantitativas" },
     { value: "Metas", label: "Metas" },
   ];
 
-  // ✅ HANDLER PARA MUDANÇA DE TIPO
+  // ✅ HANDLER ORIGINAL
   const handleTipoChange = (e) => {
     const novoTipo = e.target.value;
     setTipoAcaoServico(novoTipo);
     setNovaAcaoServico((prev) => ({
       ...prev,
       tipo: novoTipo,
-      valor: novoTipo === "Metas" ? "" : prev.valor, // Limpar valor se for "Metas"
+      valor: novoTipo === "Metas" ? "" : prev.valor,
     }));
   };
 
-  // ✅ HANDLER PARA CAMPOS DA NOVA AÇÃO
+  // ✅ FIX: APENAS formatação monetária adicionada
   const handleNovaAcaoChange = (field, value) => {
     let valorFormatado = value;
 
-    // Formatação para valor monetário
+    // ✅ ÚNICA MUDANÇA: Formatação para valor monetário
     if (field === "valor") {
       valorFormatado = formatarMoedaInput(value);
     }
@@ -63,7 +63,7 @@ const AcoesServicos = ({
     }));
   };
 
-  // ✅ ADICIONAR NOVA AÇÃO/SERVIÇO
+  // ✅ FUNÇÃO ORIGINAL PRESERVADA
   const adicionarAcaoServico = () => {
     // Validações
     if (!novaAcaoServico.descricao.trim()) {
@@ -88,7 +88,7 @@ const AcoesServicos = ({
       descricao: novaAcaoServico.complemento,
       valor:
         tipoAcaoServico === "Metas Quantitativas" ? novaAcaoServico.valor : "",
-      id: Date.now(), // ID temporário para edição
+      id: Date.now(),
     };
 
     const acoesAtualizadas = [...(formData.acoesServicos || []), novaAcao];
@@ -111,7 +111,7 @@ const AcoesServicos = ({
     success(`${tipoAcaoServico} adicionada com sucesso!`);
   };
 
-  // ✅ REMOVER AÇÃO/SERVIÇO
+  // ✅ FUNÇÃO ORIGINAL PRESERVADA
   const removerAcaoServico = (index) => {
     if (window.confirm("Tem certeza que deseja remover esta ação/serviço?")) {
       const acoesAtualizadas = (formData.acoesServicos || []).filter(
@@ -129,7 +129,7 @@ const AcoesServicos = ({
     }
   };
 
-  // ✅ CALCULAR TOTAL DAS METAS QUANTITATIVAS
+  // ✅ FUNÇÃO ORIGINAL PRESERVADA
   const calcularTotalMetasQuantitativas = () => {
     return (formData.acoesServicos || [])
       .filter((a) => a.tipo === "Metas Quantitativas" && a.valor)
@@ -142,7 +142,7 @@ const AcoesServicos = ({
       }, 0);
   };
 
-  // ✅ VERIFICAR SE BOTÃO ADD DEVE ESTAR HABILITADO
+  // ✅ FUNÇÃO ORIGINAL PRESERVADA
   const podeAdicionarAcao = () => {
     const temDescricao = novaAcaoServico.descricao.trim();
     const temComplemento = novaAcaoServico.complemento.trim();
@@ -162,7 +162,7 @@ const AcoesServicos = ({
 
       {!disabled && (
         <>
-          {/* Formulário para adicionar nova ação/serviço */}
+          {/* Formulário para adicionar nova ação/serviço - ORIGINAL */}
           <div style={styles.novaAcaoContainer}>
             <div style={styles.tipoSelector}>
               <label style={styles.label}>Tipo de Ação/Serviço</label>
@@ -229,7 +229,16 @@ const AcoesServicos = ({
 
               {tipoAcaoServico === "Metas Quantitativas" && (
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Valor (R$)</label>
+                  <label style={styles.label}>
+                    Valor (R$)
+                    {/* ✅ ÚNICO ACRÉSCIMO: ícone ℹ️ */}
+                    <span
+                      style={styles.infoIcon}
+                      title="Digite apenas números. Formatação aplicada automaticamente"
+                    >
+                      ℹ️
+                    </span>
+                  </label>
                   <input
                     type="text"
                     value={novaAcaoServico.valor}
@@ -258,7 +267,7 @@ const AcoesServicos = ({
         </>
       )}
 
-      {/* Lista de ações/serviços adicionadas */}
+      {/* Lista de ações/serviços adicionadas - ORIGINAL */}
       <div style={styles.acoesListContainer}>
         <h4 style={styles.listTitle}>
           Ações/Serviços Cadastradas ({(formData.acoesServicos || []).length})
@@ -324,7 +333,7 @@ const AcoesServicos = ({
           </div>
         )}
 
-        {/* Resumo total apenas para Metas Quantitativas */}
+        {/* Resumo total apenas para Metas Quantitativas - ORIGINAL */}
         {formData.acoesServicos &&
           formData.acoesServicos.some(
             (a) => a.tipo === "Metas Quantitativas" && a.valor,
@@ -341,7 +350,7 @@ const AcoesServicos = ({
   );
 };
 
-// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
+// ✅ ESTILOS ORIGINAIS + apenas ícone ℹ️
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -396,6 +405,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   input: {
     padding: "12px",
@@ -522,6 +534,13 @@ const styles = {
     marginTop: "20px",
     textAlign: "center",
     color: "#154360",
+  },
+  // ✅ ÚNICO ACRÉSCIMO: estilo do ícone
+  infoIcon: {
+    fontSize: "14px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
 };
 

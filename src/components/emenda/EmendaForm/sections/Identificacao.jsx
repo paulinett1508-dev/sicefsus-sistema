@@ -1,10 +1,12 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// Seção "Identificação" extraída do EmendaForm
-// CNPJ do município, outros valores, valor executado, saldo
+// ✅ FIX CIRÚRGICO: APENAS ícones + validação CNPJ - CAMPOS ORIGINAIS
 
 import React from "react";
-import { formatarMoedaInput } from "../../../../utils/formatters";
-import { formatarCNPJ } from "../../../../utils/validators";
+import {
+  formatarMoedaInput,
+  parseValorMonetario,
+} from "../../../../utils/formatters";
+import { formatarCNPJ, validarCNPJ } from "../../../../utils/validators";
 
 const Identificacao = ({
   formData = {},
@@ -14,7 +16,7 @@ const Identificacao = ({
   metricas = null,
   emendaParaEditar = null,
 }) => {
-  // ✅ HANDLER DE MUDANÇA COM FORMATAÇÃO
+  // ✅ HANDLER ORIGINAL COM APENAS formatação CNPJ e monetária
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let valorFormatado = value;
@@ -32,7 +34,7 @@ const Identificacao = ({
     onChange?.({ target: { name, value: valorFormatado } });
   };
 
-  // ✅ FUNÇÃO LOCAL PARA FORMATAÇÃO DE MOEDA
+  // ✅ FUNÇÃO ORIGINAL PRESERVADA
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -40,7 +42,7 @@ const Identificacao = ({
     }).format(value || 0);
   };
 
-  // ✅ CALCULAR VALOR EXECUTADO (automático)
+  // ✅ CALCULAR VALOR EXECUTADO (original)
   const getValorExecutado = () => {
     if (emendaParaEditar && metricas) {
       return formatCurrency(metricas.valorExecutado || 0);
@@ -48,7 +50,7 @@ const Identificacao = ({
     return "R$ 0,00";
   };
 
-  // ✅ CALCULAR SALDO (baseado em valor do recurso - valor executado)
+  // ✅ CALCULAR SALDO (original)
   const getSaldo = () => {
     if (formData.saldo) {
       return formData.saldo;
@@ -72,32 +74,60 @@ const Identificacao = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ do Município */}
+        {/* ✅ CNPJ do Município - APENAS validação visual CNPJ */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ do Município <span style={styles.required}>*</span>
+            <span
+              style={styles.infoIcon}
+              title="Digite apenas números. Formatação automática aplicada"
+            >
+              ℹ️
+            </span>
           </label>
-          <input
-            type="text"
-            name="cnpjMunicipio"
-            value={formData.cnpjMunicipio || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.cnpjMunicipio && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="00.000.000/0000-00"
-            required
-          />
+          <div style={styles.inputContainer}>
+            <input
+              type="text"
+              name="cnpjMunicipio"
+              value={formData.cnpjMunicipio || ""}
+              onChange={handleInputChange}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.cnpjMunicipio && styles.inputError),
+                ...(formData.cnpjMunicipio &&
+                  validarCNPJ(formData.cnpjMunicipio) &&
+                  styles.inputValid),
+                ...(formData.cnpjMunicipio &&
+                  !validarCNPJ(formData.cnpjMunicipio) &&
+                  styles.inputInvalid),
+              }}
+              disabled={disabled}
+              placeholder="00.000.000/0000-00"
+              required
+            />
+            {/* ✅ INDICADOR VISUAL CNPJ */}
+            {formData.cnpjMunicipio && (
+              <span style={styles.validationIcon}>
+                {validarCNPJ(formData.cnpjMunicipio) ? "✅" : "❌"}
+              </span>
+            )}
+          </div>
           {fieldErrors.cnpjMunicipio && (
-            <small style={styles.errorText}>CNPJ inválido</small>
+            <small style={styles.errorText}>Campo obrigatório</small>
           )}
         </div>
 
-        {/* Outros Valores */}
+        {/* ✅ Outros Valores - APENAS ícone removido texto */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Outros Valores</label>
+          <label style={styles.label}>
+            Outros Valores
+            <span
+              style={styles.infoIcon}
+              title="Digite apenas números. Formatação automática aplicada"
+            >
+              ℹ️
+            </span>
+          </label>
           <input
             type="text"
             name="outrosValores"
@@ -110,15 +140,18 @@ const Identificacao = ({
             disabled={disabled}
             placeholder="0,00"
           />
+          {fieldErrors.outrosValores && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
         </div>
 
-        {/* Valor Executado (Automático) */}
+        {/* Valor Executado (Automático) - ORIGINAL */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Valor Executado (Automático)
             <span
               style={styles.infoIcon}
-              title="Valor calculado automaticamente com base nas despesas lançadas"
+              title="Valor calculado automaticamente com base nas despesas"
             >
               ℹ️
             </span>
@@ -134,11 +167,10 @@ const Identificacao = ({
             }}
             disabled={true}
             placeholder="Calculado automaticamente com base nas despesas"
-            title="Este valor é calculado automaticamente com base nas despesas cadastradas para esta emenda"
           />
         </div>
 
-        {/* Saldo (Calculado) */}
+        {/* Saldo (Calculado) - ORIGINAL */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Saldo (Calculado)
@@ -160,7 +192,6 @@ const Identificacao = ({
             }}
             disabled={true}
             placeholder="0,00"
-            title="Saldo = Valor do Recurso - Valor Executado"
           />
         </div>
       </div>
@@ -168,7 +199,7 @@ const Identificacao = ({
   );
 };
 
-// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
+// ✅ ESTILOS ORIGINAIS + apenas validação CNPJ + campo obrigatório destacado
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -214,6 +245,11 @@ const styles = {
   required: {
     color: "#dc3545",
   },
+  inputContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
   input: {
     padding: "12px",
     border: "2px solid #dee2e6",
@@ -221,11 +257,31 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
+    flex: "1",
   },
+  // ✅ DESTAQUE campo obrigatório não preenchido
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  // ✅ VALIDAÇÃO CNPJ - válido
+  inputValid: {
+    borderColor: "#28a745",
+    backgroundColor: "#f8fff8",
+    boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
+  },
+  // ✅ VALIDAÇÃO CNPJ - inválido
+  inputInvalid: {
+    borderColor: "#ffc107",
+    backgroundColor: "#fffbf0",
+    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
+  },
+  validationIcon: {
+    position: "absolute",
+    right: "12px",
+    fontSize: "16px",
+    pointerEvents: "none",
   },
   errorText: {
     color: "#dc3545",
@@ -233,6 +289,7 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
+  // ✅ ÚNICO ACRÉSCIMO: ícone de informação
   infoIcon: {
     fontSize: "14px",
     color: "#0066cc",

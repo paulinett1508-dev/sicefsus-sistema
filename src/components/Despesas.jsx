@@ -218,7 +218,8 @@ const Dashboard = ({ usuario }) => {
   // ✅ NOVOS HANDLERS PARA BOTÕES (baseado em Emendas.jsx)
   const handleCriarDespesa = () => {
     console.log("➕ Criando nova despesa");
-    navigate("/despesas/criar");
+    console.log("🔄 Navegando para /despesas/nova"); // ✅ ROTA CORRETA
+    navigate("/despesas/nova"); // ✅ CORRIGIDO: era /despesas/criar
   };
 
   const recarregarDados = async () => {

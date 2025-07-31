@@ -1,9 +1,9 @@
 # 📋 HANDOVER - Sistema SICEFSUS
 
-**📅 Gerado automaticamente em:** 30/07/2025, 19:08:54  
+**📅 Gerado automaticamente em:** 31/07/2025, 07:49:35  
 **🔧 Por:** Script generateHandover.cjs v2.5  
 **📊 Status:** Sistema em Produção Ativa
-**🕒 Data/Hora obtida de:** Sistema NTP/Time Service
+**🕒 Data/Hora obtida de:** WorldTimeAPI (America/Sao_Paulo)
 
 ---
 
@@ -24,27 +24,27 @@ Correção completa do sistema de análise com forçar leitura de arquivos e eli
 - Melhoria no debugging e logs detalhados
 
 **📁 Arquivos Envolvidos:**
+- `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx`
+- `src/components/Despesas.jsx`
 - `src/components/DespesaForm.jsx`
+- `src/components/emenda/EmendaForm/index.jsx`
+- `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx`
+- `src/components/Emendas.jsx`
+- `src/components/emenda/EmendaForm/sections/Cronograma.jsx`
 - `src/components/UserForm.jsx`
 - `src/components/despesa/DespesaFormEmpenhoFields.jsx`
 - `src/components/despesa/DespesaFormOrcamentoFields.jsx`
 - `src/components/despesa/DespesaFormAdvancedFields.jsx`
 - `src/components/emenda/EmendaForm/sections/DadosBancarios.jsx`
 - `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx`
-- `src/components/emenda/EmendaForm/sections/Cronograma.jsx`
 - `src/components/emenda/EmendaForm/sections/Identificacao.jsx`
 - `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx`
 - `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx`
-- `src/components/emenda/EmendaForm/index.jsx`
 - `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx`
-- `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx`
-- `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx`
-- `src/components/Emendas.jsx`
 - `src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx`
 - `src/components/Sidebar.jsx`
 - `src/components/Sobre.jsx`
 - `src/components/Dashboard.jsx`
-- `src/components/Despesas.jsx`
 - `src/components/EmendasFilters.jsx`
 - `src/components/DespesasFilters.jsx`
 - `src/components/Login.jsx`
@@ -86,7 +86,7 @@ Esta seção identifica arquivos que podem se beneficiar de refatoração para m
 ### 📊 RESUMO EXECUTIVO
 
 - **Total de Arquivos Analisados:** 75
-- **Arquivos que Precisam de Refatoração:** 60 (80%)
+- **Arquivos que Precisam de Refatoração:** 62 (83%)
 - **Arquivos com Prioridade Crítica:** 0
 - **Score Médio de Complexidade:** 54/100
 
@@ -111,7 +111,7 @@ Os arquivos são avaliados com base nos seguintes critérios:
 
 #### 🟠 `src/components/emenda/EmendaForm/index.jsx` - Score: 78/100
 
-**📊 Resumo:** 368 linhas, 8 funções, complexidade 10344
+**📊 Resumo:** 408 linhas, 8 funções, complexidade 11893
 
 **🔧 Principais Sugestões:**
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
@@ -119,11 +119,11 @@ Os arquivos são avaliados com base nos seguintes critérios:
 
 #### 🟠 `src/components/Emendas.jsx` - Score: 77/100
 
-**📊 Resumo:** 585 linhas, 15 funções, complexidade 16003
+**📊 Resumo:** 599 linhas, 16 funções, complexidade 16628
 
 **🔧 Principais Sugestões:**
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
-- Simplificar lógicas condicionais e extrair funções auxiliares
+- Agrupar funções relacionadas em módulos separados
 
 #### 🟠 `src/components/AdminPanel.jsx` - Score: 73/100
 
@@ -285,6 +285,14 @@ Os arquivos são avaliados com base nos seguintes critérios:
 - Simplificar lógicas condicionais e extrair funções auxiliares
 - Extrair lógicas aninhadas em funções separadas
 
+#### 🟠 `src/components/Despesas.jsx` - Score: 62/100
+
+**📊 Resumo:** 694 linhas, 6 funções, complexidade 19395
+
+**🔧 Principais Sugestões:**
+- Quebrar em componentes menores ou extrair lógicas para hooks/utils
+- Simplificar lógicas condicionais e extrair funções auxiliares
+
 #### 🟠 `src/components/Login.jsx` - Score: 62/100
 
 **📊 Resumo:** 420 linhas, 7 funções, complexidade 11371
@@ -335,7 +343,7 @@ Os arquivos são avaliados com base nos seguintes critérios:
 
 #### 🟠 `src/components/emenda/EmendaForm/sections/Cronograma.jsx` - Score: 60/100
 
-**📊 Resumo:** 470 linhas, 7 funções, complexidade 12875
+**📊 Resumo:** 418 linhas, 7 funções, complexidade 11549
 
 **🔧 Principais Sugestões:**
 - Quebrar em componentes menores ou extrair lógicas para hooks/utils
@@ -348,7 +356,6 @@ Os seguintes arquivos devem ser monitorados para evitar que se tornem monolític
 - 🟡 `src/components/DespesasFilters.jsx` (Score: 59) - 303 linhas
 - 🟡 `src/components/UsersTable.jsx` (Score: 59) - 415 linhas
 - 🟡 `src/components/Dashboard.jsx` (Score: 58) - 632 linhas
-- 🟡 `src/components/Despesas.jsx` (Score: 58) - 632 linhas
 - 🟡 `src/components/SaldoEmendaWidget.jsx` (Score: 58) - 328 linhas
 - 🟡 `src/hooks/usePermissions.js` (Score: 58) - 209 linhas
 - 🟡 `src/components/EmendasFilters.jsx` (Score: 57) - 292 linhas
@@ -367,9 +374,11 @@ Os seguintes arquivos devem ser monitorados para evitar que se tornem monolític
 - 🟡 `src/components/ConfirmationModal.jsx` (Score: 48) - 203 linhas
 - 🟡 `src/components/despesa/DespesaFormBasicFields.jsx` (Score: 48) - 247 linhas
 - 🟡 `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx` (Score: 48) - 229 linhas
+- 🟡 `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx` (Score: 46) - 160 linhas
+- 🟡 `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx` (Score: 44) - 144 linhas
 - 🟡 `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx` (Score: 44) - 179 linhas
+- 🟡 `src/hooks/useEmendaFormNavigation.js` (Score: 44) - 164 linhas
 - 🟡 `src/components/despesa/DespesaFormOrcamentoFields.jsx` (Score: 43) - 189 linhas
-- 🟡 `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx` (Score: 43) - 137 linhas
 - 🟡 `src/components/TemporaryBanner.jsx` (Score: 42) - 148 linhas
 - 🟡 `src/hooks/usePageTitle.js` (Score: 41) - 40 linhas
 - 🟡 `src/services/createAdminUser.js` (Score: 41) - 146 linhas
@@ -570,6 +579,10 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 ```
 ├── HANDOVER_SICEFSUS.md
 ├── README.md
+├── attached_assets
+│   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753915310618_1753915310620.txt
+│   ├── Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1753915550408_1753915550409.txt
+│   └── image_1753915618718.png
 ├── index.html
 ├── package-lock.json
 ├── package.json
@@ -834,10 +847,10 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 #### `src/components/Despesas.jsx`
 - **Funcionalidade**: Dashboard.jsx - CORREÇÃO CRÍTICA - Admin não deve ter filtro de município
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: Dashboard, user, userLoading, userRole, userMunicipio, userUf, carregarDados, emendasRef, emendasQuery, emendasSnapshot, despesasRef, despesasQuery, despesasSnapshot, emendasIds, batchSize, batch, calcularEstatisticas, totalEmendas, totalDespesas, valorTotalEmendas, valor, valorTotalDespesas, saldoDisponivel, percentualExecutado, stats, formatCurrency, numericValue, styles, styleSheet
-- **Dependências**: react, firebase/firestore, ../firebase/firebaseConfig...
-- **Score de Refatoração:** 58/100 🟡
-- **Status:** Considerar refatoração
+- **Funções**: Dashboard, user, userLoading, navigate, userRole, userMunicipio, userUf, carregarDados, emendasRef, emendasQuery, emendasSnapshot, despesasRef, despesasQuery, despesasSnapshot, emendasIds, batchSize, batch, handleCriarDespesa, recarregarDados, calcularEstatisticas, totalEmendas, totalDespesas, valorTotalEmendas, valor, valorTotalDespesas, saldoDisponivel, percentualExecutado, stats, formatCurrency, numericValue, styles, styleSheet
+- **Dependências**: react, firebase/firestore, react-router-dom...
+- **Score de Refatoração:** 62/100 🟠
+- **Status:** Refatoração recomendada
 
 #### `src/components/DespesasFilters.jsx`
 - **Funcionalidade**: ✅ FILTROS BÁSICOS (4 campos como Emendas)
@@ -866,7 +879,7 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 #### `src/components/Emendas.jsx`
 - **Funcionalidade**: Emendas.jsx - LAYOUT PADRONIZADO COM DESPESAS
 - **Tipo**: Functional Component (Hooks)
-- **Funções**: Emendas, navigate, location, userRole, userMunicipio, userUf, carregarEmendas, emendasSnapshot, emendasData, emendasIds, batchSize, batch, despesasQuery, despesasSnapshot, despesasBatch, calcularMetricasComDespesas, despesasEmenda, totalDespesas, valorExecutado, valor, valorRecurso, saldoDisponivel, percentualExecutado, calcularMetricas, emendasAtualizadas, emendasLength, comDespesas, valorTotal, valorExecutadoTotal, handleVisualizar, handleEditar, handleCriar, handleVoltar, handleSalvarEmenda, handleDeletar, handleModalConfirm, handleModalCancel, handleDespesas, handleFiltroChange, recarregarDados, totalEmendas, styles, styleSheet
+- **Funções**: Emendas, navigate, location, userRole, userMunicipio, userUf, carregarEmendas, emendasSnapshot, emendasData, emendasIds, batchSize, batch, despesasQuery, despesasSnapshot, despesasBatch, calcularMetricasComDespesas, despesasEmenda, totalDespesas, valorExecutado, valor, valorRecurso, saldoDisponivel, percentualExecutado, calcularMetricas, emendasAtualizadas, emendasLength, comDespesas, valorTotal, valorExecutadoTotal, handleVisualizar, handleEditar, handleCriar, handleVoltar, handleSalvarEmenda, handleCancelarFormulario, handleDeletar, handleModalConfirm, handleModalCancel, handleDespesas, handleFiltroChange, recarregarDados, totalEmendas, styles, styleSheet
 - **Dependências**: react, react-router-dom, firebase/firestore...
 - **Score de Refatoração:** 77/100 🟠
 - **Status:** Refatoração recomendada
@@ -1138,18 +1151,18 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 #### `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx`
 - **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormActions.jsx
 - **Tipo**: Functional Component
-- **Funções**: EmendaFormActions, handleCancel, handleVoltar, handleSubmit, styles
-- **Dependências**: react, ../../../../hooks/useEmendaFormNavigation
-- **Score de Refatoração:** 43/100 🟡
+- **Funções**: EmendaFormActions, navigate, handleCancel, handleVoltar, handleSubmit, styles
+- **Dependências**: react, react-router-dom, ../../../../hooks/useEmendaFormNavigation
+- **Score de Refatoração:** 46/100 🟡
 - **Status:** Considerar refatoração
 
 #### `src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx`
 - **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormCancelModal.jsx
 - **Tipo**: Functional Component
-- **Funções**: EmendaFormCancelModal, handleConfirm, handleCancel, modalConfig
-- **Dependências**: react, ../../../ConfirmationModal, ../../../../hooks/useEmendaFormNavigation
-- **Score de Refatoração:** 36/100 🟢
-- **Status:** Monitorar crescimento
+- **Funções**: EmendaFormCancelModal, navigate, handleConfirm, handleCancel, modalConfig
+- **Dependências**: react, react-router-dom, ../../../ConfirmationModal...
+- **Score de Refatoração:** 44/100 🟡
+- **Status:** Considerar refatoração
 
 #### `src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx`
 - **Funcionalidade**: src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx
@@ -1237,9 +1250,9 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 
 #### `src/hooks/useEmendaFormNavigation.js`
 - **Funcionalidade**: src/hooks/useEmendaFormNavigation.js
-- **Funções**: useEmendaFormNavigation, navigate, location, navegarParaListaEmendas, navegarComConfirmacao, confirmed, cancelarFormulario, navegarAposSalvar, navegarParaEdicao, path, navegarParaCriacao, navegarParaVisualizacao, criarLinkProtegido
-- **Score de Refatoração:** 39/100 🟢
-- **Status:** Monitorar crescimento
+- **Funções**: useEmendaFormNavigation, navigate, location, navegarParaListaEmendas, tentarNavegacao, currentPath, navegarComConfirmacao, confirmed, cancelarFormulario, navegarAposSalvar, navegarParaEdicao, path, navegarParaCriacao, navegarParaVisualizacao, criarLinkProtegido
+- **Score de Refatoração:** 44/100 🟡
+- **Status:** Considerar refatoração
 
 #### `src/hooks/useNavigationProtection.js`
 - **Funcionalidade**: hooks/useNavigationProtection.js - Hook Completo para Proteção de Navegação
@@ -1356,7 +1369,7 @@ Esta seção documenta todas as validações, regras de negócio e fluxos de tra
 - **Dependências Principais**: 6
 - **Dependências de Desenvolvimento**: 7
 - **Arquivos Analisados para Refatoração**: 75
-- **Arquivos que Precisam de Refatoração**: 60
+- **Arquivos que Precisam de Refatoração**: 62
 - **Score Médio de Complexidade**: 54/100
 
 ---
@@ -1383,7 +1396,7 @@ node scripts/generateHandover.cjs
 ---
 
 **📅 Data de Criação**: Janeiro 2025  
-**🔄 Última Atualização**: 30/07/2025, 19:08:54  
+**🔄 Última Atualização**: 31/07/2025, 07:49:35  
 **📊 Versão**: 2.5  
 **💻 Desenvolvido em**: Replit  
 **✅ Status**: Produção Ativa com Sistema de Análise de Refatoração Corrigido

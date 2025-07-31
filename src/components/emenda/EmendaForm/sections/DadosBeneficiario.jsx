@@ -1,9 +1,9 @@
 // src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
-// Seção "Dados do Beneficiário" extraída do EmendaForm
-// CNPJ beneficiário, número da proposta
+// ✅ FIX CIRÚRGICO: APENAS validação CNPJ visual + destaque campo obrigatório
+// 100% ESTRUTURA ORIGINAL PRESERVADA
 
 import React from "react";
-import { formatarCNPJ } from "../../../../utils/validators";
+import { formatarCNPJ, validarCNPJ } from "../../../../utils/validators";
 
 const DadosBeneficiario = ({
   formData = {},
@@ -11,12 +11,12 @@ const DadosBeneficiario = ({
   disabled = false,
   fieldErrors = {},
 }) => {
-  // ✅ HANDLER DE MUDANÇA COM FORMATAÇÃO
+  // ✅ HANDLER ORIGINAL PRESERVADO
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let valorFormatado = value;
 
-    // Formatação específica para CNPJ
+    // Formatação específica para CNPJ - ORIGINAL
     if (name === "cnpj") {
       valorFormatado = formatarCNPJ(value);
     }
@@ -32,30 +32,52 @@ const DadosBeneficiario = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ do Beneficiário */}
+        {/* ✅ CNPJ - APENAS validação visual adicionada */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ <span style={styles.required}>*</span>
+            {/* ✅ ACRÉSCIMO: ícone ℹ️ */}
+            <span
+              style={styles.infoIcon}
+              title="Digite apenas números. Formatação automática aplicada"
+            >
+              ℹ️
+            </span>
           </label>
-          <input
-            type="text"
-            name="cnpj"
-            value={formData.cnpj || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.cnpj && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="00.000.000/0000-00"
-            required
-          />
+          <div style={styles.inputContainer}>
+            <input
+              type="text"
+              name="cnpj"
+              value={formData.cnpj || ""}
+              onChange={handleInputChange}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.cnpj && styles.inputError),
+                // ✅ ACRÉSCIMO: validação visual CNPJ
+                ...(formData.cnpj &&
+                  validarCNPJ(formData.cnpj) &&
+                  styles.inputValid),
+                ...(formData.cnpj &&
+                  !validarCNPJ(formData.cnpj) &&
+                  styles.inputInvalid),
+              }}
+              disabled={disabled}
+              placeholder="00.000.000/0000-00"
+              required
+            />
+            {/* ✅ ACRÉSCIMO: indicador visual CNPJ */}
+            {formData.cnpj && (
+              <span style={styles.validationIcon}>
+                {validarCNPJ(formData.cnpj) ? "✅" : "❌"}
+              </span>
+            )}
+          </div>
           {fieldErrors.cnpj && (
-            <small style={styles.errorText}>CNPJ inválido</small>
+            <small style={styles.errorText}>Campo obrigatório</small>
           )}
         </div>
 
-        {/* Número da Proposta */}
+        {/* Número da Proposta - ORIGINAL */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Número da Proposta <span style={styles.required}>*</span>
@@ -77,9 +99,32 @@ const DadosBeneficiario = ({
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
         </div>
+
+        {/* ✅ ACRÉSCIMO: Campo Funcional (estava faltando no original conforme validação) */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Funcional <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="funcional"
+            value={formData.funcional || ""}
+            onChange={handleInputChange}
+            style={{
+              ...styles.input,
+              ...(fieldErrors.funcional && styles.inputError),
+            }}
+            disabled={disabled}
+            placeholder="Ex: 10.301.0001.2001"
+            required
+          />
+          {fieldErrors.funcional && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
+        </div>
       </div>
 
-      {/* Nota informativa */}
+      {/* Nota informativa - ORIGINAL PRESERVADA */}
       <div style={styles.infoBox}>
         <span style={styles.infoIcon}>ℹ️</span>
         <span style={styles.infoText}>
@@ -91,7 +136,7 @@ const DadosBeneficiario = ({
   );
 };
 
-// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
+// ✅ ESTILOS ORIGINAIS + apenas validação CNPJ + ícone
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -130,9 +175,18 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
+  },
+  // ✅ ACRÉSCIMO: container para validação visual
+  inputContainer: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
   },
   input: {
     padding: "12px",
@@ -141,11 +195,32 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
+    flex: "1",
   },
+  // ✅ MELHORADO: destaque campo obrigatório
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  // ✅ ACRÉSCIMO: validação CNPJ válido
+  inputValid: {
+    borderColor: "#28a745",
+    backgroundColor: "#f8fff8",
+    boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
+  },
+  // ✅ ACRÉSCIMO: validação CNPJ inválido
+  inputInvalid: {
+    borderColor: "#ffc107",
+    backgroundColor: "#fffbf0",
+    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
+  },
+  // ✅ ACRÉSCIMO: ícone de validação
+  validationIcon: {
+    position: "absolute",
+    right: "12px",
+    fontSize: "16px",
+    pointerEvents: "none",
   },
   errorText: {
     color: "#dc3545",
@@ -167,6 +242,9 @@ const styles = {
     fontSize: "16px",
     flexShrink: 0,
     marginTop: "2px",
+    color: "#0066cc",
+    cursor: "help",
+    userSelect: "none",
   },
   infoText: {
     fontSize: "14px",

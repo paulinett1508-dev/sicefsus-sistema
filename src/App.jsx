@@ -25,6 +25,7 @@ import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 import ThemeToggle from "./components/ThemeToggle";
+import DespesaForm from "./components/DespesaForm";
 
 // Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
@@ -476,6 +477,40 @@ function AppContent() {
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
                       <Despesas usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/despesas/nova"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/despesas/criar"
+                element={<Navigate to="/despesas/nova" replace />}
+              />
+              <Route
+                path="/despesas/editar/:id"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/despesas/visualizar/:id"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }

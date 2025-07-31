@@ -19,18 +19,19 @@ const EmendaFormActions = ({
   const { navegarParaListaEmendas, cancelarFormulario } =
     useEmendaFormNavigation(hasUnsavedChanges);
 
-  // ✅ HANDLER DE CANCELAMENTO SIMPLIFICADO - sempre aciona modal
+  // ✅ HANDLER DE CANCELAMENTO SIMPLIFICADO - apenas abre modal
   const handleCancel = () => {
     console.log("🖱️ Botão Cancelar clicado!");
     console.log("📊 Estado:", { hasUnsavedChanges, onCancel: !!onCancel });
+    console.log("✅ Abrindo modal de confirmação");
 
-    // Sempre usar onCancel para abrir o modal de confirmação
+    // Sempre usar onCancel se fornecido (que abre o modal)
     if (onCancel && typeof onCancel === "function") {
-      console.log("✅ Abrindo modal de confirmação");
       onCancel();
     } else {
-      console.log("⚠️ onCancel não fornecido - navegando diretamente");
-      navegarParaListaEmendas();
+      // Fallback direto se não tem onCancel
+      console.log("⚠️ Sem onCancel - navegando diretamente");
+      navigate("/emendas", { replace: true });
     }
   };
 

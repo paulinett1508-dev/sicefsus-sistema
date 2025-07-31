@@ -244,7 +244,9 @@ const EmendaForm = ({
   // ✅ HANDLERS DE MODAL
   const handleCancelClick = () => {
     console.log("🖱️ handleCancelClick - abrindo modal");
+    console.log("📊 Estado atual showCancelModal:", showCancelModal);
     setShowCancelModal(true);
+    console.log("✅ setShowCancelModal(true) executado");
   };
 
   // ✅ CORRIGIDO: handleConfirmCancel com fallbacks robustos
@@ -373,6 +375,10 @@ const EmendaForm = ({
       </form>
 
       {/* ✅ MODAL EXTRAÍDA - usando handleConfirmCancel diretamente */}
+      {console.log(
+        "🔍 Renderizando EmendaFormCancelModal com showCancelModal =",
+        showCancelModal,
+      )}
       <EmendaFormCancelModal
         show={showCancelModal}
         onClose={handleCancelModalClose}

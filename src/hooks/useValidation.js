@@ -1,4 +1,4 @@
-// src/hooks/useValidation.js
+// src/hooks/useValidation.js - VERSÃO COMPLETA COM FIX
 import { useState, useCallback } from "react";
 
 // Regras de validação pré-definidas
@@ -260,21 +260,48 @@ export function useValidation(schema) {
     return null;
   }, []);
 
+  // 🔧 FIX CRÍTICO: validateForm com verificação de null/undefined
   const validateForm = useCallback(
     (values) => {
       const newErrors = {};
       let isValid = true;
 
-      Object.keys(schema).forEach((fieldName) => {
-        const rules = schema[fieldName];
-        const value = values[fieldName];
-        const error = validateField(fieldName, value, rules);
+      // ✅ CORREÇÃO LINHA 268: Verificar se schema existe e não é null
+      if (!schema || typeof schema !== "object") {
+        console.warn("⚠️ Schema inválido ou não fornecido para validação");
+        return {
+          isValid: false,
+          errors: { _form: "Schema de validação inválido" },
+        };
+      }
 
-        if (error) {
-          newErrors[fieldName] = error;
-          isValid = false;
-        }
-      });
+      // ✅ CORREÇÃO: Verificar se values existe e não é null antes de Object.keys
+      if (!values || typeof values !== "object") {
+        console.warn("⚠️ Values inválido ou não fornecido para validação");
+        return {
+          isValid: false,
+          errors: { _form: "Dados do formulário inválidos" },
+        };
+      }
+
+      try {
+        Object.keys(schema).forEach((fieldName) => {
+          const rules = schema[fieldName];
+          const value = values[fieldName];
+          const error = validateField(fieldName, value, rules);
+
+          if (error) {
+            newErrors[fieldName] = error;
+            isValid = false;
+          }
+        });
+      } catch (error) {
+        console.error("❌ Erro durante validação:", error);
+        return {
+          isValid: false,
+          errors: { _form: "Erro interno de validação" },
+        };
+      }
 
       setErrors(newErrors);
       return { isValid, errors: newErrors };
@@ -386,9 +413,11 @@ export function useFormValidation(initialValues, schema) {
         e.preventDefault();
 
         // Marcar todos os campos como tocados
-        Object.keys(schema).forEach((fieldName) => {
-          validation.setFieldTouched(fieldName);
-        });
+        if (schema && typeof schema === "object") {
+          Object.keys(schema).forEach((fieldName) => {
+            validation.setFieldTouched(fieldName);
+          });
+        }
 
         const { isValid } = validation.validateForm(values);
 
