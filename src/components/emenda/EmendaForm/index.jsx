@@ -529,54 +529,7 @@ const EmendaForm = () => {
   );
 };
 
-// ✅ ESTILOS BÁSICOS
-const styles = {
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto",
-    padding: "20px",
-    backgroundColor: "#ffffff",
-    fontFamily: "Arial, sans-serif",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "30px",
-  },
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "400px",
-    gap: "20px",
-  },
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #154360",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-};
-
-// ✅ KEYFRAMES PARA SPINNER
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-`;
-if (!document.querySelector('style[data-component="emenda-form"]')) {
-  styleSheet.setAttribute("data-component", "emenda-form");
-  document.head.appendChild(styleSheet);
-}
-
-export default EmendaForm;
-
-// 🎨 ESTILOS CONSISTENTES COM DASHBOARD v2.4
+// ✅ ESTILOS CONSISTENTES COM DASHBOARD v2.4
 const styles = {
   container: {
     padding: '16px',
@@ -589,7 +542,10 @@ const styles = {
     borderRadius: '8px',
     padding: '24px',
     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-    border: '1px solid #e9ecef'
+    border: '1px solid #e9ecef',
+    display: "flex",
+    flexDirection: "column",
+    gap: "30px",
   },
   loadingContainer: {
     textAlign: 'center',
@@ -597,7 +553,13 @@ const styles = {
     backgroundColor: 'white',
     borderRadius: '8px',
     boxShadow: '0 2px 4px rgba(0,0,0,0.06)',
-    margin: '20px 0'
+    margin: '20px 0',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    gap: "20px",
   },
   spinner: {
     width: '50px',
@@ -692,3 +654,20 @@ const styles = {
     borderRadius: '4px',
     fontSize: '11px',
     overflow: 'auto'
+  }
+};
+
+// ✅ KEYFRAMES PARA SPINNER
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+if (!document.querySelector('style[data-component="emenda-form"]')) {
+  styleSheet.setAttribute("data-component", "emenda-form");
+  document.head.appendChild(styleSheet);
+}
+
+export default EmendaForm;
