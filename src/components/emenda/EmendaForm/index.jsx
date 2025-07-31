@@ -136,13 +136,14 @@ const EmendaForm = ({
     }));
   };
 
-  // ✅ VALIDAÇÃO USANDO HOOK EXISTENTE
+  // ✅ VALIDAÇÃO MANUAL (sem hook que está com problema)
   const validarFormulario = () => {
     console.log("🔍 Iniciando validação do formulário");
-
+    
+    const erros = {};
     const camposObrigatorios = [
       "parlamentar",
-      "numeroEmenda",
+      "numeroEmenda", 
       "municipio",
       "uf",
       "valorRecurso",
@@ -158,17 +159,36 @@ const EmendaForm = ({
       "dataValidada",
     ];
 
-    // Usar validateForm do hook existente
-    const validation = validateForm(formData, {
-      required: camposObrigatorios,
-      cnpj: ["cnpj", "cnpjMunicipio"],
-      futureDate: ["dataValidada"],
+    // Verificar campos obrigatórios
+    camposObrigatorios.forEach(campo => {
+      if (!formData[campo] || formData[campo].toString().trim() === "") {
+        erros[campo] = true;
+      }
     });
 
-    if (!validation.isValid) {
-      setFieldErrors(validation.errors);
+    // Validar CNPJs especificamente
+    if (formData.cnpj && !validarCNPJ(formData.cnpj).valido) {
+      erros.cnpj = true;
+    }
+    
+    if (formData.cnpjMunicipio && !validarCNPJ(formData.cnpjMunicipio).valido) {
+      erros.cnpjMunicipio = true;
+    }
+
+    // Validar data futura
+    if (formData.dataValidada) {
+      const dataValidada = new Date(formData.dataValidada);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      if (dataValidada <= hoje) {
+        erros.dataValidada = true;
+      }
+    }
+
+    if (Object.keys(erros).length > 0) {
+      setFieldErrors(erros);
       error(
-        `Campos obrigatórios não preenchidos: ${Object.keys(validation.errors).join(", ")}`,
+        `Campos obrigatórios não preenchidos ou inválidos: ${Object.keys(erros).join(", ")}`,
       );
       return false;
     }

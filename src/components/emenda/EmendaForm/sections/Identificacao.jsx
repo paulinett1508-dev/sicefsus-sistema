@@ -259,21 +259,21 @@ const styles = {
     backgroundColor: "white",
     flex: "1",
   },
-  // ✅ DESTAQUE campo obrigatório não preenchido
+  // ✅ CORRIGIDO: usar border completo
   inputError: {
-    borderColor: "#dc3545",
+    border: "2px solid #dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-  // ✅ VALIDAÇÃO CNPJ - válido
+  // ✅ CORRIGIDO: validação CNPJ válido
   inputValid: {
-    borderColor: "#28a745",
+    border: "2px solid #28a745",
     backgroundColor: "#f8fff8",
     boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
   },
-  // ✅ VALIDAÇÃO CNPJ - inválido
+  // ✅ CORRIGIDO: validação CNPJ inválido
   inputInvalid: {
-    borderColor: "#ffc107",
+    border: "2px solid #ffc107",
     backgroundColor: "#fffbf0",
     boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
   },

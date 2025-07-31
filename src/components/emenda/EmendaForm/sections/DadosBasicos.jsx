@@ -309,9 +309,10 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  // ✅ DESTAQUE apenas para campos com erro após validação
+  // ✅ CORRIGIDO: usar border completo
   inputError: {
-    borderColor: "#dc3545",
+    border: "2px solid #dc3545",
+    backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
   errorText: {
