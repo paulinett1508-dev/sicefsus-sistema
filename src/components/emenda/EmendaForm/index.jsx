@@ -13,7 +13,6 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
-import { useUser } from "../../../context/UserContext"; // ✅ MESMO IMPORT DO DASHBOARD
 
 // ✅ IMPORTS DAS SEÇÕES EXISTENTES (PRESERVADOS)
 import Identificacao from "./sections/Identificacao";
@@ -28,19 +27,20 @@ import AcoesServicos from "./sections/AcoesServicos";
 import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
-
+// ✅ ADICIONADO:
+console.log("🚀 EmendaForm iniciado - usuário recebido:", usuario);
 // ✅ HOOKS EXISTENTES (SE HOUVER)
 // import { useValidation } from '../../../hooks/useValidation';
 // import { useEmendaFormNavigation } from '../../../hooks/useEmendaFormNavigation';
 
-const EmendaForm = () => {
+const EmendaForm = ({ usuario }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
 
   // ✅ ESTRUTURA COMPATÍVEL COM DASHBOARD v2.4
-  const { user } = useUser();
-  const userLoading = !user;
+  const user = usuario;
+  const userLoading = !usuario;
 
   // ✅ ESTADOS PRINCIPAIS
   const [loading, setLoading] = useState(true);
