@@ -1,4 +1,7 @@
 // src/components/emenda/EmendaForm/sections/DadosBancarios.jsx
+// Seção "Dados Bancários" extraída do EmendaForm
+// Banco, agência, conta
+
 import React from "react";
 
 const DadosBancarios = ({
@@ -7,6 +10,36 @@ const DadosBancarios = ({
   disabled = false,
   fieldErrors = {},
 }) => {
+  // ✅ HANDLER DE MUDANÇA
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // Permitir apenas números para alguns campos
+    let valorFormatado = value;
+
+    if (name === "banco" || name === "agencia" || name === "conta") {
+      // Remover caracteres não numéricos exceto para conta que pode ter dígito
+      if (name === "conta") {
+        valorFormatado = value.replace(/[^\d-]/g, "");
+      } else {
+        valorFormatado = value.replace(/[^\d]/g, "");
+      }
+    }
+
+    onChange?.({ target: { name, value: valorFormatado } });
+  };
+
+  // ✅ BANCOS MAIS COMUNS (para referência)
+  const bancosComuns = [
+    { codigo: "001", nome: "Banco do Brasil" },
+    { codigo: "104", nome: "Caixa Econômica Federal" },
+    { codigo: "237", nome: "Bradesco" },
+    { codigo: "341", nome: "Itaú" },
+    { codigo: "033", nome: "Santander" },
+    { codigo: "745", nome: "Citibank" },
+    { codigo: "422", nome: "Banco Safra" },
+  ];
+
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
@@ -15,6 +48,7 @@ const DadosBancarios = ({
       </legend>
 
       <div style={styles.formGrid}>
+        {/* Banco */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Banco <span style={styles.required}>*</span>
@@ -29,7 +63,7 @@ const DadosBancarios = ({
             type="text"
             name="banco"
             value={formData.banco || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(fieldErrors.banco && styles.inputError),
@@ -44,6 +78,7 @@ const DadosBancarios = ({
           )}
         </div>
 
+        {/* Agência */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Agência <span style={styles.required}>*</span>
@@ -58,7 +93,7 @@ const DadosBancarios = ({
             type="text"
             name="agencia"
             value={formData.agencia || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(fieldErrors.agencia && styles.inputError),
@@ -73,6 +108,7 @@ const DadosBancarios = ({
           )}
         </div>
 
+        {/* Conta */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Conta <span style={styles.required}>*</span>
@@ -87,7 +123,7 @@ const DadosBancarios = ({
             type="text"
             name="conta"
             value={formData.conta || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(fieldErrors.conta && styles.inputError),
@@ -102,10 +138,26 @@ const DadosBancarios = ({
           )}
         </div>
       </div>
+
+      {/* Bancos mais comuns - referência */}
+      <div style={styles.referenceBox}>
+        <div style={styles.referenceTitle}>
+          <span style={styles.referenceIcon}>📋</span>
+          Códigos de Bancos Mais Comuns
+        </div>
+        <div style={styles.bankList}>
+          {bancosComuns.map((banco, index) => (
+            <div key={banco.codigo} style={styles.bankItem}>
+              <strong>{banco.codigo}</strong> - {banco.nome}
+            </div>
+          ))}
+        </div>
+      </div>
     </fieldset>
   );
 };
 
+// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -160,7 +212,7 @@ const styles = {
     backgroundColor: "white",
   },
   inputError: {
-    border: "2px solid #dc3545",
+    borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },

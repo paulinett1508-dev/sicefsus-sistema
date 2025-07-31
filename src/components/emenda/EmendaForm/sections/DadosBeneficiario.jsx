@@ -1,6 +1,5 @@
 // src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
-// ✅ FIX CIRÚRGICO: APENAS validação CNPJ visual + destaque campo obrigatório
-// 100% ESTRUTURA ORIGINAL PRESERVADA
+// ✅ FIX: Validação CNPJ IMEDIATA ao digitar
 
 import React from "react";
 import { formatarCNPJ, validarCNPJ } from "../../../../utils/validators";
@@ -11,7 +10,7 @@ const DadosBeneficiario = ({
   disabled = false,
   fieldErrors = {},
 }) => {
-  // ✅ HANDLER ORIGINAL PRESERVADO
+  // ✅ FIX: HANDLER com validação CNPJ imediata
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let valorFormatado = value;
@@ -24,6 +23,25 @@ const DadosBeneficiario = ({
     onChange?.({ target: { name, value: valorFormatado } });
   };
 
+  // ✅ VALIDAÇÃO CNPJ mais rigorosa
+  const getCNPJValidationState = (cnpj) => {
+    if (!cnpj || cnpj.length < 3) return null; // Não validar enquanto está digitando
+
+    const apenasNumeros = cnpj.replace(/\D/g, "");
+
+    // Se tem menos de 14 dígitos, está incompleto mas não é erro ainda
+    if (apenasNumeros.length < 14) return "incomplete";
+
+    // Se tem 14 dígitos, validar imediatamente
+    if (apenasNumeros.length === 14) {
+      return validarCNPJ(cnpj) ? "valid" : "invalid";
+    }
+
+    return null;
+  };
+
+  const cnpjState = getCNPJValidationState(formData.cnpj);
+
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
@@ -32,14 +50,13 @@ const DadosBeneficiario = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* ✅ CNPJ - APENAS validação visual adicionada */}
+        {/* ✅ CNPJ - Validação IMEDIATA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ <span style={styles.required}>*</span>
-            {/* ✅ ACRÉSCIMO: ícone ℹ️ */}
             <span
               style={styles.infoIcon}
-              title="Digite apenas números. Formatação automática aplicada"
+              title="Digite apenas números. Validação em tempo real"
             >
               ℹ️
             </span>
@@ -53,26 +70,37 @@ const DadosBeneficiario = ({
               style={{
                 ...styles.input,
                 ...(fieldErrors.cnpj && styles.inputError),
-                // ✅ ACRÉSCIMO: validação visual CNPJ
-                ...(formData.cnpj &&
-                  validarCNPJ(formData.cnpj) &&
-                  styles.inputValid),
-                ...(formData.cnpj &&
-                  !validarCNPJ(formData.cnpj) &&
-                  styles.inputInvalid),
+                ...(cnpjState === "valid" && styles.inputValid),
+                ...(cnpjState === "invalid" && styles.inputInvalid),
+                ...(cnpjState === "incomplete" && styles.inputIncomplete),
               }}
               disabled={disabled}
               placeholder="00.000.000/0000-00"
               required
             />
-            {/* ✅ ACRÉSCIMO: indicador visual CNPJ */}
-            {formData.cnpj && (
+            {/* ✅ INDICADOR VISUAL CNPJ IMEDIATO */}
+            {formData.cnpj && formData.cnpj.length >= 3 && (
               <span style={styles.validationIcon}>
-                {validarCNPJ(formData.cnpj) ? "✅" : "❌"}
+                {cnpjState === "valid" && "✅"}
+                {cnpjState === "invalid" && "❌"}
+                {cnpjState === "incomplete" && "⏳"}
               </span>
             )}
           </div>
-          {fieldErrors.cnpj && (
+          {/* ✅ MENSAGENS DE VALIDAÇÃO IMEDIATA */}
+          {cnpjState === "invalid" && (
+            <small style={styles.errorText}>
+              CNPJ inválido - Verifique os dígitos
+            </small>
+          )}
+          {cnpjState === "incomplete" &&
+            formData.cnpj &&
+            formData.cnpj.length >= 8 && (
+              <small style={styles.warningText}>
+                Continue digitando... (14 dígitos necessários)
+              </small>
+            )}
+          {fieldErrors.cnpj && cnpjState !== "invalid" && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
         </div>
@@ -100,7 +128,7 @@ const DadosBeneficiario = ({
           )}
         </div>
 
-        {/* ✅ ACRÉSCIMO: Campo Funcional (estava faltando no original conforme validação) */}
+        {/* Campo Funcional */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Funcional <span style={styles.required}>*</span>
@@ -136,7 +164,7 @@ const DadosBeneficiario = ({
   );
 };
 
-// ✅ ESTILOS ORIGINAIS + apenas validação CNPJ + ícone
+// ✅ ESTILOS com validação CNPJ aprimorada
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -182,7 +210,6 @@ const styles = {
   required: {
     color: "#dc3545",
   },
-  // ✅ ACRÉSCIMO: container para validação visual
   inputContainer: {
     position: "relative",
     display: "flex",
@@ -193,33 +220,31 @@ const styles = {
     border: "2px solid #dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    transition: "all 0.3s ease",
     backgroundColor: "white",
     flex: "1",
   },
-  // ✅ CORRIGIDO: usar border completo em vez de borderColor
   inputError: {
-    border: "2px solid #dc3545",
+    borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-  // ✅ CORRIGIDO: validação CNPJ válido
   inputValid: {
-    border: "2px solid #28a745",
+    borderColor: "#28a745",
     backgroundColor: "#f8fff8",
     boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
   },
-  // ✅ CORRIGIDO: validação CNPJ inválido
   inputInvalid: {
-    border: "2px solid #dc3545",
-    backgroundColor: "#fff5f5",
+    borderColor: "#dc3545",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-  inputRequired: {
-    borderColor: "#ff6b6b",
-    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
-    backgroundColor: "#fff5f5",
+  // ✅ NOVO: Estado incompleto (digitando)
+  inputIncomplete: {
+    borderColor: "#ffc107",
+    backgroundColor: "#fffbf0",
+    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
   },
-  // ✅ ACRÉSCIMO: ícone de validação
   validationIcon: {
     position: "absolute",
     right: "12px",
@@ -231,6 +256,15 @@ const styles = {
     fontSize: "12px",
     marginTop: "4px",
     display: "block",
+    fontWeight: "bold",
+  },
+  // ✅ NOVO: Texto de aviso (amarelo)
+  warningText: {
+    color: "#856404",
+    fontSize: "12px",
+    marginTop: "4px",
+    display: "block",
+    fontStyle: "italic",
   },
   infoBox: {
     display: "flex",

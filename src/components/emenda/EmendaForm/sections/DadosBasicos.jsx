@@ -309,9 +309,9 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  // ✅ CORRIGIDO: usar border completo
+  // ✅ DESTAQUE campo obrigatório não preenchido
   inputError: {
-    border: "2px solid #dc3545",
+    borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },

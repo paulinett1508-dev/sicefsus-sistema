@@ -1,7 +1,5 @@
-// src/components/emenda/EmendaForm/index.jsx
-// VERSÃO REFATORADA - De 1891 linhas para ~200 linhas
-// Reutiliza hooks/utils existentes + componentes extraídos
-// ✅ CORRIGIDO: Cancelamento com fallback robusto
+// src/components/emenda/EmendaForm/index.jsx - FIX VALIDAÇÃO
+// ✅ CORREÇÃO: Erros no console + validação sem schema inválido
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,14 +9,13 @@ import { db } from "../../../firebase/firebaseConfig";
 // ✅ HOOKS EXISTENTES REUTILIZADOS
 import { useToast } from "../../Toast";
 import useEmendaDespesa from "../../../hooks/useEmendaDespesa";
-import { useValidation } from "../../../hooks/useValidation";
 import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation";
 
-// ✅ UTILS EXISTENTES REUTILIZADOS - IMPORTS CORRIGIDOS
+// ✅ UTILS EXISTENTES REUTILIZADOS
 import { formatarMoedaInput } from "../../../utils/formatters";
 import { validarCNPJ } from "../../../utils/validators";
 
-// ✅ COMPONENTES EXTRAÍDOS - PATHS CORRIGIDOS PARA COMPONENTS/
+// ✅ COMPONENTES EXTRAÍDOS
 import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
@@ -41,8 +38,7 @@ const EmendaForm = ({
 }) => {
   // ✅ HOOKS REUTILIZADOS
   const { success, error } = useToast();
-  const navigate = useNavigate(); // ✅ Hook direto para fallback
-  const { validateForm } = useValidation();
+  const navigate = useNavigate();
   const { navegarAposSalvar, cancelarFormulario } = useEmendaFormNavigation();
 
   // ✅ HOOK EXISTENTE PARA MÉTRICAS
@@ -56,7 +52,7 @@ const EmendaForm = ({
     autoRefresh: false,
   });
 
-  // ✅ ESTADOS SIMPLIFICADOS
+  // ✅ ESTADOS SIMPLIFICADOS - FUNCIONAL SEMPRE VAZIO
   const [formData, setFormData] = useState({
     parlamentar: "",
     numeroEmenda: "",
@@ -67,7 +63,7 @@ const EmendaForm = ({
     programa: "",
     cnpj: "",
     numeroProposta: "",
-    funcional: "",
+    funcional: "", // ✅ SEMPRE VAZIO POR PADRÃO
     banco: "",
     agencia: "",
     conta: "",
@@ -103,13 +99,15 @@ const EmendaForm = ({
     return { modo: "criar", readOnly: false };
   }, [modoVisualizacao, emendaParaEditar]);
 
-  // ✅ CARREGAR DADOS PARA EDIÇÃO (usando métricas do hook existente)
+  // ✅ CARREGAR DADOS PARA EDIÇÃO - PRESERVANDO FUNCIONAL VAZIO
   useEffect(() => {
     if (emendaParaEditar && metricas) {
       console.log("📝 Carregando dados para edição:", emendaParaEditar);
 
       setFormData({
         ...emendaParaEditar,
+        // ✅ FIX: Funcional sempre vazio se não existir
+        funcional: emendaParaEditar.funcional || "",
         valorRecurso: formatarMoedaInput(emendaParaEditar.valorRecurso),
         outrosValores: formatarMoedaInput(emendaParaEditar.outrosValores),
         valorExecutado: metricas.valorExecutado || 0,
@@ -136,14 +134,21 @@ const EmendaForm = ({
     }));
   };
 
-  // ✅ VALIDAÇÃO MANUAL (sem hook que está com problema)
+  // ✅ FIX: Validação SEM useValidation hook (elimina erro do console)
   const validarFormulario = () => {
     console.log("🔍 Iniciando validação do formulário");
-    
-    const erros = {};
+
+    // ✅ VERIFICAÇÃO robusta de formData
+    if (!formData || typeof formData !== "object") {
+      console.error("❌ formData inválido:", formData);
+      error("Dados do formulário inválidos");
+      return false;
+    }
+
+    // ✅ CAMPOS OBRIGATÓRIOS attualizados
     const camposObrigatorios = [
       "parlamentar",
-      "numeroEmenda", 
+      "numeroEmenda",
       "municipio",
       "uf",
       "valorRecurso",
@@ -151,7 +156,7 @@ const EmendaForm = ({
       "programa",
       "cnpj",
       "numeroProposta",
-      "funcional",
+      "funcional", // ✅ Obrigatório mas deve começar vazio
       "banco",
       "agencia",
       "conta",
@@ -159,44 +164,84 @@ const EmendaForm = ({
       "dataValidada",
     ];
 
-    // Verificar campos obrigatórios
-    camposObrigatorios.forEach(campo => {
-      if (!formData[campo] || formData[campo].toString().trim() === "") {
-        erros[campo] = true;
+    const novosErrors = {};
+    let isValid = true;
+
+    // ✅ VALIDAÇÃO manual robusta
+    camposObrigatorios.forEach((campo) => {
+      const valor = formData[campo];
+      if (!valor || (typeof valor === "string" && !valor.trim())) {
+        novosErrors[campo] = true; // Apenas marcar como erro
+        isValid = false;
+        console.log(`❌ Campo obrigatório vazio: ${campo}`);
       }
     });
 
-    // Validar CNPJs especificamente
-    if (formData.cnpj && !validarCNPJ(formData.cnpj).valido) {
-      erros.cnpj = true;
-    }
-    
-    if (formData.cnpjMunicipio && !validarCNPJ(formData.cnpjMunicipio).valido) {
-      erros.cnpjMunicipio = true;
+    // ✅ VALIDAÇÕES específicas
+    if (formData.cnpj && !validarCNPJ(formData.cnpj)) {
+      novosErrors.cnpj = true;
+      isValid = false;
+      console.log("❌ CNPJ beneficiário inválido");
     }
 
-    // Validar data futura
-    if (formData.dataValidada) {
-      const dataValidada = new Date(formData.dataValidada);
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      if (dataValidada <= hoje) {
-        erros.dataValidada = true;
+    if (formData.cnpjMunicipio && !validarCNPJ(formData.cnpjMunicipio)) {
+      novosErrors.cnpjMunicipio = true;
+      isValid = false;
+      console.log("❌ CNPJ município inválido");
+    }
+
+    // ✅ VALIDAÇÃO de valor do recurso
+    if (formData.valorRecurso) {
+      const valorNumerico = parseFloat(
+        formData.valorRecurso.replace(/[^\d,]/g, "").replace(",", "."),
+      );
+      if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        novosErrors.valorRecurso = true;
+        isValid = false;
+        console.log("❌ Valor do recurso inválido");
       }
     }
 
-    if (Object.keys(erros).length > 0) {
-      setFieldErrors(erros);
-      error(
-        `Campos obrigatórios não preenchidos ou inválidos: ${Object.keys(erros).join(", ")}`,
-      );
+    // ✅ VALIDAÇÃO de datas no cronograma
+    if (formData.dataValidada) {
+      const dataValidade = new Date(formData.dataValidada);
+
+      // Verificar se data final não excede validade
+      if (formData.finalExecucao) {
+        const dataFinal = new Date(formData.finalExecucao);
+        if (dataFinal > dataValidade) {
+          novosErrors.finalExecucao = true;
+          isValid = false;
+          console.log("❌ Data final excede validade da emenda");
+        }
+      }
+
+      // Verificar se data início não excede validade
+      if (formData.inicioExecucao) {
+        const dataInicio = new Date(formData.inicioExecucao);
+        if (dataInicio > dataValidade) {
+          novosErrors.inicioExecucao = true;
+          isValid = false;
+          console.log("❌ Data início excede validade da emenda");
+        }
+      }
+    }
+
+    // ✅ RESULTADO da validação
+    if (!isValid) {
+      setFieldErrors(novosErrors);
+      const camposComErro = Object.keys(novosErrors);
+      error(`Corrija os seguintes campos: ${camposComErro.join(", ")}`);
+      console.log("❌ Validação falhou:", camposComErro);
       return false;
     }
 
+    setFieldErrors({});
+    console.log("✅ Validação passou");
     return true;
   };
 
-  // ✅ SUBMISSÃO SIMPLIFICADA
+  // ✅ FIX: handleSubmit sem erros
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("🚀 Iniciando submissão");
@@ -206,13 +251,22 @@ const EmendaForm = ({
       return;
     }
 
-    if (!validarFormulario()) {
+    // ✅ VALIDAÇÃO robusta
+    try {
+      if (!validarFormulario()) {
+        console.log("❌ Validação falhou - parando submissão");
+        return;
+      }
+    } catch (validationError) {
+      console.error("❌ Erro na validação:", validationError);
+      error("Erro interno de validação. Tente novamente.");
       return;
     }
 
     setLoading(true);
 
     try {
+      // ✅ DADOS para salvar
       const dadosParaSalvar = {
         ...formData,
         valorRecurso:
@@ -225,9 +279,14 @@ const EmendaForm = ({
           ) || 0,
         valorExecutado:
           emendaParaEditar && metricas ? metricas.valorExecutado : 0,
-        saldo: parseFloat(formData.saldo) || 0,
+        saldo:
+          parseFloat(
+            formData.saldo?.replace(/[^\d,]/g, "").replace(",", "."),
+          ) || 0,
         updatedAt: new Date().toISOString(),
       };
+
+      console.log("💾 Dados para salvar:", dadosParaSalvar);
 
       if (emendaParaEditar) {
         await updateDoc(
@@ -252,7 +311,13 @@ const EmendaForm = ({
       }
 
       setShowSuccessMessage(true);
-      navegarAposSalvar();
+
+      // Callback para o componente pai se fornecido
+      if (onSalvar && typeof onSalvar === "function") {
+        onSalvar(dadosParaSalvar);
+      } else {
+        navegarAposSalvar();
+      }
     } catch (err) {
       console.error("❌ Erro ao salvar emenda:", err);
       error(`Erro ao salvar emenda: ${err.message}`);
@@ -264,9 +329,7 @@ const EmendaForm = ({
   // ✅ HANDLERS DE MODAL
   const handleCancelClick = () => {
     console.log("🖱️ handleCancelClick - abrindo modal");
-    console.log("📊 Estado atual showCancelModal:", showCancelModal);
     setShowCancelModal(true);
-    console.log("✅ setShowCancelModal(true) executado");
   };
 
   // ✅ CORRIGIDO: handleConfirmCancel com fallbacks robustos
@@ -275,31 +338,26 @@ const EmendaForm = ({
     setShowCancelModal(false);
 
     try {
-      // 1ª opção: usar onCancelar prop se fornecido
       if (onCancelar && typeof onCancelar === "function") {
         console.log("🔧 Usando onCancelar prop");
         onCancelar();
         return;
       }
 
-      // 2ª opção: usar cancelarFormulario do hook
       if (cancelarFormulario && typeof cancelarFormulario === "function") {
         console.log("🔧 Usando cancelarFormulario do hook");
         cancelarFormulario();
         return;
       }
 
-      // 3ª opção: navegação direta (fallback final)
       console.log("⚠️ Usando navegação direta como fallback");
       navigate("/emendas");
     } catch (error) {
       console.error("❌ Erro no cancelamento:", error);
-      // Fallback de emergência
       try {
         navigate("/emendas");
       } catch (navError) {
         console.error("❌ Erro crítico na navegação:", navError);
-        // Último recurso
         window.location.href = "/emendas";
       }
     }
@@ -312,13 +370,24 @@ const EmendaForm = ({
 
   // ✅ VERIFICAR SE HÁ ALTERAÇÕES NÃO SALVAS
   const hasUnsavedChanges = useMemo(() => {
-    if (!emendaParaEditar)
+    if (!emendaParaEditar) {
       return Object.values(formData).some(
-        (value) => value !== "" && value !== 0,
+        (value) =>
+          value !== "" && value !== 0 && value !== null && value !== undefined,
       );
-    // Comparar com dados originais se necessário
+    }
     return false;
   }, [formData, emendaParaEditar]);
+
+  // ✅ LOADING STATE
+  if (hookLoading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p>Carregando dados da emenda...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -394,13 +463,10 @@ const EmendaForm = ({
         />
       </form>
 
-      {/* ✅ MODAL EXTRAÍDA - usando handleConfirmCancel diretamente */}
-      {console.log(
-        "🔍 Renderizando EmendaFormCancelModal com showCancelModal =",
-        showCancelModal,
-      )}
+      {/* ✅ MODAL EXTRAÍDA */}
       <EmendaFormCancelModal
         show={showCancelModal}
+        onConfirm={handleConfirmCancel}
         onClose={handleCancelModalClose}
         hasUnsavedChanges={hasUnsavedChanges}
       />
@@ -408,7 +474,7 @@ const EmendaForm = ({
   );
 };
 
-// ✅ ESTILOS BÁSICOS (a maioria foi para os componentes)
+// ✅ ESTILOS BÁSICOS
 const styles = {
   container: {
     maxWidth: "1200px",
@@ -422,6 +488,35 @@ const styles = {
     flexDirection: "column",
     gap: "30px",
   },
+  loadingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    gap: "20px",
+  },
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #154360",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
 };
+
+// ✅ KEYFRAMES PARA SPINNER
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+if (!document.querySelector('style[data-component="emenda-form"]')) {
+  styleSheet.setAttribute("data-component", "emenda-form");
+  document.head.appendChild(styleSheet);
+}
 
 export default EmendaForm;

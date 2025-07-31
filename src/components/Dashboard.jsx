@@ -1,17 +1,270 @@
-// Dashboard.jsx - CORREÇÃO CRÍTICA - Admin não deve ter filtro de município
-// ✅ PROBLEMA: Admin estava sendo filtrado por município (incorreto)
-// ✅ SOLUÇÃO: Admin vê TODOS os dados sem qualquer filtro
+// Dashboard.jsx - INTEGRAÇÃO CIRÚRGICA COM WIDGET CRONOGRAMA
+// ✅ PRESERVA: Toda lógica existente de permissões e carregamento
+// ✅ ADICIONA: Widget CronogramaWidget abaixo das métricas
 
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 
+// 💎 WIDGET CRONOGRAMA INTELIGENTE
+const CronogramaWidget = ({ emendas = [] }) => {
+  const [cronogramaData, setCronogramaData] = useState({
+    proximasVencer: [],
+    vencidas: [],
+    emAndamento: [],
+    concluidas: []
+};
+
+// ✅ CSS PARA ANIMAÇÃO - PRESERVADO
+if (!document.getElementById("dashboard-animations")) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "dashboard-animations";
+  styleSheet.innerHTML = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
+
+export default Dashboard;);
+
+  // ✅ PROCESSAR dados das emendas
+  useEffect(() => {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const processarEmendas = () => {
+      const proximasVencer = [];
+      const vencidas = [];
+      const emAndamento = [];
+      const concluidas = [];
+
+      emendas.forEach(emenda => {
+        // Usar campos do SICEFSUS: dataValidada ou dataValidade
+        const dataValidadeStr = emenda.dataValidada || emenda.dataValidade;
+        if (!dataValidadeStr) return;
+
+        const dataValidade = new Date(dataValidadeStr);
+        const diffTime = dataValidade - hoje;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Calcular percentual executado
+        const valorTotal = parseFloat(emenda.valor || emenda.valorRecurso || 0);
+        const valorExecutado = parseFloat(emenda.valorExecutado || 0);
+        const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal * 100) : 0;
+
+        const emendaComDias = {
+          ...emenda,
+          diasRestantes: diffDays,
+          percentualExecutado,
+          parlamentar: emenda.autor || emenda.parlamentar || 'Não informado'
+        };
+
+        if (diffDays < 0) {
+          vencidas.push(emendaComDias);
+        } else if (diffDays <= 30) {
+          proximasVencer.push(emendaComDias);
+        } else if (emenda.inicioExecucao && emenda.finalExecucao) {
+          const dataInicio = new Date(emenda.inicioExecucao);
+          const dataFim = new Date(emenda.finalExecucao);
+
+          if (hoje >= dataInicio && hoje <= dataFim) {
+            emAndamento.push(emendaComDias);
+          } else if (hoje > dataFim) {
+            concluidas.push(emendaComDias);
+          }
+        } else if (percentualExecutado >= 100) {
+          concluidas.push(emendaComDias);
+        } else if (percentualExecutado > 0) {
+          emAndamento.push(emendaComDias);
+        }
+      });
+
+      setCronogramaData({
+        proximasVencer: proximasVencer.sort((a, b) => a.diasRestantes - b.diasRestantes),
+        vencidas: vencidas.sort((a, b) => b.diasRestantes - a.diasRestantes),
+        emAndamento: emAndamento.sort((a, b) => b.percentualExecutado - a.percentualExecutado),
+        concluidas: concluidas.slice(0, 5)
+      });
+    };
+
+    processarEmendas();
+  }, [emendas]);
+
+  // ✅ FORMATADORES
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value || 0);
+  };
+
+  return (
+    <div style={cronogramaStyles.container}>
+      <div style={cronogramaStyles.header}>
+        <h3 style={cronogramaStyles.title}>
+          <span style={cronogramaStyles.icon}>📅</span>
+          Cronograma Inteligente
+        </h3>
+        <span style={cronogramaStyles.subtitle}>
+          Acompanhamento de prazos e execução
+        </span>
+      </div>
+
+      <div style={cronogramaStyles.metricsGrid}>
+        {/* ⚠️ EMENDAS PRÓXIMAS AO VENCIMENTO */}
+        <div style={{...cronogramaStyles.metricCard, ...cronogramaStyles.warningCard}}>
+          <div style={cronogramaStyles.metricHeader}>
+            <span style={cronogramaStyles.metricIcon}>⚠️</span>
+            <div>
+              <h4 style={cronogramaStyles.metricTitle}>Próximas ao Vencimento</h4>
+              <p style={cronogramaStyles.metricSubtitle}>≤ 30 dias</p>
+            </div>
+          </div>
+          <div style={cronogramaStyles.metricValue}>{cronogramaData.proximasVencer.length}</div>
+
+          {cronogramaData.proximasVencer.slice(0, 3).map((emenda, index) => (
+            <div key={emenda.id || index} style={cronogramaStyles.emendaItem}>
+              <div style={cronogramaStyles.emendaInfo}>
+                <strong>{emenda.parlamentar}</strong>
+                <span style={cronogramaStyles.emendaLocal}>{emenda.municipio}/{emenda.uf}</span>
+              </div>
+              <div style={cronogramaStyles.emendaDias}>
+                <span style={{
+                  ...cronogramaStyles.diasBadge,
+                  backgroundColor: emenda.diasRestantes <= 7 ? '#dc3545' : '#ffc107',
+                  color: emenda.diasRestantes <= 7 ? 'white' : '#212529'
+                }}>
+                  {emenda.diasRestantes} dias
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ❌ EMENDAS VENCIDAS */}
+        <div style={{...cronogramaStyles.metricCard, ...cronogramaStyles.dangerCard}}>
+          <div style={cronogramaStyles.metricHeader}>
+            <span style={cronogramaStyles.metricIcon}>❌</span>
+            <div>
+              <h4 style={cronogramaStyles.metricTitle}>Vencidas</h4>
+              <p style={cronogramaStyles.metricSubtitle}>Prazo expirado</p>
+            </div>
+          </div>
+          <div style={cronogramaStyles.metricValue}>{cronogramaData.vencidas.length}</div>
+
+          {cronogramaData.vencidas.slice(0, 3).map((emenda, index) => (
+            <div key={emenda.id || index} style={cronogramaStyles.emendaItem}>
+              <div style={cronogramaStyles.emendaInfo}>
+                <strong>{emenda.parlamentar}</strong>
+                <span style={cronogramaStyles.emendaLocal}>{emenda.municipio}/{emenda.uf}</span>
+              </div>
+              <div style={cronogramaStyles.emendaDias}>
+                <span style={{...cronogramaStyles.diasBadge, backgroundColor: '#dc3545', color: 'white'}}>
+                  {Math.abs(emenda.diasRestantes)} dias atrás
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 🚀 EM ANDAMENTO */}
+        <div style={{...cronogramaStyles.metricCard, ...cronogramaStyles.successCard}}>
+          <div style={cronogramaStyles.metricHeader}>
+            <span style={cronogramaStyles.metricIcon}>🚀</span>
+            <div>
+              <h4 style={cronogramaStyles.metricTitle}>Em Andamento</h4>
+              <p style={cronogramaStyles.metricSubtitle}>Executando no prazo</p>
+            </div>
+          </div>
+          <div style={cronogramaStyles.metricValue}>{cronogramaData.emAndamento.length}</div>
+
+          {cronogramaData.emAndamento.slice(0, 3).map((emenda, index) => (
+            <div key={emenda.id || index} style={cronogramaStyles.emendaItem}>
+              <div style={cronogramaStyles.emendaInfo}>
+                <strong>{emenda.parlamentar}</strong>
+                <span style={cronogramaStyles.emendaLocal}>{formatCurrency(emenda.valor || emenda.valorRecurso)}</span>
+              </div>
+              <div style={cronogramaStyles.progressContainer}>
+                <div style={cronogramaStyles.progressBar}>
+                  <div 
+                    style={{
+                      ...cronogramaStyles.progressFill,
+                      width: `${Math.min(emenda.percentualExecutado, 100)}%`
+                    }}
+                  />
+                </div>
+                <span style={cronogramaStyles.progressText}>
+                  {emenda.percentualExecutado.toFixed(0)}%
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ✅ CONCLUÍDAS */}
+        <div style={{...cronogramaStyles.metricCard, ...cronogramaStyles.infoCard}}>
+          <div style={cronogramaStyles.metricHeader}>
+            <span style={cronogramaStyles.metricIcon}>✅</span>
+            <div>
+              <h4 style={cronogramaStyles.metricTitle}>Concluídas</h4>
+              <p style={cronogramaStyles.metricSubtitle}>Execução finalizada</p>
+            </div>
+          </div>
+          <div style={cronogramaStyles.metricValue}>{cronogramaData.concluidas.length}</div>
+
+          {cronogramaData.concluidas.slice(0, 3).map((emenda, index) => (
+            <div key={emenda.id || index} style={cronogramaStyles.emendaItem}>
+              <div style={cronogramaStyles.emendaInfo}>
+                <strong>{emenda.parlamentar}</strong>
+                <span style={cronogramaStyles.emendaLocal}>{emenda.municipio}/{emenda.uf}</span>
+              </div>
+              <div style={cronogramaStyles.emendaDias}>
+                <span style={{...cronogramaStyles.diasBadge, backgroundColor: '#28a745', color: 'white'}}>
+                  100%
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 📊 RESUMO GERAL */}
+      <div style={cronogramaStyles.summary}>
+        <div style={cronogramaStyles.summaryItem}>
+          <span style={cronogramaStyles.summaryLabel}>Total de Emendas:</span>
+          <span style={cronogramaStyles.summaryValue}>{emendas.length}</span>
+        </div>
+        <div style={cronogramaStyles.summaryItem}>
+          <span style={cronogramaStyles.summaryLabel}>Requer Atenção:</span>
+          <span style={{
+            ...cronogramaStyles.summaryValue,
+            color: cronogramaData.proximasVencer.length + cronogramaData.vencidas.length > 0 ? '#dc3545' : '#28a745'
+          }}>
+            {cronogramaData.proximasVencer.length + cronogramaData.vencidas.length}
+          </span>
+        </div>
+        <div style={cronogramaStyles.summaryItem}>
+          <span style={cronogramaStyles.summaryLabel}>Em Execução:</span>
+          <span style={{...cronogramaStyles.summaryValue, color: '#0066cc'}}>
+            {cronogramaData.emAndamento.length}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Dashboard = ({ usuario }) => {
   const user = usuario;
   const userLoading = !usuario;
 
-  // Estados
+  // Estados - PRESERVADOS
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +273,7 @@ const Dashboard = ({ usuario }) => {
   console.log("🏠 Dashboard iniciado");
   console.log("👤 Dados do usuário carregados para Dashboard:", user);
 
-  // ✅ VERIFICAÇÃO MAIS ESPECÍFICA: Verificar campos essenciais
+  // ✅ VERIFICAÇÃO - PRESERVADA
   if (userLoading || !user || !user.email || !user.tipo) {
     console.log("⏳ Aguardando dados completos do usuário...", {
       userLoading,
@@ -38,7 +291,7 @@ const Dashboard = ({ usuario }) => {
             {userLoading ? "Carregando usuário..." : "Verificando dados..."}
           </span>
           <span style={styles.divider}>|</span>
-          <span>Versão: v2.1</span>
+          <span>Versão: v2.2</span>
         </div>
 
         <div style={styles.loadingContainer}>
@@ -57,14 +310,14 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // ✅ DETERMINAR PERMISSÕES CORRETAS
+  // ✅ DETERMINAR PERMISSÕES - PRESERVADO
   const userRole = user.tipo || user.role || "operador";
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
 
   console.log("🔐 Permissões detectadas:", { userRole, userMunicipio, userUf });
 
-  // ✅ FUNÇÃO PARA CARREGAR DADOS SEM FILTRO DESNECESSÁRIO
+  // ✅ FUNÇÃO PARA CARREGAR DADOS - PRESERVADA
   const carregarDados = async () => {
     try {
       setLoading(true);
@@ -212,7 +465,7 @@ const Dashboard = ({ usuario }) => {
     }
   };
 
-  // ✅ EFFECT PARA CARREGAR DADOS
+  // ✅ EFFECT PARA CARREGAR DADOS - PRESERVADO
   useEffect(() => {
     console.log(
       "🔄 useEffect Dashboard - Verificando necessidade de carregar dados",
@@ -241,7 +494,7 @@ const Dashboard = ({ usuario }) => {
     }
   }, [user?.email, user?.tipo]); // Dependências mais específicas
 
-  // ✅ CALCULAR MÉTRICAS
+  // ✅ CALCULAR MÉTRICAS - PRESERVADO
   const calcularEstatisticas = () => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
@@ -274,7 +527,7 @@ const Dashboard = ({ usuario }) => {
 
   const stats = calcularEstatisticas();
 
-  // ✅ FORMATADOR DE MOEDA
+  // ✅ FORMATADOR DE MOEDA - PRESERVADO
   const formatCurrency = (valor) => {
     const numericValue = parseFloat(valor) || 0;
     return numericValue.toLocaleString("pt-BR", {
@@ -284,7 +537,7 @@ const Dashboard = ({ usuario }) => {
     });
   };
 
-  // ✅ RENDERIZAÇÃO CONDICIONAL
+  // ✅ RENDERIZAÇÃO CONDICIONAL - PRESERVADA
   if (loading) {
     return (
       <div style={styles.container}>
@@ -292,7 +545,7 @@ const Dashboard = ({ usuario }) => {
         <div style={styles.statusBar}>
           <span>Status: 🔄 Carregando...</span>
           <span style={styles.divider}>|</span>
-          <span>Versão: v2.1</span>
+          <span>Versão: v2.2</span>
           <span style={styles.divider}>|</span>
           <span>
             Usuário: {userRole === "admin" ? "👑 Admin" : `🏘️ ${userMunicipio}`}
@@ -320,7 +573,7 @@ const Dashboard = ({ usuario }) => {
         <div style={styles.statusBar}>
           <span>Status: ❌ Erro</span>
           <span style={styles.divider}>|</span>
-          <span>Versão: v2.1</span>
+          <span>Versão: v2.2</span>
         </div>
 
         <div style={styles.errorContainer}>
@@ -334,14 +587,14 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // ✅ RENDERIZAÇÃO PRINCIPAL
+  // ✅ RENDERIZAÇÃO PRINCIPAL - ATUALIZADA COM WIDGET
   return (
     <div style={styles.container}>
       {/* Status Bar */}
       <div style={styles.statusBar}>
         <span>Status: ✅ Operacional</span>
         <span style={styles.divider}>|</span>
-        <span>Versão: v2.1</span>
+        <span>Versão: v2.2</span>
         <span style={styles.divider}>|</span>
         <span>
           Usuário:{" "}
@@ -374,7 +627,7 @@ const Dashboard = ({ usuario }) => {
         </div>
       )}
 
-      {/* Métricas Principais */}
+      {/* Métricas Principais - PRESERVADAS */}
       <div style={styles.metricsGrid}>
         <div style={styles.metricCard}>
           <div style={styles.metricNumber}>{stats.totalEmendas}</div>
@@ -415,7 +668,10 @@ const Dashboard = ({ usuario }) => {
         </div>
       </div>
 
-      {/* Estado Vazio */}
+      {/* 💎 NOVO: WIDGET CRONOGRAMA */}
+      {emendas.length > 0 && <CronogramaWidget emendas={emendas} />}
+
+      {/* Estado Vazio - PRESERVADO */}
       {stats.totalEmendas === 0 && stats.totalDespesas === 0 && (
         <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>📊</div>
@@ -434,7 +690,7 @@ const Dashboard = ({ usuario }) => {
   );
 };
 
-// ✅ ESTILOS
+// ✅ ESTILOS ORIGINAIS - PRESERVADOS
 const styles = {
   container: {
     padding: "20px",
@@ -615,17 +871,166 @@ const styles = {
   },
 };
 
-// ✅ CSS PARA ANIMAÇÃO
-if (!document.getElementById("dashboard-animations")) {
-  const styleSheet = document.createElement("style");
-  styleSheet.id = "dashboard-animations";
-  styleSheet.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
-
-export default Dashboard;
+// 💎 ESTILOS DO WIDGET CRONOGRAMA
+const cronogramaStyles = {
+  container: {
+    backgroundColor: 'white',
+    borderRadius: '12px',
+    padding: '24px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+    border: '1px solid #e9ecef',
+    marginBottom: '20px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  },
+  header: {
+    marginBottom: '24px',
+    borderBottom: '2px solid #f8f9fa',
+    paddingBottom: '16px'
+  },
+  title: {
+    margin: '0 0 4px 0',
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#212529',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+  icon: {
+    fontSize: '24px'
+  },
+  subtitle: {
+    color: '#6c757d',
+    fontSize: '14px',
+    fontWeight: '400'
+  },
+  metricsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '16px',
+    marginBottom: '24px'
+  },
+  metricCard: {
+    padding: '20px',
+    borderRadius: '8px',
+    border: '1px solid #dee2e6',
+    backgroundColor: '#fff'
+  },
+  warningCard: {
+    borderColor: '#ffc107',
+    backgroundColor: '#fffbf0'
+  },
+  dangerCard: {
+    borderColor: '#dc3545',
+    backgroundColor: '#fef2f2'
+  },
+  successCard: {
+    borderColor: '#28a745',
+    backgroundColor: '#f8fff8'
+  },
+  infoCard: {
+    borderColor: '#17a2b8',
+    backgroundColor: '#f0f9ff'
+  },
+  metricHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '16px'
+  },
+  metricIcon: {
+    fontSize: '20px'
+  },
+  metricTitle: {
+    margin: '0 0 2px 0',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#495057'
+  },
+  metricSubtitle: {
+    margin: 0,
+    fontSize: '12px',
+    color: '#6c757d'
+  },
+  metricValue: {
+    fontSize: '28px',
+    fontWeight: '700',
+    color: '#212529',
+    marginBottom: '16px'
+  },
+  emendaItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '8px 0',
+    borderBottom: '1px solid #f8f9fa',
+    fontSize: '13px'
+  },
+  emendaInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    flex: 1
+  },
+  emendaLocal: {
+    color: '#6c757d',
+    fontSize: '11px'
+  },
+  emendaDias: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  diasBadge: {
+    padding: '4px 8px',
+    borderRadius: '12px',
+    fontSize: '11px',
+    fontWeight: '600'
+  },
+  progressContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    minWidth: '80px'
+  },
+  progressBar: {
+    width: '50px',
+    height: '6px',
+    backgroundColor: '#e9ecef',
+    borderRadius: '3px',
+    overflow: 'hidden'
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#28a745',
+    transition: 'width 0.3s ease'
+  },
+  progressText: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: '#495057',
+    minWidth: '25px'
+  },
+  summary: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    padding: '16px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+    border: '1px solid #dee2e6'
+  },
+  summaryItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px'
+  },
+  summaryLabel: {
+    fontSize: '12px',
+    color: '#6c757d',
+    fontWeight: '500'
+  },
+  summaryValue: {
+    fontSize: '18px',
+    fontWeight: '700',
+    color: '#212529'
+  }

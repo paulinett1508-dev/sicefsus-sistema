@@ -259,21 +259,21 @@ const styles = {
     backgroundColor: "white",
     flex: "1",
   },
-  // ✅ CORRIGIDO: usar border completo
+  // ✅ DESTAQUE campo obrigatório não preenchido
   inputError: {
-    border: "2px solid #dc3545",
+    borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-  // ✅ CORRIGIDO: validação CNPJ válido
+  // ✅ VALIDAÇÃO CNPJ - válido
   inputValid: {
-    border: "2px solid #28a745",
+    borderColor: "#28a745",
     backgroundColor: "#f8fff8",
     boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
   },
-  // ✅ CORRIGIDO: validação CNPJ inválido
+  // ✅ VALIDAÇÃO CNPJ - inválido
   inputInvalid: {
-    border: "2px solid #ffc107",
+    borderColor: "#ffc107",
     backgroundColor: "#fffbf0",
     boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
   },
@@ -295,11 +295,6 @@ const styles = {
     color: "#0066cc",
     cursor: "help",
     userSelect: "none",
-  },
-  inputRequired: {
-    borderColor: "#ff6b6b",
-    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
-    backgroundColor: "#fff5f5",
   },
 };
 
