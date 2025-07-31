@@ -86,7 +86,6 @@ const DadosBasicos = ({
             style={{
               ...styles.input,
               ...(fieldErrors.parlamentar && styles.inputError),
-              ...(!formData.parlamentar && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="Nome do deputado/senador"
@@ -133,7 +132,6 @@ const DadosBasicos = ({
             style={{
               ...styles.input,
               ...(fieldErrors.municipio && styles.inputError),
-              ...(!formData.municipio && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="Nome do município"
@@ -156,7 +154,6 @@ const DadosBasicos = ({
             style={{
               ...styles.input,
               ...(fieldErrors.uf && styles.inputError),
-              ...(!formData.uf && styles.inputRequired),
             }}
             disabled={disabled}
             required
@@ -312,15 +309,10 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  // ✅ DESTAQUE campo obrigatório não preenchido
+  // ✅ DESTAQUE apenas para campos com erro após validação
   inputError: {
     borderColor: "#dc3545",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
-  },
-  inputRequired: {
-    borderColor: "#ff6b6b",
-    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
-    backgroundColor: "#fff5f5",
   },
   errorText: {
     color: "#dc3545",

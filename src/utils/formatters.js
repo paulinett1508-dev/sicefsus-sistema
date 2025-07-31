@@ -19,7 +19,7 @@ export const formatarMoedaDisplay = (valor) => {
   });
 };
 
-// ✅ FIX: Formatação monetária inteligente com 2 casas decimais
+// ✅ FORMATAÇÃO MONETÁRIA MELHORADA - Experiência de digitação natural
 export const formatarMoedaInput = (valor) => {
   if (!valor) return "";
 
@@ -28,11 +28,12 @@ export const formatarMoedaInput = (valor) => {
 
   if (numero.length === 0) return "";
 
-  // ✅ PREENCHIMENTO INTELIGENTE: sempre 2 casas decimais
-  if (numero.length === 1) return `0,0${numero}`;
-  if (numero.length === 2) return `0,${numero}`;
+  // ✅ EXPERIÊNCIA NATURAL: sem zeros desnecessários no início
+  if (numero.length === 1) return `${numero}`;
+  if (numero.length === 2) return `${numero}`;
+  if (numero.length === 3) return `${numero.slice(0, 1)},${numero.slice(1)}`;
 
-  // ✅ FORMATAÇÃO COM 2 CASAS DECIMAIS GARANTIDAS
+  // ✅ FORMATAÇÃO COM 2 CASAS DECIMAIS (a partir de 4 dígitos)
   // Insere vírgula para centavos (últimos 2 dígitos)
   numero = numero.replace(/^(\d+)(\d{2})$/, "$1,$2");
 
