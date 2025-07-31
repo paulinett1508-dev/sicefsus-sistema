@@ -1,7 +1,4 @@
-` tags. I will pay close attention to the CSS style conflicts and the data validation errors mentioned in the intention, and I will ensure that the indentation and structure of the original code are preserved. I will also make sure that all necessary parts of the original code are included in the final code.
 
-```
-<replit_final_file>
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx
 import React from "react";
 
@@ -133,7 +130,6 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  // ✅ CORRIGIDO: usar border completo
   inputError: {
     border: "2px solid #dc3545",
     backgroundColor: "#fef2f2",
