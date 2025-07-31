@@ -211,9 +211,13 @@ const styles = {
   },
   // ✅ ACRÉSCIMO: validação CNPJ inválido
   inputInvalid: {
-    borderColor: "#ffc107",
-    backgroundColor: "#fffbf0",
-    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
+    borderColor: "#dc3545",
+    backgroundColor: "#fff5f5",
+  },
+  inputRequired: {
+    borderColor: "#ff6b6b",
+    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
+    backgroundColor: "#fff5f5",
   },
   // ✅ ACRÉSCIMO: ícone de validação
   validationIcon: {

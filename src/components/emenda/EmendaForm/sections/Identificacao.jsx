@@ -296,6 +296,11 @@ const styles = {
     cursor: "help",
     userSelect: "none",
   },
+  inputRequired: {
+    borderColor: "#ff6b6b",
+    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
+    backgroundColor: "#fff5f5",
+  },
 };
 
 export default Identificacao;

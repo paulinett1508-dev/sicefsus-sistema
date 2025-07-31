@@ -79,10 +79,11 @@ const Cronograma = ({
             type="date"
             name="dataValidada"
             value={formData.dataValidada || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
             style={{
               ...styles.input,
               ...(fieldErrors.dataValidada && styles.inputError),
+              ...(!formData.dataValidada && styles.inputRequired),
             }}
             disabled={disabled}
             required
@@ -334,8 +335,12 @@ const styles = {
   },
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  inputRequired: {
+    borderColor: "#ff6b6b",
+    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
+    backgroundColor: "#fff5f5",
   },
   errorText: {
     color: "#dc3545",

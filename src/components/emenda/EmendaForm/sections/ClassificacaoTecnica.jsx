@@ -50,6 +50,7 @@ const ClassificacaoTecnica = ({
             style={{
               ...styles.input,
               ...(fieldErrors.funcional && styles.inputError),
+              ...(!formData.funcional && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="Ex: 10.301.0001.20TP"
@@ -182,8 +183,12 @@ const styles = {
   },
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  inputRequired: {
+    borderColor: "#ff6b6b",
+    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
+    backgroundColor: "#fff5f5",
   },
   errorText: {
     color: "#dc3545",

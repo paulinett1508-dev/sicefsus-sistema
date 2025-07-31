@@ -67,6 +67,7 @@ const DadosBancarios = ({
             style={{
               ...styles.input,
               ...(fieldErrors.banco && styles.inputError),
+              ...(!formData.banco && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="001"
@@ -97,6 +98,7 @@ const DadosBancarios = ({
             style={{
               ...styles.input,
               ...(fieldErrors.agencia && styles.inputError),
+              ...(!formData.agencia && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="024120"
@@ -127,6 +129,7 @@ const DadosBancarios = ({
             style={{
               ...styles.input,
               ...(fieldErrors.conta && styles.inputError),
+              ...(!formData.conta && styles.inputRequired),
             }}
             disabled={disabled}
             placeholder="00002666965"
@@ -213,8 +216,12 @@ const styles = {
   },
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+  inputRequired: {
+    borderColor: "#ff6b6b",
+    boxShadow: "0 0 0 1px rgba(255, 107, 107, 0.3)",
+    backgroundColor: "#fff5f5",
   },
   errorText: {
     color: "#dc3545",
