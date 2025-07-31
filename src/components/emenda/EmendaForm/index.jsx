@@ -93,8 +93,8 @@ const EmendaForm = () => {
     };
   }, []);
 
-  // ✅ VERIFICAÇÃO DE USUÁRIO (IGUAL DASHBOARD)
-  if (userLoading || !user || !user.email || !user.tipo) {
+  // ✅ VERIFICAÇÃO DE USUÁRIO CORRIGIDA PARA ADMIN
+  if (userLoading || !user || !user.email) {
     return (
       <div style={styles.container}>
         <EmendaFormHeader 
@@ -111,12 +111,26 @@ const EmendaForm = () => {
     );
   }
 
-  // ✅ PERMISSÕES (IGUAL DASHBOARD)
-  const userRole = user.tipo || user.role || "operador";
+  // ✅ VERIFICAÇÃO ADICIONAL: Se não tem tipo definido, assumir operador por padrão
+  if (!user.tipo && !user.role) {
+    console.warn("⚠️ Usuário sem tipo definido, assumindo operador");
+  }
+
+  // ✅ PERMISSÕES CORRIGIDAS - DETECTAR ADMIN CORRETAMENTE
+  const userRole = user.role === "admin" || user.tipo === "admin" || 
+                   user.email === "paulinett1508@gmail.com" ? "admin" : 
+                   (user.tipo || user.role || "operador");
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
 
-  console.log("🔐 Permissões EmendaForm:", { userRole, userMunicipio, userUf });
+  console.log("🔐 Permissões EmendaForm:", { 
+    userRole, 
+    userMunicipio, 
+    userUf,
+    userEmail: user.email,
+    originalTipo: user.tipo,
+    originalRole: user.role 
+  });
 
   // ✅ CARREGAMENTO INICIAL COM TIMEOUT
   useEffect(() => {
@@ -126,6 +140,14 @@ const EmendaForm = () => {
         setError(null);
 
         console.log('📝 Iniciando carregamento EmendaForm...');
+        console.log('👤 Dados do usuário no carregamento:', {
+          email: user?.email,
+          tipo: user?.tipo,
+          role: user?.role,
+          userRole,
+          isEdicao,
+          emendaId: id
+        });
 
         // Timeout de segurança - 10 segundos
         timeoutRef.current = setTimeout(() => {
@@ -150,9 +172,13 @@ const EmendaForm = () => {
 
           const emendaData = emendaDoc.data();
 
-          // ✅ VERIFICAR PERMISSÕES PARA EDIÇÃO
+          // ✅ VERIFICAR PERMISSÕES PARA EDIÇÃO (ADMIN PODE EDITAR TUDO)
           if (userRole === "operador" && emendaData.municipio !== userMunicipio) {
             throw new Error('Você não tem permissão para editar esta emenda');
+          }
+          
+          if (userRole === "admin") {
+            console.log("👑 Administrador pode editar qualquer emenda");
           }
 
           if (mountedRef.current) {
@@ -225,19 +251,25 @@ const EmendaForm = () => {
       }
     };
 
-    // ✅ CARREGAR APENAS SE USUÁRIO COMPLETO
-    if (user && user.email && (user.tipo || user.role)) {
+    // ✅ CARREGAR DADOS - SIMPLIFICADO PARA ADMIN
+    if (user && user.email) {
       console.log("🚀 Iniciando carregamento para usuário:", user.email);
+      console.log("👤 Dados do usuário:", {
+        email: user.email,
+        tipo: user.tipo,
+        role: user.role,
+        isAdmin: userRole === "admin"
+      });
       carregarDados();
     } else {
       console.log("⏳ Aguardando dados completos do usuário...");
-      // Fallback: se não tem dados após 5s, mostrar erro
+      // Fallback: se não tem dados após 3s para admin, mostrar erro
       const fallbackTimeout = setTimeout(() => {
         if (mountedRef.current && !user?.email) {
           setError("Dados do usuário não carregaram. Tente fazer login novamente.");
           setLoading(false);
         }
-      }, 5000);
+      }, 3000); // Reduzido para 3s
 
       return () => clearTimeout(fallbackTimeout);
     }
