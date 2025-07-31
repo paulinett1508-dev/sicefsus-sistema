@@ -718,40 +718,37 @@ const cleanupBrokenUsers = async () => {
           reason: "Recuperado como órfão",
         });
       }
-    }
 
-    return brokenUsers;
-  } catch (error) {
-    console.error("❌ Erro na limpeza:", error);
-    return [];
-  }
-};
-
-// ✅ EXPORTAÇÕES CORRIGIDAS
-export const UserService = {
-  createUser,
-  getAllUsers,
-  updateUser,
-  deleteUser,
-  getCurrentUserData,
-  diagnoseEmail,
-  cleanupBrokenUsers
-};
-
-export {
-  createUser,
-  getAllUsers,
-  updateUser,
-  deleteUser,
-  getCurrentUserData,
-  diagnoseEmail,
-  cleanupBrokenUsers
-};
-
-export default UserService;o Firebase
+      // Se o UID não parece ser do Firebase
       if (userData.uid?.startsWith("recuperado-")) {
         console.log(`⚠️ Usuário com UID inválido: ${email}`);
         brokenUsers.push({
+          id: doc.id,
+          email: email,
+          nome: userData.nome,
+          tipo: userData.tipo,
+          reason: "UID inválido",
+        });
+      }
+    }
+
+    console.log(`🎯 Encontrados ${brokenUsers.length} usuários problemáticos:`);
+    brokenUsers.forEach((user, index) => {
+      console.log(
+        `${index + 1}. ${user.email} (${user.nome}) - ${user.reason}`,
+      );
+    });
+
+    return {
+      total: usuariosSnapshot.size,
+      broken: brokenUsers.length,
+      users: brokenUsers,
+    };
+  } catch (error) {
+    console.error("❌ Erro na limpeza:", error);
+    throw error;
+  }
+};
           id: doc.id,
           email: email,
           nome: userData.nome,
@@ -932,6 +929,27 @@ const userService = {
       throw error;
     }
   },
+};
+
+// ✅ EXPORTAÇÕES CORRIGIDAS
+export const UserService = {
+  createUser,
+  updateUser,
+  deleteUser: deleteUserById,
+  getAllUsers: loadUsers,
+  getCurrentUserData: () => null,
+  diagnoseEmail,
+  cleanupBrokenUsers,
+};
+
+// Exportações nomeadas
+export {
+  createUser,
+  updateUser,
+  deleteUserById as deleteUser,
+  loadUsers as getAllUsers,
+  diagnoseEmail,
+  cleanupBrokenUsers,
 };
 
 // ✅ EXPORTAR COMO DEFAULT
