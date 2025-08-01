@@ -58,13 +58,7 @@ const Identificacao = ({
     }
 
     onChange?.({ target: { name, value: valorFormatado } });
-    warningText: {
-    color: "#ffc107",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-  },
-};
+  };
 
   // Estado de validação do CNPJ
   const getCNPJStatus = () => {
@@ -269,6 +263,12 @@ const styles = {
   },
   errorText: {
     color: "#dc3545",
+    fontSize: "12px",
+    marginTop: "4px",
+    display: "block",
+  },
+  warningText: {
+    color: "#ffc107",
     fontSize: "12px",
     marginTop: "4px",
     display: "block",
