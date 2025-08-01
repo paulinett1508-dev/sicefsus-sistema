@@ -1,3 +1,7 @@
+// src/context/UserContext.jsx - CORREÇÃO COMPATIBILIDADE v2.4
+// ✅ CORREÇÃO: Retornar 'user' para compatibilidade com Dashboard
+// ✅ MANTÉM: Toda funcionalidade existente
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -175,8 +179,10 @@ export const UserProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  // ✅ CORREÇÃO CRÍTICA: Retornar 'user' para compatibilidade com Dashboard
   const value = {
-    usuario,
+    user: usuario, // ✅ CORREÇÃO: user = usuario para compatibilidade
+    usuario,       // ✅ MANTER: Para compatibilidade com código existente
     setUsuario,
     loading,
     isAuthenticated: !!usuario,

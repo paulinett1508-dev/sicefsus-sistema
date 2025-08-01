@@ -1,4 +1,4 @@
-// src/components/AdminPanel.jsx - Versão Completa e Funcional
+// src/components/AdminPanel.jsx - Versão Refatorada Profissional
 import React, { useState, useEffect } from "react";
 import { useToast } from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
@@ -6,14 +6,15 @@ import UserForm from "./UserForm";
 import UsersTable from "./UsersTable";
 import AdminStats from "./AdminStats";
 import { UserService } from "../services/userService";
+import "../styles/adminStyles.css";
 
 const AdminPanel = () => {
   // ✅ ESTADOS PRINCIPAIS
   const [users, setUsers] = useState([]);
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("users");
-  const [logs, setLogs] = useState([]);
 
   // ✅ ESTADOS DE MODALS
   const [showUserForm, setShowUserForm] = useState(false);
@@ -50,12 +51,6 @@ const AdminPanel = () => {
     loadInitialData();
   }, []);
 
-  // ✅ DEBUG: Monitorar mudanças do showUserForm
-  useEffect(() => {
-    console.log("🎭 DEBUG: showUserForm mudou para:", showUserForm);
-    console.log("👤 DEBUG: editingUser atual:", editingUser ? "SIM" : "NÃO");
-  }, [showUserForm, editingUser]);
-
   const loadInitialData = async () => {
     setLoading(true);
     try {
@@ -68,13 +63,13 @@ const AdminPanel = () => {
     }
   };
 
+  // ✅ CARREGAR USUÁRIOS
   const loadUsers = async () => {
     try {
-      const loadedUsers = await userService.loadUsers();
-      setUsers(loadedUsers);
+      const usersData = await userService.loadUsers();
+      setUsers(usersData);
     } catch (error) {
-      console.error("Erro ao carregar usuários:", error);
-      showToast("Erro ao carregar usuários", "error");
+      showToast(error.message, "error");
     }
   };
 
@@ -88,14 +83,14 @@ const AdminPanel = () => {
     }
   };
 
-  // ✅ CRIAR NOVO USUÁRIO
+  // ✅ CRIAR USUÁRIO
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setSaving(true);
 
     try {
       const result = await userService.createUser(formData);
-      await userService.addLog("CREATE_USER", `Usuário criado: ${formData.email}`);
+      await userService.addLog("CREATE_USER", result.message);
 
       showToast(result.message, "success");
       await loadUsers();
@@ -113,9 +108,17 @@ const AdminPanel = () => {
     if (!editingUser) return;
 
     setSaving(true);
+
     try {
-      const result = await userService.updateUser(editingUser.id, formData, editingUser.email);
-      await userService.addLog("UPDATE_USER", `Usuário atualizado: ${formData.email}`);
+      const result = await userService.updateUser(
+        editingUser.id,
+        formData,
+        editingUser.email,
+      );
+      await userService.addLog(
+        "UPDATE_USER",
+        `Usuário atualizado: ${formData.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers();
@@ -133,7 +136,10 @@ const AdminPanel = () => {
 
     try {
       const result = await userService.deleteUser(userToDelete.id);
-      await userService.addLog("DELETE_USER", `Usuário excluído: ${userToDelete.email}`);
+      await userService.addLog(
+        "DELETE_USER",
+        `Usuário excluído: ${userToDelete.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers();
@@ -148,7 +154,10 @@ const AdminPanel = () => {
   const handleResetPassword = async (user) => {
     try {
       const result = await userService.sendPasswordReset(user);
-      await userService.addLog("RESET_PASSWORD", `Reset de senha: ${user.email}`);
+      await userService.addLog(
+        "RESET_PASSWORD",
+        `Reset de senha: ${user.email}`,
+      );
 
       showToast(result.message, "success");
       await loadUsers(); // Recarregar para atualizar flags
@@ -159,7 +168,6 @@ const AdminPanel = () => {
 
   // ✅ UTILITÁRIOS DE FORMULÁRIO
   const resetForm = () => {
-    console.log("🔄 DEBUG: resetForm iniciado");
     setFormData({
       email: "",
       nome: "",
@@ -170,46 +178,26 @@ const AdminPanel = () => {
       municipio: "",
       uf: "",
     });
-    console.log("📝 DEBUG: formData resetado");
     setShowUserForm(false);
-    console.log("🚪 DEBUG: setShowUserForm(false)");
     setEditingUser(null);
-    console.log("👤 DEBUG: setEditingUser(null)");
-    console.log("✅ DEBUG: resetForm concluído");
   };
 
-  // ✅ HANDLERS DE AÇÕES
-  const handleNovoUsuario = () => {
-    console.log("🆕 DEBUG: Botão Novo Usuário clicado");
-    console.log("🔍 DEBUG: Estados antes do reset:", {
-      showUserForm,
-      editingUser: !!editingUser,
-      loading,
-      saving
-    });
-    resetForm();
-    console.log("🔄 DEBUG: Reset executado, setShowUserForm(true)");
-    setShowUserForm(true);
-    console.log("✅ DEBUG: setShowUserForm(true) executado");
-  };
-
-  const handleEditarUsuario = (user) => {
-    console.log("✏️ Editando usuário:", user);
+  const startEdit = (user) => {
+    setEditingUser(user);
     setFormData({
-      email: user.email || "",
-      nome: user.nome || "",
-      role: user.role || "user",
-      status: user.status || "ativo",
+      email: user.email,
+      nome: user.nome,
+      role: user.role,
+      status: user.status,
       departamento: user.departamento || "",
       telefone: user.telefone || "",
       municipio: user.municipio || "",
       uf: user.uf || "",
     });
-    setEditingUser(user);
     setShowUserForm(true);
   };
 
-  const handleConfirmarExclusao = (user) => {
+  const confirmDelete = (user) => {
     setUserToDelete(user);
     setShowDeleteModal(true);
   };
@@ -250,62 +238,38 @@ const AdminPanel = () => {
     });
   };
 
+  // ✅ LOADING STATE
   if (loading) {
     return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.loadingSpinner}>⏳</div>
-        <p>Carregando usuários...</p>
+      <div className="admin-panel">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Carregando painel administrativo...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      {/* ✅ HEADER */}
-      <div style={styles.header}>
-        <div style={styles.headerContent}>
-          <h1 style={styles.headerTitle}>
-            <span style={styles.headerIcon}>👥</span>
-            Administração de Usuários
-          </h1>
-          <p style={styles.headerSubtitle}>
-            Gerencie usuários, permissões e acessos do sistema SICEFSUS
-          </p>
+    <div className="admin-panel">
+      {/* ✅ HEADER COM ESTATÍSTICAS */}
+      <div className="admin-header">
+        <div className="header-content">
+          <h1>🔐 Painel Administrativo</h1>
+          <AdminStats users={users} />
         </div>
-        <button
-          style={styles.addButton}
-          onClick={(e) => {
-            console.log("🖱️ DEBUG: Clique físico no botão detectado", e);
-            console.log("🚫 DEBUG: Botão desabilitado?", loading || saving);
-            console.log("📊 DEBUG: Estados atuais:", { loading, saving, showUserForm, editingUser: !!editingUser });
-            handleNovoUsuario();
-          }}
-          disabled={loading || saving}
-        >
-          <span style={styles.buttonIcon}>➕</span>
-          Novo Usuário
-        </button>
       </div>
 
-      {/* ✅ ESTATÍSTICAS */}
-      <AdminStats users={users} />
-
       {/* ✅ NAVEGAÇÃO POR TABS */}
-      <div style={styles.tabsContainer}>
+      <div className="admin-tabs">
         <button
-          style={{
-            ...styles.tab,
-            ...(activeTab === "users" ? styles.tabActive : {}),
-          }}
+          className={`tab ${activeTab === "users" ? "active" : ""}`}
           onClick={() => setActiveTab("users")}
         >
           👥 Usuários ({users.length})
         </button>
         <button
-          style={{
-            ...styles.tab,
-            ...(activeTab === "logs" ? styles.tabActive : {}),
-          }}
+          className={`tab ${activeTab === "logs" ? "active" : ""}`}
           onClick={() => setActiveTab("logs")}
         >
           📋 Logs de Auditoria ({logs.length})
@@ -314,16 +278,23 @@ const AdminPanel = () => {
 
       {/* ✅ ABA DE USUÁRIOS */}
       {activeTab === "users" && (
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Gestão de Usuários</h2>
+        <div className="users-section">
+          <div className="section-header">
+            <h2>Gestão de Usuários</h2>
+            <button
+              className="btn-primary"
+              onClick={() => setShowUserForm(true)}
+              disabled={saving}
+            >
+              ➕ Novo Usuário
+            </button>
           </div>
 
           <UsersTable
             users={users}
-            onEdit={handleEditarUsuario}
+            onEdit={startEdit}
             onResetPassword={handleResetPassword}
-            onDelete={handleConfirmarExclusao}
+            onDelete={confirmDelete}
             saving={saving}
           />
         </div>
@@ -331,16 +302,15 @@ const AdminPanel = () => {
 
       {/* ✅ ABA DE LOGS */}
       {activeTab === "logs" && (
-        <div style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>📋 Logs de Auditoria</h2>
+        <div className="logs-section">
+          <div className="section-header">
+            <h2>📋 Logs de Auditoria</h2>
           </div>
 
           {/* ✅ FILTROS DE LOGS */}
-          <div style={styles.filtersContainer}>
-            <div style={styles.filterGrid}>
+          <div className="logs-filters">
+            <div className="filter-grid">
               <input
-                style={styles.filterInput}
                 type="text"
                 placeholder="Filtrar por usuário..."
                 value={logFilters.usuario}
@@ -349,7 +319,6 @@ const AdminPanel = () => {
                 }
               />
               <input
-                style={styles.filterInput}
                 type="text"
                 placeholder="Filtrar por ação..."
                 value={logFilters.acao}
@@ -358,7 +327,6 @@ const AdminPanel = () => {
                 }
               />
               <input
-                style={styles.filterInput}
                 type="date"
                 placeholder="Data início"
                 value={logFilters.dataInicio}
@@ -367,7 +335,6 @@ const AdminPanel = () => {
                 }
               />
               <input
-                style={styles.filterInput}
                 type="date"
                 placeholder="Data fim"
                 value={logFilters.dataFim}
@@ -379,33 +346,35 @@ const AdminPanel = () => {
           </div>
 
           {/* ✅ TABELA DE LOGS */}
-          <div style={styles.tableContainer}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.tableHeader}>Timestamp</th>
-                  <th style={styles.tableHeader}>Usuário</th>
-                  <th style={styles.tableHeader}>Ação</th>
-                  <th style={styles.tableHeader}>Descrição</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getFilteredLogs().map((log) => (
-                  <tr key={log.id} style={styles.tableRow}>
-                    <td style={styles.tableCell}>
-                      {log.timestamp?.toDate().toLocaleString("pt-BR")}
-                    </td>
-                    <td style={styles.tableCell}>{log.userEmail}</td>
-                    <td style={styles.tableCell}>
-                      <span style={styles.actionBadge}>
-                        {log.action.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td style={styles.tableCell}>{log.description}</td>
+          <div className="logs-table">
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Usuário</th>
+                    <th>Ação</th>
+                    <th>Descrição</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {getFilteredLogs().map((log) => (
+                    <tr key={log.id}>
+                      <td>{log.timestamp?.toDate().toLocaleString("pt-BR")}</td>
+                      <td>{log.userEmail}</td>
+                      <td>
+                        <span
+                          className={`action-badge ${log.action.toLowerCase()}`}
+                        >
+                          {log.action.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td>{log.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -433,191 +402,10 @@ const AdminPanel = () => {
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o usuário "${userToDelete?.nome}"? Esta ação não pode ser desfeita.`}
         confirmText="Excluir"
-        cancelText="Cancelar"
+        confirmButtonClass="btn-danger"
       />
-
-      {/* Debug panel removido para evitar loops infinitos */}
     </div>
   );
 };
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "1400px",
-    margin: "0 auto",
-    fontFamily: "var(--font-family)",
-  },
-
-  loadingContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "60px 20px",
-    textAlign: "center",
-  },
-
-  loadingSpinner: {
-    fontSize: "3em",
-    marginBottom: "20px",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "30px",
-    gap: "20px",
-  },
-
-  headerContent: {
-    flex: 1,
-  },
-
-  headerTitle: {
-    fontSize: "2em",
-    fontWeight: "700",
-    color: "var(--primary)",
-    margin: "0 0 8px 0",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-
-  headerIcon: {
-    fontSize: "0.9em",
-  },
-
-  headerSubtitle: {
-    color: "var(--theme-text-secondary)",
-    fontSize: "1.1em",
-    margin: 0,
-    lineHeight: "1.4",
-  },
-
-  addButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    background: "linear-gradient(135deg, var(--success), var(--success-dark))",
-    color: "var(--white)",
-    border: "none",
-    borderRadius: "10px",
-    padding: "12px 24px",
-    fontSize: "1em",
-    fontWeight: "600",
-    cursor: "pointer",
-    boxShadow: "var(--shadow)",
-    transition: "all 0.2s ease",
-    whiteSpace: "nowrap",
-  },
-
-  buttonIcon: {
-    fontSize: "1.1em",
-  },
-
-  tabsContainer: {
-    display: "flex",
-    marginBottom: "20px",
-    borderBottom: "2px solid var(--theme-border)",
-  },
-
-  tab: {
-    background: "none",
-    border: "none",
-    padding: "12px 20px",
-    fontSize: "1em",
-    cursor: "pointer",
-    color: "var(--theme-text-secondary)",
-    borderBottom: "3px solid transparent",
-    transition: "all 0.2s ease",
-  },
-
-  tabActive: {
-    color: "var(--primary)",
-    borderBottomColor: "var(--primary)",
-    fontWeight: "600",
-  },
-
-  section: {
-    marginBottom: "30px",
-  },
-
-  sectionHeader: {
-    marginBottom: "20px",
-  },
-
-  sectionTitle: {
-    fontSize: "1.5em",
-    fontWeight: "600",
-    color: "var(--theme-text)",
-    margin: 0,
-  },
-
-  filtersContainer: {
-    background: "var(--theme-surface)",
-    padding: "20px",
-    borderRadius: "10px",
-    marginBottom: "20px",
-    border: "2px solid var(--theme-border)",
-  },
-
-  filterGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "15px",
-  },
-
-  filterInput: {
-    padding: "10px 12px",
-    border: "2px solid var(--theme-border)",
-    borderRadius: "8px",
-    fontSize: "1em",
-    background: "var(--theme-surface-secondary)",
-    color: "var(--theme-text)",
-  },
-
-  tableContainer: {
-    background: "var(--theme-surface)",
-    borderRadius: "12px",
-    overflow: "hidden",
-    boxShadow: "var(--shadow)",
-    border: "2px solid var(--theme-border)",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-  },
-
-  tableHeader: {
-    background: "var(--primary)",
-    color: "var(--white)",
-    padding: "15px",
-    textAlign: "left",
-    fontWeight: "600",
-  },
-
-  tableRow: {
-    borderBottom: "1px solid var(--theme-border)",
-  },
-
-  tableCell: {
-    padding: "12px 15px",
-    color: "var(--theme-text)",
-  },
-
-  actionBadge: {
-    background: "var(--primary-light)",
-    color: "var(--primary-dark)",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    fontSize: "0.85em",
-    fontWeight: "500",
-  },
-};
-
-// Debug panel removido para evitar loops infinitos
 
 export default AdminPanel;

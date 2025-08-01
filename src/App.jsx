@@ -17,6 +17,7 @@ import Login from "./components/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Emendas from "./components/Emendas";
+import EmendaForm from "./components/emenda/EmendaForm";
 import Despesas from "./components/Despesas";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
@@ -471,6 +472,50 @@ function AppContent() {
                   </PrivateRoute>
                 }
               />
+
+              <Route
+                path="/emendas"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Emendas usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* ✅ ROTAS DE EMENDA - ADICIONADAS */}
+              <Route
+                path="/emendas/criar"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/emendas/:id/editar"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/emendas/:id"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
               <Route
                 path="/despesas"
                 element={

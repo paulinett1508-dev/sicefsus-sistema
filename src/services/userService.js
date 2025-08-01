@@ -905,34 +905,5 @@ const userService = {
   },
 };
 
-// ✅ EXPORTAÇÕES CORRIGIDAS
-export const UserService = {
-  createUser,
-  updateUser,
-  deleteUser: deleteUserById,
-  getAllUsers: loadUsers,
-  getCurrentUserData: () => null,
-  diagnoseEmail,
-  cleanupBrokenUsers,
-  trackUserAccess,
-  sendPasswordReset,
-  checkEmailExists,
-  validateFormData,
-  generateTempPassword,
-  convertRoleToTipo,
-  handleFirebaseError,
-  fixBrokenUser,
-};
-
-// Exportações nomeadas
-export {
-  createUser,
-  updateUser,
-  deleteUserById as deleteUser,
-  loadUsers as getAllUsers,
-  diagnoseEmail,
-  cleanupBrokenUsers,
-};
-
 // ✅ EXPORTAR COMO DEFAULT
 export default userService;

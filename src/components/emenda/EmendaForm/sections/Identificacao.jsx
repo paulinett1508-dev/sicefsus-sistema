@@ -1,5 +1,5 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// ✅ FIX CIRÚRGICO: APENAS ícones + validação CNPJ - CAMPOS ORIGINAIS
+// ✅ REORGANIZAÇÃO: CNPJ, Município e UF movidos para cá
 
 import React from "react";
 import {
@@ -16,7 +16,38 @@ const Identificacao = ({
   metricas = null,
   emendaParaEditar = null,
 }) => {
-  // ✅ HANDLER ORIGINAL COM APENAS formatação CNPJ e monetária
+  // ✅ ESTADOS BRASILEIROS (movidos de DadosBasicos)
+  const estados = [
+    { sigla: "AC", nome: "Acre" },
+    { sigla: "AL", nome: "Alagoas" },
+    { sigla: "AP", nome: "Amapá" },
+    { sigla: "AM", nome: "Amazonas" },
+    { sigla: "BA", nome: "Bahia" },
+    { sigla: "CE", nome: "Ceará" },
+    { sigla: "DF", nome: "Distrito Federal" },
+    { sigla: "ES", nome: "Espírito Santo" },
+    { sigla: "GO", nome: "Goiás" },
+    { sigla: "MA", nome: "Maranhão" },
+    { sigla: "MT", nome: "Mato Grosso" },
+    { sigla: "MS", nome: "Mato Grosso do Sul" },
+    { sigla: "MG", nome: "Minas Gerais" },
+    { sigla: "PA", nome: "Pará" },
+    { sigla: "PB", nome: "Paraíba" },
+    { sigla: "PR", nome: "Paraná" },
+    { sigla: "PE", nome: "Pernambuco" },
+    { sigla: "PI", nome: "Piauí" },
+    { sigla: "RJ", nome: "Rio de Janeiro" },
+    { sigla: "RN", nome: "Rio Grande do Norte" },
+    { sigla: "RS", nome: "Rio Grande do Sul" },
+    { sigla: "RO", nome: "Rondônia" },
+    { sigla: "RR", nome: "Roraima" },
+    { sigla: "SC", nome: "Santa Catarina" },
+    { sigla: "SP", nome: "São Paulo" },
+    { sigla: "SE", nome: "Sergipe" },
+    { sigla: "TO", nome: "Tocantins" },
+  ];
+
+  // ✅ HANDLER COM FORMATAÇÃO E VALIDAÇÃO
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let valorFormatado = value;
@@ -26,45 +57,24 @@ const Identificacao = ({
       valorFormatado = formatarCNPJ(value);
     }
 
-    // Formatação para campos monetários
-    if (name === "outrosValores") {
-      valorFormatado = formatarMoedaInput(value);
-    }
-
     onChange?.({ target: { name, value: valorFormatado } });
+    warningText: {
+    color: "#ffc107",
+    fontSize: "12px",
+    marginTop: "4px",
+    display: "block",
+  },
+};
+
+  // Estado de validação do CNPJ
+  const getCNPJStatus = () => {
+    if (!formData.cnpjMunicipio) return null;
+    const cnpjLimpo = formData.cnpjMunicipio.replace(/\D/g, '');
+    if (cnpjLimpo.length < 14) return 'digitando';
+    return validarCNPJ(formData.cnpjMunicipio) ? 'valido' : 'invalido';
   };
 
-  // ✅ FUNÇÃO ORIGINAL PRESERVADA
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
-  };
-
-  // ✅ CALCULAR VALOR EXECUTADO (original)
-  const getValorExecutado = () => {
-    if (emendaParaEditar && metricas) {
-      return formatCurrency(metricas.valorExecutado || 0);
-    }
-    return "R$ 0,00";
-  };
-
-  // ✅ CALCULAR SALDO (original)
-  const getSaldo = () => {
-    if (formData.saldo) {
-      return formData.saldo;
-    }
-
-    // Calcular saldo se não existir
-    const valorRecurso = parseFloat(
-      formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-    );
-    const valorExecutado = metricas?.valorExecutado || 0;
-    const saldo = valorRecurso - valorExecutado;
-
-    return saldo.toFixed(2).replace(".", ",");
-  };
+  const cnpjStatus = getCNPJStatus();
 
   return (
     <fieldset style={styles.fieldset}>
@@ -74,7 +84,7 @@ const Identificacao = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* ✅ CNPJ do Município - APENAS validação visual CNPJ */}
+        {/* ✅ CNPJ do Município */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ do Município <span style={styles.required}>*</span>
@@ -94,112 +104,89 @@ const Identificacao = ({
               style={{
                 ...styles.input,
                 ...(fieldErrors.cnpjMunicipio && styles.inputError),
-                ...(formData.cnpjMunicipio &&
-                  validarCNPJ(formData.cnpjMunicipio) &&
-                  styles.inputValid),
-                ...(formData.cnpjMunicipio &&
-                  !validarCNPJ(formData.cnpjMunicipio) &&
-                  styles.inputInvalid),
+                ...(cnpjStatus === 'valido' && styles.inputValid),
+                ...(cnpjStatus === 'invalido' && styles.inputInvalid),
               }}
               disabled={disabled}
               placeholder="00.000.000/0000-00"
               required
             />
-            {/* ✅ INDICADOR VISUAL CNPJ */}
+            {/* ✅ INDICADOR VISUAL CNPJ EM TEMPO REAL */}
             {formData.cnpjMunicipio && (
-              <span style={styles.validationIcon}>
-                {validarCNPJ(formData.cnpjMunicipio) ? "✅" : "❌"}
+              <span style={{
+                ...styles.validationIcon,
+                color: cnpjStatus === 'valido' ? '#28a745' : 
+                       cnpjStatus === 'invalido' ? '#dc3545' : '#6c757d'
+              }}>
+                {cnpjStatus === 'valido' ? "✅" : 
+                 cnpjStatus === 'invalido' ? "❌" : "⏳"}
               </span>
             )}
           </div>
           {fieldErrors.cnpjMunicipio && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
+          {cnpjStatus === 'invalido' && (
+            <small style={styles.warningText}>CNPJ inválido</small>
+          )}
         </div>
 
-        {/* ✅ Outros Valores - APENAS ícone removido texto */}
+        {/* ✅ Município (MOVIDO DE DADOS BÁSICOS) */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Outros Valores
-            <span
-              style={styles.infoIcon}
-              title="Digite apenas números. Formatação automática aplicada"
-            >
-              ℹ️
-            </span>
+            Município <span style={styles.required}>*</span>
           </label>
           <input
             type="text"
-            name="outrosValores"
-            value={formData.outrosValores || ""}
+            name="municipio"
+            value={formData.municipio || ""}
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(fieldErrors.outrosValores && styles.inputError),
+              ...(fieldErrors.municipio && styles.inputError),
             }}
             disabled={disabled}
-            placeholder="0,00"
+            placeholder="Nome do município"
+            required
           />
-          {fieldErrors.outrosValores && (
+          {fieldErrors.municipio && (
             <small style={styles.errorText}>Campo obrigatório</small>
           )}
         </div>
 
-        {/* Valor Executado (Automático) - ORIGINAL */}
+        {/* ✅ UF (MOVIDO DE DADOS BÁSICOS) */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Valor Executado (Automático)
-            <span
-              style={styles.infoIcon}
-              title="Valor calculado automaticamente com base nas despesas"
-            >
-              ℹ️
-            </span>
+            UF <span style={styles.required}>*</span>
           </label>
-          <input
-            type="text"
-            name="valorExecutado"
-            value={getValorExecutado()}
+          <select
+            name="uf"
+            value={formData.uf || ""}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
-              backgroundColor: "#f8f9fa",
-              color: "#6c757d",
+              ...(fieldErrors.uf && styles.inputError),
             }}
-            disabled={true}
-            placeholder="Calculado automaticamente com base nas despesas"
-          />
-        </div>
-
-        {/* Saldo (Calculado) - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Saldo (Calculado)
-            <span
-              style={styles.infoIcon}
-              title="Saldo = Valor do Recurso - Valor Executado"
-            >
-              ℹ️
-            </span>
-          </label>
-          <input
-            type="text"
-            name="saldo"
-            value={getSaldo()}
-            style={{
-              ...styles.input,
-              backgroundColor: "#f8f9fa",
-              color: "#6c757d",
-            }}
-            disabled={true}
-            placeholder="0,00"
-          />
+            disabled={disabled}
+            required
+          >
+            <option value="">Selecione o estado</option>
+            {estados.map((estado) => (
+              <option key={estado.sigla} value={estado.sigla}>
+                {estado.sigla} - {estado.nome}
+              </option>
+            ))}
+          </select>
+          {fieldErrors.uf && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
         </div>
       </div>
     </fieldset>
   );
 };
 
-// ✅ ESTILOS ORIGINAIS + apenas validação CNPJ + campo obrigatório destacado
+// ✅ ESTILOS ORIGINAIS MANTIDOS
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -259,19 +246,16 @@ const styles = {
     backgroundColor: "white",
     flex: "1",
   },
-  // ✅ DESTAQUE campo obrigatório não preenchido
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
     boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-  // ✅ VALIDAÇÃO CNPJ - válido
   inputValid: {
     borderColor: "#28a745",
     backgroundColor: "#f8fff8",
     boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
   },
-  // ✅ VALIDAÇÃO CNPJ - inválido
   inputInvalid: {
     borderColor: "#ffc107",
     backgroundColor: "#fffbf0",
@@ -289,7 +273,6 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
-  // ✅ ÚNICO ACRÉSCIMO: ícone de informação
   infoIcon: {
     fontSize: "14px",
     color: "#0066cc",

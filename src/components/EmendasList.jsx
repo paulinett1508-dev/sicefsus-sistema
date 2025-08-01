@@ -21,10 +21,11 @@ const EmendasList = ({
     obterEstatisticasGerais,
     filtrarEmendas,
     recarregar,
-  } = useEmendaDespesa(null, {
+  } = useEmendaDespesa(usuario, {
     carregarTodasEmendas: true,
     incluirEstatisticas: true,
     autoRefresh: true,
+    userRole: usuario?.role || usuario?.tipo || "operador",
   });
 
   const [filtros, setFiltros] = useState({

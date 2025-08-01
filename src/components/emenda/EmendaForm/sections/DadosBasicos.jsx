@@ -1,46 +1,20 @@
-// src/components/emenda/EmendaForm/sections/DadosBasicos.jsx - FIX CIRÚRGICO
-// ✅ APENAS: ícone ℹ️ + destaque campo obrigatório - TUDO MAIS ORIGINAL
+// src/components/emenda/EmendaForm/sections/DadosBasicos.jsx
+// ✅ REORGANIZAÇÃO: Município e UF movidos para Identificação, campos financeiros adicionados
 
 import React from "react";
-import { formatarMoedaInput } from "../../../../utils/formatters";
+import {
+  formatarMoedaInput,
+  parseValorMonetario,
+} from "../../../../utils/formatters";
 
 const DadosBasicos = ({
   formData = {},
   onChange,
   disabled = false,
   fieldErrors = {},
+  metricas = null,
+  emendaParaEditar = null,
 }) => {
-  // ✅ ESTADOS ORIGINAIS PRESERVADOS
-  const estados = [
-    { sigla: "AC", nome: "Acre" },
-    { sigla: "AL", nome: "Alagoas" },
-    { sigla: "AP", nome: "Amapá" },
-    { sigla: "AM", nome: "Amazonas" },
-    { sigla: "BA", nome: "Bahia" },
-    { sigla: "CE", nome: "Ceará" },
-    { sigla: "DF", nome: "Distrito Federal" },
-    { sigla: "ES", nome: "Espírito Santo" },
-    { sigla: "GO", nome: "Goiás" },
-    { sigla: "MA", nome: "Maranhão" },
-    { sigla: "MT", nome: "Mato Grosso" },
-    { sigla: "MS", nome: "Mato Grosso do Sul" },
-    { sigla: "MG", nome: "Minas Gerais" },
-    { sigla: "PA", nome: "Pará" },
-    { sigla: "PB", nome: "Paraíba" },
-    { sigla: "PR", nome: "Paraná" },
-    { sigla: "PE", nome: "Pernambuco" },
-    { sigla: "PI", nome: "Piauí" },
-    { sigla: "RJ", nome: "Rio de Janeiro" },
-    { sigla: "RN", nome: "Rio Grande do Norte" },
-    { sigla: "RS", nome: "Rio Grande do Sul" },
-    { sigla: "RO", nome: "Rondônia" },
-    { sigla: "RR", nome: "Roraima" },
-    { sigla: "SC", nome: "Santa Catarina" },
-    { sigla: "SP", nome: "São Paulo" },
-    { sigla: "SE", nome: "Sergipe" },
-    { sigla: "TO", nome: "Tocantins" },
-  ];
-
   // ✅ PROGRAMAS ORIGINAIS PRESERVADOS
   const programas = [
     "Atenção Básica",
@@ -52,17 +26,46 @@ const DadosBasicos = ({
     "Outros",
   ];
 
-  // ✅ HANDLER ORIGINAL COM APENAS formatação valor
+  // ✅ HANDLER COM FORMATAÇÃO
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let valorFormatado = value;
 
-    // ✅ ÚNICA MUDANÇA: Formatação do campo "Valor do Recurso"
-    if (name === "valorRecurso") {
+    // Formatação para campos monetários
+    if (name === "valorRecurso" || name === "outrosValores") {
       valorFormatado = formatarMoedaInput(value);
     }
 
     onChange?.({ target: { name, value: valorFormatado } });
+  };
+
+  // ✅ FUNÇÕES DE CÁLCULO
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(value || 0);
+  };
+
+  const getValorExecutado = () => {
+    if (emendaParaEditar && metricas) {
+      return formatCurrency(metricas.valorExecutado || 0);
+    }
+    return "R$ 0,00";
+  };
+
+  const getSaldo = () => {
+    const valorRecurso = parseFloat(
+      formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
+    );
+    const outrosValores = parseFloat(
+      formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
+    );
+    const valorTotal = valorRecurso + outrosValores;
+    const valorExecutado = metricas?.valorExecutado || 0;
+    const saldo = valorTotal - valorExecutado;
+
+    return formatCurrency(saldo);
   };
 
   return (
@@ -119,58 +122,7 @@ const DadosBasicos = ({
           )}
         </div>
 
-        {/* Município - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Município <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="municipio"
-            value={formData.municipio || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.municipio && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="Nome do município"
-            required
-          />
-          {fieldErrors.municipio && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* UF - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            UF <span style={styles.required}>*</span>
-          </label>
-          <select
-            name="uf"
-            value={formData.uf || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.uf && styles.inputError),
-            }}
-            disabled={disabled}
-            required
-          >
-            <option value="">Selecione o estado</option>
-            {estados.map((estado) => (
-              <option key={estado.sigla} value={estado.sigla}>
-                {estado.sigla} - {estado.nome}
-              </option>
-            ))}
-          </select>
-          {fieldErrors.uf && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* ✅ Valor do Recurso - APENAS ícone adicionado */}
+        {/* ✅ Valor do Recurso */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Valor do Recurso <span style={styles.required}>*</span>
@@ -199,8 +151,86 @@ const DadosBasicos = ({
           )}
         </div>
 
-        {/* Objeto da Proposta - ORIGINAL */}
+        {/* ✅ Outros Valores (MOVIDO DA IDENTIFICAÇÃO) */}
         <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Outros Valores
+            <span
+              style={styles.infoIcon}
+              title="Digite apenas números. Formatação automática aplicada"
+            >
+              ℹ️
+            </span>
+          </label>
+          <input
+            type="text"
+            name="outrosValores"
+            value={formData.outrosValores || ""}
+            onChange={handleInputChange}
+            style={styles.input}
+            disabled={disabled}
+            placeholder="0,00"
+          />
+        </div>
+
+        {/* ✅ Valor Executado (MOVIDO DA IDENTIFICAÇÃO) */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Valor Executado (Automático)
+            <span
+              style={styles.infoIcon}
+              title="Valor calculado automaticamente com base nas despesas"
+            >
+              ℹ️
+            </span>
+          </label>
+          <input
+            type="text"
+            value={getValorExecutado()}
+            style={{
+              ...styles.input,
+              backgroundColor: "#f8f9fa",
+              color: "#6c757d",
+            }}
+            disabled={true}
+            placeholder="Calculado automaticamente"
+          />
+        </div>
+
+        {/* ✅ Saldo (MOVIDO DA IDENTIFICAÇÃO) */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Saldo (Calculado)
+            <span
+              style={styles.infoIcon}
+              title="Saldo = (Valor do Recurso + Outros Valores) - Valor Executado"
+            >
+              ℹ️
+            </span>
+          </label>
+          <input
+            type="text"
+            value={getSaldo()}
+            style={{
+              ...styles.input,
+              backgroundColor: "#f8f9fa",
+              color:
+                parseFloat(
+                  getSaldo()
+                    .replace(/[^\d,-]/g, "")
+                    .replace(",", "."),
+                ) < 0
+                  ? "#dc3545"
+                  : "#28a745",
+              fontWeight: "bold",
+            }}
+            disabled={true}
+            placeholder="0,00"
+          />
+        </div>
+
+        {/* Objeto da Proposta - ORIGINAL */}
+        <div style={{ ...styles.formGroup, gridColumn: "span 2" }}>
           <label style={styles.label}>
             Objeto da Proposta <span style={styles.required}>*</span>
           </label>
@@ -255,7 +285,7 @@ const DadosBasicos = ({
   );
 };
 
-// ✅ ESTILOS ORIGINAIS + apenas destaque campo obrigatório + ícone
+// ✅ ESTILOS ORIGINAIS MANTIDOS
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -309,7 +339,6 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  // ✅ DESTAQUE campo obrigatório não preenchido
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
@@ -321,7 +350,6 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
-  // ✅ ÚNICO ACRÉSCIMO: ícone de informação
   infoIcon: {
     fontSize: "14px",
     color: "#0066cc",
