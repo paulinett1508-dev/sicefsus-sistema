@@ -139,40 +139,41 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
 const styles = {
   section: {
-    backgroundColor: "white",
-    borderRadius: "8px",
+    border: "2px solid #154360",
+    borderRadius: "10px",
     padding: "0",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    border: "1px solid #e9ecef",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     overflow: "hidden",
   },
 
   headerContainer: {
-    padding: "20px 24px",
+    padding: "20px",
     backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #e9ecef",
+    borderBottom: "1px solid #dee2e6",
     cursor: "pointer",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     transition: "background-color 0.2s ease",
-    "&:hover": {
-      backgroundColor: "#e9ecef"
-    }
   },
 
   sectionTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    margin: 0,
-    color: "#2c3e50",
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
+    fontWeight: "bold",
+    fontSize: "16px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    margin: 0,
   },
 
   sectionIcon: {
-    fontSize: "20px",
+    fontSize: "18px",
   },
 
   toggleButton: {
@@ -187,7 +188,7 @@ const styles = {
   toggleIcon: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#007bff",
+    color: "#154360",
   },
 
   toggleText: {
@@ -195,37 +196,38 @@ const styles = {
   },
 
   content: {
-    padding: "24px",
+    padding: "20px",
   },
 
   row: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
     marginBottom: "20px",
-    alignItems: "start",
+    border: "none",
+    padding: "0",
   },
 
   field: {
     display: "flex",
     flexDirection: "column",
+    gap: "8px",
   },
 
   label: {
+    fontWeight: "bold",
+    color: "#333",
     fontSize: "14px",
-    fontWeight: "500",
-    marginBottom: "6px",
-    color: "#495057",
   },
 
   input: {
-    padding: "10px 12px",
-    border: "1px solid #ced4da",
+    padding: "12px",
+    border: "2px solid #dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.2s, box-shadow 0.2s",
+    transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    width: "100%",
+    boxSizing: "border-box",
   },
 
   errorText: {
