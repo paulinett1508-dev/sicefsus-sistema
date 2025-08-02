@@ -2,7 +2,7 @@
 // Seção "Dados Bancários" extraída do EmendaForm
 // Banco, agência, conta
 
-import React from "react";
+import React, { useState } from "react";
 
 const DadosBancarios = ({
   formData = {},
@@ -10,6 +10,7 @@ const DadosBancarios = ({
   disabled = false,
   fieldErrors = {},
 }) => {
+  const [showBankCodes, setShowBankCodes] = useState(false);
   // ✅ HANDLER DE MUDANÇA
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,19 +140,33 @@ const DadosBancarios = ({
         </div>
       </div>
 
-      {/* Bancos mais comuns - referência */}
-      <div style={styles.referenceBox}>
-        <div style={styles.referenceTitle}>
-          <span style={styles.referenceIcon}>📋</span>
-          Códigos de Bancos Mais Comuns
-        </div>
-        <div style={styles.bankList}>
-          {bancosComuns.map((banco, index) => (
-            <div key={banco.codigo} style={styles.bankItem}>
-              <strong>{banco.codigo}</strong> - {banco.nome}
+      {/* Seção colapsável de códigos bancários */}
+      <div style={styles.collapsibleSection}>
+        <button
+          type="button"
+          onClick={() => setShowBankCodes(!showBankCodes)}
+          style={styles.toggleButton}
+          disabled={disabled}
+        >
+          <span style={styles.toggleIcon}>
+            {showBankCodes ? "▼" : "▶"}
+          </span>
+          <span style={styles.toggleText}>
+            Códigos de Bancos Mais Comuns
+          </span>
+        </button>
+
+        {showBankCodes && (
+          <div style={styles.bankCodesContent}>
+            <div style={styles.bankList}>
+              {bancosComuns.map((banco) => (
+                <div key={banco.codigo} style={styles.bankItem}>
+                  <strong>{banco.codigo}</strong> - {banco.nome}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
     </fieldset>
   );
@@ -222,24 +237,40 @@ const styles = {
     marginTop: "4px",
     display: "block",
   },
-  referenceBox: {
-    backgroundColor: "#f8f9fa",
+  collapsibleSection: {
+    marginTop: "20px",
     border: "1px solid #dee2e6",
     borderRadius: "8px",
-    padding: "15px",
-    marginTop: "20px",
+    backgroundColor: "#f8f9fa",
+    overflow: "hidden",
   },
-  referenceTitle: {
+  toggleButton: {
+    width: "100%",
+    padding: "12px 15px",
+    backgroundColor: "transparent",
+    border: "none",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    fontWeight: "bold",
+    gap: "10px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "500",
     color: "#495057",
-    marginBottom: "10px",
+    transition: "background-color 0.2s ease",
+    textAlign: "left",
+  },
+  toggleIcon: {
+    fontSize: "12px",
+    color: "#154360",
+    transition: "transform 0.2s ease",
+  },
+  toggleText: {
     fontSize: "14px",
   },
-  referenceIcon: {
-    fontSize: "16px",
+  bankCodesContent: {
+    padding: "15px",
+    backgroundColor: "white",
+    borderTop: "1px solid #dee2e6",
   },
   bankList: {
     display: "grid",
