@@ -25,7 +25,6 @@ import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
-import ThemeToggle from "./components/ThemeToggle";
 import DespesaForm from "./components/DespesaForm";
 
 // Context para proteção de navegação
@@ -244,6 +243,7 @@ function AppContent() {
 
                 // ✅ PRESERVAR TODOS OS CAMPOS ORIGINAIS
                 ...userData,
+```jsx
               };
 
               setUsuario(usuario);
@@ -371,19 +371,6 @@ function AppContent() {
 
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
 
-  const themeToggleStyle = useMemo(
-    () => ({
-      ...styles.themeToggleContainer,
-      right: isAuthenticated ? "235px" : "15px",
-      display: location.pathname === "/" && !isAuthenticated ? "none" : "block",
-    }),
-    [isAuthenticated, location.pathname],
-  );
-
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
   return (
     <div style={styles.app}>
       {/* Modal de Login */}
@@ -424,11 +411,6 @@ function AppContent() {
             onLogout={handleLogout}
           />
         )}
-
-        {/* Botão de tema */}
-        <div style={themeToggleStyle}>
-          <ThemeToggle compact={true} />
-        </div>
 
         {/* Conteúdo principal */}
         <div
@@ -681,8 +663,8 @@ const styles = {
   app: {
     fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
     minHeight: "100vh",
-    backgroundColor: "var(--theme-bg, #f4f6f8)",
-    color: "var(--theme-text, #212529)",
+    backgroundColor: "#f4f6f8",
+    color: "#212529",
     transition: "background-color 0.3s ease, color 0.3s ease",
   },
   container: {
@@ -700,7 +682,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
-    backgroundColor: "var(--theme-bg, #f4f6f8)",
+    backgroundColor: "#f4f6f8",
     color: "#154360",
   },
   loadingSpinner: {
@@ -864,12 +846,7 @@ const styles = {
     fontWeight: "500",
     transition: "background-color 0.2s",
   },
-  themeToggleContainer: {
-    position: "fixed",
-    top: "15px",
-    zIndex: 999,
-    transition: "all 0.2s ease",
-  },
+
 };
 
 // CSS para animações

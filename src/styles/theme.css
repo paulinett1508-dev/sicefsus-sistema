@@ -1,31 +1,5 @@
-/* === BOTÃO DE TEMA === */
-.theme-toggle-button:hover {
-  background: var(--theme-surface-secondary) !important;
-  border-color: var(--primary) !important;
-  transform: scale(1.05) !important;
-}
-
-.theme-toggle-button:active {
-  transform: scale(0.95) !important;
-}
-
-/* === RESPONSIVIDADE PARA BOTÃO DE TEMA === */
-@media (max-width: 768px) {
-  .theme-toggle-container {
-    right: 15px !important;
-    top: 10px !important;
-  }
-
-  .theme-toggle-button {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 16px !important;
-  }
-}
-
-
-/* src/styles/theme.css - TEMA CENTRALIZADO DO SISTEMA */
-/* ✅ Variáveis CSS para padronização completa */
+/* src/styles/theme.css - TEMA LIGHT ONLY */
+/* ✅ Variáveis CSS para padronização - APENAS TEMA CLARO */
 
 :root {
   /* === CORES PRINCIPAIS === */
@@ -72,7 +46,7 @@
   --gray-800: #212529;
   --gray-900: #0f1419;
 
-  /* === TEMA LIGHT (padrão) === */
+  /* === TEMA FIXO (LIGHT ONLY) === */
   --theme-bg: #f4f6f8;
   --theme-surface: #ffffff;
   --theme-surface-secondary: #f8f9fa;
@@ -83,41 +57,6 @@
   --theme-border-light: #e9ecef;
   --theme-shadow: rgba(0, 0, 0, 0.1);
   --theme-shadow-light: rgba(0, 0, 0, 0.05);
-}
-
-/* === TEMA DARK === */
-[data-theme="dark"] {
-  --theme-bg: #0f1419;
-  --theme-surface: #1a1f26;
-  --theme-surface-secondary: #222831;
-  --theme-text: #e9ecef;
-  --theme-text-secondary: #adb5bd;
-  --theme-text-muted: #6c757d;
-  --theme-border: #495057;
-  --theme-border-light: #343a40;
-  --theme-shadow: rgba(0, 0, 0, 0.4);
-  --theme-shadow-light: rgba(0, 0, 0, 0.3);
-
-  /* Ajustes para melhor contraste no tema dark */
-  --primary: #4A90E2;
-  --primary-light: #6ba4eb;
-  --primary-dark: #357ABD;
-  --accent: #6ba4eb;
-  --accent-light: #8bb5f0;
-  --accent-dark: #4A90E2;
-  --success: #2ecc71;
-  --success-light: #58d68d;
-  --success-dark: #27ae60;
-  --warning: #f5b041;
-  --warning-light: #f7c572;
-  --warning-dark: #f39c12;
-  --error: #ec7063;
-  --error-light: #f1948a;
-  --error-dark: #e74c3c;
-  --info: #46c5d8;
-  --info-light: #73d3e3;
-  --info-dark: #17a2b8;
-}
 
   /* === SOMBRAS === */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -181,7 +120,6 @@
   --z-popover: 1060;
   --z-tooltip: 1070;
   --z-toast: 9999;
-  --z-theme-toggle: 999;
 
   /* === LAYOUT === */
   --sidebar-width: 220px;
@@ -198,8 +136,7 @@
   --body-bg: var(--theme-bg);
 }
 
-/* === ESTILOS GLOBAIS DE TEMA === */
-
+/* === ESTILOS GLOBAIS === */
 body {
   background-color: var(--body-bg);
   color: var(--theme-text);
@@ -373,52 +310,6 @@ body {
   }
 }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-fade-in {
-  animation: fadeIn var(--transition-normal);
-}
-
-/* === RESPONSIVIDADE === */
-@media (max-width: 768px) {
-  :root {
-    --sidebar-width: 100%;
-    --space-6: var(--space-4);
-    --space-8: var(--space-5);
-  }
-
-  .container {
-    padding: 0 var(--space-4);
-  }
-
-  .btn {
-    width: 100%;
-    min-width: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  :root {
-    --font-size-2xl: var(--font-size-xl);
-    --font-size-3xl: var(--font-size-2xl);
-  }
-}
-
-/* ✅ ADICIONAR AO FINAL DO ARQUIVO src/styles/theme.css */
-
-/* === ANIMAÇÕES PARA MODAL UX === */
-
-@keyframes fadeIn {
-  from { 
-    opacity: 0; 
-  }
-  to { 
-    opacity: 1; 
-  }
-}
-
 @keyframes slideUp {
   from { 
     transform: translateY(50px); 
@@ -463,10 +354,12 @@ body {
   }
 }
 
-/* === CLASSES UTILITÁRIAS PARA ANIMAÇÕES === */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
 
 .animate-fade-in {
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn var(--transition-normal);
 }
 
 .animate-slide-up {
@@ -492,8 +385,32 @@ body {
   animation: shimmer 1.5s infinite;
 }
 
-/* === EFEITOS HOVER MELHORADOS === */
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100%;
+    --space-6: var(--space-4);
+    --space-8: var(--space-5);
+  }
 
+  .container {
+    padding: 0 var(--space-4);
+  }
+
+  .btn {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-2xl: var(--font-size-xl);
+    --font-size-3xl: var(--font-size-2xl);
+  }
+}
+
+/* === EFEITOS HOVER MELHORADOS === */
 .modal-button {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center;
@@ -516,8 +433,7 @@ body {
   box-shadow: none !important;
 }
 
-/* === BACKDROP BLUR MELHORADO === */
-
+/* === BACKDROP BLUR === */
 .modal-backdrop {
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
@@ -532,28 +448,7 @@ body {
   }
 }
 
-/* === GLASSMORPHISM EFFECT === */
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-[data-theme="dark"] .glass-card {
-  background: rgba(26, 31, 38, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
 /* === MICRO-INTERAÇÕES === */
-
 .icon-bounce {
   transition: transform 0.2s ease;
 }
@@ -576,7 +471,6 @@ body {
 }
 
 /* === LOADING STATES === */
-
 .loading-skeleton {
   background: linear-gradient(
     90deg,
@@ -601,7 +495,6 @@ body {
 }
 
 /* === TOAST ANIMATIONS === */
-
 @keyframes toast-slide-in {
   from {
     transform: translateX(100%);
@@ -632,40 +525,7 @@ body {
   animation: toast-slide-out 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* === RESPONSIVIDADE DAS ANIMAÇÕES === */
-
-@media (max-width: 768px) {
-  .modal-button:hover:not(:disabled) {
-    transform: none; /* Desabilitar hover em mobile */
-  }
-
-  /* Reduzir animações em dispositivos móveis para performance */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-}
-
-/* === DARK MODE ADAPTATIONS === */
-
-[data-theme="dark"] .modal-button:hover:not(:disabled) {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .glass-card {
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
 /* === FOCUS STATES PARA ACESSIBILIDADE === */
-
 .modal-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -676,7 +536,6 @@ body {
 }
 
 /* === PERFORMANCE OPTIMIZATIONS === */
-
 .gpu-accelerated {
   transform: translateZ(0);
   will-change: transform, opacity;
@@ -687,7 +546,6 @@ body {
 }
 
 /* === CUSTOM SCROLLBAR PARA MODAL === */
-
 .modal-content::-webkit-scrollbar {
   width: 8px;
 }
