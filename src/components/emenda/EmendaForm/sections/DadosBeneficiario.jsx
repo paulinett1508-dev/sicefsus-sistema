@@ -13,7 +13,7 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
       <div style={styles.headerContainer} onClick={toggleExpanded}>
         <h3 style={styles.sectionTitle}>
           <span style={styles.sectionIcon}>🏢</span>
-          Informações Adicionais do Beneficiário
+          Informações Adicionais do Beneficiário (opcional)
         </h3>
         <div style={styles.toggleButton}>
           <span style={styles.toggleIcon}>
@@ -29,7 +29,7 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
       {isExpanded && (
         <div style={styles.content}>
           {/* Primeira linha - Nome e Endereço */}
-          <div style={styles.row}>
+          <fieldset style={styles.row}>
             <div style={styles.field}>
               <label style={styles.label}>
                 Nome/Razão Social do Beneficiário
@@ -60,10 +60,10 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
                 style={styles.input}
               />
             </div>
-          </div>
+          </fieldset>
 
           {/* Segunda linha - Telefone, Email, Responsável */}
-          <div style={styles.row}>
+          <fieldset style={styles.row}>
             <div style={styles.field}>
               <label style={styles.label}>
                 Telefone de Contato
@@ -91,10 +91,10 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
                 style={styles.input}
               />
             </div>
-          </div>
+          </fieldset>
 
           {/* Terceira linha - Responsável Legal e CPF */}
-          <div style={styles.row}>
+          <fieldset style={styles.row}>
             <div style={styles.field}>
               <label style={styles.label}>
                 Responsável Legal
@@ -122,7 +122,7 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
                 style={styles.input}
               />
             </div>
-          </div>
+          </fieldset>
 
           {/* ✅ BANNER INFORMATIVO */}
           <div style={styles.infoBanner}>

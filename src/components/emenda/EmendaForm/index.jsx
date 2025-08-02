@@ -345,12 +345,6 @@ const EmendaForm = () => {
           errors={{}}
         />
 
-        <InformacoesComplementares
-          formData={formData}
-          onChange={handleInputChange}
-          errors={{}}
-        />
-
         <DadosBancarios
           formData={formData}
           onChange={handleInputChange}
@@ -364,6 +358,12 @@ const EmendaForm = () => {
         />
 
         <AcoesServicos
+          formData={formData}
+          onChange={handleInputChange}
+          errors={{}}
+        />
+
+        <InformacoesComplementares
           formData={formData}
           onChange={handleInputChange}
           errors={{}}
