@@ -243,7 +243,6 @@ function AppContent() {
 
                 // ✅ PRESERVAR TODOS OS CAMPOS ORIGINAIS
                 ...userData,
-```jsx
               };
 
               setUsuario(usuario);
