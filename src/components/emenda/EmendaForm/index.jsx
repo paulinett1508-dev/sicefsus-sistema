@@ -16,7 +16,6 @@ import { useUser } from "../../../context/UserContext";
 import Identificacao from "./sections/Identificacao";
 import DadosBasicos from "./sections/DadosBasicos";
 import DadosBeneficiario from "./sections/DadosBeneficiario";
-import ClassificacaoTecnica from "./sections/ClassificacaoTecnica";
 import DadosBancarios from "./sections/DadosBancarios";
 import Cronograma from "./sections/Cronograma";
 import AcoesServicos from "./sections/AcoesServicos";
@@ -346,7 +345,7 @@ const EmendaForm = () => {
           errors={{}}
         />
 
-        <ClassificacaoTecnica
+        <InformacoesComplementares
           formData={formData}
           onChange={handleInputChange}
           errors={{}}

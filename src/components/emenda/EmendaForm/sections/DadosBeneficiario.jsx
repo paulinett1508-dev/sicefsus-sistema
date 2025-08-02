@@ -1,292 +1,247 @@
-// src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
-// ✅ FIX: Validação CNPJ IMEDIATA ao digitar
+import React, { useState } from "react";
 
-import React from "react";
-import { formatarCNPJ, validarCNPJ } from "../../../../utils/validators";
+const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
-const DadosBeneficiario = ({
-  formData = {},
-  onChange,
-  disabled = false,
-  fieldErrors = {},
-}) => {
-  // ✅ FIX: HANDLER com validação CNPJ imediata
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let valorFormatado = value;
-
-    // Formatação específica para CNPJ - ORIGINAL
-    if (name === "cnpj") {
-      valorFormatado = formatarCNPJ(value);
-    }
-
-    onChange?.({ target: { name, value: valorFormatado } });
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
   };
-
-  // ✅ VALIDAÇÃO CNPJ mais rigorosa
-  const getCNPJValidationState = (cnpj) => {
-    if (!cnpj || cnpj.length < 3) return null; // Não validar enquanto está digitando
-
-    const apenasNumeros = cnpj.replace(/\D/g, "");
-
-    // Se tem menos de 14 dígitos, está incompleto mas não é erro ainda
-    if (apenasNumeros.length < 14) return "incomplete";
-
-    // Se tem 14 dígitos, validar imediatamente
-    if (apenasNumeros.length === 14) {
-      return validarCNPJ(cnpj) ? "valid" : "invalid";
-    }
-
-    return null;
-  };
-
-  const cnpjState = getCNPJValidationState(formData.cnpj);
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>🏢</span>
-        Dados do Beneficiário
-      </legend>
+    <div style={styles.section}>
+      {/* ✅ HEADER COLAPSÁVEL */}
+      <div style={styles.headerContainer} onClick={toggleExpanded}>
+        <h3 style={styles.sectionTitle}>
+          <span style={styles.sectionIcon}>🏢</span>
+          Informações Adicionais do Beneficiário
+        </h3>
+        <div style={styles.toggleButton}>
+          <span style={styles.toggleIcon}>{isExpanded ? "−" : "+"}</span>
+          <span style={styles.toggleText}>
+            {isExpanded ? "Ocultar" : "Exibir"}
+          </span>
+        </div>
+      </div>
 
-      <div style={styles.formGrid}>
-        {/* ✅ CNPJ - Validação IMEDIATA */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            CNPJ <span style={styles.required}>*</span>
-            <span
-              style={styles.infoIcon}
-              title="Digite apenas números. Validação em tempo real"
-            >
-              ℹ️
-            </span>
-          </label>
-          <div style={styles.inputContainer}>
-            <input
-              type="text"
-              name="cnpj"
-              value={formData.cnpj || ""}
-              onChange={handleInputChange}
-              style={{
-                ...styles.input,
-                ...(fieldErrors.cnpj && styles.inputError),
-                ...(cnpjState === "valid" && styles.inputValid),
-                ...(cnpjState === "invalid" && styles.inputInvalid),
-                ...(cnpjState === "incomplete" && styles.inputIncomplete),
-              }}
-              disabled={disabled}
-              placeholder="00.000.000/0000-00"
-              required
-            />
-            {/* ✅ INDICADOR VISUAL CNPJ IMEDIATO */}
-            {formData.cnpj && formData.cnpj.length >= 3 && (
-              <span style={styles.validationIcon}>
-                {cnpjState === "valid" && "✅"}
-                {cnpjState === "invalid" && "❌"}
-                {cnpjState === "incomplete" && "⏳"}
-              </span>
-            )}
+      {/* ✅ CONTEÚDO COLAPSÁVEL */}
+      {isExpanded && (
+        <div style={styles.content}>
+          {/* Primeira linha - Nome e Endereço */}
+          <div style={styles.row}>
+            <div style={styles.field}>
+              <label style={styles.label}>
+                Nome/Razão Social do Beneficiário
+              </label>
+              <input
+                type="text"
+                name="beneficiario"
+                value={formData?.beneficiario || ""}
+                onChange={onChange}
+                placeholder="Nome completo da instituição beneficiária"
+                style={styles.input}
+              />
+              {fieldErrors?.beneficiario && (
+                <span style={styles.errorText}>{fieldErrors.beneficiario}</span>
+              )}
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}>Endereço do Beneficiário</label>
+              <input
+                type="text"
+                name="enderecoBeneficiario"
+                value={formData?.enderecoBeneficiario || ""}
+                onChange={onChange}
+                placeholder="Rua, número, bairro"
+                style={styles.input}
+              />
+            </div>
           </div>
-          {/* ✅ MENSAGENS DE VALIDAÇÃO IMEDIATA */}
-          {cnpjState === "invalid" && (
-            <small style={styles.errorText}>
-              CNPJ inválido - Verifique os dígitos
-            </small>
-          )}
-          {cnpjState === "incomplete" &&
-            formData.cnpj &&
-            formData.cnpj.length >= 8 && (
-              <small style={styles.warningText}>
-                Continue digitando... (14 dígitos necessários)
-              </small>
-            )}
-          {fieldErrors.cnpj && cnpjState !== "invalid" && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
 
-        {/* Número da Proposta - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Número da Proposta <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="numeroProposta"
-            value={formData.numeroProposta || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.numeroProposta && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="Ex: 123456789"
-            required
-          />
-          {fieldErrors.numeroProposta && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
+          {/* Segunda linha - Telefone, Email, Responsável */}
+          <div style={styles.row}>
+            <div style={styles.field}>
+              <label style={styles.label}>Telefone de Contato</label>
+              <input
+                type="text"
+                name="telefoneBeneficiario"
+                value={formData?.telefoneBeneficiario || ""}
+                onChange={onChange}
+                placeholder="(00) 00000-0000"
+                style={styles.input}
+              />
+            </div>
 
-        {/* Campo Funcional */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Funcional <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="funcional"
-            value={formData.funcional || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.funcional && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="Ex: 10.301.0001.2001"
-            required
-          />
-          {fieldErrors.funcional && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-      </div>
+            <div style={styles.field}>
+              <label style={styles.label}>Email do Beneficiário</label>
+              <input
+                type="email"
+                name="emailBeneficiario"
+                value={formData?.emailBeneficiario || ""}
+                onChange={onChange}
+                placeholder="email@instituicao.com.br"
+                style={styles.input}
+              />
+            </div>
+          </div>
 
-      {/* Nota informativa - ORIGINAL PRESERVADA */}
-      <div style={styles.infoBox}>
-        <span style={styles.infoIcon}>ℹ️</span>
-        <span style={styles.infoText}>
-          O CNPJ do beneficiário deve ser válido e corresponder à entidade que
-          receberá os recursos da emenda.
-        </span>
-      </div>
-    </fieldset>
+          {/* Terceira linha - Responsável Legal e CPF */}
+          <div style={styles.row}>
+            <div style={styles.field}>
+              <label style={styles.label}>Responsável Legal</label>
+              <input
+                type="text"
+                name="responsavelLegal"
+                value={formData?.responsavelLegal || ""}
+                onChange={onChange}
+                placeholder="Nome do responsável pela instituição"
+                style={styles.input}
+              />
+            </div>
+
+            <div style={styles.field}>
+              <label style={styles.label}>CPF do Responsável</label>
+              <input
+                type="text"
+                name="cpfResponsavel"
+                value={formData?.cpfResponsavel || ""}
+                onChange={onChange}
+                placeholder="000.000.000-00"
+                style={styles.input}
+              />
+            </div>
+          </div>
+
+          {/* ✅ BANNER INFORMATIVO */}
+          <div style={styles.infoBanner}>
+            <div style={styles.infoIcon}>ℹ️</div>
+            <div style={styles.infoText}>
+              Estas informações complementam os dados do beneficiário e
+              facilitam o contato e acompanhamento da execução da emenda. O CNPJ
+              do beneficiário deve ser preenchido na seção de Dados Básicos.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
-// ✅ ESTILOS com validação CNPJ aprimorada
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  section: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "0",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    border: "1px solid #e9ecef",
+    overflow: "hidden",
   },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+
+  headerContainer: {
+    padding: "20px 24px",
+    backgroundColor: "#f8f9fa",
+    borderBottom: "1px solid #e9ecef",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    transition: "background-color 0.2s ease",
+    "&:hover": {
+      backgroundColor: "#e9ecef",
+    },
+  },
+
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    margin: 0,
+    color: "#2c3e50",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
-  legendIcon: {
-    fontSize: "18px",
+
+  sectionIcon: {
+    fontSize: "20px",
   },
-  formGrid: {
+
+  toggleButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    color: "#495057",
+    fontWeight: "500",
+  },
+
+  toggleIcon: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    color: "#007bff",
+  },
+
+  toggleText: {
+    fontSize: "14px",
+  },
+
+  content: {
+    padding: "24px",
+  },
+
+  row: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "1fr 1fr",
     gap: "20px",
     marginBottom: "20px",
+    alignItems: "start",
   },
-  formGroup: {
+
+  field: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
+
   label: {
-    fontWeight: "bold",
-    color: "#333",
     fontSize: "14px",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
+    fontWeight: "500",
+    marginBottom: "6px",
+    color: "#495057",
   },
-  required: {
-    color: "#dc3545",
-  },
-  inputContainer: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-  },
+
   input: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
+    padding: "10px 12px",
+    border: "1px solid #ced4da",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "all 0.3s ease",
+    transition: "border-color 0.2s, box-shadow 0.2s",
     backgroundColor: "white",
-    flex: "1",
+    width: "100%",
   },
-  inputError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
-  },
-  inputValid: {
-    borderColor: "#28a745",
-    backgroundColor: "#f8fff8",
-    boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
-  },
-  inputInvalid: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
-  },
-  // ✅ NOVO: Estado incompleto (digitando)
-  inputIncomplete: {
-    borderColor: "#ffc107",
-    backgroundColor: "#fffbf0",
-    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
-  },
-  validationIcon: {
-    position: "absolute",
-    right: "12px",
-    fontSize: "16px",
-    pointerEvents: "none",
-  },
+
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "4px",
-    display: "block",
-    fontWeight: "bold",
   },
-  // ✅ NOVO: Texto de aviso (amarelo)
-  warningText: {
-    color: "#856404",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-    fontStyle: "italic",
-  },
-  infoBox: {
+
+  infoBanner: {
     display: "flex",
-    alignItems: "flex-start",
-    gap: "10px",
-    backgroundColor: "#e8f4f8",
-    border: "1px solid #bee5eb",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "#e3f2fd",
+    border: "1px solid #bbdefb",
     borderRadius: "6px",
-    padding: "12px",
-    marginTop: "15px",
+    marginTop: "20px",
   },
+
   infoIcon: {
     fontSize: "16px",
     flexShrink: 0,
-    marginTop: "2px",
-    color: "#0066cc",
-    cursor: "help",
-    userSelect: "none",
   },
+
   infoText: {
     fontSize: "14px",
-    color: "#0c5460",
+    color: "#1565c0",
     lineHeight: "1.4",
   },
 };

@@ -1,6 +1,4 @@
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx
-// ✅ VERSÃO CLEAN: Apenas validação essencial, sem resumo visual
-
 import React from "react";
 
 const Cronograma = ({
@@ -9,14 +7,13 @@ const Cronograma = ({
   disabled = false,
   fieldErrors = {},
 }) => {
-  // ✅ HANDLER com validação de datas em tempo real
+  // Handler com validação de datas em tempo real
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
     onChange?.({ target: { name, value } });
   };
 
-  // ✅ VALIDAÇÃO: Data não pode ser futura
+  // Validação: Data não pode ser futura (exceto Data de Validade)
   const isDataFutura = (dataInput) => {
     if (!dataInput) return false;
     const hoje = new Date();
@@ -25,14 +22,14 @@ const Cronograma = ({
     return data > hoje;
   };
 
-  // ✅ VALIDAÇÃO: Data deve ser válida para comparação
+  // Validação: Data deve ser válida para comparação
   const isDataValidaComparacao = (dataInput) => {
     if (!dataInput) return false;
     const data = new Date(dataInput);
     return !isNaN(data.getTime());
   };
 
-  // ✅ VALIDAÇÃO: Verificar se data excede validade da emenda
+  // Validação: Verificar se data excede validade da emenda
   const isDataExcedeValidade = (dataInput, dataValidade) => {
     if (!dataInput || !dataValidade) return false;
     if (
@@ -46,7 +43,7 @@ const Cronograma = ({
     return data > validade;
   };
 
-  // ✅ FUNÇÃO para obter mensagem de erro específica
+  // Função para obter mensagem de erro específica
   const getDataErrorMessage = (fieldName, value) => {
     if (!value) return null;
 
@@ -54,28 +51,33 @@ const Cronograma = ({
       return "Data inválida";
     }
 
-    if (fieldName === "dataValidada" && isDataFutura(value)) {
-      return "Data validada não pode ser futura";
+    // Data de Validade é livre - sem restrições
+    if (fieldName === "dataValidade") {
+      return null;
+    }
+
+    if (fieldName === "dataAprovacao" && isDataFutura(value)) {
+      return "Data de aprovação não pode ser futura";
     }
 
     if (fieldName === "dataOb" && isDataFutura(value)) {
       return "Data OB não pode ser futura";
     }
 
-    // ✅ VALIDAÇÃO: Verificar contra data de validade
-    if (fieldName === "finalExecucao" && formData.dataValidada) {
-      if (isDataExcedeValidade(value, formData.dataValidada)) {
+    // Verificar contra data de validade
+    if (fieldName === "finalExecucao" && formData.dataValidade) {
+      if (isDataExcedeValidade(value, formData.dataValidade)) {
         return "Data final não pode ser posterior à validade da emenda";
       }
     }
 
-    if (fieldName === "inicioExecucao" && formData.dataValidada) {
-      if (isDataExcedeValidade(value, formData.dataValidada)) {
+    if (fieldName === "inicioExecucao" && formData.dataValidade) {
+      if (isDataExcedeValidade(value, formData.dataValidade)) {
         return "Data início não pode ser posterior à validade da emenda";
       }
     }
 
-    // ✅ VALIDAÇÃO: Início deve ser antes do fim
+    // Início deve ser antes do fim
     if (fieldName === "finalExecucao" && formData.inicioExecucao) {
       if (
         isDataValidaComparacao(value) &&
@@ -100,141 +102,152 @@ const Cronograma = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* Data Validada */}
+        {/* ✅ Data de Validade - SEM TEXTO EXPLICATIVO */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Data Validada <span style={styles.required}>*</span>
-            <span
-              style={styles.infoIcon}
-              title="Data em que a emenda foi validada oficialmente"
-            >
-              ℹ️
-            </span>
+            Data de Validade <span style={styles.required}>*</span>
           </label>
           <input
             type="date"
-            name="dataValidada"
-            value={formData.dataValidada || ""}
+            name="dataValidade"
+            value={formData?.dataValidade || ""}
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(fieldErrors.dataValidada && styles.inputError),
-              ...(getDataErrorMessage("dataValidada", formData.dataValidada) &&
-                styles.inputError),
+              ...(fieldErrors?.dataValidade && styles.inputError),
             }}
             disabled={disabled}
             required
           />
-          {getDataErrorMessage("dataValidada", formData.dataValidada) && (
+          {fieldErrors?.dataValidade && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
+        </div>
+
+        {/* Data de Aprovação */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Data de Aprovação <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="date"
+            name="dataAprovacao"
+            value={formData?.dataAprovacao || ""}
+            onChange={handleInputChange}
+            style={{
+              ...styles.input,
+              ...(fieldErrors?.dataAprovacao && styles.inputError),
+              ...(getDataErrorMessage(
+                "dataAprovacao",
+                formData?.dataAprovacao,
+              ) && styles.inputError),
+            }}
+            disabled={disabled}
+            required
+          />
+          {getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
             <small style={styles.errorText}>
-              {getDataErrorMessage("dataValidada", formData.dataValidada)}
+              {getDataErrorMessage("dataAprovacao", formData?.dataAprovacao)}
             </small>
           )}
-          {fieldErrors.dataValidada &&
-            !getDataErrorMessage("dataValidada", formData.dataValidada) && (
+          {fieldErrors?.dataAprovacao &&
+            !getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
               <small style={styles.errorText}>Campo obrigatório</small>
             )}
         </div>
 
         {/* Data OB */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Data OB
-            <span
-              style={styles.infoIcon}
-              title="Data do Ofício de Bancada (se aplicável)"
-            >
-              ℹ️
-            </span>
-          </label>
+          <label style={styles.label}>Data OB</label>
           <input
             type="date"
             name="dataOb"
-            value={formData.dataOb || ""}
+            value={formData?.dataOb || ""}
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(getDataErrorMessage("dataOb", formData.dataOb) &&
+              ...(getDataErrorMessage("dataOb", formData?.dataOb) &&
                 styles.inputError),
             }}
             disabled={disabled}
           />
-          {getDataErrorMessage("dataOb", formData.dataOb) && (
+          {getDataErrorMessage("dataOb", formData?.dataOb) && (
             <small style={styles.errorText}>
-              {getDataErrorMessage("dataOb", formData.dataOb)}
+              {getDataErrorMessage("dataOb", formData?.dataOb)}
             </small>
           )}
         </div>
 
         {/* Início da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Início da Execução
-            <span
-              style={styles.infoIcon}
-              title="Data prevista para início da execução da emenda"
-            >
-              ℹ️
-            </span>
-          </label>
+          <label style={styles.label}>Início da Execução</label>
           <input
             type="date"
             name="inicioExecucao"
-            value={formData.inicioExecucao || ""}
+            value={formData?.inicioExecucao || ""}
             onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(getDataErrorMessage(
                 "inicioExecucao",
-                formData.inicioExecucao,
+                formData?.inicioExecucao,
               ) && styles.inputError),
             }}
             disabled={disabled}
           />
-          {getDataErrorMessage("inicioExecucao", formData.inicioExecucao) && (
+          {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao) && (
             <small style={styles.errorText}>
-              {getDataErrorMessage("inicioExecucao", formData.inicioExecucao)}
+              {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao)}
             </small>
           )}
         </div>
 
         {/* Final da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Final da Execução
-            <span
-              style={styles.infoIcon}
-              title="Data prevista para conclusão da execução da emenda"
-            >
-              ℹ️
-            </span>
-          </label>
+          <label style={styles.label}>Final da Execução</label>
           <input
             type="date"
             name="finalExecucao"
-            value={formData.finalExecucao || ""}
+            value={formData?.finalExecucao || ""}
             onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(getDataErrorMessage(
                 "finalExecucao",
-                formData.finalExecucao,
+                formData?.finalExecucao,
               ) && styles.inputError),
             }}
             disabled={disabled}
           />
-          {getDataErrorMessage("finalExecucao", formData.finalExecucao) && (
+          {getDataErrorMessage("finalExecucao", formData?.finalExecucao) && (
             <small style={styles.errorText}>
-              {getDataErrorMessage("finalExecucao", formData.finalExecucao)}
+              {getDataErrorMessage("finalExecucao", formData?.finalExecucao)}
             </small>
           )}
+        </div>
+
+        {/* Data da Última Atualização - Campo informativo */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Data da Última Atualização</label>
+          <input
+            type="date"
+            value={formData?.dataUltimaAtualizacao || ""}
+            style={{
+              ...styles.input,
+              backgroundColor: "#f8f9fa",
+              cursor: "not-allowed",
+            }}
+            disabled={true}
+            readOnly
+          />
+          <small style={styles.helperText}>Atualizada automaticamente</small>
         </div>
       </div>
     </fieldset>
   );
 };
 
-// ✅ ESTILOS CLEAN - Sem resumo visual
+// ✅ ESTILOS MANTIDOS (sem o infoBox)
 const styles = {
   fieldset: {
     border: "2px solid #154360",
@@ -282,10 +295,12 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    transition: "all 0.3s ease",
     backgroundColor: "white",
   },
   inputError: {
@@ -300,11 +315,10 @@ const styles = {
     display: "block",
     fontWeight: "bold",
   },
-  infoIcon: {
-    fontSize: "14px",
-    color: "#0066cc",
-    cursor: "help",
-    userSelect: "none",
+  helperText: {
+    fontSize: "12px",
+    color: "#6c757d",
+    marginTop: "4px",
   },
 };
 

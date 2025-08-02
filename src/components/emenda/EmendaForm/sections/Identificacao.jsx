@@ -1,22 +1,8 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// ✅ REORGANIZAÇÃO: CNPJ, Município e UF movidos para cá
-
 import React from "react";
-import {
-  formatarMoedaInput,
-  parseValorMonetario,
-} from "../../../../utils/formatters";
-import { formatarCNPJ, validarCNPJ } from "../../../../utils/validators";
+import { validarCNPJ, formatarCNPJ } from "../../../../utils/validators";
 
-const Identificacao = ({
-  formData = {},
-  onChange,
-  disabled = false,
-  fieldErrors = {},
-  metricas = null,
-  emendaParaEditar = null,
-}) => {
-  // ✅ ESTADOS BRASILEIROS (movidos de DadosBasicos)
+const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
   const estados = [
     { sigla: "AC", nome: "Acre" },
     { sigla: "AL", nome: "Alagoas" },
@@ -47,86 +33,102 @@ const Identificacao = ({
     { sigla: "TO", nome: "Tocantins" },
   ];
 
-  // ✅ HANDLER COM FORMATAÇÃO E VALIDAÇÃO
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    let valorFormatado = value;
 
-    // Formatação específica para CNPJ
-    if (name === "cnpjMunicipio") {
-      valorFormatado = formatarCNPJ(value);
+    if (name === "cnpj") {
+      const formatted = formatarCNPJ(value);
+      onChange({ target: { name, value: formatted } });
+    } else {
+      onChange(e);
     }
-
-    onChange?.({ target: { name, value: valorFormatado } });
   };
 
-  // Estado de validação do CNPJ
+  // Função para obter o status de validação do CNPJ
   const getCNPJStatus = () => {
-    if (!formData.cnpjMunicipio) return null;
-    const cnpjLimpo = formData.cnpjMunicipio.replace(/\D/g, '');
-    if (cnpjLimpo.length < 14) return 'digitando';
-    return validarCNPJ(formData.cnpjMunicipio) ? 'valido' : 'invalido';
+    if (!formData.cnpj || formData.cnpj.length < 3) return null;
+
+    const cnpjLimpo = formData.cnpj.replace(/\D/g, "");
+
+    if (cnpjLimpo.length < 14) return "incomplete";
+    if (cnpjLimpo.length === 14) {
+      return validarCNPJ(formData.cnpj) ? "valid" : "invalid";
+    }
+
+    return null;
   };
 
   const cnpjStatus = getCNPJStatus();
 
-  return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>🏛️</span>
-        Identificação
-      </legend>
+  // Função para obter o estilo do input baseado no status
+  const getInputStyle = () => {
+    const baseStyle = { ...styles.input };
 
-      <div style={styles.formGrid}>
-        {/* ✅ CNPJ do Município */}
-        <div style={styles.formGroup}>
+    if (fieldErrors?.cnpj) {
+      return { ...baseStyle, ...styles.inputError };
+    }
+
+    if (cnpjStatus === "valid") {
+      return { ...baseStyle, ...styles.inputValid };
+    }
+
+    if (cnpjStatus === "invalid") {
+      return { ...baseStyle, ...styles.inputInvalid };
+    }
+
+    if (cnpjStatus === "incomplete") {
+      return { ...baseStyle, ...styles.inputIncomplete };
+    }
+
+    return baseStyle;
+  };
+
+  return (
+    <div style={styles.section}>
+      <h3 style={styles.sectionTitle}>
+        <span style={styles.sectionIcon}>🏢</span>
+        Identificação
+      </h3>
+
+      <div style={styles.row}>
+        {/* CNPJ */}
+        <div style={styles.field}>
           <label style={styles.label}>
-            CNPJ do Município <span style={styles.required}>*</span>
-            <span
-              style={styles.infoIcon}
-              title="Digite apenas números. Formatação automática aplicada"
-            >
-              ℹ️
-            </span>
+            CNPJ <span style={styles.required}>*</span>
           </label>
           <div style={styles.inputContainer}>
             <input
               type="text"
-              name="cnpjMunicipio"
-              value={formData.cnpjMunicipio || ""}
+              name="cnpj"
+              value={formData.cnpj || ""}
               onChange={handleInputChange}
-              style={{
-                ...styles.input,
-                ...(fieldErrors.cnpjMunicipio && styles.inputError),
-                ...(cnpjStatus === 'valido' && styles.inputValid),
-                ...(cnpjStatus === 'invalido' && styles.inputInvalid),
-              }}
-              disabled={disabled}
               placeholder="00.000.000/0000-00"
+              style={getInputStyle()}
               required
             />
-            {/* ✅ INDICADOR VISUAL CNPJ EM TEMPO REAL */}
-            {formData.cnpjMunicipio && (
-              <span style={{
-                ...styles.validationIcon,
-                color: cnpjStatus === 'valido' ? '#28a745' : 
-                       cnpjStatus === 'invalido' ? '#dc3545' : '#6c757d'
-              }}>
-                {cnpjStatus === 'valido' ? "✅" : 
-                 cnpjStatus === 'invalido' ? "❌" : "⏳"}
+            {formData.cnpj && formData.cnpj.length >= 3 && (
+              <span style={styles.validationIcon}>
+                {cnpjStatus === "valid" && "✅"}
+                {cnpjStatus === "invalid" && "❌"}
+                {cnpjStatus === "incomplete" && "⏳"}
               </span>
             )}
           </div>
-          {fieldErrors.cnpjMunicipio && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+          {cnpjStatus === "invalid" && (
+            <span style={styles.errorText}>CNPJ inválido</span>
           )}
-          {cnpjStatus === 'invalido' && (
-            <small style={styles.warningText}>CNPJ inválido</small>
+          {cnpjStatus === "incomplete" &&
+            formData.cnpj &&
+            formData.cnpj.length >= 8 && (
+              <span style={styles.warningText}>Continue digitando...</span>
+            )}
+          {fieldErrors?.cnpj && !cnpjStatus && (
+            <span style={styles.errorText}>{fieldErrors.cnpj}</span>
           )}
         </div>
 
-        {/* ✅ Município (MOVIDO DE DADOS BÁSICOS) */}
-        <div style={styles.formGroup}>
+        {/* Município */}
+        <div style={styles.field}>
           <label style={styles.label}>
             Município <span style={styles.required}>*</span>
           </label>
@@ -134,150 +136,134 @@ const Identificacao = ({
             type="text"
             name="municipio"
             value={formData.municipio || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
+            placeholder="Nome do município"
             style={{
               ...styles.input,
-              ...(fieldErrors.municipio && styles.inputError),
+              ...(fieldErrors?.municipio ? styles.inputError : {}),
             }}
-            disabled={disabled}
-            placeholder="Nome do município"
             required
           />
-          {fieldErrors.municipio && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+          {fieldErrors?.municipio && (
+            <span style={styles.errorText}>{fieldErrors.municipio}</span>
           )}
         </div>
 
-        {/* ✅ UF (MOVIDO DE DADOS BÁSICOS) */}
-        <div style={styles.formGroup}>
+        {/* UF */}
+        <div style={styles.field}>
           <label style={styles.label}>
             UF <span style={styles.required}>*</span>
           </label>
           <select
             name="uf"
             value={formData.uf || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
             style={{
               ...styles.input,
-              ...(fieldErrors.uf && styles.inputError),
+              ...(fieldErrors?.uf ? styles.inputError : {}),
             }}
-            disabled={disabled}
             required
           >
-            <option value="">Selecione o estado</option>
+            <option value="">Selecione</option>
             {estados.map((estado) => (
               <option key={estado.sigla} value={estado.sigla}>
                 {estado.sigla} - {estado.nome}
               </option>
             ))}
           </select>
-          {fieldErrors.uf && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+          {fieldErrors?.uf && (
+            <span style={styles.errorText}>{fieldErrors.uf}</span>
           )}
         </div>
       </div>
-    </fieldset>
+    </div>
   );
 };
 
-// ✅ ESTILOS ORIGINAIS MANTIDOS
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  section: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "24px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    border: "1px solid #e9ecef",
   },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    marginBottom: "20px",
+    color: "#2c3e50",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
-  legendIcon: {
-    fontSize: "18px",
+  sectionIcon: {
+    fontSize: "20px",
   },
-  formGrid: {
+  row: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
-    marginBottom: "20px",
   },
-  formGroup: {
+  field: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
   label: {
-    fontWeight: "bold",
-    color: "#333",
     fontSize: "14px",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
+    fontWeight: "500",
+    marginBottom: "6px",
+    color: "#495057",
   },
   required: {
     color: "#dc3545",
   },
   inputContainer: {
     position: "relative",
-    display: "flex",
-    alignItems: "center",
   },
   input: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
+    padding: "10px 12px",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#ced4da",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    transition: "all 0.2s",
     backgroundColor: "white",
-    flex: "1",
+    width: "100%",
   },
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
   inputValid: {
     borderColor: "#28a745",
     backgroundColor: "#f8fff8",
-    boxShadow: "0 0 0 2px rgba(40, 167, 69, 0.25)",
   },
   inputInvalid: {
+    borderColor: "#dc3545",
+    backgroundColor: "#fef2f2",
+  },
+  inputIncomplete: {
     borderColor: "#ffc107",
     backgroundColor: "#fffbf0",
-    boxShadow: "0 0 0 2px rgba(255, 193, 7, 0.25)",
   },
   validationIcon: {
     position: "absolute",
     right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
     fontSize: "16px",
-    pointerEvents: "none",
   },
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "4px",
-    display: "block",
   },
   warningText: {
-    color: "#ffc107",
+    color: "#856404",
     fontSize: "12px",
     marginTop: "4px",
-    display: "block",
-  },
-  infoIcon: {
-    fontSize: "14px",
-    color: "#0066cc",
-    cursor: "help",
-    userSelect: "none",
   },
 };
 

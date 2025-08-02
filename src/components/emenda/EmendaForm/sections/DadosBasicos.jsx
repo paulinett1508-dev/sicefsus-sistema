@@ -1,360 +1,434 @@
 // src/components/emenda/EmendaForm/sections/DadosBasicos.jsx
-// ✅ REORGANIZAÇÃO: Município e UF movidos para Identificação, campos financeiros adicionados
-
 import React from "react";
-import {
-  formatarMoedaInput,
-  parseValorMonetario,
-} from "../../../../utils/formatters";
 
-const DadosBasicos = ({
-  formData = {},
-  onChange,
-  disabled = false,
-  fieldErrors = {},
-  metricas = null,
-  emendaParaEditar = null,
-}) => {
-  // ✅ PROGRAMAS ORIGINAIS PRESERVADOS
+const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
+  // ✅ PROTEÇÃO CONTRA FORMDATA UNDEFINED
+  if (!formData) {
+    return <div>Carregando dados...</div>;
+  }
   const programas = [
-    "Atenção Básica",
-    "Média e Alta Complexidade",
+    "Incremento ao custeio de serviços da atenção primária à saúde",
+    "Aquisição de equipamentos",
+    "Construção e ampliação",
+    "Reforma e adequação",
+    "Custeio de serviços especializados",
+    "Apoio à gestão do SUS",
     "Vigilância em Saúde",
     "Assistência Farmacêutica",
-    "Gestão do SUS",
-    "Investimentos na Rede de Serviços",
-    "Outros",
+    "Outro",
   ];
 
-  // ✅ HANDLER COM FORMATAÇÃO
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let valorFormatado = value;
+  // ✅ FORMATAÇÃO MONETÁRIA INTELIGENTE
+  const formatarMoedaInput = (valor) => {
+    // Remove tudo exceto números
+    const numero = valor.replace(/\D/g, "");
 
-    // Formatação para campos monetários
-    if (name === "valorRecurso" || name === "outrosValores") {
-      valorFormatado = formatarMoedaInput(value);
-    }
+    if (!numero) return "";
 
-    onChange?.({ target: { name, value: valorFormatado } });
-  };
+    // Converte para centavos
+    const centavos = parseInt(numero, 10);
+    const reais = centavos / 100;
 
-  // ✅ FUNÇÕES DE CÁLCULO
-  const formatCurrency = (value) => {
+    // Formata como moeda brasileira
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(value || 0);
+    }).format(reais);
   };
 
-  const getValorExecutado = () => {
-    if (emendaParaEditar && metricas) {
-      return formatCurrency(metricas.valorExecutado || 0);
+  // Handlers
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // ✅ FORMATAÇÃO ESPECIAL PARA CAMPOS MONETÁRIOS
+    if (name === "valor" || name === "valorRecurso") {
+      const valorFormatado = formatarMoedaInput(value);
+      onChange({ target: { name, value: valorFormatado } });
+    } else {
+      onChange(e);
     }
-    return "R$ 0,00";
+  };
+
+  // Formatação monetária para exibição
+  const formatCurrency = (value) => {
+    if (!value && value !== 0) return "R$ 0,00";
+    const numericValue =
+      parseFloat(
+        value
+          .toString()
+          .replace(/[^\d,.-]/g, "")
+          .replace(",", ".") || "0",
+      ) || 0;
+    return numericValue.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+  };
+
+  // Cálculos
+  const getValorExecutado = () => {
+    return parseFloat(formData?.valorExecutado || 0) || 0;
   };
 
   const getSaldo = () => {
-    const valorRecurso = parseFloat(
-      formData.valorRecurso?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-    );
-    const outrosValores = parseFloat(
-      formData.outrosValores?.replace(/[^\d,]/g, "").replace(",", ".") || "0",
-    );
-    const valorTotal = valorRecurso + outrosValores;
-    const valorExecutado = metricas?.valorExecutado || 0;
-    const saldo = valorTotal - valorExecutado;
+    // ✅ PROTEÇÃO CONTRA UNDEFINED
+    const valorBase = formData?.valor || formData?.valorRecurso || "0";
+    const valorRecurso =
+      parseFloat(
+        valorBase
+          .toString()
+          .replace(/[^\d,.-]/g, "")
+          .replace(",", ".") || "0",
+      ) || 0;
 
-    return formatCurrency(saldo);
+    const outrosValores = parseFloat(formData?.outrosValores || 0) || 0;
+    const valorTotal = valorRecurso + outrosValores;
+    const valorExecutado = getValorExecutado();
+    const saldo = valorTotal - valorExecutado;
+    return { valorTotal, valorExecutado, saldo };
   };
 
+  const { valorTotal, valorExecutado, saldo } = getSaldo();
+
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📋</span>
+    <div style={styles.section}>
+      <h3 style={styles.sectionTitle}>
+        <span style={styles.sectionIcon}>💰</span>
         Dados Básicos
-      </legend>
+      </h3>
 
-      <div style={styles.formGrid}>
-        {/* Parlamentar - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Parlamentar <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="parlamentar"
-            value={formData.parlamentar || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.parlamentar && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="Nome do deputado/senador"
-            required
-          />
-          {fieldErrors.parlamentar && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* Número da Emenda - ORIGINAL */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Número da Emenda <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="numeroEmenda"
-            value={formData.numeroEmenda || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.numeroEmenda && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="Ex: 123456789"
-            required
-          />
-          {fieldErrors.numeroEmenda && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* ✅ Valor do Recurso */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Valor do Recurso <span style={styles.required}>*</span>
-            <span
-              style={styles.infoIcon}
-              title="Digite apenas números. Formatação aplicada automaticamente"
-            >
-              ℹ️
-            </span>
-          </label>
-          <input
-            type="text"
-            name="valorRecurso"
-            value={formData.valorRecurso || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.valorRecurso && styles.inputError),
-            }}
-            disabled={disabled}
-            placeholder="0,00"
-            required
-          />
-          {fieldErrors.valorRecurso && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* ✅ Outros Valores (MOVIDO DA IDENTIFICAÇÃO) */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Outros Valores
-            <span
-              style={styles.infoIcon}
-              title="Digite apenas números. Formatação automática aplicada"
-            >
-              ℹ️
-            </span>
-          </label>
-          <input
-            type="text"
-            name="outrosValores"
-            value={formData.outrosValores || ""}
-            onChange={handleInputChange}
-            style={styles.input}
-            disabled={disabled}
-            placeholder="0,00"
-          />
-        </div>
-
-        {/* ✅ Valor Executado (MOVIDO DA IDENTIFICAÇÃO) */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Valor Executado (Automático)
-            <span
-              style={styles.infoIcon}
-              title="Valor calculado automaticamente com base nas despesas"
-            >
-              ℹ️
-            </span>
-          </label>
-          <input
-            type="text"
-            value={getValorExecutado()}
-            style={{
-              ...styles.input,
-              backgroundColor: "#f8f9fa",
-              color: "#6c757d",
-            }}
-            disabled={true}
-            placeholder="Calculado automaticamente"
-          />
-        </div>
-
-        {/* ✅ Saldo (MOVIDO DA IDENTIFICAÇÃO) */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Saldo (Calculado)
-            <span
-              style={styles.infoIcon}
-              title="Saldo = (Valor do Recurso + Outros Valores) - Valor Executado"
-            >
-              ℹ️
-            </span>
-          </label>
-          <input
-            type="text"
-            value={getSaldo()}
-            style={{
-              ...styles.input,
-              backgroundColor: "#f8f9fa",
-              color:
-                parseFloat(
-                  getSaldo()
-                    .replace(/[^\d,-]/g, "")
-                    .replace(",", "."),
-                ) < 0
-                  ? "#dc3545"
-                  : "#28a745",
-              fontWeight: "bold",
-            }}
-            disabled={true}
-            placeholder="0,00"
-          />
-        </div>
-
-        {/* Objeto da Proposta - ORIGINAL */}
-        <div style={{ ...styles.formGroup, gridColumn: "span 2" }}>
-          <label style={styles.label}>
-            Objeto da Proposta <span style={styles.required}>*</span>
-          </label>
-          <textarea
-            name="objetoProposta"
-            value={formData.objetoProposta || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.objetoProposta && styles.inputError),
-              minHeight: "80px",
-              resize: "vertical",
-            }}
-            disabled={disabled}
-            placeholder="Descrição detalhada do objeto da emenda"
-            required
-          />
-          {fieldErrors.objetoProposta && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-        </div>
-
-        {/* Programa - ORIGINAL */}
-        <div style={styles.formGroup}>
+      {/* Primeira linha - Programa e Objeto */}
+      <div style={styles.row}>
+        <div style={styles.field}>
           <label style={styles.label}>
             Programa <span style={styles.required}>*</span>
           </label>
           <select
             name="programa"
-            value={formData.programa || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.programa && styles.inputError),
-            }}
-            disabled={disabled}
+            value={formData?.programa || ""}
+            onChange={onChange}
+            style={styles.input}
             required
           >
             <option value="">Selecione o programa</option>
-            {programas.map((programa) => (
-              <option key={programa} value={programa}>
-                {programa}
+            {programas.map((prog) => (
+              <option key={prog} value={prog}>
+                {prog}
               </option>
             ))}
           </select>
-          {fieldErrors.programa && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+          {fieldErrors?.programa && (
+            <span style={styles.errorText}>{fieldErrors.programa}</span>
+          )}
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>
+            Objeto da Proposta <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="objeto"
+            value={formData?.objeto || ""}
+            onChange={onChange}
+            placeholder="Ex: Custeio da atenção primária à saúde"
+            style={styles.input}
+            required
+          />
+          {fieldErrors?.objeto && (
+            <span style={styles.errorText}>{fieldErrors.objeto}</span>
           )}
         </div>
       </div>
-    </fieldset>
+
+      {/* Segunda linha - Parlamentar e Número */}
+      <div style={styles.row}>
+        <div style={styles.field}>
+          <label style={styles.label}>
+            Parlamentar/Autor <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="autor"
+            value={formData?.autor || ""}
+            onChange={onChange}
+            placeholder="Nome do parlamentar"
+            style={{
+              ...styles.input,
+              ...(fieldErrors?.autor ? styles.inputError : {}),
+            }}
+            required
+          />
+          {fieldErrors?.autor && (
+            <span style={styles.errorText}>{fieldErrors.autor}</span>
+          )}
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>
+            Número da Emenda <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="numero"
+            value={formData?.numero || ""}
+            onChange={onChange}
+            placeholder="Ex: 30460003"
+            style={{
+              ...styles.input,
+              ...(fieldErrors?.numero ? styles.inputError : {}),
+            }}
+            required
+          />
+          {fieldErrors?.numero && (
+            <span style={styles.errorText}>{fieldErrors.numero}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Terceira linha - Tipo de Emenda e Nº da Proposta */}
+      <div style={styles.row}>
+        <div style={styles.field}>
+          <label style={styles.label}>
+            Tipo de Emenda <span style={styles.required}>*</span>
+          </label>
+          <select
+            name="tipo"
+            value={formData?.tipo || "Individual"}
+            onChange={onChange}
+            style={styles.input}
+            required
+          >
+            <option value="Individual">Emenda Individual</option>
+            <option value="Bancada">Emenda de Bancada</option>
+            <option value="Comissao">Emenda de Comissão</option>
+            <option value="Relator">Emenda de Relator</option>
+          </select>
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Nº da Proposta</label>
+          <input
+            type="text"
+            name="numeroProposta"
+            value={formData?.numeroProposta || ""}
+            onChange={onChange}
+            placeholder="Ex: 36000660361202500"
+            style={styles.input}
+          />
+        </div>
+      </div>
+
+      {/* Quarta linha - Funcional e Beneficiário */}
+      <div style={styles.row}>
+        <div style={styles.field}>
+          <label style={styles.label}>Funcional</label>
+          <input
+            type="text"
+            name="funcional"
+            value={formData?.funcional || ""}
+            onChange={onChange}
+            placeholder="Ex: 10301311928590021"
+            style={styles.input}
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Beneficiário (CNPJ)</label>
+          <input
+            type="text"
+            name="cnpjBeneficiario"
+            value={formData?.cnpjBeneficiario || ""}
+            onChange={onChange}
+            placeholder="Ex: 11818604000166"
+            style={styles.input}
+          />
+        </div>
+      </div>
+
+      {/* ✅ QUINTA LINHA - VALORES COM FORMATAÇÃO MELHORADA */}
+      <div style={styles.row}>
+        <div style={styles.field}>
+          <label style={styles.label}>
+            Valor do Recurso <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="valor"
+            value={formData?.valor || ""}
+            onChange={handleInputChange}
+            placeholder="R$ 0,00"
+            style={{
+              ...styles.input,
+              ...styles.inputMoney,
+              ...(fieldErrors?.valor ? styles.inputError : {}),
+            }}
+            required
+          />
+          {fieldErrors?.valor && (
+            <span style={styles.errorText}>{fieldErrors.valor}</span>
+          )}
+        </div>
+
+        <div style={styles.field}>
+          <label style={styles.label}>Modalidade</label>
+          <select
+            name="modalidade"
+            value={formData?.modalidade || ""}
+            onChange={onChange}
+            style={styles.input}
+          >
+            <option value="">Selecione a modalidade</option>
+            <option value="Fundo a Fundo">Fundo a Fundo</option>
+            <option value="Convênio">Convênio</option>
+            <option value="Contrato">Contrato</option>
+            <option value="Termo de Cooperação">Termo de Cooperação</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Card de Resumo Financeiro */}
+      <div style={styles.financialSummary}>
+        <h4 style={styles.summaryTitle}>Resumo Financeiro</h4>
+        <div style={styles.summaryGrid}>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Valor Total:</span>
+            <span style={styles.summaryValue}>
+              {formatCurrency(valorTotal)}
+            </span>
+          </div>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Valor Executado:</span>
+            <span style={styles.summaryValueExecuted}>
+              {formatCurrency(valorExecutado)}
+            </span>
+          </div>
+          <div style={styles.summaryItem}>
+            <span style={styles.summaryLabel}>Saldo Disponível:</span>
+            <span style={styles.summaryValueSaldo}>
+              {formatCurrency(saldo)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-// ✅ ESTILOS ORIGINAIS MANTIDOS
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  section: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "24px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    border: "1px solid #e9ecef",
   },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    marginBottom: "20px",
+    color: "#2c3e50",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
-  legendIcon: {
-    fontSize: "18px",
+  sectionIcon: {
+    fontSize: "20px",
   },
-  formGrid: {
+  // ✅ GRID SINCRONIZADO - FORÇANDO ALINHAMENTO
+  row: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "1fr 1fr",
     gap: "20px",
     marginBottom: "20px",
+    alignItems: "start",
   },
-  formGroup: {
+  field: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
   label: {
-    fontWeight: "bold",
-    color: "#333",
     fontSize: "14px",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
+    fontWeight: "500",
+    marginBottom: "6px",
+    color: "#495057",
   },
   required: {
     color: "#dc3545",
   },
   input: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
+    padding: "10px 12px",
+    border: "1px solid #ced4da",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    transition: "border-color 0.2s, box-shadow 0.2s",
     backgroundColor: "white",
+    width: "100%",
+  },
+  // ✅ ESTILO ESPECIAL PARA CAMPO MONETÁRIO
+  inputMoney: {
+    fontWeight: "600",
+    color: "#059669",
+    textAlign: "right",
+    fontSize: "16px",
+    backgroundColor: "#f0fdf4",
+    borderColor: "#22c55e",
   },
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "4px",
-    display: "block",
   },
-  infoIcon: {
-    fontSize: "14px",
-    color: "#0066cc",
-    cursor: "help",
-    userSelect: "none",
+  helperText: {
+    fontSize: "12px",
+    color: "#6c757d",
+    marginTop: "4px",
+  },
+  financialSummary: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: "8px",
+    padding: "20px",
+    marginTop: "24px",
+    border: "1px solid #e9ecef",
+  },
+  summaryTitle: {
+    fontSize: "16px",
+    fontWeight: "600",
+    marginBottom: "16px",
+    color: "#2c3e50",
+  },
+  summaryGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "16px",
+  },
+  summaryItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  summaryLabel: {
+    fontSize: "12px",
+    color: "#6c757d",
+    fontWeight: "500",
+  },
+  summaryValue: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#2c3e50",
+  },
+  summaryValueExecuted: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#dc3545",
+  },
+  summaryValueSaldo: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#28a745",
   },
 };
 
