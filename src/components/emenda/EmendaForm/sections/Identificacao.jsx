@@ -1,8 +1,6 @@
-// src/components/emenda/EmendaForm/sections/Identificacao.jsx
 import React from "react";
-import { validarCNPJ, formatarCNPJ } from "../../../../utils/validators";
 
-const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
+const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estados = [
     { sigla: "AC", nome: "Acre" },
     { sigla: "AL", nome: "Alagoas" },
@@ -37,98 +35,88 @@ const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
     const { name, value } = e.target;
 
     if (name === "cnpj") {
-      const formatted = formatarCNPJ(value);
+      const formatted = value
+        .replace(/\D/g, "")
+        .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
       onChange({ target: { name, value: formatted } });
     } else {
       onChange(e);
     }
   };
 
-  // Função para obter o status de validação do CNPJ
+  const isValidCNPJ = (cnpj) => {
+    const numbers = cnpj.replace(/\D/g, "");
+    if (numbers.length !== 14) return false;
+
+    const digits = numbers.split("").map(Number);
+
+    // Primeiro dígito
+    let sum = 0;
+    let weight = 5;
+    for (let i = 0; i < 12; i++) {
+      sum += digits[i] * weight;
+      weight = weight === 2 ? 9 : weight - 1;
+    }
+    let digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (digit !== digits[12]) return false;
+
+    // Segundo dígito
+    sum = 0;
+    weight = 6;
+    for (let i = 0; i < 13; i++) {
+      sum += digits[i] * weight;
+      weight = weight === 2 ? 9 : weight - 1;
+    }
+    digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    return digit === digits[13];
+  };
+
   const getCNPJStatus = () => {
     if (!formData.cnpj || formData.cnpj.length < 3) return null;
-
     const cnpjLimpo = formData.cnpj.replace(/\D/g, "");
-
     if (cnpjLimpo.length < 14) return "incomplete";
-    if (cnpjLimpo.length === 14) {
-      return validarCNPJ(formData.cnpj) ? "valid" : "invalid";
-    }
-
-    return null;
+    return isValidCNPJ(formData.cnpj) ? "valid" : "invalid";
   };
 
   const cnpjStatus = getCNPJStatus();
 
-  // Função para obter o estilo do input baseado no status
-  const getInputStyle = () => {
-    const baseStyle = { ...styles.input };
-
-    if (fieldErrors?.cnpj) {
-      return { ...baseStyle, ...styles.inputError };
-    }
-
-    if (cnpjStatus === "valid") {
-      return { ...baseStyle, ...styles.inputValid };
-    }
-
-    if (cnpjStatus === "invalid") {
-      return { ...baseStyle, ...styles.inputInvalid };
-    }
-
-    if (cnpjStatus === "incomplete") {
-      return { ...baseStyle, ...styles.inputIncomplete };
-    }
-
-    return baseStyle;
-  };
-
   return (
-    <div style={styles.section}>
-      <h3 style={styles.sectionTitle}>
-        <span style={styles.sectionIcon}>🏢</span>
+    <fieldset style={styles.fieldset}>
+      <legend style={styles.legend}>
+        <span style={styles.legendIcon}>🏢</span>
         Identificação
-      </h3>
+      </legend>
 
-      <div style={styles.row}>
+      <div style={styles.formGrid}>
         {/* CNPJ */}
-        <div style={styles.field}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ <span style={styles.required}>*</span>
           </label>
-          <div style={styles.inputContainer}>
-            <input
-              type="text"
-              name="cnpj"
-              value={formData.cnpj || ""}
-              onChange={handleInputChange}
-              placeholder="00.000.000/0000-00"
-              style={getInputStyle()}
-              required
-            />
-            {formData.cnpj && formData.cnpj.length >= 3 && (
-              <span style={styles.validationIcon}>
-                {cnpjStatus === "valid" && "✅"}
-                {cnpjStatus === "invalid" && "❌"}
-                {cnpjStatus === "incomplete" && "⏳"}
-              </span>
-            )}
-          </div>
+          <input
+            type="text"
+            name="cnpj"
+            value={formData.cnpj || ""}
+            onChange={handleInputChange}
+            placeholder="00.000.000/0000-00"
+            style={{
+              ...styles.input,
+              ...(fieldErrors.cnpj && styles.inputError),
+              ...(cnpjStatus === "valid" && styles.inputValid),
+              ...(cnpjStatus === "invalid" && styles.inputError),
+            }}
+            required
+          />
           {cnpjStatus === "invalid" && (
-            <span style={styles.errorText}>CNPJ inválido</span>
+            <small style={styles.errorText}>CNPJ inválido</small>
           )}
-          {cnpjStatus === "incomplete" &&
-            formData.cnpj &&
-            formData.cnpj.length >= 8 && (
-              <span style={styles.warningText}>Continue digitando...</span>
-            )}
-          {fieldErrors?.cnpj && !cnpjStatus && (
-            <span style={styles.errorText}>{fieldErrors.cnpj}</span>
+          {fieldErrors.cnpj && !cnpjStatus && (
+            <small style={styles.errorText}>{fieldErrors.cnpj}</small>
           )}
         </div>
 
         {/* Município */}
-        <div style={styles.field}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
             Município <span style={styles.required}>*</span>
           </label>
@@ -140,17 +128,17 @@ const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
             placeholder="Nome do município"
             style={{
               ...styles.input,
-              ...(fieldErrors?.municipio ? styles.inputError : {}),
+              ...(fieldErrors.municipio && styles.inputError),
             }}
             required
           />
-          {fieldErrors?.municipio && (
-            <span style={styles.errorText}>{fieldErrors.municipio}</span>
+          {fieldErrors.municipio && (
+            <small style={styles.errorText}>{fieldErrors.municipio}</small>
           )}
         </div>
 
         {/* UF */}
-        <div style={styles.field}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
             UF <span style={styles.required}>*</span>
           </label>
@@ -160,7 +148,7 @@ const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
             onChange={onChange}
             style={{
               ...styles.input,
-              ...(fieldErrors?.uf ? styles.inputError : {}),
+              ...(fieldErrors.uf && styles.inputError),
             }}
             required
           >
@@ -171,99 +159,78 @@ const Identificacao = ({ formData, onChange, fieldErrors = {} }) => {
               </option>
             ))}
           </select>
-          {fieldErrors?.uf && (
-            <span style={styles.errorText}>{fieldErrors.uf}</span>
+          {fieldErrors.uf && (
+            <small style={styles.errorText}>{fieldErrors.uf}</small>
           )}
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };
 
 const styles = {
-  section: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    padding: "24px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    border: "1px solid #e9ecef",
+  fieldset: {
+    border: "2px solid #154360",
+    borderRadius: "10px",
+    padding: "20px",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
-  sectionTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    marginBottom: "20px",
-    color: "#2c3e50",
+  legend: {
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
+    fontWeight: "bold",
+    fontSize: "16px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
-  sectionIcon: {
-    fontSize: "20px",
+  legendIcon: {
+    fontSize: "18px",
   },
-  row: {
+  formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
   },
-  field: {
+  formGroup: {
     display: "flex",
     flexDirection: "column",
+    gap: "8px",
   },
   label: {
+    fontWeight: "bold",
+    color: "#333",
     fontSize: "14px",
-    fontWeight: "500",
-    marginBottom: "6px",
-    color: "#495057",
   },
   required: {
     color: "#dc3545",
   },
-  inputContainer: {
-    position: "relative",
-  },
   input: {
-    padding: "10px 12px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#ced4da",
+    padding: "12px",
+    border: "2px solid #dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "all 0.2s",
+    transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    width: "100%",
   },
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
   inputValid: {
     borderColor: "#28a745",
-    backgroundColor: "#f8fff8",
-  },
-  inputInvalid: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-  },
-  inputIncomplete: {
-    borderColor: "#ffc107",
-    backgroundColor: "#fffbf0",
-  },
-  validationIcon: {
-    position: "absolute",
-    right: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "16px",
+    backgroundColor: "#f8fff9",
   },
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "4px",
-  },
-  warningText: {
-    color: "#856404",
-    fontSize: "12px",
-    marginTop: "4px",
+    display: "block",
   },
 };
 

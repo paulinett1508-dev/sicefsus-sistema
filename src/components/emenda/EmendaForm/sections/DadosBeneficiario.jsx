@@ -16,9 +16,11 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
           Informações Adicionais do Beneficiário
         </h3>
         <div style={styles.toggleButton}>
-          <span style={styles.toggleIcon}>{isExpanded ? "−" : "+"}</span>
+          <span style={styles.toggleIcon}>
+            {isExpanded ? '−' : '+'}
+          </span>
           <span style={styles.toggleText}>
-            {isExpanded ? "Ocultar" : "Exibir"}
+            {isExpanded ? 'Ocultar' : 'Exibir'}
           </span>
         </div>
       </div>
@@ -46,7 +48,9 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>Endereço do Beneficiário</label>
+              <label style={styles.label}>
+                Endereço do Beneficiário
+              </label>
               <input
                 type="text"
                 name="enderecoBeneficiario"
@@ -61,7 +65,9 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
           {/* Segunda linha - Telefone, Email, Responsável */}
           <div style={styles.row}>
             <div style={styles.field}>
-              <label style={styles.label}>Telefone de Contato</label>
+              <label style={styles.label}>
+                Telefone de Contato
+              </label>
               <input
                 type="text"
                 name="telefoneBeneficiario"
@@ -73,7 +79,9 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>Email do Beneficiário</label>
+              <label style={styles.label}>
+                Email do Beneficiário
+              </label>
               <input
                 type="email"
                 name="emailBeneficiario"
@@ -88,7 +96,9 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
           {/* Terceira linha - Responsável Legal e CPF */}
           <div style={styles.row}>
             <div style={styles.field}>
-              <label style={styles.label}>Responsável Legal</label>
+              <label style={styles.label}>
+                Responsável Legal
+              </label>
               <input
                 type="text"
                 name="responsavelLegal"
@@ -100,7 +110,9 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
             </div>
 
             <div style={styles.field}>
-              <label style={styles.label}>CPF do Responsável</label>
+              <label style={styles.label}>
+                CPF do Responsável
+              </label>
               <input
                 type="text"
                 name="cpfResponsavel"
@@ -116,9 +128,7 @@ const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
           <div style={styles.infoBanner}>
             <div style={styles.infoIcon}>ℹ️</div>
             <div style={styles.infoText}>
-              Estas informações complementam os dados do beneficiário e
-              facilitam o contato e acompanhamento da execução da emenda. O CNPJ
-              do beneficiário deve ser preenchido na seção de Dados Básicos.
+              Estas informações complementam os dados do beneficiário e facilitam o contato e acompanhamento da execução da emenda. O CNPJ do beneficiário deve ser preenchido na seção de Dados Básicos.
             </div>
           </div>
         </div>
@@ -147,8 +157,8 @@ const styles = {
     alignItems: "center",
     transition: "background-color 0.2s ease",
     "&:hover": {
-      backgroundColor: "#e9ecef",
-    },
+      backgroundColor: "#e9ecef"
+    }
   },
 
   sectionTitle: {

@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 
-const InformacoesComplementares = ({
-  formData = {},
-  onChange,
-  fieldErrors = {},
-}) => {
+const InformacoesFinais = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleInputChange = (e) => {
@@ -37,7 +33,7 @@ const InformacoesComplementares = ({
           <div style={styles.formGrid}>
             {/* Área de Atuação */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Área de Atuação</label>
+              <label style={styles.label}>Área de Atuação Principal</label>
               <select
                 name="areaAtuacao"
                 value={formData.areaAtuacao || ""}
@@ -52,13 +48,16 @@ const InformacoesComplementares = ({
                 <option value="cultura">Cultura</option>
                 <option value="meio-ambiente">Meio Ambiente</option>
                 <option value="infraestrutura">Infraestrutura</option>
+                <option value="desenvolvimento-social">
+                  Desenvolvimento Social
+                </option>
                 <option value="outros">Outros</option>
               </select>
             </div>
 
             {/* Telefone */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Telefone</label>
+              <label style={styles.label}>Telefone de Contato</label>
               <input
                 type="tel"
                 name="telefone"
@@ -71,7 +70,7 @@ const InformacoesComplementares = ({
 
             {/* Email */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>E-mail</label>
+              <label style={styles.label}>E-mail de Contato</label>
               <input
                 type="email"
                 name="emailContato"
@@ -82,7 +81,7 @@ const InformacoesComplementares = ({
               />
             </div>
 
-            {/* Modalidade */}
+            {/* Modalidade de Aplicação */}
             <div style={styles.formGroup}>
               <label style={styles.label}>Modalidade de Aplicação</label>
               <select
@@ -103,20 +102,22 @@ const InformacoesComplementares = ({
 
             {/* Público-Alvo */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Público-Alvo</label>
+              <label style={styles.label}>Público-Alvo Beneficiado</label>
               <input
                 type="text"
                 name="publicoAlvo"
                 value={formData.publicoAlvo || ""}
                 onChange={handleInputChange}
-                placeholder="Ex: Crianças, Idosos, População geral"
+                placeholder="Ex: Crianças de 0 a 6 anos, Idosos..."
                 style={styles.input}
               />
             </div>
 
-            {/* Beneficiários */}
+            {/* Número de Beneficiários */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Número de Beneficiários</label>
+              <label style={styles.label}>
+                Número de Beneficiários Estimado
+              </label>
               <input
                 type="number"
                 name="numeroBeneficiarios"
@@ -130,29 +131,38 @@ const InformacoesComplementares = ({
           </div>
 
           {/* Campos de texto maiores */}
-          <div style={styles.textAreaGrid}>
+          <div style={styles.textAreaGroup}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Justificativa</label>
+              <label style={styles.label}>Justificativa da Emenda</label>
               <textarea
                 name="justificativa"
                 value={formData.justificativa || ""}
                 onChange={handleInputChange}
-                placeholder="Justifique a necessidade da emenda..."
+                placeholder="Justifique a necessidade e importância desta emenda..."
                 rows="3"
                 style={styles.textarea}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Observações</label>
+              <label style={styles.label}>Observações Adicionais</label>
               <textarea
                 name="observacoesFinais"
                 value={formData.observacoesFinais || ""}
                 onChange={handleInputChange}
-                placeholder="Informações complementares..."
+                placeholder="Informações complementares que julgar necessárias..."
                 rows="3"
                 style={styles.textarea}
               />
+            </div>
+          </div>
+
+          {/* Banner informativo */}
+          <div style={styles.infoBanner}>
+            <div style={styles.infoIcon}>ℹ️</div>
+            <div style={styles.infoText}>
+              Estas informações são opcionais e complementam os dados da emenda.
+              Podem ser úteis para acompanhamento e relatórios posteriores.
             </div>
           </div>
         </div>
@@ -169,11 +179,9 @@ const styles = {
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     overflow: "hidden",
-    marginBottom: "20px",
-    marginTop: "20px",
   },
   headerContainer: {
-    padding: "15px 20px",
+    padding: "20px",
     backgroundColor: "#f8f9fa",
     borderBottom: "1px solid #dee2e6",
     cursor: "pointer",
@@ -223,10 +231,11 @@ const styles = {
     gap: "20px",
     marginBottom: "20px",
   },
-  textAreaGrid: {
+  textAreaGroup: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "20px",
+    marginBottom: "20px",
   },
   formGroup: {
     display: "flex",
@@ -256,6 +265,24 @@ const styles = {
     resize: "vertical",
     fontFamily: "inherit",
   },
+  infoBanner: {
+    display: "flex",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "#e3f2fd",
+    border: "1px solid #bbdefb",
+    borderRadius: "6px",
+    marginTop: "20px",
+  },
+  infoIcon: {
+    fontSize: "16px",
+    flexShrink: 0,
+  },
+  infoText: {
+    fontSize: "14px",
+    color: "#1565c0",
+    lineHeight: "1.4",
+  },
 };
 
-export default InformacoesComplementares;
+export default InformacoesFinais;
