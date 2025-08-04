@@ -30,28 +30,22 @@ export default function PrivateRoute({ children, usuario, requiredRole }) {
     return <Navigate to="/unauthorized" />;
   }
 
-  // ✅ VERIFICAÇÃO DE ROLE ESPECÍFICA (COMPATIBILIDADE DUPLA)
+  // ✅ VERIFICAÇÃO DE TIPO PADRONIZADA
   if (requiredRole) {
     if (requiredRole === "admin") {
-      // ✅ VERIFICAR TANTO 'tipo' QUANTO 'role' PARA COMPATIBILIDADE
-      const isAdmin = usuario.tipo === "admin" || usuario.role === "admin";
+      const isAdmin = usuario.tipo === "admin";
       if (!isAdmin) {
         console.log(
           "❌ PrivateRoute: Usuário não é admin, redirecionando para /unauthorized",
         );
-        console.log(
-          `   Tipo: ${usuario.tipo}, Role: ${usuario.role}, Requerido: admin`,
-        );
+        console.log(`   Tipo: ${usuario.tipo}, Requerido: admin`);
         return <Navigate to="/unauthorized" />;
       }
     }
-    // ✅ VERIFICAÇÃO PARA OPERADOR/USER
-    else if (requiredRole === "operador" || requiredRole === "user") {
+    // ✅ VERIFICAÇÃO PARA OPERADOR
+    else if (requiredRole === "operador") {
       const isOperadorOrAdmin =
-        usuario.tipo === "operador" ||
-        usuario.tipo === "admin" ||
-        usuario.role === "user" ||
-        usuario.role === "admin";
+        usuario.tipo === "operador" || usuario.tipo === "admin";
 
       if (!isOperadorOrAdmin) {
         console.log("❌ PrivateRoute: Usuário não é operador nem admin");
@@ -61,7 +55,7 @@ export default function PrivateRoute({ children, usuario, requiredRole }) {
   }
 
   // ✅ VERIFICAÇÃO ESPECIAL: Operador sem localização
-  if (usuario.tipo === "operador" || usuario.role === "user") {
+  if (usuario.tipo === "operador") {
     if (!usuario.municipio || !usuario.uf) {
       console.log(
         "❌ PrivateRoute: Operador sem localização definida, redirecionando para /unauthorized",

@@ -124,15 +124,15 @@ const checkEmailExists = async (email) => {
   }
 };
 
-// ✅ CONVERTER ROLE PARA TIPO (CORRIGIDO)
-const convertRoleToTipo = (role) => {
-  const roleMap = {
+// ✅ NORMALIZAR TIPO DE USUÁRIO
+const normalizeTipo = (tipo) => {
+  const tipoMap = {
     admin: "admin",
-    user: "operador", // ✅ CORREÇÃO: user -> operador
-    operador: "operador",
     administrador: "admin",
+    user: "operador", // Compatibilidade com formulários antigos
+    operador: "operador",
   };
-  return roleMap[role] || "operador";
+  return tipoMap[tipo] || "operador";
 };
 
 // ✅ VALIDAR DADOS
@@ -156,7 +156,7 @@ const validateFormData = (formData) => {
   }
 
   // ✅ VALIDAÇÃO PARA OPERADORES - MUNICÍPIO/UF OBRIGATÓRIOS
-  const tipoUsuario = convertRoleToTipo(formData.role);
+  const tipoUsuario = normalizeTipo(formData.tipo || formData.role);
 
   if (tipoUsuario === "operador") {
     if (!formData.municipio?.trim()) {

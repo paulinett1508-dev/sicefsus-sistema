@@ -52,14 +52,8 @@ export const UserProvider = ({ children }) => {
               nome: nome,
               displayName: nome, // Para compatibilidade com Sidebar
 
-              // ✅ MAPEAMENTO DE TIPOS CORRIGIDO:
-              role:
-                tipo === "admin"
-                  ? "admin"
-                  : tipo === "operador"
-                    ? "operador"
-                    : "user", // Mapear corretamente
-              tipo: tipo, // Campo original do sistema
+              // ✅ CAMPO PADRONIZADO:
+              tipo: tipo, // Campo único do sistema
 
               // ✅ MAPEAMENTO DE STATUS:
               isActive: status === "ativo", // Para compatibilidade
@@ -130,7 +124,6 @@ export const UserProvider = ({ children }) => {
               email: firebaseUser.email,
               nome: nomeBasico,
               displayName: nomeBasico,
-              role: isAdminEmail ? "admin" : "operador",
               tipo: isAdminEmail ? "admin" : "operador",
               isActive: true,
               status: "ativo",
@@ -161,7 +154,6 @@ export const UserProvider = ({ children }) => {
             email: firebaseUser.email,
             nome: fallbackName,
             displayName: fallbackName,
-            role: isAdminEmail ? "admin" : "operador",
             tipo: isAdminEmail ? "admin" : "operador",
             isActive: true,
             status: "ativo",
@@ -186,7 +178,7 @@ export const UserProvider = ({ children }) => {
     setUsuario,
     loading,
     isAuthenticated: !!usuario,
-    isAdmin: usuario?.role === "admin" || usuario?.tipo === "admin",
+    isAdmin: usuario?.tipo === "admin",
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

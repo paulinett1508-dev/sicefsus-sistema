@@ -156,13 +156,13 @@ export const validatePassword = (senha) => {
 };
 
 /**
- * ✅ VALIDAR role de usuário (CORRIGIDO)
- * @param {string} role - Role a ser validada
- * @returns {boolean} - true se válida
+ * ✅ VALIDAR tipo de usuário (PADRONIZADO)
+ * @param {string} tipo - Tipo a ser validado
+ * @returns {boolean} - true se válido
  */
-export const validateUserRole = (role) => {
-  const rolesValidas = ["admin", "user", "operador"]; // ✅ INCLUIR "user" e "operador"
-  return rolesValidas.includes(role);
+export const validateUserTipo = (tipo) => {
+  const tiposValidos = ["admin", "operador"]; // ✅ APENAS DOIS TIPOS VÁLIDOS
+  return tiposValidos.includes(tipo);
 };
 
 /**

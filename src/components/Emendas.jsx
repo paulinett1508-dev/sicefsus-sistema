@@ -27,7 +27,7 @@ const Emendas = () => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   // ✅ CORREÇÃO: Acesso correto às propriedades do usuário
-  const userRole = user?.tipo || user?.role || "operador";
+  const userRole = user?.tipo || "operador";
   const userMunicipio = user?.municipio;
   const userUf = user?.uf;
   const userEmail = user?.email;
@@ -260,7 +260,7 @@ const Emendas = () => {
       </div>
 
       {/* Banner de informação de permissões para operadores */}
-      {(userRole === "operador" || userRole === "user") && userMunicipio && (
+      {userRole === "operador" && userMunicipio && (
         <div style={styles.permissaoInfo}>
           <span style={styles.permissaoIcon}>🔒</span>
           <div style={styles.permissaoContent}>
