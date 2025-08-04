@@ -1,0 +1,206 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: Object
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:19 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:19 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+App.jsx:287 🚪 Usuário deslogado
+UserContext.jsx:165 🚪 Usuário deslogado
+Login.jsx:109 🔐 Iniciando processo de login...
+Login.jsx:110 📧 Email: paulinett@live.com
+App.jsx:196 🔍 onAuthStateChanged: Carregando dados do usuário: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+App.jsx:200 📧 Email: paulinett@live.com
+UserContext.jsx:28 🔍 Carregando dados do usuário: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:114 ✅ Autenticação Firebase Auth bem-sucedida
+Login.jsx:115 👤 UID: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:34 🔍 Buscando dados do usuário no Firestore...
+Login.jsx:35 📋 UID: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:36 📧 Email: paulinett@live.com
+App.jsx:260 ❌ Usuário não encontrado na coleção 'usuarios'
+App.jsx:261 🚨 USUÁRIO ÓRFÃO DETECTADO!
+App.jsx:262    - Existe no Firebase Auth ✅
+App.jsx:263    - NÃO existe no Firestore ❌
+App.jsx:264    - Precisa ser criado via interface de administração
+UserContext.jsx:77 ⚠️ Documento do usuário não encontrado, criando básico...
+Login.jsx:60 🔍 Não encontrado por UID, buscando por email...
+App.jsx:287 🚪 Usuário deslogado
+UserContext.jsx:165 🚪 Usuário deslogado
+Login.jsx:70 ✅ Usuário encontrado por email: Object
+Login.jsx:119 ✅ Dados do usuário carregados: Object
+Login.jsx:141 ✅ Todas as validações passaram
+App.jsx:342 ✅ handleLoginSuccess chamado: Object
+App.jsx:346 📋 Definindo usuário com dados completos do Login.jsx: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:486 ✅ Dados carregados: Object
+Dashboard.jsx:486 ✅ Dados carregados: Object
+Sidebar.jsx:76 🔍 Tentativa de navegação para Emendas: Object
+Sidebar.jsx:97 ✅ Navegação normal para Emendas
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:19 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:19 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+Login.jsx:109 🔐 Iniciando processo de login...
+Login.jsx:110 📧 Email: paulinett1508@gmail.com
+App.jsx:196 🔍 onAuthStateChanged: Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+App.jsx:200 📧 Email: paulinett1508@gmail.com
+UserContext.jsx:28 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+Login.jsx:114 ✅ Autenticação Firebase Auth bem-sucedida
+Login.jsx:115 👤 UID: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+Login.jsx:34 🔍 Buscando dados do usuário no Firestore...
+Login.jsx:35 📋 UID: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+Login.jsx:36 📧 Email: paulinett1508@gmail.com
+App.jsx:207 ✅ Dados encontrados na coleção 'usuarios': Object
+App.jsx:250 👤 Usuário configurado via onAuthStateChanged: Object
+UserContext.jsx:35 ✅ Dados do usuário encontrados: Object
+UserContext.jsx:70 👤 Usuário configurado: Object
+Login.jsx:45 ✅ Usuário encontrado por UID: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Login.jsx:119 ✅ Dados do usuário carregados: Object
+Login.jsx:141 ✅ Todas as validações passaram
+App.jsx:342 ✅ handleLoginSuccess chamado: Object
+App.jsx:346 📋 Definindo usuário com dados completos do Login.jsx: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:486 ✅ Dados carregados: Object
+Dashboard.jsx:486 ✅ Dados carregados: Object
+Sidebar.jsx:76 🔍 Tentativa de navegação para Emendas: Object
+Sidebar.jsx:97 ✅ Navegação normal para Emendas
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:68 📊 Carregando emendas...
+Emendas.jsx:68 📊 Carregando emendas...
+Emendas.jsx:81 ✅ 2 emendas carregadas
+Emendas.jsx:81 ✅ 2 emendas carregadas
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:105 🔍 Aplicando filtros: 2
+Emendas.jsx:105 🔍 Aplicando filtros: 2
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+Emendas.jsx:35 📋 Emendas.jsx v2.1 - Dados do usuário: Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:261 🔍 Aplicando filtros locais: 0
+Despesas.jsx:76 📊 Carregando dados com filtro por município...
+Despesas.jsx:83 👑 Usuário ADMIN - carregando todas as emendas
+Despesas.jsx:261 🔍 Aplicando filtros locais: 0
+Despesas.jsx:76 📊 Carregando dados com filtro por município...
+Despesas.jsx:83 👑 Usuário ADMIN - carregando todas as emendas
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:152 ✅ Emendas permitidas carregadas: 2
+Despesas.jsx:155 📋 IDs das emendas permitidas: Array(2)
+Despesas.jsx:166 📦 Processando lote 1 - IDs: Array(2)
+Despesas.jsx:152 ✅ Emendas permitidas carregadas: 2
+Despesas.jsx:155 📋 IDs das emendas permitidas: Array(2)
+Despesas.jsx:166 📦 Processando lote 1 - IDs: Array(2)
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:186 ✅ Despesas filtradas carregadas: 2
+Despesas.jsx:187 💰 Amostra de despesas: Array(2)
+Despesas.jsx:186 ✅ Despesas filtradas carregadas: 2
+Despesas.jsx:187 💰 Amostra de despesas: Array(2)
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+Despesas.jsx:261 🔍 Aplicando filtros locais: 2
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrintButton.jsx:10 🔍 PrivateRoute verificação: Object
+PrintButton.jsx:102 ✅ PrivateRoute: Acesso autorizado
+PrintButton.jsx:10 🔍 PrivateRoute verificação: Object
+PrintButton.jsx:102 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:261 🔍 Aplicando filtros locais: 0
+Despesas.jsx:76 📊 Carregando dados com filtro por município...
+Despesas.jsx:83 👑 Usuário ADMIN - carregando todas as emendas
+Despesas.jsx:261 🔍 Aplicando filtros locais: 0
+Despesas.jsx:76 📊 Carregando dados com filtro por município...
+Despesas.jsx:83 👑 Usuário ADMIN - carregando todas as emendas
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:152 ✅ Emendas permitidas carregadas: 2
+Despesas.jsx:155 📋 IDs das emendas permitidas: Array(2)
+Despesas.jsx:166 📦 Processando lote 1 - IDs: Array(2)
+Despesas.jsx:152 ✅ Emendas permitidas carregadas: 2
+Despesas.jsx:155 📋 IDs das emendas permitidas: Array(2)
+Despesas.jsx:166 📦 Processando lote 1 - IDs: Array(2)
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:186 ✅ Despesas filtradas carregadas: 2
+Despesas.jsx:187 💰 Amostra de despesas: Array(2)
+Despesas.jsx:186 ✅ Despesas filtradas carregadas: 2
+Despesas.jsx:187 💰 Amostra de despesas: Array(2)
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+Despesas.jsx:261 🔍 Aplicando filtros locais: 2
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+Despesas.jsx:47 🔒 Despesas.jsx v2.1 - Dados do usuário completos: Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:48 📊 DespesasList: Sincronizando dados 2
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+DespesasList.jsx:39 📊 DespesasList: Recebendo dados via props Object
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:6 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:486 ✅ Dados carregados: Object
+Dashboard.jsx:486 ✅ Dados carregados: Object
+ 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: undefined, requiredRole: 'admin', …}
+ ✅ PrivateRoute: Acesso autorizado
+ 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', role: undefined, requiredRole: 'admin', …}
+ ✅ PrivateRoute: Acesso autorizado
+ 📋 Carregando usuários da collection: usuarios
+ 📋 Carregando usuários da collection: usuarios
+ ✅ 2 usuários carregados
+ ✅ Usuários carregados: 2
+ ✅ 2 usuários carregados
+ ✅ Usuários carregados: 2
