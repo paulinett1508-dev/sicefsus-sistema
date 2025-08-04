@@ -41,7 +41,13 @@ export const UserProvider = ({ children }) => {
               firebaseUser.displayName ||
               firebaseUser.email?.split("@")[0] ||
               "Usuário";
-            const tipo = userData.tipo || userData.role || "operador";
+            
+            // ✅ NORMALIZAR TIPO: converter "user" para "operador"
+            let tipo = userData.tipo || userData.role || "operador";
+            if (tipo === "user") {
+              tipo = "operador";
+            }
+            
             const status = userData.status || "ativo";
 
             setUsuario({

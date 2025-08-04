@@ -394,12 +394,15 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             >
               <span
                 style={{
-                  background:
+                  backgroundColor:
                     usuario.tipo === "admin"
-                      ? "var(--success)"
-                      : "var(--accent)",
-                  color: "var(--white)",
-                  borderRadius: 10,
+                      ? "var(--warning)"
+                      : "var(--success)",
+                  color:
+                    usuario.tipo === "admin"
+                      ? "var(--warning-dark)"
+                      : "var(--success-dark)",
+                  borderRadius: "6px",
                   padding: "2px 8px",
                   fontWeight: "bold",
                   fontSize: 10,
@@ -410,7 +413,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
                 }}
                 title={usuario.tipo === "admin" ? "Administrador" : "Operador"}
               >
-                {usuario.tipo === "admin" ? "ADMIN" : "USER"}
+                {usuario.tipo === "admin" ? "ADMIN" : "OPERADOR"}
               </span>
               <span
                 style={{
