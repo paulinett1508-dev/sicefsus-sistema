@@ -290,13 +290,16 @@ const styles = {
   },
 
   statusInactive: {
-    display: "inline-block",
-    backgroundColor: "#f8d7da",
-    color: "#721c24",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
+    backgroundColor: "#f8f9fa",
+    color: "#495057",
+    border: "1px solid #dee2e6",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
-    fontWeight: "500",
+    fontWeight: "500"
   },
 
   statusBlocked: {
