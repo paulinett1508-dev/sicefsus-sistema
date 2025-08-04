@@ -40,14 +40,14 @@ const Despesas = ({ usuario }) => {
   const [despesasComFiltros, setDespesasComFiltros] = useState([]);
 
   // Dados do usuário para filtro por município (mantido)
-  const userRole = usuario?.role || usuario?.tipo;
+  const userRole = usuario?.tipo || "operador"; // Usando 'tipo' consistentemente
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
   console.log("🔒 Despesas.jsx v2.1 - Dados do usuário completos:", {
     usuario: usuario,
     email: usuario?.email,
-    role: userRole,
+    role: userRole, // Exibe o papel correto
     tipo: usuario?.tipo,
     municipio: userMunicipio,
     uf: userUf,
@@ -411,7 +411,6 @@ const Despesas = ({ usuario }) => {
     setBreadcrumb(null);
     setDespesasFiltradas(despesas);
     setDespesasComFiltros(despesas); // ✅ NOVO: Sincronizar
-
     navigate(location.pathname, { replace: true });
   };
 

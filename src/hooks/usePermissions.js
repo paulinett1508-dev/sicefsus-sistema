@@ -33,7 +33,7 @@ const usePermissions = (usuario) => {
     }
 
     // ✅ ADMIN: Acesso total sempre
-    if (usuario.role === "admin") {
+    if (usuario.tipo === "admin") {
       return {
         acessoTotal: true,
         filtroAplicado: false,
@@ -111,14 +111,14 @@ const usePermissions = (usuario) => {
        * Verificar se é administrador
        */
       isAdmin: () => {
-        return usuario?.role === "admin";
+        return usuario?.tipo === "admin";
       },
 
       /**
        * Verificar se é operador
        */
       isOperador: () => {
-        return usuario?.role === "user" || (!usuario?.role && usuario);
+        return usuario?.tipo === "operador";
       },
 
       /**
