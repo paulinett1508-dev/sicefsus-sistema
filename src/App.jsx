@@ -1,4 +1,4 @@
-// App.jsx - VERSÃO CORRIGIDA PARA USAR USERCONTEXT
+// App.jsx - VERSÃO CORRIGIDA PARA SICEFSUS
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -8,7 +8,8 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { ToastProvider } from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import Home from "./components/Home";
@@ -23,9 +24,8 @@ import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
-import { auth } from "./firebase/firebaseConfig";
+import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
-import { UserProvider, useUser } from "./context/UserContext";
 
 // Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
@@ -99,14 +99,13 @@ function NavigationProtectionProvider({ children }) {
 }
 
 // Componente wrapper
-function ProtectedRouteWrapper({ children }) {
+function ProtectedRouteWrapper({ children, usuario }) {
   return <div style={{ position: "relative" }}>{children}</div>;
 }
 
 // Sidebar com proteção
-function ProtectedSidebar({ onNavigate, activePath, onLogout }) {
+function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
   const { canNavigate } = useNavigationProtection();
-  const { user: usuario } = useUser();
 
   const handleNavigate = (path) => {
     if (canNavigate()) {
@@ -181,25 +180,130 @@ class ErrorBoundary extends React.Component {
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
+  const [usuario, setUsuario] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
 
-  // ✅ CORREÇÃO: Usar o contexto ao invés de estado local
-  const { user: usuario, loading, setUsuario } = useUser();
+  // ✅ GERENCIAR AUTENTICAÇÃO - CORREÇÃO PRINCIPAL
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // ✅ SÓ BUSCAR DADOS SE NÃO TEMOS USUÁRIO AINDA (evita conflito com Login.jsx)
+        if (!usuario) {
+          try {
+            console.log(
+              "🔍 onAuthStateChanged: Carregando dados do usuário:",
+              firebaseUser.uid,
+            );
+            console.log("📧 Email:", firebaseUser.email);
+
+            // ✅ CORREÇÃO CRÍTICA: Buscar apenas em "usuarios"
+            const userDoc = await getDoc(doc(db, "usuarios", firebaseUser.uid));
+
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              console.log(
+                "✅ Dados encontrados na coleção 'usuarios':",
+                userData,
+              );
+
+              // ✅ MAPEAMENTO CORRETO DOS CAMPOS SICEFSUS
+              const usuario = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+
+                // ✅ CAMPOS PRINCIPAIS DO SICEFSUS
+                nome:
+                  userData.nome ||
+                  userData.name ||
+                  firebaseUser.email?.split("@")[0] ||
+                  "Usuário",
+                tipo: userData.tipo || "operador", // admin | operador
+                status: userData.status || "ativo", // ativo | inativo
+                municipio: userData.municipio || "",
+                uf: userData.uf || "",
+
+                // ✅ CAMPOS DE COMPATIBILIDADE (MAPEAMENTO CRÍTICO)
+                displayName:
+                  userData.nome || userData.name || firebaseUser.displayName,
+                role: userData.tipo === "admin" ? "admin" : "user", // ✅ MAPEAMENTO: operador → user
+                isActive: userData.status === "ativo",
+
+                // ✅ DADOS ADICIONAIS
+                departamento: userData.departamento || "",
+                telefone: userData.telefone || "",
+                dataCriacao: userData.dataCriacao,
+                dataAtualizacao: userData.dataAtualizacao,
+                ultimoAcesso: userData.ultimoAcesso,
+                primeiroAcesso: userData.primeiroAcesso || false,
+                totalAcessos: userData.totalAcessos || 0,
+                criadoPor: userData.criadoPor,
+
+                // ✅ PRESERVAR TODOS OS CAMPOS ORIGINAIS
+                ...userData,
+              };
+
+              setUsuario(usuario);
+
+              console.log("👤 Usuário configurado via onAuthStateChanged:", {
+                nome: usuario.nome,
+                tipo: usuario.tipo,
+                role: usuario.role,
+                municipio: usuario.municipio,
+                uf: usuario.uf,
+                status: usuario.status,
+                isAdmin: usuario.tipo === "admin",
+              });
+            } else {
+              console.log("❌ Usuário não encontrado na coleção 'usuarios'");
+              console.log("🚨 USUÁRIO ÓRFÃO DETECTADO!");
+              console.log("   - Existe no Firebase Auth ✅");
+              console.log("   - NÃO existe no Firestore ❌");
+              console.log(
+                "   - Precisa ser criado via interface de administração",
+              );
+
+              // ✅ LOGOUT FORÇADO - NÃO CRIAR AUTOMATICAMENTE
+              await signOut(auth);
+              setUsuario(null);
+              setAuthError(
+                "Usuário não encontrado no sistema. Entre em contato com o administrador.",
+              );
+            }
+          } catch (error) {
+            console.error("❌ Erro ao carregar dados do usuário:", error);
+
+            // ✅ EM CASO DE ERRO, NÃO CRIAR USUÁRIO FANTASMA
+            setAuthError("Erro ao carregar dados do usuário. Tente novamente.");
+            await signOut(auth);
+            setUsuario(null);
+          }
+        } else {
+          console.log("👤 Usuário já definido, pulando onAuthStateChanged");
+        }
+      } else {
+        console.log("🚪 Usuário deslogado");
+        setUsuario(null);
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []); // ✅ SEM 'usuario' nas dependências para evitar loops
 
   // Redirecionamento
   useEffect(() => {
     if (
       !usuario &&
-      !loading &&
       location.pathname !== "/" &&
       location.pathname !== "/login" &&
       !showLogin
     ) {
       navigate("/");
     }
-  }, [usuario, loading, location.pathname, navigate, showLogin]);
+  }, [usuario, location.pathname, navigate, showLogin]);
 
   // Função de logout corrigida
   const handleLogout = useCallback(async () => {
@@ -216,7 +320,7 @@ function AppContent() {
       console.error("Erro ao fazer logout:", error);
       setAuthError("Erro ao fazer logout. Tente novamente.");
     }
-  }, [canNavigate, navigate, setUsuario]);
+  }, [canNavigate, navigate]);
 
   const handleNavigate = useCallback(
     (path) => {
@@ -232,25 +336,31 @@ function AppContent() {
     setAuthError(null);
   }, []);
 
-  // ✅ FUNÇÃO CORRIGIDA: Atualizar o contexto com os dados do login
+  // ✅ FUNÇÃO CORRIGIDA PARA RECEBER DADOS COMPLETOS DO LOGIN
   const handleLoginSuccess = useCallback(
     (dadosUsuario) => {
       console.log("✅ handleLoginSuccess chamado:", dadosUsuario);
 
-      // Se recebeu dados do usuário, atualizar o contexto
+      // Se recebeu dados do usuário (login com dados), usar diretamente
       if (dadosUsuario && dadosUsuario.uid) {
         console.log(
-          "📋 Atualizando contexto com dados do Login.jsx:",
+          "📋 Definindo usuário com dados completos do Login.jsx:",
           dadosUsuario,
         );
         setUsuario(dadosUsuario);
+        setShowLogin(false);
+        setAuthError(null);
+        navigate("/dashboard");
+        return;
       }
 
+      // Caso contrário (auto-registro), só fechar modal e navegar
+      console.log("📋 Login sem dados - deixar onAuthStateChanged carregar");
       setShowLogin(false);
       setAuthError(null);
       navigate("/dashboard");
     },
-    [navigate, setUsuario],
+    [navigate],
   );
 
   const handleLoginClose = useCallback(() => {
@@ -259,11 +369,6 @@ function AppContent() {
   }, []);
 
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
-
-  // Mostrar loading enquanto carrega o usuário
-  if (loading) {
-    return <LoadingSpinner />;
-  }
 
   return (
     <div style={styles.app}>
@@ -301,6 +406,7 @@ function AppContent() {
           <ProtectedSidebar
             onNavigate={handleNavigate}
             activePath={location.pathname}
+            usuario={usuario}
             onLogout={handleLogout}
           />
         )}
@@ -326,13 +432,13 @@ function AppContent() {
                 }
               />
 
-              {/* Rotas protegidas - SEM PASSAR usuario como prop */}
+              {/* Rotas protegidas */}
               <Route
                 path="/dashboard"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <Dashboard />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Dashboard usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -340,21 +446,32 @@ function AppContent() {
               <Route
                 path="/emendas"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <Emendas />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Emendas usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
               />
 
-              {/* ✅ ROTAS DE EMENDA */}
+              <Route
+                path="/emendas"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Emendas usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* ✅ ROTAS DE EMENDA - ADICIONADAS */}
               <Route
                 path="/emendas/criar"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <EmendaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -362,9 +479,9 @@ function AppContent() {
               <Route
                 path="/emendas/:id/editar"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <EmendaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -372,9 +489,9 @@ function AppContent() {
               <Route
                 path="/emendas/:id"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <EmendaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -383,9 +500,9 @@ function AppContent() {
               <Route
                 path="/despesas"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <Despesas />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Despesas usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -393,9 +510,9 @@ function AppContent() {
               <Route
                 path="/despesas/nova"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <DespesaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -407,9 +524,9 @@ function AppContent() {
               <Route
                 path="/despesas/editar/:id"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <DespesaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -417,9 +534,9 @@ function AppContent() {
               <Route
                 path="/despesas/visualizar/:id"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <DespesaForm />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <DespesaForm usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -427,9 +544,9 @@ function AppContent() {
               <Route
                 path="/relatorios"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
-                      <Relatorios />
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Relatorios usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -437,8 +554,8 @@ function AppContent() {
               <Route
                 path="/emendas/:emendaId/fluxo/:despesaId?"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
                       <FluxoEmenda />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
@@ -447,15 +564,15 @@ function AppContent() {
               <Route
                 path="/sobre"
                 element={
-                  <PrivateRoute>
-                    <ProtectedRouteWrapper>
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
                       <Sobre />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
               />
 
-              {/* ✅ ROTAS ADMINISTRATIVAS */}
+              {/* ✅ ROTAS ADMINISTRATIVAS - CORRIGIDAS */}
               <Route
                 path="/admin"
                 element={<Navigate to="/administracao" replace />}
@@ -463,9 +580,9 @@ function AppContent() {
               <Route
                 path="/administracao"
                 element={
-                  <PrivateRoute requiredRole="admin">
-                    <ProtectedRouteWrapper>
-                      <Administracao />
+                  <PrivateRoute usuario={usuario} requiredRole="admin">
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Administracao usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
@@ -527,15 +644,13 @@ function App() {
   }
 
   return (
-    <UserProvider>
-      <ToastProvider>
-        <Router>
-          <NavigationProtectionProvider>
-            <AppContent />
-          </NavigationProtectionProvider>
-        </Router>
-      </ToastProvider>
-    </UserProvider>
+    <ToastProvider>
+      <Router>
+        <NavigationProtectionProvider>
+          <AppContent />
+        </NavigationProtectionProvider>
+      </Router>
+    </ToastProvider>
   );
 }
 
@@ -730,6 +845,7 @@ const styles = {
     fontWeight: "500",
     transition: "background-color 0.2s",
   },
+
 };
 
 // CSS para animações

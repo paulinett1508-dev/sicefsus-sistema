@@ -1,19 +1,12 @@
 // Emendas.jsx - Layout Padronizado com Despesas v2.1
-// ✅ SOLUÇÃO: Verificar múltiplas fontes de dados do usuário
+// ✅ CORRIGIDO: Acesso correto aos dados do usuário via contexto
 // ✅ MANTIDO: Todas as funcionalidades existentes de emendas
 // ✅ ADICIONADO: Cards de resumo, filtros, e estrutura idêntica
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  query,
-  where,
-} from "firebase/firestore";
-import { db, auth } from "../firebase/firebaseConfig";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import EmendasFilters from "./EmendasFilters";
 import EmendasTable from "./EmendasTable";
@@ -23,12 +16,8 @@ const Emendas = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ SOLUÇÃO: Tentar múltiplas formas de obter o usuário
-  const userContext = useUser();
-  const contextUser = userContext?.user;
-
-  // Fallback: usar o currentUser do Firebase Auth
-  const authUser = auth.currentUser;
+  // ✅ CORREÇÃO: Desestruturação correta do contexto
+  const { user, loading: userLoading } = useUser();
 
   // Estados principais
   const [emendas, setEmendas] = useState([]);
@@ -36,80 +25,37 @@ const Emendas = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
-  const [userData, setUserData] = useState(null);
 
-  // ✅ SOLUÇÃO: Buscar dados do usuário diretamente se necessário
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (contextUser) {
-        console.log("✅ Emendas: Usando dados do contexto:", contextUser);
-        setUserData(contextUser);
-        return;
-      }
+  // ✅ CORREÇÃO: Acesso correto às propriedades do usuário
+  const userRole = user?.tipo || user?.role || "operador";
+  const userMunicipio = user?.municipio;
+  const userUf = user?.uf;
+  const userEmail = user?.email;
 
-      if (authUser) {
-        console.log(
-          "🔍 Emendas: Contexto vazio, buscando dados diretamente...",
-        );
-        try {
-          // Buscar por UID
-          const userDoc = await getDoc(doc(db, "usuarios", authUser.uid));
-          if (userDoc.exists()) {
-            const data = { id: userDoc.id, ...userDoc.data() };
-            console.log("✅ Emendas: Dados encontrados por UID:", data);
-            setUserData(data);
-            return;
-          }
-
-          // Buscar por email como fallback
-          const q = query(
-            collection(db, "usuarios"),
-            where("email", "==", authUser.email),
-          );
-          const snapshot = await getDocs(q);
-          if (!snapshot.empty) {
-            const data = {
-              id: snapshot.docs[0].id,
-              ...snapshot.docs[0].data(),
-            };
-            console.log("✅ Emendas: Dados encontrados por email:", data);
-            setUserData(data);
-          }
-        } catch (error) {
-          console.error("❌ Emendas: Erro ao buscar dados do usuário:", error);
-        }
-      }
-    };
-
-    fetchUserData();
-  }, [contextUser, authUser]);
-
-  // ✅ Extrair dados do usuário
-  const usuario = userData || contextUser;
-  const userEmail = usuario?.email || authUser?.email;
-  const userRole = usuario?.tipo || usuario?.role || "operador";
-  const userMunicipio = usuario?.municipio;
-  const userUf = usuario?.uf;
-
-  console.log("📋 Emendas.jsx v2.1 - Dados do usuário FINAL:", {
-    usuario: usuario,
+  console.log("📋 Emendas.jsx v2.1 - Dados do usuário:", {
     email: userEmail,
     role: userRole,
-    tipo: usuario?.tipo,
     municipio: userMunicipio,
     uf: userUf,
-    contextUser: contextUser,
-    authUser: authUser?.email,
+    user: user, // Debug completo do objeto
   });
 
-  // Validações críticas
-  if (!authUser && !usuario) {
+  // ✅ CORREÇÃO: Aguardar carregamento do usuário
+  if (userLoading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Carregando usuário...</p>
-        </div>
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p style={styles.loadingText}>Carregando usuário...</p>
+      </div>
+    );
+  }
+
+  // Validações críticas
+  if (!user || !userEmail) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p style={styles.loadingText}>Erro ao carregar dados do usuário...</p>
       </div>
     );
   }
@@ -145,10 +91,8 @@ const Emendas = () => {
 
   // ✅ EFEITO: Carregar dados na inicialização
   useEffect(() => {
-    if (usuario || authUser) {
-      carregarDados();
-    }
-  }, [carregarDados, usuario, authUser]);
+    carregarDados();
+  }, [carregarDados]);
 
   // ✅ FUNÇÃO: Recarregar dados
   const recarregar = useCallback(async () => {
@@ -302,14 +246,14 @@ const Emendas = () => {
           <span style={styles.versionValue}>v2.1</span>
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Usuário:</span>
-          <span style={styles.statusValue}>
+          <span style={styles.versionValue}>
             {userRole === "admin"
               ? "👑 Admin"
               : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
           </span>
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Dados:</span>
-          <span style={styles.statusValue}>
+          <span style={styles.versionValue}>
             {loading ? "Carregando..." : `${totalEmendas} emendas`}
           </span>
         </div>
@@ -404,9 +348,6 @@ const Emendas = () => {
     </div>
   );
 };
-
-// ✅ Importar getDoc que estava faltando
-import { getDoc } from "firebase/firestore";
 
 // ✅ ESTILOS: Idênticos ao Despesas.jsx
 const styles = {
