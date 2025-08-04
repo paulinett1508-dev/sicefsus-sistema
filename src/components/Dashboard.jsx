@@ -420,6 +420,9 @@ const Dashboard = ({ usuario }) => {
       }
       // Operador com permissão apenas para o seu município
       else if (permissions.filtroAplicado && userMunicipio) {
+        console.log(
+          `🏘️ Dashboard Operador - carregando emendas do município: ${userMunicipio}`,
+        );
         const emendasRef = collection(db, "emendas");
         const emendasQuery = query(
           emendasRef,
@@ -429,6 +432,8 @@ const Dashboard = ({ usuario }) => {
         emendasSnapshot.forEach((doc) => {
           emendasData.push({ id: doc.id, ...doc.data() });
         });
+
+        console.log(`✅ Dashboard - ${emendasData.length} emendas encontradas para ${userMunicipio}`);
 
         if (emendasData.length > 0) {
           const emendasIds = emendasData.map((e) => e.id);
@@ -447,15 +452,19 @@ const Dashboard = ({ usuario }) => {
             });
           }
         }
+
+        console.log(`✅ Dashboard - ${despesasData.length} despesas encontradas para ${userMunicipio}`);
       } else {
-        // Caso em que o usuário tem a permissão geral, mas não tem município cadastrado
+        // Usuário operador sem município cadastrado
         if (userRole !== "admin" && !userMunicipio) {
+          console.error("❌ Dashboard - Usuário operador sem município cadastrado");
           setError(
-            "Usuário operador sem município definido. Impossível carregar dados.",
+            `Usuário operador sem município cadastrado. Entre em contato com o administrador.`,
           );
         } else {
+          console.error("❌ Dashboard - Configuração de usuário inválida");
           setError(
-            "Usuário sem permissões adequadas para acessar o dashboard.",
+            "Configuração de usuário inválida. Entre em contato com o administrador.",
           );
         }
         setLoading(false);
@@ -524,7 +533,7 @@ const Dashboard = ({ usuario }) => {
   // ✅ VALIDAR PERMISSÕES APÓS HOOKS
   if (!permissions.temAcesso()) {
     const mensagemErro = permissions.aviso || "Usuário sem permissão para acessar o dashboard.";
-    
+
     return (
       <div style={styles.container}>
         <div style={styles.statusBar}>
@@ -544,7 +553,7 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  
+
 
   // ✅ CALCULAR ESTATÍSTICAS
   const calcularEstatisticas = () => {
