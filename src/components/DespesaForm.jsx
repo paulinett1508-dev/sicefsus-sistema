@@ -82,7 +82,6 @@ const DespesaForm = ({
     descricao: "",
     observacoes: "",
     status: "pendente",
-    dataVencimento: "",
     centroCusto: "",
     naturezaDespesa: "",
     elementoDespesa: "",
@@ -254,6 +253,32 @@ const DespesaForm = ({
       }
     }
 
+    // ✅ NOVA VALIDAÇÃO: Verificar se datas não excedem validade da emenda
+    if (emendaInfo?.dataValidade) {
+      const dataValidade = new Date(emendaInfo.dataValidade);
+
+      if (
+        formData.dataEmpenho &&
+        new Date(formData.dataEmpenho) > dataValidade
+      ) {
+        novosErrors.dataEmpenho = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      }
+
+      if (
+        formData.dataLiquidacao &&
+        new Date(formData.dataLiquidacao) > dataValidade
+      ) {
+        novosErrors.dataLiquidacao = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      }
+
+      if (
+        formData.dataPagamento &&
+        new Date(formData.dataPagamento) > dataValidade
+      ) {
+        novosErrors.dataPagamento = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      }
+    }
+
     if (valorError) {
       novosErrors.valor = valorError;
     }
@@ -412,6 +437,7 @@ const DespesaForm = ({
           errors={errors}
           modoVisualizacao={modoVisualizacao}
           handleInputChange={handleInputChange}
+          emendaInfo={emendaInfo} // ✅ NOVO: Passar emendaInfo
         />
 
         <DespesaFormOrcamentoFields

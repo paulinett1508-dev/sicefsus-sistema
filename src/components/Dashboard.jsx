@@ -1,14 +1,16 @@
 // Dashboard.jsx - VERSÃO PRODUÇÃO COM LAYOUT REFINADO
-// ✅ REMOVIDO: Dados fictícios e controles de teste
-// ✅ MELHORADO: Cards compactos e título profissional
+// ✅ CORRIGIDO: Contagem de despesas
+// ✅ ADICIONADO: Navegação nos cards de prazos
 
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
+import { useNavigate } from "react-router-dom"; // ✅ NOVO: Import para navegação
 
 // 💎 WIDGET CRONOGRAMA REFINADO
 const CronogramaWidget = ({ emendas = [] }) => {
+  const navigate = useNavigate(); // ✅ NOVO: Hook de navegação
   const [cronogramaData, setCronogramaData] = useState({
     proximasVencer: [],
     vencidas: [],
@@ -81,6 +83,16 @@ const CronogramaWidget = ({ emendas = [] }) => {
     }).format(value || 0);
   };
 
+  // ✅ NOVO: Funções de navegação para cada card
+  const handleCardClick = (tipo) => {
+    // Navegar para a listagem de emendas com filtro específico
+    navigate("/emendas", {
+      state: {
+        filtroStatus: tipo,
+      },
+    });
+  };
+
   return (
     <div style={cronogramaStyles.container}>
       <div style={cronogramaStyles.header}>
@@ -96,7 +108,9 @@ const CronogramaWidget = ({ emendas = [] }) => {
           style={{
             ...cronogramaStyles.metricCard,
             ...cronogramaStyles.warningCard,
+            cursor: "pointer", // ✅ NOVO: Cursor pointer
           }}
+          onClick={() => handleCardClick("proximasVencer")} // ✅ NOVO: Handler de clique
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
@@ -155,7 +169,9 @@ const CronogramaWidget = ({ emendas = [] }) => {
           style={{
             ...cronogramaStyles.metricCard,
             ...cronogramaStyles.dangerCard,
+            cursor: "pointer", // ✅ NOVO: Cursor pointer
           }}
+          onClick={() => handleCardClick("vencidas")} // ✅ NOVO: Handler de clique
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
@@ -211,7 +227,9 @@ const CronogramaWidget = ({ emendas = [] }) => {
           style={{
             ...cronogramaStyles.metricCard,
             ...cronogramaStyles.successCard,
+            cursor: "pointer", // ✅ NOVO: Cursor pointer
           }}
+          onClick={() => handleCardClick("emAndamento")} // ✅ NOVO: Handler de clique
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
@@ -271,7 +289,9 @@ const CronogramaWidget = ({ emendas = [] }) => {
           style={{
             ...cronogramaStyles.metricCard,
             ...cronogramaStyles.infoCard,
+            cursor: "pointer", // ✅ NOVO: Cursor pointer
           }}
+          onClick={() => handleCardClick("concluidas")} // ✅ NOVO: Handler de clique
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
@@ -399,7 +419,7 @@ const Dashboard = ({ usuario }) => {
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
 
-  // ✅ CARREGAR DADOS REAIS
+  // ✅ CARREGAR DADOS REAIS - CORRIGIDO
   const carregarDados = async () => {
     try {
       setLoading(true);
@@ -411,19 +431,15 @@ const Dashboard = ({ usuario }) => {
       if (userRole === "admin") {
         // Admin - todos os dados
         const emendasRef = collection(db, "emendas");
-        const emendasQuery = query(
-          emendasRef,
-          orderBy("dataAprovacao", "desc"),
-        );
-        const emendasSnapshot = await getDocs(emendasQuery);
+        const emendasSnapshot = await getDocs(emendasRef);
 
         emendasSnapshot.forEach((doc) => {
           emendasData.push({ id: doc.id, ...doc.data() });
         });
 
+        // ✅ CORRIGIDO: Removido orderBy para despesas
         const despesasRef = collection(db, "despesas");
-        const despesasQuery = query(despesasRef, orderBy("data", "desc"));
-        const despesasSnapshot = await getDocs(despesasQuery);
+        const despesasSnapshot = await getDocs(despesasRef);
 
         despesasSnapshot.forEach((doc) => {
           despesasData.push({ id: doc.id, ...doc.data() });
@@ -434,7 +450,6 @@ const Dashboard = ({ usuario }) => {
         const emendasQuery = query(
           emendasRef,
           where("municipio", "==", userMunicipio),
-          orderBy("dataAprovacao", "desc"),
         );
         const emendasSnapshot = await getDocs(emendasQuery);
 
@@ -450,10 +465,10 @@ const Dashboard = ({ usuario }) => {
           for (let i = 0; i < emendasIds.length; i += batchSize) {
             const batch = emendasIds.slice(i, i + batchSize);
             const despesasRef = collection(db, "despesas");
+            // ✅ CORRIGIDO: Removido orderBy
             const despesasQuery = query(
               despesasRef,
               where("emendaId", "in", batch),
-              orderBy("data", "desc"),
             );
             const despesasSnapshot = await getDocs(despesasQuery);
 
@@ -467,6 +482,11 @@ const Dashboard = ({ usuario }) => {
         setLoading(false);
         return;
       }
+
+      console.log("✅ Dados carregados:", {
+        emendas: emendasData.length,
+        despesas: despesasData.length,
+      });
 
       setEmendas(emendasData);
       setDespesas(despesasData);
@@ -482,7 +502,7 @@ const Dashboard = ({ usuario }) => {
     if (user && user.email && user.tipo) {
       carregarDados();
     }
-  }, [user?.email, user?.tipo]);
+  }, [user?.email, user?.tipo, userMunicipio]); // ✅ Adicionado userMunicipio nas dependências
 
   // ✅ CALCULAR ESTATÍSTICAS
   const calcularEstatisticas = () => {
@@ -870,23 +890,43 @@ const cronogramaStyles = {
     borderRadius: "6px",
     border: "1px solid #e1e5e9",
     backgroundColor: "#fff",
-    transition: "border-color 0.2s ease",
+    transition: "all 0.2s ease", // ✅ MELHORADO: Transição para hover
   },
   warningCard: {
     borderColor: "#f57c00",
     backgroundColor: "#fffbf0",
+    "&:hover": {
+      // ✅ NOVO: Efeito hover
+      borderColor: "#e65100",
+      boxShadow: "0 4px 12px rgba(245, 124, 0, 0.2)",
+    },
   },
   dangerCard: {
     borderColor: "#d32f2f",
     backgroundColor: "#fef2f2",
+    "&:hover": {
+      // ✅ NOVO: Efeito hover
+      borderColor: "#b71c1c",
+      boxShadow: "0 4px 12px rgba(211, 47, 47, 0.2)",
+    },
   },
   successCard: {
     borderColor: "#388e3c",
     backgroundColor: "#f8fff8",
+    "&:hover": {
+      // ✅ NOVO: Efeito hover
+      borderColor: "#2e7d32",
+      boxShadow: "0 4px 12px rgba(56, 142, 60, 0.2)",
+    },
   },
   infoCard: {
     borderColor: "#0277bd",
     backgroundColor: "#f0f9ff",
+    "&:hover": {
+      // ✅ NOVO: Efeito hover
+      borderColor: "#01579b",
+      boxShadow: "0 4px 12px rgba(2, 119, 189, 0.2)",
+    },
   },
   metricHeader: {
     display: "flex",
@@ -1015,7 +1055,7 @@ const cronogramaStyles = {
   },
 };
 
-// ✅ ANIMAÇÕES CSS
+// ✅ ANIMAÇÕES CSS - ATUALIZADO COM HOVER
 if (!document.getElementById("dashboard-animations")) {
   const styleSheet = document.createElement("style");
   styleSheet.id = "dashboard-animations";
@@ -1027,6 +1067,12 @@ if (!document.getElementById("dashboard-animations")) {
 
     .metric-card:hover {
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* ✅ NOVO: Hover effects para cards clicáveis */
+    div[style*="cursor: pointer"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     }
   `;
   document.head.appendChild(styleSheet);

@@ -222,15 +222,6 @@ export default function DespesasList({
         </div>
       )}
 
-      {/* ✅ Componente de Filtros */}
-      <DespesasFilters
-        despesas={despesas}
-        emendas={emendas}
-        onFilter={handleFilter}
-        onClear={handleClearFilters}
-        filtroInicial={filtroInicial}
-      />
-
       {/* ✅ Componente da Tabela */}
       <DespesasTable
         despesas={despesasFiltradas}

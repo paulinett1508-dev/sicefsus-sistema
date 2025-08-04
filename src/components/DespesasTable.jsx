@@ -1,7 +1,7 @@
-// DespesasTable.jsx - ATUALIZADA CONFORME PRINT OFICIAL
-// ✅ Colunas sincronizadas com MÓDULO DESPESAS
-// ✅ Exibição da Natureza das Despesas Programadas
-// ✅ Campos do print organizados conforme layout oficial
+// DespesasTable.jsx - ATUALIZADA CONFORME SOLICITAÇÃO
+// ✅ REMOVIDA coluna Natureza
+// ✅ ADICIONADA coluna Emenda
+// ✅ REMOVIDA seção Natureza das Despesas Programadas
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -65,34 +65,16 @@ export default function DespesasTable({
   }
 
   // ✅ Helper para buscar dados da emenda
-  function getEmendaInfo(id) {
-    if (!emendas) return "Carregando...";
-    const emenda = emendas.find((e) => e.id === id);
-    return emenda
-      ? `${emenda.numero || emenda.numeroEmenda} - ${emenda.parlamentar}`
-      : "Emenda não encontrada";
+  function getEmendaInfo(emendaId) {
+    if (!emendas || !emendaId) return "-";
+    const emenda = emendas.find((e) => e.id === emendaId);
+    if (!emenda) return "Emenda não encontrada";
+
+    // Retorna número e parlamentar da emenda
+    const numero = emenda.numero || emenda.numeroEmenda || "-";
+    const parlamentar = emenda.parlamentar || emenda.autor || "-";
+    return `${numero} - ${parlamentar}`;
   }
-
-  // ✅ Calcular total por natureza de despesa
-  const calcularTotalPorNatureza = () => {
-    return despesas.reduce((acc, despesa) => {
-      const natureza = despesa.naturezaDespesaProgramada || "NÃO CLASSIFICADO";
-      const valor = parseFloat(
-        despesa.valorNaturezaDespesa || despesa.valor || 0,
-      );
-
-      if (!acc[natureza]) {
-        acc[natureza] = { quantidade: 0, valor: 0 };
-      }
-
-      acc[natureza].quantidade += 1;
-      acc[natureza].valor += valor;
-
-      return acc;
-    }, {});
-  };
-
-  const totaisPorNatureza = calcularTotalPorNatureza();
 
   // ✅ Função para excluir despesa
   async function handleExcluir(despesa) {
@@ -140,7 +122,7 @@ export default function DespesasTable({
 
   return (
     <div style={styles.container}>
-      {/* ✅ Header com Natureza das Despesas Programadas */}
+      {/* ✅ Header sem a seção de Natureza */}
       <div style={styles.headerSection}>
         <div style={styles.tableHeader}>
           <h2 style={styles.title}>
@@ -175,45 +157,21 @@ export default function DespesasTable({
             </button>
           </div>
         </div>
-
-        {/* ✅ Natureza das Despesas Programadas - Conforme Print */}
-        <div style={styles.naturezaSection}>
-          <h3 style={styles.naturezaTitle}>
-            NATUREZA DAS DESPESAS PROGRAMADAS:
-          </h3>
-          <div style={styles.naturezaGrid}>
-            {Object.keys(totaisPorNatureza).map((natureza) => (
-              <div key={natureza} style={styles.naturezaItem}>
-                <div style={styles.naturezaLabel}>{natureza}</div>
-                <div style={styles.naturezaValor}>
-                  R${" "}
-                  {totaisPorNatureza[natureza].valor.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </div>
-                <div style={styles.naturezaQuantidade}>
-                  {totaisPorNatureza[natureza].quantidade} despesa(s)
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* ✅ Tabela Principal */}
       <div style={styles.tableContainer}>
         {modoVisualizacao === "resumido" ? (
-          // ✅ MODO RESUMIDO - Campos principais
+          // ✅ MODO RESUMIDO - Com coluna Emenda ao invés de Natureza
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
+                <th style={styles.th}>Emenda</th>
                 <th style={styles.th}>Fornecedor</th>
                 <th style={styles.th}>Valor</th>
                 <th style={styles.th}>Nº Empenho</th>
                 <th style={styles.th}>Nº NF</th>
                 <th style={styles.th}>Data Pagamento</th>
-                <th style={styles.th}>Natureza</th>
                 <th style={styles.th}>Ações</th>
               </tr>
             </thead>
@@ -223,6 +181,11 @@ export default function DespesasTable({
                   key={despesa.id}
                   style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
                 >
+                  <td style={styles.td}>
+                    <div style={styles.emendaCell}>
+                      {getEmendaInfo(despesa.emendaId)}
+                    </div>
+                  </td>
                   <td style={styles.td}>
                     <div style={styles.fornecedorCell}>
                       {despesa.fornecedor || "-"}
@@ -247,11 +210,6 @@ export default function DespesasTable({
                   <td style={styles.td}>
                     <span style={styles.dataCell}>
                       {formatarDataFirestore(despesa.dataPagamento)}
-                    </span>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.naturezaBadge}>
-                      {despesa.naturezaDespesaProgramada || "N/A"}
                     </span>
                   </td>
                   <td style={styles.tdActions}>
@@ -286,10 +244,11 @@ export default function DespesasTable({
             </tbody>
           </table>
         ) : (
-          // ✅ MODO DETALHADO - Todos os campos conforme print
+          // ✅ MODO DETALHADO - Com coluna Emenda
           <table style={styles.table}>
             <thead>
               <tr style={styles.headerRow}>
+                <th style={styles.th}>Emenda</th>
                 <th style={styles.th}>Fornecedor</th>
                 <th style={styles.th}>Valor</th>
                 <th style={styles.th}>Nº Empenho</th>
@@ -311,6 +270,11 @@ export default function DespesasTable({
                   key={despesa.id}
                   style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
                 >
+                  <td style={styles.td}>
+                    <div style={styles.emendaCell}>
+                      {getEmendaInfo(despesa.emendaId)}
+                    </div>
+                  </td>
                   <td style={styles.td}>
                     <div style={styles.fornecedorCell}>
                       {despesa.fornecedor || "-"}
@@ -417,7 +381,7 @@ export default function DespesasTable({
         )}
       </div>
 
-      {/* ✅ Resumo Final */}
+      {/* ✅ Resumo Final - Simplificado sem naturezas */}
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
@@ -436,9 +400,9 @@ export default function DespesasTable({
             </span>
           </div>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Naturezas Diferentes:</span>
+            <span style={styles.summaryLabel}>Emendas Vinculadas:</span>
             <span style={styles.summaryValue}>
-              {Object.keys(totaisPorNatureza).length}
+              {new Set(despesas.map((d) => d.emendaId)).size}
             </span>
           </div>
         </div>
@@ -519,7 +483,6 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "20px 24px",
-    borderBottom: "1px solid #e9ecef",
   },
 
   title: {
@@ -553,56 +516,6 @@ const styles = {
     background: PRIMARY,
     color: "white",
     borderColor: PRIMARY,
-  },
-
-  naturezaSection: {
-    padding: "20px 24px",
-  },
-
-  naturezaTitle: {
-    fontSize: "14px",
-    fontWeight: "bold",
-    color: PRIMARY,
-    textTransform: "uppercase",
-    marginBottom: "15px",
-    letterSpacing: "0.5px",
-  },
-
-  naturezaGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-    gap: "15px",
-  },
-
-  naturezaItem: {
-    background: "white",
-    border: "2px solid #e9ecef",
-    borderRadius: "8px",
-    padding: "15px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  naturezaLabel: {
-    fontWeight: "bold",
-    color: PRIMARY,
-    fontSize: "13px",
-    flex: 1,
-  },
-
-  naturezaValor: {
-    fontWeight: "bold",
-    color: SUCCESS,
-    fontSize: "16px",
-    fontFamily: "monospace",
-  },
-
-  naturezaQuantidade: {
-    fontSize: "11px",
-    color: "#6c757d",
-    textAlign: "right",
-    minWidth: "80px",
   },
 
   tableContainer: {
@@ -666,6 +579,17 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
+  emendaCell: {
+    maxWidth: 200,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    fontWeight: "500",
+    fontSize: 11,
+    color: ACCENT,
+    title: "Clique para ver detalhes da emenda",
+  },
+
   fornecedorCell: {
     maxWidth: 150,
     fontWeight: "500",
@@ -689,16 +613,6 @@ const styles = {
     fontSize: 11,
     color: "#666",
     fontWeight: "500",
-  },
-
-  naturezaBadge: {
-    backgroundColor: "#fff3cd",
-    color: "#856404",
-    padding: "2px 6px",
-    borderRadius: "10px",
-    fontSize: "10px",
-    fontWeight: "600",
-    textTransform: "uppercase",
   },
 
   discriminacaoCell: {

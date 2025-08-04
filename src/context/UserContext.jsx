@@ -6,6 +6,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
+import { UserProvider, useUser } from "./context/UserContext";
 
 const UserContext = createContext();
 
@@ -179,10 +180,9 @@ export const UserProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  // ✅ CORREÇÃO CRÍTICA: Retornar 'user' para compatibilidade com Dashboard
-  const value = {
+   const value = {
     user: usuario, // ✅ CORREÇÃO: user = usuario para compatibilidade
-    usuario,       // ✅ MANTER: Para compatibilidade com código existente
+    usuario, // ✅ MANTER: Para compatibilidade com código existente
     setUsuario,
     loading,
     isAuthenticated: !!usuario,

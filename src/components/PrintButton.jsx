@@ -1,74 +1,104 @@
-// src/components/PrintButton.jsx
 import React from "react";
-import { printReport } from "../utils/printUtils";
+import { Navigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
-const PrintButton = ({ reportId, title, className = "" }) => {
-  const [isPrinting, setIsPrinting] = React.useState(false);
+export default function PrivateRoute({ children, requiredRole }) {
+  // ✅ CORREÇÃO: Usar o contexto diretamente ao invés de receber via props
+  const { user: usuario, loading } = useUser();
 
-  const handlePrint = async () => {
-    setIsPrinting(true);
-    try {
-      await printReport(reportId, title);
-    } catch (error) {
-      console.error("Erro na impressão:", error);
-      alert("Erro ao imprimir relatório");
-    } finally {
-      setIsPrinting(false);
+  // ✅ DEBUG TEMPORÁRIO - REMOVER APÓS TESTAR
+  console.log("🔍 PrivateRoute verificação:", {
+    usuario: usuario?.nome,
+    email: usuario?.email,
+    tipo: usuario?.tipo,
+    role: usuario?.role,
+    requiredRole: requiredRole,
+    isAuthenticated: !!usuario,
+    shouldHaveAccess:
+      requiredRole === "admin" ? usuario?.tipo === "admin" : true,
+    loading: loading,
+  });
+
+  // ✅ AGUARDAR CARREGAMENTO DO CONTEXTO
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <div>Carregando...</div>
+      </div>
+    );
+  }
+
+  // ✅ VERIFICAÇÃO PRINCIPAL: Usuário autenticado
+  if (!usuario) {
+    console.log(
+      "❌ PrivateRoute: Usuário não autenticado, redirecionando para /",
+    );
+    return <Navigate to="/" />;
+  }
+
+  // ✅ VERIFICAÇÃO AVANÇADA: Usuário inativo
+  if (usuario.status === "inativo") {
+    console.log(
+      "❌ PrivateRoute: Usuário inativo, redirecionando para /unauthorized",
+    );
+    return <Navigate to="/unauthorized" />;
+  }
+
+  // ✅ VERIFICAÇÃO DE ROLE ESPECÍFICA (COMPATIBILIDADE DUPLA)
+  if (requiredRole) {
+    if (requiredRole === "admin") {
+      // ✅ VERIFICAR TANTO 'tipo' QUANTO 'role' PARA COMPATIBILIDADE
+      const isAdmin = usuario.tipo === "admin" || usuario.role === "admin";
+      if (!isAdmin) {
+        console.log(
+          "❌ PrivateRoute: Usuário não é admin, redirecionando para /unauthorized",
+        );
+        console.log(
+          `   Tipo: ${usuario.tipo}, Role: ${usuario.role}, Requerido: admin`,
+        );
+        return <Navigate to="/unauthorized" />;
+      }
     }
-  };
+    // ✅ VERIFICAÇÃO PARA OPERADOR/USER
+    else if (requiredRole === "operador" || requiredRole === "user") {
+      const isOperadorOrAdmin =
+        usuario.tipo === "operador" ||
+        usuario.tipo === "admin" ||
+        usuario.role === "user" ||
+        usuario.role === "admin";
 
-  return (
-    <button
-      onClick={handlePrint}
-      disabled={isPrinting}
-      style={{
-        padding: "8px 16px",
-        backgroundColor: isPrinting ? "#666" : "#154360",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: isPrinting ? "not-allowed" : "pointer",
-        opacity: isPrinting ? 0.6 : 1,
-        fontSize: "14px",
-        fontWeight: "500",
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        transition: "all 0.2s ease",
-      }}
-    >
-      {isPrinting ? (
-        <>
-          <span
-            style={{
-              display: "inline-block",
-              width: "12px",
-              height: "12px",
-              border: "2px solid transparent",
-              borderTop: "2px solid white",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-            }}
-          ></span>
-          Imprimindo...
-        </>
-      ) : (
-        <>🖨️ Imprimir</>
-      )}
-    </button>
-  );
-};
-
-// Adiciona animação de spinning
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      if (!isOperadorOrAdmin) {
+        console.log("❌ PrivateRoute: Usuário não é operador nem admin");
+        return <Navigate to="/unauthorized" />;
+      }
     }
-  `;
-  document.head.appendChild(style);
+  }
+
+  // ✅ VERIFICAÇÃO ESPECIAL: Operador sem localização
+  if (usuario.tipo === "operador" || usuario.role === "user") {
+    if (!usuario.municipio || !usuario.uf) {
+      console.log(
+        "❌ PrivateRoute: Operador sem localização definida, redirecionando para /unauthorized",
+      );
+      return (
+        <Navigate
+          to="/unauthorized"
+          state={{
+            message:
+              "Operador sem localização definida. Contate o administrador para configurar município/UF.",
+          }}
+        />
+      );
+    }
+  }
+
+  console.log("✅ PrivateRoute: Acesso autorizado");
+  return children;
 }
-
-export default PrintButton;

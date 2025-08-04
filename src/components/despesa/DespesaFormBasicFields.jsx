@@ -100,23 +100,28 @@ const DespesaFormBasicFields = ({
 
         <div style={styles.formGroup}>
           <label style={styles.labelRequired}>Valor *</label>
-          <input
-            type="text"
-            name="valor"
-            value={formData.valor}
-            onChange={handleInputChange}
-            style={
-              errors.valor || valorError ? styles.inputError : styles.input
-            }
-            readOnly={modoVisualizacao}
-            placeholder="0,00"
-            required
-          />
+          <div style={styles.inputMonetarioContainer}>
+            <span style={styles.moedaPrefix}>R$</span>
+            <input
+              type="text"
+              name="valor"
+              value={formData.valor}
+              onChange={handleInputChange}
+              style={
+                errors.valor || valorError
+                  ? { ...styles.inputMonetario, borderColor: "#dc3545" }
+                  : styles.inputMonetario
+              }
+              readOnly={modoVisualizacao}
+              placeholder="0,00"
+              required
+            />
+          </div>
           {(errors.valor || valorError) && (
             <span style={styles.errorText}>{errors.valor || valorError}</span>
           )}
           <span style={styles.helpText}>
-            Digite apenas números. Ex: 100000 = R$ 1.000,00
+            Digite o valor normalmente. Formatação automática.
           </span>
         </div>
       </div>
@@ -241,6 +246,29 @@ const styles = {
     fontSize: "12px",
     marginTop: "5px",
   },
+  inputMonetarioContainer: {
+    display: "flex",
+    alignItems: "center",
+    position: "relative",
+  },
+  moedaPrefix: {
+    position: "absolute",
+    left: "12px",
+    color: "#495057",
+    fontWeight: "bold",
+    fontSize: "14px",
+    zIndex: 1,
+  },
+  inputMonetario: {
+    padding: "12px 12px 12px 35px",
+    border: "2px solid #dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    backgroundColor: "white",
+    boxSizing: "border-box",
+    width: "100%",
+    fontWeight: "500",
+  },
 };
-
 export default DespesaFormBasicFields;
