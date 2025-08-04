@@ -390,63 +390,12 @@ const Dashboard = ({ usuario }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ VERIFICAÇÃO APÓS HOOKS
-  if (userLoading || !user || !user.email || !user.tipo) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.statusBar}>
-          <span>
-            Status: ⏳{" "}
-            {userLoading ? "Carregando usuário..." : "Verificando dados..."}
-          </span>
-          <span style={styles.divider}>|</span>
-          <span>Versão: v2.4</span>
-        </div>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p>
-            ⏳{" "}
-            {userLoading
-              ? "Carregando dados do usuário..."
-              : "Aguardando autenticação..."}
-          </p>
-          <p style={styles.loadingSubtext}>
-            Verificando permissões do usuário...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ VALIDAR PERMISSÕES APÓS HOOKS
-  if (!permissions.temAcesso()) {
-    const mensagemErro = permissions.aviso || "Usuário sem permissão para acessar o dashboard.";
-    
-    return (
-      <div style={styles.container}>
-        <div style={styles.statusBar}>
-          <span>Status: ❌ Permissão negada</span>
-          <span style={styles.divider}>|</span>
-          <span>Versão: v2.4</span>
-        </div>
-        <div style={styles.errorContainer}>
-          <h2>❌ Acesso Negado</h2>
-          <p>{mensagemErro}</p>
-          <p>
-            Você não possui as permissões necessárias para visualizar este
-            conteúdo.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // ✅ VARIÁVEIS DERIVADAS APÓS VALIDAÇÕES
-  const userRole = user.tipo || user.role || "operador";
-  const userMunicipio = user.municipio || "";
-  const userUf = user.uf || "";
+  const userRole = user?.tipo || user?.role || "operador";
+  const userMunicipio = user?.municipio || "";
+  const userUf = user?.uf || "";
 
-  // ✅ CARREGAR DADOS REAIS - CORRIGIDO
+  // ✅ CARREGAR DADOS REAIS - useEffect DEVE VIR ANTES DAS VERIFICAÇÕES
   const carregarDados = async () => {
     try {
       setLoading(true);
@@ -543,6 +492,59 @@ const Dashboard = ({ usuario }) => {
     permissions.acessoTotal,
     permissions.filtroAplicado,
   ]); // ✅ Dependências atualizadas
+
+  // ✅ VERIFICAÇÃO APÓS HOOKS
+  if (userLoading || !user || !user.email || !user.tipo) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>
+            Status: ⏳{" "}
+            {userLoading ? "Carregando usuário..." : "Verificando dados..."}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.4</span>
+        </div>
+        <div style={styles.loadingContainer}>
+          <div style={styles.spinner}></div>
+          <p>
+            ⏳{" "}
+            {userLoading
+              ? "Carregando dados do usuário..."
+              : "Aguardando autenticação..."}
+          </p>
+          <p style={styles.loadingSubtext}>
+            Verificando permissões do usuário...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ VALIDAR PERMISSÕES APÓS HOOKS
+  if (!permissions.temAcesso()) {
+    const mensagemErro = permissions.aviso || "Usuário sem permissão para acessar o dashboard.";
+    
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>Status: ❌ Permissão negada</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.4</span>
+        </div>
+        <div style={styles.errorContainer}>
+          <h2>❌ Acesso Negado</h2>
+          <p>{mensagemErro}</p>
+          <p>
+            Você não possui as permissões necessárias para visualizar este
+            conteúdo.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  
 
   // ✅ CALCULAR ESTATÍSTICAS
   const calcularEstatisticas = () => {
