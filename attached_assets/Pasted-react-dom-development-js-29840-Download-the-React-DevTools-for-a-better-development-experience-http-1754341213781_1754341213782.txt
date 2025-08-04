@@ -1,0 +1,90 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:28 🔥 Firebase Config Status: Object
+firebaseConfig.js:55 ✅ Firebase inicializado com sucesso
+App.jsx:287 🚪 Usuário deslogado
+UserContext.jsx:171 🚪 Usuário deslogado
+Login.jsx:109 🔐 Iniciando processo de login...
+Login.jsx:110 📧 Email: paulinett@live.com
+App.jsx:196 🔍 onAuthStateChanged: Carregando dados do usuário: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+App.jsx:200 📧 Email: paulinett@live.com
+UserContext.jsx:28 🔍 Carregando dados do usuário: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:114 ✅ Autenticação Firebase Auth bem-sucedida
+Login.jsx:115 👤 UID: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:34 🔍 Buscando dados do usuário no Firestore...
+Login.jsx:35 📋 UID: x6mwim8mTDbcH1s3CbgQTbCCyWI2
+Login.jsx:36 📧 Email: paulinett@live.com
+App.jsx:207 ✅ Dados encontrados na coleção 'usuarios': Object
+App.jsx:250 👤 Usuário configurado via onAuthStateChanged: Object
+UserContext.jsx:35 ✅ Dados do usuário encontrados: Object
+UserContext.jsx:76 👤 Usuário configurado: Object
+Login.jsx:45 ✅ Usuário encontrado por UID: Object
+PrivateRoute.jsx:7 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:7 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:424  Uncaught TypeError: hasPermission is not a function
+    at Dashboard (Dashboard.jsx:424:36)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at mountIndeterminateComponent (react-dom.development.js:20074:13)
+    at beginWork (react-dom.development.js:21587:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopConcurrent (react-dom.development.js:26543:5)
+PrivateRoute.jsx:7 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+PrivateRoute.jsx:7 🔍 PrivateRoute verificação: Object
+PrivateRoute.jsx:75 ✅ PrivateRoute: Acesso autorizado
+Dashboard.jsx:424  Uncaught TypeError: hasPermission is not a function
+    at Dashboard (Dashboard.jsx:424:36)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at mountIndeterminateComponent (react-dom.development.js:20074:13)
+    at beginWork (react-dom.development.js:21587:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+react-dom.development.js:18687  The above error occurred in the <Dashboard> component:
+
+    at Dashboard (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Dashboard.jsx:746:22)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:108:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:173:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:222:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:69:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=72418908:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+logCapturedError @ react-dom.development.js:18687
+App.jsx:155  Erro capturado pelo Error Boundary: TypeError: hasPermission is not a function
+    at Dashboard (Dashboard.jsx:424:36)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at mountIndeterminateComponent (react-dom.development.js:20074:13)
+    at beginWork (react-dom.development.js:21587:16)
+    at beginWork$1 (react-dom.development.js:27426:14)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+    at renderRootSync (react-dom.development.js:26434:7)
+    at recoverFromConcurrentError (react-dom.development.js:25850:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:25750:22) Object
+componentDidCatch @ App.jsx:155
+Login.jsx:119 ✅ Dados do usuário carregados: Object
+Login.jsx:141 ✅ Todas as validações passaram
+App.jsx:342 ✅ handleLoginSuccess chamado: Object
+App.jsx:346 📋 Definindo usuário com dados completos do Login.jsx: Object
+App.jsx:287 🚪 Usuário deslogado
+UserContext.jsx:171 🚪 Usuário deslogado
