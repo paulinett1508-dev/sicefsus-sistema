@@ -380,16 +380,17 @@ const CronogramaWidget = ({ emendas = [] }) => {
 
 // 🏠 COMPONENTE PRINCIPAL DASHBOARD
 const Dashboard = ({ usuario }) => {
+  // ✅ TODOS OS HOOKS SEMPRE NO TOPO - SEM CONDIÇÕES
   const user = usuario;
   const userLoading = !usuario;
-  const permissions = usePermissions(usuario); // ✅ CORRIGIDO: Usar hook corretamente
+  const permissions = usePermissions(usuario);
 
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ VERIFICAÇÃO DE USUÁRIO E PERMISSÕES
+  // ✅ VERIFICAÇÃO APÓS HOOKS
   if (userLoading || !user || !user.email || !user.tipo) {
     return (
       <div style={styles.container}>
@@ -417,16 +418,7 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // ✅ CORRIGIDO: Obter permissões do usuário
-  const userRole = user.tipo || user.role || "operador";
-  const userMunicipio = user.municipio || "";
-  const userUf = user.uf || "";
-  
-  // Usar as permissões do hook diretamente
-  const podeVerDashboardCompleto = permissions.acessoTotal;
-  const podeVerEmendasMunicipio = permissions.temAcesso();
-
-  // ✅ VALIDAR PERMISSÕES - Simplificado
+  // ✅ VALIDAR PERMISSÕES APÓS HOOKS
   if (!permissions.temAcesso()) {
     const mensagemErro = permissions.aviso || "Usuário sem permissão para acessar o dashboard.";
     
@@ -448,6 +440,11 @@ const Dashboard = ({ usuario }) => {
       </div>
     );
   }
+
+  // ✅ VARIÁVEIS DERIVADAS APÓS VALIDAÇÕES
+  const userRole = user.tipo || user.role || "operador";
+  const userMunicipio = user.municipio || "";
+  const userUf = user.uf || "";
 
   // ✅ CARREGAR DADOS REAIS - CORRIGIDO
   const carregarDados = async () => {
