@@ -135,6 +135,17 @@ const normalizeTipo = (tipo) => {
   return tipoMap[tipo] || "operador";
 };
 
+// ✅ CONVERTER ROLE PARA TIPO (FUNÇÃO PRINCIPAL DE CONVERSÃO)
+const convertRoleToTipo = (role) => {
+  const roleMap = {
+    admin: "admin",
+    administrador: "admin",
+    user: "operador",
+    operador: "operador",
+  };
+  return roleMap[role] || "operador";
+};
+
 // ✅ VALIDAR DADOS
 const validateFormData = (formData) => {
   console.log("🔍 Validando dados:", formData);
