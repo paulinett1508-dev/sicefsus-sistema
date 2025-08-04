@@ -382,7 +382,7 @@ const CronogramaWidget = ({ emendas = [] }) => {
 const Dashboard = ({ usuario }) => {
   const user = usuario;
   const userLoading = !usuario;
-  const { hasPermission } = usePermissions(); // ✅ NOVO: Obter função de permissão
+  const permissions = usePermissions(usuario); // ✅ CORRIGIDO: Usar hook corretamente
 
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
@@ -417,19 +417,19 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // ✅ NOVO: Obter permissões do usuário
+  // ✅ CORRIGIDO: Obter permissões do usuário
   const userRole = user.tipo || user.role || "operador";
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
-  const podeVerDashboardCompleto = hasPermission("ver_dashboard_completo");
-  const podeVerEmendasMunicipio = hasPermission("ver_emendas_municipio");
+  
+  // Usar as permissões do hook diretamente
+  const podeVerDashboardCompleto = permissions.acessoTotal;
+  const podeVerEmendasMunicipio = permissions.temAcesso();
 
-  // ✅ VALIDAR PERMISSÕES
-  if (userRole !== "admin" && !podeVerEmendasMunicipio) {
-    setError(
-      "Usuário sem permissão para acessar o dashboard. Contate o administrador.",
-    );
-    setLoading(false); // Interrompe o loading
+  // ✅ VALIDAR PERMISSÕES - Simplificado
+  if (!permissions.temAcesso()) {
+    const mensagemErro = permissions.aviso || "Usuário sem permissão para acessar o dashboard.";
+    
     return (
       <div style={styles.container}>
         <div style={styles.statusBar}>
@@ -439,7 +439,7 @@ const Dashboard = ({ usuario }) => {
         </div>
         <div style={styles.errorContainer}>
           <h2>❌ Acesso Negado</h2>
-          <p>{error}</p>
+          <p>{mensagemErro}</p>
           <p>
             Você não possui as permissões necessárias para visualizar este
             conteúdo.
@@ -459,7 +459,7 @@ const Dashboard = ({ usuario }) => {
       let despesasData = [];
 
       // Admin e Operador com permissão para ver todas as emendas
-      if (userRole === "admin" || podeVerDashboardCompleto) {
+      if (permissions.acessoTotal) {
         const emendasRef = collection(db, "emendas");
         const emendasSnapshot = await getDocs(emendasRef);
         emendasSnapshot.forEach((doc) => {
@@ -473,7 +473,7 @@ const Dashboard = ({ usuario }) => {
         });
       }
       // Operador com permissão apenas para o seu município
-      else if (userRole === "operador" && podeVerEmendasMunicipio && userMunicipio) {
+      else if (permissions.filtroAplicado && userMunicipio) {
         const emendasRef = collection(db, "emendas");
         const emendasQuery = query(
           emendasRef,
@@ -533,11 +533,7 @@ const Dashboard = ({ usuario }) => {
 
   useEffect(() => {
     // Verifica se o usuário tem permissão para ver o dashboard antes de carregar os dados
-    if (
-      (userRole === "admin" || podeVerDashboardCompleto || podeVerEmendasMunicipio) &&
-      user?.email &&
-      user?.tipo
-    ) {
+    if (permissions.temAcesso() && user?.email && user?.tipo) {
       carregarDados();
     } else if (!userLoading && !user) {
       // Se o usuário não está carregando e é nulo, significa que não está autenticado
@@ -547,8 +543,8 @@ const Dashboard = ({ usuario }) => {
     user?.email,
     user?.tipo,
     userMunicipio,
-    podeVerDashboardCompleto,
-    podeVerEmendasMunicipio,
+    permissions.acessoTotal,
+    permissions.filtroAplicado,
   ]); // ✅ Dependências atualizadas
 
   // ✅ CALCULAR ESTATÍSTICAS
@@ -606,7 +602,7 @@ const Dashboard = ({ usuario }) => {
           <div style={styles.spinner}></div>
           <p style={styles.loadingText}>Carregando dados do dashboard...</p>
           <p style={styles.loadingSubtext}>
-            {userRole === "admin" || podeVerDashboardCompleto
+            {permissions.acessoTotal
               ? "Carregando todos os dados do sistema..."
               : `Carregando dados do município ${userMunicipio}...`}
           </p>
@@ -645,7 +641,7 @@ const Dashboard = ({ usuario }) => {
         <span style={styles.divider}>|</span>
         <span>
           Usuário:{" "}
-          {userRole === "admin"
+          {permissions.acessoTotal
             ? "👑 Admin"
             : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
         </span>
@@ -656,7 +652,7 @@ const Dashboard = ({ usuario }) => {
       </div>
 
       {/* BANNER OPERADOR */}
-      {userRole === "operador" && userMunicipio && (
+      {permissions.filtroAplicado && userMunicipio && (
         <div style={styles.infoBar}>
           <span style={styles.infoIcon}>🔒</span>
           <div style={styles.infoContent}>
@@ -719,7 +715,7 @@ const Dashboard = ({ usuario }) => {
           <div style={styles.emptyIcon}>📊</div>
           <h3>Sistema Aguardando Dados</h3>
           <p>
-            {userRole === "admin" || podeVerDashboardCompleto
+            {permissions.acessoTotal
               ? "Não há emendas ou despesas cadastradas no sistema."
               : `Não há dados cadastrados para o município ${userMunicipio || "não informado"}.`}
           </p>
