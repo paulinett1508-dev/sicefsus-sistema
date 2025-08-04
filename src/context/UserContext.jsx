@@ -42,10 +42,12 @@ export const UserProvider = ({ children }) => {
               firebaseUser.email?.split("@")[0] ||
               "Usuário";
             
-            // ✅ NORMALIZAR TIPO: converter "user" para "operador"
-            let tipo = userData.tipo || userData.role || "operador";
-            if (tipo === "user") {
+            // ✅ PADRONIZAR TIPO: sempre usar "tipo"
+            let tipo = userData.tipo || "operador";
+            if (userData.role === "user" || userData.role === "operador") {
               tipo = "operador";
+            } else if (userData.role === "admin") {
+              tipo = "admin";
             }
             
             const status = userData.status || "ativo";

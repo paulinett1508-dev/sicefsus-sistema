@@ -26,6 +26,7 @@ import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
+import { useUser } from "./UserContext"; // Importar useUser
 
 // Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
@@ -180,118 +181,12 @@ class ErrorBoundary extends React.Component {
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const [usuario, setUsuario] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user: usuario, loading } = useUser(); // ✅ USAR APENAS O UserContext PARA GERENCIAR USUÁRIO
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
 
-  // ✅ GERENCIAR AUTENTICAÇÃO - CORREÇÃO PRINCIPAL
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // ✅ SÓ BUSCAR DADOS SE NÃO TEMOS USUÁRIO AINDA (evita conflito com Login.jsx)
-        if (!usuario) {
-          try {
-            console.log(
-              "🔍 onAuthStateChanged: Carregando dados do usuário:",
-              firebaseUser.uid,
-            );
-            console.log("📧 Email:", firebaseUser.email);
-
-            // ✅ CORREÇÃO CRÍTICA: Buscar apenas em "usuarios"
-            const userDoc = await getDoc(doc(db, "usuarios", firebaseUser.uid));
-
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              console.log(
-                "✅ Dados encontrados na coleção 'usuarios':",
-                userData,
-              );
-
-              // ✅ MAPEAMENTO CORRETO DOS CAMPOS SICEFSUS
-              const usuario = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email,
-
-                // ✅ CAMPOS PRINCIPAIS DO SICEFSUS
-                nome:
-                  userData.nome ||
-                  userData.name ||
-                  firebaseUser.email?.split("@")[0] ||
-                  "Usuário",
-                tipo: userData.tipo || "operador", // admin | operador
-                status: userData.status || "ativo", // ativo | inativo
-                municipio: userData.municipio || "",
-                uf: userData.uf || "",
-
-                // ✅ CAMPOS DE COMPATIBILIDADE (MAPEAMENTO CRÍTICO)
-                displayName:
-                  userData.nome || userData.name || firebaseUser.displayName,
-                role: userData.tipo === "admin" ? "admin" : "user", // ✅ MAPEAMENTO: operador → user
-                isActive: userData.status === "ativo",
-
-                // ✅ DADOS ADICIONAIS
-                departamento: userData.departamento || "",
-                telefone: userData.telefone || "",
-                dataCriacao: userData.dataCriacao,
-                dataAtualizacao: userData.dataAtualizacao,
-                ultimoAcesso: userData.ultimoAcesso,
-                primeiroAcesso: userData.primeiroAcesso || false,
-                totalAcessos: userData.totalAcessos || 0,
-                criadoPor: userData.criadoPor,
-
-                // ✅ PRESERVAR TODOS OS CAMPOS ORIGINAIS
-                ...userData,
-              };
-
-              setUsuario(usuario);
-
-              console.log("👤 Usuário configurado via onAuthStateChanged:", {
-                nome: usuario.nome,
-                tipo: usuario.tipo,
-                role: usuario.role,
-                municipio: usuario.municipio,
-                uf: usuario.uf,
-                status: usuario.status,
-                isAdmin: usuario.tipo === "admin",
-              });
-            } else {
-              console.log("❌ Usuário não encontrado na coleção 'usuarios'");
-              console.log("🚨 USUÁRIO ÓRFÃO DETECTADO!");
-              console.log("   - Existe no Firebase Auth ✅");
-              console.log("   - NÃO existe no Firestore ❌");
-              console.log(
-                "   - Precisa ser criado via interface de administração",
-              );
-
-              // ✅ LOGOUT FORÇADO - NÃO CRIAR AUTOMATICAMENTE
-              await signOut(auth);
-              setUsuario(null);
-              setAuthError(
-                "Usuário não encontrado no sistema. Entre em contato com o administrador.",
-              );
-            }
-          } catch (error) {
-            console.error("❌ Erro ao carregar dados do usuário:", error);
-
-            // ✅ EM CASO DE ERRO, NÃO CRIAR USUÁRIO FANTASMA
-            setAuthError("Erro ao carregar dados do usuário. Tente novamente.");
-            await signOut(auth);
-            setUsuario(null);
-          }
-        } else {
-          console.log("👤 Usuário já definido, pulando onAuthStateChanged");
-        }
-      } else {
-        console.log("🚪 Usuário deslogado");
-        setUsuario(null);
-      }
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, []); // ✅ SEM 'usuario' nas dependências para evitar loops
+  // ✅ USUÁRIO GERENCIADO CENTRALIZADAMENTE PELO UserContext
 
   // Redirecionamento
   useEffect(() => {
@@ -312,7 +207,8 @@ function AppContent() {
     }
     try {
       await signOut(auth);
-      setUsuario(null);
+      // A lógica de limpar o usuário será tratada pelo onAuthStateChanged e UserContext
+      // setUsuario(null); // Remover esta linha
       setShowLogin(false);
       setAuthError(null);
       navigate("/");
@@ -347,7 +243,8 @@ function AppContent() {
           "📋 Definindo usuário com dados completos do Login.jsx:",
           dadosUsuario,
         );
-        setUsuario(dadosUsuario);
+        // O UserContext deve ser responsável por atualizar o estado do usuário
+        // setUsuario(dadosUsuario); // Remover esta linha
         setShowLogin(false);
         setAuthError(null);
         navigate("/dashboard");
@@ -369,6 +266,10 @@ function AppContent() {
   }, []);
 
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div style={styles.app}>
@@ -845,7 +746,6 @@ const styles = {
     fontWeight: "500",
     transition: "background-color 0.2s",
   },
-
 };
 
 // CSS para animações
