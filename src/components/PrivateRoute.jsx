@@ -2,17 +2,17 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 export default function PrivateRoute({ children, usuario, requiredRole }) {
-  // ✅ DEBUG TEMPORÁRIO - REMOVER APÓS TESTAR
-  console.log("🔍 PrivateRoute verificação:", {
-    usuario: usuario?.nome,
-    email: usuario?.email,
-    tipo: usuario?.tipo,
-    role: usuario?.role,
-    requiredRole: requiredRole,
-    isAuthenticated: !!usuario,
-    shouldHaveAccess:
-      requiredRole === "admin" ? usuario?.tipo === "admin" : true,
-  });
+  // ✅ Debug simplificado (apenas quando necessário)
+  if (process.env.NODE_ENV === 'development') {
+    console.log("🔍 PrivateRoute verificação:", {
+      usuario: usuario?.nome || "Não identificado",
+      email: usuario?.email,
+      tipo: usuario?.tipo,
+      requiredRole,
+      isAuthenticated: !!usuario,
+      hasRequiredRole: !requiredRole || usuario?.tipo === requiredRole,
+    });
+  }
 
   // ✅ VERIFICAÇÃO PRINCIPAL: Usuário autenticado
   if (!usuario) {
