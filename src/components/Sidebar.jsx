@@ -396,20 +396,18 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
                 style={{
                   backgroundColor:
                     usuario.tipo === "admin"
-                      ? "var(--warning)"
-                      : "var(--success)",
-                  color:
-                    usuario.tipo === "admin"
-                      ? "var(--warning-dark)"
-                      : "var(--success-dark)",
+                      ? "#dc3545"
+                      : "#28a745",
+                  color: "#ffffff",
                   borderRadius: "6px",
-                  padding: "2px 8px",
+                  padding: "3px 10px",
                   fontWeight: "bold",
                   fontSize: 10,
                   letterSpacing: 0.5,
                   textTransform: "uppercase",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
                 }}
                 title={usuario.tipo === "admin" ? "Administrador" : "Operador"}
               >
