@@ -38,6 +38,8 @@ const usePermissions = (usuario) => {
         acessoTotal: true,
         filtroAplicado: false,
         semAcesso: false,
+        temAcessoSistema: true,
+        podeGerenciarUsuarios: true, // ✅ ADMIN PODE GERENCIAR USUÁRIOS
         motivo: "Usuário administrador - acesso total",
         aviso: null,
         filtroMunicipio: null,
@@ -57,7 +59,9 @@ const usePermissions = (usuario) => {
         acessoTotal: false,
         filtroAplicado: true,
         semAcesso: false,
-        motivo: `Filtrado por ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
+        temAcessoSistema: true, // ✅ OPERADOR TEM ACESSO AO SISTEMA
+        podeGerenciarUsuarios: false, // ✅ MAS NÃO PODE GERENCIAR USUÁRIOS
+        motivo: `Operador com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
         aviso: null,
         filtroMunicipio: localizacao.municipio,
         filtroUf: localizacao.uf,
@@ -65,17 +69,18 @@ const usePermissions = (usuario) => {
       };
     }
 
-    // ✅ OPERADOR SEM LOCALIZAÇÃO VÁLIDA: Sem acesso
+    // ✅ OPERADOR SEM LOCALIZAÇÃO VÁLIDA: Aviso mas ainda tem acesso básico
     return {
       acessoTotal: false,
       filtroAplicado: false,
-      semAcesso: true,
-      motivo: "Dados de localização não cadastrados ou inválidos",
-      aviso:
-        "⚠️ ACESSO BLOQUEADO: Complete seu cadastro com município/UF válidos para acessar o sistema",
+      semAcesso: false, // ✅ MUDANÇA: Não bloquear completamente
+      temAcessoSistema: true, // ✅ TEM ACESSO BÁSICO
+      podeGerenciarUsuarios: false,
+      motivo: "Operador com localização incompleta",
+      aviso: "⚠️ Complete seu cadastro com município/UF para ver emendas específicas da sua região",
       filtroMunicipio: null,
       filtroUf: null,
-      tipo: "operador_bloqueado",
+      tipo: "operador_localização_pendente",
       errosLocalizacao: localizacao.erros,
     };
   }, [usuario]);
@@ -104,7 +109,14 @@ const usePermissions = (usuario) => {
        * Verificar se usuário tem acesso ao sistema
        */
       temAcesso: () => {
-        return permissoes && !permissoes.semAcesso;
+        return permissoes && (permissoes.temAcessoSistema || permissoes.acessoTotal);
+      },
+
+      /**
+       * Verificar se usuário pode gerenciar outros usuários
+       */
+      podeGerenciarUsuarios: () => {
+        return permissoes?.podeGerenciarUsuarios === true;
       },
 
       /**
@@ -146,6 +158,8 @@ const usePermissions = (usuario) => {
             return `👑 Administrador - Visualizando todas as emendas do sistema`;
           case "operador_filtrado":
             return `📍 Operador - Visualizando emendas de ${permissoes.filtroMunicipio}/${permissoes.filtroUf.toUpperCase()}`;
+          case "operador_localização_pendente":
+            return `⚠️ Operador - Complete o cadastro de localização`;
           case "operador_bloqueado":
             return `🚫 Acesso bloqueado - Complete seu cadastro`;
           case "sem_autenticacao":

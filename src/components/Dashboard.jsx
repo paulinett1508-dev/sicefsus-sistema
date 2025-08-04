@@ -7,6 +7,7 @@ import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom"; // ✅ NOVO: Import para navegação
+import usePermissions from "../hooks/usePermissions"; // ✅ NOVO: Import do hook de permissões
 
 // 💎 WIDGET CRONOGRAMA REFINADO
 const CronogramaWidget = ({ emendas = [] }) => {
@@ -381,13 +382,14 @@ const CronogramaWidget = ({ emendas = [] }) => {
 const Dashboard = ({ usuario }) => {
   const user = usuario;
   const userLoading = !usuario;
+  const { hasPermission } = usePermissions(); // ✅ NOVO: Obter função de permissão
 
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ VERIFICAÇÃO DE USUÁRIO
+  // ✅ VERIFICAÇÃO DE USUÁRIO E PERMISSÕES
   if (userLoading || !user || !user.email || !user.tipo) {
     return (
       <div style={styles.container}>
@@ -415,9 +417,37 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
+  // ✅ NOVO: Obter permissões do usuário
   const userRole = user.tipo || user.role || "operador";
   const userMunicipio = user.municipio || "";
   const userUf = user.uf || "";
+  const podeVerDashboardCompleto = hasPermission("ver_dashboard_completo");
+  const podeVerEmendasMunicipio = hasPermission("ver_emendas_municipio");
+
+  // ✅ VALIDAR PERMISSÕES
+  if (userRole !== "admin" && !podeVerEmendasMunicipio) {
+    setError(
+      "Usuário sem permissão para acessar o dashboard. Contate o administrador.",
+    );
+    setLoading(false); // Interrompe o loading
+    return (
+      <div style={styles.container}>
+        <div style={styles.statusBar}>
+          <span>Status: ❌ Permissão negada</span>
+          <span style={styles.divider}>|</span>
+          <span>Versão: v2.4</span>
+        </div>
+        <div style={styles.errorContainer}>
+          <h2>❌ Acesso Negado</h2>
+          <p>{error}</p>
+          <p>
+            Você não possui as permissões necessárias para visualizar este
+            conteúdo.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // ✅ CARREGAR DADOS REAIS - CORRIGIDO
   const carregarDados = async () => {
@@ -428,36 +458,32 @@ const Dashboard = ({ usuario }) => {
       let emendasData = [];
       let despesasData = [];
 
-      if (userRole === "admin") {
-        // Admin - todos os dados
+      // Admin e Operador com permissão para ver todas as emendas
+      if (userRole === "admin" || podeVerDashboardCompleto) {
         const emendasRef = collection(db, "emendas");
         const emendasSnapshot = await getDocs(emendasRef);
-
         emendasSnapshot.forEach((doc) => {
           emendasData.push({ id: doc.id, ...doc.data() });
         });
 
-        // ✅ CORRIGIDO: Removido orderBy para despesas
         const despesasRef = collection(db, "despesas");
         const despesasSnapshot = await getDocs(despesasRef);
-
         despesasSnapshot.forEach((doc) => {
           despesasData.push({ id: doc.id, ...doc.data() });
         });
-      } else if (userRole === "operador" && userMunicipio) {
-        // Operador - apenas do município
+      }
+      // Operador com permissão apenas para o seu município
+      else if (userRole === "operador" && podeVerEmendasMunicipio && userMunicipio) {
         const emendasRef = collection(db, "emendas");
         const emendasQuery = query(
           emendasRef,
           where("municipio", "==", userMunicipio),
         );
         const emendasSnapshot = await getDocs(emendasQuery);
-
         emendasSnapshot.forEach((doc) => {
           emendasData.push({ id: doc.id, ...doc.data() });
         });
 
-        // Carregar despesas das emendas do município
         if (emendasData.length > 0) {
           const emendasIds = emendasData.map((e) => e.id);
           const batchSize = 10;
@@ -465,20 +491,27 @@ const Dashboard = ({ usuario }) => {
           for (let i = 0; i < emendasIds.length; i += batchSize) {
             const batch = emendasIds.slice(i, i + batchSize);
             const despesasRef = collection(db, "despesas");
-            // ✅ CORRIGIDO: Removido orderBy
             const despesasQuery = query(
               despesasRef,
               where("emendaId", "in", batch),
             );
             const despesasSnapshot = await getDocs(despesasQuery);
-
             despesasSnapshot.forEach((doc) => {
               despesasData.push({ id: doc.id, ...doc.data() });
             });
           }
         }
       } else {
-        setError("Usuário sem permissões adequadas para acessar o dashboard.");
+        // Caso em que o usuário tem a permissão geral, mas não tem município cadastrado
+        if (userRole !== "admin" && !userMunicipio) {
+          setError(
+            "Usuário operador sem município definido. Impossível carregar dados.",
+          );
+        } else {
+          setError(
+            "Usuário sem permissões adequadas para acessar o dashboard.",
+          );
+        }
         setLoading(false);
         return;
       }
@@ -499,10 +532,24 @@ const Dashboard = ({ usuario }) => {
   };
 
   useEffect(() => {
-    if (user && user.email && user.tipo) {
+    // Verifica se o usuário tem permissão para ver o dashboard antes de carregar os dados
+    if (
+      (userRole === "admin" || podeVerDashboardCompleto || podeVerEmendasMunicipio) &&
+      user?.email &&
+      user?.tipo
+    ) {
       carregarDados();
+    } else if (!userLoading && !user) {
+      // Se o usuário não está carregando e é nulo, significa que não está autenticado
+      setError("Usuário não autenticado.");
     }
-  }, [user?.email, user?.tipo, userMunicipio]); // ✅ Adicionado userMunicipio nas dependências
+  }, [
+    user?.email,
+    user?.tipo,
+    userMunicipio,
+    podeVerDashboardCompleto,
+    podeVerEmendasMunicipio,
+  ]); // ✅ Dependências atualizadas
 
   // ✅ CALCULAR ESTATÍSTICAS
   const calcularEstatisticas = () => {
@@ -559,7 +606,7 @@ const Dashboard = ({ usuario }) => {
           <div style={styles.spinner}></div>
           <p style={styles.loadingText}>Carregando dados do dashboard...</p>
           <p style={styles.loadingSubtext}>
-            {userRole === "admin"
+            {userRole === "admin" || podeVerDashboardCompleto
               ? "Carregando todos os dados do sistema..."
               : `Carregando dados do município ${userMunicipio}...`}
           </p>
@@ -672,7 +719,7 @@ const Dashboard = ({ usuario }) => {
           <div style={styles.emptyIcon}>📊</div>
           <h3>Sistema Aguardando Dados</h3>
           <p>
-            {userRole === "admin"
+            {userRole === "admin" || podeVerDashboardCompleto
               ? "Não há emendas ou despesas cadastradas no sistema."
               : `Não há dados cadastrados para o município ${userMunicipio || "não informado"}.`}
           </p>
