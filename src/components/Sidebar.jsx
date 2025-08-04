@@ -395,7 +395,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
               <span
                 style={{
                   background:
-                    usuario.role === "admin"
+                    usuario.tipo === "admin"
                       ? "var(--success)"
                       : "var(--accent)",
                   color: "var(--white)",
@@ -408,9 +408,9 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
                   boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
                   border: "1px solid rgba(255,255,255,0.2)",
                 }}
-                title={usuario.role === "admin" ? "Administrador" : "Operador"}
+                title={usuario.tipo === "admin" ? "Administrador" : "Operador"}
               >
-                {usuario.role === "admin" ? "ADMIN" : "USER"}
+                {usuario.tipo === "admin" ? "ADMIN" : "USER"}
               </span>
               <span
                 style={{
