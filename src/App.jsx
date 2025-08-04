@@ -26,7 +26,7 @@ import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
-import { useUser } from "./UserContext"; // Importar useUser
+import { useUser } from "./context/UserContext"; // Importar useUser
 
 // Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
