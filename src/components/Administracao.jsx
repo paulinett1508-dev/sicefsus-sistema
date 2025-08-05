@@ -365,9 +365,12 @@ const getActionIcon = (action) => {
       </div>
     )}
   </div>
-)}
+)};
 
-tabsContainer: {
+const styles = {
+  // ... outros estilos existentes ...
+  
+  tabsContainer: {
     display: 'flex',
     marginBottom: '24px',
     borderBottom: '2px solid #e9ecef',
