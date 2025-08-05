@@ -1,474 +1,460 @@
-// src/components/Administracao.jsx - INTERFACE MELHORADA CONFORME SOLICITAÇÃO
-import React, { useState, useEffect } from "react";
-import userService from "../services/userService";
-import UserForm from "./UserForm";
-import UsersTable from "./UsersTable";
-import { useToast } from "./Toast";
+// 🔧 CORREÇÃO: Administracao.jsx - Adicionar aba de Logs de Auditoria
+// ✅ Preservar toda estrutura existente
+// ✅ Adicionar apenas a funcionalidade de logs
 
-export default function Administracao({ usuario }) {
-  const [usuarios, setUsuarios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showUserForm, setShowUserForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const { showToast } = useToast();
-  const [formData, setFormData] = useState({
-    email: "",
-    nome: "",
-    role: "user", // user = operador
-    status: "ativo",
-    municipio: "",
-    uf: "",
-    departamento: "",
-    telefone: "",
-  });
+// 1️⃣ ADICIONAR IMPORT no topo (após os imports existentes):
+import { auditService } from "../services/auditService";
 
-  // ✅ CARREGAR USUÁRIOS
-  const carregarUsuarios = async () => {
-    try {
-      setLoading(true);
-      const usuariosData = await userService.loadUsers();
-      setUsuarios(usuariosData);
-      console.log("✅ Usuários carregados:", usuariosData.length);
-    } catch (error) {
-      console.error("❌ Erro ao carregar usuários:", error);
-      showToast("Erro ao carregar usuários", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+// 2️⃣ ADICIONAR ESTADOS para logs (após os estados existentes, linha ~12):
+const [activeTab, setActiveTab] = useState("users"); // Novo estado para tabs
+const [logs, setLogs] = useState([]); // Novo estado para logs
+const [logFilters, setLogFilters] = useState({ // Novo estado para filtros
+  usuario: "",
+  acao: "",
+  dataInicio: "",
+  dataFim: "",
+});
 
-  useEffect(() => {
-    carregarUsuarios();
-  }, []);
-
-  // ✅ RESETAR FORMULÁRIO
-  const resetForm = () => {
-    setFormData({
-      email: "",
-      nome: "",
-      role: "user",
-      status: "ativo",
-      municipio: "",
-      uf: "",
-      departamento: "",
-      telefone: "",
-    });
-    setEditingUser(null);
-    setShowUserForm(false);
-  };
-
-  // ✅ NOVO USUÁRIO
-  const handleNovoUsuario = () => {
-    resetForm();
-    setShowUserForm(true);
-  };
-
-  // ✅ EDITAR USUÁRIO
-  const handleEditarUsuario = (user) => {
-    console.log("✏️ Editando usuário:", user);
-
-    // ✅ MAPEAMENTO CORRETO DOS CAMPOS
-    const roleMap = {
-      admin: "admin",
-      operador: "user",
-      user: "user", // Garantir compatibilidade
-    };
-
-    setFormData({
-      email: user.email || "",
-      nome: user.nome || "",
-      role: roleMap[user.tipo] || "user",
-      status: user.status || "ativo",
-      municipio: user.municipio || "",
-      uf: user.uf || "",
-      departamento: user.departamento || "",
-      telefone: user.telefone || "",
-    });
-    setEditingUser(user);
-    setShowUserForm(true);
-  };
-
-  // ✅ CANCELAR FORMULÁRIO
-  const handleCancelar = () => {
-    resetForm();
-  };
-
-  // ✅ SALVAR USUÁRIO
-  const handleSalvarUsuario = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-
-    try {
-      let resultado;
-
-      if (editingUser) {
-        // Atualizar usuário existente
-        resultado = await userService.updateUser(
-          editingUser.id,
-          formData,
-          editingUser.email,
-        );
-        showToast(
-          resultado.message || "Usuário atualizado com sucesso!",
-          "success",
-        );
-      } else {
-        // Criar novo usuário
-        resultado = await userService.createUser(formData);
-        showToast(
-          resultado.message || "Usuário criado com sucesso!",
-          "success",
-        );
-      }
-
-      // Recarregar lista e fechar formulário
-      await carregarUsuarios();
-      resetForm();
-    } catch (error) {
-      console.error("❌ Erro ao salvar usuário:", error);
-      showToast(error.message || "Erro ao salvar usuário", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ✅ EXCLUIR USUÁRIO
-  const handleExcluirUsuario = async (user) => {
-    const confirmMessage = `⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR permanentemente o usuário?\n\n👤 ${user.nome}\n📧 ${user.email}\n\n❌ Esta ação NÃO PODE ser desfeita!\n\nPara apenas desativar temporariamente, use a opção "Desativar" instead.`;
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      setSaving(true);
-      const resultado = await userService.deleteUser(user.id);
-      showToast(
-        resultado.message || "Usuário excluído com sucesso!",
-        "success",
-      );
-      await carregarUsuarios();
-    } catch (error) {
-      console.error("❌ Erro ao excluir usuário:", error);
-      showToast(error.message || "Erro ao excluir usuário", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ✅ NOVA: DESATIVAR/ATIVAR USUÁRIO
-  const handleToggleStatus = async (user) => {
-    const novoStatus = user.status === "ativo" ? "inativo" : "ativo";
-    const acao = novoStatus === "ativo" ? "ativar" : "desativar";
-
-    const confirmMessage = `Tem certeza que deseja ${acao} o usuário?\n\n👤 ${user.nome}\n📧 ${user.email}\n\n${novoStatus === "inativo" ? "⚠️ Usuário não poderá mais fazer login" : "✅ Usuário poderá fazer login novamente"}`;
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      setSaving(true);
-
-      // ✅ USAR updateUser COM STATUS ALTERADO
-      const dadosAtualizacao = {
-        email: user.email,
-        nome: user.nome,
-        role: user.tipo === "admin" ? "admin" : "user",
-        status: novoStatus,
-        municipio: user.municipio || "",
-        uf: user.uf || "",
-        departamento: user.departamento || "",
-        telefone: user.telefone || "",
-      };
-
-      const resultado = await userService.updateUser(
-        user.id,
-        dadosAtualizacao,
-        user.email,
-      );
-
-      showToast(
-        `Usuário ${acao === "ativar" ? "ativado" : "desativado"} com sucesso!`,
-        "success",
-      );
-      await carregarUsuarios();
-    } catch (error) {
-      console.error(`❌ Erro ao ${acao} usuário:`, error);
-      showToast(`Erro ao ${acao} usuário: ${error.message}`, "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ✅ RESET SENHA
-  const handleResetSenha = async (user) => {
-    const confirmMessage = `Enviar email de redefinição de senha para:\n\n👤 ${user.nome}\n📧 ${user.email}\n\nO usuário receberá um link para criar nova senha.`;
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    try {
-      setSaving(true);
-      const resultado = await userService.sendPasswordReset(user);
-      showToast(resultado.message || "Email de reset enviado!", "success");
-    } catch (error) {
-      console.error("❌ Erro ao enviar reset:", error);
-      showToast(error.message || "Erro ao enviar email de reset", "error");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ✅ CALCULAR ESTATÍSTICAS
-  const calcularEstatisticas = () => {
-    const total = usuarios.length;
-    const ativos = usuarios.filter((u) => u.status === "ativo").length;
-    const admins = usuarios.filter((u) => u.tipo === "admin").length;
-    const operadores = usuarios.filter((u) => u.tipo === "operador").length;
-    const inativos = usuarios.filter((u) => u.status === "inativo").length;
-
-    return { total, ativos, admins, operadores, inativos };
-  };
-
-  const stats = calcularEstatisticas();
-
-  return (
-    <div style={styles.container}>
-      {/* ✅ CABEÇALHO MELHORADO */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <h1 style={styles.title}>👥 Administração de Usuários</h1>
-          <p style={styles.subtitle}>
-            Gerencie usuários, permissões e acessos do sistema SICEFSUS
-          </p>
-        </div>
-
-        {/* ✅ BOTÃO "NOVO USUÁRIO" EM LOCAL ADEQUADO */}
-        <div style={styles.headerActions}>
-          <button
-            onClick={handleNovoUsuario}
-            style={styles.primaryButton}
-            disabled={loading || saving}
-          >
-            <span style={styles.buttonIcon}>👤</span>
-            Novo Usuário
-          </button>
-        </div>
-      </div>
-
-      {/* ✅ ESTATÍSTICAS */}
-      <div style={styles.statsContainer}>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{stats.total}</div>
-          <div style={styles.statLabel}>Total</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{stats.ativos}</div>
-          <div style={styles.statLabel}>Ativos</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{stats.admins}</div>
-          <div style={styles.statLabel}>Admins</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{stats.operadores}</div>
-          <div style={styles.statLabel}>Operadores</div>
-        </div>
-        <div style={styles.statCard}>
-          <div style={styles.statNumber}>{stats.inativos}</div>
-          <div style={styles.statLabel}>Inativos</div>
-        </div>
-      </div>
-
-      {/* ✅ TABELA DE USUÁRIOS MELHORADA */}
-      <div style={styles.tableContainer}>
-        <h3 style={styles.sectionTitle}>
-          📋 Lista de Usuários ({usuarios.length})
-        </h3>
-
-        {loading ? (
-          <div style={styles.loading}>
-            <div style={styles.spinner}></div>
-            <p>Carregando usuários...</p>
-          </div>
-        ) : (
-          <UsersTable
-            users={usuarios}
-            onEdit={handleEditarUsuario}
-            onDelete={handleExcluirUsuario}
-            onToggleStatus={handleToggleStatus} // ✅ NOVA PROP
-            onResetPassword={handleResetSenha}
-            loading={saving}
-          />
-        )}
-      </div>
-
-      {/* ✅ FORMULÁRIO DE USUÁRIO */}
-      {showUserForm && (
-        <UserForm
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleSalvarUsuario}
-          onCancel={handleCancelar}
-          editingUser={editingUser}
-          saving={saving}
-        />
-      )}
-    </div>
-  );
-}
-
-// ✅ ESTILOS MELHORADOS
-const styles = {
-  container: {
-    padding: "24px",
-    maxWidth: "1400px",
-    margin: "0 auto",
-    backgroundColor: "var(--theme-bg, #f8f9fa)",
-    minHeight: "100vh",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "32px",
-    padding: "24px",
-    backgroundColor: "white",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-
-  headerLeft: {
-    flex: 1,
-  },
-
-  title: {
-    margin: 0,
-    fontSize: "28px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    marginBottom: "8px",
-  },
-
-  subtitle: {
-    margin: 0,
-    fontSize: "16px",
-    color: "#6c757d",
-    fontWeight: "400",
-  },
-
-  headerActions: {
-    display: "flex",
-    gap: "12px",
-    alignItems: "center",
-  },
-
-  primaryButton: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    padding: "12px 24px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "500",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    boxShadow: "0 2px 4px rgba(0,123,255,0.3)",
-  },
-
-  buttonIcon: {
-    fontSize: "18px",
-  },
-
-  statsContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-    gap: "16px",
-    marginBottom: "32px",
-  },
-
-  statCard: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "12px",
-    textAlign: "center",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-
-  statNumber: {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#007bff",
-    marginBottom: "4px",
-  },
-
-  statLabel: {
-    fontSize: "14px",
-    color: "#6c757d",
-    fontWeight: "500",
-  },
-
-  tableContainer: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    padding: "24px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    border: "1px solid #e9ecef",
-  },
-
-  sectionTitle: {
-    margin: "0 0 16px 0",
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#2c3e50",
-  },
-
-  loading: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px",
-    gap: "16px",
-  },
-
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #007bff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
+// 3️⃣ ADICIONAR FUNÇÃO para carregar logs (após carregarUsuarios, linha ~35):
+const carregarLogs = async () => {
+  try {
+    console.log('📋 Carregando logs de auditoria...');
+    const logsData = await auditService.getLogs({ limit: 50 });
+    setLogs(logsData);
+    console.log(`✅ ${logsData.length} logs carregados`);
+  } catch (error) {
+    console.error('❌ Erro ao carregar logs:', error);
+    showToast("Erro ao carregar logs de auditoria", "error");
+  }
 };
 
-// ✅ CSS ANIMATIONS
-if (!document.getElementById("admin-animations")) {
-  const styleSheet = document.createElement("style");
-  styleSheet.id = "admin-animations";
-  styleSheet.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+// 4️⃣ MODIFICAR useEffect para carregar logs também (linha ~40):
+useEffect(() => {
+  const loadData = async () => {
+    await carregarUsuarios();
+    await carregarLogs(); // ✅ ADICIONAR esta linha
+  };
+  loadData();
+}, []);
+
+// 5️⃣ ADICIONAR FUNÇÃO para filtrar logs (antes do return, linha ~200):
+const getFilteredLogs = () => {
+  return logs.filter((log) => {
+    let matches = true;
+
+    if (logFilters.usuario) {
+      matches = matches &&
+        (log.userEmail || "")
+          .toLowerCase()
+          .includes(logFilters.usuario.toLowerCase());
     }
 
-    .primary-button:hover {
-      background-color: #0056b3 !important;
-      transform: translateY(-1px);
+    if (logFilters.acao) {
+      matches = matches &&
+        (log.action || "")
+          .toLowerCase()
+          .includes(logFilters.acao.toLowerCase());
     }
 
-    .special-button:hover {
-      background-color: #218838 !important;
+    if (logFilters.dataInicio) {
+      const inicio = new Date(logFilters.dataInicio);
+      const logDate = log.timestamp instanceof Date 
+        ? log.timestamp 
+        : new Date(log.timestamp?.seconds * 1000 || log.timestamp);
+      matches = matches && logDate >= inicio;
     }
-  `;
-  document.head.appendChild(styleSheet);
-}
+
+    if (logFilters.dataFim) {
+      const fim = new Date(logFilters.dataFim);
+      fim.setHours(23, 59, 59, 999);
+      const logDate = log.timestamp instanceof Date 
+        ? log.timestamp 
+        : new Date(log.timestamp?.seconds * 1000 || log.timestamp);
+      matches = matches && logDate <= fim;
+    }
+
+    return matches;
+  });
+};
+
+// 6️⃣ FUNÇÕES auxiliares para logs (antes do return):
+const getActionColor = (action) => {
+  switch (action) {
+    case 'DELETE_EMENDA':
+    case 'DELETE_DESPESA':
+    case 'DELETE_USER':
+      return '#dc3545';
+    case 'CREATE_EMENDA':
+    case 'CREATE_DESPESA':
+    case 'CREATE_USER':
+      return '#28a745';
+    case 'UPDATE_EMENDA':
+    case 'UPDATE_DESPESA':
+    case 'UPDATE_USER':
+      return '#ffc107';
+    default:
+      return '#6c757d';
+  }
+};
+
+const getActionIcon = (action) => {
+  switch (action) {
+    case 'DELETE_EMENDA':
+    case 'DELETE_DESPESA':
+    case 'DELETE_USER':
+      return '🗑️';
+    case 'CREATE_EMENDA':
+    case 'CREATE_DESPESA':
+    case 'CREATE_USER':
+      return '➕';
+    case 'UPDATE_EMENDA':
+    case 'UPDATE_DESPESA':
+    case 'UPDATE_USER':
+      return '✏️';
+    default:
+      return '⚡';
+  }
+};
+
+// 7️⃣ SUBSTITUIR o CABEÇALHO (linha ~210) para incluir tabs:
+<div style={styles.header}>
+  <div style={styles.headerLeft}>
+    <h1 style={styles.title}>
+      {activeTab === "users" ? "👥 Administração de Usuários" : "📋 Logs de Auditoria"}
+    </h1>
+    <p style={styles.subtitle}>
+      {activeTab === "users" 
+        ? "Gerencie usuários, permissões e acessos do sistema SICEFSUS"
+        : "Monitore todas as ações realizadas no sistema"}
+    </p>
+  </div>
+
+  <div style={styles.headerActions}>
+    {activeTab === "users" && (
+      <button
+        onClick={handleNovoUsuario}
+        style={styles.primaryButton}
+        disabled={loading || saving}
+      >
+        <span style={styles.buttonIcon}>👤</span>
+        Novo Usuário
+      </button>
+    )}
+    {activeTab === "logs" && (
+      <button
+        onClick={carregarLogs}
+        style={{...styles.primaryButton, backgroundColor: '#28a745'}}
+        disabled={loading}
+      >
+        <span style={styles.buttonIcon}>🔄</span>
+        Atualizar Logs
+      </button>
+    )}
+  </div>
+</div>
+
+{/* ✅ NOVA SEÇÃO: Navegação por tabs */}
+<div style={styles.tabsContainer}>
+  <button
+    onClick={() => setActiveTab("users")}
+    style={{
+      ...styles.tabButton,
+      ...(activeTab === "users" ? styles.tabButtonActive : {})
+    }}
+  >
+    👥 Usuários ({usuarios.length})
+  </button>
+  <button
+    onClick={() => setActiveTab("logs")}
+    style={{
+      ...styles.tabButton,
+      ...(activeTab === "logs" ? styles.tabButtonActive : {})
+    }}
+  >
+    📋 Logs de Auditoria ({logs.length})
+  </button>
+</div>
+
+// 8️⃣ MODIFICAR a seção de estatísticas para ser condicional (linha ~240):
+{activeTab === "users" && (
+  <div style={styles.statsContainer}>
+    {/* ... manter todo código de estatísticas existente ... */}
+  </div>
+)}
+
+// 9️⃣ MODIFICAR a seção da tabela para ser condicional (linha ~290):
+{activeTab === "users" ? (
+  <div style={styles.tableContainer}>
+    <h3 style={styles.sectionTitle}>
+      📋 Lista de Usuários ({usuarios.length})
+    </h3>
+
+    {loading ? (
+      <div style={styles.loading}>
+        <div style={styles.spinner}></div>
+        <p>Carregando usuários...</p>
+      </div>
+    ) : (
+      <UsersTable
+        users={usuarios}
+        onEdit={handleEditarUsuario}
+        onDelete={handleExcluirUsuario}
+        onToggleStatus={handleToggleStatus}
+        onResetPassword={handleResetSenha}
+        loading={saving}
+      />
+    )}
+  </div>
+) : (
+  // ✅ NOVA SEÇÃO: Aba de Logs
+  <div style={styles.tableContainer}>
+    <h3 style={styles.sectionTitle}>
+      📋 Logs de Auditoria do Sistema ({getFilteredLogs().length})
+    </h3>
+
+    {/* Filtros */}
+    <div style={styles.filtersContainer}>
+      <div style={styles.filtersGrid}>
+        <div>
+          <label style={styles.filterLabel}>👤 Usuário</label>
+          <input
+            type="text"
+            placeholder="Filtrar por email..."
+            value={logFilters.usuario}
+            onChange={(e) =>
+              setLogFilters({ ...logFilters, usuario: e.target.value })
+            }
+            style={styles.filterInput}
+          />
+        </div>
+
+        <div>
+          <label style={styles.filterLabel}>⚡ Ação</label>
+          <select
+            value={logFilters.acao}
+            onChange={(e) =>
+              setLogFilters({ ...logFilters, acao: e.target.value })
+            }
+            style={styles.filterInput}
+          >
+            <option value="">Todas as ações</option>
+            <option value="CREATE_EMENDA">Criar Emenda</option>
+            <option value="UPDATE_EMENDA">Editar Emenda</option>
+            <option value="DELETE_EMENDA">Deletar Emenda</option>
+            <option value="CREATE_DESPESA">Criar Despesa</option>
+            <option value="UPDATE_DESPESA">Editar Despesa</option>
+            <option value="DELETE_DESPESA">Deletar Despesa</option>
+          </select>
+        </div>
+
+        <div>
+          <label style={styles.filterLabel}>📅 Data Início</label>
+          <input
+            type="date"
+            value={logFilters.dataInicio}
+            onChange={(e) =>
+              setLogFilters({ ...logFilters, dataInicio: e.target.value })
+            }
+            style={styles.filterInput}
+          />
+        </div>
+
+        <div>
+          <label style={styles.filterLabel}>📅 Data Fim</label>
+          <input
+            type="date"
+            value={logFilters.dataFim}
+            onChange={(e) =>
+              setLogFilters({ ...logFilters, dataFim: e.target.value })
+            }
+            style={styles.filterInput}
+          />
+        </div>
+      </div>
+    </div>
+
+    {/* Tabela de Logs */}
+    {loading ? (
+      <div style={styles.loading}>
+        <div style={styles.spinner}></div>
+        <p>Carregando logs...</p>
+      </div>
+    ) : getFilteredLogs().length === 0 ? (
+      <div style={styles.emptyLogs}>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📋</div>
+        <h3>Nenhum log encontrado</h3>
+        <p>
+          {logFilters.usuario || logFilters.acao || logFilters.dataInicio || logFilters.dataFim
+            ? 'Tente ajustar os filtros para ver mais resultados'
+            : 'Ainda não há logs de auditoria registrados no sistema'}
+        </p>
+      </div>
+    ) : (
+      <div style={styles.logsTableContainer}>
+        <table style={styles.logsTable}>
+          <thead>
+            <tr>
+              <th style={styles.tableHeader}>📅 Data/Hora</th>
+              <th style={styles.tableHeader}>👤 Usuário</th>
+              <th style={styles.tableHeader}>⚡ Ação</th>
+              <th style={styles.tableHeader}>📋 Recurso</th>
+              <th style={styles.tableHeader}>🏢 Local</th>
+            </tr>
+          </thead>
+          <tbody>
+            {getFilteredLogs().map((log, index) => (
+              <tr key={log.id || index} style={{
+                backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8f9fa',
+                borderBottom: '1px solid #e9ecef'
+              }}>
+                <td style={styles.tableCell}>
+                  <div style={{ fontWeight: '500', fontSize: '13px' }}>
+                    {new Date(log.timestamp?.seconds * 1000 || log.timestamp).toLocaleDateString('pt-BR')}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                    {new Date(log.timestamp?.seconds * 1000 || log.timestamp).toLocaleTimeString('pt-BR')}
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={{ fontWeight: '500' }}>{log.userEmail || 'N/A'}</div>
+                  <span style={{
+                    fontSize: '10px',
+                    color: 'white',
+                    backgroundColor: log.userRole === 'admin' ? '#dc3545' : '#28a745',
+                    padding: '2px 6px',
+                    borderRadius: '10px',
+                    textTransform: 'uppercase',
+                    fontWeight: 'bold'
+                  }}>
+                    {log.userRole || 'N/A'}
+                  </span>
+                </td>
+                <td style={styles.tableCell}>
+                  <span style={{
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    backgroundColor: getActionColor(log.action),
+                    color: 'white'
+                  }}>
+                    {getActionIcon(log.action)} {(log.action || 'UNKNOWN').replace('_', ' ')}
+                  </span>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={{ fontWeight: '500' }}>{log.resourceType || 'N/A'}</div>
+                  <div style={{ fontSize: '11px', color: '#666' }}>
+                    ID: {(log.resourceId || 'N/A').substring(0, 8)}...
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  {log.userMunicipio && log.userUf ? (
+                    <div>
+                      <div style={{ fontWeight: '500' }}>{log.userMunicipio}</div>
+                      <div style={{ fontSize: '11px', color: '#666' }}>{log.userUf}</div>
+                    </div>
+                  ) : (
+                    <span style={{ color: '#999', fontStyle: 'italic' }}>N/A</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+)}
+
+// 🔟 ADICIONAR ESTILOS para as novas seções (no objeto styles):
+tabsContainer: {
+  display: 'flex',
+  marginBottom: '24px',
+  borderBottom: '2px solid #e9ecef',
+  backgroundColor: 'white',
+  borderRadius: '8px 8px 0 0',
+  padding: '0 24px',
+},
+
+tabButton: {
+  padding: '16px 24px',
+  backgroundColor: 'transparent',
+  border: 'none',
+  fontSize: '16px',
+  fontWeight: '500',
+  color: '#6c757d',
+  cursor: 'pointer',
+  borderBottom: '3px solid transparent',
+  transition: 'all 0.2s ease',
+},
+
+tabButtonActive: {
+  color: '#007bff',
+  borderBottomColor: '#007bff',
+  backgroundColor: 'rgba(0, 123, 255, 0.1)',
+},
+
+filtersContainer: {
+  marginBottom: '20px',
+  padding: '16px',
+  backgroundColor: '#f8f9fa',
+  borderRadius: '8px',
+},
+
+filtersGrid: {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+  gap: '16px',
+},
+
+filterLabel: {
+  fontSize: '12px',
+  fontWeight: 'bold',
+  color: '#495057',
+  display: 'block',
+  marginBottom: '4px',
+},
+
+filterInput: {
+  width: '100%',
+  padding: '8px 12px',
+  border: '1px solid #ced4da',
+  borderRadius: '4px',
+  fontSize: '14px',
+},
+
+emptyLogs: {
+  textAlign: 'center',
+  padding: '40px',
+  color: '#6c757d',
+},
+
+logsTableContainer: {
+  backgroundColor: 'white',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+},
+
+logsTable: {
+  width: '100%',
+  borderCollapse: 'collapse',
+},
+
+tableHeader: {
+  padding: '12px',
+  textAlign: 'left',
+  fontWeight: 'bold',
+  fontSize: '12px',
+  color: '#495057',
+  textTransform: 'uppercase',
+  backgroundColor: '#f8f9fa',
+  borderBottom: '2px solid #e9ecef',
+},
+
+tableCell: {
+  padding: '12px',
+  fontSize: '13px',
+  verticalAlign: 'top',
+},

@@ -94,24 +94,75 @@ const Despesas = ({ usuario }) => {
           userMunicipio
         ) {
           console.log(
-            `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`,
+            `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}/${userUf}`,
           );
-          const emendasQuery = query(
-            collection(db, "emendas"),
-            where("municipio", "==", userMunicipio),
-          );
-          const emendasSnapshot = await getDocs(emendasQuery);
 
+          // ✅ CORREÇÃO: Usar mesma estratégia do Dashboard (buscar por UF + filtro manual)
+          console.log(
+            "🔍 Despesas: Buscando emendas da UF para filtrar manualmente...",
+          );
+
+          const emendasRef = collection(db, "emendas");
+          const emendasQuery = userUf
+            ? query(emendasRef, where("uf", "==", userUf))
+            : query(emendasRef);
+
+          const emendasSnapshot = await getDocs(emendasQuery);
+          const todasEmendas = [];
           emendasSnapshot.forEach((doc) => {
-            const emendaData = { id: doc.id, ...doc.data() };
-            emendasData.push(emendaData);
-            emendasPermitidas.push(doc.id);
+            todasEmendas.push({ id: doc.id, ...doc.data() });
+          });
+
+          console.log(
+            `📊 Despesas: Total de emendas na UF ${userUf}: ${todasEmendas.length}`,
+          );
+
+          // 🎯 FILTRO MANUAL com normalização (igual ao Dashboard)
+          const normalizarTexto = (texto) => {
+            if (!texto) return "";
+            return texto
+              .toString()
+              .trim()
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+          };
+
+          const municipioNormalizado = normalizarTexto(userMunicipio);
+          console.log(
+            "🔄 Despesas: Município normalizado:",
+            municipioNormalizado,
+          );
+
+          const emendasFiltradas = todasEmendas.filter((emenda) => {
+            const emendaMunicipio = normalizarTexto(emenda.municipio);
+            return emendaMunicipio === municipioNormalizado;
+          });
+
+          console.log(
+            `✅ Despesas: Filtro manual encontrou ${emendasFiltradas.length} emendas para ${userMunicipio}`,
+          );
+
+          // Adicionar emendas filtradas aos arrays
+          emendasFiltradas.forEach((emenda) => {
+            emendasData.push(emenda);
+            emendasPermitidas.push(emenda.id);
           });
 
           if (emendasPermitidas.length === 0) {
             console.warn(
-              `⚠️ Nenhuma emenda encontrada para o município: ${userMunicipio}`,
+              "⚠️ Despesas: Nenhuma emenda encontrada após filtro manual",
             );
+            console.warn(
+              "📊 Despesas: Todas as emendas da UF para comparação:",
+            );
+            todasEmendas.forEach((emenda) => {
+              const normalizada = normalizarTexto(emenda.municipio);
+              console.warn(
+                `  - Original: "${emenda.municipio}" | Normalizada: "${normalizada}" | Match: ${normalizada === municipioNormalizado}`,
+              );
+            });
+
             // ✅ CORREÇÃO: Mensagem igual ao Emendas
             setError(
               `Nenhuma emenda encontrada para o município ${userMunicipio}`,
