@@ -459,4 +459,5 @@ const styles = {
     padding: '12px',
     fontSize: '13px',
     verticalAlign: 'top',
-  },
+  }
+};
