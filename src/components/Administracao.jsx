@@ -367,94 +367,93 @@ const getActionIcon = (action) => {
   </div>
 )}
 
-// 🔟 ADICIONAR ESTILOS para as novas seções (no objeto styles):
 tabsContainer: {
-  display: 'flex',
-  marginBottom: '24px',
-  borderBottom: '2px solid #e9ecef',
-  backgroundColor: 'white',
-  borderRadius: '8px 8px 0 0',
-  padding: '0 24px',
-},
+    display: 'flex',
+    marginBottom: '24px',
+    borderBottom: '2px solid #e9ecef',
+    backgroundColor: 'white',
+    borderRadius: '8px 8px 0 0',
+    padding: '0 24px',
+  },
 
-tabButton: {
-  padding: '16px 24px',
-  backgroundColor: 'transparent',
-  border: 'none',
-  fontSize: '16px',
-  fontWeight: '500',
-  color: '#6c757d',
-  cursor: 'pointer',
-  borderBottom: '3px solid transparent',
-  transition: 'all 0.2s ease',
-},
+  tabButton: {
+    padding: '16px 24px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#6c757d',
+    cursor: 'pointer',
+    borderBottom: '3px solid transparent',
+    transition: 'all 0.2s ease',
+  },
 
-tabButtonActive: {
-  color: '#007bff',
-  borderBottomColor: '#007bff',
-  backgroundColor: 'rgba(0, 123, 255, 0.1)',
-},
+  tabButtonActive: {
+    color: '#007bff',
+    borderBottomColor: '#007bff',
+    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+  },
 
-filtersContainer: {
-  marginBottom: '20px',
-  padding: '16px',
-  backgroundColor: '#f8f9fa',
-  borderRadius: '8px',
-},
+  filtersContainer: {
+    marginBottom: '20px',
+    padding: '16px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+  },
 
-filtersGrid: {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-  gap: '16px',
-},
+  filtersGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+  },
 
-filterLabel: {
-  fontSize: '12px',
-  fontWeight: 'bold',
-  color: '#495057',
-  display: 'block',
-  marginBottom: '4px',
-},
+  filterLabel: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#495057',
+    display: 'block',
+    marginBottom: '4px',
+  },
 
-filterInput: {
-  width: '100%',
-  padding: '8px 12px',
-  border: '1px solid #ced4da',
-  borderRadius: '4px',
-  fontSize: '14px',
-},
+  filterInput: {
+    width: '100%',
+    padding: '8px 12px',
+    border: '1px solid #ced4da',
+    borderRadius: '4px',
+    fontSize: '14px',
+  },
 
-emptyLogs: {
-  textAlign: 'center',
-  padding: '40px',
-  color: '#6c757d',
-},
+  emptyLogs: {
+    textAlign: 'center',
+    padding: '40px',
+    color: '#6c757d',
+  },
 
-logsTableContainer: {
-  backgroundColor: 'white',
-  borderRadius: '8px',
-  overflow: 'hidden',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-},
+  logsTableContainer: {
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
 
-logsTable: {
-  width: '100%',
-  borderCollapse: 'collapse',
-},
+  logsTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+  },
 
-tableHeader: {
-  padding: '12px',
-  textAlign: 'left',
-  fontWeight: 'bold',
-  fontSize: '12px',
-  color: '#495057',
-  textTransform: 'uppercase',
-  backgroundColor: '#f8f9fa',
-  borderBottom: '2px solid #e9ecef',
-},
+  tableHeader: {
+    padding: '12px',
+    textAlign: 'left',
+    fontWeight: 'bold',
+    fontSize: '12px',
+    color: '#495057',
+    textTransform: 'uppercase',
+    backgroundColor: '#f8f9fa',
+    borderBottom: '2px solid #e9ecef',
+  },
 
-tableCell: {
-  padding: '12px',
-  fontSize: '13px',
-  verticalAlign: 'top',
-},
+  tableCell: {
+    padding: '12px',
+    fontSize: '13px',
+    verticalAlign: 'top',
+  },
