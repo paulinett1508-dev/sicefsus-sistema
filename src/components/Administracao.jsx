@@ -461,3 +461,5 @@ const styles = {
     verticalAlign: 'top',
   }
 };
+
+export default Administracao;
