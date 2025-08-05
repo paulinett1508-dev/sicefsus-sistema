@@ -2,18 +2,63 @@
 // ✅ Preservar toda estrutura existente
 // ✅ Adicionar apenas a funcionalidade de logs
 
-// 1️⃣ ADICIONAR IMPORT no topo (após os imports existentes):
+import React, { useState, useEffect } from 'react';
 import { auditService } from "../services/auditService";
 
-// 2️⃣ ADICIONAR ESTADOS para logs (após os estados existentes, linha ~12):
-const [activeTab, setActiveTab] = useState("users"); // Novo estado para tabs
-const [logs, setLogs] = useState([]); // Novo estado para logs
-const [logFilters, setLogFilters] = useState({ // Novo estado para filtros
-  usuario: "",
-  acao: "",
-  dataInicio: "",
-  dataFim: "",
-});
+const Administracao = () => {
+  // Estados principais
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  // 2️⃣ ADICIONAR ESTADOS para logs (após os estados existentes, linha ~12):
+  const [activeTab, setActiveTab] = useState("users"); // Novo estado para tabs
+  const [logs, setLogs] = useState([]); // Novo estado para logs
+  const [logFilters, setLogFilters] = useState({ // Novo estado para filtros
+    usuario: "",
+    acao: "",
+    dataInicio: "",
+    dataFim: "",
+  });
+
+  // Função para carregar usuários (placeholder)
+  const carregarUsuarios = async () => {
+    try {
+      setLoading(true);
+      // Implementar carregamento de usuários
+      console.log('📋 Carregando usuários...');
+      setUsuarios([]);
+    } catch (error) {
+      console.error('❌ Erro ao carregar usuários:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handlers placeholder
+  const handleNovoUsuario = () => {
+    console.log('Novo usuário');
+  };
+
+  const handleEditarUsuario = (usuario) => {
+    console.log('Editar usuário:', usuario);
+  };
+
+  const handleExcluirUsuario = (usuario) => {
+    console.log('Excluir usuário:', usuario);
+  };
+
+  const handleToggleStatus = (usuario) => {
+    console.log('Toggle status:', usuario);
+  };
+
+  const handleResetSenha = (usuario) => {
+    console.log('Reset senha:', usuario);
+  };
+
+  const showToast = (message, type) => {
+    console.log(`Toast ${type}:`, message);
+  };
 
 // 3️⃣ ADICIONAR FUNÇÃO para carregar logs (após carregarUsuarios, linha ~35):
 const carregarLogs = async () => {
@@ -115,6 +160,17 @@ const getActionIcon = (action) => {
       return '⚡';
   }
 };
+
+  // Componente UsersTable placeholder
+  const UsersTable = ({ users, onEdit, onDelete, onToggleStatus, onResetPassword, loading }) => (
+    <div style={styles.emptyLogs}>
+      <h3>Componente UsersTable</h3>
+      <p>Total de usuários: {users.length}</p>
+    </div>
+  );
+
+  return (
+    <div style={styles.container}>
 
 // 7️⃣ SUBSTITUIR o CABEÇALHO (linha ~210) para incluir tabs:
 <div style={styles.header}>
@@ -364,10 +420,156 @@ const getActionIcon = (action) => {
         </table>
       </div>
     )}
-  </div>
-)};
+    </div>
+  );
+};
 
+// Componente placeholder básico para teste
 const styles = {
+  container: {
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif',
+  },
+  header: {
+    marginBottom: '20px',
+  },
+  headerLeft: {
+    marginBottom: '10px',
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    margin: '0 0 8px 0',
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: '#666',
+    margin: '0',
+  },
+  headerActions: {
+    marginBottom: '20px',
+  },
+  primaryButton: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+  },
+  buttonIcon: {
+    marginRight: '8px',
+  },
+  tabsContainer: {
+    display: 'flex',
+    marginBottom: '24px',
+    borderBottom: '2px solid #e9ecef',
+    backgroundColor: 'white',
+    borderRadius: '8px 8px 0 0',
+    padding: '0 24px',
+  },
+  tabButton: {
+    padding: '16px 24px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: '16px',
+    fontWeight: '500',
+    color: '#6c757d',
+    cursor: 'pointer',
+    borderBottom: '3px solid transparent',
+    transition: 'all 0.2s ease',
+  },
+  tabButtonActive: {
+    color: '#007bff',
+    borderBottomColor: '#007bff',
+    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+  },
+  statsContainer: {
+    marginBottom: '20px',
+  },
+  tableContainer: {
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    padding: '20px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  sectionTitle: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    marginBottom: '16px',
+    color: '#333',
+  },
+  loading: {
+    textAlign: 'center',
+    padding: '40px',
+  },
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '3px solid #f3f3f3',
+    borderTop: '3px solid #007bff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    margin: '0 auto 16px',
+  },
+  filtersContainer: {
+    marginBottom: '20px',
+    padding: '16px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '8px',
+  },
+  filtersGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+  },
+  filterLabel: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#495057',
+    display: 'block',
+    marginBottom: '4px',
+  },
+  filterInput: {
+    width: '100%',
+    padding: '8px 12px',
+    border: '1px solid #ced4da',
+    borderRadius: '4px',
+    fontSize: '14px',
+  },
+  emptyLogs: {
+    textAlign: 'center',
+    padding: '40px',
+    color: '#6c757d',
+  },
+  logsTableContainer: {
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  },
+  logsTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+  },
+  tableHeader: {
+    padding: '12px',
+    textAlign: 'left',
+    fontWeight: 'bold',
+    fontSize: '12px',
+    color: '#495057',
+    textTransform: 'uppercase',
+    backgroundColor: '#f8f9fa',
+    borderBottom: '2px solid #e9ecef',
+  },
+  tableCell: {
+    padding: '12px',
+    fontSize: '13px',
+    verticalAlign: 'top',
+  }
+};
   // ... outros estilos existentes ...
   
   tabsContainer: {
