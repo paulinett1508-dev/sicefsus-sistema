@@ -1,4 +1,4 @@
-// src/components/UserForm.jsx - CORRIGIDO PARA ESTRUTURA SICEFSUS
+// src/components/UserForm.jsx - VERSÃO COMPLETA COM MELHORIAS
 import React, { useEffect } from "react";
 import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
@@ -10,6 +10,9 @@ const UserForm = ({
   editingUser,
   saving = false,
 }) => {
+  // ✅ Estado para controlar exibição da política de segurança
+  const [showSecurityPolicy, setShowSecurityPolicy] = React.useState(false);
+
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
     addFormInteractivity();
@@ -77,13 +80,12 @@ const UserForm = ({
     TO: "Tocantins",
   };
 
-  // ✅ HANDLER PARA MUDANÇA DE TIPO DE USUÁRIO (corrigido)
+  // ✅ HANDLER PARA MUDANÇA DE TIPO DE USUÁRIO
   const handleTipoChange = (newTipo) => {
     console.log("🔄 Mudando tipo de usuário para:", newTipo);
-
     setFormData({
       ...formData,
-      role: newTipo, // Mantém compatibilidade com frontend
+      role: newTipo,
       municipio: newTipo === "admin" ? "" : formData.municipio,
       uf: newTipo === "admin" ? "" : formData.uf,
     });
@@ -91,8 +93,6 @@ const UserForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // ✅ VALIDAÇÃO ANTES DO ENVIO
     console.log("📝 Dados do formulário antes do envio:", formData);
 
     // Validações obrigatórias
@@ -112,7 +112,6 @@ const UserForm = ({
         alert("Município é obrigatório para operadores");
         return;
       }
-
       if (!formData.uf?.trim()) {
         alert("UF é obrigatória para operadores");
         return;
@@ -153,6 +152,115 @@ const UserForm = ({
             ✕
           </button>
         </div>
+
+        {/* ✅ SEÇÃO DE POLÍTICA DE SEGURANÇA - COLAPSÁVEL NO TOPO */}
+        {!editingUser && (
+          <div style={styles.securityPolicyWrapper}>
+            <button
+              type="button"
+              style={styles.securityToggleButton}
+              onClick={() => setShowSecurityPolicy(!showSecurityPolicy)}
+            >
+              <span style={styles.securityToggleIcon}>
+                {showSecurityPolicy ? "🔽" : "▶️"}
+              </span>
+              <span style={styles.securityToggleText}>
+                🔒 Política de Segurança SICEFSUS
+              </span>
+              <span style={styles.securityBadge}>LGPD</span>
+            </button>
+
+            {showSecurityPolicy && (
+              <div style={styles.securityPolicyContent}>
+                <div style={securityStyles.container}>
+                  <div style={securityStyles.backgroundPattern}></div>
+
+                  <div style={securityStyles.cardsGrid}>
+                    <div style={securityStyles.card}>
+                      <div
+                        style={{
+                          ...securityStyles.cardIcon,
+                          background:
+                            "linear-gradient(135deg, #2196f322 0%, #2196f344 100%)",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>🔐</span>
+                      </div>
+                      <div style={securityStyles.cardContent}>
+                        <h5 style={securityStyles.cardTitle}>
+                          Senha Forte Automática
+                        </h5>
+                        <p style={securityStyles.cardText}>
+                          Geração automática de senha com 12 caracteres
+                          incluindo maiúsculas, minúsculas, números e símbolos
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={securityStyles.card}>
+                      <div
+                        style={{
+                          ...securityStyles.cardIcon,
+                          background:
+                            "linear-gradient(135deg, #4caf5022 0%, #4caf5044 100%)",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>📧</span>
+                      </div>
+                      <div style={securityStyles.cardContent}>
+                        <h5 style={securityStyles.cardTitle}>
+                          Notificação Instantânea
+                        </h5>
+                        <p style={securityStyles.cardText}>
+                          Email enviado imediatamente com link seguro para
+                          configuração da conta
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={securityStyles.card}>
+                      <div
+                        style={{
+                          ...securityStyles.cardIcon,
+                          background:
+                            "linear-gradient(135deg, #ff980022 0%, #ff980044 100%)",
+                        }}
+                      >
+                        <span style={{ fontSize: "24px" }}>🔄</span>
+                      </div>
+                      <div style={securityStyles.cardContent}>
+                        <h5 style={securityStyles.cardTitle}>
+                          Renovação Obrigatória
+                        </h5>
+                        <p style={securityStyles.cardText}>
+                          Política de segurança exige troca de senha no primeiro
+                          acesso
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={securityStyles.footer}>
+                    <div style={securityStyles.footerIcon}>
+                      <span>🛡️</span>
+                    </div>
+                    <div style={securityStyles.footerContent}>
+                      <strong style={securityStyles.footerTitle}>
+                        Conformidade LGPD
+                      </strong>
+                      <p style={securityStyles.footerText}>
+                        Em conformidade com a Lei Geral de Proteção de Dados,
+                        administradores não têm acesso às senhas dos usuários,
+                        garantindo total privacidade e segurança das
+                        credenciais.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <form style={styles.container} onSubmit={handleSubmit}>
           {/* ✅ SEÇÃO DADOS PESSOAIS */}
@@ -239,33 +347,6 @@ const UserForm = ({
                 />
               </div>
             </div>
-
-            {/* ✅ INFORMAÇÃO SOBRE SEGURANÇA DE SENHA CONFORME SICEFSUS */}
-            {!editingUser && (
-              <div style={styles.emendaInfo}>
-                <h4 style={styles.emendaInfoTitle}>
-                  🔒 Política de Segurança SICEFSUS
-                  <span
-                    style={styles.infoIcon}
-                    title="Conforme LGPD: administradores não definem senhas de usuários"
-                  >
-                    ℹ️
-                  </span>
-                </h4>
-                <div style={styles.emendaInfoGrid}>
-                  <div style={styles.emendaInfoRow}>
-                    • Senha temporária será gerada automaticamente (12
-                    caracteres seguros)
-                  </div>
-                  <div style={styles.emendaInfoRow}>
-                    • Email com instruções de primeiro acesso será enviado
-                  </div>
-                  <div style={styles.emendaInfoRow}>
-                    • Obrigatório alterar senha no primeiro login
-                  </div>
-                </div>
-              </div>
-            )}
           </fieldset>
 
           {/* ✅ SEÇÃO CONFIGURAÇÕES DE ACESSO */}
@@ -322,7 +403,7 @@ const UserForm = ({
             </div>
           </fieldset>
 
-          {/* ✅ SEÇÃO DE LOCALIZAÇÃO OBRIGATÓRIA (APENAS OPERADORES) */}
+          {/* ✅ SEÇÃO DE LOCALIZAÇÃO (APENAS OPERADORES) */}
           {formData.role === "user" && (
             <fieldset
               style={{
@@ -434,7 +515,7 @@ const UserForm = ({
                     ...styles.emendaInfo,
                     backgroundColor: "rgba(39, 174, 96, 0.1)",
                     borderColor: "var(--success)",
-                    marginTop: "16px",
+                    marginTop: "24px",
                   }}
                 >
                   <div
@@ -540,7 +621,7 @@ const UserForm = ({
             </fieldset>
           )}
 
-          {/* ✅ AÇÕES DO FORMULÁRIO MELHORADAS */}
+          {/* ✅ AÇÕES DO FORMULÁRIO */}
           <div style={styles.buttonContainer}>
             <button
               type="button"
@@ -564,16 +645,7 @@ const UserForm = ({
                 <span
                   style={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
-                  <div
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      border: "2px solid transparent",
-                      borderTop: "2px solid currentColor",
-                      borderRadius: "50%",
-                      animation: "userFormSpin 1s linear infinite",
-                    }}
-                  ></div>
+                  <div style={styles.spinner}></div>
                   {editingUser ? "Atualizando..." : "Criando..."}
                 </span>
               ) : (
@@ -587,7 +659,7 @@ const UserForm = ({
   );
 };
 
-// ✅ ESTILOS UNIVERSAIS APLICADOS (seguindo padrão SICEFSUS)
+// ✅ ESTILOS PRINCIPAIS (com correções de espaçamento)
 const styles = {
   overlay: {
     position: "fixed",
@@ -655,19 +727,60 @@ const styles = {
     backdropFilter: "blur(10px)",
   },
 
-  // ✅ APLICANDO ESTILOS UNIVERSAIS DO SISTEMA
   container: formStyles.container,
-  fieldset: formStyles.fieldset,
+
+  fieldset: {
+    ...formStyles.fieldset,
+    marginBottom: "24px", // Espaçamento entre fieldsets
+  },
+
   legend: formStyles.legend,
   legendIcon: formStyles.legendIcon,
-  formGrid: formStyles.formGrid,
-  formGroup: formStyles.formGroup,
-  label: formStyles.label,
-  labelRequired: formStyles.labelRequired,
+
+  formGrid: {
+    ...formStyles.formGrid,
+    gap: "24px", // Espaçamento entre colunas
+  },
+
+  formGroup: {
+    ...formStyles.formGroup,
+    marginBottom: "20px", // Espaçamento entre campos
+  },
+
+  label: {
+    ...formStyles.label,
+    marginBottom: "8px", // Espaçamento entre label e input
+  },
+
+  labelRequired: {
+    ...formStyles.labelRequired,
+    marginBottom: "8px", // Espaçamento entre label e input
+  },
+
   required: formStyles.required,
-  input: formStyles.input,
-  select: formStyles.select,
-  helpText: formStyles.helpText,
+
+  input: {
+    ...formStyles.input,
+    marginBottom: "4px", // Pequeno espaço para helpText
+  },
+
+  select: {
+    ...formStyles.select,
+    appearance: "none",
+    WebkitAppearance: "none",
+    MozAppearance: "none",
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 12px center",
+    backgroundSize: "20px",
+    paddingRight: "40px",
+  },
+
+  helpText: {
+    ...formStyles.helpText,
+    marginBottom: "8px", // Espaço após helpText
+  },
+
   emendaInfo: formStyles.emendaInfo,
   emendaInfoTitle: formStyles.emendaInfoTitle,
   emendaInfoGrid: formStyles.emendaInfoGrid,
@@ -675,6 +788,7 @@ const styles = {
   buttonContainer: formStyles.buttonContainer,
   cancelButtonStyle: formStyles.cancelButtonStyle,
   submitButton: formStyles.submitButton,
+
   infoIcon: {
     fontSize: "14px",
     color: "#0066cc",
@@ -682,9 +796,243 @@ const styles = {
     userSelect: "none",
     marginLeft: "5px",
   },
+
+  spinner: {
+    width: "16px",
+    height: "16px",
+    border: "2px solid transparent",
+    borderTop: "2px solid currentColor",
+    borderRadius: "50%",
+    animation: "userFormSpin 1s linear infinite",
+  },
+
+  // ✅ NOVOS ESTILOS PARA SEÇÃO COLAPSÁVEL
+  securityPolicyWrapper: {
+    margin: "0 24px 20px 24px",
+    borderRadius: "12px",
+    overflow: "hidden",
+    backgroundColor: "var(--theme-surface)",
+    border: "1px solid var(--theme-border)",
+  },
+
+  securityToggleButton: {
+    width: "100%",
+    padding: "16px 20px",
+    background: "linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)",
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    transition: "all 0.3s ease",
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#1a237e",
+    "&:hover": {
+      background: "linear-gradient(135deg, #bbdefb 0%, #c5cae9 100%)",
+    },
+  },
+
+  securityToggleIcon: {
+    fontSize: "12px",
+    transition: "transform 0.3s ease",
+    display: "inline-block",
+  },
+
+  securityToggleText: {
+    flex: 1,
+    textAlign: "left",
+  },
+
+  securityBadge: {
+    background: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+    color: "white",
+    fontSize: "11px",
+    padding: "4px 12px",
+    borderRadius: "20px",
+    fontWeight: "600",
+    letterSpacing: "0.5px",
+  },
+
+  securityPolicyContent: {
+    borderTop: "1px solid var(--theme-border)",
+    animation: "slideDown 0.3s ease-out",
+    overflow: "hidden",
+  },
 };
 
-// ✅ ADICIONAR ANIMAÇÕES CSS GLOBALMENTE (uma única vez)
+// ✅ ESTILOS DA SEÇÃO DE SEGURANÇA
+const securityStyles = {
+  container: {
+    background: "linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)",
+    padding: "32px",
+    boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.06)",
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  backgroundPattern: {
+    position: "absolute",
+    top: "-50%",
+    right: "-10%",
+    width: "300px",
+    height: "300px",
+    background:
+      "radial-gradient(circle, rgba(33, 150, 243, 0.1) 0%, transparent 70%)",
+    borderRadius: "50%",
+    pointerEvents: "none",
+  },
+
+  header: {
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+    marginBottom: "32px",
+    position: "relative",
+    zIndex: 1,
+  },
+
+  iconWrapper: {
+    width: "64px",
+    height: "64px",
+    background: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    animation: "securityPulse 2s infinite",
+  },
+
+  mainIcon: {
+    fontSize: "32px",
+    filter: "brightness(2)",
+  },
+
+  title: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#1a237e",
+    margin: "0",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    letterSpacing: "-0.5px",
+  },
+
+  subtitle: {
+    fontSize: "14px",
+    color: "#607d8b",
+    margin: "4px 0 0 0",
+  },
+
+  badge: {
+    background: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+    color: "white",
+    fontSize: "12px",
+    padding: "6px 16px",
+    borderRadius: "24px",
+    fontWeight: "600",
+    letterSpacing: "0.5px",
+    display: "inline-block",
+    animation: "badgeGlow 3s ease-in-out infinite",
+  },
+
+  cardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "20px",
+    marginBottom: "28px",
+    position: "relative",
+    zIndex: 1,
+  },
+
+  card: {
+    background: "white",
+    borderRadius: "16px",
+    padding: "24px",
+    display: "flex",
+    gap: "16px",
+    alignItems: "flex-start",
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    position: "relative",
+    overflow: "hidden",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  },
+
+  cardIcon: {
+    width: "56px",
+    height: "56px",
+    borderRadius: "14px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+
+  cardContent: {
+    flex: 1,
+  },
+
+  cardTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#263238",
+    margin: "0 0 8px 0",
+    letterSpacing: "-0.3px",
+  },
+
+  cardText: {
+    fontSize: "14px",
+    color: "#607d8b",
+    margin: "0",
+    lineHeight: "1.6",
+  },
+
+  footer: {
+    background: "linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%)",
+    borderRadius: "12px",
+    padding: "20px",
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "16px",
+    border: "1px solid rgba(76, 175, 80, 0.2)",
+    position: "relative",
+    zIndex: 1,
+  },
+
+  footerIcon: {
+    width: "40px",
+    height: "40px",
+    background: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
+    borderRadius: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "20px",
+    flexShrink: 0,
+  },
+
+  footerContent: {
+    flex: 1,
+  },
+
+  footerTitle: {
+    fontSize: "16px",
+    color: "#1b5e20",
+    display: "block",
+    marginBottom: "4px",
+  },
+
+  footerText: {
+    fontSize: "14px",
+    color: "#37474f",
+    margin: "0",
+    lineHeight: "1.6",
+  },
+};
+
+// ✅ ADICIONAR ANIMAÇÕES CSS
 if (!document.getElementById("userform-animations")) {
   const styleSheet = document.createElement("style");
   styleSheet.id = "userform-animations";
@@ -710,8 +1058,68 @@ if (!document.getElementById("userform-animations")) {
         transform: translateY(0) scale(1); 
       }
     }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 800px;
+      }
+    }
+
+    @keyframes securityPulse {
+      0% {
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      }
+      50% {
+        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.5);
+      }
+      100% {
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      }
+    }
+
+    @keyframes badgeGlow {
+      0%, 100% {
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      }
+      50% {
+        box-shadow: 0 2px 12px rgba(76, 175, 80, 0.5);
+      }
+    }
+
+    /* Correção para selects */
+    select {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+    }
+
+    select:hover {
+      border-color: var(--primary) !important;
+    }
+
+    select:focus {
+      border-color: var(--primary) !important;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
+    }
+
+    /* Hover nos cards de segurança */
+    .security-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Hover no botão de toggle */
+    .security-toggle-btn:hover {
+      background: linear-gradient(135deg, #bbdefb 0%, #c5cae9 100%);
+    }
   `;
   document.head.appendChild(styleSheet);
 }
 
+// ✅ EXPORT DEFAULT DO COMPONENTE
 export default UserForm;

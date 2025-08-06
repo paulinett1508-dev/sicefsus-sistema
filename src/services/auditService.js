@@ -17,7 +17,7 @@ import { db } from "../firebase/firebaseConfig";
 
 class AuditService {
   constructor() {
-    this.collectionName = "audit_logs";
+    this.collectionName = "logs";
     console.log("🔒 AuditService inicializado");
   }
 
