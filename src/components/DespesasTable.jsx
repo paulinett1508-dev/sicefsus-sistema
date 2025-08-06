@@ -212,7 +212,8 @@ export default function DespesasTable({
               </tr>
             </thead>
             <tbody>
-              {despesas.map((despesa, index) => {
+              {despesas.filter(Boolean).map((despesa, index) => {
+                if (!despesa?.id) return null;
                 const saldoInfo = getEmendaSaldoInfo(despesa.emendaId);
                 return (
                   <tr
@@ -330,7 +331,8 @@ export default function DespesasTable({
               </tr>
             </thead>
             <tbody>
-              {despesas.map((despesa, index) => {
+              {despesas.filter(Boolean).map((despesa, index) => {
+                if (!despesa?.id) return null;
                 const saldoInfo = getEmendaSaldoInfo(despesa.emendaId);
                 return (
                   <tr
