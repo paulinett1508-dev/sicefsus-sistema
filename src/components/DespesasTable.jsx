@@ -1024,5 +1024,3 @@ const styles = {
     transition: "background-color 0.2s",
   },
 };
-
-export default DespesasTable;
