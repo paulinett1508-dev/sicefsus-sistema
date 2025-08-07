@@ -1,0 +1,19 @@
+cat > vercel.json << 'EOF'
+{
+  "installCommand": "npm install",
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+EOF
+
+# Commit e push para o GitHub
+git add vercel.json
+git commit -m "Fix Vercel build - ensure npm install runs"
+git push origin main
