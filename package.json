@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:prod",
     "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production && node remove-console-prod.cjs",
+    "build:prod": "vite build --mode production",
     "build:clean": "rm -rf dist dist-backup && npm run build:prod",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

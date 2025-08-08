@@ -29,6 +29,7 @@ import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
 import UpdateNotification from "./components/UpdateNotification";
 
+
 // Sistema inteligente de controle de logs
 import { configureConsole } from "./utils/DisableConsole";
 
