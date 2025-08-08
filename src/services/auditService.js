@@ -18,7 +18,11 @@ import { db } from "../firebase/firebaseConfig";
 class AuditService {
   constructor() {
     this.collectionName = "logs";
-    console.log("🔒 AuditService inicializado");
+    // Log de inicialização apenas uma vez por sessão
+    if (!sessionStorage.getItem('audit_service_initialized')) {
+      console.debug('🔒 AuditService inicializado');
+      sessionStorage.setItem('audit_service_initialized', 'true');
+    }
   }
 
   /**

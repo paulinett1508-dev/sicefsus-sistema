@@ -37,6 +37,24 @@ if (!currentEnv) {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
+// Log de status apenas em debug verbose
+  if (import.meta.env.VITE_LOG_LEVEL === 'verbose') {
+    console.log('🔥 Firebase Config Status:', {
+      apiKey: firebaseConfig.apiKey ? '✅ Configurada' : '❌ Não configurada',
+      authDomain: firebaseConfig.authDomain ? '✅ Configurada' : '❌ Não configurada',
+      projectId: firebaseConfig.projectId ? '✅ Configurada' : '❌ Não configurada',
+      storageBucket: firebaseConfig.storageBucket ? '✅ Configurada' : '❌ Não configurada',
+      messagingSenderId: firebaseConfig.messagingSenderId ? '✅ Configurada' : '❌ Não configurada',
+      appId: firebaseConfig.appId ? '✅ Configurada' : '❌ Não configurada'
+    });
+  }
+
+  // Log de inicialização apenas uma vez por sessão
+  if (!sessionStorage.getItem('firebase_initialized')) {
+    console.info('✅ Firebase inicializado com sucesso');
+    sessionStorage.setItem('firebase_initialized', 'true');
+  }
+
 // Inicializar Auth e Firestore
 export const auth = getAuth(app);
 export const db = getFirestore(app);

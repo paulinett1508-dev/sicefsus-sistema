@@ -1,12 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
-import { UserProvider } from './context/UserContext'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './App.css';
+import { ThemeProvider } from './context/ThemeContext.jsx';
+import { UserProvider } from './context/UserContext.jsx';
+import { configureConsole } from './utils/DisableConsole.jsx';
+
+// Configurar sistema de logs antes de tudo
+configureConsole();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<UserProvider>
-			<App />
-		</UserProvider>
+		<ThemeProvider>
+			<UserProvider>
+				<App />
+			</UserProvider>
+		</ThemeProvider>
 	</React.StrictMode>
 )
