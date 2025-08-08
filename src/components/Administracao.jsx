@@ -91,14 +91,14 @@ const Administracao = () => {
     setShowUserModal(true);
   };
 
-  // ✅ IMPLEMENTAR: Handler para editar usuário
+  // ✅ CORREÇÃO CRÍTICA: Handler para editar usuário
   const handleEditarUsuario = (usuario) => {
     console.log("✏️ Editando usuário:", usuario);
     setEditingUser(usuario);
     setFormData({
       nome: usuario.nome || "",
-      email: usuario.email || "",
-      role: usuario.tipo === "admin" ? "admin" : "user",
+      email: usuario.email || "", // ✅ CORREÇÃO: Incluir email
+      role: usuario.tipo === "admin" ? "admin" : "user", // ✅ CORREÇÃO: Mapear corretamente
       municipio: usuario.municipio || "",
       uf: usuario.uf || "",
       status: usuario.status || "ativo",
@@ -108,7 +108,7 @@ const Administracao = () => {
     setShowUserModal(true);
   };
 
-  // ✅ IMPLEMENTAR: Handler para salvar usuário
+  // ✅ CORREÇÃO CRÍTICA: Handler para salvar usuário
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
 
@@ -117,16 +117,21 @@ const Administracao = () => {
       console.log("💾 Salvando usuário:", formData);
 
       if (editingUser) {
-        // Atualizar usuário existente
-        await userService.updateUser(editingUser.id, {
-          nome: formData.nome,
-          tipo: formData.role === "admin" ? "admin" : "operador",
-          municipio: formData.role === "admin" ? "" : formData.municipio,
-          uf: formData.role === "admin" ? "" : formData.uf,
-          status: formData.status,
-          departamento: formData.departamento,
-          telefone: formData.telefone,
-        });
+        // ✅ CORREÇÃO: Atualizar usuário existente COM email original
+        await userService.updateUser(
+          editingUser.id,
+          {
+            nome: formData.nome,
+            email: formData.email, // ✅ INCLUIR email no formData
+            role: formData.role === "admin" ? "admin" : "operador",
+            municipio: formData.role === "admin" ? "" : formData.municipio,
+            uf: formData.role === "admin" ? "" : formData.uf,
+            status: formData.status,
+            departamento: formData.departamento,
+            telefone: formData.telefone,
+          },
+          editingUser.email, // ✅ CORREÇÃO: Passar email original como terceiro parâmetro
+        );
 
         showToast("✅ Usuário atualizado com sucesso!", "success");
       } else {
@@ -134,7 +139,7 @@ const Administracao = () => {
         const resultado = await userService.createUser({
           email: formData.email,
           nome: formData.nome,
-          tipo: formData.role === "admin" ? "admin" : "operador",
+          role: formData.role === "admin" ? "admin" : "operador", // ✅ USAR role ao invés de tipo
           municipio: formData.role === "admin" ? "" : formData.municipio,
           uf: formData.role === "admin" ? "" : formData.uf,
           status: formData.status,
@@ -144,7 +149,7 @@ const Administracao = () => {
 
         if (resultado.success) {
           showToast(
-            `✅ Usuário criado com sucesso! Senha temporária: ${resultado.senhaTemporaria}`,
+            `✅ Usuário criado com sucesso! Email de configuração enviado.`,
             "success",
           );
         }

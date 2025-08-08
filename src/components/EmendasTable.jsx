@@ -1,5 +1,6 @@
 // EmendasTable.jsx - Com integração para Despesas
 // ✅ Cálculos baseados nos dados reais das emendas + Botão Despesas
+// 🔧 CORREÇÃO: Campo Execução agora calcula corretamente baseado em saldo
 
 import React, { useState, useMemo } from "react";
 
@@ -7,10 +8,39 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // ✅ Função para calcular execução real
+  // ✅ Função para calcular execução real - CORRIGIDA COM METAS
   const calcularExecucao = (emenda) => {
-    const valorRecurso = emenda.valorRecurso || 0;
-    const valorExecutado = emenda.valorExecutado || 0;
+    // Buscar valor total da emenda (estrutura real do Firebase)
+    const valorRecurso = emenda.valorRecurso || emenda.valor || 0;
+
+    // ✅ NOVO: Usar valorExecutado já calculado (despesas + metas) OU calcular se necessário
+    let valorExecutado = emenda.valorExecutado || 0;
+
+    // Se ainda não calculado, calcular baseado no saldo
+    if (!valorExecutado && emenda.saldoDisponivel !== undefined) {
+      const saldoAtual = emenda.saldoDisponivel || 0;
+      valorExecutado = Math.max(0, valorRecurso - saldoAtual);
+    }
+
+    // ✅ FALLBACK: Se ainda zerado, tentar calcular das metas diretamente
+    if (
+      valorExecutado === 0 &&
+      emenda.acoesServicos &&
+      emenda.acoesServicos.length > 0
+    ) {
+      valorExecutado = emenda.acoesServicos.reduce((sum, meta) => {
+        if (meta.tipoMeta === "Quantitativa" && meta.valorAcao) {
+          const valorMeta = parseFloat(
+            meta.valorAcao
+              .replace(/[R$\s]/g, "")
+              .replace(/\./g, "")
+              .replace(",", "."),
+          );
+          return sum + valorMeta;
+        }
+        return sum;
+      }, 0);
+    }
 
     if (valorRecurso === 0) {
       return { percentual: 0, texto: "0,0% (R$ 0,00)" };
@@ -52,25 +82,40 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     );
   };
 
-  // ✅ Função para calcular status real
+  // ✅ Função para calcular status real - MELHORADA COM METAS
   const calcularStatus = (emenda) => {
     const execucao = calcularExecucao(emenda);
     const percentual = execucao.percentual;
 
-    // Verificar se há despesas associadas
+    // ✅ NOVO: Verificar se há metas quantitativas OU despesas
     const temDespesas = emenda.totalDespesas > 0;
+    const temMetas =
+      emenda.acoesServicos &&
+      emenda.acoesServicos.some((meta) => meta.tipoMeta === "Quantitativa");
+    const temExecucao = temDespesas || temMetas;
 
-    // Verificar datas para determinar status mais preciso
+    // Verificar datas para determinar status mais preciso (estrutura Firebase)
     const hoje = new Date();
     const dataInicio = emenda.inicioExecucao
       ? new Date(emenda.inicioExecucao)
       : null;
     const dataFim = emenda.finalExecucao
       ? new Date(emenda.finalExecucao)
-      : null;
+      : emenda.dataValidade
+        ? new Date(emenda.dataValidade)
+        : null;
 
-    // Lógica de status baseada em execução e datas
-    if (percentual === 0 && !temDespesas) {
+    // Verificar status do campo 'status' do Firebase
+    if (emenda.status && emenda.status.toLowerCase() === "inativa") {
+      return {
+        status: "Inativa",
+        cor: "#6c757d",
+        icone: "⏸️",
+      };
+    }
+
+    // ✅ LÓGICA MELHORADA: Considera metas e despesas
+    if (percentual === 0 && !temExecucao) {
       return {
         status: "Não Iniciado",
         cor: "#6c757d",
@@ -127,10 +172,19 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
       };
     }
 
+    // ✅ NOVO: Se tem metas mas sem percentual, considerar "Em Planejamento"
+    if (temMetas && percentual === 0) {
+      return {
+        status: "Em Planejamento",
+        cor: "#6f42c1",
+        icone: "📋",
+      };
+    }
+
     return {
-      status: "Indefinido",
-      cor: "#6c757d",
-      icone: "❓",
+      status: "Ativa",
+      cor: "#28a745",
+      icone: "✅",
     };
   };
 
@@ -275,9 +329,13 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                     </div>
                     <div style={styles.dataInfo}>
                       Criada:{" "}
-                      {emenda.createdAt
-                        ? new Date(emenda.createdAt).toLocaleDateString("pt-BR")
-                        : "N/A"}
+                      {emenda.criadoEm
+                        ? emenda.criadoEm.toDate().toLocaleDateString("pt-BR")
+                        : emenda.criadoEm
+                          ? new Date(emenda.criadoEm).toLocaleDateString(
+                              "pt-BR",
+                            )
+                          : "N/A"}
                     </div>
                   </div>
                 </td>
@@ -285,10 +343,10 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.parlamentarInfo}>
                     <div style={styles.parlamentarNome}>
-                      {emenda.parlamentar}
+                      {emenda.parlamentar || emenda.autor}
                     </div>
                     <div style={styles.numeroEmendaSecundario}>
-                      Nº {emenda.numeroEmenda}
+                      Nº {emenda.numeroProposta || emenda.numero}
                     </div>
                   </div>
                 </td>
@@ -319,17 +377,24 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.valorInfo}>
                     <div style={styles.valorPrincipal}>
-                      {formatCurrency(emenda.valorRecurso)}
+                      {formatCurrency(emenda.valorRecurso || emenda.valor)}
                     </div>
-                    {emenda.saldo !== undefined && (
+                    {(emenda.saldoDisponivel !== undefined ||
+                      emenda.saldo !== undefined) && (
                       <div style={styles.saldoInfo}>
-                        Saldo: {formatCurrency(emenda.saldo)}
+                        Saldo:{" "}
+                        {formatCurrency(
+                          emenda.saldoDisponivel ||
+                            emenda.saldo ||
+                            (emenda.valorRecurso || emenda.valor) -
+                              (emenda.valorExecutado || 0),
+                        )}
                       </div>
                     )}
                   </div>
                 </td>
 
-                {/* ✅ EXECUÇÃO REAL CALCULADA */}
+                {/* ✅ EXECUÇÃO REAL CALCULADA - CORRIGIDA */}
                 <td style={styles.td}>
                   <div style={styles.execucaoContainer}>
                     <div style={styles.execucaoTexto}>
@@ -367,12 +432,12 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                       {emenda.statusCalculado.icone}{" "}
                       {emenda.statusCalculado.status}
                     </span>
-                    {emenda.finalExecucao && (
+                    {(emenda.finalExecucao || emenda.dataValidade) && (
                       <div style={styles.prazoInfo}>
                         Prazo:{" "}
-                        {new Date(emenda.finalExecucao).toLocaleDateString(
-                          "pt-BR",
-                        )}
+                        {new Date(
+                          emenda.finalExecucao || emenda.dataValidade,
+                        ).toLocaleDateString("pt-BR")}
                       </div>
                     )}
                   </div>

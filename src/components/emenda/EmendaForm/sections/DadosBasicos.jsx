@@ -30,10 +30,54 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     if (name === "valor" || name === "valorRecurso") {
       const valorFormatado = formatarMoeda(value);
       onChange({ target: { name, value: valorFormatado } });
+    } else if (name === "beneficiario") {
+      // ✅ CNPJ do Beneficiário: Formatar automaticamente
+      const formatted = value
+        .replace(/\D/g, "")
+        .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      onChange({ target: { name, value: formatted } });
     } else {
       onChange(e);
     }
   };
+
+  // ✅ VALIDAÇÃO CNPJ - Mesma função da Identificação
+  const isValidCNPJ = (cnpj) => {
+    const numbers = cnpj.replace(/\D/g, "");
+    if (numbers.length !== 14) return false;
+
+    const digits = numbers.split("").map(Number);
+
+    // Primeiro dígito
+    let sum = 0;
+    let weight = 5;
+    for (let i = 0; i < 12; i++) {
+      sum += digits[i] * weight;
+      weight = weight === 2 ? 9 : weight - 1;
+    }
+    let digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    if (digit !== digits[12]) return false;
+
+    // Segundo dígito
+    sum = 0;
+    weight = 6;
+    for (let i = 0; i < 13; i++) {
+      sum += digits[i] * weight;
+      weight = weight === 2 ? 9 : weight - 1;
+    }
+    digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+    return digit === digits[13];
+  };
+
+  // ✅ STATUS DO CNPJ do Beneficiário
+  const getCNPJBeneficiarioStatus = () => {
+    if (!formData.beneficiario || formData.beneficiario.length < 3) return null;
+    const cnpjLimpo = formData.beneficiario.replace(/\D/g, "");
+    if (cnpjLimpo.length < 14) return "incomplete";
+    return isValidCNPJ(formData.beneficiario) ? "valid" : "invalid";
+  };
+
+  const cnpjBeneficiarioStatus = getCNPJBeneficiarioStatus();
 
   return (
     <fieldset style={styles.fieldset}>
@@ -181,17 +225,31 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           />
         </div>
 
-        {/* Beneficiário */}
+        {/* Beneficiário - CORRIGIDO COM CNPJ */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Beneficiário</label>
+          <label style={styles.label}>
+            Beneficiário (CNPJ) <span style={styles.required}>*</span>
+          </label>
           <input
             type="text"
             name="beneficiario"
             value={formData.beneficiario || ""}
-            onChange={onChange}
-            placeholder="Nome do beneficiário"
-            style={styles.input}
+            onChange={handleInputChange}
+            placeholder="00.000.000/0000-00"
+            style={{
+              ...styles.input,
+              ...(fieldErrors.beneficiario && styles.inputError),
+              ...(cnpjBeneficiarioStatus === "valid" && styles.inputValid),
+              ...(cnpjBeneficiarioStatus === "invalid" && styles.inputError),
+            }}
+            required
           />
+          {cnpjBeneficiarioStatus === "invalid" && (
+            <small style={styles.errorText}>CNPJ inválido</small>
+          )}
+          {fieldErrors.beneficiario && !cnpjBeneficiarioStatus && (
+            <small style={styles.errorText}>{fieldErrors.beneficiario}</small>
+          )}
         </div>
 
         {/* Valor do Recurso */}
@@ -264,7 +322,9 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
@@ -277,6 +337,10 @@ const styles = {
     fontSize: "16px",
     backgroundColor: "#f0fdf4",
     borderColor: "#22c55e",
+  },
+  inputValid: {
+    borderColor: "#28a745",
+    backgroundColor: "#f8fff9",
   },
   inputError: {
     borderColor: "#dc3545",

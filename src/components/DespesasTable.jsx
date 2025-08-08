@@ -1,7 +1,7 @@
-// DespesasTable.jsx - VERSÃO COM SALDO DA EMENDA
-// ✅ ADICIONADA coluna Saldo da Emenda
-// ✅ ADICIONADA coluna % Executado
-// ✅ INDICADORES VISUAIS de saldo
+// DespesasTable.jsx - VERSÃO COMPLETA COM SALDO PROGRESSIVO
+// ✅ Saldo calculado progressivamente por despesa
+// ✅ Cada linha mostra o saldo APÓS aquela despesa
+// ✅ Respeitando ordem cronológica e isolamento por emenda
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,7 @@ export default function DespesasTable({
   const navigate = useNavigate();
   const [excludindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
-  const [modoVisualizacao, setModoVisualizacao] = useState("resumido"); // "resumido" ou "detalhado"
+  const [modoVisualizacao, setModoVisualizacao] = useState("resumido");
 
   // ✅ Função para formatar datas
   function formatarDataFirestore(data) {
@@ -36,7 +36,6 @@ export default function DespesasTable({
 
     try {
       let date;
-
       if (data.seconds) {
         date = new Date(data.seconds * 1000);
       } else if (typeof data === "string") {
@@ -70,21 +69,48 @@ export default function DespesasTable({
     const emenda = emendas.find((e) => e.id === emendaId);
     if (!emenda) return "Emenda não encontrada";
 
-    // Retorna número e parlamentar da emenda
     const numero = emenda.numero || emenda.numeroEmenda || "-";
     const parlamentar = emenda.parlamentar || emenda.autor || "-";
     return `${numero} - ${parlamentar}`;
   }
 
-  // ✅ NOVO: Função para calcular informações de saldo
-  function getEmendaSaldoInfo(emendaId) {
+  // ✅ FUNÇÃO PRINCIPAL: Calcular saldo PROGRESSIVO
+  function getEmendaSaldoInfo(emendaId, despesaAtualId) {
     if (!emendas || !emendaId) return null;
     const emenda = emendas.find((e) => e.id === emendaId);
     if (!emenda) return null;
 
     const valorTotal = emenda.valor || 0;
-    const saldoAtual = emenda.saldo || 0;
-    const valorExecutado = valorTotal - saldoAtual;
+
+    // Filtrar e ordenar despesas desta emenda
+    const despesasDestaEmenda = despesas
+      .filter(d => d.emendaId === emendaId)
+      .sort((a, b) => {
+        // Ordenar por data de pagamento
+        if (a.dataPagamento && b.dataPagamento) {
+          const dataA = a.dataPagamento.seconds 
+            ? new Date(a.dataPagamento.seconds * 1000) 
+            : new Date(a.dataPagamento);
+          const dataB = b.dataPagamento.seconds 
+            ? new Date(b.dataPagamento.seconds * 1000) 
+            : new Date(b.dataPagamento);
+          return dataA - dataB;
+        }
+        return 0;
+      });
+
+    // Encontrar índice da despesa atual
+    const indexAtual = despesasDestaEmenda.findIndex(d => d.id === despesaAtualId);
+
+    // Calcular total até esta despesa (inclusive)
+    let totalDespesasAteAqui = 0;
+    for (let i = 0; i <= indexAtual; i++) {
+      totalDespesasAteAqui += despesasDestaEmenda[i].valor || 0;
+    }
+
+    // Saldo progressivo
+    const saldoAtual = valorTotal - totalDespesasAteAqui;
+    const valorExecutado = totalDespesasAteAqui;
     const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
     return {
@@ -92,22 +118,25 @@ export default function DespesasTable({
       saldoAtual,
       valorExecutado,
       percentualExecutado,
+      totalDespesasAteAqui,
+      despesaNumero: indexAtual + 1,
+      totalDespesasEmenda: despesasDestaEmenda.length,
       emenda
     };
   }
 
-  // ✅ NOVO: Função para definir cor do saldo
+  // ✅ Função para definir cor do saldo
   function getSaldoColor(percentualExecutado) {
-    if (percentualExecutado >= 90) return ERROR; // Vermelho - quase esgotado
-    if (percentualExecutado >= 70) return WARNING; // Amarelo - atenção
-    return SUCCESS; // Verde - saldo confortável
+    if (percentualExecutado >= 90) return ERROR;
+    if (percentualExecutado >= 70) return WARNING;
+    return SUCCESS;
   }
 
-  // ✅ NOVO: Função para definir indicador visual
+  // ✅ Função para definir indicador visual
   function getSaldoIndicator(percentualExecutado) {
-    if (percentualExecutado >= 90) return "🔴"; // Crítico
-    if (percentualExecutado >= 70) return "🟡"; // Atenção
-    return "🟢"; // Ok
+    if (percentualExecutado >= 90) return "🔴";
+    if (percentualExecutado >= 70) return "🟡";
+    return "🟢";
   }
 
   // ✅ Função para excluir despesa
@@ -141,7 +170,7 @@ export default function DespesasTable({
     }
   }
 
-  // ✅ Handlers de ação
+  // ✅ Handlers
   function handleEditar(despesa) {
     if (onEdit) onEdit(despesa);
   }
@@ -156,314 +185,172 @@ export default function DespesasTable({
 
   return (
     <div style={styles.container}>
-      {/* ✅ Header */}
-      <div style={styles.headerSection}>
-        <div style={styles.tableHeader}>
-          <h2 style={styles.title}>
-            💰 Módulo Despesas ({despesas.length}
-            {despesas.length !== totalDespesas &&
-              totalDespesas > 0 &&
-              ` de ${totalDespesas}`}
-            )
-          </h2>
-          <div style={styles.viewToggle}>
-            <button
-              onClick={() => setModoVisualizacao("resumido")}
-              style={{
-                ...styles.toggleButton,
-                ...(modoVisualizacao === "resumido"
-                  ? styles.toggleButtonActive
-                  : {}),
-              }}
-            >
-              📊 Resumido
-            </button>
-            <button
-              onClick={() => setModoVisualizacao("detalhado")}
-              style={{
-                ...styles.toggleButton,
-                ...(modoVisualizacao === "detalhado"
-                  ? styles.toggleButtonActive
-                  : {}),
-              }}
-            >
-              📋 Detalhado
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ✅ Tabela Principal */}
       <div style={styles.tableContainer}>
-        {modoVisualizacao === "resumido" ? (
-          // ✅ MODO RESUMIDO - Com Saldo da Emenda
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.headerRow}>
-                <th style={styles.th}>Emenda</th>
-                <th style={styles.th}>Fornecedor</th>
-                <th style={styles.th}>Valor Despesa</th>
-                <th style={styles.th}>Saldo da Emenda</th>
-                <th style={styles.th}>% Executado</th>
-                <th style={styles.th}>Nº Empenho</th>
-                <th style={styles.th}>Nº NF</th>
-                <th style={styles.th}>Data Pagamento</th>
-                <th style={styles.th}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {despesas.filter(Boolean).map((despesa, index) => {
-                if (!despesa?.id) return null;
-                const saldoInfo = getEmendaSaldoInfo(despesa.emendaId);
-                return (
-                  <tr
-                    key={despesa.id}
-                    style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
-                  >
-                    <td style={styles.td}>
-                      <div style={styles.emendaCell}>
-                        {getEmendaInfo(despesa.emendaId)}
-                      </div>
-                    </td>
-                    <td style={styles.td}>
-                      <div style={styles.fornecedorCell}>
-                        {despesa.fornecedor || "-"}
-                      </div>
-                    </td>
-                    <td style={styles.tdValue}>
-                      R${" "}
-                      {(despesa.valor || 0).toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td style={{
-                      ...styles.tdValue,
-                      color: saldoInfo ? getSaldoColor(saldoInfo.percentualExecutado) : "#666"
-                    }}>
-                      {saldoInfo ? (
-                        <>
-                          {getSaldoIndicator(saldoInfo.percentualExecutado)}{" "}
-                          R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </>
-                      ) : "-"}
-                    </td>
-                    <td style={styles.td}>
-                      {saldoInfo ? (
-                        <div style={{
-                          ...styles.percentualCell,
-                          backgroundColor: `${getSaldoColor(saldoInfo.percentualExecutado)}15`,
-                          color: getSaldoColor(saldoInfo.percentualExecutado)
-                        }}>
-                          {saldoInfo.percentualExecutado.toFixed(1)}%
-                        </div>
-                      ) : "-"}
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.numeroEmpenho || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.dataCell}>
-                        {formatarDataFirestore(despesa.dataPagamento)}
-                      </span>
-                    </td>
-                    <td style={styles.tdActions}>
-                      <div style={styles.actionsContainer}>
-                        <button
-                          onClick={() => handleVisualizar(despesa)}
-                          style={styles.viewButton}
-                          title="Visualizar despesa"
-                        >
-                          👁️
-                        </button>
-                        <button
-                          onClick={() => handleEditar(despesa)}
-                          style={styles.editButton}
-                          title="Editar despesa"
-                          disabled={excludindo === despesa.id}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => confirmarExclusao(despesa)}
-                          style={styles.deleteButton}
-                          title="Excluir despesa"
-                          disabled={excludindo === despesa.id}
-                        >
-                          {excludindo === despesa.id ? "⏳" : "🗑️"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          // ✅ MODO DETALHADO - Com Saldo da Emenda
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.headerRow}>
-                <th style={styles.th}>Emenda</th>
-                <th style={styles.th}>Fornecedor</th>
-                <th style={styles.th}>Valor Despesa</th>
-                <th style={styles.th}>Saldo Emenda</th>
-                <th style={styles.th}>% Exec.</th>
-                <th style={styles.th}>Nº Empenho</th>
-                <th style={styles.th}>Nº Contrato</th>
-                <th style={styles.th}>Nº NF</th>
-                <th style={styles.th}>Discriminação</th>
-                <th style={styles.th}>Data Empenho</th>
-                <th style={styles.th}>Data Liquidação</th>
-                <th style={styles.th}>Data Pagamento</th>
-                <th style={styles.th}>Ação</th>
-                <th style={styles.th}>Dotação</th>
-                <th style={styles.th}>Class. Funcional</th>
-                <th style={styles.th}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {despesas.filter(Boolean).map((despesa, index) => {
-                if (!despesa?.id) return null;
-                const saldoInfo = getEmendaSaldoInfo(despesa.emendaId);
-                return (
-                  <tr
-                    key={despesa.id}
-                    style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
-                  >
-                    <td style={styles.td}>
-                      <div style={styles.emendaCell}>
-                        {getEmendaInfo(despesa.emendaId)}
-                      </div>
-                    </td>
-                    <td style={styles.td}>
-                      <div style={styles.fornecedorCell}>
-                        {despesa.fornecedor || "-"}
-                      </div>
-                    </td>
-                    <td style={styles.tdValue}>
-                      R${" "}
-                      {(despesa.valor || 0).toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </td>
-                    <td style={{
-                      ...styles.tdValue,
-                      color: saldoInfo ? getSaldoColor(saldoInfo.percentualExecutado) : "#666"
-                    }}>
-                      {saldoInfo ? (
-                        <>
-                          {getSaldoIndicator(saldoInfo.percentualExecutado)}{" "}
-                          R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </>
-                      ) : "-"}
-                    </td>
-                    <td style={styles.td}>
-                      {saldoInfo ? (
-                        <div style={{
-                          ...styles.percentualCellSmall,
-                          backgroundColor: `${getSaldoColor(saldoInfo.percentualExecutado)}15`,
-                          color: getSaldoColor(saldoInfo.percentualExecutado)
-                        }}>
-                          {saldoInfo.percentualExecutado.toFixed(0)}%
-                        </div>
-                      ) : "-"}
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.numeroEmpenho || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.numeroContrato || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <div style={styles.discriminacaoCell}>
-                        {despesa.discriminacao || "-"}
-                      </div>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.dataCell}>
-                        {formatarDataFirestore(despesa.dataEmpenho)}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.dataCell}>
-                        {formatarDataFirestore(despesa.dataLiquidacao)}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.dataCell}>
-                        {formatarDataFirestore(despesa.dataPagamento)}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.acaoCell}>{despesa.acao || "-"}</span>
-                    </td>
-                    <td style={styles.td}>
-                      <span style={styles.numeroCell}>
-                        {despesa.dotacaoOrcamentaria || "-"}
-                      </span>
-                    </td>
-                    <td style={styles.td}>
-                      <div style={styles.classificacaoCell}>
-                        {despesa.classificacaoFuncionalProgramatica ||
-                          despesa.classificacaoFuncional ||
-                          "-"}
-                      </div>
-                    </td>
-                    <td style={styles.tdActions}>
-                      <div style={styles.actionsContainer}>
-                        <button
-                          onClick={() => handleVisualizar(despesa)}
-                          style={styles.viewButton}
-                          title="Visualizar"
-                        >
-                          👁️
-                        </button>
-                        <button
-                          onClick={() => handleEditar(despesa)}
-                          style={styles.editButton}
-                          title="Editar"
-                          disabled={excludindo === despesa.id}
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => confirmarExclusao(despesa)}
-                          style={styles.deleteButton}
-                          title="Excluir"
-                          disabled={excludindo === despesa.id}
-                        >
-                          {excludindo === despesa.id ? "⏳" : "🗑️"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+        {/* Toggle de visualização */}
+        <div style={styles.viewToggleContainer}>
+          <button
+            onClick={() => setModoVisualizacao("resumido")}
+            style={{
+              ...styles.toggleButton,
+              ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
+            }}
+          >
+            📊 Resumido
+          </button>
+          <button
+            onClick={() => setModoVisualizacao("detalhado")}
+            style={{
+              ...styles.toggleButton,
+              ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),
+            }}
+          >
+            📋 Detalhado
+          </button>
+        </div>
 
-        {/* ✅ Estado Vazio */}
+        {/* Tabela */}
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.headerRow}>
+              <th style={styles.th}>Emenda</th>
+              <th style={styles.th}>Fornecedor</th>
+              <th style={styles.th}>Valor Despesa</th>
+              <th style={styles.th}>Saldo da Emenda</th>
+              <th style={styles.th}>% Executado</th>
+              {modoVisualizacao === "detalhado" && (
+                <>
+                  <th style={styles.th}>Nº Contrato</th>
+                  <th style={styles.th}>Discriminação</th>
+                  <th style={styles.th}>Data Empenho</th>
+                  <th style={styles.th}>Data Liquidação</th>
+                </>
+              )}
+              <th style={styles.th}>Nº Empenho</th>
+              <th style={styles.th}>Nº NF</th>
+              <th style={styles.th}>Data Pagamento</th>
+              <th style={styles.th}>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {despesas.map((despesa, index) => {
+              const saldoInfo = getEmendaSaldoInfo(despesa.emendaId, despesa.id);
+              return (
+                <tr
+                  key={despesa.id}
+                  style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
+                >
+                  <td style={styles.td}>
+                    <div style={styles.emendaCell}>
+                      {getEmendaInfo(despesa.emendaId)}
+                    </div>
+                  </td>
+                  <td style={styles.td}>
+                    <div style={styles.fornecedorCell}>
+                      {despesa.fornecedor || "-"}
+                    </div>
+                  </td>
+                  <td style={styles.tdValue}>
+                    R$ {(despesa.valor || 0).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </td>
+                  <td style={{
+                    ...styles.tdValue,
+                    color: saldoInfo ? getSaldoColor(saldoInfo.percentualExecutado) : "#666"
+                  }}>
+                    {saldoInfo ? (
+                      <>
+                        {getSaldoIndicator(saldoInfo.percentualExecutado)}{" "}
+                        R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </>
+                    ) : "-"}
+                  </td>
+                  <td style={styles.td}>
+                    {saldoInfo ? (
+                      <div style={{
+                        ...styles.percentualCell,
+                        backgroundColor: `${getSaldoColor(saldoInfo.percentualExecutado)}15`,
+                        color: getSaldoColor(saldoInfo.percentualExecutado)
+                      }}>
+                        {saldoInfo.percentualExecutado.toFixed(1)}%
+                      </div>
+                    ) : "-"}
+                  </td>
+                  {modoVisualizacao === "detalhado" && (
+                    <>
+                      <td style={styles.td}>
+                        <span style={styles.numeroCell}>
+                          {despesa.numeroContrato || "-"}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <div style={styles.discriminacaoCell}>
+                          {despesa.discriminacao || "-"}
+                        </div>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={styles.dataCell}>
+                          {formatarDataFirestore(despesa.dataEmpenho)}
+                        </span>
+                      </td>
+                      <td style={styles.td}>
+                        <span style={styles.dataCell}>
+                          {formatarDataFirestore(despesa.dataLiquidacao)}
+                        </span>
+                      </td>
+                    </>
+                  )}
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroEmpenho || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.numeroCell}>
+                      {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
+                    </span>
+                  </td>
+                  <td style={styles.td}>
+                    <span style={styles.dataCell}>
+                      {formatarDataFirestore(despesa.dataPagamento)}
+                    </span>
+                  </td>
+                  <td style={styles.tdActions}>
+                    <div style={styles.actionsContainer}>
+                      <button
+                        onClick={() => handleVisualizar(despesa)}
+                        style={styles.viewButton}
+                        title="Visualizar despesa"
+                      >
+                        👁️
+                      </button>
+                      <button
+                        onClick={() => handleEditar(despesa)}
+                        style={styles.editButton}
+                        title="Editar despesa"
+                        disabled={excludindo === despesa.id}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={() => confirmarExclusao(despesa)}
+                        style={styles.deleteButton}
+                        title="Excluir despesa"
+                        disabled={excludindo === despesa.id}
+                      >
+                        {excludindo === despesa.id ? "⏳" : "🗑️"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {/* Estado Vazio */}
         {despesas.length === 0 && (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>💰</div>
@@ -475,23 +362,12 @@ export default function DespesasTable({
         )}
       </div>
 
-      {/* ✅ Resumo Final - Com informações de saldo */}
+      {/* Resumo Final */}
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
             <span style={styles.summaryLabel}>Total de Despesas:</span>
             <span style={styles.summaryValue}>{despesas.length}</span>
-          </div>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Valor Total:</span>
-            <span style={styles.summaryValueMoney}>
-              R${" "}
-              {despesas
-                .reduce((sum, d) => sum + (d.valor || 0), 0)
-                .toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                })}
-            </span>
           </div>
           <div style={styles.summaryCard}>
             <span style={styles.summaryLabel}>Emendas Vinculadas:</span>
@@ -500,13 +376,22 @@ export default function DespesasTable({
             </span>
           </div>
 
-          {/* ✅ NOVO: Indicador de Saldos Críticos */}
+          {/* Indicador de Saldos Críticos */}
           {(() => {
             const emendasCriticas = new Set();
+            const emendasProcessadas = new Set();
+
             despesas.forEach(d => {
-              const saldoInfo = getEmendaSaldoInfo(d.emendaId);
-              if (saldoInfo && saldoInfo.percentualExecutado >= 90) {
-                emendasCriticas.add(d.emendaId);
+              if (!emendasProcessadas.has(d.emendaId)) {
+                const todasDespesasEmenda = despesas.filter(desp => desp.emendaId === d.emendaId);
+                const ultimaDespesa = todasDespesasEmenda[todasDespesasEmenda.length - 1];
+                if (ultimaDespesa) {
+                  const saldoFinal = getEmendaSaldoInfo(d.emendaId, ultimaDespesa.id);
+                  if (saldoFinal && saldoFinal.percentualExecutado >= 90) {
+                    emendasCriticas.add(d.emendaId);
+                  }
+                }
+                emendasProcessadas.add(d.emendaId);
               }
             });
 
@@ -525,7 +410,7 @@ export default function DespesasTable({
         </div>
       )}
 
-      {/* ✅ Modal de Confirmação - Com info de saldo */}
+      {/* Modal de Confirmação */}
       {confirmExclusao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -535,39 +420,31 @@ export default function DespesasTable({
                 Tem certeza que deseja excluir esta despesa?
               </p>
               <div style={styles.modalDetails}>
-                <p>
-                  <strong>Fornecedor:</strong> {confirmExclusao.fornecedor}
-                </p>
-                <p>
-                  <strong>Valor:</strong> R${" "}
-                  {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </p>
-                <p>
-                  <strong>Nº Empenho:</strong> {confirmExclusao.numeroEmpenho}
-                </p>
-                <p>
-                  <strong>Discriminação:</strong>{" "}
-                  {confirmExclusao.discriminacao}
-                </p>
+                <p><strong>Fornecedor:</strong> {confirmExclusao.fornecedor}</p>
+                <p><strong>Valor:</strong> R$ {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}</p>
+                <p><strong>Nº Empenho:</strong> {confirmExclusao.numeroEmpenho}</p>
+                <p><strong>Discriminação:</strong> {confirmExclusao.discriminacao}</p>
 
-                {/* ✅ NOVO: Informação sobre o saldo após exclusão */}
                 {(() => {
-                  const saldoInfo = getEmendaSaldoInfo(confirmExclusao.emendaId);
+                  const saldoInfo = getEmendaSaldoInfo(confirmExclusao.emendaId, confirmExclusao.id);
                   if (saldoInfo) {
                     const novoSaldo = saldoInfo.saldoAtual + confirmExclusao.valor;
                     return (
                       <div style={styles.saldoInfo}>
-                        <p>
-                          <strong>Saldo Atual da Emenda:</strong> R${" "}
-                          {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </p>
-                        <p>
+                        <p><strong>Valor Total da Emenda:</strong> R$ {saldoInfo.valorTotal.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}</p>
+                        <p><strong>Total de Despesas até aqui:</strong> R$ {saldoInfo.totalDespesasAteAqui.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}</p>
+                        <p><strong>Saldo Atual:</strong> R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}</p>
+                        <p style={{ borderTop: "1px solid #e9ecef", paddingTop: "8px", marginTop: "8px" }}>
                           <strong>Saldo Após Exclusão:</strong>{" "}
-                          <span style={{ color: SUCCESS }}>
+                          <span style={{ color: SUCCESS, fontSize: "16px" }}>
                             R$ {novoSaldo.toLocaleString("pt-BR", {
                               minimumFractionDigits: 2,
                             })}
@@ -607,46 +484,34 @@ export default function DespesasTable({
   );
 }
 
-// ✅ Estilos Atualizados
+// ✅ Estilos
 const styles = {
   container: {
     backgroundColor: WHITE,
     borderRadius: 12,
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
     overflow: "hidden",
-    margin: "0 32px 24px 32px",
+    margin: "0",
   },
 
-  headerSection: {
+  tableContainer: {
+    overflowX: "auto",
+  },
+
+  viewToggleContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    padding: "12px",
     backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #dee2e6",
-  },
-
-  tableHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "20px 24px",
-  },
-
-  title: {
-    color: PRIMARY,
-    fontSize: 18,
-    fontWeight: "600",
-    margin: 0,
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  viewToggle: {
-    display: "flex",
-    gap: "8px",
+    borderBottom: "1px solid #dee2e6",
   },
 
   toggleButton: {
     padding: "8px 16px",
-    border: "1px solid #dee2e6",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "4px",
     background: "white",
     color: "#6c757d",
@@ -660,10 +525,6 @@ const styles = {
     background: PRIMARY,
     color: "white",
     borderColor: PRIMARY,
-  },
-
-  tableContainer: {
-    overflowX: "auto",
   },
 
   table: {
@@ -731,7 +592,6 @@ const styles = {
     fontWeight: "500",
     fontSize: 11,
     color: ACCENT,
-    title: "Clique para ver detalhes da emenda",
   },
 
   fornecedorCell: {
@@ -759,7 +619,6 @@ const styles = {
     fontWeight: "500",
   },
 
-  // ✅ NOVO: Estilos para células de percentual
   percentualCell: {
     display: "inline-block",
     padding: "4px 8px",
@@ -770,37 +629,12 @@ const styles = {
     textAlign: "center",
   },
 
-  percentualCellSmall: {
-    display: "inline-block",
-    padding: "2px 6px",
-    borderRadius: "3px",
-    fontSize: "10px",
-    fontWeight: "600",
-    minWidth: "35px",
-    textAlign: "center",
-  },
-
   discriminacaoCell: {
     maxWidth: 120,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     fontSize: 11,
-  },
-
-  acaoCell: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: ACCENT,
-  },
-
-  classificacaoCell: {
-    maxWidth: 100,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    fontSize: 10,
-    fontFamily: "monospace",
   },
 
   actionsContainer: {
@@ -819,9 +653,6 @@ const styles = {
     borderRadius: 3,
     color: ACCENT,
     transition: "all 0.2s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   editButton: {
@@ -833,9 +664,6 @@ const styles = {
     borderRadius: 3,
     color: WARNING,
     transition: "all 0.2s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   deleteButton: {
@@ -847,9 +675,6 @@ const styles = {
     borderRadius: 3,
     color: ERROR,
     transition: "all 0.2s",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
   },
 
   summarySection: {
@@ -883,13 +708,6 @@ const styles = {
     color: PRIMARY,
   },
 
-  summaryValueMoney: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: SUCCESS,
-    fontFamily: "monospace",
-  },
-
   emptyState: {
     textAlign: "center",
     padding: "80px 20px",
@@ -915,7 +733,6 @@ const styles = {
     color: "#666",
   },
 
-  // ✅ Modal styles
   modalOverlay: {
     position: "fixed",
     top: 0,
@@ -949,9 +766,6 @@ const styles = {
     padding: "20px 24px",
     borderBottom: "1px solid #eee",
     backgroundColor: "#fdf2f2",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
   },
 
   modalBody: {
@@ -972,7 +786,6 @@ const styles = {
     border: "1px solid #e9ecef",
   },
 
-  // ✅ NOVO: Estilo para informação de saldo no modal
   saldoInfo: {
     marginTop: 12,
     paddingTop: 12,

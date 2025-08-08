@@ -1,11 +1,11 @@
 run = "npm run dev"
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "python-3.11"]
 hidden = [".config", "package-lock.json"]
 entrypoint = "index.html"
 
 [nix]
 channel = "stable-24_05"
-packages = ["firebase-tools"]
+packages = ["firebase-tools", "zip"]
 
 [unitTest]
 language = "nodejs"
@@ -14,6 +14,14 @@ language = "nodejs"
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+
+[[ports]]
+localPort = 3000
+externalPort = 3001
+
+[[ports]]
+localPort = 4173
+externalPort = 3002
 
 [[ports]]
 localPort = 5173

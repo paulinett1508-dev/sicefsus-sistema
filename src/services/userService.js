@@ -135,15 +135,38 @@ const normalizeTipo = (tipo) => {
   return tipoMap[tipo] || "operador";
 };
 
-// ✅ CONVERTER ROLE PARA TIPO (FUNÇÃO PRINCIPAL DE CONVERSÃO)
+// ✅ CORREÇÃO CRÍTICA: CONVERTER ROLE PARA TIPO (FUNÇÃO PRINCIPAL DE CONVERSÃO)
 const convertRoleToTipo = (role) => {
+  console.log("🔄 Convertendo role:", role, "| Tipo:", typeof role);
+
+  // ✅ NORMALIZAR entrada
+  const normalizedRole = String(role || "")
+    .toLowerCase()
+    .trim();
+
   const roleMap = {
+    // ✅ MAPEAMENTO CORRETO
     admin: "admin",
     administrador: "admin",
+    administrator: "admin",
     user: "operador",
     operador: "operador",
+    operator: "operador",
+    // ✅ FALLBACKS
+    "": "operador", // default
+    undefined: "operador",
+    null: "operador",
   };
-  return roleMap[role] || "operador";
+
+  const resultado = roleMap[normalizedRole] || "operador";
+
+  console.log("✅ Conversão:", {
+    input: role,
+    normalized: normalizedRole,
+    output: resultado,
+  });
+
+  return resultado;
 };
 
 // ✅ VALIDAR DADOS
@@ -453,16 +476,26 @@ const createUser = async (formData) => {
   }
 };
 
-// ✅ ATUALIZAR USUÁRIO
+// ✅ CORREÇÃO CRÍTICA: ATUALIZAR USUÁRIO
 const updateUser = async (userId, formData, originalEmail) => {
   console.log("✏️ Atualizando usuário:", userId);
+  console.log("📝 FormData recebido:", formData);
 
-  const validation = validateFormData(formData);
+  // ✅ CORREÇÃO: Criar um objeto de validação que inclui email
+  const validationData = {
+    ...formData,
+    // ✅ GARANTIR que email esteja presente (vem do editingUser)
+    email: formData.email || originalEmail,
+  };
+
+  const validation = validateFormData(validationData);
   if (!validation.isValid) {
+    console.error("❌ Dados inválidos para atualização:", validation.errors);
     throw new Error(validation.errors.join(", "));
   }
 
-  if (formData.email !== originalEmail) {
+  // ✅ VERIFICAR EMAIL APENAS SE MUDOU
+  if (formData.email && formData.email !== originalEmail) {
     const emailExists = await checkEmailExists(formData.email);
     if (emailExists) {
       throw new Error("Este email já está cadastrado no sistema");
@@ -472,7 +505,7 @@ const updateUser = async (userId, formData, originalEmail) => {
   try {
     const updateData = {
       nome: formData.nome.trim(),
-      tipo: convertRoleToTipo(formData.role), // ✅ USAR FUNÇÃO CORRIGIDA
+      tipo: convertRoleToTipo(formData.role),
       status: formData.status || "ativo",
       departamento: formData.departamento?.trim() || "",
       telefone: formData.telefone?.trim() || "",
@@ -489,7 +522,14 @@ const updateUser = async (userId, formData, originalEmail) => {
       updateData.uf = formData.uf?.trim().toUpperCase() || "";
     }
 
+    // ✅ NÃO ATUALIZAR EMAIL no Firestore (email não muda)
+    // ✅ EMAIL fica imutável após criação
+
+    console.log("💾 Dados para atualização:", updateData);
+
     await updateDoc(doc(db, COLLECTION_NAME, userId), updateData);
+
+    console.log("✅ Usuário atualizado com sucesso");
 
     return {
       success: true,

@@ -1,40 +1,9 @@
 // src/firebase/firebaseConfig.js
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 
-// ✅ VALIDAÇÃO DAS VARIÁVEIS DE AMBIENTE
-const requiredEnvVars = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_STORAGE_BUCKET',
-  'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  'VITE_FIREBASE_APP_ID'
-];
-
-// ✅ Verificar se todas as variáveis estão definidas
-const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error('❌ FIREBASE CONFIG ERROR: Variáveis de ambiente ausentes:', missingVars);
-  console.error('📝 Configure as seguintes variáveis no Secrets do Replit:');
-  missingVars.forEach(varName => console.error(`   - ${varName}`));
-}
-
-// ✅ Log de debug das configurações (apenas em desenvolvimento)
-if (import.meta.env.DEV) {
-  console.log('🔥 Firebase Config Status:', {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✅ Configurada' : '❌ Ausente',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✅ Configurada' : '❌ Ausente',
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✅ Configurada' : '❌ Ausente',
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✅ Configurada' : '❌ Ausente',
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✅ Configurada' : '❌ Ausente',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✅ Configurada' : '❌ Ausente',
-  });
-}
-
+// 🔧 CONFIGURAÇÃO SIMPLES: Funciona em DEV e PROD
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -42,20 +11,34 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-let app, db, auth, storage;
+// 🔍 DEBUG: Mostrar ambiente atual
+const currentEnv = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+const isProduction = currentEnv?.includes("-prod");
+const isDevelopment = currentEnv?.includes("-60dbd");
 
-try {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  auth = getAuth(app);
-  storage = getStorage(app);
-  console.log('✅ Firebase inicializado com sucesso');
-} catch (error) {
-  console.error('❌ Erro ao inicializar Firebase:', error);
-  console.error('🔧 Verifique as variáveis de ambiente no Secrets do Replit');
+console.log("🔥 Firebase Environment:", {
+  projectId: currentEnv,
+  environment: isProduction
+    ? "PRODUCTION"
+    : isDevelopment
+      ? "DEVELOPMENT"
+      : "UNKNOWN",
+  timestamp: new Date().toISOString(),
+});
+
+// ⚠️ Validação crítica
+if (!currentEnv) {
+  console.error("❌ ERRO CRÍTICO: VITE_FIREBASE_PROJECT_ID não encontrado!");
+  console.log("📋 Variáveis disponíveis:", Object.keys(import.meta.env));
 }
 
-export { db, auth, storage };
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+
+// Inicializar Auth e Firestore
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+export default app;

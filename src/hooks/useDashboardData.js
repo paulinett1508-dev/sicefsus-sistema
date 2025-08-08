@@ -191,7 +191,34 @@ const useDashboardData = (user, permissions) => {
         throw new Error(mensagem);
       }
 
-      setEmendas(resultado.emendasData);
+      // ✅ CORREÇÃO: Calcular execução individual de cada emenda
+      const emendasComExecucao = resultado.emendasData.map((emenda) => {
+        // Calcular despesas desta emenda
+        const despesasEmenda = resultado.despesasData.filter(
+          (despesa) => despesa.emendaId === emenda.id,
+        );
+
+        // Calcular valores
+        const valorTotal = parseFloat(emenda.valorRecurso || emenda.valor || 0);
+        const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
+          return sum + parseFloat(despesa.valor || 0);
+        }, 0);
+
+        const saldoDisponivel = valorTotal - valorExecutado;
+        const percentualExecutado =
+          valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+
+        return {
+          ...emenda,
+          valorExecutado,
+          saldoDisponivel,
+          percentualExecutado,
+          totalDespesas: despesasEmenda.length,
+          despesasVinculadas: despesasEmenda,
+        };
+      });
+
+      setEmendas(emendasComExecucao);
       setDespesas(resultado.despesasData);
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
@@ -211,22 +238,20 @@ const useDashboardData = (user, permissions) => {
       return total + (isNaN(valor) ? 0 : valor);
     }, 0);
 
-    const valorTotalDespesas = despesas.reduce((total, despesa) => {
-      const valor = parseFloat(despesa.valor || 0);
-      return total + (isNaN(valor) ? 0 : valor);
+    // ✅ CORREÇÃO: Usar valorExecutado já calculado em cada emenda
+    const valorExecutado = emendas.reduce((total, emenda) => {
+      return total + (emenda.valorExecutado || 0);
     }, 0);
 
-    const saldoDisponivel = valorTotalEmendas - valorTotalDespesas;
+    const saldoDisponivel = valorTotalEmendas - valorExecutado;
     const percentualExecutado =
-      valorTotalEmendas > 0
-        ? (valorTotalDespesas / valorTotalEmendas) * 100
-        : 0;
+      valorTotalEmendas > 0 ? (valorExecutado / valorTotalEmendas) * 100 : 0;
 
     return {
       totalEmendas,
       totalDespesas,
       valorTotalEmendas,
-      valorTotalDespesas,
+      valorExecutado, // ✅ Nome corrigido
       saldoDisponivel,
       percentualExecutado: Math.round(percentualExecutado * 100) / 100,
     };

@@ -34,7 +34,7 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "cnpj") {
+    if (name === "cnpjBeneficiario") {
       const formatted = value
         .replace(/\D/g, "")
         .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
@@ -72,10 +72,11 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   };
 
   const getCNPJStatus = () => {
-    if (!formData.cnpj || formData.cnpj.length < 3) return null;
-    const cnpjLimpo = formData.cnpj.replace(/\D/g, "");
+    if (!formData.cnpjBeneficiario || formData.cnpjBeneficiario.length < 3)
+      return null;
+    const cnpjLimpo = formData.cnpjBeneficiario.replace(/\D/g, "");
     if (cnpjLimpo.length < 14) return "incomplete";
-    return isValidCNPJ(formData.cnpj) ? "valid" : "invalid";
+    return isValidCNPJ(formData.cnpjBeneficiario) ? "valid" : "invalid";
   };
 
   const cnpjStatus = getCNPJStatus();
@@ -88,20 +89,20 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ */}
+        {/* CNPJ - CORRIGIDO */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             CNPJ <span style={styles.required}>*</span>
           </label>
           <input
             type="text"
-            name="cnpj"
-            value={formData.cnpj || ""}
+            name="cnpjBeneficiario"
+            value={formData.cnpjBeneficiario || ""}
             onChange={handleInputChange}
             placeholder="00.000.000/0000-00"
             style={{
               ...styles.input,
-              ...(fieldErrors.cnpj && styles.inputError),
+              ...(fieldErrors.cnpjBeneficiario && styles.inputError),
               ...(cnpjStatus === "valid" && styles.inputValid),
               ...(cnpjStatus === "invalid" && styles.inputError),
             }}
@@ -110,8 +111,10 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
           {cnpjStatus === "invalid" && (
             <small style={styles.errorText}>CNPJ inválido</small>
           )}
-          {fieldErrors.cnpj && !cnpjStatus && (
-            <small style={styles.errorText}>{fieldErrors.cnpj}</small>
+          {fieldErrors.cnpjBeneficiario && !cnpjStatus && (
+            <small style={styles.errorText}>
+              {fieldErrors.cnpjBeneficiario}
+            </small>
           )}
         </div>
 
@@ -211,7 +214,9 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",

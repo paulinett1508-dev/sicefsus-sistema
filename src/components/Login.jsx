@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import EnvironmentIndicator from "./EnvironmentIndicator";
 import {
   doc,
   getDoc,
@@ -269,6 +270,9 @@ export default function Login({ onLoginSuccess }) {
           </small>
         </div>
       </div>
+
+      {/* 🔧 Indicador discreto de ambiente para desenvolvedores */}
+      <EnvironmentIndicator />
     </div>
   );
 }

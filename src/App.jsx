@@ -27,6 +27,45 @@ import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
+import UpdateNotification from "./components/UpdateNotification";
+
+// Desabilitar console.logs em produção
+if (import.meta.env.PROD || import.meta.env.VITE_ENV === "production") {
+  const noop = () => {};
+
+  // Desabilitar todos os métodos do console
+  console.log = noop;
+  console.info = noop;
+  console.warn = noop;
+  console.error = noop;
+  console.debug = noop;
+  console.trace = noop;
+  console.table = noop;
+  console.time = noop;
+  console.timeEnd = noop;
+  console.group = noop;
+  console.groupEnd = noop;
+  console.groupCollapsed = noop;
+  console.assert = noop;
+  console.clear = noop;
+  console.count = noop;
+  console.countReset = noop;
+  console.dir = noop;
+  console.dirxml = noop;
+  console.profile = noop;
+  console.profileEnd = noop;
+  console.timeLog = noop;
+  console.timeStamp = noop;
+
+  // Também desabilitar no window.console
+  if (window.console) {
+    Object.keys(window.console).forEach((key) => {
+      if (typeof window.console[key] === "function") {
+        window.console[key] = noop;
+      }
+    });
+  }
+}
 
 // Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
@@ -273,6 +312,9 @@ function AppContent() {
 
   return (
     <div style={styles.app}>
+      {/* Sistema de notificação de updates */}
+      <UpdateNotification />
+
       {/* Modal de Login */}
       {showLogin && (
         <div style={styles.overlay}>
@@ -355,18 +397,7 @@ function AppContent() {
                 }
               />
 
-              <Route
-                path="/emendas"
-                element={
-                  <PrivateRoute usuario={usuario}>
-                    <ProtectedRouteWrapper usuario={usuario}>
-                      <Emendas usuario={usuario} />
-                    </ProtectedRouteWrapper>
-                  </PrivateRoute>
-                }
-              />
-
-              {/* ✅ ROTAS DE EMENDA - ADICIONADAS */}
+              {/* ✅ ROTAS DE EMENDA - COMPLETAS */}
               <Route
                 path="/emendas/criar"
                 element={
@@ -393,6 +424,30 @@ function AppContent() {
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
                       <EmendaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* ✅ ROTA PARA DESPESAS DE UMA EMENDA ESPECÍFICA */}
+              <Route
+                path="/emendas/:id/despesas"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Despesas usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* ✅ ROTA PARA DESPESAS DE UMA EMENDA ESPECÍFICA */}
+              <Route
+                path="/emendas/:id/despesas"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <Despesas usuario={usuario} />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }

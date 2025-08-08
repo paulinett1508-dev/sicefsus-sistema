@@ -1,7 +1,7 @@
-// Emendas.jsx - Layout Padronizado com Despesas v2.1
-// ✅ CORRIGIDO: Acesso correto aos dados do usuário via contexto
-// ✅ MANTIDO: Todas as funcionalidades existentes de emendas
-// ✅ ADICIONADO: Cards de resumo, filtros, e estrutura idêntica
+// Emendas.jsx - Layout Padronizado com Despesas v2.3
+// ✅ CORRIGIDO: Execução baseada APENAS em despesas reais
+// ✅ REMOVIDO: Metas não são contabilizadas como execução
+// ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ import { useUser } from "../context/UserContext";
 import EmendasFilters from "./EmendasFilters";
 import EmendasTable from "./EmendasTable";
 import Toast from "./Toast";
+import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
 const Emendas = () => {
   const navigate = useNavigate();
@@ -26,18 +27,25 @@ const Emendas = () => {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
+  // Estados do modal de exclusão
+  const [modalExclusao, setModalExclusao] = useState({
+    isOpen: false,
+    emenda: null,
+    loading: false,
+  });
+
   // ✅ CORREÇÃO: Acesso correto às propriedades do usuário
   const userRole = user?.tipo || "operador";
   const userMunicipio = user?.municipio;
   const userUf = user?.uf;
   const userEmail = user?.email;
 
-  console.log("📋 Emendas.jsx v2.1 - Dados do usuário:", {
+  console.log("📋 Emendas.jsx v2.3 - Dados do usuário:", {
     email: userEmail,
     role: userRole,
     municipio: userMunicipio,
     uf: userUf,
-    user: user, // Debug completo do objeto
+    user: user,
   });
 
   // ✅ CORREÇÃO: Aguardar carregamento do usuário
@@ -60,30 +68,89 @@ const Emendas = () => {
     );
   }
 
-  // ✅ FUNÇÃO: Carregar dados principais
+  // ✅ FUNÇÃO: Carregar dados principais COM DESPESAS
   const carregarDados = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log("📊 Carregando emendas...");
+      console.log("📊 Carregando emendas e despesas...");
 
-      const emendasRef = collection(db, "emendas");
-      const snapshot = await getDocs(emendasRef);
+      // Carregar emendas e despesas em paralelo
+      const [emendasSnapshot, despesasSnapshot] = await Promise.all([
+        getDocs(collection(db, "emendas")),
+        getDocs(collection(db, "despesas")),
+      ]);
 
       const emendasData = [];
-      snapshot.forEach((doc) => {
+      emendasSnapshot.forEach((doc) => {
         emendasData.push({
           id: doc.id,
           ...doc.data(),
         });
       });
 
-      console.log(`✅ ${emendasData.length} emendas carregadas`);
-      setEmendas(emendasData);
-      setEmendasFiltradas(emendasData);
+      const despesasData = [];
+      despesasSnapshot.forEach((doc) => {
+        despesasData.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
+      const emendasComExecucao = emendasData.map((emenda) => {
+        // Buscar despesas desta emenda
+        const despesasEmenda = despesasData.filter(
+          (despesa) => despesa.emendaId === emenda.id,
+        );
+
+        // ✅ CORREÇÃO: Calcular valor executado APENAS das despesas
+        const valorExecutadoDespesas = despesasEmenda.reduce((sum, despesa) => {
+          return sum + (parseFloat(despesa.valor) || 0);
+        }, 0);
+
+        // ❌ REMOVIDO: Não somar metas como execução
+        // Metas são planejamento, não execução real
+
+        // ✅ TOTAL EXECUTADO: Apenas Despesas
+        const valorExecutadoTotal = valorExecutadoDespesas;
+
+        // Calcular valores finais
+        const valorTotal = emenda.valorRecurso || emenda.valor || 0;
+        const saldoDisponivel = valorTotal - valorExecutadoTotal;
+        const percentualExecutado =
+          valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0;
+
+        console.log(`💰 Emenda ${emenda.numero}:`, {
+          valorTotal,
+          valorExecutadoDespesas,
+          valorExecutadoTotal,
+          saldoDisponivel,
+          percentualExecutado: percentualExecutado.toFixed(1) + "%",
+        });
+
+        return {
+          ...emenda,
+          valorExecutado: valorExecutadoTotal, // ✅ APENAS despesas reais
+          saldoDisponivel: saldoDisponivel,
+          percentualExecutado: percentualExecutado,
+          totalDespesas: despesasEmenda.length,
+          totalMetas: (emenda.acoesServicos || []).length,
+          despesasVinculadas: despesasEmenda,
+          metasVinculadas: emenda.acoesServicos || [],
+        };
+      });
+
+      console.log(
+        `✅ ${emendasComExecucao.length} emendas carregadas com execução calculada`,
+      );
+      console.log(`✅ ${despesasData.length} despesas carregadas`);
+
+      setEmendas(emendasComExecucao);
+      setEmendasFiltradas(emendasComExecucao);
     } catch (error) {
-      console.error("❌ Erro ao carregar emendas:", error);
-      setError(`Erro ao carregar emendas: ${error.message}`);
+      console.error("❌ Erro ao carregar dados:", error);
+      setError(`Erro ao carregar dados: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -127,45 +194,135 @@ const Emendas = () => {
     navigate(`/emendas/${emenda.id}/despesas`);
   };
 
-  const handleDeletar = async (emendaId) => {
-    console.log("🗑️ Deletar emenda ID:", emendaId);
+  // ✅ NOVO: Handler para abrir modal de exclusão
+  const handleDeletar = (emendaParam) => {
+    console.log("🗑️ handleDeletar recebeu:", emendaParam);
 
-    if (!emendaId) {
-      alert("ID da emenda não encontrado!");
+    // Verificar se recebeu um ID string ou um objeto emenda
+    let emendaObj;
+
+    if (typeof emendaParam === "string") {
+      // Se recebeu apenas o ID, buscar a emenda completa
+      emendaObj = emendas.find((e) => e.id === emendaParam);
+      console.log(
+        "🔍 Buscando emenda por ID:",
+        emendaParam,
+        "Encontrada:",
+        emendaObj,
+      );
+    } else if (emendaParam && typeof emendaParam === "object") {
+      // Se recebeu o objeto completo
+      emendaObj = emendaParam;
+    }
+
+    if (!emendaObj || !emendaObj.id) {
+      console.error("❌ Emenda não encontrada ou sem ID:", emendaParam);
+      setToast({
+        show: true,
+        message: "Erro: Emenda não encontrada!",
+        type: "error",
+      });
       return;
     }
 
-    if (window.confirm("Tem certeza que deseja excluir esta emenda?")) {
-      try {
-        await deleteDoc(doc(db, "emendas", emendaId));
-        await recarregar();
-        console.log("✅ Emenda deletada com sucesso:", emendaId);
+    console.log(
+      "✅ Abrindo modal de exclusão para emenda:",
+      emendaObj.id,
+      emendaObj,
+    );
+    setModalExclusao({
+      isOpen: true,
+      emenda: emendaObj,
+      loading: false,
+    });
+  };
 
-        setToast({
-          show: true,
-          message: "Emenda deletada com sucesso!",
-          type: "success",
-        });
-      } catch (error) {
-        console.error("❌ Erro ao deletar emenda:", error);
-        setToast({
-          show: true,
-          message: "Erro ao deletar emenda. Tente novamente.",
-          type: "error",
-        });
+  // ✅ NOVO: Handler para confirmar exclusão
+  const handleConfirmarExclusao = async () => {
+    // Validações de segurança
+    if (!modalExclusao.emenda) {
+      console.error("❌ Nenhuma emenda selecionada para exclusão!");
+      setToast({
+        show: true,
+        message: "Erro: Nenhuma emenda selecionada!",
+        type: "error",
+      });
+      return;
+    }
+
+    const emendaId = modalExclusao.emenda?.id;
+
+    if (!emendaId) {
+      console.error("❌ ID da emenda não encontrado!", modalExclusao.emenda);
+      setToast({
+        show: true,
+        message: "Erro: ID da emenda não encontrado!",
+        type: "error",
+      });
+      return;
+    }
+
+    // Se for operador, não deve chegar aqui (o modal já bloqueia)
+    if (userRole === "operador" || userRole === "Operador") {
+      console.warn("⚠️ Operador tentando excluir emenda - ação bloqueada");
+      setToast({
+        show: true,
+        message: "Você não tem permissão para excluir emendas!",
+        type: "warning",
+      });
+      return;
+    }
+
+    setModalExclusao((prev) => ({ ...prev, loading: true }));
+
+    console.log("🗑️ Iniciando exclusão da emenda:", emendaId);
+
+    try {
+      // Deletar todas as despesas vinculadas primeiro
+      if (modalExclusao.emenda.despesasVinculadas?.length > 0) {
+        console.log(
+          `🗑️ Deletando ${modalExclusao.emenda.despesasVinculadas.length} despesas vinculadas...`,
+        );
+        const deletePromises = modalExclusao.emenda.despesasVinculadas.map(
+          (despesa) => deleteDoc(doc(db, "despesas", despesa.id)),
+        );
+        await Promise.all(deletePromises);
       }
+
+      // Deletar a emenda
+      await deleteDoc(doc(db, "emendas", emendaId));
+
+      console.log("✅ Emenda e despesas deletadas com sucesso:", emendaId);
+
+      setToast({
+        show: true,
+        message: "Emenda excluída com sucesso!",
+        type: "success",
+      });
+
+      // Fechar modal e recarregar dados
+      setModalExclusao({ isOpen: false, emenda: null, loading: false });
+      await recarregar();
+    } catch (error) {
+      console.error("❌ Erro ao deletar emenda:", error);
+      setToast({
+        show: true,
+        message: `Erro ao excluir emenda: ${error.message}`,
+        type: "error",
+      });
+      setModalExclusao((prev) => ({ ...prev, loading: false }));
     }
   };
 
-  // ✅ CALCULAR: Estatísticas
+  // ✅ CALCULAR: Estatísticas COM VALORES REAIS
   const totalEmendas = emendasFiltradas.length;
   const valorTotal = emendasFiltradas.reduce((sum, emenda) => {
-    const valor = parseFloat(emenda.valor || emenda.valorRecurso || 0);
+    const valor = parseFloat(emenda.valorRecurso || emenda.valor || 0);
     return sum + valor;
   }, 0);
 
   const emendasAtivas = emendasFiltradas.filter((e) => {
-    const saldo = parseFloat(e.saldoDisponivel || e.saldo || 0);
+    const saldo = parseFloat(e.saldoDisponivel || 0);
     return saldo > 0;
   }).length;
 
@@ -178,6 +335,14 @@ const Emendas = () => {
     const executado = parseFloat(emenda.valorExecutado || 0);
     return sum + executado;
   }, 0);
+
+  console.log("📊 Estatísticas calculadas:", {
+    totalEmendas,
+    valorTotal,
+    valorExecutado,
+    emendasAtivas,
+    emendasExecutadas,
+  });
 
   // ✅ RENDERIZAÇÃO: Estados especiais
   if (loading) {
@@ -224,7 +389,7 @@ const Emendas = () => {
     );
   }
 
-  // ✅ RENDERIZAÇÃO: Layout principal (igual Despesas)
+  // ✅ RENDERIZAÇÃO: Layout principal
   return (
     <div style={styles.container}>
       {/* Toast de notificações */}
@@ -236,6 +401,18 @@ const Emendas = () => {
         />
       )}
 
+      {/* Modal de Exclusão */}
+      <ModalExclusaoEmenda
+        isOpen={modalExclusao.isOpen}
+        onClose={() =>
+          setModalExclusao({ isOpen: false, emenda: null, loading: false })
+        }
+        onConfirm={handleConfirmarExclusao}
+        emenda={modalExclusao.emenda}
+        userRole={userRole}
+        loading={modalExclusao.loading}
+      />
+
       {/* Header com informações do sistema */}
       <div style={styles.compactHeader}>
         <div style={styles.statusInfo}>
@@ -243,7 +420,7 @@ const Emendas = () => {
           <span style={styles.statusValue}>✅ Operacional</span>
           <span style={styles.divider}>|</span>
           <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>v2.1</span>
+          <span style={styles.versionValue}>v2.3</span>
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Usuário:</span>
           <span style={styles.versionValue}>
@@ -343,6 +520,7 @@ const Emendas = () => {
           onView={handleVisualizar}
           onDelete={handleDeletar}
           onDespesas={handleDespesas}
+          userRole={userRole}
         />
       )}
     </div>

@@ -11,6 +11,8 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const { execSync } = require('child_process');
+const envDetector = require('./detectEnvironment.cjs');
+const envAnalysis = await envDetector.analyze();
 
 class HandoverGenerator {
   constructor() {

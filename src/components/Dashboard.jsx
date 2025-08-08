@@ -1,91 +1,62 @@
-// src/components/Dashboard.jsx - VERSÃO REFATORADA
-// ✅ REDUZIDO: De 1.132 para ~200 linhas
-// ✅ PRESERVADO: 100% das funcionalidades
-// ✅ CORRIGIDO: Filtro operador com município + UF
-// ✅ MODULARIZADO: Componentes e hook separados
+// src/components/Dashboard.jsx - VERSÃO PROFISSIONAL
+// ✅ FOCO: Visão gerencial e tomada de decisões
+// ✅ UX: Cards informativos com insights acionáveis
+// ✅ MANTIDO: Padrões visuais do sistema
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import usePermissions from "../hooks/usePermissions";
-
-// 🧩 Componentes extraídos
 import useDashboardData from "../hooks/useDashboardData";
 import CronogramaWidget from "./DashboardComponents/CronogramaWidget";
-import MetricsGrid from "./DashboardComponents/MetricsGrid";
 
 const Dashboard = ({ usuario }) => {
-  // 🔧 Hooks (sempre no topo)
+  const navigate = useNavigate();
   const user = usuario;
   const userLoading = !usuario;
   const permissions = usePermissions(usuario);
 
-  // 🎯 Hook de dados (com correção operador)
-  const { emendas, despesas, loading, error, stats, recarregar, debug } =
+  const { emendas, despesas, loading, error, stats, recarregar } =
     useDashboardData(user, permissions);
 
-  // 🔍 Estados de loading inicial
+  // Loading inicial
   if (userLoading || !user || !user.email || !user.tipo) {
     return (
       <div style={styles.container}>
-        <StatusBar
-          status="⏳ Carregando..."
-          message={
-            userLoading ? "Carregando usuário..." : "Verificando dados..."
-          }
-        />
-        <LoadingState
-          message={
-            userLoading
-              ? "Carregando dados do usuário..."
-              : "Aguardando autenticação..."
-          }
-          subtext="Verificando permissões do usuário..."
-        />
+        <LoadingState message="Carregando dashboard..." />
       </div>
     );
   }
 
-  // 🚨 Verificação de permissões
+  // Verificação de permissões
   if (!permissions.temAcesso()) {
     return (
       <div style={styles.container}>
-        <StatusBar status="❌ Permissão negada" />
         <ErrorState
-          title="❌ Acesso Negado"
+          title="Acesso Negado"
           message={
-            permissions.aviso ||
-            "Usuário sem permissão para acessar o dashboard."
+            permissions.aviso || "Sem permissão para acessar o dashboard."
           }
-          subtext="Você não possui as permissões necessárias para visualizar este conteúdo."
         />
       </div>
     );
   }
 
-  // 🔄 Estado de carregamento de dados
+  // Loading de dados
   if (loading) {
     return (
       <div style={styles.container}>
-        <StatusBar status="🔄 Carregando..." />
-        <LoadingState
-          message="Carregando dados do dashboard..."
-          subtext={
-            permissions.acessoTotal
-              ? "Carregando todos os dados do sistema..."
-              : `Carregando dados do município ${user.municipio}...`
-          }
-        />
+        <LoadingState message="Carregando dados..." />
       </div>
     );
   }
 
-  // ❌ Estado de erro
+  // Erro
   if (error) {
     return (
       <div style={styles.container}>
-        <StatusBar status="❌ Erro" />
         <ErrorState
-          title="❌ Erro no Dashboard"
+          title="Erro no Dashboard"
           message={error}
           onRetry={recarregar}
         />
@@ -93,38 +64,192 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // ✅ Renderização principal
+  // Cálculos para insights
+  const taxaExecucao =
+    stats.valorTotalEmendas > 0
+      ? ((stats.valorExecutado / stats.valorTotalEmendas) * 100).toFixed(1)
+      : 0;
+
+  const emendasCriticas = emendas.filter((e) => {
+    const hoje = new Date();
+    const validade = e.dataValidade ? new Date(e.dataValidade) : null;
+    const diasRestantes = validade
+      ? Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24))
+      : 0;
+    return (
+      diasRestantes > 0 && diasRestantes <= 30 && e.percentualExecutado < 80
+    );
+  }).length;
+
+  const emendasVencidas = emendas.filter((e) => {
+    const hoje = new Date();
+    const validade = e.dataValidade ? new Date(e.dataValidade) : null;
+    return validade && validade < hoje && e.percentualExecutado < 100;
+  }).length;
+
+  const topEmendas = [...emendas]
+    .sort((a, b) => (b.valorRecurso || 0) - (a.valorRecurso || 0))
+    .slice(0, 5);
+
   return (
     <div style={styles.container}>
-      {/* 📊 Barra de status */}
-      <StatusBar
-        status="✅ Operacional"
-        user={
-          permissions.acessoTotal
-            ? "👑 Admin"
-            : `🏘️ ${user.municipio || "Município não cadastrado"}`
-        }
-        data={`${stats.totalEmendas} emendas • ${stats.totalDespesas} despesas`}
-      />
+      {/* Header Profissional */}
+      <div style={styles.header}>
+        <div>
+          <h1 style={styles.title}>Dashboard Gerencial</h1>
+          <p style={styles.subtitle}>
+            {permissions.acessoTotal
+              ? "Visão geral do sistema"
+              : `${user.municipio}/${user.uf}`}
+          </p>
+        </div>
+        <div style={styles.headerActions}>
+          <span style={styles.lastUpdate}>
+            Atualizado em: {new Date().toLocaleString("pt-BR")}
+          </span>
+          <button onClick={recarregar} style={styles.refreshButton}>
+            🔄 Atualizar
+          </button>
+        </div>
+      </div>
 
-      {/* 🔒 Banner para operadores */}
-      {permissions.filtroAplicado && user.municipio && (
-        <InfoBar
-          municipio={user.municipio}
-          uf={user.uf}
-          totalEmendas={stats.totalEmendas}
-          totalDespesas={stats.totalDespesas}
+      {/* Cards de Métricas Principais */}
+      <div style={styles.metricsGrid}>
+        <MetricCard
+          title="Valor Total"
+          value={formatCurrency(stats.valorTotalEmendas)}
+          subtitle={`${stats.totalEmendas} emendas`}
+          icon="💰"
+          color="#154360"
+          onClick={() => navigate("/emendas")}
         />
+        <MetricCard
+          title="Executado"
+          value={formatCurrency(stats.valorExecutado)}
+          subtitle={`${taxaExecucao}% do total`}
+          icon="📊"
+          color="#27AE60"
+          progress={taxaExecucao}
+          onClick={() => navigate("/despesas")}
+        />
+        <MetricCard
+          title="Saldo Disponível"
+          value={formatCurrency(stats.saldoDisponivel)}
+          subtitle="Para execução"
+          icon="💵"
+          color="#4A90E2"
+        />
+        <MetricCard
+          title="Alertas"
+          value={emendasCriticas + emendasVencidas}
+          subtitle={`${emendasCriticas} críticas, ${emendasVencidas} vencidas`}
+          icon="⚠️"
+          color={emendasCriticas + emendasVencidas > 0 ? "#E74C3C" : "#95A5A6"}
+          highlight={emendasCriticas + emendasVencidas > 0}
+        />
+      </div>
+
+      {/* Insights Acionáveis */}
+      {(emendasCriticas > 0 || emendasVencidas > 0) && (
+        <div style={styles.alertsSection}>
+          <h2 style={styles.sectionTitle}>⚡ Ações Necessárias</h2>
+          <div style={styles.alertsGrid}>
+            {emendasCriticas > 0 && (
+              <AlertCard
+                type="warning"
+                title={`${emendasCriticas} emendas próximas do vencimento`}
+                message="Com menos de 30 dias e execução abaixo de 80%"
+                action="Ver emendas críticas"
+                onAction={() => navigate("/emendas")}
+              />
+            )}
+            {emendasVencidas > 0 && (
+              <AlertCard
+                type="danger"
+                title={`${emendasVencidas} emendas vencidas`}
+                message="Prazo expirado com execução incompleta"
+                action="Ver emendas vencidas"
+                onAction={() => navigate("/emendas")}
+              />
+            )}
+          </div>
+        </div>
       )}
 
-      {/* 📊 Métricas principais */}
-      <MetricsGrid stats={stats} />
+      {/* Visão por Status */}
+      <div style={styles.statusSection}>
+        <h2 style={styles.sectionTitle}>📈 Distribuição por Status</h2>
+        <div style={styles.statusGrid}>
+          <StatusCard
+            status="Executando"
+            count={
+              emendas.filter((e) => {
+                const percentual = e.percentualExecutado || 0;
+                return percentual > 0 && percentual < 100;
+              }).length
+            }
+            total={stats.totalEmendas}
+            color="#F39C12"
+          />
+          <StatusCard
+            status="Concluídas"
+            count={
+              emendas.filter((e) => {
+                const percentual = e.percentualExecutado || 0;
+                return percentual >= 100;
+              }).length
+            }
+            total={stats.totalEmendas}
+            color="#27AE60"
+          />
+          <StatusCard
+            status="Não Iniciadas"
+            count={
+              emendas.filter((e) => {
+                const percentual = e.percentualExecutado || 0;
+                const totalDespesas = e.totalDespesas || 0;
+                return percentual === 0 && totalDespesas === 0;
+              }).length
+            }
+            total={stats.totalEmendas}
+            color="#95A5A6"
+          />
+          <StatusCard
+            status="Vencidas"
+            count={emendasVencidas}
+            total={stats.totalEmendas}
+            color="#E74C3C"
+          />
+        </div>
+      </div>
 
-      {/* 💎 Widget cronograma */}
-      {emendas.length > 0 && <CronogramaWidget emendas={emendas} />}
+      {/* Top Emendas */}
+      {topEmendas.length > 0 && (
+        <div style={styles.topEmendasSection}>
+          <h2 style={styles.sectionTitle}>🏆 Maiores Emendas</h2>
+          <div style={styles.topEmendasGrid}>
+            {topEmendas.map((emenda, index) => (
+              <TopEmendaCard
+                key={emenda.id}
+                rank={index + 1}
+                emenda={emenda}
+                onClick={() => navigate(`/emendas/${emenda.id}`)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* 📈 Estado vazio */}
-      {stats.totalEmendas === 0 && stats.totalDespesas === 0 && (
+      {/* Cronograma Widget */}
+      {emendas.length > 0 && (
+        <div style={styles.cronogramaSection}>
+          <h2 style={styles.sectionTitle}>📅 Cronograma de Execução</h2>
+          <CronogramaWidget emendas={emendas} />
+        </div>
+      )}
+
+      {/* Estado Vazio */}
+      {stats.totalEmendas === 0 && (
         <EmptyState
           isAdmin={permissions.acessoTotal}
           municipio={user.municipio}
@@ -134,60 +259,131 @@ const Dashboard = ({ usuario }) => {
   );
 };
 
-// 🧩 Componente StatusBar
-const StatusBar = ({ status, user, data }) => (
-  <div style={styles.statusBar}>
-    <span>Status: {status}</span>
-    <span style={styles.divider}>|</span>
-    <span>Versão: v2.5</span>
-    {user && (
-      <>
-        <span style={styles.divider}>|</span>
-        <span>Usuário: {user}</span>
-      </>
-    )}
-    {data && (
-      <>
-        <span style={styles.divider}>|</span>
-        <span>Dados: {data}</span>
-      </>
+// Componente MetricCard
+const MetricCard = ({
+  title,
+  value,
+  subtitle,
+  icon,
+  color,
+  progress,
+  onClick,
+  highlight,
+}) => (
+  <div
+    style={{
+      ...styles.metricCard,
+      borderLeft: `4px solid ${color}`,
+      cursor: onClick ? "pointer" : "default",
+      animation: highlight ? "pulse 2s infinite" : "none",
+    }}
+    onClick={onClick}
+  >
+    <div style={styles.metricHeader}>
+      <span style={styles.metricIcon}>{icon}</span>
+      <span style={styles.metricTitle}>{title}</span>
+    </div>
+    <div style={styles.metricValue}>{value}</div>
+    <div style={styles.metricSubtitle}>{subtitle}</div>
+    {progress !== undefined && (
+      <div style={styles.progressBar}>
+        <div
+          style={{
+            ...styles.progressFill,
+            width: `${Math.min(progress, 100)}%`,
+            backgroundColor: color,
+          }}
+        />
+      </div>
     )}
   </div>
 );
 
-// 🧩 Componente InfoBar (Banner Operador)
-const InfoBar = ({ municipio, uf, totalEmendas, totalDespesas }) => (
-  <div style={styles.infoBar}>
-    <span style={styles.infoIcon}>🔒</span>
-    <div style={styles.infoContent}>
-      <span style={styles.infoText}>
-        <strong>Filtro Ativo:</strong> Exibindo dados do município{" "}
-        <strong>
-          {municipio}/{uf || "UF não informada"}
-        </strong>
-      </span>
-      <span style={styles.infoSubtext}>
-        {totalEmendas} emenda(s) • {totalDespesas} despesa(s) disponíveis
+// Componente AlertCard
+const AlertCard = ({ type, title, message, action, onAction }) => (
+  <div
+    style={{
+      ...styles.alertCard,
+      backgroundColor: type === "danger" ? "#FADBD8" : "#FCF3CF",
+      borderColor: type === "danger" ? "#E74C3C" : "#F39C12",
+    }}
+  >
+    <h4 style={styles.alertTitle}>{title}</h4>
+    <p style={styles.alertMessage}>{message}</p>
+    <button
+      onClick={onAction}
+      style={{
+        ...styles.alertButton,
+        backgroundColor: type === "danger" ? "#E74C3C" : "#F39C12",
+      }}
+    >
+      {action}
+    </button>
+  </div>
+);
+
+// Componente StatusCard
+const StatusCard = ({ status, count, total, color }) => (
+  <div style={styles.statusCard}>
+    <div style={{ ...styles.statusIndicator, backgroundColor: color }} />
+    <div style={styles.statusContent}>
+      <span style={styles.statusLabel}>{status}</span>
+      <span style={styles.statusCount}>{count}</span>
+      <span style={styles.statusPercent}>
+        {total > 0 ? `${((count / total) * 100).toFixed(0)}%` : "0%"}
       </span>
     </div>
   </div>
 );
 
-// 🧩 Componente LoadingState
-const LoadingState = ({ message, subtext }) => (
-  <div style={styles.loadingContainer}>
-    <div style={styles.spinner}></div>
-    <p style={styles.loadingText}>{message}</p>
-    <p style={styles.loadingSubtext}>{subtext}</p>
+// Componente TopEmendaCard
+const TopEmendaCard = ({ rank, emenda, onClick }) => (
+  <div style={styles.topEmendaCard} onClick={onClick}>
+    <div style={styles.topEmendaRank}>#{rank}</div>
+    <div style={styles.topEmendaContent}>
+      <div style={styles.topEmendaHeader}>
+        <span style={styles.topEmendaNumero}>{emenda.numero}</span>
+        <span style={styles.topEmendaValor}>
+          {formatCurrency(emenda.valorRecurso || 0)}
+        </span>
+      </div>
+      <div style={styles.topEmendaInfo}>
+        <span>{emenda.parlamentar}</span>
+        <span style={styles.topEmendaDivider}>•</span>
+        <span>
+          {emenda.municipio}/{emenda.uf}
+        </span>
+      </div>
+      <div style={styles.topEmendaProgress}>
+        <div style={styles.progressBar}>
+          <div
+            style={{
+              ...styles.progressFill,
+              width: `${emenda.percentualExecutado || 0}%`,
+              backgroundColor: getProgressColor(emenda.percentualExecutado),
+            }}
+          />
+        </div>
+        <span style={styles.topEmendaPercent}>
+          {(emenda.percentualExecutado || 0).toFixed(0)}% executado
+        </span>
+      </div>
+    </div>
   </div>
 );
 
-// 🧩 Componente ErrorState
-const ErrorState = ({ title, message, subtext, onRetry }) => (
+// Componentes auxiliares
+const LoadingState = ({ message }) => (
+  <div style={styles.loadingContainer}>
+    <div style={styles.spinner}></div>
+    <p style={styles.loadingText}>{message}</p>
+  </div>
+);
+
+const ErrorState = ({ title, message, onRetry }) => (
   <div style={styles.errorContainer}>
     <h2>{title}</h2>
     <p>{message}</p>
-    {subtext && <p>{subtext}</p>}
     {onRetry && (
       <button onClick={onRetry} style={styles.retryButton}>
         🔄 Tentar Novamente
@@ -196,146 +392,322 @@ const ErrorState = ({ title, message, subtext, onRetry }) => (
   </div>
 );
 
-// 🧩 Componente EmptyState
 const EmptyState = ({ isAdmin, municipio }) => (
   <div style={styles.emptyState}>
     <div style={styles.emptyIcon}>📊</div>
-    <h3>Sistema Aguardando Dados</h3>
+    <h3>Sem dados para exibir</h3>
     <p>
       {isAdmin
-        ? "Não há emendas ou despesas cadastradas no sistema."
-        : `Não há dados cadastrados para o município ${municipio || "não informado"}.`}
-    </p>
-    <p style={styles.emptySubtext}>
-      O dashboard será populado automaticamente conforme os dados forem
-      cadastrados.
+        ? "Não há emendas cadastradas no sistema."
+        : `Não há dados para o município ${municipio}.`}
     </p>
   </div>
 );
 
-// 🎨 Estilos do Dashboard
+// Funções auxiliares
+const formatCurrency = (value) => {
+  return (value || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
+
+const getProgressColor = (percent) => {
+  if (percent >= 80) return "#27AE60";
+  if (percent >= 50) return "#F39C12";
+  if (percent >= 20) return "#E67E22";
+  return "#E74C3C";
+};
+
+// Estilos
 const styles = {
   container: {
-    padding: "16px",
+    padding: "24px",
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
     fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif",
   },
-  statusBar: {
+  header: {
     display: "flex",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     alignItems: "center",
-    background: "linear-gradient(135deg, #154360, #4A90E2)",
-    color: "white",
-    padding: "6px 16px",
-    borderRadius: "6px",
-    marginBottom: "16px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    fontSize: "13px",
-    gap: "6px",
+    marginBottom: "32px",
+    padding: "20px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
   },
-  divider: {
-    opacity: 0.7,
-    margin: "0 3px",
+  title: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#154360",
+    margin: 0,
   },
-  infoBar: {
+  subtitle: {
+    fontSize: "14px",
+    color: "#666",
+    marginTop: "4px",
+  },
+  headerActions: {
     display: "flex",
-    alignItems: "flex-start",
-    gap: "10px",
-    padding: "12px 16px",
-    backgroundColor: "#e8f5e8",
-    border: "1px solid #4caf50",
-    borderRadius: 8,
+    alignItems: "center",
+    gap: "16px",
+  },
+  lastUpdate: {
+    fontSize: "12px",
+    color: "#999",
+  },
+  refreshButton: {
+    backgroundColor: "#4A90E2",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+  metricsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "20px",
+    marginBottom: "32px",
+  },
+  metricCard: {
+    backgroundColor: "white",
+    padding: "24px",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    transition: "all 0.3s",
+  },
+  metricHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "12px",
+  },
+  metricIcon: {
+    fontSize: "24px",
+  },
+  metricTitle: {
+    fontSize: "14px",
+    color: "#666",
+    fontWeight: "600",
+  },
+  metricValue: {
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#154360",
+    marginBottom: "4px",
+  },
+  metricSubtitle: {
+    fontSize: "13px",
+    color: "#999",
+  },
+  progressBar: {
+    height: "4px",
+    backgroundColor: "#e9ecef",
+    borderRadius: "2px",
+    marginTop: "12px",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    transition: "width 0.3s ease",
+  },
+  alertsSection: {
+    marginBottom: "32px",
+  },
+  sectionTitle: {
+    fontSize: "20px",
+    fontWeight: "600",
+    color: "#154360",
     marginBottom: "16px",
-    fontSize: 13,
-    color: "#2e7d32",
-    boxShadow: "0 2px 6px rgba(76, 175, 80, 0.1)",
   },
-  infoIcon: {
-    fontSize: 16,
-    flexShrink: 0,
-    marginTop: 1,
+  alertsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gap: "16px",
   },
-  infoContent: {
+  alertCard: {
+    padding: "20px",
+    borderRadius: "8px",
+    border: "1px solid",
+  },
+  alertTitle: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#333",
+    margin: "0 0 8px 0",
+  },
+  alertMessage: {
+    fontSize: "14px",
+    color: "#666",
+    margin: "0 0 12px 0",
+  },
+  alertButton: {
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  statusSection: {
+    marginBottom: "32px",
+  },
+  statusGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: "16px",
+  },
+  statusCard: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+  statusIndicator: {
+    width: "8px",
+    height: "40px",
+    borderRadius: "4px",
+  },
+  statusContent: {
+    flex: 1,
     display: "flex",
     flexDirection: "column",
-    gap: 3,
+  },
+  statusLabel: {
+    fontSize: "14px",
+    color: "#666",
+    marginBottom: "4px",
+  },
+  statusCount: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#154360",
+  },
+  statusPercent: {
+    fontSize: "12px",
+    color: "#999",
+  },
+  topEmendasSection: {
+    marginBottom: "32px",
+  },
+  topEmendasGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+    gap: "16px",
+  },
+  topEmendaCard: {
+    backgroundColor: "white",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+    display: "flex",
+    gap: "16px",
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+  topEmendaRank: {
+    fontSize: "24px",
+    fontWeight: "700",
+    color: "#4A90E2",
+  },
+  topEmendaContent: {
     flex: 1,
   },
-  infoText: {
-    fontSize: 13,
-    lineHeight: 1.3,
-    fontWeight: "500",
+  topEmendaHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "8px",
   },
-  infoSubtext: {
-    fontSize: 11,
-    opacity: 0.8,
-    fontWeight: "400",
+  topEmendaNumero: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#154360",
+  },
+  topEmendaValor: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#27AE60",
+  },
+  topEmendaInfo: {
+    fontSize: "13px",
+    color: "#666",
+    marginBottom: "8px",
+  },
+  topEmendaDivider: {
+    margin: "0 8px",
+  },
+  topEmendaProgress: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+  topEmendaPercent: {
+    fontSize: "12px",
+    color: "#666",
+    whiteSpace: "nowrap",
+  },
+  cronogramaSection: {
+    marginBottom: "32px",
   },
   loadingContainer: {
     textAlign: "center",
-    padding: "50px 20px",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    padding: "60px",
   },
   spinner: {
-    width: "40px",
-    height: "40px",
-    border: "3px solid #f3f3f3",
-    borderTop: "3px solid #007bff",
+    width: "48px",
+    height: "48px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #4A90E2",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "0 auto 16px",
+    margin: "0 auto 24px",
   },
   loadingText: {
     fontSize: "16px",
-    color: "#333",
-    marginBottom: "6px",
-  },
-  loadingSubtext: {
-    fontSize: "13px",
     color: "#666",
   },
   errorContainer: {
     textAlign: "center",
-    padding: "40px",
-    backgroundColor: "#f8d7da",
+    padding: "60px",
+    backgroundColor: "#fee",
     borderRadius: "8px",
-    border: "1px solid #f5c6cb",
   },
   retryButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#E74C3C",
     color: "white",
     border: "none",
-    padding: "10px 20px",
-    borderRadius: "5px",
+    padding: "10px 24px",
+    borderRadius: "6px",
     cursor: "pointer",
-    fontSize: "13px",
+    fontSize: "14px",
     fontWeight: "600",
+    marginTop: "16px",
   },
   emptyState: {
     textAlign: "center",
-    padding: "50px 20px",
+    padding: "60px",
     backgroundColor: "white",
     borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
   },
   emptyIcon: {
-    fontSize: "48px",
+    fontSize: "64px",
     marginBottom: "16px",
-  },
-  emptySubtext: {
-    color: "#666",
-    fontSize: "13px",
-    fontStyle: "italic",
-    marginTop: "8px",
+    opacity: 0.3,
   },
 };
 
-// ✅ Animações CSS
+// CSS para animações
 if (!document.getElementById("dashboard-animations")) {
   const styleSheet = document.createElement("style");
   styleSheet.id = "dashboard-animations";
@@ -344,9 +716,14 @@ if (!document.getElementById("dashboard-animations")) {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
     div[style*="cursor: pointer"]:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important;
     }
   `;
   document.head.appendChild(styleSheet);

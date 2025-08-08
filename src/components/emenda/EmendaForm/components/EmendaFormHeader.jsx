@@ -1,6 +1,6 @@
 // src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx
 // Header do formulário de emenda extraído
-// Baseado no padrão DespesaFormHeader.jsx
+// ✅ CORRIGIDO: Banner sem ID da emenda
 
 import React from "react";
 
@@ -11,7 +11,7 @@ const EmendaFormHeader = ({
   showSuccessMessage = false,
   successMessage = "",
 }) => {
-  // ✅ CONFIGURAÇÃO DO MODO
+  // ✅ CONFIGURAÇÃO DO MODO - SEM ID DA EMENDA
   const configuracao = {
     criar: {
       titulo: "📝 Criar Emenda",
@@ -21,13 +21,13 @@ const EmendaFormHeader = ({
     },
     editar: {
       titulo: "✏️ Editar Emenda",
-      subtitulo: `ID: ${emendaId || ""} | Parlamentar: ${parlamentar || ""}`,
+      subtitulo: `Parlamentar: ${parlamentar || "Não informado"}`,
       cor: "#d4edda",
       corTexto: "#155724",
     },
     visualizar: {
       titulo: "👁️ Visualizar Emenda",
-      subtitulo: `ID: ${emendaId || ""} | Parlamentar: ${parlamentar || ""}`,
+      subtitulo: `Parlamentar: ${parlamentar || "Não informado"}`,
       cor: "#e7f3ff",
       corTexto: "#004085",
     },

@@ -126,12 +126,11 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
           />
         </div>
 
-        {/* Município/UF */}
+        {/* Município/UF - PLACEHOLDER REMOVIDO */}
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>🏙️ Município/UF</label>
           <input
             type="text"
-            placeholder="São Paulo, SP"
             value={filtros.municipioUf}
             onChange={(e) => handleFiltroChange("municipioUf", e.target.value)}
             style={styles.filterInput}
