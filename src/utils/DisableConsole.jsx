@@ -64,8 +64,11 @@ export const configureConsole = () => {
       '🔥 Firebase Environment:',
       '[vite] connecting...',
       '[vite] connected.',
+      '[vite] server connection lost',
+      '[vite] polling for restart',
       'Firebase App',
-      'Firebase Configuration'
+      'Firebase Configuration',
+      '🚪 Usuário deslogado'
     ];
 
     // Verificar se corresponde a algum padrão repetitivo
@@ -120,14 +123,26 @@ export const configureConsole = () => {
         
         // Filtros específicos para desenvolvimento
         if (import.meta.env.DEV) {
-          // Reduzir logs muito verbosos
+          // Reduzir logs muito verbosos do Vite
           if (typeof message === 'string' && (
-            message.includes('🚪 Usuário deslogado') ||
+            message.includes('[vite] connecting') ||
+            message.includes('[vite] connected') ||
             message.includes('[vite] server connection lost') ||
-            message.includes('polling for restart')
+            message.includes('polling for restart') ||
+            message.includes('🚪 Usuário deslogado') ||
+            message.includes('🔥 Firebase Environment') ||
+            message.includes('🔒 AuditService inicializado')
           )) {
-            // Mostrar apenas se não foi mostrado nos últimos 10 segundos
-            if (shouldThrottle(message)) return;
+            // Throttle agressivo para estes logs
+            const throttleKey = message.substring(0, 20);
+            const now = Date.now();
+            if (logCache.has(throttleKey)) {
+              const lastTime = logCache.get(throttleKey);
+              if (now - lastTime < 30000) { // 30 segundos
+                return;
+              }
+            }
+            logCache.set(throttleKey, now);
           }
         }
         

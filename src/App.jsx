@@ -29,43 +29,11 @@ import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
 import UpdateNotification from "./components/UpdateNotification";
 
-// Desabilitar console.logs em produçãoã// Desabilitar console em produção
-if (import.meta.env.PROD || import.meta.env.VITE_ENV === "production") {
-  const noop = () => {};
+// Sistema inteligente de controle de logs
+import { configureConsole } from "./utils/DisableConsole";
 
-  // Desabilitar todos os métodos do console
-  console.log = noop;
-  console.info = noop;
-  console.warn = noop;
-  console.error = noop;
-  console.debug = noop;
-  console.trace = noop;
-  console.table = noop;
-  console.time = noop;
-  console.timeEnd = noop;
-  console.group = noop;
-  console.groupEnd = noop;
-  console.groupCollapsed = noop;
-  console.assert = noop;
-  console.clear = noop;
-  console.count = noop;
-  console.countReset = noop;
-  console.dir = noop;
-  console.dirxml = noop;
-  console.profile = noop;
-  console.profileEnd = noop;
-  console.timeLog = noop;
-  console.timeStamp = noop;
-
-  // Também desabilitar no window.console
-  if (window.console) {
-    Object.keys(window.console).forEach((key) => {
-      if (typeof window.console[key] === "function") {
-        window.console[key] = noop;
-      }
-    });
-  }
-}
+// Configurar console inteligente
+configureConsole();
 
 // Context para proteção de navegaçãovegação
 const NavigationProtectionContext = React.createContext({
