@@ -28,6 +28,7 @@ import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
 import UpdateNotification from "./components/UpdateNotification";
+import { checkVersion } from "./utils/versionControl";
 
 
 // Sistema inteligente de controle de logs
@@ -195,6 +196,11 @@ function AppContent() {
   const { canNavigate } = useNavigationProtection();
 
   // ✅ USUÁRIO GERENCIADO CENTRALIZADAMENTE PELO UserContext
+
+  // Verificar versão ao carregar a aplicação
+  useEffect(() => {
+    checkVersion();
+  }, []);
 
   // Redirecionamento
   useEffect(() => {
