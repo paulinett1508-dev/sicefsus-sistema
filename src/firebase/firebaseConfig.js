@@ -18,15 +18,19 @@ const currentEnv = import.meta.env.VITE_FIREBASE_PROJECT_ID;
 const isProduction = currentEnv?.includes("-prod");
 const isDevelopment = currentEnv?.includes("-60dbd");
 
-console.log("🔥 Firebase Environment:", {
-  projectId: currentEnv,
-  environment: isProduction
-    ? "PRODUCTION"
-    : isDevelopment
-      ? "DEVELOPMENT"
-      : "UNKNOWN",
-  timestamp: new Date().toISOString(),
-});
+// Log de ambiente apenas uma vez por sessão
+if (!sessionStorage.getItem('firebase_env_logged')) {
+  console.log('🔥 Firebase Environment:', {
+    projectId: currentEnv,
+    environment: isProduction
+      ? "PRODUCTION"
+      : isDevelopment
+        ? "DEVELOPMENT"
+        : "UNKNOWN",
+    timestamp: new Date().toISOString(),
+  });
+  sessionStorage.setItem('firebase_env_logged', 'true');
+}
 
 // ⚠️ Validação crítica
 if (!currentEnv) {
@@ -37,22 +41,23 @@ if (!currentEnv) {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Log de status apenas em debug verbose
-  if (import.meta.env.VITE_LOG_LEVEL === 'verbose') {
-    console.log('🔥 Firebase Config Status:', {
-      apiKey: firebaseConfig.apiKey ? '✅ Configurada' : '❌ Não configurada',
-      authDomain: firebaseConfig.authDomain ? '✅ Configurada' : '❌ Não configurada',
-      projectId: firebaseConfig.projectId ? '✅ Configurada' : '❌ Não configurada',
-      storageBucket: firebaseConfig.storageBucket ? '✅ Configurada' : '❌ Não configurada',
-      messagingSenderId: firebaseConfig.messagingSenderId ? '✅ Configurada' : '❌ Não configurada',
-      appId: firebaseConfig.appId ? '✅ Configurada' : '❌ Não configurada'
-    });
-  }
+// Log da configuração atual apenas em desenvolvimento (uma vez por sessão)
+if (import.meta.env.DEV && !sessionStorage.getItem('firebase_config_logged')) {
+  console.log('🔥 Firebase Config Status:', {
+    apiKey: firebaseConfig.apiKey ? '✅ Configurada' : '❌ Ausente',
+    authDomain: firebaseConfig.authDomain ? '✅ Configurada' : '❌ Ausente',
+    projectId: firebaseConfig.projectId ? '✅ Configurada' : '❌ Ausente',
+    storageBucket: firebaseConfig.storageBucket ? '✅ Configurada' : '❌ Ausente',
+    messagingSenderId: firebaseConfig.messagingSenderId ? '✅ Configurada' : '❌ Ausente',
+    appId: firebaseConfig.appId ? '✅ Configurada' : '❌ Ausente'
+  });
+  sessionStorage.setItem('firebase_config_logged', 'true');
+}
 
   // Log de inicialização apenas uma vez por sessão
-  if (!sessionStorage.getItem('firebase_initialized')) {
-    console.info('✅ Firebase inicializado com sucesso');
-    sessionStorage.setItem('firebase_initialized', 'true');
+  if (!sessionStorage.getItem('firebase_initialized_logged')) {
+    console.log('✅ Firebase inicializado com sucesso');
+    sessionStorage.setItem('firebase_initialized_logged', 'true');
   }
 
 // Inicializar Auth e Firestore

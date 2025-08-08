@@ -1,3 +1,4 @@
+
 // Arquivo: src/utils/DisableConsole.jsx
 // Sistema avançado de controle de logs com níveis
 
@@ -16,6 +17,10 @@ const getLogLevel = () => {
   if (import.meta.env.VITE_LOG_LEVEL === 'minimal') return LOG_LEVELS.INFO;
   return LOG_LEVELS.DEBUG; // Padrão para desenvolvimento
 };
+
+// Cache para logs já exibidos
+const logCache = new Map();
+const SESSION_LOGS = new Set();
 
 export const configureConsole = () => {
   const currentLevel = getLogLevel();
@@ -47,24 +52,82 @@ export const configureConsole = () => {
     timeStamp: console.timeStamp
   };
 
+  // Função para verificar se é um log repetitivo
+  const isRepetitiveLog = (message, level = 'log') => {
+    if (typeof message !== 'string') return false;
+    
+    // Lista de padrões de logs repetitivos
+    const repetitivePatterns = [
+      '🔥 Firebase Config Status',
+      '✅ Firebase inicializado com sucesso',
+      '🔒 AuditService inicializado',
+      '🔥 Firebase Environment:',
+      '[vite] connecting...',
+      '[vite] connected.',
+      'Firebase App',
+      'Firebase Configuration'
+    ];
+
+    // Verificar se corresponde a algum padrão repetitivo
+    const isRepetitive = repetitivePatterns.some(pattern => 
+      message.includes(pattern)
+    );
+
+    if (!isRepetitive) return false;
+
+    // Para logs repetitivos, mostrar apenas uma vez por sessão
+    const logKey = `${level}_${message.substring(0, 50)}`;
+    
+    if (SESSION_LOGS.has(logKey)) {
+      return true; // É repetitivo e já foi mostrado
+    }
+
+    SESSION_LOGS.add(logKey);
+    return false; // É repetitivo mas ainda não foi mostrado
+  };
+
+  // Função para verificar rate limiting
+  const shouldThrottle = (message) => {
+    if (typeof message !== 'string') return false;
+    
+    const now = Date.now();
+    const throttleTime = 5000; // 5 segundos
+    
+    // Criar chave baseada no início da mensagem
+    const key = message.substring(0, 30);
+    
+    if (logCache.has(key)) {
+      const lastTime = logCache.get(key);
+      if (now - lastTime < throttleTime) {
+        return true; // Throttle
+      }
+    }
+    
+    logCache.set(key, now);
+    return false;
+  };
+
   // Sistema de log inteligente
   const createLogWrapper = (level, method) => {
     return (...args) => {
       if (currentLevel >= level) {
-        // Filtrar logs específicos em desenvolvimento
+        const message = args[0];
+        
+        // Verificar se é repetitivo ou deve ser throttled
+        if (isRepetitiveLog(message, method) || shouldThrottle(message)) {
+          return;
+        }
+        
+        // Filtros específicos para desenvolvimento
         if (import.meta.env.DEV) {
-          const message = args[0];
-          
-          // Reduzir logs repetitivos do Firebase
+          // Reduzir logs muito verbosos
           if (typeof message === 'string' && (
-            message.includes('🔥 Firebase Config Status') ||
-            message.includes('🔒 AuditService inicializado') ||
-            message.includes('Firebase Environment')
+            message.includes('🚪 Usuário deslogado') ||
+            message.includes('[vite] server connection lost') ||
+            message.includes('polling for restart')
           )) {
-            // Mostrar apenas uma vez por sessão
-            const key = `logged_${message.substring(0, 30)}`;
-            if (sessionStorage.getItem(key)) return;
-            sessionStorage.setItem(key, 'true');
+            // Mostrar apenas se não foi mostrado nos últimos 10 segundos
+            if (shouldThrottle(message)) return;
           }
         }
         
@@ -90,6 +153,8 @@ export const configureConsole = () => {
   // Sempre manter error em desenvolvimento, desabilitar só em produção
   if (import.meta.env.PROD) {
     console.error = noop;
+  } else {
+    console.error = createLogWrapper(LOG_LEVELS.ERROR, 'error');
   }
 
   // Desabilitar métodos de debug em produção
@@ -114,10 +179,17 @@ export const configureConsole = () => {
   }
 
   // Logging de inicialização apenas uma vez
-  if (currentLevel >= LOG_LEVELS.INFO && !sessionStorage.getItem('console_configured')) {
+  if (currentLevel >= LOG_LEVELS.INFO && !SESSION_LOGS.has('console_configured')) {
     originalConsole.info(`🔧 Console configurado - Nível: ${Object.keys(LOG_LEVELS)[currentLevel]} (${currentLevel})`);
-    sessionStorage.setItem('console_configured', 'true');
+    SESSION_LOGS.add('console_configured');
   }
+};
+
+// Função para limpar cache de logs (útil para debugging)
+export const clearLogCache = () => {
+  logCache.clear();
+  SESSION_LOGS.clear();
+  console.info('🧹 Cache de logs limpo');
 };
 
 // Compatibilidade com função anterior

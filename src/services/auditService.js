@@ -19,9 +19,9 @@ class AuditService {
   constructor() {
     this.collectionName = "logs";
     // Log de inicialização apenas uma vez por sessão
-    if (!sessionStorage.getItem('audit_service_initialized')) {
-      console.debug('🔒 AuditService inicializado');
-      sessionStorage.setItem('audit_service_initialized', 'true');
+    if (!sessionStorage.getItem('audit_service_logged')) {
+      console.log('🔒 AuditService inicializado');
+      sessionStorage.setItem('audit_service_logged', 'true');
     }
   }
 
