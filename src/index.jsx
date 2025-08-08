@@ -10,10 +10,8 @@ configureConsole();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<React.StrictMode>
-		<ThemeProvider>
-			<UserProvider>
-				<App />
-			</UserProvider>
-		</ThemeProvider>
+		<UserProvider>
+			<App />
+		</UserProvider>
 	</React.StrictMode>,
 );
