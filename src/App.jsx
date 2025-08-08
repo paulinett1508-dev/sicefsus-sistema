@@ -29,7 +29,7 @@ import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
 import UpdateNotification from "./components/UpdateNotification";
 
-// Desabilitar console.logs em produção
+// Desabilitar console.logs em produçãoã// Desabilitar console em produção
 if (import.meta.env.PROD || import.meta.env.VITE_ENV === "production") {
   const noop = () => {};
 
@@ -67,7 +67,7 @@ if (import.meta.env.PROD || import.meta.env.VITE_ENV === "production") {
   }
 }
 
-// Context para proteção de navegação
+// Context para proteção de navegaçãovegação
 const NavigationProtectionContext = React.createContext({
   isFormActive: false,
   setFormActive: () => {},
