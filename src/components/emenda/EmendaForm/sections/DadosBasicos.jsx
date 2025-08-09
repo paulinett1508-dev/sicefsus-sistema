@@ -1,5 +1,5 @@
 import React from "react";
-import { formatarCNPJ, validarCNPJ } from '../../../utils/cnpjUtils';
+import { formatarCNPJ, validarCNPJ } from '../../../../utils/cnpjUtils';
 
 const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const programas = [

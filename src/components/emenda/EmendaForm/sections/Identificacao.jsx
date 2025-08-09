@@ -1,5 +1,5 @@
 import React from "react";
-import { formatarCNPJ, validarCNPJ } from '../../../utils/cnpjUtils';
+import { formatarCNPJ, validarCNPJ } from '../../../../utils/cnpjUtils';
 
 const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estados = [
