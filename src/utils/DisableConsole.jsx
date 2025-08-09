@@ -31,7 +31,10 @@ export const configureConsole = () => {
   const environment = import.meta.env.VITE_ENV || import.meta.env.NODE_ENV || 'development';
   const enableLogs = import.meta.env.VITE_ENABLE_LOGS !== 'false';
 
-  const currentLogLevel = getLogLevel(); // Esta variável precisa ser definida antes de ser usada abaixo.
+  const currentLogLevel = getLogLevel();
+
+  // Função noop (no operation) para desabilitar logs
+  const noop = () => {};
 
   // Backup dos métodos originais
   const originalConsole = {
@@ -161,15 +164,15 @@ export const configureConsole = () => {
   // Configurar níveis de log
   if (currentLogLevel < LOG_LEVELS.VERBOSE) {
     console.debug = currentLogLevel >= LOG_LEVELS.DEBUG ? createLogWrapper(LOG_LEVELS.DEBUG, 'debug') : noop;
-    console.log = currentLevel >= LOG_LEVELS.DEBUG ? createLogWrapper(LOG_LEVELS.DEBUG, 'log') : noop;
+    console.log = currentLogLevel >= LOG_LEVELS.DEBUG ? createLogWrapper(LOG_LEVELS.DEBUG, 'log') : noop;
   }
 
   if (currentLogLevel < LOG_LEVELS.INFO) {
-    console.info = currentLevel >= LOG_LEVELS.INFO ? createLogWrapper(LOG_LEVELS.INFO, 'info') : noop;
+    console.info = currentLogLevel >= LOG_LEVELS.INFO ? createLogWrapper(LOG_LEVELS.INFO, 'info') : noop;
   }
 
   if (currentLogLevel < LOG_LEVELS.WARN) {
-    console.warn = currentLevel >= LOG_LEVELS.WARN ? createLogWrapper(LOG_LEVELS.WARN, 'warn') : noop;
+    console.warn = currentLogLevel >= LOG_LEVELS.WARN ? createLogWrapper(LOG_LEVELS.WARN, 'warn') : noop;
   }
 
   // Sempre manter error em desenvolvimento, desabilitar só em produção
