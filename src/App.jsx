@@ -151,42 +151,7 @@ function LoadingSpinner() {
   );
 }
 
-// Error boundary
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error("Erro capturado pelo Error Boundary:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={styles.errorContainer}>
-          <h2 style={styles.errorTitle}>Oops! Algo deu errado</h2>
-          <p style={styles.errorMessage}>
-            Ocorreu um erro inesperado. Por favor, recarregue a página.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            style={styles.errorButton}
-          >
-            Recarregar Página
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
+// ErrorBoundary já é importado do arquivo separado
 
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
