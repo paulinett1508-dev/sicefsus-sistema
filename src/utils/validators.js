@@ -176,6 +176,16 @@ export const validateUserStatus = (status) => {
 };
 
 /**
+ * ✅ VALIDAR role de usuário
+ * @param {string} role - Role a ser validado
+ * @returns {boolean} - true se válido
+ */
+export const validateUserRole = (role) => {
+  const rolesValidos = ["admin", "user", "operador"];
+  return rolesValidos.includes(role);
+};
+
+/**
  * ✅ SANITIZAR string removendo caracteres perigosos
  * @param {string} str - String a ser sanitizada
  * @returns {string} - String sanitizada
@@ -557,33 +567,7 @@ export const validarCNPJ = (cnpj) => {
   return { valido: true, erro: null };
 };
 
-/**
- * Valida formulário de emenda completo
- * @param {Object} formData - Dados do formulário
- * @returns {Object} - Objeto com erros encontrados
- */
-export const validarFormularioEmenda = (formData) => {
-  const errors = {};
 
-  // Validação de campos obrigatórios
-  if (!formData.numero) errors.numero = 'Número da emenda é obrigatório';
-  if (!formData.parlamentar) errors.parlamentar = 'Parlamentar é obrigatório';
-  if (!formData.cnpjBeneficiario) errors.cnpjBeneficiario = 'CNPJ é obrigatório';
-  if (!formData.municipio) errors.municipio = 'Município é obrigatório';
-  if (!formData.uf) errors.uf = 'UF é obrigatória';
-
-  // Validação de CNPJ se preenchido
-  if (formData.cnpjBeneficiario) {
-    // Import dinâmico para evitar problemas circulares
-    import('./cnpjUtils').then(({ validarCNPJ }) => {
-      if (!validarCNPJ(formData.cnpjBeneficiario)) {
-        errors.cnpjBeneficiario = 'CNPJ inválido';
-      }
-    });
-  }
-
-  return errors;
-};
 
 // ✅ HOOK PARA USO NO DESPESAFORM
 import { useState } from 'react';
@@ -606,15 +590,6 @@ export const useCNPJValidation = () => {
       } else {
         setCnpjError("CNPJ inválido");
       }
-    } else {
-      setCnpjError("");
-    }
-  };
-
-  return { cnpjError, handleCNPJChange };
-};ace(/\D/g, "").length === 14) {
-      const validacao = validarCNPJ(cnpjFormatado);
-      setCnpjError(validacao.valido ? "" : validacao.erro);
     } else {
       setCnpjError("");
     }
