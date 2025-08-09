@@ -246,7 +246,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [calcularMetricasEmenda, permissoes.isAdmin, filtroMunicipio, filtroUf]);
+  }, [calcularMetricasEmenda, permissoes.isAdmin, filtroMunicipio, filtroUf, usuario?.tipo, usuario?.municipio, usuario?.uf]);
 
   // ✅ FUNÇÃO: Validar nova despesa contra saldo da emenda
   const validarNovaDespesa = useCallback(
