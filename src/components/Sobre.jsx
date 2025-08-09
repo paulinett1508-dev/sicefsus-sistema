@@ -390,10 +390,10 @@ const Sobre = () => {
         }
 
         .sopro-logo {
-          width: 32px;
-          height: 32px;
+          width: 48px;
+          height: 48px;
           object-fit: contain;
-          border-radius: 6px;
+          border-radius: 8px;
           opacity: 0.8;
           transition: opacity 0.3s ease;
         }
@@ -447,8 +447,8 @@ const Sobre = () => {
           }
 
           .sopro-logo {
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
           }
         }
       `}</style>
