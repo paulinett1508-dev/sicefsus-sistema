@@ -1,7 +1,7 @@
 // Despesas.jsx - VERSÃO REFATORADA
 // Componente orquestrador que delega responsabilidades aos sub-componentes
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   collection,
@@ -25,7 +25,7 @@ const Despesas = ({ usuario }) => {
 
   // Estados principais
   const [currentView, setCurrentView] = useState("listagem");
-  
+
   // Debug controlado
   useEffect(() => {
     console.log("🔍 Despesas - currentView mudou:", currentView);
@@ -191,48 +191,59 @@ const Despesas = ({ usuario }) => {
   };
 
   // ✅ FUNÇÃO PARA CALCULAR SALDO DISPONÍVEL
-  const calcularEmendaInfoCompleta = useCallback((emenda) => {
-    if (!emenda) return null;
+  const calcularEmendaInfoCompleta = useCallback(
+    (emenda) => {
+      if (!emenda) return null;
 
-    // Buscar despesas desta emenda específica
-    const despesasDaEmenda = despesas.filter(d => d.emendaId === emenda.id);
-    
-    // Calcular valor executado
-    const valorExecutado = despesasDaEmenda.reduce((soma, despesa) => {
-      const valor = Number(despesa.valor) || 0;
-      return soma + valor;
-    }, 0);
+      // Buscar despesas desta emenda específica
+      const despesasDaEmenda = despesas.filter((d) => d.emendaId === emenda.id);
 
-    // Extrair valor total da emenda (com fallbacks)
-    const valorTotal = Number(emenda.valor) || Number(emenda.valorRecurso) || Number(emenda.valorTotal) || 0;
-    
-    // Calcular saldo disponível
-    const saldoDisponivel = valorTotal - valorExecutado;
+      // Calcular valor executado
+      const valorExecutado = despesasDaEmenda.reduce((soma, despesa) => {
+        const valor = Number(despesa.valor) || 0;
+        return soma + valor;
+      }, 0);
 
-    console.log("🔍 DEBUG SALDO EMENDA:");
-    console.log("Emenda ID:", emenda.id);
-    console.log("Valor Total:", valorTotal);
-    console.log("Valor Executado:", valorExecutado);
-    console.log("Saldo Disponível:", saldoDisponivel);
-    console.log("Despesas encontradas:", despesasDaEmenda.length);
+      // Extrair valor total da emenda (com fallbacks)
+      const valorTotal =
+        Number(emenda.valor) ||
+        Number(emenda.valorRecurso) ||
+        Number(emenda.valorTotal) ||
+        0;
 
-    // Retornar emenda completa com saldo calculado
-    return {
-      ...emenda,
-      valorRecurso: valorTotal, // Padronizar campo de valor
-      saldoDisponivel: saldoDisponivel
-    };
-  }, [despesas]);
+      // Calcular saldo disponível
+      const saldoDisponivel = valorTotal - valorExecutado;
+
+      console.log("🔍 DEBUG SALDO EMENDA:");
+      console.log("Emenda ID:", emenda.id);
+      console.log("Valor Total:", valorTotal);
+      console.log("Valor Executado:", valorExecutado);
+      console.log("Saldo Disponível:", saldoDisponivel);
+      console.log("Despesas encontradas:", despesasDaEmenda.length);
+
+      // Retornar emenda completa com saldo calculado
+      return {
+        ...emenda,
+        valorRecurso: valorTotal, // Padronizar campo de valor
+        saldoDisponivel: saldoDisponivel,
+      };
+    },
+    [despesas],
+  );
 
   // 🚨 CALCULAR SALDO PARA TODAS AS EMENDAS DISPONÍVEIS
   const emendasComSaldo = useMemo(() => {
-    return emendas.map(emenda => calcularEmendaInfoCompleta(emenda));
+    return emendas.map((emenda) => calcularEmendaInfoCompleta(emenda));
   }, [emendas, calcularEmendaInfoCompleta]);
 
   // Renderização condicional por view
-  if (currentView === "criar" || currentView === "editar" || currentView === "visualizar") {
+  if (
+    currentView === "criar" ||
+    currentView === "editar" ||
+    currentView === "visualizar"
+  ) {
     console.log("🔍 Renderizando formulário - View:", currentView);
-    
+
     // Verificar se todos os dados necessários estão disponíveis
     if (!usuario) {
       console.error("❌ Usuário não encontrado");
@@ -263,9 +274,11 @@ const Despesas = ({ usuario }) => {
             emendaInfo={calcularEmendaInfoCompleta(filtroAutomatico?.emenda)}
             modoVisualizacao={currentView === "visualizar"}
             titulo={
-              currentView === "criar" ? "Nova Despesa" :
-              currentView === "editar" ? "Editar Despesa" :
-              "Visualizar Despesa"
+              currentView === "criar"
+                ? "Nova Despesa"
+                : currentView === "editar"
+                  ? "Editar Despesa"
+                  : "Visualizar Despesa"
             }
           />
         </div>
@@ -277,9 +290,7 @@ const Despesas = ({ usuario }) => {
           <div style={styles.errorMessage}>
             <h3>Erro ao carregar formulário</h3>
             <p>Detalhes: {error.message}</p>
-            <button onClick={handleVoltar}>
-              Voltar para Lista
-            </button>
+            <button onClick={handleVoltar}>Voltar para Lista</button>
           </div>
         </div>
       );
@@ -293,10 +304,12 @@ const Despesas = ({ usuario }) => {
         <div style={styles.errorMessage}>
           <h3>Erro ao carregar dados</h3>
           <p>{error}</p>
-          <button onClick={() => {
-            setError(null);
-            carregarDados();
-          }}>
+          <button
+            onClick={() => {
+              setError(null);
+              carregarDados();
+            }}
+          >
             Tentar Novamente
           </button>
         </div>
@@ -335,8 +348,8 @@ const Despesas = ({ usuario }) => {
 
         {/* Botões de ação */}
         <div style={styles.actionContainer}>
-          <button 
-            style={styles.primaryButton} 
+          <button
+            style={styles.primaryButton}
             onClick={() => {
               console.log("🖱️ Clicou em Nova Despesa");
               handleCriar();
