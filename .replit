@@ -12,7 +12,7 @@ language = "nodejs"
 
 [deployment]
 deploymentTarget = "static"
-build = ["npm", "run", "build"]
+build = ["sh", "-c", "npm run build:prod"]
 publicDir = "dist"
 
 [[ports]]
@@ -22,6 +22,10 @@ externalPort = 3001
 [[ports]]
 localPort = 4173
 externalPort = 3002
+
+[[ports]]
+localPort = 4174
+externalPort = 3003
 
 [[ports]]
 localPort = 5173

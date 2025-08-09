@@ -2,7 +2,7 @@
 
 // Configuração da versão atual
 export const APP_VERSION = {
-  number: "1.0.0",
+  number: "1.0.1",
   date: "08/08/2025",
   changes: [
     "🚀 Sistema em produção",
