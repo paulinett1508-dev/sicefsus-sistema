@@ -190,6 +190,40 @@ const Despesas = ({ usuario }) => {
     navigate("/emendas");
   };
 
+  // ✅ FUNÇÃO PARA CALCULAR SALDO DISPONÍVEL
+  const calcularEmendaInfoCompleta = useCallback((emenda) => {
+    if (!emenda) return null;
+
+    // Buscar despesas desta emenda específica
+    const despesasDaEmenda = despesas.filter(d => d.emendaId === emenda.id);
+    
+    // Calcular valor executado
+    const valorExecutado = despesasDaEmenda.reduce((soma, despesa) => {
+      const valor = Number(despesa.valor) || 0;
+      return soma + valor;
+    }, 0);
+
+    // Extrair valor total da emenda (com fallbacks)
+    const valorTotal = Number(emenda.valor) || Number(emenda.valorRecurso) || Number(emenda.valorTotal) || 0;
+    
+    // Calcular saldo disponível
+    const saldoDisponivel = valorTotal - valorExecutado;
+
+    console.log("🔍 DEBUG SALDO EMENDA:");
+    console.log("Emenda ID:", emenda.id);
+    console.log("Valor Total:", valorTotal);
+    console.log("Valor Executado:", valorExecutado);
+    console.log("Saldo Disponível:", saldoDisponivel);
+    console.log("Despesas encontradas:", despesasDaEmenda.length);
+
+    // Retornar emenda completa com saldo calculado
+    return {
+      ...emenda,
+      valorRecurso: valorTotal, // Padronizar campo de valor
+      saldoDisponivel: saldoDisponivel
+    };
+  }, [despesas]);
+
   // Renderização condicional por view
   if (currentView === "criar" || currentView === "editar" || currentView === "visualizar") {
     console.log("🔍 Renderizando formulário - View:", currentView);
@@ -221,7 +255,7 @@ const Despesas = ({ usuario }) => {
             onSuccess={handleSalvarDespesa}
             emendasDisponiveis={emendas}
             emendaPreSelecionada={filtroAutomatico?.emendaId}
-            emendaInfo={filtroAutomatico?.emenda}
+            emendaInfo={calcularEmendaInfoCompleta(filtroAutomatico?.emenda)}
             modoVisualizacao={currentView === "visualizar"}
             titulo={
               currentView === "criar" ? "Nova Despesa" :
