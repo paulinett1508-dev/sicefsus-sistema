@@ -214,9 +214,9 @@ export default function DespesasTable({
             <tr style={styles.headerRow}>
               <th style={styles.th}>Emenda</th>
               <th style={styles.th}>Fornecedor</th>
-              <th style={styles.th}>Valor Despesa</th>
-              <th style={styles.th}>Saldo da Emenda</th>
-              <th style={styles.th}>% Executado</th>
+              <th style={styles.th}>Valor</th>
+              <th style={styles.th}>Saldo</th>
+              <th style={styles.th}>%</th>
               {modoVisualizacao === "detalhado" && (
                 <>
                   <th style={styles.th}>Nº Contrato</th>
@@ -227,7 +227,7 @@ export default function DespesasTable({
               )}
               <th style={styles.th}>Nº Empenho</th>
               <th style={styles.th}>Nº NF</th>
-              <th style={styles.th}>Data Pagamento</th>
+              <th style={styles.th}>Data Pgto</th>
               <th style={styles.th}>Ações</th>
             </tr>
           </thead>
@@ -553,7 +553,8 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: PRIMARY,
+    backgroundColor: "#2c3e50",
+    color: "white",
   },
 
   th: {
@@ -561,11 +562,16 @@ const styles = {
     textAlign: "left",
     color: WHITE,
     fontWeight: "600",
-    fontSize: 11,
+    fontSize: 14,
+    borderBottom: "2px solid #34495e",
     borderRight: "1px solid rgba(255,255,255,0.1)",
     whiteSpace: "nowrap",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
+    position: "sticky",
+    top: 0,
+    backgroundColor: "#2c3e50",
+    zIndex: 10,
   },
 
   evenRow: {
