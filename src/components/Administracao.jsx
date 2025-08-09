@@ -505,6 +505,25 @@ const Administracao = () => {
                     >
                       🔑
                     </button>
+                    
+                    {/* ✅ ADICIONAR ESTE BOTÃO: */}
+                    <button
+                      onClick={() => onDelete(usuario)}
+                      style={{
+                        ...styles.actionButton,
+                        backgroundColor: usuario.status === "inativo" ? "#dc3545" : "#6c757d",
+                        opacity: usuario.status === "inativo" ? 1 : 0.5,
+                        cursor: usuario.status === "inativo" ? "pointer" : "not-allowed"
+                      }}
+                      title={
+                        usuario.status === "inativo" 
+                          ? "Excluir usuário permanentemente" 
+                          : "Inative o usuário para poder excluir"
+                      }
+                      disabled={usuario.status === "ativo"}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </td>
               </tr>
