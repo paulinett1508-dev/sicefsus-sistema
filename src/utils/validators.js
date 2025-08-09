@@ -587,6 +587,50 @@ export const validarCNPJ = (cnpj) => {
 
   // Verifica se os dígitos calculados conferem
   if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
+    return { valido: false, erro: "CNPJ inválido" };
+  }
+
+  return { valido: true, erro: null };
+};
+
+/**
+ * Validar formulário de emenda
+ * @param {Object} formData - Dados do formulário
+ * @returns {Object} - Resultado da validação
+ */
+export const validarFormularioEmenda = (formData) => {
+  const errors = {};
+
+  // Validar campos obrigatórios
+  if (!formData.numero) {
+    errors.numero = "Número da emenda é obrigatório";
+  }
+
+  if (!formData.autor) {
+    errors.autor = "Autor é obrigatório";
+  }
+
+  if (!formData.valorTotal) {
+    errors.valorTotal = "Valor total é obrigatório";
+  }
+
+  if (!formData.tipo) {
+    errors.tipo = "Tipo é obrigatório";
+  }
+
+  // Validar CNPJ se fornecido
+  if (formData.cnpjBeneficiario) {
+    const resultadoCNPJ = validarCNPJ(formData.cnpjBeneficiario);
+    if (!resultadoCNPJ.valido) {
+      errors.cnpjBeneficiario = resultadoCNPJ.erro;
+    }
+  }
+
+  return {
+    valido: Object.keys(errors).length === 0,
+    errors
+  };dos conferem
+  if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
     return {
       valido: false,
       erro: "CNPJ inválido - dígitos verificadores incorretos",
