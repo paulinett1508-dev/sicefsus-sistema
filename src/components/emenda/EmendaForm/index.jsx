@@ -81,6 +81,13 @@ const EmendaForm = () => {
     observacoes: "",
   });
 
+  const [expandedSections, setExpandedSections] = useState({
+    identificacao: true,
+    dadosBasicos: true,
+    beneficiario: false,
+    complementares: false,
+  });
+
   const mountedRef = useRef(true);
   const isEdicao = Boolean(id);
 
@@ -196,6 +203,13 @@ const EmendaForm = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const toggleSection = (sectionName) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
     }));
   };
 
@@ -450,6 +464,8 @@ const EmendaForm = () => {
           errors={{}}
           styles={styles}
           buscarDadosFornecedor={buscarDadosFornecedor}
+          expanded={expandedSections.beneficiario}
+          onToggle={() => toggleSection('beneficiario')}
         />
 
         <DadosBancarios
