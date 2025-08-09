@@ -88,11 +88,11 @@ export default function DespesasTable({
       .sort((a, b) => {
         // Ordenar por data de pagamento
         if (a.dataPagamento && b.dataPagamento) {
-          const dataA = a.dataPagamento.seconds 
-            ? new Date(a.dataPagamento.seconds * 1000) 
+          const dataA = a.dataPagamento.seconds
+            ? new Date(a.dataPagamento.seconds * 1000)
             : new Date(a.dataPagamento);
-          const dataB = b.dataPagamento.seconds 
-            ? new Date(b.dataPagamento.seconds * 1000) 
+          const dataB = b.dataPagamento.seconds
+            ? new Date(b.dataPagamento.seconds * 1000)
             : new Date(b.dataPagamento);
           return dataA - dataB;
         }
@@ -410,58 +410,77 @@ export default function DespesasTable({
         </div>
       )}
 
-      {/* Modal de Confirmação */}
+      {/* Modal de Confirmação - MELHORADO */}
       {confirmExclusao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
-            <h3 style={styles.modalTitle}>⚠️ Confirmar Exclusão</h3>
-            <div style={styles.modalBody}>
-              <p style={styles.modalText}>
-                Tem certeza que deseja excluir esta despesa?
-              </p>
-              <div style={styles.modalDetails}>
-                <p><strong>Fornecedor:</strong> {confirmExclusao.fornecedor}</p>
-                <p><strong>Valor:</strong> R$ {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                })}</p>
-                <p><strong>Nº Empenho:</strong> {confirmExclusao.numeroEmpenho}</p>
-                <p><strong>Discriminação:</strong> {confirmExclusao.discriminacao}</p>
+            {/* Header simplificado */}
+            <div style={styles.modalHeader}>
+              <span style={styles.modalIcon}>⚠️</span>
+              <h3 style={styles.modalTitle}>Excluir Despesa</h3>
+            </div>
 
-                {(() => {
-                  const saldoInfo = getEmendaSaldoInfo(confirmExclusao.emendaId, confirmExclusao.id);
-                  if (saldoInfo) {
-                    const novoSaldo = saldoInfo.saldoAtual + confirmExclusao.valor;
-                    return (
-                      <div style={styles.saldoInfo}>
-                        <p><strong>Valor Total da Emenda:</strong> R$ {saldoInfo.valorTotal.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}</p>
-                        <p><strong>Total de Despesas até aqui:</strong> R$ {saldoInfo.totalDespesasAteAqui.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}</p>
-                        <p><strong>Saldo Atual:</strong> R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}</p>
-                        <p style={{ borderTop: "1px solid #e9ecef", paddingTop: "8px", marginTop: "8px" }}>
-                          <strong>Saldo Após Exclusão:</strong>{" "}
-                          <span style={{ color: SUCCESS, fontSize: "16px" }}>
-                            R$ {novoSaldo.toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </span>
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
+            {/* Corpo com informações organizadas */}
+            <div style={styles.modalBody}>
+              {/* Card com dados da despesa */}
+              <div style={styles.despesaCard}>
+                <div style={styles.infoRow}>
+                  <span style={styles.label}>Fornecedor:</span>
+                  <span style={styles.value}>{confirmExclusao.fornecedor}</span>
+                </div>
+                <div style={styles.infoRow}>
+                  <span style={styles.label}>Valor:</span>
+                  <span style={styles.valueHighlight}>
+                    R$ {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div style={styles.infoRow}>
+                  <span style={styles.label}>Nº Empenho:</span>
+                  <span style={styles.value}>{confirmExclusao.numeroEmpenho || "-"}</span>
+                </div>
+                <div style={styles.infoRow}>
+                  <span style={styles.label}>Descrição:</span>
+                  <span style={styles.value}>{confirmExclusao.discriminacao || "-"}</span>
+                </div>
               </div>
-              <div style={styles.modalWarning}>
-                ⚠️ <strong>Atenção:</strong> O valor será estornado para o saldo
-                da emenda. Esta ação não pode ser desfeita.
+
+              {/* Resumo financeiro */}
+              {(() => {
+                const saldoInfo = getEmendaSaldoInfo(confirmExclusao.emendaId, confirmExclusao.id);
+                if (saldoInfo) {
+                  const novoSaldo = saldoInfo.saldoAtual + confirmExclusao.valor;
+                  return (
+                    <div style={styles.financialSummary}>
+                      <div style={styles.summaryItem}>
+                        <span>Saldo Atual:</span>
+                        <span>R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                        })}</span>
+                      </div>
+                      <div style={styles.summaryItemAfter}>
+                        <span>Saldo Após Exclusão:</span>
+                        <span style={styles.successValue}>
+                          R$ {novoSaldo.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Aviso simplificado */}
+              <div style={styles.warningMessage}>
+                <p>Esta ação não pode ser desfeita. O valor será devolvido ao saldo da emenda.</p>
               </div>
             </div>
-            <div style={styles.modalActions}>
+
+            {/* Footer com botões */}
+            <div style={styles.modalFooter}>
               <button
                 onClick={() => setConfirmExclusao(null)}
                 style={styles.cancelButton}
@@ -471,7 +490,7 @@ export default function DespesasTable({
               </button>
               <button
                 onClick={() => handleExcluir(confirmExclusao)}
-                style={styles.confirmButton}
+                style={styles.confirmDeleteButton}
                 disabled={excludindo}
               >
                 {excludindo ? "Excluindo..." : "Confirmar Exclusão"}
@@ -739,101 +758,143 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
-    backdropFilter: "blur(4px)",
   },
 
   modalContent: {
     backgroundColor: WHITE,
     borderRadius: 12,
-    padding: 0,
     maxWidth: 500,
     width: "90%",
-    maxHeight: "90vh",
+    maxHeight: "80vh",
     overflow: "auto",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+  },
+
+  modalHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "24px 24px 20px",
+    borderBottom: "1px solid #e5e7eb",
+  },
+
+  modalIcon: {
+    fontSize: 28,
   },
 
   modalTitle: {
-    color: ERROR,
     margin: 0,
-    fontSize: 20,
+    fontSize: "1.5rem",
     fontWeight: "600",
-    padding: "20px 24px",
-    borderBottom: "1px solid #eee",
-    backgroundColor: "#fdf2f2",
+    color: "#1f2937",
   },
 
-  modalBody: {
-    padding: 24,
-  },
-
-  modalText: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 16,
-  },
-
-  modalDetails: {
-    backgroundColor: "#f8f9fa",
-    padding: 16,
+  despesaCard: {
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
     borderRadius: 8,
-    marginBottom: 16,
-    border: "1px solid #e9ecef",
+    padding: 16,
+    marginBottom: 20,
   },
 
-  saldoInfo: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTop: "1px solid #e9ecef",
-  },
-
-  modalWarning: {
-    backgroundColor: "#fff3cd",
-    color: "#856404",
-    padding: 12,
-    borderRadius: 6,
-    fontSize: 14,
+  infoRow: {
     display: "flex",
-    alignItems: "flex-start",
-    gap: 8,
-    border: "1px solid #ffeaa7",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
   },
 
-  modalActions: {
+  label: {
+    fontWeight: "500",
+    color: "#6b7280",
+    fontSize: 14,
+  },
+
+  value: {
+    fontWeight: "500",
+    color: "#1f2937",
+    textAlign: "right",
+  },
+
+  valueHighlight: {
+    fontWeight: "600",
+    color: ERROR,
+    fontSize: 16,
+  },
+
+  financialSummary: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    padding: 16,
+    background: "#f0f9ff",
+    border: "1px solid #bfdbfe",
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+
+  summaryItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: 14,
+  },
+
+  summaryItemAfter: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: 14,
+    fontWeight: "600",
+    paddingTop: 12,
+    borderTop: "1px solid #bfdbfe",
+  },
+
+  successValue: {
+    color: SUCCESS,
+    fontSize: 16,
+  },
+
+  warningMessage: {
+    background: "#fef3c7",
+    border: "1px solid #fcd34d",
+    borderRadius: 8,
+    padding: "12px 16px",
+  },
+
+  modalFooter: {
     display: "flex",
     gap: 12,
-    justifyContent: "flex-end",
-    padding: "16px 24px",
-    borderTop: "1px solid #eee",
-    backgroundColor: "#fafafa",
+    padding: "20px 24px",
+    borderTop: "1px solid #e5e7eb",
+    background: "#f9fafb",
   },
 
   cancelButton: {
     padding: "10px 20px",
-    border: "1px solid #ddd",
-    borderRadius: 6,
+    border: "1px solid #d1d5db",
     background: WHITE,
-    color: "#666",
+    borderRadius: 8,
     cursor: "pointer",
     fontSize: 14,
     fontWeight: "500",
     transition: "all 0.2s",
   },
 
-  confirmButton: {
+  confirmDeleteButton: {
+    flex: 1,
     padding: "10px 20px",
     border: "none",
-    borderRadius: 6,
     background: ERROR,
     color: WHITE,
-    cursor: "pointer",
-    fontSize: 14,
+    borderRadius: 8,
     fontWeight: "500",
-    transition: "background-color 0.2s",
+    cursor: "pointer",
+    transition: "all 0.2s",
   },
 };

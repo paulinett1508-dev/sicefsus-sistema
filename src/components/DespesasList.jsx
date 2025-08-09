@@ -113,9 +113,7 @@ export default function DespesasList({
 
   // ✅ Handler para excluir simplificado
   const handleDelete = async (despesaId) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta despesa?")) {
-      return;
-    }
+    
 
     try {
       // Excluir do Firebase
