@@ -30,6 +30,7 @@ import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
 import LoadingOverlay from '../../LoadingOverlay';
+import Toast from '../../Toast'; // Assuming Toast component is available
 
 const EmendaForm = () => {
   const navigate = useNavigate();
@@ -283,8 +284,8 @@ const EmendaForm = () => {
 
         // Aguardar e redirecionar
         setTimeout(() => {
-          navigate('/emendas');
-        }, 1500);
+          navigate('/emendas', { replace: true });
+        }, 800);
 
       } else {
         dadosParaSalvar.criadoEm = serverTimestamp();
@@ -300,8 +301,8 @@ const EmendaForm = () => {
 
         // Aguardar e redirecionar
         setTimeout(() => {
-          navigate('/emendas');
-        }, 1500);
+          navigate('/emendas', { replace: true });
+        }, 800);
       }
 
     } catch (error) {
