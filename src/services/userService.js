@@ -15,6 +15,7 @@ import {
   where,
   serverTimestamp,
   deleteDoc,
+  setDoc,
 } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { db, auth } from "../firebase/firebaseConfig";
@@ -61,22 +62,95 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       "✅ Usuário deslogado da instância secundária (admin preservado)",
     );
 
-    // 4. Salvar dados do usuário no Firestore
+    // 4. ✅ CORREÇÃO: Salvar dados com estrutura COMPLETA igual ao admin
     const userDoc = {
       uid: userCredential.user.uid,
-      nome: userData.nome,
       email: userData.email,
-      municipio: userData.municipio,
-      uf: userData.uf,
+      nome: userData.nome,
       tipo: userData.tipo || "operador",
       status: "ativo",
-      senhaTemporaria: senhaTemporaria,
+      departamento: userData.departamento || "",
+      telefone: userData.telefone || "",
+      municipio: userData.tipo === "admin" ? "" : userData.municipio || "",
+      uf: userData.tipo === "admin" ? "" : userData.uf || "",
+
+      // ✅ CAMPOS OBRIGATÓRIOS DO SISTEMA
+      ativo: true,
+      primeiroAcesso: true,
+      ultimoAcesso: null,
+      ultimo_acesso: null,
+
+      // ✅ TIMESTAMPS PADRONIZADOS
       criadoEm: serverTimestamp(),
+      data_criacao: serverTimestamp(),
+      dataAtualizacao: serverTimestamp(),
+      data_atualizacao: serverTimestamp(),
+
+      // ✅ CONFIGURAÇÕES PADRÃO
+      configuracoes: {
+        idioma: "pt-BR",
+        tema: "light",
+        timezone: "America/Sao_Paulo",
+        notificacoes_email: true,
+      },
+
+      // ✅ PERMISSÕES BASEADAS NO TIPO
+      permissoes:
+        userData.tipo === "admin"
+          ? {
+              // Permissões de administrador
+              criar_emenda: true,
+              editar_emenda: true,
+              excluir_emenda: true,
+              criar_despesa: true,
+              editar_despesa: true,
+              excluir_despesa: true,
+              criar_usuario: true,
+              editar_usuario: true,
+              desativar_usuario: true,
+              gerenciar_usuarios: true,
+              acessar_relatorios: true,
+              relatorios_avancados: true,
+              visualizar_auditoria: true,
+              visualizar_todas_emendas: true,
+              visualizar_todas_despesas: true,
+              configurar_sistema: true,
+              backup_dados: true,
+              exportar_dados: true,
+            }
+          : {
+              // Permissões de operador
+              criar_emenda: false,
+              editar_emenda: false,
+              excluir_emenda: false,
+              criar_despesa: true,
+              editar_despesa: true,
+              excluir_despesa: false,
+              criar_usuario: false,
+              editar_usuario: false,
+              desativar_usuario: false,
+              gerenciar_usuarios: false,
+              acessar_relatorios: true,
+              relatorios_avancados: false,
+              visualizar_auditoria: false,
+              visualizar_todas_emendas: false,
+              visualizar_todas_despesas: false,
+              configurar_sistema: false,
+              backup_dados: false,
+              exportar_dados: false,
+            },
+
+      // ✅ CAMPOS TEMPORÁRIOS
+      senhaTemporaria: senhaTemporaria,
       primeiroLogin: true,
     };
 
-    await addDoc(collection(db, "usuarios"), userDoc);
-    console.log("✅ Dados do usuário salvos no Firestore");
+    // ✅ USAR setDoc com UID como ID do documento
+    await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
+    console.log(
+      "✅ Dados do usuário salvos no Firestore com estrutura completa:",
+      userCredential.user.uid,
+    );
 
     // 5. ✅ CORREÇÃO: Enviar email de configuração inicial (não reset)
     console.log("📨 Enviando email de configuração inicial...");
