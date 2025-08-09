@@ -4,6 +4,7 @@
 export const APP_VERSION = {
   number: "2.3.0",
   date: "09/01/2025",
+  timestamp: "09/01/2025 às 15:30",
   changes: [
     "🚀 Sistema de versionamento centralizado implementado",
     "✅ Fonte única da verdade em versionControl.js",

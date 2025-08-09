@@ -17,12 +17,15 @@ const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 console.log("📍 Versão package.json (antes):", packageJson.version);
 
 // ✅ USAR A VERSÃO DA FONTE ÚNICA
+const agora = new Date();
 const versionInfo = {
   version: APP_VERSION.number,
   buildDate: new Date().toISOString(),
+  buildDateBR: `${agora.toLocaleDateString("pt-BR")} às ${agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}`,
   environment: process.env.NODE_ENV || "production",
   changes: APP_VERSION.changes,
   date: APP_VERSION.date,
+  timestamp: APP_VERSION.timestamp || `${agora.toLocaleDateString("pt-BR")} às ${agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}`,
 };
 
 // Salvar na pasta public

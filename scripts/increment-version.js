@@ -41,8 +41,10 @@ switch (versionType) {
 console.log(`📍 Versão atual: ${currentVersion}`);
 console.log(`📍 Nova versão: ${newVersion}`);
 
-// Atualizar data
-const newDate = new Date().toLocaleDateString("pt-BR");
+// Atualizar data e timestamp no formato brasileiro
+const agora = new Date();
+const newDate = agora.toLocaleDateString("pt-BR");
+const newTimestamp = `${agora.toLocaleDateString("pt-BR")} às ${agora.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' })}`;
 
 // Substituir no arquivo
 content = content.replace(
@@ -53,6 +55,11 @@ content = content.replace(
 content = content.replace(
   /date: "([^"]+)"/,
   `date: "${newDate}"`
+);
+
+content = content.replace(
+  /timestamp: "([^"]+)"/,
+  `timestamp: "${newTimestamp}"`
 );
 
 // Salvar arquivo
