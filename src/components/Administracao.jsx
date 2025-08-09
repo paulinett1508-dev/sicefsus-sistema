@@ -3,7 +3,7 @@
 // ✅ Adicionar apenas o necessário para o modal funcionar
 
 import React, { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 // ✅ ADICIONAR: Import do UserForm e userService
@@ -168,10 +168,15 @@ const Administracao = () => {
 
   // ✅ IMPLEMENTAR: Handler para excluir usuário
   const handleExcluirUsuario = (usuario) => {
+    if (usuario.status === "ativo") {
+      showToast("⚠️ Inative o usuário antes de excluir", "warning");
+      return;
+    }
+
     setConfirmModal({
       isOpen: true,
       title: "Excluir Usuário",
-      message: `Tem certeza que deseja excluir o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`,
+      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`,
       type: "danger",
       onConfirm: async () => {
         try {
@@ -192,7 +197,13 @@ const Administracao = () => {
   const handleToggleStatus = async (usuario) => {
     try {
       const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
-      await userService.updateUser(usuario.id, { status: novoStatus });
+
+      // ✅ CORREÇÃO: Update simples apenas do status
+      const userRef = doc(db, "usuarios", usuario.id);
+      await updateDoc(userRef, {
+        status: novoStatus,
+        dataAtualizacao: new Date()
+      });
 
       showToast(`✅ Status alterado para ${novoStatus}!`, "success");
       await carregarUsuarios();
@@ -200,6 +211,39 @@ const Administracao = () => {
       console.error("❌ Erro ao alterar status:", error);
       showToast("Erro ao alterar status", "error");
     }
+  };
+
+  // ✅ ADICIONAR: Nova função para inativar antes de excluir
+  const handleInativarUsuario = async (usuario) => {
+    if (usuario.status === "inativo") {
+      // Se já está inativo, pode excluir
+      handleExcluirUsuario(usuario);
+      return;
+    }
+
+    // Se está ativo, primeiro inativar
+    setConfirmModal({
+      isOpen: true,
+      title: "Inativar Usuário",
+      message: `Deseja inativar o usuário "${usuario.nome}"? Usuários inativos não podem acessar o sistema.`,
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          const userRef = doc(db, "usuarios", usuario.id);
+          await updateDoc(userRef, {
+            status: "inativo",
+            dataAtualizacao: new Date()
+          });
+          showToast("✅ Usuário inativado com sucesso!", "success");
+          await carregarUsuarios();
+        } catch (error) {
+          console.error("❌ Erro ao inativar usuário:", error);
+          showToast("Erro ao inativar usuário", "error");
+        }
+        setConfirmModal(null);
+      },
+      onCancel: () => setConfirmModal(null),
+    });
   };
 
   // ✅ IMPLEMENTAR: Handler para resetar senha
