@@ -452,7 +452,8 @@ const EmendaForm = () => {
         <EmendaFormActions
           onCancel={handleCancel}
           onSubmit={handleSubmit}
-          isEdit={!!emendaParaEditar}
+          isEdit={isEdicao}
+          emendaParaEditar={isEdicao}
           salvando={salvando} // Pass the saving state
         />
       </form>

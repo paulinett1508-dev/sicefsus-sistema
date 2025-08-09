@@ -97,17 +97,13 @@ const EmendaFormActions = ({
           <button
             type="submit"
             onClick={handleSubmit}
-            style={{
-              ...styles.submitButton,
-              opacity: salvando ? 0.6 : 1,
-              cursor: salvando ? "not-allowed" : "pointer",
-            }}
+            style={styles.submitButton}
             disabled={salvando}
           >
             {salvando ? (
               "Processando..."
             ) : (
-              isEdit ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
+              emendaParaEditar ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
             )}
           </button>
         </>
