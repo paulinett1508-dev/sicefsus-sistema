@@ -1,0 +1,56 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:23 🔥 Firebase Environment: Object
+firebaseConfig.js:46 🔥 Firebase Config Status: Object
+firebaseConfig.js:59 ✅ Firebase inicializado com sucesso
+auditService.js:23 🔒 AuditService inicializado
+DisableConsole.jsx:208 🔧 Console configurado - Nível: INFO (2)
+Administracao.jsx:708  Uncaught ReferenceError: handleResetPassword is not defined
+    at Administracao (Administracao.jsx:708:32)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+Administracao.jsx:708  Uncaught ReferenceError: handleResetPassword is not defined
+    at Administracao (Administracao.jsx:708:32)
+    at renderWithHooks (react-dom.development.js:16305:18)
+    at updateFunctionComponent (react-dom.development.js:19588:20)
+    at beginWork (react-dom.development.js:21601:16)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at beginWork$1 (react-dom.development.js:27451:7)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+DisableConsole.jsx:159  The above error occurred in the <ErrorBoundary> component:
+
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/ErrorBoundary.jsx:5:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:182:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:78:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=eee6d6de:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=eee6d6de:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+(anônimo) @ DisableConsole.jsx:159
+react-dom.development.js:26923  Uncaught TypeError: Cannot read properties of null (reading 'componentStack')
+    at ErrorBoundary.render (ErrorBoundary.jsx:71:41)
+    at finishClassComponent (react-dom.development.js:19752:31)
+    at updateClassComponent (react-dom.development.js:19698:24)
+    at beginWork (react-dom.development.js:21611:16)
+    at beginWork$1 (react-dom.development.js:27426:14)
+    at performUnitOfWork (react-dom.development.js:26557:12)
+    at workLoopSync (react-dom.development.js:26466:5)
+    at renderRootSync (react-dom.development.js:26434:7)
+    at recoverFromConcurrentError (react-dom.development.js:25850:20)
+    at performConcurrentWorkOnRoot (react-dom.development.js:25750:22)
