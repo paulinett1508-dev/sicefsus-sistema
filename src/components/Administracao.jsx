@@ -482,6 +482,7 @@ const Administracao = () => {
                       onClick={() => onEdit(usuario)}
                       style={styles.actionButton}
                       title="Editar usuário"
+                      disabled={loading}
                     >
                       ✏️
                     </button>
@@ -492,6 +493,7 @@ const Administracao = () => {
                         backgroundColor: usuario.status === "ativo" ? "#ffc107" : "#28a745",
                       }}
                       title={usuario.status === "ativo" ? "Inativar usuário" : "Ativar usuário"}
+                      disabled={loading}
                     >
                       {usuario.status === "ativo" ? "⏸️" : "▶️"}
                     </button>
@@ -502,13 +504,17 @@ const Administracao = () => {
                         backgroundColor: "#17a2b8",
                       }}
                       title="Resetar senha"
+                      disabled={loading}
                     >
                       🔑
                     </button>
                     
-                    {/* ✅ ADICIONAR ESTE BOTÃO: */}
+                    {/* ✅ CORREÇÃO: Botão excluir com função correta */}
                     <button
-                      onClick={() => onDelete(usuario)}
+                      onClick={() => {
+                        console.log("🗑️ Clique no botão excluir:", usuario);
+                        onDelete(usuario);
+                      }}
                       style={{
                         ...styles.actionButton,
                         backgroundColor: usuario.status === "inativo" ? "#dc3545" : "#6c757d",
@@ -520,7 +526,7 @@ const Administracao = () => {
                           ? "Excluir usuário permanentemente" 
                           : "Inative o usuário para poder excluir"
                       }
-                      disabled={usuario.status === "ativo"}
+                      disabled={loading || usuario.status === "ativo"}
                     >
                       🗑️
                     </button>
