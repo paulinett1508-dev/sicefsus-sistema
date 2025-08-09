@@ -33,7 +33,7 @@ import LoadingOverlay from '../../LoadingOverlay';
 import Toast from '../../Toast'; // Assuming Toast component is available
 
 // Imports de utilitários e validações
-import { formatarMoeda, parseValorMonetario } from "../../../utils/formatters";
+import { formatarMoedaDisplay, formatarMoedaInput, parseValorMonetario } from "../../../utils/formatters";
 import { validarFormularioEmenda } from "../../../utils/validators";
 import { validarCNPJ } from "../../../utils/cnpjUtils"; // Importe a função de validação de CNPJ
 import CNPJInput from "../../CNPJInput"; // Importe o componente CNPJInput

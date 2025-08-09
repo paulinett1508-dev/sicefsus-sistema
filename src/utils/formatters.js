@@ -212,3 +212,6 @@ export const calcularEstatisticas = (despesas, emendas) => {
     percentualExecutadoFormatado: formatarPercentual(percentualExecutado),
   };
 };
+
+// ✅ ALIAS PARA COMPATIBILIDADE
+export const formatarMoeda = formatarMoedaDisplay;
