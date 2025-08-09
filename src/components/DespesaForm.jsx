@@ -38,6 +38,9 @@ import {
 } from "../utils/formatters";
 import { useCNPJValidation } from "../utils/validators";
 import LoadingOverlay from './LoadingOverlay';
+import { validarCNPJ } from "../utils/cnpjUtils";
+import CNPJInput from "./CNPJInput";
+
 
 const DespesaForm = ({
   usuario,
@@ -302,6 +305,16 @@ const DespesaForm = ({
     // Prevenir duplo clique
     if (salvando) return;
 
+    // Validar CNPJs antes de salvar
+    if (formData.cnpjFornecedor && !validarCNPJ(formData.cnpjFornecedor)) {
+      setToast({
+        show: true,
+        message: "❌ CNPJ do fornecedor inválido!",
+        type: "error",
+      });
+      return;
+    }
+
     if (!validarFormulario()) {
       setToast({
         show: true,
@@ -436,6 +449,36 @@ const DespesaForm = ({
     setErrors({});
   };
 
+  // Função para buscar dados da empresa via CNPJ
+  const buscarDadosFornecedor = async (cnpj) => {
+    try {
+      // Remover formatação
+      const cnpjLimpo = cnpj.replace(/\D/g, '');
+
+      // Usar API pública da Receita
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+
+      if (response.ok) {
+        const dados = await response.json();
+
+        // Preencher automaticamente outros campos
+        setFormData(prev => ({
+          ...prev,
+          fornecedor: dados.nome_fantasia || dados.razao_social,
+          razaoSocial: dados.razao_social,
+        }));
+
+        // Mostrar notificação de sucesso
+        setToast({
+          show: true,
+          message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
+          type: 'success'
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CNPJ:', error);
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -542,7 +585,7 @@ const DespesaForm = ({
             >
               ← Voltar
             </button>
-            
+
             <button
               type="submit"
               style={{
@@ -575,13 +618,13 @@ const DespesaForm = ({
 
       </form>
 
-      <LoadingOverlay 
-        show={salvando} 
+      <LoadingOverlay
+        show={salvando}
         message={
-          despesaParaEditar 
-            ? "Atualizando despesa..." 
+          despesaParaEditar
+            ? "Atualizando despesa..."
             : "Cadastrando nova despesa..."
-        } 
+        }
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import CNPJInput from "../../../CNPJInput";
 
-const DadosBeneficiario = ({ formData = {}, onChange, fieldErrors = {} }) => {
+const DadosBeneficiario = ({ formData, setFormData, styles, buscarDadosFornecedor }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -255,6 +256,11 @@ const styles = {
     fontSize: "14px",
     color: "#1565c0",
     lineHeight: "1.4",
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
   },
 };
 

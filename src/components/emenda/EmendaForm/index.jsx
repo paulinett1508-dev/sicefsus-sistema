@@ -32,6 +32,12 @@ import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
 import LoadingOverlay from '../../LoadingOverlay';
 import Toast from '../../Toast'; // Assuming Toast component is available
 
+// Imports de utilitários e validações
+import { formatarMoeda, parseValorMonetario } from "../../../utils/formatters";
+import { validarFormularioEmenda } from "../../../utils/validators";
+import { validarCNPJ } from "../../../utils/cnpjUtils"; // Importe a função de validação de CNPJ
+import CNPJInput from "../../CNPJInput"; // Importe o componente CNPJInput
+
 const EmendaForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -208,15 +214,22 @@ const EmendaForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prevenir duplo clique
-    if (salvando) return;
-
-    // Validar formulário
-    const validationErrors = validarFormulario();
-    if (validationErrors.length > 0) {
-      setError(validationErrors.join(". "));
+    // Validar CNPJs antes de salvar
+    if (formData.cnpjBeneficiario && !validarCNPJ(formData.cnpjBeneficiario)) {
+      setToast({
+        show: true,
+        message: "❌ CNPJ do beneficiário inválido!",
+        type: "error",
+      });
       return;
     }
+
+    if (!validarFormulario()) {
+      return;
+    }
+
+    // Prevenir duplo clique
+    if (salvando) return;
 
     setSalvando(true); // Ativa estado de salvando
 
@@ -328,6 +341,36 @@ const EmendaForm = () => {
     setShowCancelModal(true);
   };
 
+  // Função para buscar dados da empresa via CNPJ
+  const buscarDadosFornecedor = async (cnpj) => {
+    try {
+      // Remover formatação
+      const cnpjLimpo = cnpj.replace(/\D/g, '');
+
+      // Usar API pública da Receita
+      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+
+      if (response.ok) {
+        const dados = await response.json();
+
+        // Preencher automaticamente outros campos
+        setFormData(prev => ({
+          ...prev,
+          beneficiario: dados.nome_fantasia || dados.razao_social,
+          razaoSocial: dados.razao_social,
+        }));
+
+        // Mostrar notificação de sucesso
+        setToast({
+          show: true,
+          message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
+          type: 'success'
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CNPJ:', error);
+    }
+  };
 
   // ✅ LOADING simplificado
   if (loading) {
@@ -402,8 +445,9 @@ const EmendaForm = () => {
 
         <DadosBeneficiario
           formData={formData}
-          onChange={handleInputChange}
-          errors={{}}
+          setFormData={setFormData}
+          styles={styles}
+          buscarDadosFornecedor={buscarDadosFornecedor} // Passa a função para buscar dados do CNPJ
         />
 
         <DadosBancarios

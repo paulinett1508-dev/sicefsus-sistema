@@ -72,6 +72,8 @@ export function validarCNPJ(cnpj) {
   return true;
 }
 
+import { useState } from 'react';
+
 /**
  * Hook para input de CNPJ com validação em tempo real
  */
