@@ -1,11 +1,11 @@
 {
   "name": "react-javascript",
-  "version": "1.0.0",
+  "version": "2.3.2",
   "type": "module",
   "description": "React TypeScript on Replit, using Vite bundler",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/auto-increment.js production && vite build",
+    "build": "node generate-version.js && vite build",
     "build:dev": "node scripts/auto-increment.js development && vite build --mode development",
     "build:prod": "node scripts/auto-increment.js production && vite build --mode production",
     "build:clean": "rm -rf dist dist-backup && npm run build:prod",

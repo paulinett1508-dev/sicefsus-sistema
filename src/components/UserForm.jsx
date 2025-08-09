@@ -458,7 +458,7 @@ const UserForm = ({
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        municipio: e.target.value.trim(),
+                        municipio: e.target.value,
                       })
                     }
                     disabled={saving || editingUser}

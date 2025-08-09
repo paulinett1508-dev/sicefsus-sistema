@@ -1,5 +1,15 @@
 {
-  "version": "1.0.0",
-  "buildDate": "2025-08-09T16:38:10.974Z",
-  "environment": "production"
+  "version": "2.3.2",
+  "buildDate": "2025-08-09T17:04:58.858Z",
+  "buildDateBR": "09/08/2025 às 17:04",
+  "environment": "production",
+  "changes": [
+    "🚀 Sistema de versionamento centralizado implementado",
+    "✅ Fonte única da verdade em versionControl.js",
+    "🔧 Sincronização automática com package.json",
+    "📊 Funções de incremento de versão automático",
+    "🎯 Interface consistente para todos os componentes"
+  ],
+  "date": "09/08/2025",
+  "timestamp": "09/08/2025 às 17:04"
 }

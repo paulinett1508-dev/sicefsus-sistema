@@ -472,7 +472,7 @@ export default function DespesasTable({
               <button
                 onClick={() => setConfirmExclusao(null)}
                 style={styles.cancelButton}
-                disabled={excludindo}
+                disabled={excluindo === confirmExclusao.id}
               >
                 Cancelar
               </button>
