@@ -26,7 +26,7 @@ export default function DespesasTable({
   totalDespesas = 0,
 }) {
   const navigate = useNavigate();
-  const [excludindo, setExcluindo] = useState(null);
+  const [excluindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState("resumido");
 
@@ -221,8 +221,6 @@ export default function DespesasTable({
                 <>
                   <th style={styles.th}>Nº Contrato</th>
                   <th style={styles.th}>Discriminação</th>
-                  <th style={styles.th}>Data Empenho</th>
-                  <th style={styles.th}>Data Liquidação</th>
                 </>
               )}
               <th style={styles.th}>Nº Empenho</th>
@@ -290,16 +288,6 @@ export default function DespesasTable({
                           {despesa.discriminacao || "-"}
                         </div>
                       </td>
-                      <td style={styles.td}>
-                        <span style={styles.dataCell}>
-                          {formatarDataFirestore(despesa.dataEmpenho)}
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <span style={styles.dataCell}>
-                          {formatarDataFirestore(despesa.dataLiquidacao)}
-                        </span>
-                      </td>
                     </>
                   )}
                   <td style={styles.td}>
@@ -330,7 +318,7 @@ export default function DespesasTable({
                         onClick={() => handleEditar(despesa)}
                         style={styles.editButton}
                         title="Editar despesa"
-                        disabled={excludindo === despesa.id}
+                        disabled={excluindo === despesa.id}
                       >
                         ✏️
                       </button>
@@ -338,7 +326,7 @@ export default function DespesasTable({
                         onClick={() => confirmarExclusao(despesa)}
                         style={styles.deleteButton}
                         title="Excluir despesa"
-                        disabled={excludindo === despesa.id}
+                        disabled={excluindo === despesa.id}
                       >
                         {excludindo === despesa.id ? "⏳" : "🗑️"}
                       </button>

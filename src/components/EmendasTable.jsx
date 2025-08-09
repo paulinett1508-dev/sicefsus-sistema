@@ -283,40 +283,40 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
           <thead style={styles.thead}>
             <tr>
               <th style={styles.th} onClick={() => handleSort("numero")}>
-                📋 Emenda{" "}
+                Emenda{" "}
                 {sortField === "numero" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("parlamentar")}>
-                👤 Parlamentar{" "}
+                Parlamentar{" "}
                 {sortField === "parlamentar" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("tipo")}>
-                🏷️ Tipo{" "}
+                Tipo{" "}
                 {sortField === "tipo" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("municipio")}>
-                🏛️ Município/UF{" "}
+                Município/UF{" "}
                 {sortField === "municipio" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("valorRecurso")}>
-                💰 Valor Total{" "}
+                Valor Total{" "}
                 {sortField === "valorRecurso" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("execucao")}>
-                📊 Execução{" "}
+                Execução{" "}
                 {sortField === "execucao" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("status")}>
-                🏃 Status{" "}
+                Status{" "}
                 {sortField === "status" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
-              <th style={styles.thActions}>⚙️ Ações</th>
+              <th style={styles.thActions}>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -560,6 +560,7 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     backgroundColor: "#2c3e50",
+    color: "#ffffff",
   },
 
   thActions: {
@@ -573,6 +574,7 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     backgroundColor: "#2c3e50",
+    color: "#ffffff",
   },
 
   tr: {
