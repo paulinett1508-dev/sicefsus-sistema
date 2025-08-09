@@ -489,11 +489,11 @@ const Administracao = () => {
                       onClick={() => onToggleStatus(usuario)}
                       style={{
                         ...styles.actionButton,
-                        backgroundColor: "#ffc107",
+                        backgroundColor: usuario.status === "ativo" ? "#ffc107" : "#28a745",
                       }}
-                      title="Alterar status"
+                      title={usuario.status === "ativo" ? "Inativar usuário" : "Ativar usuário"}
                     >
-                      🔄
+                      {usuario.status === "ativo" ? "⏸️" : "▶️"}
                     </button>
                     <button
                       onClick={() => onResetPassword(usuario)}
