@@ -1,0 +1,191 @@
+// 🔧 CORREÇÃO CRÍTICA: useEmendaDespesa.js - Aplicar filtro geográfico
+// Baseado na lógica que FUNCIONA no useDashboardData.js
+// Localização: src/hooks/useEmendaDespesa.js
+
+// Encontrar a função carregarTodasEmendasComMetricas (linha ~200+)
+// SUBSTITUIR o trecho problemático:
+
+// ❌ CÓDIGO ATUAL (PROBLEMÁTICO - linha ~200+):
+/*
+const carregarTodasEmendasComMetricas = useCallback(async () => {
+  try {
+    setLoading(true);
+
+    // ✅ Query base
+    let emendasQuery = query(
+      collection(db, "emendas"),
+      orderBy("numero", "asc"),
+    );
+
+    // ✅ Aplicar filtros APENAS para operadores (se admin, carrega tudo)
+    if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
+      emendasQuery = query(
+        collection(db, "emendas"),
+        where("municipio", "==", filtroMunicipio),
+        where("uf", "==", filtroUf),
+        orderBy("numero", "asc"),
+      );
+    } else if (permissoes.isAdmin) {
+    }
+
+    const [emendasSnapshot, despesasSnapshot] = await Promise.all([
+      getDocs(emendasQuery),
+      getDocs(collection(db, "despesas")),
+    ]);
+*/
+
+// ✅ CÓDIGO CORRIGIDO (APLICAR ESTA CORREÇÃO):
+const carregarTodasEmendasComMetricas = useCallback(async () => {
+  try {
+    setLoading(true);
+
+    // 🔍 IDENTIFICAR CONTEXTO DO USUÁRIO (igual Dashboard)
+    const userRole = usuario?.tipo || usuario?.role || 'operador';
+    const userMunicipio = usuario?.municipio?.trim();
+    const userUf = usuario?.uf?.trim();
+
+    console.log('🎣 useEmendaDespesa - Carregando emendas para:', { 
+      userRole, 
+      userMunicipio, 
+      userUf 
+    });
+
+    // 🚀 APLICAR FILTRO GEOGRÁFICO (IGUAL AO DASHBOARD)
+    let emendasQuery;
+
+    if (userRole === 'admin') {
+      // 👑 ADMIN: Ver todas as emendas
+      console.log('👑 Admin: Carregando todas as emendas');
+      emendasQuery = query(
+        collection(db, "emendas"),
+        orderBy("numero", "asc")
+      );
+    } else {
+      // 🎯 OPERADOR: Filtrar por município e UF (IGUAL DASHBOARD)
+      if (userMunicipio && userUf) {
+        console.log(`🔒 Operador: Filtrando por ${userMunicipio}/${userUf}`);
+        
+        // 🔧 ESTRATÉGIA: Buscar por UF e filtrar manualmente (igual Dashboard)
+        const emendasRef = collection(db, "emendas");
+        const emendasQueryUf = query(emendasRef, where("uf", "==", userUf));
+        
+        const emendasSnapshot = await getDocs(emendasQueryUf);
+        const todasEmendas = [];
+        emendasSnapshot.forEach((doc) => {
+          todasEmendas.push({ id: doc.id, ...doc.data() });
+        });
+
+        console.log(`📊 Total de emendas na UF ${userUf}: ${todasEmendas.length}`);
+
+        // 🎯 FILTRO MANUAL com normalização (igual Dashboard)
+        const normalizarTexto = (texto) => {
+          if (!texto) return "";
+          return texto
+            .toString()
+            .trim()
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+        };
+
+        const municipioNormalizado = normalizarTexto(userMunicipio);
+        console.log('🔄 Município normalizado:', municipioNormalizado);
+
+        const emendasData = todasEmendas.filter((emenda) => {
+          const emendaMunicipio = normalizarTexto(emenda.municipio);
+          const match = emendaMunicipio === municipioNormalizado;
+
+          if (!match) {
+            console.log(`🔍 Comparando: "${municipioNormalizado}" vs "${emendaMunicipio}" = ${match}`);
+          }
+
+          return match;
+        });
+
+        console.log(`✅ Filtro manual encontrou: ${emendasData.length} emendas para ${userMunicipio}`);
+
+        // Carregar despesas das emendas filtradas
+        let despesasData = [];
+        if (emendasData.length > 0) {
+          const emendasIds = emendasData.map((e) => e.id);
+          const batchSize = 10;
+
+          for (let i = 0; i < emendasIds.length; i += batchSize) {
+            const batch = emendasIds.slice(i, i + batchSize);
+            const despesasRef = collection(db, "despesas");
+            const despesasQuery = query(
+              despesasRef,
+              where("emendaId", "in", batch),
+            );
+            const despesasSnapshot = await getDocs(despesasQuery);
+            despesasSnapshot.forEach((doc) => {
+              despesasData.push({ id: doc.id, ...doc.data() });
+            });
+          }
+        }
+
+        // ✅ Calcular métricas para cada emenda (preservar lógica existente)
+        const emendasComMetricas = emendasData.map((emenda) => {
+          const metricasEmenda = calcularMetricasEmenda(emenda, despesasData);
+          return { ...emenda, ...metricasEmenda };
+        });
+
+        setEmendas(emendasComMetricas);
+        setDespesas(despesasData);
+
+        console.log(`✅ Operador carregou: ${emendasComMetricas.length} emendas, ${despesasData.length} despesas`);
+        setLoading(false);
+        return emendasComMetricas;
+
+      } else {
+        // Operador sem município/UF - não carregar dados
+        console.warn('⚠️ Operador sem município/UF definido');
+        setEmendas([]);
+        setDespesas([]);
+        setLoading(false);
+        return [];
+      }
+    }
+
+    // 📊 CÓDIGO PARA ADMIN (preservar lógica original)
+    const [emendasSnapshot, despesasSnapshot] = await Promise.all([
+      getDocs(emendasQuery),
+      getDocs(collection(db, "despesas")),
+    ]);
+
+    const emendasData = emendasSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const despesasData = despesasSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // ✅ Calcular métricas para cada emenda (preservar lógica existente)
+    const emendasComMetricas = emendasData.map((emenda) => {
+      const metricasEmenda = calcularMetricasEmenda(emenda, despesasData);
+      return { ...emenda, ...metricasEmenda };
+    });
+
+    setEmendas(emendasComMetricas);
+    setDespesas(despesasData);
+
+    console.log(`✅ Admin carregou: ${emendasComMetricas.length} emendas, ${despesasData.length} despesas`);
+    return emendasComMetricas;
+    
+  } catch (err) {
+    console.error("❌ Erro ao carregar emendas:", err);
+    setError("Erro ao carregar dados");
+    return [];
+  } finally {
+    setLoading(false);
+  }
+}, [calcularMetricasEmenda, usuario?.tipo, usuario?.municipio, usuario?.uf]); // ✅ ADICIONAR dependências
+
+// 🎯 INSTRUÇÕES DE APLICAÇÃO:
+// 1. Encontrar a função carregarTodasEmendasComMetricas no useEmendaDespesa.js
+// 2. Substituir toda a função pelo código acima
+// 3. Certificar que os imports incluem: query, where do firebase/firestore
+// 4. Testar com operador Simone Araújo
