@@ -1,5 +1,6 @@
 import React from "react";
 import CNPJInput from "../../../CNPJInput";
+import CNPJTester from "../../../CNPJTester";
 
 const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estados = [
@@ -38,6 +39,9 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
         <span style={styles.legendIcon}>🏢</span>
         Identificação
       </legend>
+
+      {/* DEBUG: Componente temporário para testar CNPJ */}
+      <CNPJTester />
 
       <div style={styles.formGrid}>
         {/* CNPJ - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}

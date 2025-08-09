@@ -224,6 +224,31 @@ const DadosBeneficiario = ({
               />
             </div>
 
+            {/* CNPJ do Beneficiário - USANDO CNPJInput COM VALIDAÇÃO */}
+            <div style={customStyles.formGroup}>
+              <CNPJInput
+                label="CNPJ do Beneficiário (Opcional)"
+                value={formData?.cnpjBeneficiario || ""}
+                onChange={(e) => {
+                  console.log("🔧 DadosBeneficiario CNPJ change:", e.target.value);
+                  onChange({
+                    target: {
+                      name: "cnpjBeneficiario",
+                      value: e.target.value,
+                    },
+                  });
+                }}
+                required={false}
+                placeholder="00.000.000/0000-00"
+                showValidation={true}
+                style={customStyles.formGroup}
+                inputStyle={customStyles.input}
+                onValidChange={(isValid, value) => {
+                  console.log("🎯 DadosBeneficiario CNPJ validation:", isValid, value);
+                }}
+              />
+            </div>
+
             {/* CPF do Responsável */}
             <div style={customStyles.formGroup}>
               <label style={customStyles.label}>CPF do Responsável</label>

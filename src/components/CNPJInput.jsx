@@ -28,6 +28,7 @@ const CNPJInput = ({
   const handleChange = (e) => {
     const rawValue = e.target.value;
     const formatted = formatarCNPJ(rawValue);
+    console.log("🔧 CNPJInput handleChange - Raw:", rawValue, "Formatted:", formatted);
 
     // Só permite números e formatação
     if (rawValue.length > formatted.length + 1) return;
@@ -46,9 +47,12 @@ const CNPJInput = ({
 
     // VALIDAÇÃO EM TEMPO REAL - Valida sempre que há mudança
     const digits = formatted.replace(/\D/g, "");
+    console.log("🔢 CNPJInput digits:", digits, "length:", digits.length);
 
     if (digits.length === 14) {
+      console.log("🔍 CNPJInput - Validando CNPJ completo:", digits);
       const valid = validarCNPJ(digits); // Usar apenas números para validação
+      console.log("✅ CNPJInput - Resultado validação:", valid);
       setIsValid(valid);
 
       // Callback de validação
@@ -57,11 +61,13 @@ const CNPJInput = ({
       }
     } else if (digits.length > 0) {
       // AJUSTE URGENTE: Invalida imediatamente se não tem 14 dígitos
+      console.log("⚠️ CNPJInput - CNPJ incompleto, invalidando");
       setIsValid(false);
       if (onValidChange) {
         onValidChange(false, formatted);
       }
     } else {
+      console.log("🔄 CNPJInput - Campo vazio");
       setIsValid(false);
       if (onValidChange) {
         onValidChange(false, formatted);
