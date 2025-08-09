@@ -1,4 +1,4 @@
-// src/components/CNPJInput.jsx
+// src/components/CNPJInput.jsx - VALIDAÇÃO EM TEMPO REAL APRIMORADA
 import React, { useState, useEffect } from "react";
 import { formatarCNPJ, validarCNPJ } from "../utils/cnpjUtils";
 
@@ -34,26 +34,32 @@ const CNPJInput = ({
 
     setCNPJ(formatted);
 
-    // Callback com valor formatado
+    // CORREÇÃO CRÍTICA: Callback sem rawValue para evitar problemas no form
     if (onChange) {
       onChange({
         target: {
           name: e.target.name,
           value: formatted,
-          rawValue: formatted.replace(/\D/g, ""),
         },
       });
     }
 
-    // Valida se tiver 14 dígitos
+    // VALIDAÇÃO EM TEMPO REAL - Valida sempre que há mudança
     const digits = formatted.replace(/\D/g, "");
+
     if (digits.length === 14) {
-      const valid = validarCNPJ(formatted);
+      const valid = validarCNPJ(digits); // Usar apenas números para validação
       setIsValid(valid);
 
       // Callback de validação
       if (onValidChange) {
         onValidChange(valid, formatted);
+      }
+    } else if (digits.length > 0) {
+      // AJUSTE URGENTE: Invalida imediatamente se não tem 14 dígitos
+      setIsValid(false);
+      if (onValidChange) {
+        onValidChange(false, formatted);
       }
     } else {
       setIsValid(false);
@@ -63,8 +69,29 @@ const CNPJInput = ({
     }
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e) => {
     setTouched(true);
+
+    // VALIDAÇÃO IMEDIATA AO SAIR DO CAMPO
+    const digits = cnpj.replace(/\D/g, "");
+    if (digits.length > 0 && digits.length < 14) {
+      setIsValid(false);
+      if (onValidChange) {
+        onValidChange(false, cnpj);
+      }
+    } else if (digits.length === 14) {
+      // Re-validar ao sair do campo
+      const valid = validarCNPJ(digits);
+      setIsValid(valid);
+      if (onValidChange) {
+        onValidChange(valid, cnpj);
+      }
+    }
+
+    // Chama onBlur se foi passado
+    if (e.target.onBlur) {
+      e.target.onBlur(e);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -75,8 +102,10 @@ const CNPJInput = ({
     }
   };
 
-  const hasError = touched && !isValid && cnpj.length > 0;
-  const showSuccess = touched && isValid && cnpj.length === 18;
+  // AJUSTE URGENTE: Mostra erro assim que usuário digita algo inválido
+  const digits = cnpj.replace(/\D/g, "");
+  const hasError = digits.length > 0 && (digits.length < 14 || !isValid);
+  const showSuccess = digits.length === 14 && isValid;
 
   return (
     <div style={{ ...styles.container, ...style }} className={className}>
@@ -106,7 +135,7 @@ const CNPJInput = ({
           }}
         />
 
-        {showValidation && cnpj.length > 0 && (
+        {showValidation && digits.length > 0 && (
           <div style={styles.validationIcon}>
             {loading ? (
               <span style={styles.loadingIcon}>🔄</span>
@@ -121,9 +150,12 @@ const CNPJInput = ({
         )}
       </div>
 
+      {/* MENSAGEM DE ERRO EM TEMPO REAL */}
       {showValidation && hasError && (
         <div style={styles.errorMessage}>
-          CNPJ inválido. Verifique os dígitos.
+          {digits.length < 14 && digits.length > 0
+            ? `CNPJ incompleto (${digits.length}/14 dígitos)`
+            : "CNPJ inválido. Verifique os dígitos."}
         </div>
       )}
 

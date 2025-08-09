@@ -1,5 +1,5 @@
 import React from "react";
-import { formatarCNPJ, validarCNPJ } from '../../../../utils/cnpjUtils';
+import CNPJInput from "../../../CNPJInput";
 
 const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estados = [
@@ -32,27 +32,6 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
     { sigla: "TO", nome: "Tocantins" },
   ];
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "cnpjBeneficiario") {
-      const formatted = formatarCNPJ(value);
-      onChange({ target: { name, value: formatted } });
-    } else {
-      onChange(e);
-    }
-  };
-
-  const getCNPJStatus = () => {
-    if (!formData.cnpjBeneficiario || formData.cnpjBeneficiario.length < 3)
-      return null;
-    const cnpjLimpo = formData.cnpjBeneficiario.replace(/\D/g, "");
-    if (cnpjLimpo.length < 14) return "incomplete";
-    return validarCNPJ(formData.cnpjBeneficiario) ? "valid" : "invalid";
-  };
-
-  const cnpjStatus = getCNPJStatus();
-
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
@@ -61,29 +40,26 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ - CORRIGIDO */}
+        {/* CNPJ - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            CNPJ <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="cnpjBeneficiario"
+          <CNPJInput
+            label="CNPJ"
             value={formData.cnpjBeneficiario || ""}
-            onChange={handleInputChange}
-            placeholder="00.000.000/0000-00"
-            style={{
-              ...styles.input,
-              ...(fieldErrors.cnpjBeneficiario && styles.inputError),
-              ...(cnpjStatus === "valid" && styles.inputValid),
-              ...(cnpjStatus === "invalid" && styles.inputError),
+            onChange={(e) => {
+              onChange({
+                target: {
+                  name: "cnpjBeneficiario",
+                  value: e.target.value,
+                },
+              });
             }}
-            required
+            required={true}
+            placeholder="00.000.000/0000-00"
+            showValidation={true}
+            style={styles.formGroup}
+            inputStyle={styles.input}
           />
-          {cnpjStatus === "invalid" && (
-            <small style={styles.errorText}>CNPJ inválido</small>
-          )}
-          {fieldErrors.cnpjBeneficiario && !cnpjStatus && (
+          {fieldErrors.cnpjBeneficiario && (
             <small style={styles.errorText}>
               {fieldErrors.cnpjBeneficiario}
             </small>

@@ -1,20 +1,19 @@
-
 import React, { useState } from "react";
 import CNPJInput from "../../../CNPJInput";
 
-const DadosBeneficiario = ({ 
-  formData, 
-  onChange, 
-  setFormData, 
-  styles, 
-  buscarDadosFornecedor, 
+const DadosBeneficiario = ({
+  formData,
+  onChange,
+  setFormData,
+  styles,
+  buscarDadosFornecedor,
   errors = {},
   expanded,
-  onToggle
+  onToggle,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const toggleExpanded = () => {
     if (onToggle) {
@@ -23,45 +22,51 @@ const DadosBeneficiario = ({
       setIsExpanded(!isExpanded);
     }
   };
-  
+
   // Use external expanded state if provided, otherwise use internal state
   const currentExpanded = expanded !== undefined ? expanded : isExpanded;
 
   // Função para buscar dados do CNPJ automaticamente
   const buscarDadosCNPJ = async (cnpj) => {
     try {
-      const cnpjLimpo = cnpj.replace(/\D/g, '');
-      
+      const cnpjLimpo = cnpj.replace(/\D/g, "");
+
       if (cnpjLimpo.length !== 14) return;
-      
+
       setLoading(true);
-      
+
       // API pública para consulta de CNPJ
-      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
-      
+      const response = await fetch(
+        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+      );
+
       if (response.ok) {
         const dados = await response.json();
-        
+
         // Preencher campos automaticamente
         const novosValores = {
-          beneficiario: dados.razao_social || dados.nome_fantasia || formData.beneficiario,
-          enderecoBeneficiario: dados.logradouro && dados.numero 
-            ? `${dados.logradouro}, ${dados.numero} - ${dados.bairro}, ${dados.municipio}/${dados.uf}`
-            : formData.enderecoBeneficiario,
-          telefoneBeneficiario: dados.ddd_telefone_1 && dados.telefone_1 
-            ? `(${dados.ddd_telefone_1}) ${dados.telefone_1}`
-            : formData.telefoneBeneficiario,
+          beneficiario:
+            dados.razao_social || dados.nome_fantasia || formData.beneficiario,
+          enderecoBeneficiario:
+            dados.logradouro && dados.numero
+              ? `${dados.logradouro}, ${dados.numero} - ${dados.bairro}, ${dados.municipio}/${dados.uf}`
+              : formData.enderecoBeneficiario,
+          telefoneBeneficiario:
+            dados.ddd_telefone_1 && dados.telefone_1
+              ? `(${dados.ddd_telefone_1}) ${dados.telefone_1}`
+              : formData.telefoneBeneficiario,
           emailBeneficiario: dados.email || formData.emailBeneficiario,
-          responsavelLegal: dados.qsa && dados.qsa[0] && dados.qsa[0].nome 
-            ? dados.qsa[0].nome 
-            : formData.responsavelLegal
+          responsavelLegal:
+            dados.qsa && dados.qsa[0] && dados.qsa[0].nome
+              ? dados.qsa[0].nome
+              : formData.responsavelLegal,
         };
 
         // Atualizar formData com múltiplos campos
         if (setFormData) {
-          setFormData(prev => ({
+          setFormData((prev) => ({
             ...prev,
-            ...novosValores
+            ...novosValores,
           }));
         } else {
           // Se não tiver setFormData, usar onChange para cada campo
@@ -70,42 +75,42 @@ const DadosBeneficiario = ({
               onChange({
                 target: {
                   name: key,
-                  value: value
-                }
+                  value: value,
+                },
               });
             }
           });
         }
-        
+
         // Expandir automaticamente para mostrar os dados preenchidos se usando estado interno
         if (onToggle) {
           onToggle(); // Use external toggle function if provided
         } else {
           setIsExpanded(true);
         }
-        
+
         // Mostrar feedback de sucesso
         setToast({
           show: true,
           message: `✅ Dados carregados: ${dados.nome_fantasia || dados.razao_social}`,
-          type: 'success'
+          type: "success",
         });
-        
+
         // Ocultar toast após 3 segundos
         setTimeout(() => {
-          setToast({ show: false, message: '', type: '' });
+          setToast({ show: false, message: "", type: "" });
         }, 3000);
       }
     } catch (error) {
-      console.error('Erro ao buscar CNPJ:', error);
+      console.error("Erro ao buscar CNPJ:", error);
       setToast({
         show: true,
-        message: '⚠️ Erro ao buscar dados do CNPJ',
-        type: 'error'
+        message: "⚠️ Erro ao buscar dados do CNPJ",
+        type: "error",
       });
-      
+
       setTimeout(() => {
-        setToast({ show: false, message: '', type: '' });
+        setToast({ show: false, message: "", type: "" });
       }, 3000);
     } finally {
       setLoading(false);
@@ -113,76 +118,43 @@ const DadosBeneficiario = ({
   };
 
   return (
-    <div style={styles.section}>
+    <div style={customStyles.section}>
       {/* Toast de notificação */}
       {toast.show && (
-        <div style={toast.type === 'success' ? customStyles.toastSuccess : customStyles.toastError}>
+        <div
+          style={
+            toast.type === "success"
+              ? customStyles.toastSuccess
+              : customStyles.toastError
+          }
+        >
           {toast.message}
         </div>
       )}
 
-      {/* CNPJ do Beneficiário - Campo Principal */}
-      <div style={styles.content}>
-        <div style={styles.row}>
-          <div style={styles.field}>
-            <CNPJInput
-              label="CNPJ do Beneficiário"
-              value={formData.cnpjBeneficiario || ''}
-              onChange={(e) => {
-                onChange({
-                  target: {
-                    name: 'cnpjBeneficiario',
-                    value: e.target.value
-                  }
-                });
-              }}
-              onValidChange={(isValid, value) => {
-                if (isValid && value) {
-                  // Buscar dados automaticamente quando CNPJ for válido
-                  buscarDadosCNPJ(value);
-                }
-              }}
-              required={true}
-              placeholder="00.000.000/0000-00"
-              showValidation={true}
-              disabled={loading}
-              style={styles.formGroup}
-            />
-            
-            {loading && (
-              <div style={customStyles.loadingIndicator}>
-                <span>🔄 Buscando dados do CNPJ...</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* HEADER COLAPSÁVEL para informações adicionais */}
-      <div style={styles.headerContainer} onClick={toggleExpanded}>
-        <h3 style={styles.sectionTitle}>
-          <span style={styles.sectionIcon}>
-            {currentExpanded ? '📂' : '📁'}
+      {/* HEADER COLAPSÁVEL - MESMO FORMATO DE InformacoesComplementares */}
+      <div style={customStyles.headerContainer} onClick={toggleExpanded}>
+        <legend style={customStyles.legend}>
+          <span style={customStyles.legendIcon}>📋</span>
+          Informações Adicionais do Beneficiário (Opcional)
+        </legend>
+        <div style={customStyles.toggleButton}>
+          <span style={customStyles.toggleIcon}>
+            {currentExpanded ? "−" : "+"}
           </span>
-          Informações Adicionais do Beneficiário (opcional)
-        </h3>
-        <div style={styles.toggleButton}>
-          <span style={styles.toggleIcon}>
-            {currentExpanded ? '−' : '+'}
-          </span>
-          <span style={styles.toggleText}>
-            {currentExpanded ? 'Ocultar' : 'Exibir'}
+          <span style={customStyles.toggleText}>
+            {currentExpanded ? "Ocultar" : "Exibir"}
           </span>
         </div>
       </div>
 
-      {/* CONTEÚDO COLAPSÁVEL */}
+      {/* CONTEÚDO COLAPSÁVEL - MESMO FORMATO DE InformacoesComplementares */}
       {currentExpanded && (
-        <div style={styles.content}>
-          {/* Primeira linha - Nome e Endereço */}
-          <fieldset style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>
+        <div style={customStyles.content}>
+          <div style={customStyles.formGrid}>
+            {/* Nome/Razão Social */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>
                 Nome/Razão Social do Beneficiário
               </label>
               <input
@@ -191,96 +163,107 @@ const DadosBeneficiario = ({
                 value={formData?.beneficiario || ""}
                 onChange={onChange}
                 placeholder="Nome completo da instituição beneficiária"
-                style={styles.input}
+                style={customStyles.input}
               />
               {errors?.beneficiario && (
-                <span style={styles.errorText}>{errors.beneficiario}</span>
+                <span style={customStyles.errorText}>
+                  {errors.beneficiario}
+                </span>
               )}
             </div>
 
-            <div style={styles.field}>
-              <label style={styles.label}>
-                Endereço do Beneficiário
-              </label>
+            {/* Endereço */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>Endereço do Beneficiário</label>
               <input
                 type="text"
                 name="enderecoBeneficiario"
                 value={formData?.enderecoBeneficiario || ""}
                 onChange={onChange}
                 placeholder="Rua, número, bairro, cidade/UF"
-                style={styles.input}
+                style={customStyles.input}
               />
             </div>
-          </fieldset>
 
-          {/* Segunda linha - Telefone, Email */}
-          <fieldset style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>
-                Telefone de Contato
-              </label>
+            {/* Telefone */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>Telefone de Contato</label>
               <input
-                type="text"
+                type="tel"
                 name="telefoneBeneficiario"
                 value={formData?.telefoneBeneficiario || ""}
                 onChange={onChange}
                 placeholder="(00) 00000-0000"
-                style={styles.input}
+                style={customStyles.input}
               />
             </div>
 
-            <div style={styles.field}>
-              <label style={styles.label}>
-                Email do Beneficiário
-              </label>
+            {/* Email */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>E-mail do Beneficiário</label>
               <input
                 type="email"
                 name="emailBeneficiario"
                 value={formData?.emailBeneficiario || ""}
                 onChange={onChange}
                 placeholder="email@instituicao.com.br"
-                style={styles.input}
+                style={customStyles.input}
               />
             </div>
-          </fieldset>
 
-          {/* Terceira linha - Responsável Legal e CPF */}
-          <fieldset style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>
-                Responsável Legal
-              </label>
+            {/* Responsável Legal */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>Responsável Legal</label>
               <input
                 type="text"
                 name="responsavelLegal"
                 value={formData?.responsavelLegal || ""}
                 onChange={onChange}
                 placeholder="Nome do responsável pela instituição"
-                style={styles.input}
+                style={customStyles.input}
               />
             </div>
 
-            <div style={styles.field}>
-              <label style={styles.label}>
-                CPF do Responsável
-              </label>
+            {/* CPF do Responsável */}
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>CPF do Responsável</label>
               <input
                 type="text"
                 name="cpfResponsavel"
                 value={formData?.cpfResponsavel || ""}
                 onChange={onChange}
                 placeholder="000.000.000-00"
-                style={styles.input}
+                style={customStyles.input}
               />
             </div>
-          </fieldset>
+          </div>
 
-          {/* BANNER INFORMATIVO */}
-          <div style={styles.infoBanner}>
-            <div style={styles.infoIcon}>ℹ️</div>
-            <div style={styles.infoText}>
-              Digite um CNPJ válido acima para preencher automaticamente os dados do beneficiário. 
-              Estas informações complementam os dados básicos e facilitam o contato e acompanhamento da execução da emenda.
+          {/* Campos de texto maiores - MESMO FORMATO */}
+          <div style={customStyles.textAreaGrid}>
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>
+                Observações sobre o Beneficiário
+              </label>
+              <textarea
+                name="observacoesBeneficiario"
+                value={formData.observacoesBeneficiario || ""}
+                onChange={onChange}
+                placeholder="Informações complementares sobre o beneficiário..."
+                rows="3"
+                style={customStyles.textarea}
+              />
+            </div>
+
+            <div style={customStyles.formGroup}>
+              <label style={customStyles.label}>Informações Adicionais</label>
+              <textarea
+                name="infoAdicionaisBeneficiario"
+                value={formData.infoAdicionaisBeneficiario || ""}
+                onChange={onChange}
+                placeholder="Outras informações relevantes..."
+                rows="3"
+                style={customStyles.textarea}
+              />
             </div>
           </div>
         </div>
@@ -289,47 +272,8 @@ const DadosBeneficiario = ({
   );
 };
 
-// Estilos customizados adicionais
+// Estilos customizados - MESMO FORMATO DE InformacoesComplementares
 const customStyles = {
-  toastSuccess: {
-    position: 'fixed',
-    top: '20px',
-    right: '20px',
-    backgroundColor: '#d4edda',
-    color: '#155724',
-    padding: '12px 20px',
-    borderRadius: '6px',
-    border: '1px solid #c3e6cb',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    zIndex: 1000,
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-  
-  toastError: {
-    position: 'fixed',
-    top: '20px',
-    right: '20px',
-    backgroundColor: '#f8d7da',
-    color: '#721c24',
-    padding: '12px 20px',
-    borderRadius: '6px',
-    border: '1px solid #f5c6cb',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    zIndex: 1000,
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-  
-  loadingIndicator: {
-    marginTop: '8px',
-    fontSize: '14px',
-    color: '#666',
-    fontStyle: 'italic',
-  },
-};
-
-const styles = {
   section: {
     border: "2px solid #154360",
     borderRadius: "10px",
@@ -338,10 +282,11 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     overflow: "hidden",
     marginBottom: "20px",
+    marginTop: "20px",
   },
 
   headerContainer: {
-    padding: "20px",
+    padding: "15px 20px",
     backgroundColor: "#f8f9fa",
     borderBottom: "1px solid #dee2e6",
     cursor: "pointer",
@@ -351,7 +296,7 @@ const styles = {
     transition: "background-color 0.2s ease",
   },
 
-  sectionTitle: {
+  legend: {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
@@ -365,7 +310,7 @@ const styles = {
     margin: 0,
   },
 
-  sectionIcon: {
+  legendIcon: {
     fontSize: "18px",
   },
 
@@ -392,16 +337,20 @@ const styles = {
     padding: "20px",
   },
 
-  row: {
+  formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
     marginBottom: "20px",
-    border: "none",
-    padding: "0",
   },
 
-  field: {
+  textAreaGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
+  },
+
+  formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
@@ -420,7 +369,17 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    boxSizing: "border-box",
+  },
+
+  textarea: {
+    padding: "12px",
+    border: "2px solid #dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    backgroundColor: "white",
+    resize: "vertical",
+    fontFamily: "inherit",
   },
 
   errorText: {
@@ -429,31 +388,41 @@ const styles = {
     marginTop: "4px",
   },
 
-  infoBanner: {
-    display: "flex",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#e3f2fd",
-    border: "1px solid #bbdefb",
+  toastSuccess: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    backgroundColor: "#d4edda",
+    color: "#155724",
+    padding: "12px 20px",
     borderRadius: "6px",
-    marginTop: "20px",
-  },
-
-  infoIcon: {
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-
-  infoText: {
+    border: "1px solid #c3e6cb",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    zIndex: 1000,
     fontSize: "14px",
-    color: "#1565c0",
-    lineHeight: "1.4",
+    fontWeight: "500",
   },
 
-  formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+  toastError: {
+    position: "fixed",
+    top: "20px",
+    right: "20px",
+    backgroundColor: "#f8d7da",
+    color: "#721c24",
+    padding: "12px 20px",
+    borderRadius: "6px",
+    border: "1px solid #f5c6cb",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    zIndex: 1000,
+    fontSize: "14px",
+    fontWeight: "500",
+  },
+
+  loadingIndicator: {
+    marginTop: "8px",
+    fontSize: "14px",
+    color: "#666",
+    fontStyle: "italic",
   },
 };
 

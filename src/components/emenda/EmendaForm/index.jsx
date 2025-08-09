@@ -1,8 +1,4 @@
-// src/components/emenda/EmendaForm/index.jsx - CORREÇÕES CRÍTICAS
-// ✅ CORRIGIDO: Valor dos recursos em formato monetário
-// ✅ CORRIGIDO: CNPJ com mapeamento correto
-// ✅ MANTIDO: Todas as funcionalidades existentes
-
+// src/components/emenda/EmendaForm/index.jsx - VALIDAÇÃO CORRIGIDA
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -29,28 +25,30 @@ import InformacoesComplementares from "./sections/InformacoesComplementares";
 import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
-import LoadingOverlay from '../../LoadingOverlay';
-import Toast from '../../Toast'; // Assuming Toast component is available
+import LoadingOverlay from "../../LoadingOverlay";
+import Toast from "../../Toast";
 
 // Imports de utilitários e validações
-import { formatarMoedaDisplay, formatarMoedaInput, parseValorMonetario } from "../../../utils/formatters";
+import {
+  formatarMoedaDisplay,
+  formatarMoedaInput,
+  parseValorMonetario,
+} from "../../../utils/formatters";
 import { validarFormularioEmenda } from "../../../utils/validators";
-import { validarCNPJ } from "../../../utils/cnpjUtils"; // Importe a função de validação de CNPJ
-import CNPJInput from "../../CNPJInput"; // Importe o componente CNPJInput
+import { validarCNPJ, limparCNPJ } from "../../../utils/cnpjUtils";
 
 const EmendaForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
 
-  // ✅ CORREÇÃO: Estados simplificados
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false); // Renamed to saving to match the provided changes
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [salvando, setSalvando] = useState(false); // Added for the loading overlay
-  const [toast, setToast] = useState({ show: false, message: "", type: "" }); // Added for toast notifications
+  const [salvando, setSalvando] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
   const [formData, setFormData] = useState({
     numero: "",
@@ -72,11 +70,10 @@ const EmendaForm = () => {
     dataValidade: "",
     inicioExecucao: "",
     finalExecucao: "",
-    // ✅ CAMPOS ADICIONADOS: Estados iniciais
     numeroProposta: "",
     funcional: "",
     dataOb: "",
-    dataUltimaAtualizacao: new Date().toISOString().split("T")[0], // Data atual automática
+    dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
     acoesServicos: [],
     observacoes: "",
   });
@@ -91,14 +88,12 @@ const EmendaForm = () => {
   const mountedRef = useRef(true);
   const isEdicao = Boolean(id);
 
-  // ✅ CLEANUP
   useEffect(() => {
     return () => {
       mountedRef.current = false;
     };
   }, []);
 
-  // ✅ CORREÇÃO PRINCIPAL: useEffect simplificado
   useEffect(() => {
     const inicializar = async () => {
       console.log("🚀 Inicializando EmendaForm...", {
@@ -112,7 +107,6 @@ const EmendaForm = () => {
         setError(null);
 
         if (isEdicao && id) {
-          // ✅ MODO EDIÇÃO: Carregar emenda
           console.log("📝 Carregando emenda para edição:", id);
 
           const emendaDoc = await getDoc(doc(db, "emendas", id));
@@ -124,7 +118,6 @@ const EmendaForm = () => {
           const emendaData = emendaDoc.data();
           console.log("✅ Emenda carregada:", emendaData.numero);
 
-          // ✅ CORRIGIDO: Valor dos Recursos em formato monetário
           const valorFormatado =
             typeof emendaData.valorRecurso === "number"
               ? emendaData.valorRecurso.toLocaleString("pt-BR", {
@@ -154,7 +147,6 @@ const EmendaForm = () => {
               emendaData.dataValidade || emendaData.dataValidada || "",
             inicioExecucao: emendaData.inicioExecucao || "",
             finalExecucao: emendaData.finalExecucao || "",
-            // ✅ CAMPOS CORRIGIDOS: Mapeamento correto
             numeroProposta: emendaData.numeroProposta || "",
             funcional: emendaData.funcional || "",
             dataOb: emendaData.dataOb || "",
@@ -162,7 +154,6 @@ const EmendaForm = () => {
             observacoes: emendaData.observacoes || "",
           });
         } else {
-          // ✅ MODO CRIAÇÃO: Pré-preencher dados do operador
           console.log("➕ Modo criação - preparando formulário limpo");
 
           if (user?.tipo === "operador" && user?.municipio && user?.uf) {
@@ -189,7 +180,6 @@ const EmendaForm = () => {
       }
     };
 
-    // Verificar se o usuário está disponível antes de inicializar
     if (user) {
       inicializar();
     } else {
@@ -197,7 +187,6 @@ const EmendaForm = () => {
     }
   }, [user, id, isEdicao]);
 
-  // ✅ HANDLERS simplificados
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -207,20 +196,87 @@ const EmendaForm = () => {
   };
 
   const toggleSection = (sectionName) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [sectionName]: !prev[sectionName]
+      [sectionName]: !prev[sectionName],
     }));
   };
 
+  // ✅ VALIDAÇÃO CORRIGIDA E COMPLETA
   const validarFormulario = () => {
     const errors = [];
 
-    if (!formData.numero?.trim()) errors.push("Número da emenda é obrigatório");
-    if (!formData.autor?.trim()) errors.push("Autor/Parlamentar é obrigatório");
-    if (!formData.municipio?.trim()) errors.push("Município é obrigatório");
-    if (!formData.uf?.trim()) errors.push("UF é obrigatória");
-    if (!formData.valor?.toString().trim()) errors.push("Valor é obrigatório");
+    // Campos obrigatórios básicos
+    if (!formData.numero?.trim()) {
+      errors.push("Número da emenda é obrigatório");
+    }
+
+    if (!formData.autor?.trim()) {
+      errors.push("Parlamentar/Autor é obrigatório");
+    }
+
+    if (!formData.municipio?.trim()) {
+      errors.push("Município é obrigatório");
+    }
+
+    if (!formData.uf?.trim()) {
+      errors.push("UF é obrigatória");
+    }
+
+    if (!formData.programa?.trim()) {
+      errors.push("Programa é obrigatório");
+    }
+
+    if (!formData.objeto?.trim()) {
+      errors.push("Objeto da Proposta é obrigatório");
+    }
+
+    if (!formData.beneficiario?.trim()) {
+      errors.push("Beneficiário (CNPJ) é obrigatório");
+    }
+
+    if (!formData.valor?.toString().trim()) {
+      errors.push("Valor do Recurso é obrigatório");
+    }
+
+    // ✅ VALIDAÇÃO CNPJ CORRIGIDA - Usando o campo correto
+    if (formData.cnpjBeneficiario) {
+      const cnpjLimpo = limparCNPJ(formData.cnpjBeneficiario);
+      if (cnpjLimpo.length === 14) {
+        if (!validarCNPJ(formData.cnpjBeneficiario)) {
+          errors.push("CNPJ do município (Identificação) é inválido");
+        }
+      } else if (cnpjLimpo.length > 0) {
+        errors.push("CNPJ do município está incompleto");
+      }
+    }
+
+    // ✅ VALIDAÇÃO CNPJ BENEFICIÁRIO CORRIGIDA
+    if (formData.beneficiario) {
+      const cnpjLimpo = limparCNPJ(formData.beneficiario);
+      if (cnpjLimpo.length === 14) {
+        if (!validarCNPJ(formData.beneficiario)) {
+          errors.push("CNPJ do beneficiário é inválido");
+        }
+      } else if (cnpjLimpo.length > 0) {
+        errors.push("CNPJ do beneficiário está incompleto");
+      }
+    }
+
+    // Validação de valor
+    if (formData.valor) {
+      const valorNumerico = parseFloat(
+        formData.valor
+          .toString()
+          .replace(/[R$\s]/g, "")
+          .replace(/\./g, "")
+          .replace(",", "."),
+      );
+
+      if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        errors.push("Valor do recurso deve ser maior que zero");
+      }
+    }
 
     return errors;
   };
@@ -228,34 +284,33 @@ const EmendaForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar CNPJs antes de salvar
-    if (formData.cnpjBeneficiario && !validarCNPJ(formData.cnpjBeneficiario)) {
+    // ✅ VALIDAÇÃO COMPLETA ANTES DE SALVAR
+    const validationErrors = validarFormulario();
+
+    if (validationErrors.length > 0) {
       setToast({
         show: true,
-        message: "❌ CNPJ do beneficiário inválido!",
+        message: `❌ Erro na validação:\n${validationErrors.join("\n")}`,
         type: "error",
       });
-      return;
-    }
-
-    if (!validarFormulario()) {
       return;
     }
 
     // Prevenir duplo clique
     if (salvando) return;
 
-    setSalvando(true); // Ativa estado de salvando
+    setSalvando(true);
 
     try {
       const valorNumerico = parseFloat(
         formData.valor
           ?.toString()
-          .replace(/[R$\s]/g, "") // Remove R$ e espaços
-          .replace(/\./g, "") // Remove pontos (milhares)
-          .replace(",", "."), // Troca vírgula por ponto (decimais)
+          .replace(/[R$\s]/g, "")
+          .replace(/\./g, "")
+          .replace(",", "."),
       );
 
+      // ✅ DADOS CORRIGIDOS - Campos mapeados corretamente
       const dadosParaSalvar = {
         numero: formData.numero?.trim(),
         autor: formData.autor?.trim(),
@@ -277,7 +332,6 @@ const EmendaForm = () => {
         dataValidade: formData.dataValidade,
         inicioExecucao: formData.inicioExecucao,
         finalExecucao: formData.finalExecucao,
-        // ✅ CAMPOS CORRIGIDOS: Incluídos no salvamento
         numeroProposta: formData.numeroProposta?.trim(),
         funcional: formData.funcional?.trim(),
         dataOb: formData.dataOb,
@@ -285,8 +339,7 @@ const EmendaForm = () => {
         observacoes: formData.observacoes?.trim(),
         valorExecutado: 0,
         status: "Ativa",
-        // ✅ DATA AUTOMÁTICA: Data de última atualização
-        dataUltimaAtualizacao: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
         atualizadoEm: serverTimestamp(),
         atualizadoPor: user.uid || user.email,
       };
@@ -301,11 +354,9 @@ const EmendaForm = () => {
           type: "success",
         });
 
-        // Aguardar e redirecionar
         setTimeout(() => {
-          navigate('/emendas', { replace: true });
+          navigate("/emendas", { replace: true });
         }, 800);
-
       } else {
         dadosParaSalvar.criadoEm = serverTimestamp();
         dadosParaSalvar.criadoPor = user.uid || user.email;
@@ -318,19 +369,17 @@ const EmendaForm = () => {
           type: "success",
         });
 
-        // Aguardar e redirecionar
         setTimeout(() => {
-          navigate('/emendas', { replace: true });
+          navigate("/emendas", { replace: true });
         }, 800);
       }
-
     } catch (error) {
       console.error("❌ Erro ao salvar:", error);
       let mensagemErro = "❌ Erro ao salvar emenda. ";
 
-      if (error.code === 'permission-denied') {
+      if (error.code === "permission-denied") {
         mensagemErro += "Você não tem permissão para esta operação.";
-      } else if (error.code === 'already-exists') {
+      } else if (error.code === "already-exists") {
         mensagemErro += "Já existe uma emenda com este número.";
       } else {
         mensagemErro += "Tente novamente.";
@@ -342,70 +391,62 @@ const EmendaForm = () => {
         type: "error",
       });
     } finally {
-      setSalvando(false); // Desativa estado de salvando
+      setSalvando(false);
     }
   };
 
-  // Mock para emendaParaEditar e onSuccess, se não estiverem definidos em um contexto pai
-  const emendaParaEditar = null; // Substitua pelo contexto real se existir
-  const onSuccess = null; // Substitua pelo callback real se existir
+  const emendaParaEditar = null;
+  const onSuccess = null;
 
   const handleCancel = () => {
-    // Implementar lógica de cancelamento, talvez mostrar um modal
     setShowCancelModal(true);
   };
 
-  // Função para buscar dados da empresa via CNPJ
   const buscarDadosFornecedor = async (cnpj) => {
     try {
-      // Remover formatação
-      const cnpjLimpo = cnpj.replace(/\D/g, '');
+      const cnpjLimpo = cnpj.replace(/\D/g, "");
 
-      // Usar API pública da Receita
-      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+      const response = await fetch(
+        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+      );
 
       if (response.ok) {
         const dados = await response.json();
 
-        // Preencher automaticamente outros campos
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           beneficiario: dados.nome_fantasia || dados.razao_social,
           razaoSocial: dados.razao_social,
         }));
 
-        // Mostrar notificação de sucesso
         setToast({
           show: true,
           message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
-          type: 'success'
+          type: "success",
         });
       }
     } catch (error) {
-      console.error('Erro ao buscar CNPJ:', error);
+      console.error("Erro ao buscar CNPJ:", error);
     }
   };
 
-  // ✅ LOADING simplificado
   if (loading) {
     return (
       <div style={styles.container}>
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
           <h3>
-            {!user 
-              ? "Carregando..." 
-              : isEdicao 
-                ? "Carregando dados da emenda..." 
-                : "Preparando formulário..."
-            }
+            {!user
+              ? "Carregando..."
+              : isEdicao
+                ? "Carregando dados da emenda..."
+                : "Preparando formulário..."}
           </h3>
         </div>
       </div>
     );
   }
 
-  // ✅ ERROR state
   if (error) {
     return (
       <div style={styles.container}>
@@ -417,7 +458,7 @@ const EmendaForm = () => {
             <button
               onClick={() => {
                 setError(null);
-                setIsReady(false); // Reset state to try loading again
+                setIsReady(false);
               }}
               style={styles.retryButton}
             >
@@ -435,7 +476,6 @@ const EmendaForm = () => {
     );
   }
 
-  // ✅ FORMULÁRIO PRINCIPAL
   return (
     <div style={styles.container}>
       <EmendaFormHeader
@@ -448,7 +488,7 @@ const EmendaForm = () => {
         <Identificacao
           formData={formData}
           onChange={handleInputChange}
-          errors={{}} // Pass an empty object if no specific errors are managed here
+          errors={{}}
         />
 
         <DadosBasicos
@@ -465,7 +505,7 @@ const EmendaForm = () => {
           styles={styles}
           buscarDadosFornecedor={buscarDadosFornecedor}
           expanded={expandedSections.beneficiario}
-          onToggle={() => toggleSection('beneficiario')}
+          onToggle={() => toggleSection("beneficiario")}
         />
 
         <DadosBancarios
@@ -507,7 +547,7 @@ const EmendaForm = () => {
         <EmendaFormCancelModal
           show={showCancelModal}
           onClose={() => setShowCancelModal(false)}
-          hasUnsavedChanges={true} // Adjust as needed
+          hasUnsavedChanges={true}
         />
       )}
 
@@ -518,19 +558,18 @@ const EmendaForm = () => {
         onClose={() => setToast({ show: false, message: "", type: "" })}
       />
 
-      <LoadingOverlay 
-        show={salvando} 
+      <LoadingOverlay
+        show={salvando}
         message={
-          isEdicao 
-            ? "Atualizando emenda parlamentar..." 
+          isEdicao
+            ? "Atualizando emenda parlamentar..."
             : "Cadastrando nova emenda parlamentar..."
-        } 
+        }
       />
     </div>
   );
 };
 
-// ✅ ESTILOS (mantidos originais)
 const styles = {
   container: {
     padding: "16px",
@@ -603,67 +642,65 @@ const styles = {
     fontSize: "14px",
     fontWeight: "500",
   },
-  // Added styles for CNPJInput and related feedback
   formGroup: {
-    display: 'flex',
-    flexDirection: 'column',
-    marginBottom: '16px',
-    position: 'relative',
+    display: "flex",
+    flexDirection: "column",
+    marginBottom: "16px",
+    position: "relative",
   },
   input: {
-    padding: '12px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '16px',
-    marginTop: '4px',
+    padding: "12px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    fontSize: "16px",
+    marginTop: "4px",
   },
   inputValid: {
-    borderColor: '#27ae60',
-    backgroundColor: '#f0fff4',
+    borderColor: "#27ae60",
+    backgroundColor: "#f0fff4",
   },
   inputInvalid: {
-    borderColor: '#e74c3c',
-    backgroundColor: '#fff5f5',
+    borderColor: "#e74c3c",
+    backgroundColor: "#fff5f5",
   },
   validationFeedback: {
-    position: 'absolute',
-    right: '10px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    fontSize: '20px',
-    cursor: 'pointer',
+    position: "absolute",
+    right: "10px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    fontSize: "20px",
+    cursor: "pointer",
   },
   helperText: {
-    fontSize: '12px',
-    marginTop: '4px',
-    color: '#666',
+    fontSize: "12px",
+    marginTop: "4px",
+    color: "#666",
   },
   errorText: {
-    fontSize: '12px',
-    marginTop: '4px',
-    color: '#e74c3c',
-    fontWeight: '500',
+    fontSize: "12px",
+    marginTop: "4px",
+    color: "#e74c3c",
+    fontWeight: "500",
   },
   expandedSection: {
-    border: '1px solid #e0e0e0',
-    borderRadius: '8px',
-    padding: '20px',
-    backgroundColor: '#fdfdfd',
-    marginTop: '20px',
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    padding: "20px",
+    backgroundColor: "#fdfdfd",
+    marginTop: "20px",
   },
   sectionTitle: {
-    margin: '0 0 16px 0',
-    paddingBottom: '8px',
-    borderBottom: '1px solid #eee',
-    color: '#333',
+    margin: "0 0 16px 0",
+    paddingBottom: "8px",
+    borderBottom: "1px solid #eee",
+    color: "#333",
   },
   formRow: {
-    display: 'flex',
-    gap: '16px',
+    display: "flex",
+    gap: "16px",
   },
 };
 
-// ✅ CSS animation
 if (!document.querySelector('style[data-component="emenda-form-fixed"]')) {
   const styleSheet = document.createElement("style");
   styleSheet.setAttribute("data-component", "emenda-form-fixed");
