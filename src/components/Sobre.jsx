@@ -167,7 +167,17 @@ const Sobre = () => {
         </div>
 
         <div className="sobre-footer">
-          <p>© 2025 - Desenvolvido por SOPRO - Solution Provider</p>
+          <div className="footer-content">
+            <img
+              src="/src/images/logo-sopro.jpeg"
+              alt="SOPRO Logo"
+              className="sopro-logo"
+              onError={(e) => {
+                e.target.style.display = "none";
+              }}
+            />
+            <p>© 2025 - Desenvolvido por SOPRO - Solution Provider</p>
+          </div>
         </div>
       </div>
 
@@ -371,6 +381,27 @@ const Sobre = () => {
           border: 1px solid #dee2e6;
         }
 
+        .footer-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .sopro-logo {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+          border-radius: 6px;
+          opacity: 0.8;
+          transition: opacity 0.3s ease;
+        }
+
+        .sopro-logo:hover {
+          opacity: 1;
+        }
+
         .sobre-footer p {
           margin: 0;
           color: #666;
@@ -408,6 +439,16 @@ const Sobre = () => {
 
           .empresa-nome {
             font-size: 1.2em;
+          }
+
+          .footer-content {
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .sopro-logo {
+            width: 28px;
+            height: 28px;
           }
         }
       `}</style>
