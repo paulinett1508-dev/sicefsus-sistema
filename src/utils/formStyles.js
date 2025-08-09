@@ -190,6 +190,26 @@ const formStyles = {
     boxShadow: '0 0 0 0.2rem rgba(39, 174, 96, 0.25)',
   },
 
+  inputSuccess: {
+    borderColor: '#27ae60',
+    backgroundColor: '#f0fff4',
+  },
+
+  errorMessage: {
+    color: '#e74c3c',
+    fontSize: '12px',
+    marginTop: '4px',
+    display: 'block',
+  },
+
+  successMessage: {
+    color: '#27ae60',
+    fontSize: '12px',
+    marginTop: '4px',
+    display: 'block',
+    fontWeight: '500',
+  },
+
   cnpjContainer: {
     position: 'relative',
     marginBottom: '16px',
