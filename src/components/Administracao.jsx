@@ -178,11 +178,27 @@ const Administracao = () => {
 
   // ✅ FUNÇÃO PARA EXCLUIR USUÁRIO PERMANENTEMENTE
   const handleExcluirUsuario = async (usuario) => {
-    console.log("🗑️ Tentando excluir usuário:", usuario);
+    console.log("🗑️ handleExcluirUsuario chamado com:", usuario);
+
+    if (!usuario?.id) {
+      console.error("❌ ID do usuário não fornecido");
+      showToast({
+        tipo: "erro",
+        titulo: "❌ Erro",
+        mensagem: "ID do usuário não encontrado",
+        duracao: 3000,
+      });
+      return;
+    }
 
     // Verificar se o usuário está inativo
     if (usuario.status === "ativo") {
-      showToast("❌ Usuário deve estar inativo para ser excluído", "error");
+      showToast({
+        tipo: "aviso",
+        titulo: "⚠️ Usuário Ativo",
+        mensagem: "Desative o usuário antes de excluí-lo",
+        duracao: 4000,
+      });
       return;
     }
 
