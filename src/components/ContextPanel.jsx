@@ -1,864 +1,236 @@
-// ContextPanel.jsx - Painel de Contexto da Emenda
-import React, { useState, useEffect } from "react";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  limit,
-} from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+// 🔧 CORREÇÃO URGENTE: ContextPanel.jsx - Cálculo de Saldo Disponível
+// PROBLEMA: Saldo mostrando R$ 0,00 quando deveria mostrar R$ 73.000,00
 
-const ContextPanel = ({
-  emenda = null,
-  isVisible = false,
-  onClose = () => {},
-  onNavigateToDespesas = () => {},
-  onNavigateToRelatorios = () => {},
-}) => {
-  const [contextData, setContextData] = useState({
-    despesas: [],
-    resumoFinanceiro: {
-      totalDespesas: 0,
-      valorExecutado: 0,
-      saldoRestante: 0,
-      percentualExecutado: 0,
-    },
-    atividades: [],
-    loading: true,
-  });
+import React, { useMemo } from "react";
+import { formatarMoeda } from "../utils/formatters";
 
-  const [activeTab, setActiveTab] = useState("resumo");
+const ContextPanel = ({ emenda, despesas = [] }) => {
+  // 🚨 CORREÇÃO PRINCIPAL: Cálculo do saldo com debug e validações
+  const { valorTotal, valorExecutado, saldoRestante } = useMemo(() => {
+    console.log("🔍 DEBUG SALDO - ContextPanel:");
+    console.log("Emenda recebida:", emenda);
+    console.log("Despesas recebidas:", despesas);
 
-  // Carregar dados de contexto
-  useEffect(() => {
-    if (emenda?.id) {
-      loadContextData();
+    // 1. GARANTIR QUE EMENDA EXISTE
+    if (!emenda) {
+      console.warn("⚠️ Emenda não fornecida");
+      return { valorTotal: 0, valorExecutado: 0, saldoRestante: 0 };
     }
-  }, [emenda]);
 
-  const loadContextData = async () => {
-    if (!emenda?.id) return;
+    // 2. EXTRAIR VALOR TOTAL COM FALLBACKS ORDENADOS
+    // Prioridade: valorTotal > valor > valorRecurso
+    let valorTotalCalculado = 0;
 
-    try {
-      setContextData((prev) => ({ ...prev, loading: true }));
-
-      // Carregar despesas da emenda
-      const despesasQuery = query(
-        collection(db, "despesas"),
-        where("emendaId", "==", emenda.id),
-        orderBy("data", "desc"),
-        limit(5),
-      );
-
-      const despesasSnapshot = await getDocs(despesasQuery);
-      const despesas = despesasSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // Calcular resumo financeiro
-      const totalDespesas = despesas.length;
-      const valorExecutado = despesas.reduce(
-        (sum, l) => sum + (l.valor || 0),
-        0,
-      );
-      const saldoRestante = emenda.saldo || 0;
-      const valorTotal = valorExecutado + saldoRestante;
-      const percentualExecutado =
-        valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
-
-      // Atividades recentes
-      const atividades = [
-        {
-          id: 1,
-          tipo: "despesa",
-          descricao: `Último despesa: ${despesas[0]?.descricao || "Nenhum"}`,
-          data: despesas[0]?.data || emenda.updatedAt,
-          valor: despesas[0]?.valor || 0,
-        },
-        {
-          id: 2,
-          tipo: "emenda",
-          descricao: "Emenda atualizada",
-          data: emenda.updatedAt,
-          usuario: emenda.updatedBy,
-        },
-      ];
-
-      setContextData({
-        despesas,
-        resumoFinanceiro: {
-          totalDespesas,
-          valorExecutado,
-          saldoRestante,
-          percentualExecutado: Math.round(percentualExecutado * 100) / 100,
-        },
-        atividades,
-        loading: false,
-      });
-    } catch (error) {
-      console.error("Erro ao carregar dados de contexto:", error);
-      setContextData((prev) => ({ ...prev, loading: false }));
+    if (emenda.valorTotal !== undefined && emenda.valorTotal !== null) {
+      valorTotalCalculado = emenda.valorTotal;
+      console.log("✅ Usando emenda.valorTotal:", valorTotalCalculado);
+    } else if (emenda.valor !== undefined && emenda.valor !== null) {
+      valorTotalCalculado = emenda.valor;
+      console.log("✅ Usando emenda.valor:", valorTotalCalculado);
+    } else if (
+      emenda.valorRecurso !== undefined &&
+      emenda.valorRecurso !== null
+    ) {
+      valorTotalCalculado = emenda.valorRecurso;
+      console.log("✅ Usando emenda.valorRecurso:", valorTotalCalculado);
+    } else {
+      console.warn("⚠️ Nenhum campo de valor encontrado na emenda");
     }
-  };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
-  };
+    // 3. CONVERTER PARA NUMBER (caso seja string)
+    if (typeof valorTotalCalculado === "string") {
+      // Remove formatação monetária se existir
+      const valorLimpo = valorTotalCalculado.replace(/[R$\s.,]/g, "");
+      valorTotalCalculado = parseFloat(valorLimpo) || 0;
+      console.log("🔄 Valor convertido de string:", valorTotalCalculado);
+    } else {
+      valorTotalCalculado = Number(valorTotalCalculado) || 0;
+    }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("pt-BR");
-  };
+    console.log("💰 Valor Total Final:", valorTotalCalculado);
+    console.log("📊 Tipo do Valor Total:", typeof valorTotalCalculado);
 
-  if (!isVisible) return null;
+    // 4. CALCULAR VALOR EXECUTADO COM VALIDAÇÕES
+    const despesasValidas = Array.isArray(despesas) ? despesas : [];
+    console.log("📋 Despesas válidas:", despesasValidas.length);
 
-  // Prevenir múltiplas instâncias
-  if (!emenda) {
-    return null;
-  }
+    const valorExecutadoCalculado = despesasValidas.reduce((soma, despesa) => {
+      if (!despesa) return soma;
 
+      let valorDespesa = despesa.valor || despesa.valorDespesa || 0;
+
+      // Converter string para number se necessário
+      if (typeof valorDespesa === "string") {
+        const valorLimpo = valorDespesa.replace(/[R$\s.,]/g, "");
+        valorDespesa = parseFloat(valorLimpo) || 0;
+      } else {
+        valorDespesa = Number(valorDespesa) || 0;
+      }
+
+      console.log(`💸 Despesa ${despesa.id || "sem-id"}: R$ ${valorDespesa}`);
+      return soma + valorDespesa;
+    }, 0);
+
+    console.log("💸 Valor Executado Total:", valorExecutadoCalculado);
+
+    // 5. CALCULAR SALDO RESTANTE
+    const saldoCalculado = valorTotalCalculado - valorExecutadoCalculado;
+    console.log("💰 Saldo Calculado:", saldoCalculado);
+
+    // 6. VALIDAÇÃO FINAL
+    if (saldoCalculado < 0) {
+      console.warn("⚠️ Saldo negativo detectado!");
+    }
+
+    return {
+      valorTotal: valorTotalCalculado,
+      valorExecutado: valorExecutadoCalculado,
+      saldoRestante: saldoCalculado,
+    };
+  }, [emenda, despesas]);
+
+  // 🎨 RENDER DO BANNER DE CONTEXTO
   return (
-    <div style={styles.overlay}>
-      <div style={styles.panel}>
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.headerContent}>
-            <h3 style={styles.title}>🔍 Contexto da Emenda {emenda?.numero}</h3>
-            <p style={styles.subtitle}>{emenda?.parlamentar}</p>
+    <div className="context-panel bg-white border rounded-lg p-4 mb-4 shadow-sm">
+      {/* Informações da Emenda */}
+      <div className="emenda-info mb-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              {emenda?.parlamentar || "Parlamentar não informado"} -{" "}
+              {emenda?.numero || "S/N"}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {emenda?.municipio || "Município não informado"}/
+              {emenda?.uf || "UF"}
+            </p>
+            <p className="text-sm text-gray-600 mt-1">
+              {emenda?.programa || "Programa não informado"}
+            </p>
           </div>
 
-          <button onClick={onClose} style={styles.closeButton}>
-            ✕
-          </button>
-        </div>
-
-        {/* Tabs */}
-        <div style={styles.tabs}>
-          <button
-            onClick={() => setActiveTab("resumo")}
-            style={{
-              ...styles.tab,
-              ...(activeTab === "resumo" ? styles.activeTab : {}),
-            }}
-          >
-            📊 Resumo
-          </button>
-
-          <button
-            onClick={() => setActiveTab("despesas")}
-            style={{
-              ...styles.tab,
-              ...(activeTab === "despesas" ? styles.activeTab : {}),
-            }}
-          >
-            💰 Despesas
-          </button>
-
-          <button
-            onClick={() => setActiveTab("atividades")}
-            style={{
-              ...styles.tab,
-              ...(activeTab === "atividades" ? styles.activeTab : {}),
-            }}
-          >
-            📝 Atividades
-          </button>
-        </div>
-
-        {/* Content */}
-        <div style={styles.content}>
-          {contextData.loading ? (
-            <div style={styles.loading}>
-              <div style={styles.spinner}></div>
-              <p>Carregando dados...</p>
-            </div>
-          ) : (
-            <div style={styles.tabContent}>{renderTabContent()}</div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div style={styles.actions}>
-          <button
-            onClick={() => onNavigateToDespesas(emenda)}
-            style={styles.actionButton}
-          >
-            💰 Ver Despesas ({contextData.resumoFinanceiro.totalDespesas})
-          </button>
-
-          <button
-            onClick={() => onNavigateToRelatorios(emenda)}
-            style={styles.actionButtonSecondary}
-          >
-            📊 Relatórios
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  function renderTabContent() {
-    switch (activeTab) {
-      case "resumo":
-        return renderResumoTab();
-      case "despesas":
-        return renderDespesasTab();
-      case "atividades":
-        return renderAtividadesTab();
-      default:
-        return renderResumoTab();
-    }
-  }
-
-  function renderResumoTab() {
-    const { resumoFinanceiro } = contextData;
-
-    return (
-      <div style={styles.resumoContent}>
-        {/* KPIs */}
-        <div style={styles.kpiGrid}>
-          <div style={styles.kpiCard}>
-            <div style={styles.kpiIcon}>💰</div>
-            <div style={styles.kpiContent}>
-              <span style={styles.kpiValue}>
-                {formatCurrency(resumoFinanceiro.valorExecutado)}
-              </span>
-              <span style={styles.kpiLabel}>Executado</span>
-            </div>
-          </div>
-
-          <div style={styles.kpiCard}>
-            <div style={styles.kpiIcon}>🏦</div>
-            <div style={styles.kpiContent}>
-              <span style={styles.kpiValue}>
-                {formatCurrency(resumoFinanceiro.saldoRestante)}
-              </span>
-              <span style={styles.kpiLabel}>Saldo</span>
-            </div>
-          </div>
-
-          <div style={styles.kpiCard}>
-            <div style={styles.kpiIcon}>📈</div>
-            <div style={styles.kpiContent}>
-              <span style={styles.kpiValue}>
-                {resumoFinanceiro.percentualExecutado.toFixed(1)}%
-              </span>
-              <span style={styles.kpiLabel}>Execução</span>
-            </div>
-          </div>
-
-          <div style={styles.kpiCard}>
-            <div style={styles.kpiIcon}>📋</div>
-            <div style={styles.kpiContent}>
-              <span style={styles.kpiValue}>
-                {resumoFinanceiro.totalDespesas}
-              </span>
-              <span style={styles.kpiLabel}>Despesas</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Barra de Progresso */}
-        <div style={styles.progressSection}>
-          <div style={styles.progressHeader}>
-            <span style={styles.progressLabel}>Execução Orçamentária</span>
-            <span style={styles.progressPercent}>
-              {resumoFinanceiro.percentualExecutado.toFixed(1)}%
+          {/* Status da Emenda */}
+          <div className="text-right">
+            <span
+              className={`px-2 py-1 rounded text-xs font-medium ${
+                emenda?.status === "Ativa"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {emenda?.status || "Status não definido"}
             </span>
           </div>
-
-          <div style={styles.progressBar}>
-            <div
-              style={{
-                ...styles.progressFill,
-                width: `${Math.min(100, resumoFinanceiro.percentualExecutado)}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Informações da Emenda */}
-        <div style={styles.emendaInfo}>
-          <h4 style={styles.sectionTitle}>📋 Informações da Emenda</h4>
-
-          <div style={styles.infoGrid}>
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Tipo:</span>
-              <span style={styles.infoValue}>{emenda?.tipo}</span>
-            </div>
-
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Município:</span>
-              <span style={styles.infoValue}>
-                {emenda?.municipio}/{emenda?.uf}
-              </span>
-            </div>
-
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Validade:</span>
-              <span style={styles.infoValue}>
-                {formatDate(emenda?.validade)}
-              </span>
-            </div>
-
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>GND:</span>
-              <span style={styles.infoValue}>{emenda?.gnd}</span>
-            </div>
-          </div>
         </div>
       </div>
-    );
-  }
 
-  function renderDespesasTab() {
-    const { despesas } = contextData;
+      {/* Métricas Financeiras - BANNER PRINCIPAL */}
+      <div className="financial-metrics grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Valor Total */}
+        <div className="metric-card bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="text-sm font-medium text-blue-700">Valor Total</div>
+          <div className="text-xl font-bold text-blue-800">
+            {formatarMoeda(valorTotal)}
+          </div>
+        </div>
 
-    return (
-      <div style={styles.despesasContent}>
-        <div style={styles.sectionHeader}>
-          <h4 style={styles.sectionTitle}>💰 Últimas 5 Despesas</h4>
-          <button
-            onClick={() => onNavigateToDespesas(emenda)}
-            style={styles.seeAllButton}
+        {/* Valor Executado */}
+        <div className="metric-card bg-orange-50 border border-orange-200 rounded-lg p-3">
+          <div className="text-sm font-medium text-orange-700">
+            Valor Executado
+          </div>
+          <div className="text-xl font-bold text-orange-800">
+            {formatarMoeda(valorExecutado)}
+          </div>
+          <div className="text-xs text-orange-600 mt-1">
+            {despesas.length} despesa(s) cadastrada(s)
+          </div>
+        </div>
+
+        {/* Saldo Disponível - CAMPO PROBLEMÁTICO CORRIGIDO */}
+        <div
+          className={`metric-card border rounded-lg p-3 ${
+            saldoRestante > 0
+              ? "bg-green-50 border-green-200"
+              : saldoRestante === 0
+                ? "bg-gray-50 border-gray-200"
+                : "bg-red-50 border-red-200"
+          }`}
+        >
+          <div
+            className={`text-sm font-medium ${
+              saldoRestante > 0
+                ? "text-green-700"
+                : saldoRestante === 0
+                  ? "text-gray-700"
+                  : "text-red-700"
+            }`}
           >
-            Ver Todos →
-          </button>
-        </div>
-
-        {despesas.length === 0 ? (
-          <div style={styles.emptyState}>
-            <span style={styles.emptyIcon}>📝</span>
-            <p style={styles.emptyText}>Nenhuma despesa encontrada</p>
-            <button
-              onClick={() => onNavigateToDespesas(emenda)}
-              style={styles.createButton}
-            >
-              ➕ Criar Primeira Despesa
-            </button>
+            Saldo Disponível
           </div>
-        ) : (
-          <div style={styles.despesasList}>
-            {despesas.map((despesa) => (
-              <div key={despesa.id} style={styles.despesaItem}>
-                <div style={styles.despesaHeader}>
-                  <span style={styles.despesaNumero}>
-                    {despesa.numero}
-                  </span>
-                  <span style={styles.despesaValor}>
-                    {formatCurrency(despesa.valor)}
-                  </span>
-                </div>
-
-                <p style={styles.despesaDescricao}>{despesa.descricao}</p>
-
-                <div style={styles.despesaFooter}>
-                  <span style={styles.despesaData}>
-                    📅 {formatDate(despesa.data)}
-                  </span>
-                  <span style={styles.despesaFornecedor}>
-                    🏢 {despesa.notaFiscalFornecedor}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div
+            className={`text-xl font-bold ${
+              saldoRestante > 0
+                ? "text-green-800"
+                : saldoRestante === 0
+                  ? "text-gray-800"
+                  : "text-red-800"
+            }`}
+          >
+            {formatarMoeda(saldoRestante)}
           </div>
-        )}
-      </div>
-    );
-  }
-
-  function renderAtividadesTab() {
-    const { atividades } = contextData;
-
-    return (
-      <div style={styles.atividadesContent}>
-        <h4 style={styles.sectionTitle}>📝 Atividades Recentes</h4>
-
-        <div style={styles.atividadesList}>
-          {atividades.map((atividade) => (
-            <div key={atividade.id} style={styles.atividadeItem}>
-              <div style={styles.atividadeIcon}>
-                {atividade.tipo === "despesa" ? "💰" : "📋"}
-              </div>
-
-              <div style={styles.atividadeContent}>
-                <p style={styles.atividadeDescricao}>{atividade.descricao}</p>
-
-                <div style={styles.atividadeFooter}>
-                  <span style={styles.atividadeData}>
-                    📅 {formatDate(atividade.data)}
-                  </span>
-
-                  {atividade.valor && (
-                    <span style={styles.atividadeValor}>
-                      💰 {formatCurrency(atividade.valor)}
-                    </span>
-                  )}
-
-                  {atividade.usuario && (
-                    <span style={styles.atividadeUsuario}>
-                      👤 {atividade.usuario}
-                    </span>
-                  )}
-                </div>
-              </div>
+          {saldoRestante <= 0 && (
+            <div className="text-xs text-red-600 mt-1">
+              {saldoRestante === 0
+                ? "Recurso totalmente executado"
+                : "Execução excedente"}
             </div>
-          ))}
+          )}
         </div>
       </div>
-    );
-  }
-};
 
-const styles = {
-  overlay: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 1000,
-    padding: "20px",
-  },
+      {/* Indicadores de Progresso */}
+      <div className="progress-section mt-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-gray-700">Execução</span>
+          <span className="text-sm text-gray-600">
+            {valorTotal > 0
+              ? Math.round((valorExecutado / valorTotal) * 100)
+              : 0}
+            %
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full transition-all duration-300 ${
+              valorTotal > 0 && valorExecutado / valorTotal <= 1
+                ? "bg-green-500"
+                : "bg-red-500"
+            }`}
+            style={{
+              width: `${valorTotal > 0 ? Math.min((valorExecutado / valorTotal) * 100, 100) : 0}%`,
+            }}
+          />
+        </div>
+      </div>
 
-  panel: {
-    backgroundColor: "white",
-    borderRadius: "12px",
-    width: "100%",
-    maxWidth: "800px",
-    maxHeight: "90vh",
-    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "24px",
-    borderBottom: "1px solid #e9ecef",
-    backgroundColor: "#f8f9fa",
-  },
-
-  headerContent: {
-    flex: 1,
-  },
-
-  title: {
-    fontSize: "20px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    margin: "0 0 4px 0",
-  },
-
-  subtitle: {
-    fontSize: "14px",
-    color: "#6c757d",
-    margin: 0,
-  },
-
-  closeButton: {
-    background: "none",
-    border: "none",
-    fontSize: "20px",
-    color: "#6c757d",
-    cursor: "pointer",
-    padding: "8px",
-    borderRadius: "4px",
-  },
-
-  tabs: {
-    display: "flex",
-    borderBottom: "1px solid #e9ecef",
-    backgroundColor: "#f8f9fa",
-  },
-
-  tab: {
-    flex: 1,
-    padding: "12px 16px",
-    border: "none",
-    backgroundColor: "transparent",
-    cursor: "pointer",
-    fontSize: "14px",
-    color: "#6c757d",
-  },
-
-  activeTab: {
-    backgroundColor: "white",
-    color: "#007bff",
-    borderBottom: "2px solid #007bff",
-  },
-
-  content: {
-    flex: 1,
-    overflow: "auto",
-    padding: "24px",
-  },
-
-  loading: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px",
-    gap: "16px",
-  },
-
-  spinner: {
-    width: "32px",
-    height: "32px",
-    border: "3px solid #e9ecef",
-    borderTop: "3px solid #007bff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-
-  tabContent: {
-    minHeight: "300px",
-  },
-
-  resumoContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-  },
-
-  kpiGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: "16px",
-  },
-
-  kpiCard: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    border: "1px solid #e9ecef",
-  },
-
-  kpiIcon: {
-    fontSize: "24px",
-  },
-
-  kpiContent: {
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  kpiValue: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#2c3e50",
-  },
-
-  kpiLabel: {
-    fontSize: "12px",
-    color: "#6c757d",
-    fontWeight: "500",
-  },
-
-  progressSection: {
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    border: "1px solid #e9ecef",
-  },
-
-  progressHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "12px",
-  },
-
-  progressLabel: {
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#495057",
-  },
-
-  progressPercent: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#007bff",
-  },
-
-  progressBar: {
-    width: "100%",
-    height: "8px",
-    backgroundColor: "#e9ecef",
-    borderRadius: "4px",
-    overflow: "hidden",
-  },
-
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#007bff",
-    borderRadius: "4px",
-    transition: "width 0.3s ease",
-  },
-
-  emendaInfo: {
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    border: "1px solid #e9ecef",
-  },
-
-  sectionTitle: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    margin: "0 0 16px 0",
-  },
-
-  infoGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "12px",
-  },
-
-  infoItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "8px 0",
-    borderBottom: "1px solid #e9ecef",
-  },
-
-  infoLabel: {
-    fontSize: "14px",
-    color: "#6c757d",
-    fontWeight: "500",
-  },
-
-  infoValue: {
-    fontSize: "14px",
-    color: "#2c3e50",
-    fontWeight: "500",
-  },
-
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "20px",
-  },
-
-  seeAllButton: {
-    background: "none",
-    border: "1px solid #007bff",
-    color: "#007bff",
-    padding: "6px 12px",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  },
-
-  emptyState: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "40px",
-    textAlign: "center",
-  },
-
-  emptyIcon: {
-    fontSize: "48px",
-    marginBottom: "16px",
-    opacity: 0.5,
-  },
-
-  emptyText: {
-    fontSize: "16px",
-    color: "#6c757d",
-    margin: "0 0 20px 0",
-  },
-
-  createButton: {
-    padding: "8px 16px",
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "14px",
-    cursor: "pointer",
-  },
-
-  despesasContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-
-  despesasList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-
-  despesaItem: {
-    padding: "16px",
-    border: "1px solid #e9ecef",
-    borderRadius: "8px",
-    backgroundColor: "#f8f9fa",
-  },
-
-  despesaHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "8px",
-  },
-
-  despesaNumero: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#007bff",
-  },
-
-  despesaValor: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#28a745",
-  },
-
-  despesaDescricao: {
-    fontSize: "14px",
-    color: "#495057",
-    margin: "0 0 8px 0",
-  },
-
-  despesaFooter: {
-    display: "flex",
-    gap: "16px",
-    fontSize: "12px",
-    color: "#6c757d",
-  },
-
-  despesaData: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  despesaFornecedor: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  atividadesContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-
-  atividadesList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-
-  atividadeItem: {
-    display: "flex",
-    gap: "12px",
-    padding: "16px",
-    border: "1px solid #e9ecef",
-    borderRadius: "8px",
-    backgroundColor: "#f8f9fa",
-  },
-
-  atividadeIcon: {
-    fontSize: "20px",
-    marginTop: "2px",
-  },
-
-  atividadeContent: {
-    flex: 1,
-  },
-
-  atividadeDescricao: {
-    fontSize: "14px",
-    color: "#2c3e50",
-    margin: "0 0 8px 0",
-    fontWeight: "500",
-  },
-
-  atividadeFooter: {
-    display: "flex",
-    gap: "16px",
-    fontSize: "12px",
-    color: "#6c757d",
-  },
-
-  atividadeData: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  atividadeValor: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-    color: "#28a745",
-    fontWeight: "500",
-  },
-
-  atividadeUsuario: {
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  actions: {
-    display: "flex",
-    gap: "12px",
-    padding: "20px 24px",
-    backgroundColor: "#f8f9fa",
-    borderTop: "1px solid #e9ecef",
-  },
-
-  actionButton: {
-    flex: 1,
-    padding: "12px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-  },
-
-  actionButtonSecondary: {
-    padding: "12px 20px",
-    backgroundColor: "white",
-    color: "#6c757d",
-    border: "1px solid #6c757d",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "500",
-    cursor: "pointer",
-  },
+      {/* Debug Info (apenas em desenvolvimento) */}
+      {process.env.NODE_ENV === "development" && (
+        <details className="mt-4 text-xs text-gray-500">
+          <summary className="cursor-pointer">🔍 Debug Info</summary>
+          <pre className="mt-2 bg-gray-100 p-2 rounded text-xs overflow-auto">
+            {`Valor Total: ${valorTotal} (${typeof valorTotal})
+Valor Executado: ${valorExecutado} (${typeof valorExecutado})
+Saldo Restante: ${saldoRestante} (${typeof saldoRestante})
+Despesas: ${despesas.length} itens
+Emenda.valor: ${emenda?.valor}
+Emenda.valorTotal: ${emenda?.valorTotal}
+Emenda.valorRecurso: ${emenda?.valorRecurso}`}
+          </pre>
+        </details>
+      )}
+    </div>
+  );
 };
 
 export default ContextPanel;

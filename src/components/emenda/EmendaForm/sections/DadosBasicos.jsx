@@ -199,7 +199,13 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             placeholder="00.000.000/0000-00"
             showValidation={true}
             style={styles.formGroup}
-            inputStyle={styles.input}
+            inputStyle={{
+              ...styles.input,
+              padding: "12px", // ✅ ALINHAMENTO: mesmo padding dos outros campos
+              fontSize: "14px", // ✅ ALINHAMENTO: mesmo font-size dos outros campos
+              border: "2px solid #dee2e6", // ✅ ALINHAMENTO: mesma borda dos outros campos
+              borderRadius: "6px", // ✅ ALINHAMENTO: mesmo border-radius dos outros campos
+            }}
           />
           {fieldErrors.beneficiario && (
             <small style={styles.errorText}>{fieldErrors.beneficiario}</small>

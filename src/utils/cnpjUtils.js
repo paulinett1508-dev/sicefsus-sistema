@@ -34,13 +34,13 @@ export const limparCNPJ = (cnpj) => {
 };
 
 /**
- * Validar CNPJ brasileiro - VERSÃO CORRIGIDA COM DEBUG
+ * Validar CNPJ brasileiro - VERSÃO CORRIGIDA DEFINITIVA
  * @param {string} cnpj - CNPJ a ser validado
  * @returns {boolean} - true se válido, false se inválido
  */
 export const validarCNPJ = (cnpj) => {
   console.log("🔧 DEBUG validarCNPJ - Input:", cnpj);
-  
+
   if (!cnpj) {
     console.log("❌ CNPJ vazio");
     return false;
@@ -48,23 +48,23 @@ export const validarCNPJ = (cnpj) => {
 
   // Remove caracteres especiais e converte para string
   const numero = String(cnpj).replace(/[^\d]/g, "");
-  console.log("🔢 CNPJ apenas números:", numero);
+  console.log("🔧 DEBUG validarCNPJ - Numero limpo:", numero);
 
   // Verifica se tem 14 dígitos
   if (numero.length !== 14) {
-    console.log(`❌ Comprimento inválido: ${numero.length}/14`);
+    console.log("❌ Não tem 14 dígitos:", numero.length);
     return false;
   }
 
   // Verifica se todos os dígitos são iguais (CNPJs inválidos conhecidos)
   if (/^(\d)\1+$/.test(numero)) {
-    console.log("❌ Todos os dígitos iguais");
+    console.log("❌ Todos dígitos iguais");
     return false;
   }
 
   // Array com os dígitos do CNPJ
   const digits = numero.split("").map(Number);
-  console.log("🔢 Dígitos array:", digits);
+  console.log("🔧 DEBUG validarCNPJ - Digits array:", digits);
 
   // ✅ CÁLCULO PRIMEIRO DÍGITO VERIFICADOR CORRIGIDO
   let soma = 0;
@@ -79,7 +79,12 @@ export const validarCNPJ = (cnpj) => {
   // Calcula o primeiro dígito verificador
   let resto = soma % 11;
   const digito1 = resto < 2 ? 0 : 11 - resto;
-  console.log(`🔢 1º DV calculado: ${digito1}, informado: ${digits[12]}`);
+  console.log(
+    "🔧 DEBUG validarCNPJ - Primeiro dígito calculado:",
+    digito1,
+    "vs esperado:",
+    digits[12],
+  );
 
   // ✅ CÁLCULO SEGUNDO DÍGITO VERIFICADOR CORRIGIDO
   soma = 0;
@@ -94,17 +99,23 @@ export const validarCNPJ = (cnpj) => {
   // Calcula o segundo dígito verificador
   resto = soma % 11;
   const digito2 = resto < 2 ? 0 : 11 - resto;
-  console.log(`🔢 2º DV calculado: ${digito2}, informado: ${digits[13]}`);
+  console.log(
+    "🔧 DEBUG validarCNPJ - Segundo dígito calculado:",
+    digito2,
+    "vs esperado:",
+    digits[13],
+  );
 
   // ✅ VERIFICAÇÃO FINAL CORRIGIDA
   const digitoVerificador1 = digits[12];
   const digitoVerificador2 = digits[13];
 
-  const valido = digito1 === digitoVerificador1 && digito2 === digitoVerificador2;
-  console.log(`🎯 CNPJ ${numero} é ${valido ? 'VÁLIDO' : 'INVÁLIDO'}`);
+  const resultado =
+    digito1 === digitoVerificador1 && digito2 === digitoVerificador2;
+  console.log("🔧 DEBUG validarCNPJ - Resultado final:", resultado);
 
   // Retorna true se ambos os dígitos verificadores estão corretos
-  return valido;
+  return resultado;
 };
 
 /**
