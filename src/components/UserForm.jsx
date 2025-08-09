@@ -91,7 +91,7 @@ const UserForm = ({
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("📝 Dados do formulário antes do envio:", formData);
 
@@ -119,7 +119,27 @@ const UserForm = ({
     }
 
     console.log("✅ Validações passed, enviando...");
-    onSubmit(e);
+    
+    try {
+      // Chamar o onSubmit e aguardar resultado se não for edição
+      if (!editingUser) {
+        const resultado = await onSubmit(e);
+        
+        // ✅ Se o resultado indica necessidade de reautenticação, redirecionar
+        if (resultado && resultado.requiresReauth) {
+          setTimeout(() => {
+            alert("✅ Usuário criado com sucesso! Você será redirecionado para o login.");
+            window.location.href = '/?message=Usuario criado com sucesso. Faça login novamente.';
+          }, 1500);
+        }
+      } else {
+        // Para edição, apenas chamar o onSubmit normalmente
+        onSubmit(e);
+      }
+    } catch (error) {
+      console.error("Erro no envio do formulário:", error);
+      // O erro será tratado pelo componente pai
+    }
   };
 
   return (
