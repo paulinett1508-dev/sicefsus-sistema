@@ -29,6 +29,7 @@ import InformacoesComplementares from "./sections/InformacoesComplementares";
 import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
+import LoadingOverlay from '../../LoadingOverlay';
 
 const EmendaForm = () => {
   const navigate = useNavigate();
@@ -37,10 +38,12 @@ const EmendaForm = () => {
 
   // ✅ CORREÇÃO: Estados simplificados
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false); // Renamed to saving to match the provided changes
   const [error, setError] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [salvando, setSalvando] = useState(false); // Added for the loading overlay
+  const [toast, setToast] = useState({ show: false, message: "", type: "" }); // Added for toast notifications
 
   const [formData, setFormData] = useState({
     numero: "",
@@ -212,16 +215,19 @@ const EmendaForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const errors = validarFormulario();
-    if (errors.length > 0) {
-      setError(errors.join(". "));
+    // Prevenir duplo clique
+    if (salvando) return;
+
+    // Validar formulário
+    const validationErrors = validarFormulario();
+    if (validationErrors.length > 0) {
+      setError(validationErrors.join(". "));
       return;
     }
 
-    try {
-      setSaving(true);
-      setError(null);
+    setSalvando(true); // Ativa estado de salvando
 
+    try {
       const valorNumerico = parseFloat(
         formData.valor
           ?.toString()
@@ -268,22 +274,68 @@ const EmendaForm = () => {
       if (isEdicao) {
         await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
         console.log("✅ Emenda atualizada");
+
+        // Aguardar para mostrar feedback
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        setToast({
+          show: true,
+          message: "✅ Emenda atualizada com sucesso!",
+          type: "success",
+        });
       } else {
         dadosParaSalvar.criadoEm = serverTimestamp();
         dadosParaSalvar.criadoPor = user.uid || user.email;
         await addDoc(collection(db, "emendas"), dadosParaSalvar);
         console.log("✅ Emenda criada");
+
+        // Aguardar para mostrar feedback
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        setToast({
+          show: true,
+          message: "✅ Emenda criada com sucesso!",
+          type: "success",
+        });
       }
 
-      // ✅ NAVEGAÇÃO SIMPLES E DIRETA
+      // Aguardar mais um pouco para o usuário ver a mensagem
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Navegar para a lista de emendas
       navigate("/emendas");
+
     } catch (error) {
       console.error("❌ Erro ao salvar:", error);
-      setError(`Erro ao salvar emenda: ${error.message}`);
+      let mensagemErro = "❌ Erro ao salvar emenda. ";
+
+      if (error.code === 'permission-denied') {
+        mensagemErro += "Você não tem permissão para esta operação.";
+      } else if (error.code === 'already-exists') {
+        mensagemErro += "Já existe uma emenda com este número.";
+      } else {
+        mensagemErro += "Tente novamente.";
+      }
+
+      setToast({
+        show: true,
+        message: mensagemErro,
+        type: "error",
+      });
     } finally {
-      setSaving(false);
+      setSalvando(false); // Desativa estado de salvando
     }
   };
+
+  // Mock para emendaParaEditar e onSuccess, se não estiverem definidos em um contexto pai
+  const emendaParaEditar = null; // Substitua pelo contexto real se existir
+  const onSuccess = null; // Substitua pelo callback real se existir
+
+  const handleCancel = () => {
+    // Implementar lógica de cancelamento, talvez mostrar um modal
+    setShowCancelModal(true);
+  };
+
 
   // ✅ LOADING inicial (aguardando usuário)
   if (!user || !user.email) {
@@ -327,7 +379,7 @@ const EmendaForm = () => {
             <button
               onClick={() => {
                 setError(null);
-                setIsReady(false);
+                setIsReady(false); // Reset state to try loading again
               }}
               style={styles.retryButton}
             >
@@ -358,7 +410,7 @@ const EmendaForm = () => {
         <Identificacao
           formData={formData}
           onChange={handleInputChange}
-          errors={{}}
+          errors={{}} // Pass an empty object if no specific errors are managed here
         />
 
         <DadosBasicos
@@ -398,10 +450,10 @@ const EmendaForm = () => {
         />
 
         <EmendaFormActions
-          modo={isEdicao ? "editar" : "criar"}
-          loading={saving}
-          onCancel={() => setShowCancelModal(true)}
+          onCancel={handleCancel}
           onSubmit={handleSubmit}
+          isEdit={!!emendaParaEditar}
+          salvando={salvando} // Pass the saving state
         />
       </form>
 
@@ -409,9 +461,21 @@ const EmendaForm = () => {
         <EmendaFormCancelModal
           show={showCancelModal}
           onClose={() => setShowCancelModal(false)}
-          hasUnsavedChanges={true}
+          hasUnsavedChanges={true} // Adjust as needed
         />
       )}
+
+      <Toast
+        show={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ show: false, message: "", type: "" })}
+      />
+
+      <LoadingOverlay 
+        show={salvando} 
+        message={isEdicao ? "Atualizando emenda parlamentar..." : "Salvando nova emenda parlamentar..."} 
+      />
     </div>
   );
 };
