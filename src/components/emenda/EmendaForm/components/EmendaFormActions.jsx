@@ -61,6 +61,11 @@ const EmendaFormActions = ({
     }
   };
 
+  // Determine if we are in edit mode based on the 'modo' prop
+  const isEdit = modo === "editar";
+  // Use 'salvando' if provided, otherwise default to 'loading' for consistency
+  const salvando = loading; 
+
   return (
     <div style={styles.buttonContainer}>
       {/* Botão Voltar apenas no modo edição */}
@@ -94,16 +99,16 @@ const EmendaFormActions = ({
             onClick={handleSubmit}
             style={{
               ...styles.submitButton,
-              opacity: loading ? 0.6 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
+              opacity: salvando ? 0.6 : 1,
+              cursor: salvando ? "not-allowed" : "pointer",
             }}
-            disabled={loading}
+            disabled={salvando}
           >
-            {loading
-              ? "Salvando..."
-              : modo === "criar"
-                ? "✅ Criar Emenda"
-                : "✅ Atualizar Emenda"}
+            {salvando ? (
+              "Processando..."
+            ) : (
+              isEdit ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
+            )}
           </button>
         </>
       )}

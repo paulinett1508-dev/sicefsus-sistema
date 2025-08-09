@@ -275,35 +275,34 @@ const EmendaForm = () => {
         await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
         console.log("✅ Emenda atualizada");
 
-        // Aguardar para mostrar feedback
-        await new Promise(resolve => setTimeout(resolve, 800));
-
         setToast({
           show: true,
           message: "✅ Emenda atualizada com sucesso!",
           type: "success",
         });
+
+        // Aguardar e redirecionar
+        setTimeout(() => {
+          navigate('/emendas');
+        }, 1500);
+
       } else {
         dadosParaSalvar.criadoEm = serverTimestamp();
         dadosParaSalvar.criadoPor = user.uid || user.email;
         await addDoc(collection(db, "emendas"), dadosParaSalvar);
         console.log("✅ Emenda criada");
 
-        // Aguardar para mostrar feedback
-        await new Promise(resolve => setTimeout(resolve, 800));
-
         setToast({
           show: true,
-          message: "✅ Emenda criada com sucesso!",
+          message: "✅ Emenda cadastrada com sucesso!",
           type: "success",
         });
+
+        // Aguardar e redirecionar
+        setTimeout(() => {
+          navigate('/emendas');
+        }, 1500);
       }
-
-      // Aguardar mais um pouco para o usuário ver a mensagem
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Navegar para a lista de emendas
-      navigate("/emendas");
 
     } catch (error) {
       console.error("❌ Erro ao salvar:", error);
