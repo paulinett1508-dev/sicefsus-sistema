@@ -191,90 +191,156 @@ const Despesas = ({ usuario }) => {
 
   // Renderização condicional por view
   if (currentView === "criar" || currentView === "editar" || currentView === "visualizar") {
+    console.log("🔍 Renderizando formulário - View:", currentView);
+    
+    // Verificar se todos os dados necessários estão disponíveis
+    if (!usuario) {
+      console.error("❌ Usuário não encontrado");
+      return (
+        <div style={styles.container}>
+          <div style={styles.errorMessage}>
+            <h3>Erro: Usuário não encontrado</h3>
+            <p>Por favor, faça login novamente.</p>
+            <button onClick={() => window.location.reload()}>
+              Recarregar Página
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    try {
+      return (
+        <div style={styles.container}>
+          <DespesaForm
+            usuario={usuario}
+            despesaParaEditar={despesaSelecionada}
+            onCancelar={handleVoltar}
+            onSalvar={handleSalvarDespesa}
+            onSuccess={handleSalvarDespesa}
+            emendasDisponiveis={emendas}
+            emendaPreSelecionada={filtroAutomatico?.emendaId}
+            emendaInfo={filtroAutomatico?.emenda}
+            modoVisualizacao={currentView === "visualizar"}
+            titulo={
+              currentView === "criar" ? "Nova Despesa" :
+              currentView === "editar" ? "Editar Despesa" :
+              "Visualizar Despesa"
+            }
+          />
+        </div>
+      );
+    } catch (error) {
+      console.error("❌ Erro ao renderizar DespesaForm:", error);
+      return (
+        <div style={styles.container}>
+          <div style={styles.errorMessage}>
+            <h3>Erro ao carregar formulário</h3>
+            <p>Detalhes: {error.message}</p>
+            <button onClick={handleVoltar}>
+              Voltar para Lista
+            </button>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Verificar se há erro crítico
+  if (error) {
     return (
       <div style={styles.container}>
-        <DespesaForm
-          usuario={usuario}
-          despesaParaEditar={despesaSelecionada}
-          onCancelar={handleVoltar}
-          onSalvar={handleSalvarDespesa}
-          onSuccess={handleSalvarDespesa}
-          emendasDisponiveis={emendas}
-          emendaPreSelecionada={filtroAutomatico?.emendaId}
-          emendaInfo={filtroAutomatico?.emenda}
-          modoVisualizacao={currentView === "visualizar"}
-          titulo={
-            currentView === "criar" ? "Nova Despesa" :
-            currentView === "editar" ? "Editar Despesa" :
-            "Visualizar Despesa"
-          }
-        />
+        <div style={styles.errorMessage}>
+          <h3>Erro ao carregar dados</h3>
+          <p>{error}</p>
+          <button onClick={() => {
+            setError(null);
+            carregarDados();
+          }}>
+            Tentar Novamente
+          </button>
+        </div>
       </div>
     );
   }
 
   // View principal - Listagem
-  return (
-    <div style={styles.container}>
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: "", type: "" })}
+  try {
+    return (
+      <div style={styles.container}>
+        {toast.show && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast({ show: false, message: "", type: "" })}
+          />
+        )}
+
+        {/* Header do sistema */}
+        <DespesasListHeader
+          usuario={usuario}
+          loading={loading}
+          totalDespesas={despesas.length}
+          onVoltarEmendas={params.id ? handleVoltarEmendas : null}
+          emenda={filtroAutomatico?.emenda}
         />
-      )}
 
-      {/* Header do sistema */}
-      <DespesasListHeader
-        usuario={usuario}
-        loading={loading}
-        totalDespesas={despesas.length}
-        onVoltarEmendas={params.id ? handleVoltarEmendas : null}
-        emenda={filtroAutomatico?.emenda}
-      />
+        {/* Estatísticas */}
+        <DespesasStats
+          despesas={despesas}
+          loading={loading}
+          filtroAutomatico={filtroAutomatico}
+          userMunicipio={userMunicipio}
+        />
 
-      {/* Estatísticas */}
-      <DespesasStats
-        despesas={despesas}
-        loading={loading}
-        filtroAutomatico={filtroAutomatico}
-        userMunicipio={userMunicipio}
-      />
+        {/* Botões de ação */}
+        <div style={styles.actionContainer}>
+          <button 
+            style={styles.primaryButton} 
+            onClick={() => {
+              console.log("🖱️ Clicou em Nova Despesa");
+              handleCriar();
+            }}
+          >
+            ➕ Nova Despesa
+          </button>
+          <button
+            style={styles.refreshButton}
+            onClick={carregarDados}
+            disabled={loading}
+          >
+            🔄 {loading ? "Atualizando..." : "Atualizar"}
+          </button>
+        </div>
 
-      {/* Botões de ação */}
-      <div style={styles.actionContainer}>
-        <button 
-          style={styles.primaryButton} 
-          onClick={() => {
-            console.log("🖱️ Clicou em Nova Despesa");
-            handleCriar();
-          }}
-        >
-          ➕ Nova Despesa
-        </button>
-        <button
-          style={styles.refreshButton}
-          onClick={carregarDados}
-          disabled={loading}
-        >
-          🔄 {loading ? "Atualizando..." : "Atualizar"}
-        </button>
+        {/* Lista de despesas */}
+        <DespesasList
+          despesas={despesas}
+          emendas={emendas}
+          loading={loading}
+          error={error}
+          onEdit={handleEditar}
+          onView={handleVisualizar}
+          onRecarregar={carregarDados}
+          usuario={usuario}
+          filtroInicial={filtroAutomatico}
+        />
       </div>
-
-      {/* Lista de despesas */}
-      <DespesasList
-        despesas={despesas}
-        emendas={emendas}
-        loading={loading}
-        error={error}
-        onEdit={handleEditar}
-        onView={handleVisualizar}
-        onRecarregar={carregarDados}
-        usuario={usuario}
-        filtroInicial={filtroAutomatico}
-      />
-    </div>
-  );
+    );
+  } catch (renderError) {
+    console.error("❌ Erro na renderização principal:", renderError);
+    return (
+      <div style={styles.container}>
+        <div style={styles.errorMessage}>
+          <h3>Oops! Algo deu errado</h3>
+          <p>Ocorreu um erro inesperado. Por favor, recarregue a página.</p>
+          <button onClick={() => window.location.reload()}>
+            Recarregar Página
+          </button>
+        </div>
+      </div>
+    );
+  }
 };
 
 const styles = {
@@ -312,6 +378,14 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  errorMessage: {
+    backgroundColor: "#fff3cd",
+    border: "1px solid #ffeaa7",
+    borderRadius: "8px",
+    padding: "20px",
+    textAlign: "center",
+    margin: "20px 0",
   },
 };
 

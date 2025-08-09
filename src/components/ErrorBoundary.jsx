@@ -1,10 +1,13 @@
-
 import React from 'react';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = { 
+      hasError: false, 
+      error: null, 
+      errorInfo: null 
+    };
   }
 
   static getDerivedStateFromError(error) {
@@ -12,9 +15,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('🚨 Error Boundary capturou erro:', error);
-    console.error('📍 Stack trace:', errorInfo);
-    
+    console.error('🚨 ErrorBoundary caught an error:', error, errorInfo);
     this.setState({
       error: error,
       errorInfo: errorInfo
@@ -60,10 +61,10 @@ class ErrorBoundary extends React.Component {
             <p style={styles.errorMessage}>
               Ocorreu um erro inesperado. A página será recarregada automaticamente.
             </p>
-            
+
             {import.meta.env.DEV && (
               <details style={styles.errorDetails}>
-                <summary>Detalhes do erro (modo desenvolvimento)</summary>
+                <summary style={styles.errorSummary}>Detalhes do erro (modo desenvolvimento)</summary>
                 <pre style={styles.errorStack}>
                   {this.state.error && this.state.error.toString()}
                   <br />
@@ -71,7 +72,7 @@ class ErrorBoundary extends React.Component {
                 </pre>
               </details>
             )}
-            
+
             <div style={styles.errorActions}>
               <button
                 onClick={() => window.location.reload()}
@@ -80,10 +81,10 @@ class ErrorBoundary extends React.Component {
                 🔄 Recarregar Página
               </button>
               <button
-                onClick={() => this.setState({ hasError: false })}
+                onClick={() => this.setState({ hasError: false, error: null, errorInfo: null })}
                 style={styles.retryButton}
               >
-                🔁 Tentar Novamente
+                ↻ Tentar Novamente
               </button>
             </div>
           </div>
@@ -102,7 +103,8 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#f8f9fa',
-    padding: '20px'
+    padding: '20px',
+    fontFamily: 'Arial, sans-serif'
   },
   errorCard: {
     backgroundColor: 'white',
@@ -132,13 +134,19 @@ const styles = {
   errorDetails: {
     textAlign: 'left',
     marginBottom: '20px',
-    padding: '10px',
+    padding: '15px',
     backgroundColor: '#f8f9fa',
-    borderRadius: '6px'
+    borderRadius: '6px',
+    border: '1px solid #dee2e6'
+  },
+  errorSummary: {
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    marginBottom: '10px'
   },
   errorStack: {
     fontSize: '12px',
-    color: '#666',
+    color: '#e74c3c',
     overflow: 'auto',
     maxHeight: '200px'
   },
@@ -148,24 +156,24 @@ const styles = {
     justifyContent: 'center'
   },
   reloadButton: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: '#007bff',
     color: 'white',
     border: 'none',
     padding: '12px 24px',
     borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '16px',
-    fontWeight: '500'
+    fontWeight: 'bold'
   },
   retryButton: {
-    backgroundColor: '#154360',
+    backgroundColor: '#28a745',
     color: 'white',
     border: 'none',
     padding: '12px 24px',
     borderRadius: '6px',
     cursor: 'pointer',
     fontSize: '16px',
-    fontWeight: '500'
+    fontWeight: 'bold'
   }
 };
 
