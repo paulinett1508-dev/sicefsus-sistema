@@ -354,7 +354,7 @@ const Emendas = () => {
   }).length;
 
   const valorExecutado = emendasFiltradas.reduce((sum, emenda) => {
-    const executado = parseFloat(emenda.valorExecutado || 0);
+    const executado = parseFloat(e.valorExecutado || 0);
     return sum + executado;
   }, 0);
 
