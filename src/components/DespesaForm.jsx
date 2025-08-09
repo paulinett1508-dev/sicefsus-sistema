@@ -329,30 +329,19 @@ const DespesaForm = ({
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
         await updateDoc(despesaRef, dadosParaSalvar);
 
-        // Aguardar um pouco para mostrar o feedback
-        await new Promise(resolve => setTimeout(resolve, 800));
-
         setToast({
           show: true,
           message: "✅ Despesa atualizada com sucesso!",
           type: "success",
         });
 
-        // Aguardar e redirecionar
+        // Aguardar um pouco e redirecionar
         setTimeout(() => {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            // Redirecionar para listagem de despesas
-            navigate('/despesas');
-          }
+          navigate('/despesas');
         }, 1500);
 
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
-
-        // Aguardar um pouco para mostrar o feedback
-        await new Promise(resolve => setTimeout(resolve, 800));
 
         setToast({
           show: true,
@@ -360,14 +349,9 @@ const DespesaForm = ({
           type: "success",
         });
 
-        // Aguardar e redirecionar
+        // Aguardar um pouco e redirecionar
         setTimeout(() => {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            // Redirecionar para listagem de despesas
-            navigate('/despesas');
-          }
+          navigate('/despesas');
         }, 1500);
 
         // Limpar formulário após o cadastro
