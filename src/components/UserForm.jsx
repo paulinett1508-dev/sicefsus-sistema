@@ -462,7 +462,7 @@ const UserForm = ({
                       })
                     }
                     disabled={saving || editingUser}
-                    placeholder="Ex: São Paulo, Rio de Janeiro, Belo Horizonte"
+                    placeholder=""
                     required={formData.role === "user"}
                     minLength="2"
                     maxLength="100"
