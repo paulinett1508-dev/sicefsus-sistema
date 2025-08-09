@@ -2,47 +2,49 @@
 // Problema: createUserWithEmailAndPassword desloga admin automaticamente
 // Solução: Implementar signOut imediato + redirecionamento controlado
 
-import { 
-  createUserWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
   signOut,
-  auth 
-} from '../firebase/firebaseConfig';
-import { 
-  collection, 
-  addDoc, 
-  updateDoc, 
-  doc, 
-  getDocs, 
-  query, 
+  auth,
+} from "../firebase/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  getDocs,
+  query,
   where,
-  serverTimestamp 
-} from 'firebase/firestore';
-import { db } from '../firebase/firebaseConfig';
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 
 // 🎯 FUNÇÃO CORRIGIDA: Criar usuário com logout controlado
 export const createUserInFirebase = async (userData, navigate, showToast) => {
   let userCredential = null;
 
   try {
-    console.log('🔄 Iniciando criação de usuário...');
+    console.log("🔄 Iniciando criação de usuário...");
 
     // 1. Gerar senha temporária
     const senhaTemporaria = Math.random().toString(36).slice(-8);
 
     // 2. ⚠️ IMPORTANTE: Este comando VAI deslogar o admin atual
-    console.log('⚠️ ATENÇÃO: Admin será deslogado após criação do usuário');
+    console.log("⚠️ ATENÇÃO: Admin será deslogado após criação do usuário");
 
     userCredential = await createUserWithEmailAndPassword(
       auth,
       userData.email.trim(),
-      senhaTemporaria
+      senhaTemporaria,
     );
 
-    console.log('✅ Usuário criado no Firebase Auth:', userCredential.user.uid);
+    console.log("✅ Usuário criado no Firebase Auth:", userCredential.user.uid);
 
     // 3. 🔧 CORREÇÃO PRINCIPAL: Deslogar imediatamente o usuário recém-criado
     await signOut(auth);
-    console.log('✅ Usuário recém-criado deslogado (admin também foi deslogado)');
+    console.log(
+      "✅ Usuário recém-criado deslogado (admin também foi deslogado)",
+    );
 
     // 4. Salvar dados do usuário no Firestore
     const userDoc = {
@@ -51,35 +53,35 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       email: userData.email,
       municipio: userData.municipio,
       uf: userData.uf,
-      tipo: userData.tipo || 'operador',
-      status: 'ativo',
+      tipo: userData.tipo || "operador",
+      status: "ativo",
       senhaTemporaria: senhaTemporaria,
       criadoEm: serverTimestamp(),
-      primeiroLogin: true
+      primeiroLogin: true,
     };
 
-    await addDoc(collection(db, 'usuarios'), userDoc);
-    console.log('✅ Dados do usuário salvos no Firestore');
+    await addDoc(collection(db, "usuarios"), userDoc);
+    console.log("✅ Dados do usuário salvos no Firestore");
 
     // 5. 🎯 REDIRECIONAMENTO CONTROLADO com mensagem explicativa
     if (showToast) {
       showToast({
-        tipo: 'sucesso',
-        titulo: '✅ Usuário Criado com Sucesso!',
+        tipo: "sucesso",
+        titulo: "✅ Usuário Criado com Sucesso!",
         mensagem: `Usuário ${userData.nome} foi criado. Você será redirecionado para o login.`,
-        duracao: 4000
+        duracao: 4000,
       });
     }
 
     // 6. Aguardar um momento para o usuário ler a mensagem
     setTimeout(() => {
       if (navigate) {
-        navigate('/login', {
+        navigate("/login", {
           state: {
-            message: '✅ Usuário criado com sucesso! Faça login novamente.',
-            type: 'success',
-            userCreated: userData.nome
-          }
+            message: "✅ Usuário criado com sucesso! Faça login novamente.",
+            type: "success",
+            userCreated: userData.nome,
+          },
         });
       }
     }, 2000);
@@ -88,23 +90,22 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       sucesso: true,
       uid: userCredential.user.uid,
       senhaTemporaria: senhaTemporaria,
-      mensagem: 'Usuário criado com sucesso'
+      mensagem: "Usuário criado com sucesso",
     };
-
   } catch (error) {
-    console.error('❌ Erro ao criar usuário:', error);
+    console.error("❌ Erro ao criar usuário:", error);
 
     // Se houver erro, tentar fazer logout mesmo assim para limpar estado
     try {
       await signOut(auth);
     } catch (signOutError) {
-      console.error('❌ Erro adicional no signOut:', signOutError);
+      console.error("❌ Erro adicional no signOut:", signOutError);
     }
 
     throw {
       codigo: error.code,
       mensagem: getErrorMessage(error),
-      detalhes: error.message
+      detalhes: error.message,
     };
   }
 };
@@ -112,16 +113,16 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
 // 🎯 FUNÇÃO AUXILIAR: Melhorar mensagens de erro
 const getErrorMessage = (error) => {
   switch (error.code) {
-    case 'auth/email-already-in-use':
-      return 'Este email já está sendo usado por outro usuário';
-    case 'auth/invalid-email':
-      return 'Email inválido';
-    case 'auth/weak-password':
-      return 'Senha muito fraca';
-    case 'auth/network-request-failed':
-      return 'Erro de conexão. Verifique sua internet';
+    case "auth/email-already-in-use":
+      return "Este email já está sendo usado por outro usuário";
+    case "auth/invalid-email":
+      return "Email inválido";
+    case "auth/weak-password":
+      return "Senha muito fraca";
+    case "auth/network-request-failed":
+      return "Erro de conexão. Verifique sua internet";
     default:
-      return 'Erro ao criar usuário. Tente novamente.';
+      return "Erro ao criar usuário. Tente novamente.";
   }
 };
 
@@ -129,7 +130,7 @@ const getErrorMessage = (error) => {
 export const createUserWithAdminSDK = async (userData) => {
   // ⚠️ NOTA: Esta função requeria Firebase Admin SDK
   // Por ora, não implementada - usar createUserInFirebase
-  throw new Error('Função não implementada. Use createUserInFirebase.');
+  throw new Error("Função não implementada. Use createUserInFirebase.");
 };
 
 // 🎯 WRAPPER FUNCTION: Para compatibilidade com código existente
@@ -138,7 +139,7 @@ export const createUser = async (userData, options = {}) => {
 
   if (preserveSession) {
     // Futuro: implementar com Admin SDK
-    throw new Error('Preservar sessão requer Firebase Admin SDK');
+    throw new Error("Preservar sessão requer Firebase Admin SDK");
   }
 
   return await createUserInFirebase(userData, navigate, showToast);
@@ -152,7 +153,7 @@ export const checkAuthState = () => {
       resolve({
         isLoggedIn: !!user,
         user: user,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
   });
@@ -162,10 +163,10 @@ export const checkAuthState = () => {
 export const logoutUser = async () => {
   try {
     await signOut(auth);
-    console.log('✅ Logout realizado com sucesso');
+    console.log("✅ Logout realizado com sucesso");
     return { sucesso: true };
   } catch (error) {
-    console.error('❌ Erro no logout:', error);
+    console.error("❌ Erro no logout:", error);
     throw error;
   }
 };
@@ -202,5 +203,5 @@ export default {
   createUser,
   createUserInFirebase,
   checkAuthState,
-  logoutUser
+  logoutUser,
 };
