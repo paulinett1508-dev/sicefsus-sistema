@@ -1,8 +1,9 @@
+
 // generate-version.js
 // Gera arquivo de versão para o sistema de updates
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 // Ler versão do package.json
 const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
