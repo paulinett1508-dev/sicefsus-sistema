@@ -109,12 +109,14 @@ const CNPJInput = ({
         {showValidation && cnpj.length > 0 && (
           <div style={styles.validationIcon}>
             {loading ? (
-              <span style={styles.loadingIcon}>⏳</span>
+              <span style={styles.loadingIcon}>🔄</span>
             ) : showSuccess ? (
               <span style={styles.successIcon}>✅</span>
             ) : hasError ? (
               <span style={styles.errorIcon}>❌</span>
-            ) : null}
+            ) : (
+              <span style={styles.pendingIcon}>⚪</span>
+            )}
           </div>
         )}
       </div>
@@ -193,6 +195,11 @@ const styles = {
 
   errorIcon: {
     color: "#e74c3c",
+  },
+
+  pendingIcon: {
+    color: "#95a5a6",
+    opacity: 0.7,
   },
 
   errorMessage: {

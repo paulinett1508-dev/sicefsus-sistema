@@ -447,9 +447,9 @@ const EmendaForm = () => {
           formData={formData}
           onChange={handleInputChange}
           setFormData={setFormData}
+          errors={{}}
           styles={styles}
           buscarDadosFornecedor={buscarDadosFornecedor}
-          errors={{}}
         />
 
         <DadosBancarios
@@ -586,6 +586,64 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "500",
+  },
+  // Added styles for CNPJInput and related feedback
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    marginBottom: '16px',
+    position: 'relative',
+  },
+  input: {
+    padding: '12px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontSize: '16px',
+    marginTop: '4px',
+  },
+  inputValid: {
+    borderColor: '#27ae60',
+    backgroundColor: '#f0fff4',
+  },
+  inputInvalid: {
+    borderColor: '#e74c3c',
+    backgroundColor: '#fff5f5',
+  },
+  validationFeedback: {
+    position: 'absolute',
+    right: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontSize: '20px',
+    cursor: 'pointer',
+  },
+  helperText: {
+    fontSize: '12px',
+    marginTop: '4px',
+    color: '#666',
+  },
+  errorText: {
+    fontSize: '12px',
+    marginTop: '4px',
+    color: '#e74c3c',
+    fontWeight: '500',
+  },
+  expandedSection: {
+    border: '1px solid #e0e0e0',
+    borderRadius: '8px',
+    padding: '20px',
+    backgroundColor: '#fdfdfd',
+    marginTop: '20px',
+  },
+  sectionTitle: {
+    margin: '0 0 16px 0',
+    paddingBottom: '8px',
+    borderBottom: '1px solid #eee',
+    color: '#333',
+  },
+  formRow: {
+    display: 'flex',
+    gap: '16px',
   },
 };
 

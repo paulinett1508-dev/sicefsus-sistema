@@ -179,14 +179,29 @@ const formStyles = {
   },
 
   inputError: {
-    padding: "12px",
-    border: "2px solid var(--error)",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "all 0.3s ease",
-    backgroundColor: "var(--theme-surface)",
-    color: "var(--theme-text)",
-    boxSizing: "border-box",
+    borderColor: '#e74c3c',
+    backgroundColor: '#fff5f5',
+    boxShadow: '0 0 0 0.2rem rgba(231, 76, 60, 0.25)',
+  },
+
+  inputValid: {
+    borderColor: '#27ae60',
+    backgroundColor: '#f0fff4',
+    boxShadow: '0 0 0 0.2rem rgba(39, 174, 96, 0.25)',
+  },
+
+  cnpjContainer: {
+    position: 'relative',
+    marginBottom: '16px',
+  },
+
+  validationFeedback: {
+    position: 'absolute',
+    right: '12px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    fontSize: '18px',
+    pointerEvents: 'none',
   },
 
   inputReadonly: {
