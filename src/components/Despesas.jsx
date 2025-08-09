@@ -25,6 +25,10 @@ const Despesas = ({ usuario }) => {
 
   // Estados principais
   const [currentView, setCurrentView] = useState("listagem");
+  
+  // Debug
+  console.log("🔍 Despesas - currentView:", currentView);
+  console.log("🔍 Despesas - usuario:", usuario);
   const [despesaSelecionada, setDespesaSelecionada] = useState(null);
   const [despesas, setDespesas] = useState([]);
   const [emendas, setEmendas] = useState([]);
@@ -151,6 +155,7 @@ const Despesas = ({ usuario }) => {
 
   // Handlers de navegação
   const handleCriar = () => {
+    console.log("🔍 Mudando para view 'criar'");
     setDespesaSelecionada(null);
     setCurrentView("criar");
   };
@@ -185,7 +190,7 @@ const Despesas = ({ usuario }) => {
   };
 
   // Renderização condicional por view
-  if (currentView !== "listagem") {
+  if (currentView === "criar" || currentView === "editar" || currentView === "visualizar") {
     return (
       <div style={styles.container}>
         <DespesaForm
@@ -198,6 +203,11 @@ const Despesas = ({ usuario }) => {
           emendaPreSelecionada={filtroAutomatico?.emendaId}
           emendaInfo={filtroAutomatico?.emenda}
           modoVisualizacao={currentView === "visualizar"}
+          titulo={
+            currentView === "criar" ? "Nova Despesa" :
+            currentView === "editar" ? "Editar Despesa" :
+            "Visualizar Despesa"
+          }
         />
       </div>
     );
@@ -233,7 +243,13 @@ const Despesas = ({ usuario }) => {
 
       {/* Botões de ação */}
       <div style={styles.actionContainer}>
-        <button style={styles.primaryButton} onClick={handleCriar}>
+        <button 
+          style={styles.primaryButton} 
+          onClick={() => {
+            console.log("🖱️ Clicou em Nova Despesa");
+            handleCriar();
+          }}
+        >
           ➕ Nova Despesa
         </button>
         <button
