@@ -1,6 +1,7 @@
 // src/components/UserForm.jsx - VERSÃO COMPLETA COM MELHORIAS
 import React, { useEffect } from "react";
 import { formStyles, addFormInteractivity } from "../utils/formStyles";
+import MunicipioSelector from "./MunicipioSelector"; // Importar o componente MunicipioSelector
 
 const UserForm = ({
   formData,
@@ -119,11 +120,11 @@ const UserForm = ({
     }
 
     console.log("✅ Validações passed, enviando...");
-    
+
     try {
       const resultado = await onSubmit(e);
       console.log("📋 Resultado da criação:", resultado);
-      
+
       // ✅ Admin permanece logado - operação normal
       if (resultado && resultado.adminPreserved) {
         console.log("🎉 Usuário criado - admin permanece logado!");
@@ -132,7 +133,7 @@ const UserForm = ({
         // ✅ FALLBACK: caso não tenha adminPreserved (edição não afeta)
         console.log("✅ Usuário criado com sucesso");
       }
-      
+
     } catch (error) {
       console.error("❌ Erro no envio do formulário:", error);
       throw error;
@@ -447,82 +448,77 @@ const UserForm = ({
                 </span>
               </legend>
 
-              <div style={styles.formGrid}>
-                <div style={styles.formGroup}>
-                  <label style={styles.labelRequired}>
-                    Município <span style={styles.required}>*</span>
-                    {editingUser && (
-                      <span
-                        style={styles.infoIcon}
-                        title="Localização não pode ser alterada após criação"
-                      >
-                        ℹ️
-                      </span>
-                    )}
-                  </label>
-                  <input
-                    type="text"
-                    style={{
-                      ...styles.input,
-                      borderColor: editingUser
-                        ? "var(--warning)"
-                        : "var(--primary)",
-                      backgroundColor: editingUser
-                        ? "var(--theme-surface-secondary)"
-                        : "white",
-                    }}
-                    value={formData.municipio || ""}
-                    onChange={(e) =>
+              {/* Seletor UF + Município Padronizado */}
+              <div style={styles.formGroup}>
+                {editingUser ? (
+                  <>
+                    {/* Durante edição, mostrar campos somente leitura */}
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelRequired}>
+                        Estado (UF) <span style={styles.required}>*</span>
+                        <span
+                          style={styles.infoIcon}
+                          title="UF não pode ser alterada após criação"
+                        >
+                          ℹ️
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        style={{
+                          ...styles.input,
+                          borderColor: "var(--warning)",
+                          backgroundColor: "var(--theme-surface-secondary)",
+                        }}
+                        value={formData.uf || ""}
+                        disabled={true}
+                        required={formData.role === "user"}
+                      />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelRequired}>
+                        Município <span style={styles.required}>*</span>
+                        <span
+                          style={styles.infoIcon}
+                          title="Localização não pode ser alterada após criação"
+                        >
+                          ℹ️
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        style={{
+                          ...styles.input,
+                          borderColor: "var(--warning)",
+                          backgroundColor: "var(--theme-surface-secondary)",
+                        }}
+                        value={formData.municipio || ""}
+                        disabled={true}
+                        required={formData.role === "user"}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  /* Durante criação, usar seletor padronizado */
+                  <MunicipioSelector
+                    ufSelecionada={formData.uf || ""}
+                    municipioSelecionado={formData.municipio || ""}
+                    onUfChange={(uf) => {
                       setFormData({
                         ...formData,
-                        municipio: e.target.value,
-                      })
-                    }
-                    disabled={saving || editingUser}
-                    placeholder=""
-                    required={formData.role === "user"}
-                    minLength="2"
-                    maxLength="100"
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.labelRequired}>
-                    Estado (UF) <span style={styles.required}>*</span>
-                    {editingUser && (
-                      <span
-                        style={styles.infoIcon}
-                        title="UF não pode ser alterada após criação"
-                      >
-                        ℹ️
-                      </span>
-                    )}
-                  </label>
-                  <select
-                    style={{
-                      ...styles.select,
-                      borderColor: editingUser
-                        ? "var(--warning)"
-                        : "var(--primary)",
-                      backgroundColor: editingUser
-                        ? "var(--theme-surface-secondary)"
-                        : "white",
+                        uf: uf,
+                        municipio: "" // Limpar município quando UF mudar
+                      });
                     }}
-                    value={formData.uf || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, uf: e.target.value })
-                    }
-                    disabled={saving || editingUser}
-                    required={formData.role === "user"}
-                  >
-                    <option value="">Selecione o Estado</option>
-                    {UFS_VALIDAS.map((uf) => (
-                      <option key={uf} value={uf}>
-                        {uf} - {UF_NAMES[uf]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    onMunicipioChange={(municipio) => {
+                      setFormData({
+                        ...formData,
+                        municipio: municipio
+                      });
+                    }}
+                    disabled={saving}
+                  />
+                )}
               </div>
 
               {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
