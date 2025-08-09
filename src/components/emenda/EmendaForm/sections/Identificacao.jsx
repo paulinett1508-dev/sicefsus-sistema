@@ -2,6 +2,7 @@
 // Seção de Identificação com layout IDÊNTICO às outras seções
 
 import React, { useState, useEffect } from "react";
+import CNPJInput from "../../../CNPJInput";
 
 const Identificacao = ({
   formData,
@@ -118,37 +119,50 @@ const Identificacao = ({
   };
 
   return (
-    <div style={styles.container}>
-      {/* Header da seção - IGUAL outras seções */}
-      <div style={styles.sectionHeader}>
-        <div style={styles.sectionIcon}>📋</div>
-        <h3 style={styles.sectionTitle}>Identificação</h3>
-      </div>
+    <fieldset style={styles.fieldset}>
+      {/* Header da seção - IGUAL Dados Básicos */}
+      <legend style={styles.legend}>
+        <span style={styles.legendIcon}>📋</span>
+        Identificação
+      </legend>
 
-      {/* Grid de campos - IGUAL outras seções */}
-      <div style={styles.fieldsGrid}>
-        {/* CNPJ - Input simples para evitar erros */}
-        <div style={styles.fieldGroup}>
-          <label style={styles.label}>
-            CNPJ <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="cnpj"
+      {/* Grid de campos - IGUAL Dados Básicos */}
+      <div style={styles.formGrid}>
+        {/* CNPJ - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}
+        <div style={styles.formGroup}>
+          <CNPJInput
+            label="CNPJ"
             value={formData?.cnpj || ""}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              console.log("🔧 Identificacao CNPJ change:", e.target.value);
+              handleInputChange({
+                target: {
+                  name: "cnpj",
+                  value: e.target.value,
+                },
+              });
+            }}
+            required={true}
             placeholder="00.000.000/0000-00"
             disabled={disabled}
-            style={{
+            showValidation={true}
+            style={styles.formGroup}
+            inputStyle={{
               ...styles.input,
-              ...(errors.cnpj ? styles.inputError : {}),
+              padding: "12px", // ✅ ALINHAMENTO: mesmo padding dos outros campos
+              fontSize: "14px", // ✅ ALINHAMENTO: mesmo font-size dos outros campos
+              border: "2px solid #dee2e6", // ✅ ALINHAMENTO: mesma borda dos outros campos
+              borderRadius: "6px", // ✅ ALINHAMENTO: mesmo border-radius dos outros campos
+            }}
+            onValidChange={(isValid, value) => {
+              console.log("🎯 Identificacao CNPJ validation:", isValid, value);
             }}
           />
           {errors.cnpj && <div style={styles.errorMessage}>{errors.cnpj}</div>}
         </div>
 
         {/* UF */}
-        <div style={styles.fieldGroup}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
             🗺️ UF <span style={styles.required}>*</span>
           </label>
@@ -173,7 +187,7 @@ const Identificacao = ({
         </div>
 
         {/* Município */}
-        <div style={styles.fieldGroup}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
             🏙️ Município <span style={styles.required}>*</span>
           </label>
@@ -214,61 +228,53 @@ const Identificacao = ({
           )}
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };
 
-// Estilos IDÊNTICOS às outras seções
+// Estilos IDÊNTICOS à seção Dados Básicos
 const styles = {
-  container: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    border: "2px solid #e1e5e9",
-    padding: "24px",
-    marginBottom: "20px",
+  fieldset: {
+    border: "2px solid #154360",
+    borderRadius: "10px",
+    padding: "20px",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
-  sectionHeader: {
+  legend: {
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
+    fontWeight: "bold",
+    fontSize: "16px",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    marginBottom: "24px",
-    paddingBottom: "16px",
-    borderBottom: "1px solid #e1e5e9",
+    gap: "8px",
   },
 
-  sectionIcon: {
-    fontSize: "24px",
-    padding: "8px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
+  legendIcon: {
+    fontSize: "18px",
   },
 
-  sectionTitle: {
-    fontSize: "20px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    margin: 0,
-  },
-
-  fieldsGrid: {
+  formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
-    alignItems: "start",
   },
 
-  fieldGroup: {
+  formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
   },
 
   label: {
+    fontWeight: "bold",
+    color: "#333",
     fontSize: "14px",
-    fontWeight: "600",
-    color: "#495057",
-    marginBottom: "4px",
   },
 
   required: {
@@ -276,38 +282,37 @@ const styles = {
   },
 
   input: {
-    width: "100%",
-    padding: "12px 16px",
-    border: "2px solid #e1e5e9",
-    borderRadius: "8px",
+    padding: "12px",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
+    borderRadius: "6px",
     fontSize: "14px",
+    transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
   },
 
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
 
   select: {
-    width: "100%",
-    padding: "12px 16px",
-    border: "2px solid #e1e5e9",
-    borderRadius: "8px",
+    padding: "12px",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
+    borderRadius: "6px",
     fontSize: "14px",
+    transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
   },
 
   selectError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
 
   selectLoading: {
@@ -316,9 +321,10 @@ const styles = {
   },
 
   errorMessage: {
-    fontSize: "12px",
     color: "#dc3545",
+    fontSize: "12px",
     marginTop: "4px",
+    display: "block",
   },
 
   municipioCount: {
