@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   getAuth,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import {
   collection,
@@ -13,6 +14,7 @@ import {
   query,
   where,
   serverTimestamp,
+  deleteDoc,
 } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { db, auth } from "../firebase/firebaseConfig";
@@ -76,22 +78,27 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
     await addDoc(collection(db, "usuarios"), userDoc);
     console.log("✅ Dados do usuário salvos no Firestore");
 
-    // 5. ✅ CORREÇÃO: Não redirecionar - admin permanece logado
+    // 5. ✅ CORREÇÃO: Enviar email de configuração inicial (não reset)
+    console.log("📨 Enviando email de configuração inicial...");
+    await sendPasswordResetEmail(auth, userData.email.trim());
+    console.log("✅ Email de configuração enviado");
+
+    // 6. ✅ ALTERNATIVA: Mostrar senha temporária para admin
     if (showToast) {
       showToast({
         tipo: "sucesso",
         titulo: "✅ Usuário Criado!",
-        mensagem: `Usuário ${userData.nome} foi criado com sucesso!`,
-        duracao: 3000,
+        mensagem: `Usuário ${userData.nome} criado! Senha temporária: ${senhaTemporaria}`,
+        duracao: 8000, // Mais tempo para copiar senha
       });
     }
 
     return {
       sucesso: true,
-      adminPreserved: true, // ✅ NOVO: Flag indicando que admin foi preservado
+      adminPreserved: true,
       uid: userCredential.user.uid,
-      senhaTemporaria: senhaTemporaria,
-      mensagem: "Usuário criado com sucesso",
+      senhaTemporaria: senhaTemporaria, // ✅ INCLUIR senha para o admin ver
+      mensagem: `Usuário criado! Senha temporária: ${senhaTemporaria}`,
     };
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
@@ -159,9 +166,80 @@ export const logoutUser = async () => {
   }
 };
 
+// ✅ FUNÇÃO PARA ATUALIZAR USUÁRIO
+export const updateUser = async (userId, userData, originalEmail) => {
+  try {
+    console.log("✏️ Atualizando usuário:", userId, userData);
+
+    const userRef = doc(db, "usuarios", userId);
+    const updateData = {
+      nome: userData.nome,
+      tipo: userData.role === "admin" ? "admin" : "operador",
+      status: userData.status || "ativo",
+      departamento: userData.departamento || "",
+      telefone: userData.telefone || "",
+      municipio: userData.role === "admin" ? "" : userData.municipio || "",
+      uf: userData.role === "admin" ? "" : userData.uf || "",
+      dataAtualizacao: serverTimestamp(),
+    };
+
+    await updateDoc(userRef, updateData);
+    console.log("✅ Usuário atualizado com sucesso");
+
+    return {
+      success: true,
+      message: "Usuário atualizado com sucesso!",
+    };
+  } catch (error) {
+    console.error("❌ Erro ao atualizar usuário:", error);
+    throw new Error("Erro ao atualizar usuário: " + error.message);
+  }
+};
+
+// ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
+export const deleteUserById = async (userId) => {
+  try {
+    console.log("🗑️ Excluindo usuário:", userId);
+
+    const userRef = doc(db, "usuarios", userId);
+    await deleteDoc(userRef);
+    console.log("✅ Usuário excluído com sucesso");
+
+    return {
+      success: true,
+      message: "Usuário excluído com sucesso!",
+    };
+  } catch (error) {
+    console.error("❌ Erro ao excluir usuário:", error);
+    throw new Error("Erro ao excluir usuário: " + error.message);
+  }
+};
+
+// ✅ FUNÇÃO PARA RESETAR SENHA
+export const sendPasswordReset = async (email) => {
+  try {
+    console.log("📨 Enviando reset de senha para:", email);
+
+    // Usar a instância principal de auth para enviar email
+    await sendPasswordResetEmail(auth, email);
+    console.log("✅ Email de reset enviado");
+
+    return {
+      success: true,
+      message: "Email de redefinição enviado com sucesso!",
+    };
+  } catch (error) {
+    console.error("❌ Erro ao enviar reset:", error);
+    throw new Error("Erro ao enviar email de redefinição: " + error.message);
+  }
+};
+
 export default {
   createUser,
   createUserInFirebase,
+  updateUser,
+  deleteUserById,
+  sendPasswordReset,
   checkAuthState,
   logoutUser,
 };
