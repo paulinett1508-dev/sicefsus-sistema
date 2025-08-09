@@ -3,7 +3,7 @@
 // ✅ Adicionar apenas o necessário para o modal funcionar
 
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, query, orderBy, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 // ✅ ADICIONAR: Import do UserForm e userService
@@ -193,16 +193,15 @@ const Administracao = () => {
     });
   };
 
-  // ✅ IMPLEMENTAR: Handler para toggle status
   const handleToggleStatus = async (usuario) => {
     try {
       const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
 
-      // ✅ CORREÇÃO: Update simples apenas do status
+      // ✅ Update simples apenas do status
       const userRef = doc(db, "usuarios", usuario.id);
       await updateDoc(userRef, {
         status: novoStatus,
-        dataAtualizacao: new Date()
+        dataAtualizacao: new Date(),
       });
 
       showToast(`✅ Status alterado para ${novoStatus}!`, "success");
@@ -232,7 +231,7 @@ const Administracao = () => {
           const userRef = doc(db, "usuarios", usuario.id);
           await updateDoc(userRef, {
             status: "inativo",
-            dataAtualizacao: new Date()
+            dataAtualizacao: new Date(),
           });
           showToast("✅ Usuário inativado com sucesso!", "success");
           await carregarUsuarios();
