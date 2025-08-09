@@ -474,7 +474,11 @@ const EmendaForm = () => {
 
       <LoadingOverlay 
         show={salvando} 
-        message={isEdicao ? "Atualizando emenda parlamentar..." : "Salvando nova emenda parlamentar..."} 
+        message={
+          isEdicao 
+            ? "Atualizando emenda parlamentar..." 
+            : "Cadastrando nova emenda parlamentar..."
+        } 
       />
     </div>
   );
