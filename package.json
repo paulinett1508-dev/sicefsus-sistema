@@ -5,7 +5,7 @@
   "description": "React TypeScript on Replit, using Vite bundler",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:prod",
+    "build": "node generate-version.js && vite build",
     "build:dev": "vite build --mode development",
     "build:prod": "vite build --mode production",
     "build:clean": "rm -rf dist dist-backup && npm run build:prod",
@@ -13,7 +13,10 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "check-console": "node remove-console-prod.cjs",
     "restore-backup": "rm -rf dist && mv dist-backup dist",
-    "analise": "node scripts/analise-runner.cjs"
+    "analise": "node scripts/analise-runner.cjs",
+    "version:patch": "npm version patch && node generate-version.js",
+    "version:minor": "npm version minor && node generate-version.js",
+    "version:major": "npm version major && node generate-version.js"
   },
   "keywords": [],
   "author": "",
