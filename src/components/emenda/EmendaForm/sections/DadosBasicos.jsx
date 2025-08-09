@@ -1,6 +1,5 @@
 import React from "react";
 import CNPJInput from "../../../CNPJInput";
-import MunicipioSelector from "../../../MunicipioSelector";
 
 const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const programas = [
@@ -236,52 +235,6 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           )}
         </div>
       </div>
-
-      {/* Seção de Localização com Seletor Padronizado */}
-      <div style={styles.localizacaoGrid}>
-        <MunicipioSelector
-          ufSelecionada={formData.uf || ""}
-          municipioSelecionado={formData.municipio || ""}
-          onUfChange={(uf) => {
-            onChange({
-              target: {
-                name: "uf",
-                value: uf,
-              },
-            });
-            // Limpar município quando UF mudar
-            if (formData.municipio) {
-              onChange({
-                target: {
-                  name: "municipio",
-                  value: "",
-                },
-              });
-            }
-          }}
-          onMunicipioChange={(municipio) => {
-            onChange({
-              target: {
-                name: "municipio",
-                value: municipio,
-              },
-            });
-          }}
-          disabled={false}
-        />
-        
-        {/* Validação de erros para localização */}
-        {(fieldErrors.uf || fieldErrors.municipio) && (
-          <div style={styles.localizacaoErrors}>
-            {fieldErrors.uf && (
-              <small style={styles.errorText}>{fieldErrors.uf}</small>
-            )}
-            {fieldErrors.municipio && (
-              <small style={styles.errorText}>{fieldErrors.municipio}</small>
-            )}
-          </div>
-        )}
-      </div>
     </fieldset>
   );
 };
@@ -367,19 +320,7 @@ const styles = {
     display: "block",
     fontWeight: "500",
   },
-  localizacaoGrid: {
-    marginTop: "20px",
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
-    border: "2px solid #154360",
-    borderRadius: "8px",
-  },
-  localizacaoErrors: {
-    marginTop: "12px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-  },
+  
 };
 
 export default DadosBasicos;
