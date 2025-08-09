@@ -109,6 +109,9 @@ export function useCNPJInput() {
     handleChange,
     handleBlur,
     setCNPJ,
+    setIsValid,
     setTouched
+  };
+}tTouched
   };
 }
