@@ -121,24 +121,18 @@ const UserForm = ({
     console.log("✅ Validações passed, enviando...");
     
     try {
-      // Chamar o onSubmit e aguardar resultado se não for edição
-      if (!editingUser) {
-        const resultado = await onSubmit(e);
-        
-        // ✅ Se o resultado indica necessidade de reautenticação, redirecionar
-        if (resultado && resultado.requiresReauth) {
-          setTimeout(() => {
-            alert("✅ Usuário criado com sucesso! Você será redirecionado para o login.");
-            window.location.href = '/?message=Usuario criado com sucesso. Faça login novamente.';
-          }, 1500);
-        }
-      } else {
-        // Para edição, apenas chamar o onSubmit normalmente
-        onSubmit(e);
+      const resultado = await onSubmit(e);
+      console.log("📋 Resultado da criação:", resultado);
+      
+      // ✅ Admin permanece logado - operação normal
+      if (resultado && resultado.adminPreserved) {
+        console.log("🎉 Usuário criado - admin permanece logado!");
+        // Componente pai já tratará o sucesso
       }
+      
     } catch (error) {
-      console.error("Erro no envio do formulário:", error);
-      // O erro será tratado pelo componente pai
+      console.error("❌ Erro no envio do formulário:", error);
+      throw error;
     }
   };
 
