@@ -118,6 +118,11 @@ const ContextPanel = ({
 
   if (!isVisible) return null;
 
+  // Prevenir múltiplas instâncias
+  if (!emenda) {
+    return null;
+  }
+
   return (
     <div style={styles.overlay}>
       <div style={styles.panel}>

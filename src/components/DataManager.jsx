@@ -35,6 +35,15 @@ const DataManager = () => {
     checkAutoBackupSetting();
   }, []);
 
+  // Cleanup para prevenir múltiplas instâncias
+  useEffect(() => {
+    return () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.removeEventListener('change', handleFileSelect);
+      }
+    };
+  }, []);
+
   const loadBackups = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "backups"));

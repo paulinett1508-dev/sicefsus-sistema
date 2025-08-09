@@ -35,8 +35,11 @@ import ErrorBoundary from "./components/ErrorBoundary";
 // Sistema inteligente de controle de logs
 import { configureConsole } from "./utils/DisableConsole";
 
-// Configurar console inteligente
-configureConsole();
+// Configurar console inteligente apenas uma vez
+if (!window.__consoleConfigured) {
+  configureConsole();
+  window.__consoleConfigured = true;
+}
 
 // Context para proteção de navegaçãovegação
 const NavigationProtectionContext = React.createContext({

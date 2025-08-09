@@ -26,9 +26,10 @@ const Despesas = ({ usuario }) => {
   // Estados principais
   const [currentView, setCurrentView] = useState("listagem");
   
-  // Debug
-  console.log("🔍 Despesas - currentView:", currentView);
-  console.log("🔍 Despesas - usuario:", usuario);
+  // Debug controlado
+  useEffect(() => {
+    console.log("🔍 Despesas - currentView mudou:", currentView);
+  }, [currentView]);
   const [despesaSelecionada, setDespesaSelecionada] = useState(null);
   const [despesas, setDespesas] = useState([]);
   const [emendas, setEmendas] = useState([]);
