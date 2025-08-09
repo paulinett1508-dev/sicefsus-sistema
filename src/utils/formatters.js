@@ -201,3 +201,74 @@ export default {
   formatarMoeda,
   formatarData,
 };
+/**
+ * Utilitários para formatação de dados
+ */
+
+/**
+ * Formatar valor como moeda brasileira
+ * @param {number|string} valor - Valor a ser formatado
+ * @returns {string} - Valor formatado como moeda
+ */
+export const formatarMoeda = (valor) => {
+  if (!valor && valor !== 0) return "R$ 0,00";
+  
+  const numero = typeof valor === 'string' ? 
+    parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
+  
+  if (isNaN(numero)) return "R$ 0,00";
+  
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(numero);
+};
+
+/**
+ * Formatar data brasileira
+ * @param {Date|string} data - Data a ser formatada
+ * @returns {string} - Data formatada DD/MM/AAAA
+ */
+export const formatarData = (data) => {
+  if (!data) return "";
+  
+  const dataObj = data instanceof Date ? data : new Date(data);
+  
+  if (isNaN(dataObj.getTime())) return "";
+  
+  return dataObj.toLocaleDateString("pt-BR");
+};
+
+/**
+ * Formatar telefone brasileiro
+ * @param {string} telefone - Telefone a ser formatado
+ * @returns {string} - Telefone formatado
+ */
+export const formatarTelefone = (telefone) => {
+  if (!telefone) return "";
+  
+  const numeros = telefone.replace(/\D/g, "");
+  
+  if (numeros.length === 10) {
+    return numeros.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+  }
+  
+  if (numeros.length === 11) {
+    return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  }
+  
+  return telefone;
+};
+
+/**
+ * Formatar CPF
+ * @param {string} cpf - CPF a ser formatado
+ * @returns {string} - CPF formatado XXX.XXX.XXX-XX
+ */
+export const formatarCPF = (cpf) => {
+  if (!cpf) return "";
+  
+  const numeros = cpf.replace(/\D/g, "");
+  
+  return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+};

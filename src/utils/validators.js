@@ -490,8 +490,6 @@ export const createErrorReport = (context, error, additionalData = {}) => {
     lineNumber: error.lineNumber,
     columnNumber: error.columnNumber
   };
-};: error.columnNumber,
-  };
 };
 
 // ✅ CNPJ Validators
