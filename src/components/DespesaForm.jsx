@@ -37,6 +37,7 @@ import {
   formatarMoedaDisplay,
 } from "../utils/formatters";
 import { useCNPJValidation } from "../utils/validators";
+import LoadingOverlay from './LoadingOverlay';
 
 const DespesaForm = ({
   usuario,
@@ -51,6 +52,7 @@ const DespesaForm = ({
   titulo = null,
   subtitle = null,
   emendaId = null,
+  onSuccess // Adicionado para callback de sucesso
 }) => {
   // ✅ HOOKS REUTILIZADOS
   const isMounted = useIsMounted();
@@ -103,9 +105,11 @@ const DespesaForm = ({
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [salvando, setSalvando] = useState(false); // Estado adicionado
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
   const [emendas, setEmendas] = useState(emendasDisponiveis);
+  const [emendaData, setEmendaData] = useState(null); // Estado original mantido
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // ✅ CONFIGURAÇÃO DE MODO SIMPLIFICADA
@@ -295,6 +299,9 @@ const DespesaForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevenir duplo clique
+    if (salvando) return;
+
     if (!validarFormulario()) {
       setToast({
         show: true,
@@ -304,7 +311,7 @@ const DespesaForm = ({
       return;
     }
 
-    setLoading(true);
+    setSalvando(true); // Ativa estado de salvando
 
     try {
       const dadosParaSalvar = {
@@ -321,47 +328,49 @@ const DespesaForm = ({
       if (despesaParaEditar) {
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
         await updateDoc(despesaRef, dadosParaSalvar);
+
+        // Aguardar um pouco para mostrar o feedback
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         setToast({
           show: true,
-          message: "Despesa atualizada com sucesso!",
+          message: "✅ Despesa atualizada com sucesso!",
           type: "success",
         });
       } else {
-        const collectionRef = collection(db, "despesas");
-        const docRef = await addDoc(collectionRef, dadosParaSalvar);
+        await addDoc(collection(db, "despesas"), dadosParaSalvar);
 
-        // Verificar se foi criado
-        const docCheck = await getDoc(docRef);
-        if (!docCheck.exists()) {
-          throw new Error("Documento não foi criado corretamente");
-        }
+        // Aguardar um pouco para mostrar o feedback
+        await new Promise(resolve => setTimeout(resolve, 800));
 
         setToast({
           show: true,
-          message: "Despesa criada com sucesso!",
+          message: "✅ Despesa criada com sucesso!",
           type: "success",
         });
       }
 
-      if (isMounted) {
-        setShowSuccessMessage(true);
-        setTimeout(() => {
-          if (isMounted) {
-            setShowSuccessMessage(false);
-            if (onSalvar && typeof onSalvar === "function") {
-              onSalvar();
-            }
-          }
-        }, 1500);
+      // Aguardar mais um pouco para o usuário ver a mensagem
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Chamar callback de sucesso
+      if (onSuccess) {
+        onSuccess();
       }
+
+      // Limpar formulário se não for edição
+      if (!despesaParaEditar) {
+        limparFormulario();
+      }
+
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);
+      let mensagemErro = "❌ Erro ao salvar despesa. ";
 
-      let mensagemErro = "Erro ao salvar despesa. ";
-      if (error.code === "permission-denied") {
-        mensagemErro += "Verifique as regras de segurança do Firebase.";
-      } else if (error.code === "network-request-failed") {
-        mensagemErro += "Problema de conexão.";
+      if (error.code === 'permission-denied') {
+        mensagemErro += "Você não tem permissão para esta operação.";
+      } else if (error.code === 'unavailable') {
+        mensagemErro += "Serviço temporariamente indisponível.";
       } else {
         mensagemErro += "Tente novamente.";
       }
@@ -372,18 +381,62 @@ const DespesaForm = ({
         type: "error",
       });
     } finally {
+      setSalvando(false); // Desativa estado de salvando
       setLoading(false);
     }
   };
 
+  // Função para limpar o formulário (pode ser útil após salvar)
+  const limparFormulario = () => {
+    setFormData({
+      emendaId: emendaPreSelecionada || emendaId || "",
+      discriminacao: "",
+      fornecedor: "",
+      valor: "",
+      numeroEmpenho: "",
+      numeroNota: "",
+      dataEmpenho: "",
+      dataLiquidacao: "",
+      dataPagamento: "",
+      acao: "",
+      dotacaoOrcamentaria: "",
+      classificacaoFuncional: "",
+      numeroContrato: "",
+      categoria: "",
+      descricao: "",
+      observacoes: "",
+      status: "pendente",
+      centroCusto: "",
+      naturezaDespesa: "",
+      elementoDespesa: "",
+      fonteRecurso: "",
+      programaTrabalho: "",
+      planoInterno: "",
+      contrapartida: 0,
+      percentualExecucao: 0,
+      etapaExecucao: "",
+      coordenadasGeograficas: "",
+      populacaoBeneficiada: "",
+      impactoSocial: "",
+      cnpjFornecedor: "",
+      enderecoFornecedor: "",
+      telefoneFornecedor: "",
+      emailFornecedor: "",
+      dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
+    });
+    setErrors({});
+  };
+
+
   return (
     <div style={styles.container}>
       {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: "", type: "" })}
-        />
+        <div style={styles.toast}>
+          <p>{toast.message}</p>
+          <button onClick={() => setToast({ ...toast, show: false })}>
+            ✕
+          </button>
+        </div>
       )}
 
       {/* ✅ HEADER EXTRAÍDO */}
@@ -476,7 +529,31 @@ const DespesaForm = ({
           modoVisualizacao={modoVisualizacao}
           onCancelar={onCancelar}
         />
+
+        {/* Botão de Submit Atualizado */}
+        <button
+            type="submit"
+            style={{
+              ...styles.submitButton,
+              opacity: salvando ? 0.6 : 1,
+              cursor: salvando ? 'not-allowed' : 'pointer',
+              transform: salvando ? 'scale(0.98)' : 'scale(1)',
+            }}
+            disabled={salvando}
+          >
+            {salvando ? (
+              "Processando..."
+            ) : (
+              despesaParaEditar ? "Atualizar Despesa" : "Salvar Despesa"
+            )}
+          </button>
+
       </form>
+
+      <LoadingOverlay
+        show={salvando}
+        message={despesaParaEditar ? "Atualizando despesa..." : "Salvando nova despesa..."}
+      />
     </div>
   );
 };
@@ -507,6 +584,32 @@ const styles = {
     marginBottom: "20px",
     transition: "background-color 0.3s ease",
   },
+  submitButton: {
+    backgroundColor: "#27AE60",
+    color: "white",
+    padding: "14px 32px",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 4px 12px rgba(39, 174, 96, 0.3)",
+    minWidth: "200px",
+  },
+  toast: {
+    position: 'fixed',
+    top: '20px',
+    right: '20px',
+    backgroundColor: '#333',
+    color: 'white',
+    padding: '15px',
+    borderRadius: '5px',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  }
 };
 
 export default DespesaForm;
