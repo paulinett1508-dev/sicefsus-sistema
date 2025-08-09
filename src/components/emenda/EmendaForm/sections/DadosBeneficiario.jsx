@@ -125,6 +125,25 @@ const DadosBeneficiario = ({ formData, onChange, setFormData, styles, buscarDado
             </div>
           </fieldset>
 
+          {/* CNPJ do Beneficiário */}
+          <fieldset style={styles.row}>
+            <div style={styles.field}>
+              <CNPJInput
+                label="CNPJ do Beneficiário"
+                value={formData.cnpjBeneficiario || ''}
+                onChange={(e) => onChange({
+                  target: {
+                    name: 'cnpjBeneficiario',
+                    value: e.target.value
+                  }
+                })}
+                required={true}
+                placeholder="00.000.000/0000-00"
+                style={styles.formGroup}
+              />
+            </div>
+          </fieldset>
+
           {/* ✅ BANNER INFORMATIVO */}
           <div style={styles.infoBanner}>
             <div style={styles.infoIcon}>ℹ️</div>
