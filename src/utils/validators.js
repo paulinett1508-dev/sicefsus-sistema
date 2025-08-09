@@ -488,7 +488,9 @@ export const createErrorReport = (context, error, additionalData = {}) => {
     errorName: error.name,
     fileName: error.fileName,
     lineNumber: error.lineNumber,
-    columnNumber: error.columnNumber,
+    columnNumber: error.columnNumber
+  };
+};: error.columnNumber,
   };
 };
 
@@ -574,16 +576,21 @@ export const validarFormularioEmenda = (formData) => {
 
   // Validação de CNPJ se preenchido
   if (formData.cnpjBeneficiario) {
-    const { validarCNPJ } = require('./cnpjUtils');
-    if (!validarCNPJ(formData.cnpjBeneficiario)) {
-      errors.cnpjBeneficiario = 'CNPJ inválido';
-    }
+    // Import dinâmico para evitar problemas circulares
+    import('./cnpjUtils').then(({ validarCNPJ }) => {
+      if (!validarCNPJ(formData.cnpjBeneficiario)) {
+        errors.cnpjBeneficiario = 'CNPJ inválido';
+      }
+    });
   }
 
   return errors;
 };
 
 // ✅ HOOK PARA USO NO DESPESAFORM
+import { useState } from 'react';
+import { formatarCNPJ, validarCNPJ } from './cnpjUtils';
+
 export const useCNPJValidation = () => {
   const [cnpjError, setCnpjError] = useState("");
 
@@ -595,7 +602,19 @@ export const useCNPJValidation = () => {
     setFormData((prev) => ({ ...prev, cnpjFornecedor: cnpjFormatado }));
 
     // Valida apenas se tem 14 dígitos
-    if (cnpjFormatado.replace(/\D/g, "").length === 14) {
+    if (cnpjFormatado.replace(/\D/g, '').length === 14) {
+      if (validarCNPJ(cnpjFormatado)) {
+        setCnpjError("");
+      } else {
+        setCnpjError("CNPJ inválido");
+      }
+    } else {
+      setCnpjError("");
+    }
+  };
+
+  return { cnpjError, handleCNPJChange };
+};ace(/\D/g, "").length === 14) {
       const validacao = validarCNPJ(cnpjFormatado);
       setCnpjError(validacao.valido ? "" : validacao.erro);
     } else {

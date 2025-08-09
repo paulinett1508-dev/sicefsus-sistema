@@ -163,90 +163,41 @@ export const formatarTelefone = (telefone) => {
 
 // ✅ FORMATADOR PARA DATA
 export const formatarData = (data) => {
-  if (!data) return "";
+  if (!data) return '';
 
-  try {
-    const dataObj = new Date(data);
-    return dataObj.toLocaleDateString("pt-BR");
-  } catch (error) {
-    return data;
-  }
+  // Se já está no formato brasileiro
+  if (data.includes('/')) return data;
+
+  // Se está no formato ISO (YYYY-MM-DD)
+  const [ano, mes, dia] = data.split('-');
+  return `${dia}/${mes}/${ano}`;
 };
 
-// ✅ FORMATADOR PARA DATA E HORA
-export const formatarDataHora = (data) => {
-  if (!data) return "";
-
-  try {
-    const dataObj = new Date(data);
-    return dataObj.toLocaleString("pt-BR");
-  } catch (error) {
-    return data;
-  }
-};
-
-// ✅ UTILITÁRIOS PARA VALIDAÇÃO DE VALORES
-export const validarValorMonetario = (valor, saldoMaximo = null) => {
-  const valorNumerico = parseValorMonetario(valor);
-
-  if (valorNumerico <= 0) {
-    return { valido: false, erro: "Valor deve ser maior que zero" };
-  }
-
-  if (saldoMaximo && valorNumerico > saldoMaximo) {
-    return {
-      valido: false,
-      erro: `Valor excede saldo disponível: ${formatarMoedaDisplay(saldoMaximo)}`,
-    };
-  }
-
-  return { valido: true, erro: null };
-};
-
-// ✅ CALCULADORA DE ESTATÍSTICAS FINANCEIRAS
-export const calcularEstatisticas = (despesas, emendas) => {
-  const totalDespesas = despesas.reduce((acc, despesa) => {
-    return acc + parseValorMonetario(despesa.valor);
-  }, 0);
-
-  const totalEmendas = emendas.reduce((acc, emenda) => {
-    return acc + (emenda.valorRecurso || 0);
-  }, 0);
-
-  const saldoTotal = totalEmendas - totalDespesas;
-  const percentualExecutado =
-    totalEmendas > 0 ? (totalDespesas / totalEmendas) * 100 : 0;
-
-  return {
-    totalDespesas,
-    totalEmendas,
-    saldoTotal,
-    percentualExecutado,
-    totalDespesasFormatado: formatarMoedaDisplay(totalDespesas),
-    totalEmendasFormatado: formatarMoedaDisplay(totalEmendas),
-    saldoTotalFormatado: formatarMoedaDisplay(saldoTotal),
-    percentualExecutadoFormatado: formatarPercentual(percentualExecutado),
-  };
-};
-
-// ✅ FORMATADOR DE VALOR MONETÁRIO (PARA INPUTS DE DINHEIRO)
-export const formatarValorMonetario = (valor) => {
-  if (!valor) return '';
+/**
+ * Formatar valor em moeda brasileira
+ * @param {string|number} valor - Valor a ser formatado
+ * @returns {string} Valor formatado em R$
+ */
+export const formatarMoeda = (valor) => {
+  if (!valor) return 'R$ 0,00';
 
   // Remove tudo que não é número
   const numero = valor.toString().replace(/\D/g, '');
 
-  if (!numero) return '';
+  if (!numero) return 'R$ 0,00';
 
-  // Converte para número e divide por 100 (para centavos)
-  const valorNumerico = parseFloat(numero) / 100;
+  // Converte para centavos e depois para reais
+  const centavos = parseInt(numero, 10);
+  const reais = centavos / 100;
 
-  // Formata como moeda brasileira
-  return valorNumerico.toLocaleString('pt-BR', {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: 'BRL'
-  });
+    currency: 'BRL',
+  }).format(reais);
 };
 
-// Alias para compatibilidade
-export const formatarMoeda = formatarValorMonetario;
+// Export default para compatibilidade
+export default {
+  formatarMoeda,
+  formatarData,
+};
