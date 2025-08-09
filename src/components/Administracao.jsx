@@ -3,7 +3,17 @@
 // ✅ Adicionar apenas o necessário para o modal funcionar
 
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 // ✅ ADICIONAR: Import do UserForm e userService
@@ -166,30 +176,71 @@ const Administracao = () => {
     }
   };
 
-  // ✅ IMPLEMENTAR: Handler para excluir usuário
-  const handleExcluirUsuario = (usuario) => {
+  // ✅ FUNÇÃO PARA EXCLUIR USUÁRIO PERMANENTEMENTE
+  const handleExcluirUsuario = async (usuario) => {
+    console.log("🗑️ Tentando excluir usuário:", usuario);
+
+    // Verificar se o usuário está inativo
     if (usuario.status === "ativo") {
-      showToast("⚠️ Inative o usuário antes de excluir", "warning");
+      showToast("❌ Usuário deve estar inativo para ser excluído", "error");
       return;
     }
 
+    // Confirmar exclusão permanente
     setConfirmModal({
       isOpen: true,
-      title: "Excluir Usuário",
+      title: "Excluir Usuário Permanentemente",
       message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`,
       type: "danger",
       onConfirm: async () => {
         try {
-          await userService.deleteUserById(usuario.id);
-          showToast("✅ Usuário excluído com sucesso!", "success");
+          console.log("🗑️ Executando exclusão permanente...");
+
+          // Buscar o documento do usuário na coleção
+          const usuariosQuery = query(
+            collection(db, "usuarios"),
+            where("uid", "==", usuario.uid)
+          );
+
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+
+          if (usuariosSnapshot.empty) {
+            throw new Error("Usuário não encontrado na base de dados");
+          }
+
+          // Excluir o documento do Firestore
+          const userDoc = usuariosSnapshot.docs[0];
+          await deleteDoc(doc(db, "usuarios", userDoc.id));
+
+          console.log("✅ Usuário excluído do Firestore");
+
+          // Log de auditoria
+          if (window.auditService) {
+            await window.auditService.logAction(
+              "DELETE_USER",
+              `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
+              {
+                usuarioExcluido: {
+                  uid: usuario.uid,
+                  nome: usuario.nome,
+                  email: usuario.email,
+                  municipio: usuario.municipio,
+                  uf: usuario.uf,
+                },
+              }
+            );
+          }
+
+          showToast("✅ Usuário excluído permanentemente!", "success");
           await carregarUsuarios();
         } catch (error) {
           console.error("❌ Erro ao excluir usuário:", error);
-          showToast("Erro ao excluir usuário", "error");
+          showToast(`❌ Erro ao excluir usuário: ${error.message}`, "error");
         }
-        setConfirmModal(null);
       },
-      onCancel: () => setConfirmModal(null),
+      onCancel: () => {
+        console.log("❌ Exclusão cancelada pelo usuário");
+      },
     });
   };
 
@@ -508,7 +559,7 @@ const Administracao = () => {
                     >
                       🔑
                     </button>
-                    
+
                     {/* ✅ CORREÇÃO: Botão excluir com função correta */}
                     <button
                       onClick={() => {
@@ -519,11 +570,11 @@ const Administracao = () => {
                         ...styles.actionButton,
                         backgroundColor: usuario.status === "inativo" ? "#dc3545" : "#6c757d",
                         opacity: usuario.status === "inativo" ? 1 : 0.5,
-                        cursor: usuario.status === "inativo" ? "pointer" : "not-allowed"
+                        cursor: usuario.status === "inativo" ? "pointer" : "not-allowed",
                       }}
                       title={
-                        usuario.status === "inativo" 
-                          ? "Excluir usuário permanentemente" 
+                        usuario.status === "inativo"
+                          ? "Excluir usuário permanentemente"
                           : "Inative o usuário para poder excluir"
                       }
                       disabled={loading || usuario.status === "ativo"}
@@ -654,8 +705,8 @@ const Administracao = () => {
               onEdit={handleEditarUsuario}
               onDelete={handleExcluirUsuario}
               onToggleStatus={handleToggleStatus}
-              onResetPassword={handleResetSenha}
-              loading={saving}
+              onResetPassword={handleResetPassword}
+              loading={loading}
             />
           )}
         </div>
