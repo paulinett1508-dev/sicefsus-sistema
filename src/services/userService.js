@@ -19,6 +19,7 @@ import {
   sendPasswordResetEmail,
   getAuth,
   deleteUser,
+  signOut,
 } from "firebase/auth";
 import { db } from "../firebase/firebaseConfig";
 
@@ -415,7 +416,12 @@ const createUser = async (formData) => {
     await setDoc(firestoreDocRef, userData);
     console.log("✅ Documento criado no Firestore:", userCredential.user.uid);
 
-    // ✅ PASSO CRÍTICO 4: Enviar email
+    // ✅ PASSO CRÍTICO 4: Fazer logout do admin
+    console.log("🚪 Fazendo logout do admin...");
+    await signOut(auth);
+    console.log("✅ Admin deslogado - será redirecionado para login");
+
+    // ✅ PASSO CRÍTICO 5: Enviar email
     console.log("📨 Enviando email de reset...");
     await sendPasswordResetEmail(auth, formData.email.trim());
     console.log("✅ Email enviado");
@@ -423,6 +429,7 @@ const createUser = async (formData) => {
     console.log("🎉 USUÁRIO CRIADO COM SUCESSO (ATÔMICO)!");
     return {
       success: true,
+      requiresReauth: true, // ✅ INDICAR QUE PRECISA REAUTENTICAR
       user: userData,
       id: userCredential.user.uid,
       message: `Usuário criado com sucesso! Email enviado para ${formData.email}`,
