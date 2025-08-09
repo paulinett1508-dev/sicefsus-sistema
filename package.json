@@ -5,9 +5,9 @@
   "description": "React TypeScript on Replit, using Vite bundler",
   "scripts": {
     "dev": "vite",
-    "build": "node generate-version.js && vite build",
-    "build:dev": "vite build --mode development",
-    "build:prod": "vite build --mode production",
+    "build": "node scripts/auto-increment.js production && vite build",
+    "build:dev": "node scripts/auto-increment.js development && vite build --mode development",
+    "build:prod": "node scripts/auto-increment.js production && vite build --mode production",
     "build:clean": "rm -rf dist dist-backup && npm run build:prod",
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
