@@ -1,17 +1,16 @@
+// src/components/emenda/EmendaForm/sections/Identificacao.jsx
+// Seção de Identificação com layout IDÊNTICO às outras seções
+
 import React, { useState, useEffect } from "react";
 
-const IdentificacaoUfMunicipio = ({
-  cnpj,
-  uf,
-  municipio,
-  onUfChange,
-  onMunicipioChange,
+const Identificacao = ({
+  formData,
+  onChange,
   errors = {},
   disabled = false,
 }) => {
   const [municipios, setMunicipios] = useState([]);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
-  const [totalMunicipios, setTotalMunicipios] = useState(0);
 
   // Lista de UFs brasileiras
   const ufs = [
@@ -47,9 +46,10 @@ const IdentificacaoUfMunicipio = ({
   // Carregar municípios quando UF mudar
   useEffect(() => {
     const carregarMunicipios = async () => {
+      const uf = formData?.uf;
+
       if (!uf) {
         setMunicipios([]);
-        setTotalMunicipios(0);
         return;
       }
 
@@ -74,85 +74,87 @@ const IdentificacaoUfMunicipio = ({
         }));
 
         setMunicipios(municipiosFormatados);
-        setTotalMunicipios(municipiosFormatados.length);
-
         console.log(
           `✅ ${municipiosFormatados.length} municípios carregados para ${uf}`,
         );
       } catch (error) {
         console.error("❌ Erro ao carregar municípios:", error);
         setMunicipios([]);
-        setTotalMunicipios(0);
       } finally {
         setLoadingMunicipios(false);
       }
     };
 
     carregarMunicipios();
-  }, [uf]);
+  }, [formData?.uf]);
 
-  // Limpar município quando UF mudar
-  useEffect(() => {
-    if (municipio && onMunicipioChange) {
-      onMunicipioChange("");
-    }
-  }, [uf]);
-
-  const handleUfChange = (e) => {
-    const novaUf = e.target.value;
-    if (onUfChange) {
-      onUfChange(novaUf);
+  // Handler padrão para inputs
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (onChange) {
+      onChange(e);
     }
   };
 
-  const handleMunicipioChange = (e) => {
-    const novoMunicipio = e.target.value;
-    if (onMunicipioChange) {
-      onMunicipioChange(novoMunicipio);
+  // Handler específico para UF (limpa município)
+  const handleUfChange = (e) => {
+    // Primeiro atualiza a UF
+    handleInputChange(e);
+
+    // Depois limpa o município se houver
+    if (formData?.municipio) {
+      const municipioEvent = {
+        target: {
+          name: "municipio",
+          value: "",
+        },
+      };
+      setTimeout(() => {
+        if (onChange) {
+          onChange(municipioEvent);
+        }
+      }, 100);
     }
   };
 
   return (
     <div style={styles.container}>
-      {/* Header da seção igual ao original */}
+      {/* Header da seção - IGUAL outras seções */}
       <div style={styles.sectionHeader}>
         <div style={styles.sectionIcon}>📋</div>
         <h3 style={styles.sectionTitle}>Identificação</h3>
       </div>
 
-      {/* Grid de campos */}
+      {/* Grid de campos - IGUAL outras seções */}
       <div style={styles.fieldsGrid}>
-        {/* CNPJ - mantém como estava */}
+        {/* CNPJ - Input simples para evitar erros */}
         <div style={styles.fieldGroup}>
           <label style={styles.label}>
             CNPJ <span style={styles.required}>*</span>
           </label>
-          <div style={styles.inputContainer}>
-            <input
-              type="text"
-              value={cnpj || ""}
-              placeholder="00.000.000/0000-00"
-              style={{
-                ...styles.input,
-                ...(errors.cnpj ? styles.inputError : {}),
-              }}
-              disabled={disabled}
-              readOnly // Assumindo que CNPJ é readonly nesta tela
-            />
-            <div style={styles.inputIcon}>
-              <span style={styles.iconCnpj}>🏢</span>
-            </div>
-          </div>
+          <input
+            type="text"
+            name="cnpj"
+            value={formData?.cnpj || ""}
+            onChange={handleInputChange}
+            placeholder="00.000.000/0000-00"
+            disabled={disabled}
+            style={{
+              ...styles.input,
+              ...(errors.cnpj ? styles.inputError : {}),
+            }}
+          />
           {errors.cnpj && <div style={styles.errorMessage}>{errors.cnpj}</div>}
         </div>
 
-        {/* UF - Melhorado */}
+        {/* UF */}
         <div style={styles.fieldGroup}>
           <label style={styles.label}>
             🗺️ UF <span style={styles.required}>*</span>
           </label>
           <select
-            value={uf || ""}
+            name="uf"
+            value={formData?.uf || ""}
             onChange={handleUfChange}
             disabled={disabled}
             style={{
@@ -170,15 +172,16 @@ const IdentificacaoUfMunicipio = ({
           {errors.uf && <div style={styles.errorMessage}>{errors.uf}</div>}
         </div>
 
-        {/* Município - Melhorado */}
-        <div style={styles.fieldGroupWide}>
+        {/* Município */}
+        <div style={styles.fieldGroup}>
           <label style={styles.label}>
             🏙️ Município <span style={styles.required}>*</span>
           </label>
           <select
-            value={municipio || ""}
-            onChange={handleMunicipioChange}
-            disabled={disabled || !uf || loadingMunicipios}
+            name="municipio"
+            value={formData?.municipio || ""}
+            onChange={handleInputChange}
+            disabled={disabled || !formData?.uf || loadingMunicipios}
             style={{
               ...styles.select,
               ...(errors.municipio ? styles.selectError : {}),
@@ -188,7 +191,7 @@ const IdentificacaoUfMunicipio = ({
             <option value="">
               {loadingMunicipios
                 ? "Carregando municípios..."
-                : !uf
+                : !formData?.uf
                   ? "Selecione primeiro a UF"
                   : "Selecione o município..."}
             </option>
@@ -199,18 +202,10 @@ const IdentificacaoUfMunicipio = ({
             ))}
           </select>
 
-          {/* Indicador de progresso */}
-          {loadingMunicipios && (
-            <div style={styles.loadingIndicator}>
-              <div style={styles.spinner}></div>
-              <span>Carregando...</span>
-            </div>
-          )}
-
           {/* Contador de municípios */}
-          {totalMunicipios > 0 && !loadingMunicipios && (
+          {municipios.length > 0 && !loadingMunicipios && (
             <div style={styles.municipioCount}>
-              📊 {totalMunicipios} municípios disponíveis em {uf}
+              📊 {municipios.length} municípios disponíveis em {formData?.uf}
             </div>
           )}
 
@@ -219,35 +214,18 @@ const IdentificacaoUfMunicipio = ({
           )}
         </div>
       </div>
-
-      {/* Preview dos dados selecionados */}
-      {uf && municipio && (
-        <div style={styles.previewContainer}>
-          <div style={styles.previewHeader}>
-            <span style={styles.previewIcon}>✅</span>
-            <span style={styles.previewTitle}>Localização Confirmada</span>
-          </div>
-          <div style={styles.previewContent}>
-            <strong>
-              {municipio}/{uf}
-            </strong>
-            <span style={styles.previewSubtext}>
-              Dados padronizados conforme IBGE
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
+// Estilos IDÊNTICOS às outras seções
 const styles = {
   container: {
     backgroundColor: "white",
-    borderRadius: "12px",
+    borderRadius: "8px",
     border: "2px solid #e1e5e9",
     padding: "24px",
-    marginBottom: "24px",
+    marginBottom: "20px",
   },
 
   sectionHeader: {
@@ -275,7 +253,7 @@ const styles = {
 
   fieldsGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 200px 1fr",
+    gridTemplateColumns: "repeat(3, 1fr)",
     gap: "20px",
     alignItems: "start",
   },
@@ -284,13 +262,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
-  },
-
-  fieldGroupWide: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    gridColumn: "span 1",
   },
 
   label: {
@@ -304,36 +275,21 @@ const styles = {
     color: "#dc3545",
   },
 
-  inputContainer: {
-    position: "relative",
-  },
-
   input: {
     width: "100%",
     padding: "12px 16px",
-    paddingRight: "40px",
     border: "2px solid #e1e5e9",
     borderRadius: "8px",
     fontSize: "14px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "white",
     transition: "all 0.2s ease",
     boxSizing: "border-box",
+    fontFamily: "inherit",
   },
 
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fff5f5",
-  },
-
-  inputIcon: {
-    position: "absolute",
-    right: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-  },
-
-  iconCnpj: {
-    fontSize: "16px",
   },
 
   select: {
@@ -346,6 +302,7 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     boxSizing: "border-box",
+    fontFamily: "inherit",
   },
 
   selectError: {
@@ -364,83 +321,12 @@ const styles = {
     marginTop: "4px",
   },
 
-  loadingIndicator: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    marginTop: "8px",
-    fontSize: "12px",
-    color: "#6c757d",
-  },
-
-  spinner: {
-    width: "12px",
-    height: "12px",
-    border: "2px solid #f3f3f3",
-    borderTop: "2px solid #007bff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-  },
-
   municipioCount: {
     fontSize: "12px",
     color: "#28a745",
     marginTop: "4px",
     fontWeight: "500",
   },
-
-  previewContainer: {
-    marginTop: "20px",
-    padding: "16px",
-    backgroundColor: "#e8f5e8",
-    border: "1px solid #28a745",
-    borderRadius: "8px",
-  },
-
-  previewHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    marginBottom: "8px",
-  },
-
-  previewIcon: {
-    fontSize: "16px",
-  },
-
-  previewTitle: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#2e7d32",
-  },
-
-  previewContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-  },
-
-  previewSubtext: {
-    fontSize: "12px",
-    color: "#4caf50",
-    fontStyle: "italic",
-  },
 };
 
-// CSS para animação do spinner
-if (
-  typeof document !== "undefined" &&
-  !document.getElementById("identificacao-animations")
-) {
-  const styleSheet = document.createElement("style");
-  styleSheet.id = "identificacao-animations";
-  styleSheet.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
-
-export default IdentificacaoUfMunicipio;
+export default Identificacao;
