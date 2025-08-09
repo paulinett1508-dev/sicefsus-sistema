@@ -337,6 +337,17 @@ const DespesaForm = ({
           message: "✅ Despesa atualizada com sucesso!",
           type: "success",
         });
+
+        // Aguardar e redirecionar
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            // Redirecionar para listagem de despesas
+            navigate('/despesas');
+          }
+        }, 1500);
+
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
 
@@ -345,21 +356,21 @@ const DespesaForm = ({
 
         setToast({
           show: true,
-          message: "✅ Despesa criada com sucesso!",
+          message: "✅ Despesa cadastrada com sucesso!",
           type: "success",
         });
-      }
 
-      // Aguardar mais um pouco para o usuário ver a mensagem
-      await new Promise(resolve => setTimeout(resolve, 500));
+        // Aguardar e redirecionar
+        setTimeout(() => {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            // Redirecionar para listagem de despesas
+            navigate('/despesas');
+          }
+        }, 1500);
 
-      // Chamar callback de sucesso
-      if (onSuccess) {
-        onSuccess();
-      }
-
-      // Limpar formulário se não for edição
-      if (!despesaParaEditar) {
+        // Limpar formulário após o cadastro
         limparFormulario();
       }
 
