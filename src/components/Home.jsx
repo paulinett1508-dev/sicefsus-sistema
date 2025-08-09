@@ -27,7 +27,7 @@ export default function Home({ onLoginClick }) {
         </button>
       </div>
       <footer style={styles.footer}>
-        <span>© {new Date().getFullYear()} SICEFSUSM</span>
+        <span>© {new Date().getFullYear()} SICEFSUS</span>
       </footer>
     </div>
   );
