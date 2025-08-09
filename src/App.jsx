@@ -29,6 +29,7 @@ import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext"; // Importar useUser
 import { checkVersion } from "./utils/versionControl";
 import ErrorBoundary from "./components/ErrorBoundary";
+import UpdateNotification from "./components/UpdateNotification";
 
 
 // Sistema inteligente de controle de logs
@@ -166,9 +167,9 @@ function AppContent() {
   // ✅ USUÁRIO GERENCIADO CENTRALIZADAMENTE PELO UserContext
 
   // Verificar versão ao carregar a aplicação
-  useEffect(() => {
-    checkVersion();
-  }, []);
+  // useEffect(() => {
+  //   checkVersion();
+  // }, []);
 
   // Redirecionamento
   useEffect(() => {
@@ -534,6 +535,7 @@ function App() {
       <Router>
         <NavigationProtectionProvider>
           <AppContent />
+          <UpdateNotification />
         </NavigationProtectionProvider>
       </Router>
     </ToastProvider>
