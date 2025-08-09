@@ -128,6 +128,8 @@ const UserForm = ({
       if (resultado && resultado.adminPreserved) {
         console.log("🎉 Usuário criado - admin permanece logado!");
         // Componente pai já tratará o sucesso
+      } else if (!editingUser) {
+        console.log("✅ Usuário criado com sucesso");
       }
       
     } catch (error) {
