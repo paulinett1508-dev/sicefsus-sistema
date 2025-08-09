@@ -1,25 +1,26 @@
-
 // ✅ UTILITÁRIOS PARA CNPJ
 // Funções para formatação, validação e manipulação de CNPJ
 
 /**
- * Formatar CNPJ com máscara
- * @param {string} cnpj - CNPJ sem formatação
- * @returns {string} CNPJ formatado (XX.XXX.XXX/XXXX-XX)
+ * Formatar CNPJ com máscara XX.XXX.XXX/XXXX-XX
+ * @param {string} valor - CNPJ a ser formatado
+ * @returns {string} - CNPJ formatado
  */
-export const formatarCNPJ = (cnpj) => {
-  if (!cnpj) return '';
-  
-  // Remove tudo que não for número
-  const somenteNumeros = cnpj.replace(/\D/g, '');
-  
-  // Aplica a máscara
-  return somenteNumeros
+export const formatarCNPJ = (valor) => {
+  if (!valor) return "";
+
+  // Remove tudo que não é número
+  const numeros = valor.replace(/\D/g, "");
+
+  // Limita a 14 dígitos
+  const limitado = numeros.slice(0, 14);
+
+  // Aplica máscara XX.XXX.XXX/XXXX-XX
+  return limitado
     .replace(/^(\d{2})(\d)/, '$1.$2')
     .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
     .replace(/\.(\d{3})(\d)/, '.$1/$2')
-    .replace(/(\d{4})(\d)/, '$1-$2')
-    .slice(0, 18); // Limita a 18 caracteres
+    .replace(/(\d{4})(\d)/, '$1-$2');
 };
 
 /**
@@ -33,57 +34,56 @@ export const limparCNPJ = (cnpj) => {
 };
 
 /**
- * Validar CNPJ (algoritmo oficial)
- * @param {string} cnpj - CNPJ para validar
- * @returns {boolean} true se válido
+ * Validar CNPJ brasileiro
+ * @param {string} cnpj - CNPJ a ser validado
+ * @returns {boolean|Object} - true se válido, ou objeto com erro se inválido
  */
 export const validarCNPJ = (cnpj) => {
   if (!cnpj) return false;
-  
-  const somenteNumeros = limparCNPJ(cnpj);
-  
+
+  // Remove caracteres especiais
+  const numero = cnpj.replace(/[^\d]/g, "");
+
   // Verifica se tem 14 dígitos
-  if (somenteNumeros.length !== 14) return false;
-  
+  if (numero.length !== 14) {
+    return false;
+  }
+
   // Verifica se todos os dígitos são iguais
-  if (/^(\d)\1+$/.test(somenteNumeros)) return false;
-  
+  if (/^(\d)\1+$/.test(numero)) {
+    return false;
+  }
+
   // Calcula primeiro dígito verificador
   let soma = 0;
   let peso = 5;
-  
+
   for (let i = 0; i < 12; i++) {
-    soma += parseInt(somenteNumeros[i]) * peso;
+    soma += parseInt(numero[i]) * peso;
     peso = peso === 2 ? 9 : peso - 1;
   }
-  
-  let resto = soma % 11;
-  const dv1 = resto < 2 ? 0 : 11 - resto;
-  
-  if (parseInt(somenteNumeros[12]) !== dv1) return false;
-  
+
+  let digito1 = soma % 11;
+  digito1 = digito1 < 2 ? 0 : 11 - digito1;
+
   // Calcula segundo dígito verificador
   soma = 0;
   peso = 6;
-  
+
   for (let i = 0; i < 13; i++) {
-    soma += parseInt(somenteNumeros[i]) * peso;
+    soma += parseInt(numero[i]) * peso;
     peso = peso === 2 ? 9 : peso - 1;
   }
-  
-  resto = soma % 11;
-  const dv2 = resto < 2 ? 0 : 11 - resto;
-  
-  return parseInt(somenteNumeros[13]) === dv2;
-};
 
-/**
- * Obter apenas os números do CNPJ
- * @param {string} cnpj - CNPJ com ou sem formatação
- * @returns {string} CNPJ apenas com números
- */
-export const obterNumerosCNPJ = (cnpj) => {
-  return limparCNPJ(cnpj);
+  let digito2 = soma % 11;
+  digito2 = digito2 < 2 ? 0 : 11 - digito2;
+
+  // Verifica se os dígitos calculados conferem
+  if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
+    return false;
+  }
+
+  return true;
 };
 
 /**
@@ -115,80 +115,12 @@ export const pareceCNPJ = (valor) => {
   const numeros = limparCNPJ(valor);
   return numeros.length >= 8; // Pelo menos 8 dígitos para parecer CNPJ
 };
-/**
- * Utilitários para formatação e validação de CNPJ
- */
 
 /**
- * Formatar CNPJ com máscara XX.XXX.XXX/XXXX-XX
- * @param {string} valor - CNPJ a ser formatado
- * @returns {string} - CNPJ formatado
+ * Obter apenas os números do CNPJ
+ * @param {string} cnpj - CNPJ com ou sem formatação
+ * @returns {string} CNPJ apenas com números
  */
-export const formatarCNPJ = (valor) => {
-  if (!valor) return "";
-
-  // Remove tudo que não é número
-  const numeros = valor.replace(/\D/g, "");
-
-  // Aplica máscara XX.XXX.XXX/XXXX-XX
-  return numeros.replace(
-    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-    "$1.$2.$3/$4-$5",
-  );
-};
-
-/**
- * Validar CNPJ brasileiro
- * @param {string} cnpj - CNPJ a ser validado
- * @returns {Object} - Resultado da validação
- */
-export const validarCNPJ = (cnpj) => {
-  if (!cnpj) return { valido: false, erro: "CNPJ é obrigatório" };
-
-  // Remove caracteres especiais
-  const numero = cnpj.replace(/[^\d]/g, "");
-
-  // Verifica se tem 14 dígitos
-  if (numero.length !== 14) {
-    return { valido: false, erro: "CNPJ deve ter 14 dígitos" };
-  }
-
-  // Verifica se todos os dígitos são iguais
-  if (/^(\d)\1+$/.test(numero)) {
-    return { valido: false, erro: "CNPJ inválido" };
-  }
-
-  // Calcula primeiro dígito verificador
-  let soma = 0;
-  let peso = 5;
-
-  for (let i = 0; i < 12; i++) {
-    soma += parseInt(numero[i]) * peso;
-    peso = peso === 2 ? 9 : peso - 1;
-  }
-
-  let digito1 = soma % 11;
-  digito1 = digito1 < 2 ? 0 : 11 - digito1;
-
-  // Calcula segundo dígito verificador
-  soma = 0;
-  peso = 6;
-
-  for (let i = 0; i < 13; i++) {
-    soma += parseInt(numero[i]) * peso;
-    peso = peso === 2 ? 9 : peso - 1;
-  }
-
-  let digito2 = soma % 11;
-  digito2 = digito2 < 2 ? 0 : 11 - digito2;
-
-  // Verifica se os dígitos calculados conferem
-  if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
-    return {
-      valido: false,
-      erro: "CNPJ inválido - dígitos verificadores incorretos",
-    };
-  }
-
-  return { valido: true, erro: null };
+export const obterNumerosCNPJ = (cnpj) => {
+  return limparCNPJ(cnpj);
 };

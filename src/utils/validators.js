@@ -186,6 +186,35 @@ export const validateUserRole = (role) => {
 };
 
 /**
+ * Validar formulário de emenda completo
+ * @param {Object} formData - Dados do formulário
+ * @returns {Object} - Objeto com erros encontrados
+ */
+export const validarFormularioEmenda = (formData) => {
+  const errors = {};
+
+  // Validação de campos obrigatórios
+  if (!formData.numero) errors.numero = 'Número da emenda é obrigatório';
+  if (!formData.autor) errors.autor = 'Parlamentar é obrigatório';
+  if (!formData.cnpjBeneficiario) errors.cnpjBeneficiario = 'CNPJ é obrigatório';
+  if (!formData.municipio) errors.municipio = 'Município é obrigatório';
+  if (!formData.uf) errors.uf = 'UF é obrigatória';
+  if (!formData.programa) errors.programa = 'Programa é obrigatório';
+  if (!formData.objeto) errors.objeto = 'Objeto da proposta é obrigatório';
+  if (!formData.valor) errors.valor = 'Valor é obrigatório';
+
+  // Validação de CNPJ se preenchido
+  if (formData.cnpjBeneficiario) {
+    const { validarCNPJ } = require('./cnpjUtils');
+    if (!validarCNPJ(formData.cnpjBeneficiario)) {
+      errors.cnpjBeneficiario = 'CNPJ inválido';
+    }
+  }
+
+  return errors;
+};
+
+/**
  * ✅ SANITIZAR string removendo caracteres perigosos
  * @param {string} str - String a ser sanitizada
  * @returns {string} - String sanitizada

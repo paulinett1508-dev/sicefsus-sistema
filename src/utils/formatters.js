@@ -212,12 +212,12 @@ export default {
  */
 export const formatarMoeda = (valor) => {
   if (!valor && valor !== 0) return "R$ 0,00";
-  
+
   const numero = typeof valor === 'string' ? 
     parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
-  
+
   if (isNaN(numero)) return "R$ 0,00";
-  
+
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
@@ -231,11 +231,11 @@ export const formatarMoeda = (valor) => {
  */
 export const formatarData = (data) => {
   if (!data) return "";
-  
+
   const dataObj = data instanceof Date ? data : new Date(data);
-  
+
   if (isNaN(dataObj.getTime())) return "";
-  
+
   return dataObj.toLocaleDateString("pt-BR");
 };
 
@@ -246,17 +246,17 @@ export const formatarData = (data) => {
  */
 export const formatarTelefone = (telefone) => {
   if (!telefone) return "";
-  
+
   const numeros = telefone.replace(/\D/g, "");
-  
+
   if (numeros.length === 10) {
     return numeros.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
   }
-  
+
   if (numeros.length === 11) {
     return numeros.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   }
-  
+
   return telefone;
 };
 
@@ -267,8 +267,8 @@ export const formatarTelefone = (telefone) => {
  */
 export const formatarCPF = (cpf) => {
   if (!cpf) return "";
-  
+
   const numeros = cpf.replace(/\D/g, "");
-  
+
   return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 };
