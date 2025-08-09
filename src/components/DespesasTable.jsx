@@ -328,7 +328,7 @@ export default function DespesasTable({
                         title="Excluir despesa"
                         disabled={excluindo === despesa.id}
                       >
-                        {excludindo === despesa.id ? "⏳" : "🗑️"}
+                        {excluindo === despesa.id ? "⏳" : "🗑️"}
                       </button>
                     </div>
                   </td>
