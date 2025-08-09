@@ -539,7 +539,7 @@ const styles = {
   },
 
   thead: {
-    backgroundColor: "#154360",
+    backgroundColor: "#2c3e50",
     color: "white",
     position: "sticky",
     top: 0,
@@ -550,19 +550,29 @@ const styles = {
     padding: "16px 12px",
     textAlign: "left",
     fontWeight: "600",
-    fontSize: "13px",
+    fontSize: "14px",
     cursor: "pointer",
     transition: "background-color 0.3s ease",
     userSelect: "none",
-    borderBottom: "2px solid #4A90E2",
+    borderBottom: "2px solid #34495e",
+    borderRight: "1px solid rgba(255,255,255,0.1)",
+    whiteSpace: "nowrap",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    backgroundColor: "#2c3e50",
   },
 
   thActions: {
     padding: "16px 12px",
     textAlign: "center",
     fontWeight: "600",
-    fontSize: "13px",
-    borderBottom: "2px solid #4A90E2",
+    fontSize: "14px",
+    borderBottom: "2px solid #34495e",
+    borderRight: "1px solid rgba(255,255,255,0.1)",
+    whiteSpace: "nowrap",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+    backgroundColor: "#2c3e50",
   },
 
   tr: {
