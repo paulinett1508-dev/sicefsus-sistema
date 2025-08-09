@@ -373,26 +373,16 @@ function AppContent() {
               />
 
               {/* ✅ ROTAS DE EMENDA - COMPLETAS */}
-              <Route
-                path="/emendas/criar"
-                element={
-                  <PrivateRoute usuario={usuario}>
-                    <ProtectedRouteWrapper usuario={usuario}>
-                      <EmendaForm usuario={usuario} />
-                    </ProtectedRouteWrapper>
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/emendas/:id/editar"
-                element={
-                  <PrivateRoute usuario={usuario}>
-                    <ProtectedRouteWrapper usuario={usuario}>
-                      <EmendaForm usuario={usuario} />
-                    </ProtectedRouteWrapper>
-                  </PrivateRoute>
-                }
-              />
+              <Route path="/emendas/criar" element={
+              <PrivateRoute usuario={usuario}>
+                <EmendaForm usuario={usuario} />
+              </PrivateRoute>
+            } />
+            <Route path="/emendas/:id/editar" element={
+              <PrivateRoute usuario={usuario}>
+                <EmendaForm usuario={usuario} />
+              </PrivateRoute>
+            } />
               <Route
                 path="/emendas/:id"
                 element={

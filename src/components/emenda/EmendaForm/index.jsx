@@ -85,24 +85,13 @@ const EmendaForm = () => {
     };
   }, []);
 
-  // ✅ CORREÇÃO PRINCIPAL: useEffect SEM dependências problemáticas
+  // ✅ CORREÇÃO PRINCIPAL: useEffect simplificado
   useEffect(() => {
     const inicializar = async () => {
-      // ✅ GUARD: Verificar se contexto está pronto
-      if (!user || !user.email) {
-        console.log("⏳ Aguardando dados do usuário...");
-        return;
-      }
-
-      // ✅ EVITAR duplo carregamento
-      if (isReady) {
-        console.log("✅ Já inicializado, ignorando...");
-        return;
-      }
-
       console.log("🚀 Inicializando EmendaForm...", {
         isEdicao,
-        userId: user.uid,
+        userId: user?.uid,
+        userEmail: user?.email,
       });
 
       try {
@@ -163,9 +152,7 @@ const EmendaForm = () => {
           // ✅ MODO CRIAÇÃO: Pré-preencher dados do operador
           console.log("➕ Modo criação - preparando formulário limpo");
 
-          const userRole = user.tipo || user.role || "operador";
-
-          if (userRole === "operador" && user.municipio && user.uf) {
+          if (user?.tipo === "operador" && user?.municipio && user?.uf) {
             setFormData((prev) => ({
               ...prev,
               municipio: user.municipio,
@@ -189,8 +176,13 @@ const EmendaForm = () => {
       }
     };
 
-    inicializar();
-  }, [user?.uid, user?.email, user?.tipo, id, isEdicao, isReady]);
+    // Verificar se o usuário está disponível antes de inicializar
+    if (user) {
+      inicializar();
+    } else {
+      console.log("⏳ Aguardando dados do usuário...");
+    }
+  }, [user, id, isEdicao]);
 
   // ✅ HANDLERS simplificados
   const handleInputChange = (e) => {
@@ -337,31 +329,20 @@ const EmendaForm = () => {
   };
 
 
-  // ✅ LOADING inicial (aguardando usuário)
-  if (!user || !user.email) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <h3>Carregando...</h3>
-          <p>Verificando dados do usuário...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ LOADING específico do formulário
+  // ✅ LOADING simplificado
   if (loading) {
     return (
       <div style={styles.container}>
         <div style={styles.loadingContainer}>
           <div style={styles.spinner}></div>
-          <h3>Preparando formulário...</h3>
-          <p>
-            {isEdicao
-              ? "Carregando dados da emenda..."
-              : "Preparando nova emenda..."}
-          </p>
+          <h3>
+            {!user 
+              ? "Carregando..." 
+              : isEdicao 
+                ? "Carregando dados da emenda..." 
+                : "Preparando formulário..."
+            }
+          </h3>
         </div>
       </div>
     );
