@@ -1,12 +1,9 @@
-// 🔧 CORREÇÃO CRÍTICA: userService.js - Fix Logout Automático
-// Problema: createUserWithEmailAndPassword desloga admin automaticamente
-// Solução: Implementar signOut imediato + redirecionamento controlado
-
+// src/services/userService.js - VERSÃO CORRIGIDA COM SEGUNDA INSTÂNCIA FIREBASE
 import {
   createUserWithEmailAndPassword,
   signOut,
-  auth,
-} from "../firebase/firebaseConfig";
+  getAuth,
+} from "firebase/auth";
 import {
   collection,
   addDoc,
@@ -17,9 +14,23 @@ import {
   where,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import { initializeApp } from "firebase/app";
+import { db, auth } from "../firebase/firebaseConfig";
 
-// 🎯 FUNÇÃO CORRIGIDA: Criar usuário com logout controlado
+// 🔧 SOLUÇÃO: Segunda instância Firebase para criar usuários sem afetar admin
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+
+const secondaryApp = initializeApp(firebaseConfig, "secondary");
+const secondaryAuth = getAuth(secondaryApp);
+
+// 🎯 FUNÇÃO CORRIGIDA: Criar usuário SEM deslogar admin
 export const createUserInFirebase = async (userData, navigate, showToast) => {
   let userCredential = null;
 
@@ -29,21 +40,23 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
     // 1. Gerar senha temporária
     const senhaTemporaria = Math.random().toString(36).slice(-8);
 
-    // 2. ⚠️ IMPORTANTE: Este comando VAI deslogar o admin atual
-    console.log("⚠️ ATENÇÃO: Admin será deslogado após criação do usuário");
+    // 2. ✅ CORREÇÃO: Usar instância secundária - admin não é afetado
+    console.log(
+      "📧 Criando usuário na instância secundária (admin preservado)...",
+    );
 
     userCredential = await createUserWithEmailAndPassword(
-      auth,
+      secondaryAuth,
       userData.email.trim(),
       senhaTemporaria,
     );
 
     console.log("✅ Usuário criado no Firebase Auth:", userCredential.user.uid);
 
-    // 3. 🔧 CORREÇÃO PRINCIPAL: Deslogar imediatamente o usuário recém-criado
-    await signOut(auth);
+    // 3. ✅ IMPORTANTE: Deslogar apenas da instância secundária
+    await signOut(secondaryAuth);
     console.log(
-      "✅ Usuário recém-criado deslogado (admin também foi deslogado)",
+      "✅ Usuário deslogado da instância secundária (admin preservado)",
     );
 
     // 4. Salvar dados do usuário no Firestore
@@ -63,31 +76,19 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
     await addDoc(collection(db, "usuarios"), userDoc);
     console.log("✅ Dados do usuário salvos no Firestore");
 
-    // 5. 🎯 REDIRECIONAMENTO CONTROLADO com mensagem explicativa
+    // 5. ✅ CORREÇÃO: Não redirecionar - admin permanece logado
     if (showToast) {
       showToast({
         tipo: "sucesso",
-        titulo: "✅ Usuário Criado com Sucesso!",
-        mensagem: `Usuário ${userData.nome} foi criado. Você será redirecionado para o login.`,
-        duracao: 4000,
+        titulo: "✅ Usuário Criado!",
+        mensagem: `Usuário ${userData.nome} foi criado com sucesso!`,
+        duracao: 3000,
       });
     }
 
-    // 6. Aguardar um momento para o usuário ler a mensagem
-    setTimeout(() => {
-      if (navigate) {
-        navigate("/login", {
-          state: {
-            message: "✅ Usuário criado com sucesso! Faça login novamente.",
-            type: "success",
-            userCreated: userData.nome,
-          },
-        });
-      }
-    }, 2000);
-
     return {
       sucesso: true,
+      adminPreserved: true, // ✅ NOVO: Flag indicando que admin foi preservado
       uid: userCredential.user.uid,
       senhaTemporaria: senhaTemporaria,
       mensagem: "Usuário criado com sucesso",
@@ -95,11 +96,11 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
 
-    // Se houver erro, tentar fazer logout mesmo assim para limpar estado
+    // Se houver erro, tentar fazer logout da instância secundária
     try {
-      await signOut(auth);
+      await signOut(secondaryAuth);
     } catch (signOutError) {
-      console.error("❌ Erro adicional no signOut:", signOutError);
+      console.error("❌ Erro adicional no signOut secundário:", signOutError);
     }
 
     throw {
@@ -126,22 +127,9 @@ const getErrorMessage = (error) => {
   }
 };
 
-// 🎯 FUNÇÃO ALTERNATIVA: Para casos onde queremos manter admin logado
-export const createUserWithAdminSDK = async (userData) => {
-  // ⚠️ NOTA: Esta função requeria Firebase Admin SDK
-  // Por ora, não implementada - usar createUserInFirebase
-  throw new Error("Função não implementada. Use createUserInFirebase.");
-};
-
 // 🎯 WRAPPER FUNCTION: Para compatibilidade com código existente
 export const createUser = async (userData, options = {}) => {
-  const { navigate, showToast, preserveSession = false } = options;
-
-  if (preserveSession) {
-    // Futuro: implementar com Admin SDK
-    throw new Error("Preservar sessão requer Firebase Admin SDK");
-  }
-
+  const { navigate, showToast } = options;
   return await createUserInFirebase(userData, navigate, showToast);
 };
 
@@ -170,34 +158,6 @@ export const logoutUser = async () => {
     throw error;
   }
 };
-
-// 📋 EXEMPLO DE USO NO COMPONENTE:
-/*
-// No UserForm.jsx ou Administracao.jsx:
-
-import { createUser } from '../services/userService';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '../components/Toast';
-
-const handleCreateUser = async (formData) => {
-  try {
-    const result = await createUser(formData, {
-      navigate,
-      showToast,
-      preserveSession: false // por enquanto sempre false
-    });
-
-    console.log('Usuário criado:', result);
-
-  } catch (error) {
-    showToast({
-      tipo: 'erro',
-      titulo: 'Erro ao criar usuário',
-      mensagem: error.mensagem || 'Erro desconhecido'
-    });
-  }
-};
-*/
 
 export default {
   createUser,
