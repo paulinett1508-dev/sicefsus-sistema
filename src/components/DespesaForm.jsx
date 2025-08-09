@@ -335,10 +335,10 @@ const DespesaForm = ({
           type: "success",
         });
 
-        // Aguardar um pouco e redirecionar
+        // Redirecionar imediatamente após mostrar o toast
         setTimeout(() => {
-          navigate('/despesas');
-        }, 1500);
+          navigate('/despesas', { replace: true });
+        }, 800);
 
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
@@ -349,10 +349,10 @@ const DespesaForm = ({
           type: "success",
         });
 
-        // Aguardar um pouco e redirecionar
+        // Redirecionar imediatamente após mostrar o toast
         setTimeout(() => {
-          navigate('/despesas');
-        }, 1500);
+          navigate('/despesas', { replace: true });
+        }, 800);
 
         // Limpar formulário após o cadastro
         limparFormulario();
