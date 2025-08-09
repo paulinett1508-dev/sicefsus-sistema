@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import EmendasFilters from "./EmendasFilters";
@@ -74,10 +74,36 @@ const Emendas = () => {
       setLoading(true);
       setError(null);
       console.log("📊 Carregando emendas e despesas...");
+      console.log("👤 Usuário:", { role: userRole, municipio: userMunicipio, uf: userUf });
 
-      // Carregar emendas e despesas em paralelo
+      // ✅ CORREÇÃO: Query com filtro baseado no tipo de usuário
+      let emendasQuery;
+
+      if (userRole === "admin") {
+        // Admin vê todas as emendas
+        console.log("🔓 Admin - carregando TODAS as emendas");
+        emendasQuery = collection(db, "emendas");
+      } else {
+        // Operador vê apenas emendas do seu município/UF
+        if (userMunicipio && userUf) {
+          console.log(`🔒 Operador - filtrando por ${userMunicipio}/${userUf}`);
+          emendasQuery = query(
+            collection(db, "emendas"),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf)
+          );
+        } else {
+          console.warn("⚠️ Operador sem município/UF definido - não carregando emendas");
+          setEmendas([]);
+          setEmendasFiltradas([]);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Carregar emendas (com filtro) e despesas em paralelo
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
-        getDocs(collection(db, "emendas")),
+        getDocs(emendasQuery), // ✅ AGORA COM FILTRO!
         getDocs(collection(db, "despesas")),
       ]);
 
@@ -97,6 +123,9 @@ const Emendas = () => {
         });
       });
 
+      console.log(`✅ Emendas encontradas: ${emendasData.length}`);
+      console.log(`✅ Despesas encontradas: ${despesasData.length}`);
+
       // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
       const emendasComExecucao = emendasData.map((emenda) => {
         // Buscar despesas desta emenda
@@ -109,9 +138,6 @@ const Emendas = () => {
           return sum + (parseFloat(despesa.valor) || 0);
         }, 0);
 
-        // ❌ REMOVIDO: Não somar metas como execução
-        // Metas são planejamento, não execução real
-
         // ✅ TOTAL EXECUTADO: Apenas Despesas
         const valorExecutadoTotal = valorExecutadoDespesas;
 
@@ -121,17 +147,16 @@ const Emendas = () => {
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0;
 
-        console.log(`💰 Emenda ${emenda.numero}:`, {
+        console.log(`💰 Emenda ${emenda.numero} (${emenda.municipio}/${emenda.uf}):`, {
           valorTotal,
           valorExecutadoDespesas,
-          valorExecutadoTotal,
           saldoDisponivel,
           percentualExecutado: percentualExecutado.toFixed(1) + "%",
         });
 
         return {
           ...emenda,
-          valorExecutado: valorExecutadoTotal, // ✅ APENAS despesas reais
+          valorExecutado: valorExecutadoTotal,
           saldoDisponivel: saldoDisponivel,
           percentualExecutado: percentualExecutado,
           totalDespesas: despesasEmenda.length,
@@ -141,21 +166,18 @@ const Emendas = () => {
         };
       });
 
-      console.log(
-        `✅ ${emendasComExecucao.length} emendas carregadas com execução calculada`,
-      );
-      console.log(`✅ ${despesasData.length} despesas carregadas`);
+      console.log(`✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`);
 
       setEmendas(emendasComExecucao);
       setEmendasFiltradas(emendasComExecucao);
+
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
       setError(`Erro ao carregar dados: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  }, []);
-
+  }, [userRole, userMunicipio, userUf]); // ✅ ADICIONAR dependências
   // ✅ EFEITO: Carregar dados na inicialização
   useEffect(() => {
     carregarDados();
