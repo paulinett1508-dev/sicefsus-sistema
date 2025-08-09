@@ -557,6 +557,32 @@ export const validarCNPJ = (cnpj) => {
   return { valido: true, erro: null };
 };
 
+/**
+ * Valida formulário de emenda completo
+ * @param {Object} formData - Dados do formulário
+ * @returns {Object} - Objeto com erros encontrados
+ */
+export const validarFormularioEmenda = (formData) => {
+  const errors = {};
+
+  // Validação de campos obrigatórios
+  if (!formData.numero) errors.numero = 'Número da emenda é obrigatório';
+  if (!formData.parlamentar) errors.parlamentar = 'Parlamentar é obrigatório';
+  if (!formData.cnpjBeneficiario) errors.cnpjBeneficiario = 'CNPJ é obrigatório';
+  if (!formData.municipio) errors.municipio = 'Município é obrigatório';
+  if (!formData.uf) errors.uf = 'UF é obrigatória';
+
+  // Validação de CNPJ se preenchido
+  if (formData.cnpjBeneficiario) {
+    const { validarCNPJ } = require('./cnpjUtils');
+    if (!validarCNPJ(formData.cnpjBeneficiario)) {
+      errors.cnpjBeneficiario = 'CNPJ inválido';
+    }
+  }
+
+  return errors;
+};
+
 // ✅ HOOK PARA USO NO DESPESAFORM
 export const useCNPJValidation = () => {
   const [cnpjError, setCnpjError] = useState("");

@@ -1,4 +1,5 @@
 import React from "react";
+import { formatarCNPJ, validarCNPJ } from '../../../utils/cnpjUtils';
 
 const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estados = [
@@ -35,40 +36,11 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
     const { name, value } = e.target;
 
     if (name === "cnpjBeneficiario") {
-      const formatted = value
-        .replace(/\D/g, "")
-        .replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+      const formatted = formatarCNPJ(value);
       onChange({ target: { name, value: formatted } });
     } else {
       onChange(e);
     }
-  };
-
-  const isValidCNPJ = (cnpj) => {
-    const numbers = cnpj.replace(/\D/g, "");
-    if (numbers.length !== 14) return false;
-
-    const digits = numbers.split("").map(Number);
-
-    // Primeiro dígito
-    let sum = 0;
-    let weight = 5;
-    for (let i = 0; i < 12; i++) {
-      sum += digits[i] * weight;
-      weight = weight === 2 ? 9 : weight - 1;
-    }
-    let digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    if (digit !== digits[12]) return false;
-
-    // Segundo dígito
-    sum = 0;
-    weight = 6;
-    for (let i = 0; i < 13; i++) {
-      sum += digits[i] * weight;
-      weight = weight === 2 ? 9 : weight - 1;
-    }
-    digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
-    return digit === digits[13];
   };
 
   const getCNPJStatus = () => {
@@ -76,7 +48,7 @@ const Identificacao = ({ formData = {}, onChange, fieldErrors = {} }) => {
       return null;
     const cnpjLimpo = formData.cnpjBeneficiario.replace(/\D/g, "");
     if (cnpjLimpo.length < 14) return "incomplete";
-    return isValidCNPJ(formData.cnpjBeneficiario) ? "valid" : "invalid";
+    return validarCNPJ(formData.cnpjBeneficiario) ? "valid" : "invalid";
   };
 
   const cnpjStatus = getCNPJStatus();

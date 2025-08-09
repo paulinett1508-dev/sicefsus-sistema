@@ -2,6 +2,19 @@
 import { useState } from "react";
 
 /**
+ * Formata valor para moeda brasileira
+ * @param {number|string} valor - Valor a ser formatado
+ * @returns {string} - Valor formatado em moeda
+ */
+export function formatarMoeda(valor) {
+  const numero = parseFloat(valor) || 0;
+  return numero.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+}
+
+/**
  * Formata valor monetário para exibição
  * @param {number|string} valor - Valor a ser formatado
  * @returns {string} - Valor formatado como moeda brasileira
