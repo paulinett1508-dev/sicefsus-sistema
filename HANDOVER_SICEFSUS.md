@@ -1,7 +1,7 @@
 # 📋 DOCUMENTAÇÃO - Sistema SICEFSUS
 
-**📅 Gerado em:** 08/08/2025, 14:47:27  
-**🔧 Ambiente atual:** development  
+**📅 Gerado em:** 09/08/2025, 10:26:14  
+**🔧 Ambiente atual:** production  
 **🌐 URL Produção:** https://sicefsus.replit.app/
 
 ---
@@ -16,7 +16,7 @@ O **SICEFSUS** (Sistema de Controle de Execuções Financeiras do SUS) é uma ap
 
 ### Configuração de Ambientes
 
-**Ambiente Atual:** 🟢 DESENVOLVIMENTO
+**Ambiente Atual:** 🔴 PRODUÇÃO
 
 | Ambiente | Project ID | Status |
 |----------|------------|--------|
@@ -45,50 +45,48 @@ npm run build:prod
 
 ## 📁 ESTRUTURA DO PROJETO
 
-├── HANDOVER_SICEFSUS.md (77.2 KB)
+├── HANDOVER_SICEFSUS.md (29.0 KB)
 ├── README.md (842 bytes)
 ├── analise-runner-2025-08-08T00-33-36.md (22.3 KB)
+├── attached_assets/
 ├── generate-version.js (1.1 KB)
 ├── package-lock.json (302.8 KB)
 ├── package.json (1.2 KB)
 ├── public/
 │   └── version.json (50 bytes)
-├── relatorio-ambiente-2025-08-08T00-33-33.md (4.5 KB)
-├── relatorio-ambiente-2025-08-08T10-40-31.md (4.5 KB)
-├── relatorio-ambiente-2025-08-08T10-40-52.md (4.5 KB)
 ├── scripts/
-│   ├── criar-admin-prod.js (7.1 KB)
-│   ├── package.json (369 bytes)
-│   └── project-analyzer.js (12.9 KB)
+│   └── package.json (369 bytes)
 ├── src/
-│   ├── App.jsx (21.4 KB)
+│   ├── App.jsx (20.4 KB)
 │   ├── components/
 │   │   ├── AdminPanel.jsx (15.7 KB)
 │   │   ├── AdminStats.jsx (7.5 KB)
 │   │   ├── Administracao.jsx (30.0 KB)
+│   │   ├── CNPJInput.jsx (4.7 KB)
 │   │   ├── ConfirmationModal.jsx (4.0 KB)
 │   │   ├── ContextPanel.jsx (19.4 KB)
 │   │   ├── Dashboard.jsx (18.3 KB)
 │   │   ├── DashboardComponents/
 │   │   │   ├── CronogramaWidget.jsx (16.1 KB)
 │   │   │   └── MetricsGrid.jsx (2.6 KB)
-│   │   ├── DataManager.jsx (27.0 KB)
+│   │   ├── DataManager.jsx (27.2 KB)
 │   │   ├── DebugPanel.jsx (2.2 KB)
-│   │   ├── DespesaForm.jsx (15.1 KB)
-│   │   ├── Despesas.jsx (8.1 KB)
+│   │   ├── DespesaForm.jsx (20.2 KB)
+│   │   ├── Despesas.jsx (10.9 KB)
 │   │   ├── DespesasFilters.jsx (7.6 KB)
-│   │   ├── DespesasList.jsx (9.6 KB)
-│   │   ├── DespesasTable.jsx (23.5 KB)
+│   │   ├── DespesasList.jsx (9.5 KB)
+│   │   ├── DespesasTable.jsx (24.1 KB)
 │   │   ├── Emendas.jsx (20.9 KB)
 │   │   ├── EmendasFilters.jsx (7.4 KB)
 │   │   ├── EmendasList.jsx (28.7 KB)
-│   │   ├── EmendasTable.jsx (21.6 KB)
+│   │   ├── EmendasTable.jsx (21.9 KB)
 │   │   ├── EnvironmentIndicator.jsx (3.0 KB)
-│   │   ├── ErrorBoundary.jsx (4.3 KB)
+│   │   ├── ErrorBoundary.jsx (4.5 KB)
 │   │   ├── FirebaseError.jsx (3.5 KB)
 │   │   ├── FluxoEmenda.jsx (17.9 KB)
 │   │   ├── GlobalSearch.jsx (18.1 KB)
 │   │   ├── Home.jsx (2.5 KB)
+│   │   ├── LoadingOverlay.jsx (1.4 KB)
 │   │   ├── Login.jsx (11.3 KB)
 │   │   ├── PaginatedTable.jsx (0 bytes)
 │   │   ├── Pagination.jsx (14.0 KB)
@@ -125,15 +123,15 @@ npm run build:prod
 │   │   │   │   │   ├── EmendaFormActions.jsx (4.4 KB)
 │   │   │   │   │   ├── EmendaFormCancelModal.jsx (4.1 KB)
 │   │   │   │   │   └── EmendaFormHeader.jsx (2.4 KB)
-│   │   │   │   ├── index.jsx (14.5 KB)
+│   │   │   │   ├── index.jsx (19.0 KB)
 │   │   │   │   └── sections/
 │   │   │   │       ├── AcoesServicos.jsx (14.9 KB)
 │   │   │   │       ├── ClassificacaoTecnica.jsx (5.7 KB)
 │   │   │   │       ├── Cronograma.jsx (9.3 KB)
 │   │   │   │       ├── DadosBancarios.jsx (7.5 KB)
-│   │   │   │       ├── DadosBasicos.jsx (10.3 KB)
-│   │   │   │       ├── DadosBeneficiario.jsx (6.7 KB)
-│   │   │   │       ├── Identificacao.jsx (6.7 KB)
+│   │   │   │       ├── DadosBasicos.jsx (9.6 KB)
+│   │   │   │       ├── DadosBeneficiario.jsx (12.3 KB)
+│   │   │   │       ├── Identificacao.jsx (6.0 KB)
 │   │   │   │       ├── InformacoesComplementares.jsx (7.6 KB)
 │   │   │   │       └── InformacoesFinais.jsx (8.5 KB)
 │   │   │   └── ModalExclusaoEmenda.jsx (7.3 KB)
@@ -175,17 +173,18 @@ npm run build:prod
 │   │   └── userService.js (28.9 KB)
 │   ├── styles/
 │   └── utils/
-│       ├── DisableConsole.jsx (6.5 KB)
+│       ├── DisableConsole.jsx (6.8 KB)
+│       ├── cnpjUtils.js (3.1 KB)
 │       ├── despesaValidators.js (2.3 KB)
 │       ├── errorHandlers.js (5.2 KB)
 │       ├── exportImport.js (0 bytes)
 │       ├── firebaseCollections.js (7.8 KB)
-│       ├── formStyles.js (14.1 KB)
-│       ├── formatters.js (5.9 KB)
+│       ├── formStyles.js (14.7 KB)
+│       ├── formatters.js (5.2 KB)
 │       ├── pdfHelpers.js (4.7 KB)
 │       ├── printUtils.js (6.3 KB)
 │       ├── relatoriosConstants.js (1.7 KB)
-│       ├── validators.js (13.1 KB)
+│       ├── validators.js (14.4 KB)
 │       └── versionControl.js (7.3 KB)
 ├── switch-env.sh (3.8 KB)
 ├── tsconfig.json (505 bytes)
@@ -214,7 +213,7 @@ npm run build:prod
 
 ## 📄 ARQUIVOS DO SISTEMA
 
-### 🧩 Componentes (78)
+### 🧩 Componentes (80)
 
 #### `src/components/AdminPanel.jsx`
 - **Descrição:** 🔧 MELHORAR AdminPanel.jsx - Integrar com AuditService
@@ -229,6 +228,11 @@ npm run build:prod
 #### `src/components/Administracao.jsx`
 - **Descrição:** 🔧 CORREÇÃO: Administracao.jsx - Implementar Modal de Usuário
 - **Tamanho:** 30.0 KB
+- **Exports:** default
+
+#### `src/components/CNPJInput.jsx`
+- **Descrição:** src/components/CNPJInput.jsx
+- **Tamanho:** 4.7 KB
 - **Exports:** default
 
 #### `src/components/ConfirmationModal.jsx`
@@ -258,7 +262,7 @@ npm run build:prod
 
 #### `src/components/DataManager.jsx`
 - **Descrição:** Sem descrição
-- **Tamanho:** 27.0 KB
+- **Tamanho:** 27.2 KB
 - **Exports:** default
 
 #### `src/components/DebugPanel.jsx`
@@ -268,12 +272,12 @@ npm run build:prod
 
 #### `src/components/DespesaForm.jsx`
 - **Descrição:** src/components/DespesaForm.jsx
-- **Tamanho:** 15.1 KB
+- **Tamanho:** 20.2 KB
 - **Exports:** default
 
 #### `src/components/Despesas.jsx`
 - **Descrição:** Despesas.jsx - VERSÃO REFATORADA
-- **Tamanho:** 8.1 KB
+- **Tamanho:** 10.9 KB
 - **Exports:** default
 
 #### `src/components/DespesasFilters.jsx`
@@ -283,12 +287,12 @@ npm run build:prod
 
 #### `src/components/DespesasList.jsx`
 - **Descrição:** DespesasList.jsx - CORRIGIDO SEM useEmendaDespesa
-- **Tamanho:** 9.6 KB
+- **Tamanho:** 9.5 KB
 - **Exports:** default
 
 #### `src/components/DespesasTable.jsx`
 - **Descrição:** DespesasTable.jsx - VERSÃO COMPLETA COM SALDO PROGRESSIVO
-- **Tamanho:** 23.5 KB
+- **Tamanho:** 24.1 KB
 - **Exports:** default
 
 #### `src/components/Emendas.jsx`
@@ -308,7 +312,7 @@ npm run build:prod
 
 #### `src/components/EmendasTable.jsx`
 - **Descrição:** EmendasTable.jsx - Com integração para Despesas
-- **Tamanho:** 21.6 KB
+- **Tamanho:** 21.9 KB
 - **Exports:** default
 
 #### `src/components/EnvironmentIndicator.jsx`
@@ -318,7 +322,7 @@ npm run build:prod
 
 #### `src/components/ErrorBoundary.jsx`
 - **Descrição:** Sem descrição
-- **Tamanho:** 4.3 KB
+- **Tamanho:** 4.5 KB
 - **Exports:** default
 
 #### `src/components/FirebaseError.jsx`
@@ -339,6 +343,11 @@ npm run build:prod
 #### `src/components/Home.jsx`
 - **Descrição:** Sem descrição
 - **Tamanho:** 2.5 KB
+- **Exports:** default
+
+#### `src/components/LoadingOverlay.jsx`
+- **Descrição:** src/components/LoadingOverlay.jsx
+- **Tamanho:** 1.4 KB
 - **Exports:** default
 
 #### `src/components/Login.jsx`
@@ -503,7 +512,7 @@ npm run build:prod
 
 #### `src/components/emenda/EmendaForm/index.jsx`
 - **Descrição:** src/components/emenda/EmendaForm/index.jsx - CORREÇÕES CRÍTICAS
-- **Tamanho:** 14.5 KB
+- **Tamanho:** 19.0 KB
 - **Exports:** default
 
 #### `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx`
@@ -528,17 +537,17 @@ npm run build:prod
 
 #### `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx`
 - **Descrição:** Sem descrição
-- **Tamanho:** 10.3 KB
+- **Tamanho:** 9.6 KB
 - **Exports:** default
 
 #### `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx`
 - **Descrição:** Sem descrição
-- **Tamanho:** 6.7 KB
+- **Tamanho:** 12.3 KB
 - **Exports:** default
 
 #### `src/components/emenda/EmendaForm/sections/Identificacao.jsx`
 - **Descrição:** Sem descrição
-- **Tamanho:** 6.7 KB
+- **Tamanho:** 6.0 KB
 - **Exports:** default
 
 #### `src/components/emenda/EmendaForm/sections/InformacoesComplementares.jsx`
@@ -650,11 +659,15 @@ npm run build:prod
 - **Tamanho:** 15.6 KB
 
 
-### 🛠️ Utilitários (12)
+### 🛠️ Utilitários (13)
 
 #### `src/utils/DisableConsole.jsx`
-- **Descrição:** Função para limpar cache de logs (útil para debugging)
-- **Tamanho:** 6.5 KB
+- **Descrição:** Arquivo: src/utils/DisableConsole.jsx
+- **Tamanho:** 6.8 KB
+
+#### `src/utils/cnpjUtils.js`
+- **Descrição:** ✅ UTILITÁRIOS PARA CNPJ
+- **Tamanho:** 3.1 KB
 
 #### `src/utils/despesaValidators.js`
 - **Descrição:** src/components/despesa/DespesaFormHeader.jsx
@@ -674,11 +687,11 @@ npm run build:prod
 
 #### `src/utils/formStyles.js`
 - **Descrição:** ✅ ESTILOS UNIVERSAIS PARA FORMS - COM DARK MODE COMPLETO
-- **Tamanho:** 14.1 KB
+- **Tamanho:** 14.7 KB
 
 #### `src/utils/formatters.js`
 - **Descrição:** ✅ FORMATADORES MONETÁRIOS PRECISOS - src/utils/formatters.js - VERSÃO COMPLETA
-- **Tamanho:** 5.9 KB
+- **Tamanho:** 5.2 KB
 
 #### `src/utils/pdfHelpers.js`
 - **Descrição:** src/utils/pdfHelpers.js
@@ -694,7 +707,7 @@ npm run build:prod
 
 #### `src/utils/validators.js`
 - **Descrição:** src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
-- **Tamanho:** 13.1 KB
+- **Tamanho:** 14.4 KB
 
 #### `src/utils/versionControl.js`
 - **Descrição:** src/utils/versionControl.js
@@ -749,16 +762,35 @@ npm run build:prod
 
 ## 🔄 MUDANÇAS RECENTES (Últimos 7 dias)
 
+- `src/utils/validators.js` (Utilitário) - 09/08/2025
+- `src/components/emenda/EmendaForm/sections/Identificacao.jsx` (Componente) - 09/08/2025
+- `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx` (Componente) - 09/08/2025
+- `src/utils/formatters.js` (Utilitário) - 09/08/2025
+- `src/utils/cnpjUtils.js` (Utilitário) - 09/08/2025
+- `src/utils/formStyles.js` (Utilitário) - 09/08/2025
+- `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx` (Componente) - 09/08/2025
+- `src/components/CNPJInput.jsx` (Componente) - 09/08/2025
+- `src/components/emenda/EmendaForm/index.jsx` (Componente) - 09/08/2025
+- `src/components/DespesaForm.jsx` (Componente) - 09/08/2025
+- `src/components/ErrorBoundary.jsx` (Componente) - 09/08/2025
+- `src/components/DespesasTable.jsx` (Componente) - 09/08/2025
+- `src/utils/DisableConsole.jsx` (Utilitário) - 09/08/2025
+- `src/components/Despesas.jsx` (Componente) - 09/08/2025
+- `src/components/ContextPanel.jsx` (Componente) - 09/08/2025
+- `src/components/DataManager.jsx` (Componente) - 09/08/2025
+- `src/components/EmendasTable.jsx` (Componente) - 09/08/2025
+- `src/components/emenda/EmendaForm/components/EmendaFormActions.jsx` (Componente) - 09/08/2025
+- `src/components/Emendas.jsx` (Componente) - 09/08/2025
+- `src/components/despesa/DespesaFormActions.jsx` (Componente) - 09/08/2025
+- `src/components/LoadingOverlay.jsx` (Componente) - 09/08/2025
+- `src/components/DespesasList.jsx` (Componente) - 09/08/2025
 - `src/utils/versionControl.js` (Utilitário) - 08/08/2025
-- `src/utils/DisableConsole.jsx` (Utilitário) - 08/08/2025
 - `src/services/auditService.js` (Serviço) - 08/08/2025
-- `src/components/emenda/EmendaForm/sections/DadosBasicos.jsx` (Componente) - 08/08/2025
 - `src/components/Login.jsx` (Componente) - 08/08/2025
 - `src/components/EnvironmentIndicator.jsx` (Componente) - 08/08/2025
 - `src/components/UpdateNotification.jsx` (Componente) - 07/08/2025
 - `src/services/userService.js` (Serviço) - 07/08/2025
 - `src/components/Administracao.jsx` (Componente) - 07/08/2025
-- `src/components/Emendas.jsx` (Componente) - 06/08/2025
 - `src/components/emenda/ModalExclusaoEmenda.jsx` (Componente) - 06/08/2025
 - `src/components/relatorios/geradores/RelatorioConsolidado.js` (Componente) - 06/08/2025
 - `src/components/relatorios/geradores/RelatorioPrestacao.js` (Componente) - 06/08/2025
@@ -778,14 +810,9 @@ npm run build:prod
 - `src/components/Dashboard.jsx` (Componente) - 06/08/2025
 - `src/components/despesa/DespesasStats.jsx` (Componente) - 06/08/2025
 - `src/components/despesa/DespesasListHeader.jsx` (Componente) - 06/08/2025
-- `src/components/Despesas.jsx` (Componente) - 06/08/2025
-- `src/components/EmendasTable.jsx` (Componente) - 06/08/2025
 - `src/components/emenda/EmendaForm/sections/AcoesServicos.jsx` (Componente) - 06/08/2025
-- `src/components/emenda/EmendaForm/index.jsx` (Componente) - 06/08/2025
-- `src/components/emenda/EmendaForm/sections/Identificacao.jsx` (Componente) - 06/08/2025
 - `src/components/emenda/EmendaForm/components/EmendaFormHeader.jsx` (Componente) - 06/08/2025
 - `src/components/EmendasFilters.jsx` (Componente) - 06/08/2025
-- `src/components/DespesasTable.jsx` (Componente) - 06/08/2025
 - `src/components/UserForm.jsx` (Componente) - 05/08/2025
 - `src/components/AdminPanel.jsx` (Componente) - 05/08/2025
 - `src/components/DashboardComponents/MetricsGrid.jsx` (Componente) - 04/08/2025
@@ -794,21 +821,12 @@ npm run build:prod
 - `src/components/Sidebar.jsx` (Componente) - 04/08/2025
 - `src/components/UsersTable.jsx` (Componente) - 04/08/2025
 - `src/components/PrivateRoute.jsx` (Componente) - 04/08/2025
-- `src/utils/validators.js` (Utilitário) - 04/08/2025
 - `src/components/PrintButton.jsx` (Componente) - 04/08/2025
-- `src/components/DespesaForm.jsx` (Componente) - 04/08/2025
 - `src/components/despesa/DespesaFormDateFields.jsx` (Componente) - 04/08/2025
 - `src/components/despesa/DespesaFormBasicFields.jsx` (Componente) - 04/08/2025
-- `src/components/DespesasList.jsx` (Componente) - 04/08/2025
 - `src/components/emenda/EmendaForm/sections/DadosBancarios.jsx` (Componente) - 02/08/2025
-- `src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx` (Componente) - 02/08/2025
 - `src/components/emenda/EmendaForm/sections/InformacoesComplementares.jsx` (Componente) - 02/08/2025
 - `src/components/emenda/EmendaForm/sections/InformacoesFinais.jsx` (Componente) - 02/08/2025
-- `src/components/emenda/EmendaForm/sections/ClassificacaoTecnica.jsx` (Componente) - 02/08/2025
-- `src/components/ThemeToggle.jsx` (Componente) - 02/08/2025
-- `src/components/emenda/EmendaForm/sections/Cronograma.jsx` (Componente) - 02/08/2025
-- `src/components/EmendasList.jsx` (Componente) - 01/08/2025
-- `src/components/VisualizacaoEmendaDespesas.jsx` (Componente) - 01/08/2025
 
 ---
 
@@ -834,12 +852,12 @@ npm run build:prod
 
 ## 📊 ESTATÍSTICAS
 
-- **Total de Componentes:** 78
+- **Total de Componentes:** 80
 - **Total de Hooks:** 10
-- **Total de Utilitários:** 12
+- **Total de Utilitários:** 13
 - **Total de Serviços:** 4
 - **Arquivos Importantes:** 4
-- **Mudanças Recentes:** 60
+- **Mudanças Recentes:** 65
 
 ---
 
