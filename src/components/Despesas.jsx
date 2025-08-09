@@ -224,6 +224,11 @@ const Despesas = ({ usuario }) => {
     };
   }, [despesas]);
 
+  // 🚨 CALCULAR SALDO PARA TODAS AS EMENDAS DISPONÍVEIS
+  const emendasComSaldo = useMemo(() => {
+    return emendas.map(emenda => calcularEmendaInfoCompleta(emenda));
+  }, [emendas, calcularEmendaInfoCompleta]);
+
   // Renderização condicional por view
   if (currentView === "criar" || currentView === "editar" || currentView === "visualizar") {
     console.log("🔍 Renderizando formulário - View:", currentView);
@@ -253,7 +258,7 @@ const Despesas = ({ usuario }) => {
             onCancelar={handleVoltar}
             onSalvar={handleSalvarDespesa}
             onSuccess={handleSalvarDespesa}
-            emendasDisponiveis={emendas}
+            emendasDisponiveis={emendasComSaldo}
             emendaPreSelecionada={filtroAutomatico?.emendaId}
             emendaInfo={calcularEmendaInfoCompleta(filtroAutomatico?.emenda)}
             modoVisualizacao={currentView === "visualizar"}
