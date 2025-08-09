@@ -1,0 +1,113 @@
+// Atualizações para o EmendaForm
+
+// 1. Adicione os imports no topo do arquivo:
+import CNPJInput from '../../components/CNPJInput';
+// ou se estiver em outra pasta:
+// import CNPJInput from '../CNPJInput';
+
+// 2. No componente EmendaForm, substitua os campos de CNPJ por:
+
+// Para o campo CNPJ do Beneficiário (seção Identificação):
+<div style={styles.formGroup}>
+  <CNPJInput
+    label="CNPJ do Beneficiário"
+    value={formData.cnpjBeneficiario || ''}
+    onChange={(e) => setFormData({
+      ...formData,
+      cnpjBeneficiario: e.target.value
+    })}
+    onValidChange={(isValid, value) => {
+      // Opcional: fazer algo quando o CNPJ for válido
+      if (isValid) {
+        console.log('CNPJ válido:', value);
+        // Pode buscar dados da empresa aqui
+      }
+    }}
+    required={true}
+    placeholder="00.000.000/0000-00"
+  />
+</div>
+
+// 3. Se houver outros campos de CNPJ no formulário:
+<div style={styles.formGroup}>
+  <CNPJInput
+    label="CNPJ da Instituição"
+    value={formData.cnpjInstituicao || ''}
+    onChange={(e) => setFormData({
+      ...formData,
+      cnpjInstituicao: e.target.value
+    })}
+    required={false}
+  />
+</div>
+
+// 4. Para o DespesaForm.jsx, faça o mesmo:
+// No campo CNPJ do fornecedor:
+<div style={styles.formGroup}>
+  <CNPJInput
+    label="CNPJ do Fornecedor"
+    value={formData.fornecedorCnpj || formData.cnpj || ''}
+    onChange={(e) => setFormData({
+      ...formData,
+      fornecedorCnpj: e.target.value,
+      cnpj: e.target.value // manter compatibilidade
+    })}
+    onValidChange={(isValid, value) => {
+      if (isValid) {
+        // Opcional: buscar dados do fornecedor
+        buscarDadosFornecedor(value);
+      }
+    }}
+    required={true}
+    placeholder="Digite o CNPJ"
+  />
+</div>
+
+// 5. Função opcional para buscar dados da empresa (exemplo):
+const buscarDadosFornecedor = async (cnpj) => {
+  try {
+    // Remover formatação
+    const cnpjLimpo = cnpj.replace(/\D/g, '');
+    
+    // Usar API pública da Receita ou outra
+    const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
+    
+    if (response.ok) {
+      const dados = await response.json();
+      
+      // Preencher automaticamente outros campos
+      setFormData(prev => ({
+        ...prev,
+        fornecedor: dados.nome_fantasia || dados.razao_social,
+        razaoSocial: dados.razao_social,
+        // outros campos conforme necessário
+      }));
+      
+      // Mostrar notificação de sucesso
+      setToast({
+        show: true,
+        message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
+        type: 'success'
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao buscar CNPJ:', error);
+  }
+};
+
+// 6. Validação no handleSubmit:
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Validar CNPJs antes de salvar
+  if (formData.cnpjBeneficiario && !validarCNPJ(formData.cnpjBeneficiario)) {
+    setToast({
+      show: true,
+      message: "❌ CNPJ do beneficiário inválido!",
+      type: "error",
+    });
+    return;
+  }
+  
+  // ... resto da validação e salvamento
+};
