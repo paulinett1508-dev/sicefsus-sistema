@@ -28,7 +28,10 @@ const CNPJInput = ({
   const handleChange = (e) => {
     const rawValue = e.target.value;
     const formatted = formatarCNPJ(rawValue);
-    console.log("🔧 CNPJInput handleChange - Raw:", rawValue, "Formatted:", formatted);
+    
+    console.log("=== DEBUG CNPJInput ===");
+    console.log("Raw:", rawValue);
+    console.log("Formatted:", formatted);
 
     // Só permite números e formatação
     if (rawValue.length > formatted.length + 1) return;
@@ -45,29 +48,33 @@ const CNPJInput = ({
       });
     }
 
-    // VALIDAÇÃO EM TEMPO REAL - Valida sempre que há mudança
+    // VALIDAÇÃO EM TEMPO REAL - FORÇAR RE-IMPORTAÇÃO
     const digits = formatted.replace(/\D/g, "");
-    console.log("🔢 CNPJInput digits:", digits, "length:", digits.length);
+    console.log("Digits:", digits, "Length:", digits.length);
 
     if (digits.length === 14) {
-      console.log("🔍 CNPJInput - Validando CNPJ completo:", digits);
-      const valid = validarCNPJ(digits); // Usar apenas números para validação
-      console.log("✅ CNPJInput - Resultado validação:", valid);
-      setIsValid(valid);
-
-      // Callback de validação
-      if (onValidChange) {
-        onValidChange(valid, formatted);
-      }
+      console.log("🔍 VALIDANDO:", digits);
+      
+      // FORÇAR RE-IMPORTAÇÃO PARA EVITAR CACHE
+      import('../utils/cnpjUtils.js').then(({ validarCNPJ: validarCNPJFresh }) => {
+        const valid = validarCNPJFresh(digits);
+        console.log("✅ RESULTADO FRESH:", valid);
+        console.log("===================");
+        
+        setIsValid(valid);
+        if (onValidChange) {
+          onValidChange(valid, formatted);
+        }
+      });
+      
     } else if (digits.length > 0) {
-      // AJUSTE URGENTE: Invalida imediatamente se não tem 14 dígitos
-      console.log("⚠️ CNPJInput - CNPJ incompleto, invalidando");
+      console.log("⚠️ CNPJ incompleto");
       setIsValid(false);
       if (onValidChange) {
         onValidChange(false, formatted);
       }
     } else {
-      console.log("🔄 CNPJInput - Campo vazio");
+      console.log("🔄 Campo vazio");
       setIsValid(false);
       if (onValidChange) {
         onValidChange(false, formatted);
