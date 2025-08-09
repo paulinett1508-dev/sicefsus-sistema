@@ -522,31 +522,47 @@ const DespesaForm = ({
           />
         )}
 
-        {/* ✅ AÇÕES EXTRAÍDAS */}
-        <DespesaFormActions
-          configModo={configModo}
-          loading={loading}
-          modoVisualizacao={modoVisualizacao}
-          onCancelar={onCancelar}
-        />
+        {/* ✅ AÇÕES DO FORMULÁRIO */}
+        {!modoVisualizacao && (
+          <div style={styles.formActions}>
+            <button
+              type="button"
+              onClick={onCancelar}
+              style={styles.cancelButton}
+              disabled={salvando}
+            >
+              ← Voltar
+            </button>
+            
+            <button
+              type="submit"
+              style={{
+                ...styles.submitButton,
+                opacity: salvando ? 0.6 : 1,
+                cursor: salvando ? 'not-allowed' : 'pointer',
+              }}
+              disabled={salvando}
+            >
+              {salvando ? (
+                "Processando..."
+              ) : (
+                despesaParaEditar ? "↻ Atualizar Despesa" : "✓ Cadastrar Despesa"
+              )}
+            </button>
+          </div>
+        )}
 
-        {/* Botão de Submit Atualizado */}
-        <button
-            type="submit"
-            style={{
-              ...styles.submitButton,
-              opacity: salvando ? 0.6 : 1,
-              cursor: salvando ? 'not-allowed' : 'pointer',
-              transform: salvando ? 'scale(0.98)' : 'scale(1)',
-            }}
-            disabled={salvando}
-          >
-            {salvando ? (
-              "Processando..."
-            ) : (
-              despesaParaEditar ? "Atualizar Despesa" : "Salvar Despesa"
-            )}
-          </button>
+        {modoVisualizacao && (
+          <div style={styles.formActions}>
+            <button
+              type="button"
+              onClick={onCancelar}
+              style={styles.cancelButton}
+            >
+              ← Voltar
+            </button>
+          </div>
+        )}
 
       </form>
 
@@ -584,12 +600,31 @@ const styles = {
     marginBottom: "20px",
     transition: "background-color 0.3s ease",
   },
+  formActions: {
+    display: "flex",
+    gap: "15px",
+    justifyContent: "flex-end",
+    marginTop: "30px",
+    paddingTop: "20px",
+    borderTop: "1px solid #dee2e6",
+  },
+  cancelButton: {
+    padding: "12px 24px",
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "background-color 0.3s ease",
+  },
   submitButton: {
     backgroundColor: "#27AE60",
     color: "white",
-    padding: "14px 32px",
+    padding: "12px 24px",
     border: "none",
-    borderRadius: "8px",
+    borderRadius: "6px",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
