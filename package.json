@@ -1,6 +1,6 @@
 {
   "name": "react-javascript",
-  "version": "2.3.25",
+  "version": "2.3.26",
   "type": "module",
   "description": "React TypeScript on Replit, using Vite bundler",
   "scripts": {
