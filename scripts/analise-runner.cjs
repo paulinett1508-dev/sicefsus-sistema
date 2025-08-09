@@ -1,6 +1,4 @@
 
-#!/usr/bin/env node
-
 /**
  * 📁 ANALISADOR DE ESTRUTURA - SICEFSUS
  * Script para gerar análise completa da estrutura de pastas e arquivos
