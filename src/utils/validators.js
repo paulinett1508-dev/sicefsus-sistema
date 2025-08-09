@@ -186,35 +186,6 @@ export const validateUserRole = (role) => {
 };
 
 /**
- * Validar formulário de emenda completo
- * @param {Object} formData - Dados do formulário
- * @returns {Object} - Objeto com erros encontrados
- */
-export const validarFormularioEmenda = (formData) => {
-  const errors = {};
-
-  // Validação de campos obrigatórios
-  if (!formData.numero) errors.numero = 'Número da emenda é obrigatório';
-  if (!formData.autor) errors.autor = 'Parlamentar é obrigatório';
-  if (!formData.cnpjBeneficiario) errors.cnpjBeneficiario = 'CNPJ é obrigatório';
-  if (!formData.municipio) errors.municipio = 'Município é obrigatório';
-  if (!formData.uf) errors.uf = 'UF é obrigatória';
-  if (!formData.programa) errors.programa = 'Programa é obrigatório';
-  if (!formData.objeto) errors.objeto = 'Objeto da proposta é obrigatório';
-  if (!formData.valor) errors.valor = 'Valor é obrigatório';
-
-  // Validação de CNPJ se preenchido
-  if (formData.cnpjBeneficiario) {
-    const { validarCNPJ } = require('./cnpjUtils');
-    if (!validarCNPJ(formData.cnpjBeneficiario)) {
-      errors.cnpjBeneficiario = 'CNPJ inválido';
-    }
-  }
-
-  return errors;
-};
-
-/**
  * ✅ SANITIZAR string removendo caracteres perigosos
  * @param {string} str - String a ser sanitizada
  * @returns {string} - String sanitizada
@@ -591,83 +562,6 @@ export const validarCNPJ = (cnpj) => {
   }
 
   return { valido: true, erro: null };
-};
-
-/**
- * Validar formulário de emenda
- * @param {Object} formData - Dados do formulário
- * @returns {Object} - Resultado da validação
- */
-export const validarFormularioEmenda = (formData) => {
-  const errors = {};
-
-  // Validar campos obrigatórios
-  if (!formData.numero) {
-    errors.numero = "Número da emenda é obrigatório";
-  }
-
-  if (!formData.autor) {
-    errors.autor = "Autor é obrigatório";
-  }
-
-  if (!formData.valorTotal) {
-    errors.valorTotal = "Valor total é obrigatório";
-  }
-
-  if (!formData.tipo) {
-    errors.tipo = "Tipo é obrigatório";
-  }
-
-  // Validar CNPJ se fornecido
-  if (formData.cnpjBeneficiario) {
-    const resultadoCNPJ = validarCNPJ(formData.cnpjBeneficiario);
-    if (!resultadoCNPJ.valido) {
-      errors.cnpjBeneficiario = resultadoCNPJ.erro;
-    }
-  }
-
-  return {
-    valido: Object.keys(errors).length === 0,
-    errors
-  };dos conferem
-  if (parseInt(numero[12]) !== digito1 || parseInt(numero[13]) !== digito2) {
-    return {
-      valido: false,
-      erro: "CNPJ inválido - dígitos verificadores incorretos",
-    };
-  }
-
-  return { valido: true, erro: null };
-};
-
-
-
-/**
- * Valida formulário de emenda completo
- * @param {Object} formData - Dados do formulário
- * @returns {Object} - Objeto com erros encontrados
- */
-export const validarFormularioEmenda = (formData) => {
-  const errors = {};
-
-  // Validação de campos obrigatórios
-  if (!formData.numero) errors.numero = 'Número da emenda é obrigatório';
-  if (!formData.parlamentar) errors.parlamentar = 'Parlamentar é obrigatório';
-  if (!formData.cnpjBeneficiario) errors.cnpjBeneficiario = 'CNPJ é obrigatório';
-  if (!formData.municipio) errors.municipio = 'Município é obrigatório';
-  if (!formData.uf) errors.uf = 'UF é obrigatória';
-
-  // Validação de CNPJ se preenchido
-  if (formData.cnpjBeneficiario) {
-    // Import dinâmico para evitar problemas circulares
-    import('./cnpjUtils').then(({ validarCNPJ }) => {
-      if (!validarCNPJ(formData.cnpjBeneficiario)) {
-        errors.cnpjBeneficiario = 'CNPJ inválido';
-      }
-    });
-  }
-
-  return errors;
 };
 
 // ✅ HOOK PARA USO NO DESPESAFORM
