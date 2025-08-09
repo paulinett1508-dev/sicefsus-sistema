@@ -193,6 +193,7 @@ const Despesas = ({ usuario }) => {
           despesaParaEditar={despesaSelecionada}
           onCancelar={handleVoltar}
           onSalvar={handleSalvarDespesa}
+          onSuccess={handleSalvarDespesa}
           emendasDisponiveis={emendas}
           emendaPreSelecionada={filtroAutomatico?.emendaId}
           emendaInfo={filtroAutomatico?.emenda}

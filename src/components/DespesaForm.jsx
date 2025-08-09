@@ -335,10 +335,16 @@ const DespesaForm = ({
           type: "success",
         });
 
-        // Redirecionar imediatamente após mostrar o toast
-        setTimeout(() => {
-          navigate('/despesas', { replace: true });
-        }, 800);
+        // Usar callback onSuccess se fornecido, senão navegar diretamente
+        if (onSuccess && typeof onSuccess === 'function') {
+          setTimeout(() => {
+            onSuccess();
+          }, 800);
+        } else {
+          setTimeout(() => {
+            navigate('/despesas', { replace: true });
+          }, 800);
+        }
 
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
@@ -349,13 +355,21 @@ const DespesaForm = ({
           type: "success",
         });
 
-        // Redirecionar imediatamente após mostrar o toast
-        setTimeout(() => {
-          navigate('/despesas', { replace: true });
-        }, 800);
+        // Usar callback onSuccess se fornecido, senão navegar diretamente
+        if (onSuccess && typeof onSuccess === 'function') {
+          setTimeout(() => {
+            onSuccess();
+          }, 800);
+        } else {
+          setTimeout(() => {
+            navigate('/despesas', { replace: true });
+          }, 800);
+        }
 
-        // Limpar formulário após o cadastro
-        limparFormulario();
+        // Limpar formulário após o cadastro apenas se não houver callback
+        if (!onSuccess) {
+          limparFormulario();
+        }
       }
 
     } catch (error) {
