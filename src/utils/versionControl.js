@@ -1,14 +1,15 @@
 // src/utils/versionControl.js
 
-// Configuração da versão atual
+// ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 export const APP_VERSION = {
-  number: "1.0.1",
-  date: "08/08/2025",
+  number: "2.3.0",
+  date: "09/01/2025",
   changes: [
-    "🚀 Sistema em produção",
-    "✅ Separação de ambientes Dev/Prod",
-    "🔧 Correções de estabilidade",
-    "📊 Melhorias de performance",
+    "🚀 Sistema de versionamento centralizado implementado",
+    "✅ Fonte única da verdade em versionControl.js",
+    "🔧 Sincronização automática com package.json",
+    "📊 Funções de incremento de versão automático",
+    "🎯 Interface consistente para todos os componentes",
   ],
 };
 
@@ -282,6 +283,37 @@ export function getVersionInfo() {
 export function forceVersionCheck() {
   localStorage.removeItem(VERSION_KEY);
   checkVersion();
+}
+
+/**
+ * Obtém a versão atual - INTERFACE CONSISTENTE
+ * @returns {object} Informações da versão atual
+ */
+export function getCurrentVersion() {
+  return {
+    ...APP_VERSION,
+    timestamp: new Date().toISOString(),
+    environment: import.meta.env.MODE || 'development',
+  };
+}
+
+/**
+ * Incrementa a versão automaticamente
+ * @param {string} type - Tipo de incremento: 'major', 'minor', 'patch'
+ * @returns {string} Nova versão incrementada
+ */
+export function incrementVersion(type = 'patch') {
+  const [major, minor, patch] = APP_VERSION.number.split('.').map(Number);
+  
+  switch (type) {
+    case 'major':
+      return `${major + 1}.0.0`;
+    case 'minor':
+      return `${major}.${minor + 1}.0`;
+    case 'patch':
+    default:
+      return `${major}.${minor}.${patch + 1}`;
+  }
 }
 
 /**

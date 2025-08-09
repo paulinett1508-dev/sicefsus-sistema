@@ -1,35 +1,65 @@
 
+
 // generate-version.js
-// Gera arquivo de versão para o sistema de updates
+// ✅ SINCRONIZAÇÃO AUTOMÁTICA - Lê da fonte única em versionControl.js
 
 import fs from "fs";
 import path from "path";
 
-// Ler versão do package.json
-const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+// ✅ IMPORTAR DA FONTE ÚNICA DA VERDADE
+import { APP_VERSION, getCurrentVersion } from "./src/utils/versionControl.js";
 
+console.log("🔄 Sincronizando versões...");
+console.log("📍 Versão fonte (versionControl.js):", APP_VERSION.number);
+
+// Ler package.json atual
+const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+console.log("📍 Versão package.json (antes):", packageJson.version);
+
+// ✅ USAR A VERSÃO DA FONTE ÚNICA
 const versionInfo = {
-  version: packageJson.version || "1.0.0",
+  version: APP_VERSION.number,
   buildDate: new Date().toISOString(),
   environment: process.env.NODE_ENV || "production",
+  changes: APP_VERSION.changes,
+  date: APP_VERSION.date,
 };
 
 // Salvar na pasta public
 const versionPath = path.join("./public", "version.json");
 fs.writeFileSync(versionPath, JSON.stringify(versionInfo, null, 2));
+console.log("✅ version.json atualizado:", versionInfo.version);
 
-console.log("✅ Arquivo de versão gerado:", versionInfo);
+// ✅ SINCRONIZAR package.json COM A FONTE ÚNICA
+if (packageJson.version !== APP_VERSION.number) {
+  packageJson.version = APP_VERSION.number;
+  fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
+  console.log("✅ package.json sincronizado:", APP_VERSION.number);
+} else {
+  console.log("✅ package.json já está sincronizado");
+}
 
-// Atualizar package.json scripts
-const updatedScripts = {
-  ...packageJson.scripts,
+// Atualizar scripts se necessário
+const requiredScripts = {
   build: "node generate-version.js && vite build",
-  "version:patch": "npm version patch && node generate-version.js",
-  "version:minor": "npm version minor && node generate-version.js",
-  "version:major": "npm version major && node generate-version.js",
+  "version:sync": "node generate-version.js",
+  "version:patch": "node scripts/increment-version.js patch",
+  "version:minor": "node scripts/increment-version.js minor", 
+  "version:major": "node scripts/increment-version.js major",
 };
 
-packageJson.scripts = updatedScripts;
-fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
+let scriptsUpdated = false;
+Object.entries(requiredScripts).forEach(([key, value]) => {
+  if (!packageJson.scripts[key] || packageJson.scripts[key] !== value) {
+    packageJson.scripts[key] = value;
+    scriptsUpdated = true;
+  }
+});
 
-console.log("✅ Scripts do package.json atualizados!");
+if (scriptsUpdated) {
+  fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
+  console.log("✅ Scripts do package.json atualizados!");
+}
+
+console.log("🎉 Sincronização concluída - Versão:", APP_VERSION.number);
+
