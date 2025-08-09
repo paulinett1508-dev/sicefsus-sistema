@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "check-console": "node remove-console-prod.cjs",
-    "restore-backup": "rm -rf dist && mv dist-backup dist"
+    "restore-backup": "rm -rf dist && mv dist-backup dist",
+    "analise": "node scripts/analise-runner.cjs"
   },
   "keywords": [],
   "author": "",
