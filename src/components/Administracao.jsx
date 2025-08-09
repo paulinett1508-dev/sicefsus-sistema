@@ -705,7 +705,7 @@ const Administracao = () => {
               onEdit={handleEditarUsuario}
               onDelete={handleExcluirUsuario}
               onToggleStatus={handleToggleStatus}
-              onResetPassword={handleResetPassword}
+              onResetPassword={handleResetSenha}
               loading={loading}
             />
           )}
