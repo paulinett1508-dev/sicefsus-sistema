@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import CNPJInput from "../../../CNPJInput";
 
-const DadosBeneficiario = ({ formData, setFormData, styles, buscarDadosFornecedor }) => {
+const DadosBeneficiario = ({ formData, onChange, setFormData, styles, buscarDadosFornecedor, errors = {} }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -43,8 +43,8 @@ const DadosBeneficiario = ({ formData, setFormData, styles, buscarDadosFornecedo
                 placeholder="Nome completo da instituição beneficiária"
                 style={styles.input}
               />
-              {fieldErrors?.beneficiario && (
-                <span style={styles.errorText}>{fieldErrors.beneficiario}</span>
+              {errors?.beneficiario && (
+                <span style={styles.errorText}>{errors.beneficiario}</span>
               )}
             </div>
 

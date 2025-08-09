@@ -445,9 +445,11 @@ const EmendaForm = () => {
 
         <DadosBeneficiario
           formData={formData}
+          onChange={handleInputChange}
           setFormData={setFormData}
           styles={styles}
-          buscarDadosFornecedor={buscarDadosFornecedor} // Passa a função para buscar dados do CNPJ
+          buscarDadosFornecedor={buscarDadosFornecedor}
+          errors={{}}
         />
 
         <DadosBancarios
