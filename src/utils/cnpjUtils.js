@@ -112,6 +112,4 @@ export function useCNPJInput() {
     setIsValid,
     setTouched
   };
-}tTouched
-  };
 }

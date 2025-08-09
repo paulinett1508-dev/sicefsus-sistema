@@ -35,7 +35,7 @@ export const formatarMoedaDisplay = (valor) => {
   }).format(numero);
 };
 
-// ✅ FORMATAÇÃO MONETÁRIA MELHORADA - Experiência de digitação natural
+// ✅ EXPERIÊNCIA NATURAL DE DIGITAÇÃO MONETÁRIA
 export const formatarMoedaInput = (valor) => {
   if (!valor) return "";
 
@@ -229,9 +229,24 @@ export const calcularEstatisticas = (despesas, emendas) => {
   };
 };
 
-/**
- * Alias para formatarMoedaDisplay (compatibilidade)
- * @param {number|string} valor - Valor a ser formatado
- * @returns {string} - Valor formatado como moeda brasileira
- */
-export const formatarMoeda = formatarMoedaDisplay;
+// ✅ FORMATADOR DE VALOR MONETÁRIO (PARA INPUTS DE DINHEIRO)
+export const formatarValorMonetario = (valor) => {
+  if (!valor) return '';
+
+  // Remove tudo que não é número
+  const numero = valor.toString().replace(/\D/g, '');
+
+  if (!numero) return '';
+
+  // Converte para número e divide por 100 (para centavos)
+  const valorNumerico = parseFloat(numero) / 100;
+
+  // Formata como moeda brasileira
+  return valorNumerico.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+};
+
+// Alias para compatibilidade
+export const formatarMoeda = formatarValorMonetario;
