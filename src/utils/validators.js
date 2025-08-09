@@ -364,6 +364,94 @@ export const validateUserData = (userData) => {
 };
 
 /**
+ * ✅ VALIDAR formulário de emenda completo
+ * @param {Object} formData - Dados do formulário de emenda
+ * @returns {Object} - Resultado da validação
+ */
+export const validarFormularioEmenda = (formData) => {
+  const erros = {};
+
+  // Validar campos obrigatórios básicos
+  if (!formData.numero || formData.numero.trim() === '') {
+    erros.numero = 'Número da emenda é obrigatório';
+  }
+
+  if (!formData.autor || formData.autor.trim() === '') {
+    erros.autor = 'Autor é obrigatório';
+  }
+
+  if (!formData.municipio || formData.municipio.trim() === '') {
+    erros.municipio = 'Município é obrigatório';
+  }
+
+  if (!formData.uf || formData.uf.trim() === '') {
+    erros.uf = 'UF é obrigatória';
+  }
+
+  // Validar UF
+  if (formData.uf && !validateUF(formData.uf)) {
+    erros.uf = 'UF inválida';
+  }
+
+  // Validar valor
+  if (!formData.valor || parseFloat(formData.valor.toString().replace(/[^\d,.-]/g, '').replace(',', '.')) <= 0) {
+    erros.valor = 'Valor deve ser maior que zero';
+  }
+
+  // Validar programa
+  if (!formData.programa || formData.programa.trim() === '') {
+    erros.programa = 'Programa é obrigatório';
+  }
+
+  // Validar beneficiário
+  if (!formData.beneficiario || formData.beneficiario.trim() === '') {
+    erros.beneficiario = 'Beneficiário é obrigatório';
+  }
+
+  // Validar CNPJ do beneficiário se fornecido
+  if (formData.cnpjBeneficiario) {
+    const cnpjValidacao = validarCNPJ(formData.cnpjBeneficiario);
+    if (!cnpjValidacao.valido) {
+      erros.cnpjBeneficiario = cnpjValidacao.erro;
+    }
+  }
+
+  // Validar tipo
+  const tiposValidos = ['Individual', 'Coletiva', 'Bancada'];
+  if (!formData.tipo || !tiposValidos.includes(formData.tipo)) {
+    erros.tipo = 'Tipo de emenda inválido';
+  }
+
+  // Validar modalidade
+  if (!formData.modalidade || formData.modalidade.trim() === '') {
+    erros.modalidade = 'Modalidade é obrigatória';
+  }
+
+  // Validar objeto
+  if (!formData.objeto || formData.objeto.trim() === '') {
+    erros.objeto = 'Objeto é obrigatório';
+  }
+
+  // Validar dados bancários
+  if (!formData.banco || formData.banco.trim() === '') {
+    erros.banco = 'Banco é obrigatório';
+  }
+
+  if (!formData.agencia || formData.agencia.trim() === '') {
+    erros.agencia = 'Agência é obrigatória';
+  }
+
+  if (!formData.conta || formData.conta.trim() === '') {
+    erros.conta = 'Conta é obrigatória';
+  }
+
+  return {
+    valido: Object.keys(erros).length === 0,
+    erros
+  };
+};
+
+/**
  * ✅ LOGS DE VALIDAÇÃO PARA DEBUG
  * @param {string} operacao - Nome da operação
  * @param {Object} dados - Dados sendo validados

@@ -1,22 +1,25 @@
 // ✅ FORMATADORES MONETÁRIOS PRECISOS - src/utils/formatters.js - VERSÃO COMPLETA
 import { useState } from "react";
 
+/**
+ * Formata valor monetário para exibição
+ * @param {number|string} valor - Valor a ser formatado
+ * @returns {string} - Valor formatado como moeda brasileira
+ */
 export const formatarMoedaDisplay = (valor) => {
   if (!valor && valor !== 0) return "R$ 0,00";
 
   const numero =
     typeof valor === "string"
-      ? parseFloat(valor.replace(/[^\d,]/g, "").replace(",", "."))
+      ? parseFloat(valor.replace(/[^\d,.-]/g, "").replace(",", "."))
       : valor;
 
   if (isNaN(numero)) return "R$ 0,00";
 
-  return numero.toLocaleString("pt-BR", {
+  return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  }).format(numero);
 };
 
 // ✅ FORMATAÇÃO MONETÁRIA MELHORADA - Experiência de digitação natural
@@ -213,5 +216,9 @@ export const calcularEstatisticas = (despesas, emendas) => {
   };
 };
 
-// ✅ ALIAS PARA COMPATIBILIDADE
+/**
+ * Alias para formatarMoedaDisplay (compatibilidade)
+ * @param {number|string} valor - Valor a ser formatado
+ * @returns {string} - Valor formatado como moeda brasileira
+ */
 export const formatarMoeda = formatarMoedaDisplay;
