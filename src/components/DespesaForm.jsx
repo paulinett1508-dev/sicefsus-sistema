@@ -577,9 +577,13 @@ const DespesaForm = ({
 
       </form>
 
-      <LoadingOverlay
-        show={salvando}
-        message={despesaParaEditar ? "Atualizando despesa..." : "Salvando nova despesa..."}
+      <LoadingOverlay 
+        show={salvando} 
+        message={
+          despesaParaEditar 
+            ? "Atualizando despesa..." 
+            : "Cadastrando nova despesa..."
+        } 
       />
     </div>
   );
