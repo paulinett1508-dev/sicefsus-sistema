@@ -8,15 +8,24 @@ const DadosBeneficiario = ({
   setFormData, 
   styles, 
   buscarDadosFornecedor, 
-  errors = {} 
+  errors = {},
+  expanded,
+  onToggle
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
+    if (onToggle) {
+      onToggle();
+    } else {
+      setIsExpanded(!isExpanded);
+    }
   };
+  
+  // Use external expanded state if provided, otherwise use internal state
+  const currentExpanded = expanded !== undefined ? expanded : isExpanded;
 
   // Função para buscar dados do CNPJ automaticamente
   const buscarDadosCNPJ = async (cnpj) => {
@@ -68,8 +77,12 @@ const DadosBeneficiario = ({
           });
         }
         
-        // Expandir automaticamente para mostrar os dados preenchidos
-        setIsExpanded(true);
+        // Expandir automaticamente para mostrar os dados preenchidos se usando estado interno
+        if (onToggle) {
+          onToggle(); // Use external toggle function if provided
+        } else {
+          setIsExpanded(true);
+        }
         
         // Mostrar feedback de sucesso
         setToast({
@@ -148,21 +161,23 @@ const DadosBeneficiario = ({
       {/* HEADER COLAPSÁVEL para informações adicionais */}
       <div style={styles.headerContainer} onClick={toggleExpanded}>
         <h3 style={styles.sectionTitle}>
-          <span style={styles.sectionIcon}>🏢</span>
+          <span style={styles.sectionIcon}>
+            {currentExpanded ? '📂' : '📁'}
+          </span>
           Informações Adicionais do Beneficiário (opcional)
         </h3>
         <div style={styles.toggleButton}>
           <span style={styles.toggleIcon}>
-            {isExpanded ? '−' : '+'}
+            {currentExpanded ? '−' : '+'}
           </span>
           <span style={styles.toggleText}>
-            {isExpanded ? 'Ocultar' : 'Exibir'}
+            {currentExpanded ? 'Ocultar' : 'Exibir'}
           </span>
         </div>
       </div>
 
       {/* CONTEÚDO COLAPSÁVEL */}
-      {isExpanded && (
+      {currentExpanded && (
         <div style={styles.content}>
           {/* Primeira linha - Nome e Endereço */}
           <fieldset style={styles.row}>
