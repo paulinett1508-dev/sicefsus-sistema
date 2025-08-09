@@ -431,11 +431,13 @@ const EmendaForm = () => {
         />
 
         <EmendaFormActions
+          modo={isEdicao ? "editar" : "criar"}
           onCancel={handleCancel}
           onSubmit={handleSubmit}
           isEdit={isEdicao}
-          emendaParaEditar={isEdicao}
-          salvando={salvando} // Pass the saving state
+          salvando={salvando}
+          loading={saving}
+          hasUnsavedChanges={true}
         />
       </form>
 

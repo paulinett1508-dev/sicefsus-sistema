@@ -14,6 +14,8 @@ const EmendaFormActions = ({
   onSubmit,
   onCancel,
   hasUnsavedChanges = false,
+  isEdit = false,
+  salvando = false,
 }) => {
   const navigate = useNavigate(); // ✅ ADICIONADO: Navegação direta como fallback
   const { navegarParaListaEmendas, cancelarFormulario } =
@@ -61,11 +63,6 @@ const EmendaFormActions = ({
     }
   };
 
-  // Determine if we are in edit mode based on the 'modo' prop
-  const isEdit = modo === "editar";
-  // Use 'salvando' if provided, otherwise default to 'loading' for consistency
-  const salvando = loading; 
-
   return (
     <div style={styles.buttonContainer}>
       {/* Botão Voltar apenas no modo edição */}
@@ -98,12 +95,12 @@ const EmendaFormActions = ({
             type="submit"
             onClick={handleSubmit}
             style={styles.submitButton}
-            disabled={salvando}
+            disabled={salvando || loading}
           >
-            {salvando ? (
+            {(salvando || loading) ? (
               "Processando..."
             ) : (
-              emendaParaEditar ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
+              isEdit ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
             )}
           </button>
         </>
