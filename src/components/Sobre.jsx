@@ -176,7 +176,10 @@ const Sobre = () => {
                 e.target.style.display = "none";
               }}
             />
-            <p>© 2025 - Desenvolvido por SOPRO - Solution Provider</p>
+            <p className="sobre-footer-text">
+            © 2025 SICEFSUS - Sistema de Controle de Emendas e Fiscalização
+            do SUS
+          </p>
           </div>
         </div>
       </div>
@@ -402,7 +405,7 @@ const Sobre = () => {
           opacity: 1;
         }
 
-        .sobre-footer p {
+        .sobre-footer-text {
           margin: 0;
           color: #666;
           font-size: 0.9em;
