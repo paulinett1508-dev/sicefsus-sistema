@@ -59,6 +59,7 @@ const EmendaForm = () => {
     valorRecurso: "",
     programa: "",
     beneficiario: "",
+    cnpj: "",
     cnpjBeneficiario: "",
     tipo: "Individual",
     modalidade: "",
@@ -240,10 +241,10 @@ const EmendaForm = () => {
     }
 
     // ✅ VALIDAÇÃO CNPJ CORRIGIDA - Usando o campo correto
-    if (formData.cnpjBeneficiario) {
-      const cnpjLimpo = limparCNPJ(formData.cnpjBeneficiario);
-      if (cnpjLimpo.length === 14) {
-        if (!validarCNPJ(formData.cnpjBeneficiario)) {
+    if (formData.cnpj) {
+      const cnpjLimpo = limparCNPJ(formData.cnpj);
+        if (cnpjLimpo && cnpjLimpo.length === 14)
+        if (!validarCNPJ(formData.cnpj)) {
           errors.push("CNPJ do município (Identificação) é inválido");
         }
       } else if (cnpjLimpo.length > 0) {

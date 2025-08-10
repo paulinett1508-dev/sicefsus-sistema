@@ -1,11 +1,11 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// ✅ CORREÇÃO: Usar CNPJInput profissional como "Dados Básicos"
+// ✅ CORREÇÃO COMPLETA: Layout e lógica idênticos ao DadosBasicos
 
 import React, { useState, useEffect } from "react";
-import CNPJInput from "../../../CNPJInput"; // ✅ COMPONENTE PROFISSIONAL
+import CNPJInput from "../../../CNPJInput";
 
 const Identificacao = ({
-  formData,
+  formData = {},
   onChange,
   errors = {},
   disabled = false,
@@ -89,25 +89,10 @@ const Identificacao = ({
     carregarMunicipios();
   }, [formData?.uf]);
 
-  // ✅ HANDLER PROFISSIONAL para CNPJInput (igual Dados Básicos)
-  const handleCnpjChange = (cnpjValue) => {
-    // CNPJInput retorna o valor, não evento
-    const syntheticEvent = {
-      target: {
-        name: "cnpj",
-        value: cnpjValue,
-      },
-    };
-
-    if (onChange) {
-      onChange(syntheticEvent);
-    }
-  };
-
   // Handler específico para UF (limpa município)
   const handleUfChange = (e) => {
     // Primeiro atualiza a UF
-    onChange(e); // ✅ CORREÇÃO: usar onChange ao invés de handleInputChange
+    onChange(e);
 
     // Depois limpa o município se houver
     if (formData?.municipio) {
@@ -132,13 +117,12 @@ const Identificacao = ({
         Identificação
       </legend>
 
-      {/* Grid de campos - IGUAL outras seções */}
-      <div style={styles.fieldsGrid}>
-        {/* CNPJ - Input simples para evitar erros */}
+      <div style={styles.formGrid}>
+        {/* CNPJ - IDÊNTICO ao Beneficiário de DadosBasicos */}
         <div style={styles.formGroup}>
           <CNPJInput
             label="CNPJ"
-            value={formData?.cnpj || ""}
+            value={formData.cnpj || ""}
             onChange={(e) => {
               onChange({
                 target: {
@@ -156,7 +140,9 @@ const Identificacao = ({
               ...styles.input,
               padding: "12px",
               fontSize: "14px",
-              border: "2px solid #dee2e6",
+              borderWidth: "2px",
+              borderStyle: "solid",
+              borderColor: "#dee2e6",
               borderRadius: "6px",
             }}
           />
@@ -164,19 +150,20 @@ const Identificacao = ({
         </div>
 
         {/* UF */}
-        <div style={styles.fieldGroup}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
-            🗺️ UF <span style={styles.required}>*</span>
+            UF <span style={styles.required}>*</span>
           </label>
           <select
             name="uf"
-            value={formData?.uf || ""}
+            value={formData.uf || ""}
             onChange={handleUfChange}
             disabled={disabled}
             style={{
-              ...styles.select,
-              ...(errors.uf ? styles.selectError : {}),
+              ...styles.input,
+              ...(errors.uf && styles.inputError),
             }}
+            required
           >
             <option value="">Selecione a UF</option>
             {ufs.map((estado) => (
@@ -185,24 +172,25 @@ const Identificacao = ({
               </option>
             ))}
           </select>
-          {errors.uf && <div style={styles.errorMessage}>{errors.uf}</div>}
+          {errors.uf && <small style={styles.errorText}>{errors.uf}</small>}
         </div>
 
         {/* Município */}
-        <div style={styles.fieldGroup}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>
-            🏙️ Município <span style={styles.required}>*</span>
+            Município <span style={styles.required}>*</span>
           </label>
           <select
             name="municipio"
-            value={formData?.municipio || ""}
-            onChange={onChange} // ✅ CORREÇÃO: usar onChange ao invés de handleInputChange
+            value={formData.municipio || ""}
+            onChange={onChange}
             disabled={disabled || !formData?.uf || loadingMunicipios}
             style={{
-              ...styles.select,
-              ...(errors.municipio ? styles.selectError : {}),
-              ...(loadingMunicipios ? styles.selectLoading : {}),
+              ...styles.input,
+              ...(errors.municipio && styles.inputError),
+              ...(loadingMunicipios && styles.inputLoading),
             }}
+            required
           >
             <option value="">
               {loadingMunicipios
@@ -226,7 +214,7 @@ const Identificacao = ({
           )}
 
           {errors.municipio && (
-            <div style={styles.errorMessage}>{errors.municipio}</div>
+            <small style={styles.errorText}>{errors.municipio}</small>
           )}
         </div>
       </div>
@@ -234,109 +222,73 @@ const Identificacao = ({
   );
 };
 
-// Estilos IDÊNTICOS às outras seções
+// ✅ ESTILOS IDÊNTICOS AO DadosBasicos
 const styles = {
-  container: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    border: "2px solid #e1e5e9",
-    padding: "24px",
-    marginBottom: "20px",
+  fieldset: {
+    border: "2px solid #154360",
+    borderRadius: "10px",
+    padding: "20px",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
-
-  sectionHeader: {
+  legend: {
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
+    fontWeight: "bold",
+    fontSize: "16px",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    marginBottom: "24px",
-    paddingBottom: "16px",
-    borderBottom: "1px solid #e1e5e9",
+    gap: "8px",
   },
-
-  sectionIcon: {
-    fontSize: "24px",
-    padding: "8px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
+  legendIcon: {
+    fontSize: "18px",
   },
-
-  sectionTitle: {
-    fontSize: "20px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    margin: 0,
-  },
-
-  fieldsGrid: {
+  formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
-    alignItems: "start",
   },
-
-  fieldGroup: {
+  formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
   },
-
   label: {
+    fontWeight: "bold",
+    color: "#333",
     fontSize: "14px",
-    fontWeight: "600",
-    color: "#495057",
-    marginBottom: "4px",
   },
-
   required: {
     color: "#dc3545",
   },
-
   input: {
-    width: "100%",
-    padding: "12px 16px",
-    border: "2px solid #e1e5e9",
-    borderRadius: "8px",
+    padding: "12px",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
+    borderRadius: "6px",
     fontSize: "14px",
+    transition: "border-color 0.3s ease",
     backgroundColor: "white",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
   },
-
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
-
-  select: {
-    width: "100%",
-    padding: "12px 16px",
-    border: "2px solid #e1e5e9",
-    borderRadius: "8px",
-    fontSize: "14px",
-    backgroundColor: "white",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-    fontFamily: "inherit",
-  },
-
-  selectError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
-  },
-
-  selectLoading: {
+  inputLoading: {
     backgroundColor: "#f8f9fa",
     cursor: "wait",
   },
-
-  errorMessage: {
-    fontSize: "12px",
+  errorText: {
     color: "#dc3545",
+    fontSize: "12px",
     marginTop: "4px",
+    display: "block",
   },
-
   municipioCount: {
     fontSize: "12px",
     color: "#28a745",
