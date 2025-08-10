@@ -230,7 +230,7 @@ const Identificacao = ({
           )}
         </div>
       </div>
-    </div>
+    </fieldset>
   );
 };
 
