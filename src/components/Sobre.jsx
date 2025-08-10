@@ -197,6 +197,7 @@ const Sobre = () => {
             )}
           </div>
         </div>
+      </div>
 
       <style>{`
         .sobre-container {
