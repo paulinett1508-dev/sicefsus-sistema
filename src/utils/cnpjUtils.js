@@ -7,7 +7,7 @@
  * @returns {string} - CNPJ formatado
  */
 export const formatarCNPJ = (valor) => {
-  if (!valor) return "";
+  if (!valor || typeof valor !== "string") return "";
 
   // Remove tudo que não é número
   const numeros = valor.replace(/\D/g, "");
@@ -29,8 +29,7 @@ export const formatarCNPJ = (valor) => {
  * @returns {string} CNPJ apenas com números
  */
 export const limparCNPJ = (cnpj) => {
-  if (!cnpj) return "";
-  return cnpj.replace(/\D/g, "");
+  if (!cnpj || typeof cnpj !== "string") return "";
 };
 
 /**

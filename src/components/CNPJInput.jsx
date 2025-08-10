@@ -218,22 +218,26 @@ const styles = {
     width: "100%",
     padding: "12px 40px 12px 12px", // ✅ ALINHAMENTO: padding igual aos outros campos
     fontSize: "14px", // ✅ ALINHAMENTO: fonte igual aos outros campos
-    border: "2px solid #dee2e6", // ✅ ALINHAMENTO: borda igual aos outros campos
+    borderWidth: "2px", // ← Separado
+    borderStyle: "solid", // ← Separado
+    borderColor: "#dee2e6", // ← Separado
     borderRadius: "6px", // ✅ ALINHAMENTO: border-radius igual aos outros campos
     outline: "none",
     transition: "all 0.3s ease",
     backgroundColor: "white", // ✅ ALINHAMENTO: fundo igual aos outros campos
     boxSizing: "border-box", // ✅ ALINHAMENTO: garantir box-sizing consistente
   },
+
   inputError: {
-    borderColor: "#dc3545", // ✅ ALINHAMENTO: cor de erro padrão do sistema
+    borderColor: "#dc3545", // ← Agora sem conflito!
     backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)", // ✅ ALINHAMENTO: shadow igual aos outros campos
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
   inputSuccess: {
-    borderColor: "#28a745", // ✅ ALINHAMENTO: cor de sucesso padrão do sistema
+    borderColor: "#28a745", // ← Agora sem conflito!
     backgroundColor: "#f8fff9",
   },
+
   validationIcon: {
     position: "absolute",
     right: "12px",
