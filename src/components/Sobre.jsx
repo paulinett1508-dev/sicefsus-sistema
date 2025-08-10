@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import logoSicefsus from "../images/logo-sicefsus.png";
 import logoAraujoInfo from "../images/logoaraujoinfo.png";
+import logoSopro from "../images/logo-sopro.jpeg"; // Importando a logo SOPRO
 
 const Sobre = () => {
   // Hook local para título da página
@@ -168,11 +169,11 @@ const Sobre = () => {
 
         <div className="sobre-footer">
           <div className="footer-content">
-            {process.env.NODE_ENV === 'production' ? (
+            {import.meta.env.MODE === 'production' ? (
               // MODO PRODUÇÃO - Logo SOPRO + Texto desenvolvido por
               <>
                 <img
-                  src="/src/images/logo-sopro.jpeg"
+                  src={logoSopro}
                   alt="SOPRO Logo"
                   className="sopro-logo"
                   onError={(e) => {
