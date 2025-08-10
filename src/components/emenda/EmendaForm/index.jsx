@@ -431,6 +431,7 @@ const EmendaForm = () => {
     }
   };
 
+  // ✅ RENDERIZAÇÃO CONDICIONAL DENTRO DO COMPONENTE
   if (loading) {
     return (
       <div style={styles.container}>
