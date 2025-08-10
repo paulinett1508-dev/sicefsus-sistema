@@ -168,21 +168,34 @@ const Sobre = () => {
 
         <div className="sobre-footer">
           <div className="footer-content">
-            <img
-              src="/src/images/logo-sopro.jpeg"
-              alt="SOPRO Logo"
-              className="sopro-logo"
-              onError={(e) => {
-                e.target.style.display = "none";
-              }}
-            />
-            <p className="sobre-footer-text">
-            © 2025 SICEFSUS - Sistema de Controle de Emendas e Fiscalização
-            do SUS
-          </p>
+            {process.env.NODE_ENV === 'production' ? (
+              // MODO PRODUÇÃO - Logo SOPRO + Texto desenvolvido por
+              <>
+                <img
+                  src="/src/images/logo-sopro.jpeg"
+                  alt="SOPRO Logo"
+                  className="sopro-logo"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+                <div className="footer-text-container">
+                  <p className="sobre-footer-text">
+                    Desenvolvido por SOPRO - Solution Provider
+                  </p>
+                  <p className="sobre-footer-text" style={{fontSize: '0.8em', marginTop: '4px', opacity: 0.8}}>
+                    © 2025 - Todos os direitos reservados
+                  </p>
+                </div>
+              </>
+            ) : (
+              // MODO DESENVOLVIMENTO - Logo oculta + Texto original
+              <p className="sobre-footer-text">
+                © 2025 SICEFSUS - Sistema de Controle de Emendas e Fiscalização do SUS
+              </p>
+            )}
           </div>
         </div>
-      </div>
 
       <style>{`
         .sobre-container {

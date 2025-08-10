@@ -55,11 +55,11 @@ const EmendaForm = () => {
     autor: "",
     municipio: "",
     uf: "",
+    cnpj: "", // ✅ CAMPO CNPJ ADICIONADO
     valor: "",
     valorRecurso: "",
     programa: "",
     beneficiario: "",
-    cnpj: "",
     cnpjBeneficiario: "",
     tipo: "Individual",
     modalidade: "",
@@ -132,6 +132,7 @@ const EmendaForm = () => {
             autor: emendaData.autor || emendaData.parlamentar || "",
             municipio: emendaData.municipio || "",
             uf: emendaData.uf || "",
+            cnpj: emendaData.cnpj || "", // ✅ MAPEAR CAMPO CNPJ
             valor: valorFormatado,
             valorRecurso: valorFormatado,
             programa: emendaData.programa || "",
@@ -240,14 +241,14 @@ const EmendaForm = () => {
       errors.push("Valor do Recurso é obrigatório");
     }
 
-    // ✅ VALIDAÇÃO CNPJ CORRIGIDA - Usando o campo correto
+    // ✅ VALIDAÇÃO CNPJ CORRIGIDA - Campo Identificação
     if (formData.cnpj) {
       const cnpjLimpo = limparCNPJ(formData.cnpj);
-        if (cnpjLimpo && cnpjLimpo.length === 14)
+      if (cnpjLimpo && cnpjLimpo.length === 14) {
         if (!validarCNPJ(formData.cnpj)) {
           errors.push("CNPJ do município (Identificação) é inválido");
         }
-      } else if (cnpjLimpo.length > 0) {
+      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
         errors.push("CNPJ do município está incompleto");
       }
     }
@@ -255,11 +256,11 @@ const EmendaForm = () => {
     // ✅ VALIDAÇÃO CNPJ BENEFICIÁRIO CORRIGIDA
     if (formData.beneficiario) {
       const cnpjLimpo = limparCNPJ(formData.beneficiario);
-      if (cnpjLimpo.length === 14) {
+      if (cnpjLimpo && cnpjLimpo.length === 14) {
         if (!validarCNPJ(formData.beneficiario)) {
           errors.push("CNPJ do beneficiário é inválido");
         }
-      } else if (cnpjLimpo.length > 0) {
+      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
         errors.push("CNPJ do beneficiário está incompleto");
       }
     }
@@ -318,6 +319,7 @@ const EmendaForm = () => {
         parlamentar: formData.autor?.trim(),
         municipio: formData.municipio?.trim(),
         uf: formData.uf?.trim(),
+        cnpj: formData.cnpj?.trim(), // ✅ SALVAR CAMPO CNPJ
         valor: valorNumerico,
         valorRecurso: valorNumerico,
         programa: formData.programa?.trim(),
