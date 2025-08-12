@@ -1,182 +1,325 @@
-// src/components/despesa/DespesaFormDateFields.jsx
-// ✅ ATUALIZADO: Removido campo data de vencimento e adicionada validação contra data de validade da emenda
+// ATUALIZAÇÃO em src/components/despesa/DespesaFormDateFields.jsx
+// Integrar validação de datas vs emenda
 
 import React from "react";
+import {
+  validarDatasDespesaEmenda,
+  formatarPeriodoVigenciaEmenda,
+} from "../../utils/validators";
 
 const DespesaFormDateFields = ({
   formData,
   errors,
   modoVisualizacao,
   handleInputChange,
-  emendaInfo, // ✅ NOVO: Para acessar a data de validade da emenda
+  emendaInfo, // ✅ NOVO: Receber dados da emenda
 }) => {
-  // ✅ Função para obter a data máxima permitida (data de validade da emenda)
-  const getDataMaxima = () => {
-    if (emendaInfo?.dataValidade) {
-      return emendaInfo.dataValidade;
-    }
-    return null;
+  // ✅ VALIDAÇÃO EM TEMPO REAL para cada campo de data
+  const validarDataCampo = (nomeCampo, valor) => {
+    if (!valor || !emendaInfo) return null;
+
+    const validacao = validarDatasDespesaEmenda(valor, emendaInfo);
+    return validacao.isValid ? null : validacao.errors[0];
   };
 
-  const dataMaxima = getDataMaxima();
+  // ✅ OBTER LIMITES de data baseado na emenda
+  const obterLimitesData = () => {
+    if (!emendaInfo) return { min: null, max: null };
+
+    const dataInicio =
+      emendaInfo.dataInicio ||
+      emendaInfo.dataCriacao ||
+      emendaInfo.dataAprovacao;
+    const dataFim =
+      emendaInfo.dataFim ||
+      emendaInfo.dataValidade ||
+      emendaInfo.dataVencimento;
+    const hoje = new Date().toISOString().split("T")[0];
+
+    return {
+      min: dataInicio ? new Date(dataInicio).toISOString().split("T")[0] : null,
+      max: dataFim
+        ? Math.min(new Date(dataFim), new Date(hoje)) ===
+          new Date(hoje).getTime()
+          ? hoje
+          : new Date(dataFim).toISOString().split("T")[0]
+        : hoje,
+    };
+  };
+
+  const limites = obterLimitesData();
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📅</span>
-        Datas da Despesa
-      </legend>
+    <div style={styles.section}>
+      <h3 style={styles.sectionTitle}>
+        📅 <span>Datas da Execução</span>
+      </h3>
 
-      {/* ✅ Aviso sobre limite de data */}
-      {dataMaxima && (
-        <div style={styles.avisoDataLimite}>
-          <span style={styles.avisoIcon}>⚠️</span>
-          <span style={styles.avisoTexto}>
-            Todas as datas devem ser anteriores à validade da emenda:{" "}
-            <strong>{new Date(dataMaxima).toLocaleDateString("pt-BR")}</strong>
-          </span>
+      {/* ✅ BANNER informativo sobre período da emenda */}
+      {emendaInfo && (
+        <div style={styles.emendaDateBanner}>
+          <div style={styles.bannerIcon}>📅</div>
+          <div style={styles.bannerContent}>
+            <strong>Período de Vigência da Emenda:</strong>
+            <br />
+            {formatarPeriodoVigenciaEmenda(emendaInfo)}
+            <br />
+            <small style={styles.bannerHint}>
+              Todas as datas devem estar dentro deste período
+            </small>
+          </div>
         </div>
       )}
 
-      <div style={styles.formGrid}>
+      <div style={styles.row}>
+        {/* Data do Empenho */}
         <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Data do Empenho *</label>
+          <label style={styles.labelRequired}>
+            Data do Empenho <span style={styles.required}>*</span>
+          </label>
           <input
             type="date"
             name="dataEmpenho"
-            value={formData.dataEmpenho}
+            value={formData.dataEmpenho || ""}
             onChange={handleInputChange}
-            style={errors.dataEmpenho ? styles.inputError : styles.input}
-            readOnly={modoVisualizacao}
-            max={dataMaxima} // ✅ Limita pela data de validade
+            min={limites.min}
+            max={limites.max}
+            style={{
+              ...styles.input,
+              borderColor:
+                errors.dataEmpenho ||
+                validarDataCampo("dataEmpenho", formData.dataEmpenho)
+                  ? "#e74c3c"
+                  : styles.input.borderColor,
+            }}
+            disabled={modoVisualizacao}
             required
           />
-          {errors.dataEmpenho && (
-            <span style={styles.errorText}>{errors.dataEmpenho}</span>
+          {(errors.dataEmpenho ||
+            validarDataCampo("dataEmpenho", formData.dataEmpenho)) && (
+            <span style={styles.error}>
+              {errors.dataEmpenho ||
+                validarDataCampo("dataEmpenho", formData.dataEmpenho)}
+            </span>
           )}
         </div>
 
+        {/* Data da Liquidação */}
         <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Data da Liquidação *</label>
+          <label style={styles.labelRequired}>
+            Data da Liquidação <span style={styles.required}>*</span>
+          </label>
           <input
             type="date"
             name="dataLiquidacao"
-            value={formData.dataLiquidacao}
+            value={formData.dataLiquidacao || ""}
             onChange={handleInputChange}
-            style={errors.dataLiquidacao ? styles.inputError : styles.input}
-            readOnly={modoVisualizacao}
-            max={dataMaxima} // ✅ Limita pela data de validade
+            min={limites.min}
+            max={limites.max}
+            style={{
+              ...styles.input,
+              borderColor:
+                errors.dataLiquidacao ||
+                validarDataCampo("dataLiquidacao", formData.dataLiquidacao)
+                  ? "#e74c3c"
+                  : styles.input.borderColor,
+            }}
+            disabled={modoVisualizacao}
             required
           />
-          {errors.dataLiquidacao && (
-            <span style={styles.errorText}>{errors.dataLiquidacao}</span>
+          {(errors.dataLiquidacao ||
+            validarDataCampo("dataLiquidacao", formData.dataLiquidacao)) && (
+            <span style={styles.error}>
+              {errors.dataLiquidacao ||
+                validarDataCampo("dataLiquidacao", formData.dataLiquidacao)}
+            </span>
           )}
         </div>
 
+        {/* Data do Pagamento */}
         <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Data do Pagamento *</label>
+          <label style={styles.labelRequired}>
+            Data do Pagamento <span style={styles.required}>*</span>
+          </label>
           <input
             type="date"
             name="dataPagamento"
-            value={formData.dataPagamento}
+            value={formData.dataPagamento || ""}
             onChange={handleInputChange}
-            style={errors.dataPagamento ? styles.inputError : styles.input}
-            readOnly={modoVisualizacao}
-            max={dataMaxima} // ✅ Limita pela data de validade
+            min={limites.min}
+            max={limites.max}
+            style={{
+              ...styles.input,
+              borderColor:
+                errors.dataPagamento ||
+                validarDataCampo("dataPagamento", formData.dataPagamento)
+                  ? "#e74c3c"
+                  : styles.input.borderColor,
+            }}
+            disabled={modoVisualizacao}
             required
           />
-          {errors.dataPagamento && (
-            <span style={styles.errorText}>{errors.dataPagamento}</span>
+          {(errors.dataPagamento ||
+            validarDataCampo("dataPagamento", formData.dataPagamento)) && (
+            <span style={styles.error}>
+              {errors.dataPagamento ||
+                validarDataCampo("dataPagamento", formData.dataPagamento)}
+            </span>
           )}
         </div>
       </div>
-    </fieldset>
+
+      {/* ✅ VALIDAÇÃO visual de sequência de datas */}
+      {formData.dataEmpenho &&
+        formData.dataLiquidacao &&
+        formData.dataPagamento && (
+          <ValidacaoSequenciaDatas
+            dataEmpenho={formData.dataEmpenho}
+            dataLiquidacao={formData.dataLiquidacao}
+            dataPagamento={formData.dataPagamento}
+          />
+        )}
+    </div>
+  );
+};
+
+// ✅ COMPONENTE auxiliar para validar sequência lógica de datas
+const ValidacaoSequenciaDatas = ({
+  dataEmpenho,
+  dataLiquidacao,
+  dataPagamento,
+}) => {
+  const empenho = new Date(dataEmpenho);
+  const liquidacao = new Date(dataLiquidacao);
+  const pagamento = new Date(dataPagamento);
+
+  const sequenciaCorreta = empenho <= liquidacao && liquidacao <= pagamento;
+
+  return (
+    <div
+      style={{
+        ...styles.sequenceValidation,
+        backgroundColor: sequenciaCorreta
+          ? "rgba(39, 174, 96, 0.1)"
+          : "rgba(231, 76, 60, 0.1)",
+        borderColor: sequenciaCorreta ? "#27ae60" : "#e74c3c",
+      }}
+    >
+      <div style={styles.sequenceIcon}>{sequenciaCorreta ? "✅" : "⚠️"}</div>
+      <div style={styles.sequenceContent}>
+        <strong>
+          {sequenciaCorreta
+            ? "Sequência de Datas Correta"
+            : "Atenção: Sequência de Datas"}
+        </strong>
+        <br />
+        <small>
+          {sequenciaCorreta
+            ? "Empenho → Liquidação → Pagamento (ordem cronológica correta)"
+            : "A ordem deve ser: Empenho ≤ Liquidação ≤ Pagamento"}
+        </small>
+      </div>
+    </div>
   );
 };
 
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  section: {
+    marginBottom: "32px",
   },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  legendIcon: {
+
+  sectionTitle: {
     fontSize: "18px",
-  },
-  avisoDataLimite: {
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: "20px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "10px 15px",
-    backgroundColor: "#fff3cd",
-    border: "1px solid #ffeaa7",
-    borderRadius: "6px",
-    marginBottom: "15px",
-    fontSize: "13px",
-    color: "#856404",
   },
-  avisoIcon: {
-    fontSize: "16px",
+
+  emendaDateBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "rgba(52, 152, 219, 0.1)",
+    borderRadius: "8px",
+    border: "1px solid rgba(52, 152, 219, 0.3)",
+    marginBottom: "20px",
   },
-  avisoTexto: {
-    flex: 1,
+
+  bannerIcon: {
+    fontSize: "20px",
+    flexShrink: 0,
   },
-  formGrid: {
+
+  bannerContent: {
+    fontSize: "14px",
+    color: "rgba(52, 152, 219, 0.8)",
+    lineHeight: "1.4",
+  },
+
+  bannerHint: {
+    color: "rgba(52, 152, 219, 0.6)",
+    fontStyle: "italic",
+  },
+
+  row: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
     gap: "20px",
   },
+
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
-  label: {
-    fontWeight: "bold",
-    color: "#333",
-    fontSize: "14px",
-  },
+
   labelRequired: {
-    fontWeight: "bold",
-    color: "#333",
     fontSize: "14px",
+    fontWeight: "500",
+    color: "#2c3e50",
+    marginBottom: "8px",
   },
+
+  required: {
+    color: "#e74c3c",
+  },
+
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
     borderRadius: "6px",
+    border: "2px solid #e1e8ed",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    boxSizing: "border-box",
   },
-  inputError: {
-    padding: "12px",
-    border: "2px solid #dc3545",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    boxSizing: "border-box",
-  },
-  errorText: {
-    color: "#dc3545",
+
+  error: {
+    color: "#e74c3c",
     fontSize: "12px",
-    marginTop: "5px",
+    marginTop: "4px",
+    display: "block",
+  },
+
+  sequenceValidation: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "12px",
+    borderRadius: "6px",
+    border: "1px solid",
+    marginTop: "16px",
+  },
+
+  sequenceIcon: {
+    fontSize: "16px",
+    flexShrink: 0,
+  },
+
+  sequenceContent: {
+    fontSize: "13px",
+    lineHeight: "1.4",
   },
 };
 

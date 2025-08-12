@@ -1,0 +1,5 @@
+** Operador cadastrar emenda/despesa pra municipios diferentes
+Regra: municipio/UF qdo for operador, precisa vir pré-definido, ou seja, operador não consegue alterar
+o municipio/uf da emenda. Campo não editável
+
+** Criar opção "esqueci senha" para os usuários (lembrando que essa requisição é feita no Firebase)

@@ -382,40 +382,48 @@ export const validarFormularioEmenda = (formData) => {
   const erros = {};
 
   // Validar campos obrigatórios básicos
-  if (!formData.numero || formData.numero.trim() === '') {
-    erros.numero = 'Número da emenda é obrigatório';
+  if (!formData.numero || formData.numero.trim() === "") {
+    erros.numero = "Número da emenda é obrigatório";
   }
 
-  if (!formData.autor || formData.autor.trim() === '') {
-    erros.autor = 'Autor é obrigatório';
+  if (!formData.autor || formData.autor.trim() === "") {
+    erros.autor = "Autor é obrigatório";
   }
 
-  if (!formData.municipio || formData.municipio.trim() === '') {
-    erros.municipio = 'Município é obrigatório';
+  if (!formData.municipio || formData.municipio.trim() === "") {
+    erros.municipio = "Município é obrigatório";
   }
 
-  if (!formData.uf || formData.uf.trim() === '') {
-    erros.uf = 'UF é obrigatória';
+  if (!formData.uf || formData.uf.trim() === "") {
+    erros.uf = "UF é obrigatória";
   }
 
   // Validar UF
   if (formData.uf && !validateUF(formData.uf)) {
-    erros.uf = 'UF inválida';
+    erros.uf = "UF inválida";
   }
 
   // Validar valor
-  if (!formData.valor || parseFloat(formData.valor.toString().replace(/[^\d,.-]/g, '').replace(',', '.')) <= 0) {
-    erros.valor = 'Valor deve ser maior que zero';
+  if (
+    !formData.valor ||
+    parseFloat(
+      formData.valor
+        .toString()
+        .replace(/[^\d,.-]/g, "")
+        .replace(",", "."),
+    ) <= 0
+  ) {
+    erros.valor = "Valor deve ser maior que zero";
   }
 
   // Validar programa
-  if (!formData.programa || formData.programa.trim() === '') {
-    erros.programa = 'Programa é obrigatório';
+  if (!formData.programa || formData.programa.trim() === "") {
+    erros.programa = "Programa é obrigatório";
   }
 
   // Validar beneficiário
-  if (!formData.beneficiario || formData.beneficiario.trim() === '') {
-    erros.beneficiario = 'Beneficiário é obrigatório';
+  if (!formData.beneficiario || formData.beneficiario.trim() === "") {
+    erros.beneficiario = "Beneficiário é obrigatório";
   }
 
   // Validar CNPJ do beneficiário se fornecido
@@ -427,37 +435,37 @@ export const validarFormularioEmenda = (formData) => {
   }
 
   // Validar tipo
-  const tiposValidos = ['Individual', 'Coletiva', 'Bancada'];
+  const tiposValidos = ["Individual", "Coletiva", "Bancada"];
   if (!formData.tipo || !tiposValidos.includes(formData.tipo)) {
-    erros.tipo = 'Tipo de emenda inválido';
+    erros.tipo = "Tipo de emenda inválido";
   }
 
   // Validar modalidade
-  if (!formData.modalidade || formData.modalidade.trim() === '') {
-    erros.modalidade = 'Modalidade é obrigatória';
+  if (!formData.modalidade || formData.modalidade.trim() === "") {
+    erros.modalidade = "Modalidade é obrigatória";
   }
 
   // Validar objeto
-  if (!formData.objeto || formData.objeto.trim() === '') {
-    erros.objeto = 'Objeto é obrigatório';
+  if (!formData.objeto || formData.objeto.trim() === "") {
+    erros.objeto = "Objeto é obrigatório";
   }
 
   // Validar dados bancários
-  if (!formData.banco || formData.banco.trim() === '') {
-    erros.banco = 'Banco é obrigatório';
+  if (!formData.banco || formData.banco.trim() === "") {
+    erros.banco = "Banco é obrigatório";
   }
 
-  if (!formData.agencia || formData.agencia.trim() === '') {
-    erros.agencia = 'Agência é obrigatória';
+  if (!formData.agencia || formData.agencia.trim() === "") {
+    erros.agencia = "Agência é obrigatória";
   }
 
-  if (!formData.conta || formData.conta.trim() === '') {
-    erros.conta = 'Conta é obrigatória';
+  if (!formData.conta || formData.conta.trim() === "") {
+    erros.conta = "Conta é obrigatória";
   }
 
   return {
     valido: Object.keys(erros).length === 0,
-    erros
+    erros,
   };
 };
 
@@ -498,11 +506,9 @@ export const createErrorReport = (context, error, additionalData = {}) => {
     errorName: error.name,
     fileName: error.fileName,
     lineNumber: error.lineNumber,
-    columnNumber: error.columnNumber
+    columnNumber: error.columnNumber,
   };
 };
-
-
 
 // ✅ HOOK PARA USO NO DESPESAFORM
 
@@ -511,8 +517,8 @@ export const useCNPJValidation = () => {
 
   const handleCNPJChange = (valor, setFormData) => {
     // Import CNPJ functions from cnpjUtils
-    const { formatarCNPJ, validarCNPJ } = require('./cnpjUtils');
-    
+    const { formatarCNPJ, validarCNPJ } = require("./cnpjUtils");
+
     // Formata o CNPJ
     const cnpjFormatado = formatarCNPJ(valor);
 
@@ -520,7 +526,7 @@ export const useCNPJValidation = () => {
     setFormData((prev) => ({ ...prev, cnpjFornecedor: cnpjFormatado }));
 
     // Valida apenas se tem 14 dígitos
-    if (cnpjFormatado.replace(/\D/g, '').length === 14) {
+    if (cnpjFormatado.replace(/\D/g, "").length === 14) {
       if (validarCNPJ(cnpjFormatado)) {
         setCnpjError("");
       } else {
@@ -532,4 +538,147 @@ export const useCNPJValidation = () => {
   };
 
   return { cnpjError, handleCNPJChange };
+};
+// ADIÇÕES GRANULARES em src/utils/validators.js
+
+// 🔧 ADICIONAR no final do arquivo (após linha ~600):
+
+/**
+ * ✅ VALIDAR datas da despesa em relação à emenda
+ * @param {string} dataDespesa - Data da despesa
+ * @param {Object} emenda - Dados da emenda
+ * @returns {Object} - Resultado da validação
+ */
+export const validarDatasDespesaEmenda = (dataDespesa, emenda) => {
+  const errors = [];
+
+  if (!dataDespesa) {
+    errors.push("Data da despesa é obrigatória");
+    return { isValid: false, errors };
+  }
+
+  if (!emenda) {
+    errors.push("Emenda não encontrada");
+    return { isValid: false, errors };
+  }
+
+  // Buscar datas da emenda em diferentes campos possíveis
+  const dataInicioEmenda =
+    emenda.dataInicio || emenda.dataCriacao || emenda.dataAprovacao;
+  const dataFimEmenda =
+    emenda.dataFim || emenda.dataValidade || emenda.dataVencimento;
+
+  // Converte strings para objetos Date
+  const dataDespesaObj = new Date(dataDespesa);
+  const dataInicioObj = dataInicioEmenda ? new Date(dataInicioEmenda) : null;
+  const dataFimObj = dataFimEmenda ? new Date(dataFimEmenda) : null;
+
+  // Validação: despesa deve ser >= data de criação da emenda
+  if (dataInicioObj && dataDespesaObj < dataInicioObj) {
+    const dataInicioFormatada = dataInicioObj.toLocaleDateString("pt-BR");
+    errors.push(
+      `Data da despesa deve ser posterior ou igual à data de criação da emenda (${dataInicioFormatada})`,
+    );
+  }
+
+  // Validação: despesa deve ser <= data de validade da emenda
+  if (dataFimObj && dataDespesaObj > dataFimObj) {
+    const dataFimFormatada = dataFimObj.toLocaleDateString("pt-BR");
+    errors.push(
+      `Data da despesa deve ser anterior ou igual à data de validade da emenda (${dataFimFormatada})`,
+    );
+  }
+
+  // Validação: data não pode ser futura
+  const hoje = new Date();
+  hoje.setHours(23, 59, 59, 999); // Permite até o final do dia atual
+
+  if (dataDespesaObj > hoje) {
+    errors.push("Data da despesa não pode ser futura");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    validacoes: {
+      dentroVigenciaEmenda:
+        dataInicioObj && dataFimObj
+          ? dataDespesaObj >= dataInicioObj && dataDespesaObj <= dataFimObj
+          : true,
+      naoFutura: dataDespesaObj <= hoje,
+      posDataCriacao: dataInicioObj ? dataDespesaObj >= dataInicioObj : true,
+      anteDataValidade: dataFimObj ? dataDespesaObj <= dataFimObj : true,
+    },
+  };
+};
+
+/**
+ * ✅ FORMATAR período de vigência da emenda
+ * @param {Object} emenda - Dados da emenda
+ * @returns {string} - Período formatado
+ */
+export const formatarPeriodoVigenciaEmenda = (emenda) => {
+  const dataInicio =
+    emenda.dataInicio || emenda.dataCriacao || emenda.dataAprovacao;
+  const dataFim =
+    emenda.dataFim || emenda.dataValidade || emenda.dataVencimento;
+
+  if (!dataInicio && !dataFim) {
+    return "Período não definido";
+  }
+
+  const formatarData = (data) => {
+    if (!data) return null;
+    return new Date(data).toLocaleDateString("pt-BR");
+  };
+
+  const inicioFormatado = formatarData(dataInicio);
+  const fimFormatado = formatarData(dataFim);
+
+  if (inicioFormatado && fimFormatado) {
+    return `${inicioFormatado} até ${fimFormatado}`;
+  } else if (inicioFormatado) {
+    return `A partir de ${inicioFormatado}`;
+  } else if (fimFormatado) {
+    return `Até ${fimFormatado}`;
+  }
+
+  return "Período não definido";
+};
+
+/**
+ * ✅ HOOK para usar validação de datas no formulário
+ * @param {Object} emenda - Dados da emenda
+ * @returns {Object} - Funções de validação
+ */
+export const useValidacaoDatasDespesa = (emenda) => {
+  const validarData = (dataDespesa) => {
+    return validarDatasDespesaEmenda(dataDespesa, emenda);
+  };
+
+  const obterLimitesData = () => {
+    if (!emenda) return { min: null, max: null };
+
+    const dataInicio =
+      emenda.dataInicio || emenda.dataCriacao || emenda.dataAprovacao;
+    const dataFim =
+      emenda.dataFim || emenda.dataValidade || emenda.dataVencimento;
+    const hoje = new Date().toISOString().split("T")[0];
+
+    return {
+      min: dataInicio ? new Date(dataInicio).toISOString().split("T")[0] : null,
+      max: dataFim
+        ? Math.min(new Date(dataFim), new Date(hoje)) ===
+          new Date(hoje).getTime()
+          ? hoje
+          : new Date(dataFim).toISOString().split("T")[0]
+        : hoje,
+    };
+  };
+
+  return {
+    validarData,
+    obterLimitesData,
+    formatarPeriodoVigencia: () => formatarPeriodoVigenciaEmenda(emenda),
+  };
 };

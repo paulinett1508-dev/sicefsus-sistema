@@ -1,6 +1,7 @@
 // src/components/despesa/DespesasListHeader.jsx
 // Header da página de listagem de despesas (diferente do DespesaFormHeader)
 import React from "react";
+import { useVersion } from "../../hooks/useVersion";
 
 const DespesasListHeader = ({
   usuario,
@@ -9,6 +10,7 @@ const DespesasListHeader = ({
   onVoltarEmendas,
   emenda,
 }) => {
+  const { formatVersion } = useVersion();
   const userRole = usuario?.tipo || "operador";
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
@@ -29,7 +31,7 @@ const DespesasListHeader = ({
           <span style={styles.statusValue}>✅ Operacional</span>
           <span style={styles.divider}>|</span>
           <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>v2.2</span>
+          <span style={styles.versionValue}>{formatVersion()}</span>
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Usuário:</span>
           <span style={styles.versionValue}>

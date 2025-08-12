@@ -2,12 +2,21 @@
 // ✅ CORRIGIDO: Execução baseada APENAS em despesas reais
 // ✅ REMOVIDO: Metas não são contabilizadas como execução
 // ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
+// 🔧 CORREÇÃO: Versão dinâmica integrada com versionControl.js
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
+import { useVersion } from "../hooks/useVersion";
 import EmendasFilters from "./EmendasFilters";
 import EmendasTable from "./EmendasTable";
 import Toast from "./Toast";
@@ -19,6 +28,7 @@ const Emendas = () => {
 
   // ✅ CORREÇÃO: Desestruturação correta do contexto
   const { user, loading: userLoading } = useUser();
+  const { formatVersion } = useVersion();
 
   // Estados principais
   const [emendas, setEmendas] = useState([]);
@@ -74,7 +84,11 @@ const Emendas = () => {
       setLoading(true);
       setError(null);
       console.log("📊 Carregando emendas e despesas...");
-      console.log("👤 Usuário:", { role: userRole, municipio: userMunicipio, uf: userUf });
+      console.log("👤 Usuário:", {
+        role: userRole,
+        municipio: userMunicipio,
+        uf: userUf,
+      });
 
       // ✅ CORREÇÃO: Query com filtro baseado no tipo de usuário
       let emendasQuery;
@@ -90,10 +104,12 @@ const Emendas = () => {
           emendasQuery = query(
             collection(db, "emendas"),
             where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf)
+            where("uf", "==", userUf),
           );
         } else {
-          console.warn("⚠️ Operador sem município/UF definido - não carregando emendas");
+          console.warn(
+            "⚠️ Operador sem município/UF definido - não carregando emendas",
+          );
           setEmendas([]);
           setEmendasFiltradas([]);
           setLoading(false);
@@ -147,12 +163,15 @@ const Emendas = () => {
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0;
 
-        console.log(`💰 Emenda ${emenda.numero} (${emenda.municipio}/${emenda.uf}):`, {
-          valorTotal,
-          valorExecutadoDespesas,
-          saldoDisponivel,
-          percentualExecutado: percentualExecutado.toFixed(1) + "%",
-        });
+        console.log(
+          `💰 Emenda ${emenda.numero} (${emenda.municipio}/${emenda.uf}):`,
+          {
+            valorTotal,
+            valorExecutadoDespesas,
+            saldoDisponivel,
+            percentualExecutado: percentualExecutado.toFixed(1) + "%",
+          },
+        );
 
         return {
           ...emenda,
@@ -166,11 +185,12 @@ const Emendas = () => {
         };
       });
 
-      console.log(`✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`);
+      console.log(
+        `✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`,
+      );
 
       setEmendas(emendasComExecucao);
       setEmendasFiltradas(emendasComExecucao);
-
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
       setError(`Erro ao carregar dados: ${error.message}`);
@@ -442,7 +462,7 @@ const Emendas = () => {
           <span style={styles.statusValue}>✅ Operacional</span>
           <span style={styles.divider}>|</span>
           <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>v2.3</span>
+          <span style={styles.versionValue}>{formatVersion()}</span>
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Usuário:</span>
           <span style={styles.versionValue}>

@@ -1,0 +1,213 @@
+// MUDANÇAS GRANULARES em src/components/UserForm.jsx
+
+// 🔧 ADICIONAR import do contexto do usuário (após linha 2):
+import { useUser } from '../context/UserContext';
+
+// 🔧 ADICIONAR no início do componente (após linha 8):
+const { user: currentUser } = useUser(); // Usuário logado atual
+
+// 🔧 ADICIONAR useEffect para pré-preenchimento (após linha 13):
+useEffect(() => {
+  // Pré-preencher município/UF para operadores
+  if (!editingUser && currentUser?.tipo === 'operador' && currentUser?.municipio && currentUser?.uf) {
+    setFormData(prev => ({
+      ...prev,
+      municipio: currentUser.municipio,
+      uf: currentUser.uf,
+      role: 'user' // Operadores só podem criar outros operadores
+    }));
+  }
+}, [editingUser, currentUser, setFormData]);
+
+// 🔧 SUBSTITUIR a seção de localização (linhas ~180-220) por:
+{formData.role === "user" && (
+  <fieldset
+    style={{
+      ...styles.fieldset,
+      borderColor: "var(--primary)",
+      backgroundColor: "rgba(52, 152, 219, 0.05)",
+    }}
+  >
+    <legend
+      style={{
+        ...styles.legend,
+        borderColor: "var(--primary)",
+        color: "var(--primary)",
+        fontWeight: "600",
+      }}
+    >
+      <span style={styles.legendIcon}>📍</span>
+      Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
+      <span
+        style={styles.infoIcon}
+        title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
+      >
+        ℹ️
+      </span>
+    </legend>
+
+    {/* 🆕 Banner informativo para operadores */}
+    {currentUser?.tipo === 'operador' && !editingUser && (
+      <div style={styles.operatorBanner}>
+        <div style={styles.operatorBannerIcon}>📍</div>
+        <div style={styles.operatorBannerContent}>
+          <strong>Pré-preenchimento automático:</strong>
+          <br />
+          Como operador, você só pode criar usuários para o seu município ({currentUser.municipio}/{currentUser.uf})
+        </div>
+      </div>
+    )}
+
+    <div style={styles.formGroup}>
+      {editingUser ? (
+        <>
+          {/* Durante edição, mostrar campos somente leitura */}
+          <div style={styles.formGroup}>
+            <label style={styles.labelRequired}>
+              Estado (UF) <span style={styles.required}>*</span>
+              <span
+                style={styles.infoIcon}
+                title="UF não pode ser alterada após criação"
+              >
+                ℹ️
+              </span>
+            </label>
+            <input
+              type="text"
+              style={{
+                ...styles.input,
+                borderColor: "var(--warning)",
+                backgroundColor: "var(--theme-surface-secondary)",
+              }}
+              value={formData.uf || ""}
+              disabled={true}
+              required={formData.role === "user"}
+            />
+          </div>
+          <div style={styles.formGroup}>
+            <label style={styles.labelRequired}>
+              Município <span style={styles.required}>*</span>
+              <span
+                style={styles.infoIcon}
+                title="Localização não pode ser alterada após criação"
+              >
+                ℹ️
+              </span>
+            </label>
+            <input
+              type="text"
+              style={{
+                ...styles.input,
+                borderColor: "var(--warning)",
+                backgroundColor: "var(--theme-surface-secondary)",
+              }}
+              value={formData.municipio || ""}
+              disabled={true}
+              required={formData.role === "user"}
+            />
+          </div>
+        </>
+      ) : (
+        /* Durante criação, verificar se deve ser readonly */
+        <MunicipioSelector
+          ufSelecionada={formData.uf || ""}
+          municipioSelecionado={formData.municipio || ""}
+          onUfChange={(uf) => {
+            // 🆕 Bloquear mudança se operador
+            if (currentUser?.tipo === 'operador') return;
+            
+            setFormData({
+              ...formData,
+              uf: uf,
+              municipio: "" // Limpar município quando UF mudar
+            });
+          }}
+          onMunicipioChange={(municipio) => {
+            // 🆕 Bloquear mudança se operador
+            if (currentUser?.tipo === 'operador') return;
+            
+            setFormData({
+              ...formData,
+              municipio: municipio
+            });
+          }}
+          disabled={saving || currentUser?.tipo === 'operador'} // 🆕 Desabilitar para operadores
+        />
+      )}
+    </div>
+
+    {/* ✅ PREVIEW DA CONFIGURAÇÃO existente... */}
+    {formData.municipio && formData.uf && (
+      <div
+        style={{
+          ...styles.emendaInfo,
+          backgroundColor: "rgba(39, 174, 96, 0.1)",
+          borderColor: "var(--success)",
+          marginTop: "24px",
+        }}
+      >
+        <div
+          style={{
+            color: "var(--success)",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          ✅ <strong>Configuração de Acesso:</strong>
+        </div>
+        <div
+          style={{
+            marginTop: "8px",
+            padding: "12px",
+            backgroundColor: "rgba(39, 174, 96, 0.05)",
+            borderRadius: "6px",
+            fontFamily: "monospace",
+            fontSize: "0.9em",
+          }}
+        >
+          📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
+          <br />
+          🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
+          <br />
+          👤 <strong>Permissões:</strong> Visualizar, criar despesas
+          {currentUser?.tipo === 'operador' && (
+            <>
+              <br />
+              🔒 <strong>Restrito:</strong> Criado por operador de {currentUser.municipio}
+            </>
+          )}
+        </div>
+      </div>
+    )}
+  </fieldset>
+)}
+
+// 🔧 ADICIONAR novos estilos no objeto styles:
+const newOperatorStyles = {
+  operatorBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "rgba(52, 152, 219, 0.1)",
+    borderRadius: "8px",
+    border: "1px solid rgba(52, 152, 219, 0.3)",
+    marginBottom: "20px",
+  },
+
+  operatorBannerIcon: {
+    fontSize: "20px",
+    flexShrink: 0,
+  },
+
+  operatorBannerContent: {
+    fontSize: "14px",
+    color: "rgba(52, 152, 219, 0.8)",
+    lineHeight: "1.4",
+  },
+};
+
+// Mesclar com styles existente (adicionar no final do arquivo)
+Object.assign(styles, newOperatorStyles);
