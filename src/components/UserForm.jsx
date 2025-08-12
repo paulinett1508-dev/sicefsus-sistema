@@ -1,7 +1,7 @@
 // src/components/UserForm.jsx - VERSÃO COMPLETA COM MELHORIAS
 import React, { useEffect } from "react";
-import { formStyles, addFormInteractivity } from "../utils/formStyles";
-import MunicipioSelector from "./MunicipioSelector"; // Importar o componente MunicipioSelector
+import MunicipioSelector from "./MunicipioSelector";
+import { useUser } from '../context/UserContext';
 
 const UserForm = ({
   formData,
@@ -11,6 +11,8 @@ const UserForm = ({
   editingUser,
   saving = false,
 }) => {
+  const { user: currentUser } = useUser(); // Usuário logado atual
+
   // ✅ Estado para controlar exibição da política de segurança
   const [showSecurityPolicy, setShowSecurityPolicy] = React.useState(false);
 
@@ -139,6 +141,50 @@ const UserForm = ({
       throw error;
     }
   };
+
+  // ✅ useEffect para pré-preencher os campos do formulário se estiver editando um usuário
+  useEffect(() => {
+    if (editingUser) {
+      setFormData({
+        nome: editingUser.nome || "",
+        email: editingUser.email || "",
+        senha: "", // Nunca pré-preencher senha
+        municipio: editingUser.municipio || "",
+        uf: editingUser.uf || "",
+        role: editingUser.role || "user",
+        status: editingUser.status || "ativo",
+        telefone: editingUser.telefone || "",
+        departamento: editingUser.departamento || "",
+      });
+    } else {
+      setFormData({
+        nome: "",
+        email: "",
+        senha: "",
+        municipio: "",
+        uf: "",
+        role: "user",
+        status: "ativo",
+        telefone: "",
+        departamento: "",
+      });
+    }
+    setErrors({});
+  }, [editingUser]);
+
+  // ✅ useEffect para pré-preencher município/UF para operadores ao criar novo usuário
+  useEffect(() => {
+    // Pré-preencher município/UF para operadores
+    if (!editingUser && currentUser?.tipo === 'operador' && currentUser?.municipio && currentUser?.uf) {
+      setFormData(prev => ({
+        ...prev,
+        municipio: currentUser.municipio,
+        uf: currentUser.uf,
+        role: 'user' // Operadores só podem criar outros operadores
+      }));
+    }
+  }, [editingUser, currentUser, setFormData]);
+
 
   return (
     <div
@@ -383,7 +429,7 @@ const UserForm = ({
                   style={styles.select}
                   value={formData.role || "user"}
                   onChange={(e) => handleTipoChange(e.target.value)}
-                  disabled={saving}
+                  disabled={saving || (editingUser && currentUser?.tipo === 'operador' && editingUser.id !== currentUser.id)} // 🆕 Impedir que operadores editem outros admins, ou que usuários editem seu próprio tipo se não for admin
                   required
                 >
                   <option value="user">👤 Operador</option>
@@ -448,7 +494,18 @@ const UserForm = ({
                 </span>
               </legend>
 
-              {/* Seletor UF + Município Padronizado */}
+              {/* 🆕 Banner informativo para operadores */}
+              {currentUser?.tipo === 'operador' && !editingUser && (
+                <div style={styles.operatorBanner}>
+                  <div style={styles.operatorBannerIcon}>📍</div>
+                  <div style={styles.operatorBannerContent}>
+                    <strong>Pré-preenchimento automático:</strong>
+                    <br />
+                    Como operador, você só pode criar usuários para o seu município ({currentUser.municipio}/{currentUser.uf})
+                  </div>
+                </div>
+              )}
+
               <div style={styles.formGroup}>
                 {editingUser ? (
                   <>
@@ -499,11 +556,14 @@ const UserForm = ({
                     </div>
                   </>
                 ) : (
-                  /* Durante criação, usar seletor padronizado */
+                  /* Durante criação, verificar se deve ser readonly */
                   <MunicipioSelector
                     ufSelecionada={formData.uf || ""}
                     municipioSelecionado={formData.municipio || ""}
                     onUfChange={(uf) => {
+                      // 🆕 Bloquear mudança se operador
+                      if (currentUser?.tipo === 'operador') return;
+
                       setFormData({
                         ...formData,
                         uf: uf,
@@ -511,17 +571,20 @@ const UserForm = ({
                       });
                     }}
                     onMunicipioChange={(municipio) => {
+                      // 🆕 Bloquear mudança se operador
+                      if (currentUser?.tipo === 'operador') return;
+
                       setFormData({
                         ...formData,
                         municipio: municipio
                       });
                     }}
-                    disabled={saving}
+                    disabled={saving || currentUser?.tipo === 'operador'} // 🆕 Desabilitar para operadores
                   />
                 )}
               </div>
 
-              {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
+              {/* ✅ PREVIEW DA CONFIGURAÇÃO existente... */}
               {formData.municipio && formData.uf && (
                 <div
                   style={{
@@ -552,13 +615,17 @@ const UserForm = ({
                       fontSize: "0.9em",
                     }}
                   >
-                    📍 <strong>Localização:</strong> {formData.municipio} /{" "}
-                    {formData.uf}
+                    📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
                     <br />
-                    🔍 <strong>Acesso:</strong> Apenas emendas de{" "}
-                    {formData.municipio}
+                    🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
                     <br />
                     👤 <strong>Permissões:</strong> Visualizar, criar despesas
+                    {currentUser?.tipo === 'operador' && (
+                      <>
+                        <br />
+                        🔒 <strong>Restrito:</strong> Criado por operador de {currentUser.municipio}
+                      </>
+                    )}
                   </div>
                 </div>
               )}
@@ -803,12 +870,44 @@ const styles = {
   submitButton: formStyles.submitButton,
 
   infoIcon: {
-    fontSize: "14px",
-    color: "#0066cc",
+    marginLeft: "6px",
     cursor: "help",
-    userSelect: "none",
-    marginLeft: "5px",
+    color: "var(--primary)",
+    fontSize: "14px",
+    fontWeight: "bold",
   },
+
+  emendaInfo: {
+    padding: "16px",
+    borderRadius: "8px",
+    border: "2px solid var(--success)",
+    backgroundColor: "rgba(39, 174, 96, 0.1)",
+    fontSize: "14px",
+    lineHeight: "1.5",
+  },
+
+  operatorBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "rgba(52, 152, 219, 0.1)",
+    borderRadius: "8px",
+    border: "1px solid rgba(52, 152, 219, 0.3)",
+    marginBottom: "20px",
+  },
+
+  operatorBannerIcon: {
+    fontSize: "20px",
+    flexShrink: 0,
+  },
+
+  operatorBannerContent: {
+    fontSize: "14px",
+    color: "rgba(52, 152, 219, 0.8)",
+    lineHeight: "1.4",
+  },
+
 
   spinner: {
     width: "16px",
@@ -1062,13 +1161,13 @@ if (!document.getElementById("userform-animations")) {
     }
 
     @keyframes userFormSlideUp {
-      from { 
-        opacity: 0; 
-        transform: translateY(20px) scale(0.95); 
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
       }
-      to { 
-        opacity: 1; 
-        transform: translateY(0) scale(1); 
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
     }
 
