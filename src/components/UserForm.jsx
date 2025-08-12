@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import MunicipioSelector from "./MunicipioSelector";
 import { useUser } from '../context/UserContext';
-import formStyles from '../utils/formStyles';
+import { formStyles, addFormInteractivity } from '../utils/formStyles';
 
 const UserForm = ({
   formData,
@@ -19,7 +19,9 @@ const UserForm = ({
 
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
-    addFormInteractivity();
+    if (typeof addFormInteractivity === 'function') {
+      addFormInteractivity();
+    }
   }, []);
 
   // ✅ LISTA DE UFS CONFORME DOCUMENTAÇÃO SICEFSUS
