@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import MunicipioSelector from "./MunicipioSelector";
 import { useUser } from '../context/UserContext';
+import formStyles from '../utils/formStyles';
 
 const UserForm = ({
   formData,
@@ -875,15 +876,6 @@ const styles = {
     color: "var(--primary)",
     fontSize: "14px",
     fontWeight: "bold",
-  },
-
-  emendaInfo: {
-    padding: "16px",
-    borderRadius: "8px",
-    border: "2px solid var(--success)",
-    backgroundColor: "rgba(39, 174, 96, 0.1)",
-    fontSize: "14px",
-    lineHeight: "1.5",
   },
 
   operatorBanner: {

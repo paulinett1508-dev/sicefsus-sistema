@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebase/firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
 import {
   doc,
@@ -17,9 +17,11 @@ export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
-  // ✅ REMOVIDO: Modo cadastro não disponível no login público
-  const [lembrarEmail, setLembrarEmail] = useState(false);
+  const [lembrarEmail, setLembrarEmail] = useState(true);
   const [carregando, setCarregando] = useState(false);
+  const [modoEsqueciSenha, setModoEsqueciSenha] = useState(false);
+  const [emailReset, setEmailReset] = useState("");
+  const [sucessoReset, setSucessoReset] = useState(false);
 
   // Ao carregar, verifica se há e-mail salvo
   useEffect(() => {
@@ -158,103 +160,221 @@ export default function Login({ onLoginSuccess }) {
     }
   }
 
-  function traduzirErroFirebase(err) {
-    console.error("🔥 Erro Firebase:", err.code, err.message);
-
-    if (err.code === "auth/invalid-email") return "E-mail inválido.";
-    if (
-      err.code === "auth/user-not-found" ||
-      err.code === "auth/wrong-password"
-    )
-      return "E-mail ou senha incorretos.";
-    if (err.code === "auth/too-many-requests")
-      return "Muitas tentativas. Aguarde alguns minutos.";
-    if (err.code === "auth/network-request-failed")
-      return "Erro de conexão. Verifique sua internet.";
-
-    // Erros customizados do sistema
-    if (err.message.includes("Dados do usuário não encontrados")) {
-      return "Usuário não encontrado no sistema. Contate o administrador.";
+  const traduzirErroFirebase = (erro) => {
+    switch (erro.code) {
+      case "auth/user-not-found":
+        return "Usuário não encontrado. Verifique o e-mail.";
+      case "auth/wrong-password":
+        return "Senha incorreta. Tente novamente.";
+      case "auth/invalid-email":
+        return "E-mail inválido. Verifique o formato.";
+      case "auth/user-disabled":
+        return "Esta conta foi desabilitada. Entre em contato com o suporte.";
+      case "auth/too-many-requests":
+        return "Muitas tentativas de login. Tente novamente mais tarde.";
+      case "auth/network-request-failed":
+        return "Erro de conexão. Verifique sua internet.";
+      case "auth/invalid-credential":
+        return "Credenciais inválidas. Verifique e-mail e senha.";
+      case "auth/account-exists-with-different-credential":
+        return "Já existe uma conta com este e-mail usando outro método de login.";
+      default:
+        return `Erro no login: ${erro.message}`;
     }
-    if (err.message.includes("Usuário inativo")) {
-      return err.message;
-    }
-    if (err.message.includes("sem localização definida")) {
-      return err.message;
-    }
+  };
 
-    return err.message || "Erro interno do sistema";
-  }
+  const handleEsqueciSenha = async (e) => {
+    e.preventDefault();
+    setErro("");
+    setCarregando(true);
+
+    try {
+      await sendPasswordResetEmail(auth, emailReset);
+      setSucessoReset(true);
+      setErro("");
+    } catch (err) {
+      console.error("❌ Erro ao enviar email:", err);
+      if (err.code === "auth/user-not-found") {
+        setErro("Email não encontrado no sistema.");
+      } else if (err.code === "auth/invalid-email") {
+        setErro("Email inválido.");
+      } else {
+        setErro("Erro ao enviar email. Tente novamente.");
+      }
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.header}>
-          <h2 style={styles.title}>🔐 Login SICEFSUS</h2>
+          <h2 style={styles.title}>
+            {modoEsqueciSenha ? "🔑 Recuperar Senha" : "🔐 Login SICEFSUS"}
+          </h2>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>E-mail:</label>
-            <input
-              type="email"
-              placeholder="Digite seu e-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={styles.input}
-              autoFocus
+        {/* MODO NORMAL DE LOGIN */}
+        {!modoEsqueciSenha && (
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>E-mail:</label>
+              <input
+                type="email"
+                placeholder="Digite seu e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                style={styles.input}
+                autoFocus
+                disabled={carregando}
+              />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Senha:</label>
+              <input
+                type="password"
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+                style={styles.input}
+                disabled={carregando}
+              />
+            </div>
+
+            <div style={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="lembrarEmail"
+                checked={lembrarEmail}
+                onChange={(e) => setLembrarEmail(e.target.checked)}
+                disabled={carregando}
+              />
+              <label htmlFor="lembrarEmail" style={styles.checkboxLabel}>
+                Lembrar e-mail
+              </label>
+            </div>
+
+            {/* ADICIONAR botão esqueci senha */}
+            <div style={styles.forgotPasswordContainer}>
+              <button
+                type="button"
+                onClick={() => {
+                  setModoEsqueciSenha(true);
+                  setEmailReset(email);
+                  setErro("");
+                }}
+                style={styles.forgotPasswordButton}
+                disabled={carregando}
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              style={{
+                ...styles.button,
+                opacity: carregando ? 0.6 : 1,
+                cursor: carregando ? "not-allowed" : "pointer",
+              }}
               disabled={carregando}
-            />
+            >
+              {carregando ? (
+                <span style={styles.loadingText}>
+                  <div style={styles.spinner}></div>
+                  Entrando...
+                </span>
+              ) : (
+                "🚀 Entrar"
+              )}
+            </button>
+          </form>
+        )}
+
+        {/* MODO ESQUECI SENHA */}
+        {modoEsqueciSenha && !sucessoReset && (
+          <form onSubmit={handleEsqueciSenha} style={styles.form}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Digite seu e-mail:</label>
+              <input
+                type="email"
+                placeholder="Digite seu e-mail cadastrado"
+                value={emailReset}
+                onChange={(e) => setEmailReset(e.target.value)}
+                required
+                style={styles.input}
+                autoFocus
+                disabled={carregando}
+              />
+            </div>
+
+            <div style={styles.buttonGroup}>
+              <button
+                type="button"
+                onClick={() => {
+                  setModoEsqueciSenha(false);
+                  setErro("");
+                  setSucessoReset(false);
+                }}
+                style={styles.cancelButton}
+                disabled={carregando}
+              >
+                ← Voltar
+              </button>
+
+              <button
+                type="submit"
+                style={{
+                  ...styles.button,
+                  opacity: carregando ? 0.6 : 1,
+                  cursor: carregando ? "not-allowed" : "pointer",
+                }}
+                disabled={carregando}
+              >
+                {carregando ? (
+                  <span style={styles.loadingText}>
+                    <div style={styles.spinner}></div>
+                    Enviando...
+                  </span>
+                ) : (
+                  "📧 Enviar Link"
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* SUCESSO NO RESET */}
+        {sucessoReset && (
+          <div style={styles.form}>
+            <div style={styles.successContainer}>
+              <div style={styles.successIcon}>✅</div>
+              <h3 style={styles.successTitle}>Email Enviado!</h3>
+              <p style={styles.successText}>
+                Enviamos um link de recuperação para <strong>{emailReset}</strong>
+              </p>
+              <p style={styles.successText}>
+                Verifique sua caixa de entrada e spam.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setModoEsqueciSenha(false);
+                setSucessoReset(false);
+                setErro("");
+                setEmailReset("");
+              }}
+              style={styles.button}
+            >
+              ← Voltar ao Login
+            </button>
           </div>
-
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Senha:</label>
-            <input
-              type="password"
-              placeholder="Digite sua senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required
-              style={styles.input}
-              disabled={carregando}
-            />
-          </div>
-
-          <div style={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              id="lembrarEmail"
-              checked={lembrarEmail}
-              onChange={(e) => setLembrarEmail(e.target.checked)}
-              disabled={carregando}
-            />
-            <label htmlFor="lembrarEmail" style={styles.checkboxLabel}>
-              Lembrar e-mail
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            style={{
-              ...styles.button,
-              opacity: carregando ? 0.6 : 1,
-              cursor: carregando ? "not-allowed" : "pointer",
-            }}
-            disabled={carregando}
-          >
-            {carregando ? (
-              <span style={styles.loadingText}>
-                <div style={styles.spinner}></div>
-                Entrando...
-              </span>
-            ) : (
-              "🚀 Entrar"
-            )}
-          </button>
-        </form>
-
-        {/* ✅ REMOVIDO: Botão "Criar nova conta" não disponível publicamente */}
+        )}
 
         {erro && (
           <div style={styles.errorContainer}>
@@ -262,7 +382,6 @@ export default function Login({ onLoginSuccess }) {
           </div>
         )}
 
-        {/* ✅ INFORMAÇÕES ÚTEIS */}
         <div style={styles.infoContainer}>
           <small style={styles.infoText}>
             💡 <strong>Dica:</strong> Se você é operador e não consegue fazer
@@ -271,7 +390,6 @@ export default function Login({ onLoginSuccess }) {
         </div>
       </div>
 
-      {/* 🔧 Indicador discreto de ambiente para desenvolvedores */}
       <EnvironmentIndicator />
     </div>
   );
@@ -403,9 +521,63 @@ const styles = {
   },
   infoText: {
     color: "#666",
-    fontSize: 12,
+    fontSize: 14,
+    lineHeight: "1.4",
+  },
+
+  forgotPasswordContainer: {
+    textAlign: "center",
+    marginBottom: 16,
+  },
+
+  forgotPasswordButton: {
+    background: "none",
+    border: "none",
+    color: "#3498db",
+    cursor: "pointer",
+    textDecoration: "underline",
+    fontSize: 14,
+    padding: "4px 0",
+  },
+
+  buttonGroup: {
+    display: "flex",
+    gap: 12,
+  },
+
+  cancelButton: {
+    flex: 1,
+    padding: 14,
+    background: "#95a5a6",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
+
+  successContainer: {
+    textAlign: "center",
+    padding: "20px 0",
+  },
+
+  successIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+
+  successTitle: {
+    color: "#27ae60",
+    marginBottom: 16,
+    fontSize: "1.2em",
+  },
+
+  successText: {
+    color: "#666",
+    marginBottom: 12,
     lineHeight: 1.4,
-    display: "block",
   },
 };
 
