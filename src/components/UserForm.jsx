@@ -16,6 +16,9 @@ const UserForm = ({
 
   // ✅ Estado para controlar exibição da política de segurança
   const [showSecurityPolicy, setShowSecurityPolicy] = React.useState(false);
+  
+  // ✅ Estado para controlar erros do formulário
+  const [errors, setErrors] = React.useState({});
 
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
@@ -173,7 +176,7 @@ const UserForm = ({
       });
     }
     setErrors({});
-  }, [editingUser]);
+  }, [editingUser, setFormData]);
 
   // ✅ useEffect para pré-preencher município/UF para operadores ao criar novo usuário
   useEffect(() => {
