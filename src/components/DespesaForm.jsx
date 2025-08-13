@@ -31,7 +31,6 @@ import DespesaFormActions from "./despesa/DespesaFormActions";
 
 // ✅ HOOKS E UTILS EXISTENTES REUTILIZADOS
 import Toast from "./Toast";
-import { useIsMounted } from "../hooks/useEmendaDespesa";
 import {
   useMoedaFormatting,
   parseValorMonetario,
@@ -59,8 +58,8 @@ const DespesaForm = ({
   onSuccess // Adicionado para callback de sucesso
 }) => {
   // ✅ HOOKS REUTILIZADOS
-  const isMounted = useIsMounted();
   const navigate = useNavigate();
+  const isMountedRef = useRef(true);
   const { valorError, handleValorChange } = useMoedaFormatting();
   const {cnpjError, handleCNPJChange } = useCNPJValidation();
 
@@ -228,8 +227,9 @@ const DespesaForm = ({
 
   // ✅ EFFECTS SIMPLIFICADOS
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
-      isMounted.current = false;
+      isMountedRef.current = false;
     };
   }, []);
 
@@ -278,9 +278,20 @@ const DespesaForm = ({
   // ✅ HANDLER DE MUDANÇA SIMPLIFICADO
   const handleInputChange = useCallback(
     (e) => {
-      if (!isMounted) return;
+      if (!isMountedRef.current) return;
 
       const { name, value } = e.target;
+
+      // Tratamento especial para mudança de emenda
+      if (name === "emendaId") {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        
+        // Limpar erro do campo
+        if (errors[name]) {
+          setErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+        return;
+      }
 
       // Tratamento especial para valor monetário
       if (name === "valor") {
@@ -302,7 +313,7 @@ const DespesaForm = ({
         setErrors((prev) => ({ ...prev, [name]: "" }));
       }
     },
-    [isMounted, errors, emendaInfoDinamica, emendaInfo, handleValorChange, handleCNPJChange],
+    [errors, emendaInfoDinamica, emendaInfo, handleValorChange, handleCNPJChange],
   );
 
   // ✅ VALIDAÇÃO SIMPLIFICADA
