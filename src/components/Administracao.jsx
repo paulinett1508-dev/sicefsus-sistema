@@ -43,8 +43,17 @@ const Administracao = () => {
   });
 
   // ✅ ADICIONAR: Estados para feedback
-  const [toast, setToast] = useState(null);
-  const [confirmModal, setConfirmModal] = useState(null);
+  const [toast, setToast] = useState({ show: false });
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "Confirmar",
+    cancelText: "Cancelar",
+    type: "warning",
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
 
   // Estados para logs
   const [activeTab, setActiveTab] = useState("users");
@@ -66,29 +75,30 @@ const Administracao = () => {
       const usuariosRef = collection(db, "usuarios");
       const snapshot = await getDocs(usuariosRef);
 
-      const usuariosData = [];
-      snapshot.forEach((doc) => {
-        const userData = {
-          id: doc.id, // ✅ ID do documento Firestore
-          ...doc.data(),
+      const usuariosData = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          uid: data.uid || doc.id, // Garantir que uid existe
+          email: data.email,
+          nome: data.nome || data.name || "Nome não informado",
+          tipo: data.tipo || data.role || "operador", // Normalizar tipo
+          status: data.status || "ativo",
+          departamento: data.departamento || "",
+          telefone: data.telefone || "",
+          municipio: data.municipio || "",
+          uf: data.uf || "",
+          ultimoAcesso: data.ultimoAcesso || data.ultimo_acesso,
+          criadoEm: data.criadoEm || data.data_criacao,
+          ...data,
         };
-        usuariosData.push(userData);
-        
-        // ✅ DEBUG: Mostrar estrutura de dados
-        console.log("👤 Usuário carregado:", {
-          documentId: doc.id,
-          uid: userData.uid,
-          email: userData.email,
-          nome: userData.nome,
-          status: userData.status
-        });
       });
 
       setUsuarios(usuariosData);
       console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
     } catch (error) {
       console.error("❌ Erro ao carregar usuários:", error);
-      showToast("Erro ao carregar usuários", "error");
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao carregar usuários" });
     } finally {
       setLoading(false);
     }
@@ -153,7 +163,7 @@ const Administracao = () => {
           editingUser.email, // ✅ CORREÇÃO: Passar email original como terceiro parâmetro
         );
 
-        showToast("✅ Usuário atualizado com sucesso!", "success");
+        showToast({ tipo: "success", titulo: "Sucesso", mensagem: "Usuário atualizado com sucesso!" });
       } else {
         // Criar novo usuário
         const resultado = await userService.createUser({
@@ -169,8 +179,7 @@ const Administracao = () => {
 
         if (resultado.success) {
           showToast(
-            `✅ Usuário criado com sucesso! Email de configuração enviado.`,
-            "success",
+            { tipo: "success", titulo: "Sucesso", mensagem: `Usuário criado com sucesso! Email de configuração enviado.` },
           );
         }
       }
@@ -180,105 +189,87 @@ const Administracao = () => {
       await carregarUsuarios();
     } catch (error) {
       console.error("❌ Erro ao salvar usuário:", error);
-      showToast(error.message || "Erro ao salvar usuário", "error");
+      showToast({ tipo: "error", titulo: "Erro", mensagem: error.message || "Erro ao salvar usuário" });
     } finally {
       setSaving(false);
     }
   };
 
   // ✅ FUNÇÃO CORRIGIDA PARA EXCLUIR USUÁRIO PERMANENTEMENTE
-  const handleExcluirUsuario = async (usuario) => {
-    console.log("🗑️ handleExcluirUsuario chamado com:", {
-      id: usuario?.id,
-      uid: usuario?.uid,
-      nome: usuario?.nome,
-      status: usuario?.status
-    });
+  const handleDelete = async (usuario) => {
+    console.log("🗑️ Tentativa de exclusão:", usuario);
 
-    // ✅ CORREÇÃO: Verificar tanto ID quanto UID
-    if (!usuario?.id && !usuario?.uid) {
-      console.error("❌ ID ou UID do usuário não fornecido");
-      showToast("❌ Dados do usuário incompletos", "error");
-      return;
-    }
-
-    // Verificar se o usuário está inativo
+    // Verificar se usuário está inativo
     if (usuario.status === "ativo") {
-      showToast("⚠️ Desative o usuário antes de excluí-lo", "warning");
+      showToast({
+        tipo: "erro",
+        titulo: "❌ Usuário Ativo",
+        mensagem: "Desative o usuário primeiro para poder excluir",
+      });
       return;
     }
 
-    // Confirmar exclusão permanente
-    setConfirmModal({
+    // Mostrar modal de confirmação
+    setConfirmationModal({
       isOpen: true,
       title: "Excluir Usuário Permanentemente",
-      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`,
+      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome || usuario.email}"? Esta ação não pode ser desfeita.`,
+      confirmText: "Sim, Excluir",
+      cancelText: "Cancelar",
       type: "danger",
       onConfirm: async () => {
         try {
-          console.log("🗑️ Executando exclusão permanente...");
-          
-          let documentId = null;
-          let userUid = usuario.uid;
+          setLoading(true);
 
-          // ✅ CORREÇÃO: Se temos o ID do documento, usar diretamente
-          if (usuario.id) {
-            documentId = usuario.id;
-            console.log("📋 Usando ID do documento direto:", documentId);
-          } else {
-            // ✅ FALLBACK: Buscar por UID se não temos o ID
-            console.log("🔍 Buscando documento por UID:", usuario.uid);
-            const usuariosQuery = query(
-              collection(db, "usuarios"),
-              where("uid", "==", usuario.uid)
-            );
-            const usuariosSnapshot = await getDocs(usuariosQuery);
+          console.log("🗑️ Excluindo usuário:", {
+            id: usuario.id,
+            uid: usuario.uid,
+            email: usuario.email
+          });
 
-            if (usuariosSnapshot.empty) {
-              throw new Error("Usuário não encontrado na base de dados");
+          // Usar o ID do documento como primeiro parâmetro e UID como segundo
+          const userDocId = usuario.id || usuario.uid;
+          const userAuthId = usuario.uid;
+
+          await userService.deleteUserById(userDocId, userAuthId);
+
+          showToast({
+            tipo: "sucesso",
+            titulo: "✅ Usuário Excluído",
+            mensagem: `Usuário ${usuario.nome || usuario.email} removido permanentemente`,
+          });
+
+          // Registrar auditoria
+          await auditService.log(
+            "delete_user",
+            "usuarios",
+            userDocId,
+            {
+              usuario_excluido: usuario.email,
+              motivo: "Exclusão permanente via administração"
             }
+          );
 
-            documentId = usuariosSnapshot.docs[0].id;
-            console.log("📋 ID do documento encontrado:", documentId);
-          }
-
-          // ✅ CORREÇÃO: Excluir usando o ID correto
-          await deleteDoc(doc(db, "usuarios", documentId));
-          console.log("✅ Usuário excluído do Firestore com ID:", documentId);
-
-          // ⚠️ NOTA: Exclusão do Firebase Auth deve ser feita no backend
-          console.log("⚠️ UID para exclusão do Auth (backend):", userUid);
-
-          // Log de auditoria
-          if (window.auditService) {
-            await window.auditService.logAction(
-              "DELETE_USER",
-              `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
-              {
-                usuarioExcluido: {
-                  documentId: documentId,
-                  uid: userUid,
-                  nome: usuario.nome,
-                  email: usuario.email,
-                  municipio: usuario.municipio,
-                  uf: usuario.uf,
-                },
-              }
-            );
-          }
-
-          showToast("✅ Usuário excluído permanentemente do sistema!", "success");
+          // Recarregar lista
           await carregarUsuarios();
         } catch (error) {
           console.error("❌ Erro ao excluir usuário:", error);
-          showToast(`❌ Erro ao excluir usuário: ${error.message}`, "error");
+          showToast({
+            tipo: "erro",
+            titulo: "❌ Erro na Exclusão",
+            mensagem: error.message || "Erro ao excluir usuário",
+          });
+        } finally {
+          setLoading(false);
+          setConfirmationModal({ isOpen: false });
         }
       },
       onCancel: () => {
-        console.log("❌ Exclusão cancelada pelo usuário");
-      },
+        setConfirmationModal({ isOpen: false });
+      }
     });
   };
+
 
   const handleToggleStatus = async (usuario) => {
     try {
@@ -291,11 +282,11 @@ const Administracao = () => {
         dataAtualizacao: new Date(),
       });
 
-      showToast(`✅ Status alterado para ${novoStatus}!`, "success");
+      showToast({ tipo: "success", titulo: "Sucesso", mensagem: `Status alterado para ${novoStatus}!` });
       await carregarUsuarios();
     } catch (error) {
       console.error("❌ Erro ao alterar status:", error);
-      showToast("Erro ao alterar status", "error");
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao alterar status" });
     }
   };
 
@@ -303,15 +294,17 @@ const Administracao = () => {
   const handleInativarUsuario = async (usuario) => {
     if (usuario.status === "inativo") {
       // Se já está inativo, pode excluir
-      handleExcluirUsuario(usuario);
+      handleDelete(usuario);
       return;
     }
 
     // Se está ativo, primeiro inativar
-    setConfirmModal({
+    setConfirmationModal({
       isOpen: true,
       title: "Inativar Usuário",
       message: `Deseja inativar o usuário "${usuario.nome}"? Usuários inativos não podem acessar o sistema.`,
+      confirmText: "Sim, Inativar",
+      cancelText: "Cancelar",
       type: "warning",
       onConfirm: async () => {
         try {
@@ -320,43 +313,44 @@ const Administracao = () => {
             status: "inativo",
             dataAtualizacao: new Date(),
           });
-          showToast("✅ Usuário inativado com sucesso!", "success");
+          showToast({ tipo: "success", titulo: "Sucesso", mensagem: "Usuário inativado com sucesso!" });
           await carregarUsuarios();
         } catch (error) {
           console.error("❌ Erro ao inativar usuário:", error);
-          showToast("Erro ao inativar usuário", "error");
+          showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao inativar usuário" });
         }
-        setConfirmModal(null);
+        setConfirmationModal({ isOpen: false });
       },
-      onCancel: () => setConfirmModal(null),
+      onCancel: () => setConfirmationModal({ isOpen: false }),
     });
   };
 
   // ✅ IMPLEMENTAR: Handler para resetar senha
   const handleResetSenha = (usuario) => {
-    setConfirmModal({
+    setConfirmationModal({
       isOpen: true,
       title: "Resetar Senha",
       message: `Deseja enviar um email de redefinição de senha para "${usuario.email}"?`,
+      confirmText: "Enviar Email",
+      cancelText: "Cancelar",
       type: "warning",
       onConfirm: async () => {
         try {
           await userService.sendPasswordReset(usuario.email);
-          showToast("✅ Email de redefinição enviado!", "success");
+          showToast({ tipo: "success", titulo: "Sucesso", mensagem: "Email de redefinição enviado!" });
         } catch (error) {
           console.error("❌ Erro ao resetar senha:", error);
-          showToast("Erro ao enviar email de redefinição", "error");
+          showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao enviar email de redefinição" });
         }
-        setConfirmModal(null);
+        setConfirmationModal({ isOpen: false });
       },
-      onCancel: () => setConfirmModal(null),
+      onCancel: () => setConfirmationModal({ isOpen: false }),
     });
   };
 
-  // ✅ ATUALIZAR: Função showToast
-  const showToast = (message, type) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 5000);
+  const showToast = (toastData) => {
+    setToast({ ...toastData, show: true });
+    setTimeout(() => setToast({ show: false }), toastData.duracao || 5000);
   };
 
   // Função para carregar logs
@@ -368,7 +362,7 @@ const Administracao = () => {
       console.log(`✅ ${logsData.length} logs carregados`);
     } catch (error) {
       console.error("❌ Erro ao carregar logs:", error);
-      showToast("Erro ao carregar logs de auditoria", "error");
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao carregar logs de auditoria" });
     }
   };
 
@@ -629,24 +623,27 @@ const Administracao = () => {
 
   return (
     <div style={styles.container}>
-      {/* ✅ ADICIONAR: Toast para feedback */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
+      {/* ✅ MODAL DE CONFIRMAÇÃO */}
+      {confirmationModal.isOpen && (
+        <ConfirmationModal
+          title={confirmationModal.title}
+          message={confirmationModal.message}
+          confirmText={confirmationModal.confirmText}
+          cancelText={confirmationModal.cancelText}
+          onConfirm={confirmationModal.onConfirm}
+          onCancel={confirmationModal.onCancel}
+          type={confirmationModal.type}
         />
       )}
 
-      {/* ✅ ADICIONAR: Modal de confirmação */}
-      {confirmModal && (
-        <ConfirmationModal
-          isOpen={confirmModal.isOpen}
-          title={confirmModal.title}
-          message={confirmModal.message}
-          type={confirmModal.type}
-          onConfirm={confirmModal.onConfirm}
-          onCancel={confirmModal.onCancel}
+      {/* ✅ TOAST PARA NOTIFICAÇÕES */}
+      {toast.show && (
+        <Toast
+          tipo={toast.tipo}
+          titulo={toast.titulo}
+          mensagem={toast.mensagem}
+          onClose={() => setToast({ show: false })}
+          duracao={toast.duracao}
         />
       )}
 
@@ -739,7 +736,7 @@ const Administracao = () => {
             <UsersTable
               users={usuarios}
               onEdit={handleEditarUsuario}
-              onDelete={handleExcluirUsuario}
+              onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
               onResetPassword={handleResetSenha}
               loading={loading}
