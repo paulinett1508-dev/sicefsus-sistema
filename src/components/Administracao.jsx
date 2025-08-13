@@ -18,7 +18,14 @@ import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 // ✅ ADICIONAR: Import do UserForm e userService
 import UserForm from "./UserForm";
-import userService from "../services/userService"; // Corrigido: import default
+import {
+  createUser,
+  checkAuthState,
+  logoutUser,
+  updateUser,
+  deleteUserById,
+  sendPasswordReset,
+} from "../services/userService"; // Corrigido: import default
 import Toast from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
 
@@ -148,7 +155,7 @@ const Administracao = () => {
 
       if (editingUser) {
         // ✅ CORREÇÃO: Atualizar usuário existente COM email original
-        await userService.updateUser(
+        await updateUser(
           editingUser.id,
           {
             nome: formData.nome,
@@ -231,7 +238,7 @@ const Administracao = () => {
           const userDocId = usuario.id || usuario.uid;
           const userAuthId = usuario.uid;
 
-          await userService.deleteUserById(userDocId, userAuthId);
+          await deleteUserById(userDocId, userAuthId);
 
           showToast({
             tipo: "sucesso",
@@ -621,6 +628,14 @@ const Administracao = () => {
     );
   };
 
+  // Filtro para a lista de usuários
+  const [userFilter, setUserFilter] = useState("");
+  const filteredUsers = usuarios.filter(
+    (user) =>
+      user.nome.toLowerCase().includes(userFilter.toLowerCase()) ||
+      user.email.toLowerCase().includes(userFilter.toLowerCase()),
+  );
+
   return (
     <div style={styles.container}>
       {/* ✅ MODAL DE CONFIRMAÇÃO */}
@@ -724,8 +739,18 @@ const Administracao = () => {
       {activeTab === "users" ? (
         <div style={styles.tableContainer}>
           <h3 style={styles.sectionTitle}>
-            📋 Lista de Usuários ({usuarios.length})
+            📋 Lista de Usuários ({filteredUsers.length})
           </h3>
+          {/* Campo de busca para usuários */}
+          <div style={styles.searchContainer}>
+            <input
+              type="text"
+              placeholder="Buscar usuário por nome ou email..."
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
 
           {loading ? (
             <div style={styles.loading}>
@@ -734,7 +759,7 @@ const Administracao = () => {
             </div>
           ) : (
             <UsersTable
-              users={usuarios}
+              users={filteredUsers}
               onEdit={handleEditarUsuario}
               onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
@@ -781,6 +806,12 @@ const Administracao = () => {
                   <option value="CREATE_DESPESA">Criar Despesa</option>
                   <option value="UPDATE_DESPESA">Editar Despesa</option>
                   <option value="DELETE_DESPESA">Deletar Despesa</option>
+                  <option value="CREATE_USER">Criar Usuário</option>
+                  <option value="UPDATE_USER">Editar Usuário</option>
+                  <option value="DELETE_USER">Deletar Usuário</option>
+                  <option value="ACTIVATE_USER">Ativar Usuário</option>
+                  <option value="DEACTIVATE_USER">Inativar Usuário</option>
+                  <option value="RESET_PASSWORD">Resetar Senha</option>
                 </select>
               </div>
 
@@ -963,7 +994,10 @@ const styles = {
     margin: "0",
   },
   headerActions: {
-    marginBottom: "20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
   primaryButton: {
     backgroundColor: "#007bff",
@@ -974,9 +1008,12 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "600",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
   buttonIcon: {
-    marginRight: "8px",
+    fontSize: "16px",
   },
   tabsContainer: {
     display: "flex",
@@ -1015,6 +1052,16 @@ const styles = {
     fontWeight: "bold",
     marginBottom: "16px",
     color: "#333",
+  },
+  searchContainer: {
+    marginBottom: "20px",
+  },
+  searchInput: {
+    width: "100%",
+    padding: "10px 15px",
+    border: "1px solid #ced4da",
+    borderRadius: "5px",
+    fontSize: "14px",
   },
   loading: {
     textAlign: "center",
@@ -1107,6 +1154,23 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "12px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "30px",
+    height: "30px",
+  },
+  badge: {
+    color: "white",
+    padding: "4px 8px",
+    borderRadius: "12px",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+    fontSize: "10px",
+  },
+  actionsContainer: {
+    display: "flex",
+    gap: "8px",
   },
 };
 
