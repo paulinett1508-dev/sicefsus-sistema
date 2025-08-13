@@ -260,31 +260,80 @@ const DespesaForm = ({
       }
     }
 
+    // Validações de datas básicas
+    if (!formData.dataEmpenho) {
+      novosErrors.dataEmpenho = "Data do empenho é obrigatória";
+    }
+
+    if (!formData.dataLiquidacao) {
+      novosErrors.dataLiquidacao = "Data da liquidação é obrigatória";
+    }
+
+    if (!formData.dataPagamento) {
+      novosErrors.dataPagamento = "Data do pagamento é obrigatória";
+    }
+
     // ✅ NOVA VALIDAÇÃO: Verificar se datas não excedem validade da emenda
-    if (emendaInfo?.dataValidade) {
-      const dataValidade = new Date(emendaInfo.dataValidade);
+    if (emendaInfo?.dataValidade || emendaInfo?.dataFim || emendaInfo?.dataVencimento) {
+      const dataValidade = new Date(emendaInfo.dataValidade || emendaInfo.dataFim || emendaInfo.dataVencimento);
+      const dataInicio = emendaInfo.dataInicio || emendaInfo.dataCriacao || emendaInfo.dataAprovacao;
+      const inicioEmenda = dataInicio ? new Date(dataInicio) : null;
 
-      if (
-        formData.dataEmpenho &&
-        new Date(formData.dataEmpenho) > dataValidade
-      ) {
-        novosErrors.dataEmpenho = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      // Validar data do empenho
+      if (formData.dataEmpenho) {
+        const dataEmpenho = new Date(formData.dataEmpenho);
+
+        if (inicioEmenda && dataEmpenho < inicioEmenda) {
+          novosErrors.dataEmpenho = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
+        }
+
+        if (dataEmpenho > dataValidade) {
+          novosErrors.dataEmpenho = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+        }
       }
 
-      if (
-        formData.dataLiquidacao &&
-        new Date(formData.dataLiquidacao) > dataValidade
-      ) {
-        novosErrors.dataLiquidacao = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      // Validar data da liquidação
+      if (formData.dataLiquidacao) {
+        const dataLiquidacao = new Date(formData.dataLiquidacao);
+
+        if (inicioEmenda && dataLiquidacao < inicioEmenda) {
+          novosErrors.dataLiquidacao = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
+        }
+
+        if (dataLiquidacao > dataValidade) {
+          novosErrors.dataLiquidacao = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+        }
       }
 
-      if (
-        formData.dataPagamento &&
-        new Date(formData.dataPagamento) > dataValidade
-      ) {
-        novosErrors.dataPagamento = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+      // Validar data do pagamento
+      if (formData.dataPagamento) {
+        const dataPagamento = new Date(formData.dataPagamento);
+
+        if (inicioEmenda && dataPagamento < inicioEmenda) {
+          novosErrors.dataPagamento = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
+        }
+
+        if (dataPagamento > dataValidade) {
+          novosErrors.dataPagamento = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
+        }
       }
     }
+
+    // 🔧 ADICIONAR validação de sequência cronológica:
+    if (formData.dataEmpenho && formData.dataLiquidacao && formData.dataPagamento) {
+      const empenho = new Date(formData.dataEmpenho);
+      const liquidacao = new Date(formData.dataLiquidacao);
+      const pagamento = new Date(formData.dataPagamento);
+
+      if (liquidacao < empenho) {
+        novosErrors.dataLiquidacao = "Data de liquidação deve ser posterior à data do empenho";
+      }
+
+      if (pagamento < liquidacao) {
+        novosErrors.dataPagamento = "Data de pagamento deve ser posterior à data da liquidação";
+      }
+    }
+
 
     if (valorError) {
       novosErrors.valor = valorError;
