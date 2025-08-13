@@ -1,0 +1,298 @@
+// 🔧 CORREÇÕES UNIVERSAIS - Administracao.jsx
+// Funcionam em DEV/HOMOLOG/PROD
+
+// ===== CORREÇÃO 1: Import correto do userService =====
+// ✅ SUBSTITUIR as linhas 14-21 por:
+
+import {
+  createUser,
+  updateUser,
+  deleteUserById,
+  sendPasswordReset,
+} from "../services/userService";
+
+// ===== CORREÇÃO 2: Corrigir função handleSalvarUsuario =====
+// ✅ SUBSTITUIR a função handleSalvarUsuario (linhas ~117-154) por:
+
+const handleSalvarUsuario = async (e) => {
+  e.preventDefault();
+
+  try {
+    setSaving(true);
+    console.log("💾 Salvando usuário:", formData);
+
+    if (editingUser) {
+      // ✅ Atualizar usuário existente
+      await updateUser(
+        editingUser.id,
+        {
+          nome: formData.nome,
+          email: formData.email,
+          role: formData.role === "admin" ? "admin" : "operador",
+          municipio: formData.role === "admin" ? "" : formData.municipio,
+          uf: formData.role === "admin" ? "" : formData.uf,
+          status: formData.status,
+          departamento: formData.departamento,
+          telefone: formData.telefone,
+        },
+        editingUser.email,
+      );
+
+      showToast({ 
+        tipo: "success", 
+        titulo: "Sucesso", 
+        mensagem: "Usuário atualizado com sucesso!" 
+      });
+    } else {
+      // ✅ Criar novo usuário
+      const resultado = await createUser({
+        email: formData.email,
+        nome: formData.nome,
+        role: formData.role === "admin" ? "admin" : "operador",
+        municipio: formData.role === "admin" ? "" : formData.municipio,
+        uf: formData.role === "admin" ? "" : formData.uf,
+        status: formData.status,
+        departamento: formData.departamento,
+        telefone: formData.telefone,
+      });
+
+      if (resultado && resultado.sucesso) {
+        showToast({
+          tipo: "success", 
+          titulo: "Sucesso", 
+          mensagem: "Usuário criado com sucesso! Email de configuração enviado."
+        });
+      }
+    }
+
+    // Fechar modal e recarregar lista
+    setShowUserModal(false);
+    await carregarUsuarios();
+  } catch (error) {
+    console.error("❌ Erro ao salvar usuário:", error);
+    showToast({ 
+      tipo: "error", 
+      titulo: "Erro", 
+      mensagem: error.message || "Erro ao salvar usuário" 
+    });
+  } finally {
+    setSaving(false);
+  }
+};
+
+// ===== CORREÇÃO 3: Corrigir função handleDelete =====
+// ✅ SUBSTITUIR a função handleDelete (linhas ~156-210) por:
+
+const handleDelete = async (usuario) => {
+  console.log("🗑️ === EXCLUSÃO UNIVERSAL ===");
+  console.log("🗑️ Dados do usuário:", {
+    id: usuario?.id,
+    uid: usuario?.uid,
+    nome: usuario?.nome,
+    email: usuario?.email,
+    status: usuario?.status
+  });
+
+  // Verificar dados básicos
+  if (!usuario?.id) {
+    console.error("❌ ID do usuário não encontrado");
+    showToast({
+      tipo: "error",
+      titulo: "Erro",
+      mensagem: "Dados do usuário incompletos"
+    });
+    return;
+  }
+
+  // Verificar se usuário está inativo
+  if (usuario.status === "ativo") {
+    showToast({
+      tipo: "warning",
+      titulo: "Usuário Ativo",
+      mensagem: "Desative o usuário primeiro para poder excluir"
+    });
+    return;
+  }
+
+  // Confirmar exclusão
+  const confirmar = window.confirm(
+    `🗑️ EXCLUIR PERMANENTEMENTE?\n\n` +
+    `Nome: ${usuario.nome || 'N/A'}\n` +
+    `Email: ${usuario.email || 'N/A'}\n` +
+    `ID: ${usuario.id}\n\n` +
+    `Esta ação NÃO pode ser desfeita!`
+  );
+
+  if (!confirmar) {
+    console.log("❌ Exclusão cancelada pelo usuário");
+    return;
+  }
+
+  try {
+    console.log("🗑️ Executando exclusão...");
+    setLoading(true);
+
+    // ✅ EXCLUSÃO DIRETA DO FIRESTORE
+    await deleteDoc(doc(db, "usuarios", usuario.id));
+    console.log("✅ Usuário excluído do Firestore");
+
+    // Log de auditoria
+    if (window.auditService) {
+      await window.auditService.logAction(
+        "DELETE_USER",
+        `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
+        {
+          usuarioExcluido: {
+            id: usuario.id,
+            uid: usuario.uid,
+            nome: usuario.nome,
+            email: usuario.email,
+            municipio: usuario.municipio,
+            uf: usuario.uf,
+          },
+        }
+      );
+    }
+
+    showToast({
+      tipo: "success",
+      titulo: "Sucesso",
+      mensagem: "Usuário excluído permanentemente!"
+    });
+
+    // Recarregar lista
+    await carregarUsuarios();
+
+  } catch (error) {
+    console.error("❌ Erro na exclusão:", error);
+    showToast({
+      tipo: "error",
+      titulo: "Erro",
+      mensagem: `Erro ao excluir usuário: ${error.message}`
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ===== CORREÇÃO 4: Corrigir função handleResetSenha =====
+// ✅ SUBSTITUIR a função handleResetSenha (linhas ~267-285) por:
+
+const handleResetSenha = async (usuario) => {
+  const confirmar = window.confirm(
+    `📧 RESETAR SENHA?\n\n` +
+    `Enviar email de redefinição para:\n${usuario.email}\n\n` +
+    `O usuário receberá um link para criar nova senha.`
+  );
+
+  if (!confirmar) return;
+
+  try {
+    console.log("📧 Enviando reset de senha para:", usuario.email);
+    
+    await sendPasswordReset(usuario.email);
+    
+    showToast({
+      tipo: "success",
+      titulo: "Email Enviado",
+      mensagem: "Email de redefinição enviado com sucesso!"
+    });
+
+    // Log de auditoria
+    if (window.auditService) {
+      await window.auditService.logAction(
+        "RESET_PASSWORD",
+        `Reset de senha solicitado para ${usuario.email}`,
+        { usuarioEmail: usuario.email }
+      );
+    }
+
+  } catch (error) {
+    console.error("❌ Erro ao resetar senha:", error);
+    showToast({
+      tipo: "error",
+      titulo: "Erro",
+      mensagem: "Erro ao enviar email de redefinição"
+    });
+  }
+};
+
+// ===== CORREÇÃO 5: Melhorar função showToast =====
+// ✅ SUBSTITUIR a função showToast (linhas ~287-290) por:
+
+const showToast = (toastData) => {
+  console.log("📢 Toast:", toastData);
+  setToast({ 
+    ...toastData, 
+    show: true 
+  });
+  
+  // Auto-hide após 5 segundos
+  setTimeout(() => {
+    setToast({ show: false });
+  }, toastData.duracao || 5000);
+};
+
+// ===== CORREÇÃO 6: Verificar e corrigir props do ConfirmationModal =====
+// ✅ SUBSTITUIR o JSX do modal de confirmação (linhas ~368-378) por:
+
+{confirmationModal.isOpen && (
+  <ConfirmationModal
+    isOpen={confirmationModal.isOpen}
+    title={confirmationModal.title}
+    message={confirmationModal.message}
+    confirmText={confirmationModal.confirmText || "Confirmar"}
+    cancelText={confirmationModal.cancelText || "Cancelar"}
+    onConfirm={() => {
+      if (confirmationModal.onConfirm) {
+        confirmationModal.onConfirm();
+      }
+      setConfirmationModal({ isOpen: false });
+    }}
+    onCancel={() => {
+      if (confirmationModal.onCancel) {
+        confirmationModal.onCancel();
+      }
+      setConfirmationModal({ isOpen: false });
+    }}
+    type={confirmationModal.type || "warning"}
+  />
+)}
+
+// ===== CORREÇÃO 7: Garantir que Toast funcione corretamente =====
+// ✅ SUBSTITUIR o JSX do Toast (linhas ~380-388) por:
+
+{toast.show && (
+  <Toast
+    message={toast.mensagem || toast.message}
+    type={toast.tipo || toast.type || "info"}
+    onClose={() => setToast({ show: false })}
+  />
+)}
+
+// ===== CORREÇÃO 8: Adicionar debugging no useEffect =====
+// ✅ SUBSTITUIR o useEffect (linhas ~300-306) por:
+
+useEffect(() => {
+  const loadData = async () => {
+    console.log("🚀 Iniciando carregamento de dados...");
+    
+    try {
+      await carregarUsuarios();
+      console.log("✅ Usuários carregados");
+      
+      await carregarLogs();
+      console.log("✅ Logs carregados");
+      
+    } catch (error) {
+      console.error("❌ Erro no carregamento inicial:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Erro ao carregar dados iniciais"
+      });
+    }
+  };
+  
+  loadData();
+}, []);
