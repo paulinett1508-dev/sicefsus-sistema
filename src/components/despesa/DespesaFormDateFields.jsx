@@ -15,20 +15,14 @@ const DespesaFormDateFields = ({
   emendaInfo, // ✅ Dados da emenda para validação
   onValidationChange, // ✅ NOVO: Callback para informar estado de validação ao formulário pai
 }) => {
-  // ✅ VALIDAÇÃO ROBUSTA baseada na Lei 4.320/64
+  // ✅ VALIDAÇÃO EM TEMPO REAL mais específica e clara
   const validarDataCampo = (nomeCampo, valor) => {
     if (!valor) return { isValid: false, message: "Data obrigatória" };
     if (!emendaInfo) return { isValid: true, message: "" };
 
-    const dataAtual = new Date();
     const dataInformada = new Date(valor);
 
-    // 1. VALIDAÇÃO: Data não pode ser futura
-    if (dataInformada > dataAtual) {
-      return { isValid: false, message: "Data não pode ser futura" };
-    }
-
-    // 2. VALIDAÇÃO: Data deve estar no período da emenda
+    // 1. VALIDAÇÃO: Data deve estar no período da emenda
     const dataInicio =
       emendaInfo.dataInicio ||
       emendaInfo.dataCriacao ||
@@ -41,65 +35,50 @@ const DespesaFormDateFields = ({
     if (dataInicio && dataInformada < new Date(dataInicio)) {
       return {
         isValid: false,
-        message: `Data deve ser posterior ao início da emenda (${new Date(dataInicio).toLocaleDateString("pt-BR")})`,
+        message: `Deve ser após ${new Date(dataInicio).toLocaleDateString("pt-BR")} (início da emenda)`,
       };
     }
 
     if (dataFim && dataInformada > new Date(dataFim)) {
       return {
         isValid: false,
-        message: `Data deve ser anterior ao fim da emenda (${new Date(dataFim).toLocaleDateString("pt-BR")})`,
+        message: `Deve ser antes de ${new Date(dataFim).toLocaleDateString("pt-BR")} (fim da emenda)`,
       };
     }
 
-    // 3. VALIDAÇÃO ESPECÍFICA: Sequência cronológica obrigatória (Lei 4.320/64)
+    // 2. VALIDAÇÃO: Sequência cronológica (Lei 4.320/64)
     if (nomeCampo === "dataLiquidacao" && formData.dataEmpenho) {
       const dataEmpenho = new Date(formData.dataEmpenho);
       if (dataInformada < dataEmpenho) {
         return {
           isValid: false,
-          message:
-            "Liquidação deve ser posterior ao empenho (Lei 4.320/64, Art. 63)",
+          message: "Deve ser posterior ao empenho",
         };
       }
     }
 
     if (nomeCampo === "dataPagamento") {
-      // Pagamento deve ser posterior ao empenho
+      // Deve ser posterior ao empenho
       if (formData.dataEmpenho) {
         const dataEmpenho = new Date(formData.dataEmpenho);
         if (dataInformada < dataEmpenho) {
           return {
             isValid: false,
-            message: "Pagamento deve ser posterior ao empenho (Lei 4.320/64)",
+            message: "Deve ser posterior ao empenho",
           };
         }
       }
 
-      // Pagamento deve ser posterior à liquidação
+      // Deve ser posterior à liquidação
       if (formData.dataLiquidacao) {
         const dataLiquidacao = new Date(formData.dataLiquidacao);
         if (dataInformada < dataLiquidacao) {
           return {
             isValid: false,
-            message:
-              "Pagamento deve ser posterior à liquidação (Lei 4.320/64, Art. 64)",
+            message: "Deve ser posterior à liquidação",
           };
         }
       }
-    }
-
-    // 4. VALIDAÇÃO: Exercício fiscal (ano da emenda)
-    const anoEmenda = dataInicio
-      ? new Date(dataInicio).getFullYear()
-      : new Date().getFullYear();
-    const anoInformado = dataInformada.getFullYear();
-
-    if (anoInformado > anoEmenda + 1) {
-      return {
-        isValid: false,
-        message: `Data fora do exercício fiscal válido (${anoEmenda}-${anoEmenda + 1})`,
-      };
     }
 
     return { isValid: true, message: "" };
@@ -118,7 +97,7 @@ const DespesaFormDateFields = ({
     });
   };
 
-  // ✅ OBTER LIMITES de data baseado na emenda
+  // ✅ OBTER LIMITES de data baseado na emenda (sem restrição de data futura)
   const obterLimitesData = () => {
     if (!emendaInfo) return { min: null, max: null };
 
@@ -133,9 +112,7 @@ const DespesaFormDateFields = ({
 
     return {
       min: dataInicio ? new Date(dataInicio).toISOString().split("T")[0] : null,
-      max: dataFim
-        ? new Date(dataFim).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0],
+      max: dataFim ? new Date(dataFim).toISOString().split("T")[0] : null, // ✅ Sem limitação de data atual
     };
   };
 
@@ -198,8 +175,6 @@ const DespesaFormDateFields = ({
             name="dataEmpenho"
             value={formData.dataEmpenho || ""}
             onChange={handleInputChange}
-            min={limites.min}
-            max={limites.max}
             style={obterEstiloCampo("dataEmpenho", formData.dataEmpenho)}
             disabled={modoVisualizacao}
             required
@@ -226,8 +201,6 @@ const DespesaFormDateFields = ({
             name="dataLiquidacao"
             value={formData.dataLiquidacao || ""}
             onChange={handleInputChange}
-            min={limites.min}
-            max={limites.max}
             style={obterEstiloCampo("dataLiquidacao", formData.dataLiquidacao)}
             disabled={modoVisualizacao}
             required
@@ -257,8 +230,6 @@ const DespesaFormDateFields = ({
             name="dataPagamento"
             value={formData.dataPagamento || ""}
             onChange={handleInputChange}
-            min={limites.min}
-            max={limites.max}
             style={obterEstiloCampo("dataPagamento", formData.dataPagamento)}
             disabled={modoVisualizacao}
             required
