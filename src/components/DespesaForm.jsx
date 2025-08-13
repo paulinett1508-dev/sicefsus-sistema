@@ -2,7 +2,7 @@
 // ✅ REFATORADO: De 1404 linhas para ~200 linhas
 // Reutiliza componentes modulares existentes + hooks/utils existentes
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   doc,
@@ -14,6 +14,7 @@ import {
   getDocs,
   addDoc,
   getDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
@@ -61,7 +62,7 @@ const DespesaForm = ({
   const isMounted = useIsMounted();
   const navigate = useNavigate();
   const { valorError, handleValorChange } = useMoedaFormatting();
-  const { cnpjError, handleCNPJChange } = useCNPJValidation();
+  const {cnpjError, handleCNPJChange } = useCNPJValidation();
 
   // ✅ DADOS DO USUÁRIO SIMPLIFICADOS
   const userRole = usuario?.role || usuario?.tipo;
@@ -112,7 +113,8 @@ const DespesaForm = ({
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [mostrarCamposAvancados, setMostrarCamposAvancados] = useState(false);
   const [emendas, setEmendas] = useState(emendasDisponiveis);
-  const [emendaData, setEmendaData] = useState(null); // Estado original mantido
+  const [emendaData, setEmendaData] = useState(emendaInfo);
+  const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo); // Estado para emenda carregada dinamicamente
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // ✅ CONFIGURAÇÃO DE MODO SIMPLIFICADA
@@ -167,7 +169,87 @@ const DespesaForm = ({
     }
   }, [userRole, userMunicipio]);
 
+  // ✅ FUNÇÃO para buscar dados da emenda selecionada:
+  const carregarDadosEmenda = useCallback(async (emendaId) => {
+    if (!emendaId) {
+      setEmendaInfoDinamica(null);
+      return;
+    }
+
+    try {
+      console.log("🔍 Buscando dados da emenda:", emendaId);
+
+      const emendaRef = doc(db, "emendas", emendaId);
+      const emendaDoc = await getDoc(emendaRef);
+
+      if (emendaDoc.exists()) {
+        const emendaData = { id: emendaDoc.id, ...emendaDoc.data() };
+
+        // Calcular saldo disponível
+        const despesasQuery = query(
+          collection(db, "despesas"),
+          where("emendaId", "==", emendaId)
+        );
+        const despesasSnapshot = await getDocs(despesasQuery);
+
+        const totalExecutado = despesasSnapshot.docs.reduce((total, doc) => {
+          const despesa = doc.data();
+          return total + (parseFloat(despesa.valor) || 0);
+        }, 0);
+
+        const saldoDisponivel = (parseFloat(emendaData.valor) || 0) - totalExecutado;
+
+        const emendaCompleta = {
+          ...emendaData,
+          saldoDisponivel,
+          totalExecutado,
+          percentualExecutado: emendaData.valor > 0 ? (totalExecutado / emendaData.valor) * 100 : 0
+        };
+
+        setEmendaInfoDinamica(emendaCompleta);
+        console.log("✅ Dados da emenda carregados:", emendaCompleta);
+
+      } else {
+        console.warn("⚠️ Emenda não encontrada:", emendaId);
+        setEmendaInfoDinamica(null);
+      }
+
+    } catch (error) {
+      console.error("❌ Erro ao carregar dados da emenda:", error);
+      setToast({
+        show: true,
+        message: "Erro ao carregar informações da emenda",
+        type: "error",
+      });
+      setEmendaInfoDinamica(null);
+    }
+  }, []);
+
+
   // ✅ EFFECTS SIMPLIFICADOS
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // ✅ useEffect para monitorar mudanças na emenda selecionada:
+  useEffect(() => {
+    // Se tem emenda pré-selecionada, usar ela
+    if (emendaPreSelecionada && emendaInfo) {
+      setEmendaInfoDinamica(emendaInfo);
+      return;
+    }
+
+    // Se usuário selecionou emenda manualmente, buscar dados
+    if (formData.emendaId && !emendaPreSelecionada) {
+      carregarDadosEmenda(formData.emendaId);
+    } else if (!formData.emendaId) {
+      setEmendaInfoDinamica(null);
+    }
+  }, [formData.emendaId, emendaPreSelecionada, emendaInfo, carregarDadosEmenda]);
+
+
   useEffect(() => {
     if (emendas.length === 0 && !emendaPreSelecionada) {
       carregarEmendas();
@@ -202,7 +284,7 @@ const DespesaForm = ({
 
       // Tratamento especial para valor monetário
       if (name === "valor") {
-        handleValorChange(value, emendaInfo, setFormData);
+        handleValorChange(value, emendaInfoDinamica || emendaInfo, setFormData);
         return;
       }
 
@@ -220,12 +302,13 @@ const DespesaForm = ({
         setErrors((prev) => ({ ...prev, [name]: "" }));
       }
     },
-    [isMounted, errors, emendaInfo, handleValorChange, handleCNPJChange],
+    [isMounted, errors, emendaInfoDinamica, emendaInfo, handleValorChange, handleCNPJChange],
   );
 
   // ✅ VALIDAÇÃO SIMPLIFICADA
   const validarFormulario = useCallback(() => {
     const novosErrors = {};
+    const emendaAtual = emendaInfoDinamica || emendaInfo; // Usar emenda dinâmica ou pré-selecionada
 
     const camposObrigatorios = {
       emendaId: "Emenda é obrigatória",
@@ -255,8 +338,8 @@ const DespesaForm = ({
         novosErrors.valor = "Valor deve ser maior que 0";
       }
 
-      if (emendaInfo && valor > emendaInfo.saldoDisponivel) {
-        novosErrors.valor = `Valor excede o saldo disponível (R$ ${emendaInfo.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})`;
+      if (emendaAtual && valor > emendaAtual.saldoDisponivel) {
+        novosErrors.valor = `Valor excede o saldo disponível (R$ ${emendaAtual.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})`;
       }
     }
 
@@ -274,9 +357,9 @@ const DespesaForm = ({
     }
 
     // ✅ NOVA VALIDAÇÃO: Verificar se datas não excedem validade da emenda
-    if (emendaInfo?.dataValidade || emendaInfo?.dataFim || emendaInfo?.dataVencimento) {
-      const dataValidade = new Date(emendaInfo.dataValidade || emendaInfo.dataFim || emendaInfo.dataVencimento);
-      const dataInicio = emendaInfo.dataInicio || emendaInfo.dataCriacao || emendaInfo.dataAprovacao;
+    if (emendaAtual?.dataValidade || emendaAtual?.dataFim || emendaAtual?.dataVencimento) {
+      const dataValidade = new Date(emendaAtual.dataValidade || emendaAtual.dataFim || emendaAtual.dataVencimento);
+      const dataInicio = emendaAtual.dataInicio || emendaAtual.dataCriacao || emendaAtual.dataAprovacao;
       const inicioEmenda = dataInicio ? new Date(dataInicio) : null;
 
       // Validar data do empenho
@@ -345,7 +428,7 @@ const DespesaForm = ({
 
     setErrors(novosErrors);
     return Object.keys(novosErrors).length === 0;
-  }, [formData, emendaInfo, valorError, cnpjError]);
+  }, [formData, emendaInfoDinamica, emendaInfo, valorError, cnpjError]);
 
   // ✅ SUBMISSÃO SIMPLIFICADA
   const handleSubmit = async (e) => {
@@ -561,8 +644,10 @@ const DespesaForm = ({
         configModo={configModo}
       />
 
-      {/* ✅ CARD DA EMENDA EXTRAÍDO */}
-      {emendaInfo && <DespesaFormEmendaInfo emendaInfo={emendaInfo} />}
+      {/* CARD DA EMENDA - Mostrar sempre que houver dados */}
+        {(emendaInfoDinamica || emendaInfo) && (
+          <DespesaFormEmendaInfo emendaInfo={emendaInfoDinamica || emendaInfo} />
+        )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
         {/* ✅ TODAS AS SEÇÕES EXTRAÍDAS PARA COMPONENTES MODULARES */}
@@ -571,7 +656,7 @@ const DespesaForm = ({
           errors={errors}
           emendas={emendas}
           emendaPreSelecionada={emendaPreSelecionada}
-          emendaInfo={emendaInfo}
+          emendaInfo={emendaInfoDinamica || emendaInfo}
           userRole={userRole}
           userMunicipio={userMunicipio}
           modoVisualizacao={modoVisualizacao}
@@ -591,7 +676,7 @@ const DespesaForm = ({
           errors={errors}
           modoVisualizacao={modoVisualizacao}
           handleInputChange={handleInputChange}
-          emendaInfo={emendaInfo} // ✅ NOVO: Passar emendaInfo
+          emendaInfo={emendaInfoDinamica || emendaInfo} // ✅ NOVO: Passar emendaInfo
         />
 
         <DespesaFormOrcamentoFields
