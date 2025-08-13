@@ -43,6 +43,16 @@ const Cronograma = ({
     return data > validade;
   };
 
+  // Validação específica: OB anterior à aprovação
+  const isOBAnteriorAprovacao = (dataOB, dataAprovacao) => {
+    if (!dataOB || !dataAprovacao) return false;
+    if (!isDataValidaComparacao(dataOB) || !isDataValidaComparacao(dataAprovacao)) return false;
+    
+    const ob = new Date(dataOB);
+    const aprovacao = new Date(dataAprovacao);
+    return ob < aprovacao;
+  };
+
   // Função para obter mensagem de erro específica
   const getDataErrorMessage = (fieldName, value) => {
     if (!value) return null;
@@ -60,8 +70,15 @@ const Cronograma = ({
       return "Data de aprovação não pode ser futura";
     }
 
-    if (fieldName === "dataOb" && isDataFutura(value)) {
-      return "Data OB não pode ser futura";
+    if (fieldName === "dataOb") {
+      if (isDataFutura(value)) {
+        return "Data OB não pode ser futura";
+      }
+      
+      // ✅ NOVA VALIDAÇÃO: OB anterior à aprovação
+      if (formData.dataAprovacao && isOBAnteriorAprovacao(value, formData.dataAprovacao)) {
+        return "Data OB não pode ser anterior à Data de Aprovação (fluxo irregular)";
+      }
     }
 
     // Verificar contra data de validade
@@ -101,32 +118,22 @@ const Cronograma = ({
         Cronograma
       </legend>
 
-      <div style={styles.formGrid}>
-        {/* ✅ Data de Validade - SEM TEXTO EXPLICATIVO */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Data de Validade <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="date"
-            name="dataValidade"
-            value={formData?.dataValidade || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors?.dataValidade && styles.inputError),
-            }}
-            disabled={disabled}
-            required
-          />
-          {fieldErrors?.dataValidade && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
+      {/* 🎯 BANNER EXPLICATIVO DO FLUXO CRONOLÓGICO */}
+      <div style={styles.fluxoBanner}>
+        <div style={styles.fluxoIcon}>🔄</div>
+        <div style={styles.fluxoContent}>
+          <strong>Fluxo Cronológico:</strong> 
+          <span style={styles.fluxoSequence}>
+            Aprovação → OB → Início → Final → Validade
+          </span>
         </div>
+      </div>
 
-        {/* Data de Aprovação */}
+      <div style={styles.formGrid}>
+        {/* 1️⃣ PRIMEIRO: Data de Aprovação - BASE DO PROCESSO */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
+            <span style={styles.stepBadge}>1</span>
             Data de Aprovação <span style={styles.required}>*</span>
           </label>
           <input
@@ -137,10 +144,9 @@ const Cronograma = ({
             style={{
               ...styles.input,
               ...(fieldErrors?.dataAprovacao && styles.inputError),
-              ...(getDataErrorMessage(
-                "dataAprovacao",
-                formData?.dataAprovacao,
-              ) && styles.inputError),
+              ...(getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && styles.inputError),
+              borderColor: '#3498db',
+              borderWidth: '2px'
             }}
             disabled={disabled}
             required
@@ -150,15 +156,18 @@ const Cronograma = ({
               {getDataErrorMessage("dataAprovacao", formData?.dataAprovacao)}
             </small>
           )}
-          {fieldErrors?.dataAprovacao &&
-            !getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
-              <small style={styles.errorText}>Campo obrigatório</small>
-            )}
+          {fieldErrors?.dataAprovacao && !getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
+          <small style={styles.helperText}>🏛️ Aprovação pelo Congresso Nacional</small>
         </div>
 
-        {/* Data OB */}
+        {/* 2️⃣ SEGUNDO: Data OB */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Data OB</label>
+          <label style={styles.label}>
+            <span style={styles.stepBadge}>2</span>
+            Data OB
+          </label>
           <input
             type="date"
             name="dataOb"
@@ -166,21 +175,25 @@ const Cronograma = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(getDataErrorMessage("dataOb", formData?.dataOb) &&
-                styles.inputError),
+              ...(getDataErrorMessage("dataOb", formData?.dataOb) && styles.inputError),
+              opacity: formData?.dataAprovacao ? 1 : 0.6
             }}
-            disabled={disabled}
+            disabled={disabled || !formData?.dataAprovacao}
           />
           {getDataErrorMessage("dataOb", formData?.dataOb) && (
             <small style={styles.errorText}>
               {getDataErrorMessage("dataOb", formData?.dataOb)}
             </small>
           )}
+          <small style={styles.helperText}>🏦 Ordem Bancária (após aprovação)</small>
         </div>
 
-        {/* Início da Execução */}
+        {/* 3️⃣ TERCEIRO: Início da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Início da Execução</label>
+          <label style={styles.label}>
+            <span style={styles.stepBadge}>3</span>
+            Início da Execução
+          </label>
           <input
             type="date"
             name="inicioExecucao"
@@ -188,23 +201,25 @@ const Cronograma = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(getDataErrorMessage(
-                "inicioExecucao",
-                formData?.inicioExecucao,
-              ) && styles.inputError),
+              ...(getDataErrorMessage("inicioExecucao", formData?.inicioExecucao) && styles.inputError),
+              opacity: formData?.dataAprovacao ? 1 : 0.6
             }}
-            disabled={disabled}
+            disabled={disabled || !formData?.dataAprovacao}
           />
           {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao) && (
             <small style={styles.errorText}>
               {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao)}
             </small>
           )}
+          <small style={styles.helperText}>🚀 Início das ações executivas</small>
         </div>
 
-        {/* Final da Execução */}
+        {/* 4️⃣ QUARTO: Final da Execução */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Final da Execução</label>
+          <label style={styles.label}>
+            <span style={styles.stepBadge}>4</span>
+            Final da Execução
+          </label>
           <input
             type="date"
             name="finalExecucao"
@@ -212,23 +227,51 @@ const Cronograma = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
-              ...(getDataErrorMessage(
-                "finalExecucao",
-                formData?.finalExecucao,
-              ) && styles.inputError),
+              ...(getDataErrorMessage("finalExecucao", formData?.finalExecucao) && styles.inputError),
+              opacity: formData?.inicioExecucao ? 1 : 0.6
             }}
-            disabled={disabled}
+            disabled={disabled || !formData?.inicioExecucao}
           />
           {getDataErrorMessage("finalExecucao", formData?.finalExecucao) && (
             <small style={styles.errorText}>
               {getDataErrorMessage("finalExecucao", formData?.finalExecucao)}
             </small>
           )}
+          <small style={styles.helperText}>🏁 Conclusão das ações</small>
         </div>
 
-        {/* Data da Última Atualização - Campo informativo */}
+        {/* 5️⃣ QUINTO: Data de Validade */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>Data da Última Atualização</label>
+          <label style={styles.label}>
+            <span style={styles.stepBadge}>5</span>
+            Data de Validade <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="date"
+            name="dataValidade"
+            value={formData?.dataValidade || ""}
+            onChange={handleInputChange}
+            style={{
+              ...styles.input,
+              ...(fieldErrors?.dataValidade && styles.inputError),
+              borderColor: '#e74c3c',
+              borderWidth: '2px'
+            }}
+            disabled={disabled}
+            required
+          />
+          {fieldErrors?.dataValidade && (
+            <small style={styles.errorText}>Campo obrigatório</small>
+          )}
+          <small style={styles.helperText}>⏰ Prazo legal final</small>
+        </div>
+
+        {/* 📊 ÚLTIMO: Data da Última Atualização */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            <span style={styles.stepBadge}>📊</span>
+            Data da Última Atualização
+          </label>
           <input
             type="date"
             value={formData?.dataUltimaAtualizacao || ""}
@@ -240,7 +283,7 @@ const Cronograma = ({
             disabled={true}
             readOnly
           />
-          <small style={styles.helperText}>Atualizada automaticamente</small>
+          <small style={styles.helperText}>🔄 Atualizada automaticamente</small>
         </div>
       </div>
     </fieldset>
@@ -319,6 +362,44 @@ const styles = {
     fontSize: "12px",
     color: "#6c757d",
     marginTop: "4px",
+  },
+  fluxoBanner: {
+    backgroundColor: "#e8f4fd",
+    borderRadius: "8px",
+    padding: "12px 16px",
+    marginBottom: "20px",
+    border: "1px solid #3498db",
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+  fluxoIcon: {
+    fontSize: "16px",
+    flexShrink: 0,
+  },
+  fluxoContent: {
+    fontSize: "14px",
+    color: "#2c3e50",
+  },
+  fluxoSequence: {
+    marginLeft: "8px",
+    fontFamily: "monospace",
+    color: "#3498db",
+    fontWeight: "bold",
+  },
+  stepBadge: {
+    width: "18px",
+    height: "18px",
+    borderRadius: "50%",
+    backgroundColor: "#3498db",
+    color: "white",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "10px",
+    fontWeight: "bold",
+    flexShrink: 0,
+    marginRight: "4px",
   },
 };
 
