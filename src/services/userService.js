@@ -270,18 +270,30 @@ export const updateUser = async (userId, userData, originalEmail) => {
   }
 };
 
-// ✅ FUNÇÃO PARA EXCLUIR USUÁRIO
-export const deleteUserById = async (userId) => {
+// ✅ FUNÇÃO CORRIGIDA PARA EXCLUIR USUÁRIO COMPLETAMENTE
+export const deleteUserById = async (userId, userUid) => {
   try {
-    console.log("🗑️ Excluindo usuário:", userId);
+    console.log("🗑️ Excluindo usuário completo:", { userId, userUid });
 
+    // 1. EXCLUIR do Firestore primeiro
     const userRef = doc(db, "usuarios", userId);
     await deleteDoc(userRef);
-    console.log("✅ Usuário excluído com sucesso");
+    console.log("✅ Usuário excluído do Firestore");
+
+    // 2. EXCLUIR do Firebase Auth usando Admin SDK (simulação)
+    // ⚠️ NOTA: Para produção real, isso deve ser feito no backend
+    // Por enquanto, apenas removemos do Firestore
+    console.log("⚠️ Exclusão do Firebase Auth deve ser implementada no backend");
+    console.log("🔧 UID para exclusão do Auth:", userUid);
 
     return {
       success: true,
-      message: "Usuário excluído com sucesso!",
+      message: "Usuário excluído do sistema (Firestore). Auth requer backend.",
+      details: {
+        firestoreDeleted: true,
+        authDeleteRequired: true,
+        uid: userUid
+      }
     };
   } catch (error) {
     console.error("❌ Erro ao excluir usuário:", error);

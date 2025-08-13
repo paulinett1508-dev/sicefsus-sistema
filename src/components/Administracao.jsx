@@ -56,7 +56,7 @@ const Administracao = () => {
     dataFim: "",
   });
 
-  // ✅ CORREÇÃO: Implementar carregamento real de usuários
+  // ✅ CORREÇÃO: Implementar carregamento real de usuários com debugging
   const carregarUsuarios = async () => {
     try {
       setLoading(true);
@@ -68,14 +68,24 @@ const Administracao = () => {
 
       const usuariosData = [];
       snapshot.forEach((doc) => {
-        usuariosData.push({
-          id: doc.id,
+        const userData = {
+          id: doc.id, // ✅ ID do documento Firestore
           ...doc.data(),
+        };
+        usuariosData.push(userData);
+        
+        // ✅ DEBUG: Mostrar estrutura de dados
+        console.log("👤 Usuário carregado:", {
+          documentId: doc.id,
+          uid: userData.uid,
+          email: userData.email,
+          nome: userData.nome,
+          status: userData.status
         });
       });
 
       setUsuarios(usuariosData);
-      console.log(`✅ ${usuariosData.length} usuários carregados`);
+      console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
     } catch (error) {
       console.error("❌ Erro ao carregar usuários:", error);
       showToast("Erro ao carregar usuários", "error");
@@ -176,29 +186,25 @@ const Administracao = () => {
     }
   };
 
-  // ✅ FUNÇÃO PARA EXCLUIR USUÁRIO PERMANENTEMENTE
+  // ✅ FUNÇÃO CORRIGIDA PARA EXCLUIR USUÁRIO PERMANENTEMENTE
   const handleExcluirUsuario = async (usuario) => {
-    console.log("🗑️ handleExcluirUsuario chamado com:", usuario);
+    console.log("🗑️ handleExcluirUsuario chamado com:", {
+      id: usuario?.id,
+      uid: usuario?.uid,
+      nome: usuario?.nome,
+      status: usuario?.status
+    });
 
-    if (!usuario?.id) {
-      console.error("❌ ID do usuário não fornecido");
-      showToast({
-        tipo: "erro",
-        titulo: "❌ Erro",
-        mensagem: "ID do usuário não encontrado",
-        duracao: 3000,
-      });
+    // ✅ CORREÇÃO: Verificar tanto ID quanto UID
+    if (!usuario?.id && !usuario?.uid) {
+      console.error("❌ ID ou UID do usuário não fornecido");
+      showToast("❌ Dados do usuário incompletos", "error");
       return;
     }
 
     // Verificar se o usuário está inativo
     if (usuario.status === "ativo") {
-      showToast({
-        tipo: "aviso",
-        titulo: "⚠️ Usuário Ativo",
-        mensagem: "Desative o usuário antes de excluí-lo",
-        duracao: 4000,
-      });
+      showToast("⚠️ Desative o usuário antes de excluí-lo", "warning");
       return;
     }
 
@@ -211,24 +217,37 @@ const Administracao = () => {
       onConfirm: async () => {
         try {
           console.log("🗑️ Executando exclusão permanente...");
+          
+          let documentId = null;
+          let userUid = usuario.uid;
 
-          // Buscar o documento do usuário na coleção
-          const usuariosQuery = query(
-            collection(db, "usuarios"),
-            where("uid", "==", usuario.uid)
-          );
+          // ✅ CORREÇÃO: Se temos o ID do documento, usar diretamente
+          if (usuario.id) {
+            documentId = usuario.id;
+            console.log("📋 Usando ID do documento direto:", documentId);
+          } else {
+            // ✅ FALLBACK: Buscar por UID se não temos o ID
+            console.log("🔍 Buscando documento por UID:", usuario.uid);
+            const usuariosQuery = query(
+              collection(db, "usuarios"),
+              where("uid", "==", usuario.uid)
+            );
+            const usuariosSnapshot = await getDocs(usuariosQuery);
 
-          const usuariosSnapshot = await getDocs(usuariosQuery);
+            if (usuariosSnapshot.empty) {
+              throw new Error("Usuário não encontrado na base de dados");
+            }
 
-          if (usuariosSnapshot.empty) {
-            throw new Error("Usuário não encontrado na base de dados");
+            documentId = usuariosSnapshot.docs[0].id;
+            console.log("📋 ID do documento encontrado:", documentId);
           }
 
-          // Excluir o documento do Firestore
-          const userDoc = usuariosSnapshot.docs[0];
-          await deleteDoc(doc(db, "usuarios", userDoc.id));
+          // ✅ CORREÇÃO: Excluir usando o ID correto
+          await deleteDoc(doc(db, "usuarios", documentId));
+          console.log("✅ Usuário excluído do Firestore com ID:", documentId);
 
-          console.log("✅ Usuário excluído do Firestore");
+          // ⚠️ NOTA: Exclusão do Firebase Auth deve ser feita no backend
+          console.log("⚠️ UID para exclusão do Auth (backend):", userUid);
 
           // Log de auditoria
           if (window.auditService) {
@@ -237,7 +256,8 @@ const Administracao = () => {
               `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
               {
                 usuarioExcluido: {
-                  uid: usuario.uid,
+                  documentId: documentId,
+                  uid: userUid,
                   nome: usuario.nome,
                   email: usuario.email,
                   municipio: usuario.municipio,
@@ -247,7 +267,7 @@ const Administracao = () => {
             );
           }
 
-          showToast("✅ Usuário excluído permanentemente!", "success");
+          showToast("✅ Usuário excluído permanentemente do sistema!", "success");
           await carregarUsuarios();
         } catch (error) {
           console.error("❌ Erro ao excluir usuário:", error);
