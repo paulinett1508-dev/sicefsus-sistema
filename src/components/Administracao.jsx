@@ -173,7 +173,7 @@ const Administracao = () => {
         showToast({ tipo: "success", titulo: "Sucesso", mensagem: "Usuário atualizado com sucesso!" });
       } else {
         // Criar novo usuário
-        const resultado = await userService.createUser({
+        const resultado = await createUser({
           email: formData.email,
           nome: formData.nome,
           role: formData.role === "admin" ? "admin" : "operador", // ✅ USAR role ao invés de tipo
@@ -204,77 +204,95 @@ const Administracao = () => {
 
   // ✅ FUNÇÃO CORRIGIDA PARA EXCLUIR USUÁRIO PERMANENTEMENTE
   const handleDelete = async (usuario) => {
-    console.log("🗑️ Tentativa de exclusão:", usuario);
+    console.log("🗑️ === EXCLUSÃO UNIVERSAL ===");
+    console.log("🗑️ Dados do usuário:", {
+      id: usuario?.id,
+      uid: usuario?.uid,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      status: usuario?.status
+    });
 
-    // Verificar se usuário está inativo
-    if (usuario.status === "ativo") {
+    // Verificar dados básicos
+    if (!usuario?.id) {
+      console.error("❌ ID do usuário não encontrado");
       showToast({
-        tipo: "erro",
-        titulo: "❌ Usuário Ativo",
-        mensagem: "Desative o usuário primeiro para poder excluir",
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Dados do usuário incompletos"
       });
       return;
     }
 
-    // Mostrar modal de confirmação
-    setConfirmationModal({
-      isOpen: true,
-      title: "Excluir Usuário Permanentemente",
-      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome || usuario.email}"? Esta ação não pode ser desfeita.`,
-      confirmText: "Sim, Excluir",
-      cancelText: "Cancelar",
-      type: "danger",
-      onConfirm: async () => {
-        try {
-          setLoading(true);
+    // Verificar se usuário está inativo
+    if (usuario.status === "ativo") {
+      showToast({
+        tipo: "warning",
+        titulo: "Usuário Ativo",
+        mensagem: "Desative o usuário primeiro para poder excluir"
+      });
+      return;
+    }
 
-          console.log("🗑️ Excluindo usuário:", {
-            id: usuario.id,
-            uid: usuario.uid,
-            email: usuario.email
-          });
+    // Confirmar exclusão
+    const confirmar = window.confirm(
+      `🗑️ EXCLUIR PERMANENTEMENTE?\n\n` +
+      `Nome: ${usuario.nome || 'N/A'}\n` +
+      `Email: ${usuario.email || 'N/A'}\n` +
+      `ID: ${usuario.id}\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
+    );
 
-          // Usar o ID do documento como primeiro parâmetro e UID como segundo
-          const userDocId = usuario.id || usuario.uid;
-          const userAuthId = usuario.uid;
+    if (!confirmar) {
+      console.log("❌ Exclusão cancelada pelo usuário");
+      return;
+    }
 
-          await deleteUserById(userDocId, userAuthId);
+    try {
+      console.log("🗑️ Executando exclusão...");
+      setLoading(true);
 
-          showToast({
-            tipo: "sucesso",
-            titulo: "✅ Usuário Excluído",
-            mensagem: `Usuário ${usuario.nome || usuario.email} removido permanentemente`,
-          });
+      // ✅ EXCLUSÃO DIRETA DO FIRESTORE
+      await deleteDoc(doc(db, "usuarios", usuario.id));
+      console.log("✅ Usuário excluído do Firestore");
 
-          // Registrar auditoria
-          await auditService.log(
-            "delete_user",
-            "usuarios",
-            userDocId,
-            {
-              usuario_excluido: usuario.email,
-              motivo: "Exclusão permanente via administração"
-            }
-          );
-
-          // Recarregar lista
-          await carregarUsuarios();
-        } catch (error) {
-          console.error("❌ Erro ao excluir usuário:", error);
-          showToast({
-            tipo: "erro",
-            titulo: "❌ Erro na Exclusão",
-            mensagem: error.message || "Erro ao excluir usuário",
-          });
-        } finally {
-          setLoading(false);
-          setConfirmationModal({ isOpen: false });
-        }
-      },
-      onCancel: () => {
-        setConfirmationModal({ isOpen: false });
+      // Log de auditoria
+      if (window.auditService) {
+        await window.auditService.logAction(
+          "DELETE_USER",
+          `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
+          {
+            usuarioExcluido: {
+              id: usuario.id,
+              uid: usuario.uid,
+              nome: usuario.nome,
+              email: usuario.email,
+              municipio: usuario.municipio,
+              uf: usuario.uf,
+            },
+          }
+        );
       }
-    });
+
+      showToast({
+        tipo: "success",
+        titulo: "Sucesso",
+        mensagem: "Usuário excluído permanentemente!"
+      });
+
+      // Recarregar lista
+      await carregarUsuarios();
+
+    } catch (error) {
+      console.error("❌ Erro na exclusão:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: `Erro ao excluir usuário: ${error.message}`
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -333,31 +351,56 @@ const Administracao = () => {
   };
 
   // ✅ IMPLEMENTAR: Handler para resetar senha
-  const handleResetSenha = (usuario) => {
-    setConfirmationModal({
-      isOpen: true,
-      title: "Resetar Senha",
-      message: `Deseja enviar um email de redefinição de senha para "${usuario.email}"?`,
-      confirmText: "Enviar Email",
-      cancelText: "Cancelar",
-      type: "warning",
-      onConfirm: async () => {
-        try {
-          await userService.sendPasswordReset(usuario.email);
-          showToast({ tipo: "success", titulo: "Sucesso", mensagem: "Email de redefinição enviado!" });
-        } catch (error) {
-          console.error("❌ Erro ao resetar senha:", error);
-          showToast({ tipo: "error", titulo: "Erro", mensagem: "Erro ao enviar email de redefinição" });
-        }
-        setConfirmationModal({ isOpen: false });
-      },
-      onCancel: () => setConfirmationModal({ isOpen: false }),
-    });
+  const handleResetSenha = async (usuario) => {
+    const confirmar = window.confirm(
+      `📧 RESETAR SENHA?\n\n` +
+      `Enviar email de redefinição para:\n${usuario.email}\n\n` +
+      `O usuário receberá um link para criar nova senha.`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      console.log("📧 Enviando reset de senha para:", usuario.email);
+
+      await sendPasswordReset(usuario.email);
+
+      showToast({
+        tipo: "success",
+        titulo: "Email Enviado",
+        mensagem: "Email de redefinição enviado com sucesso!"
+      });
+
+      // Log de auditoria
+      if (window.auditService) {
+        await window.auditService.logAction(
+          "RESET_PASSWORD",
+          `Reset de senha solicitado para ${usuario.email}`,
+          { usuarioEmail: usuario.email }
+        );
+      }
+
+    } catch (error) {
+      console.error("❌ Erro ao resetar senha:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Erro ao enviar email de redefinição"
+      });
+    }
   };
 
   const showToast = (toastData) => {
-    setToast({ ...toastData, show: true });
-    setTimeout(() => setToast({ show: false }), toastData.duracao || 5000);
+    console.log("📢 Toast:", toastData);
+    setToast({ 
+      ...toastData, 
+      show: true 
+    });
+
+    // Auto-hide após 5 segundos
+    setTimeout(() => {
+      setToast({ show: false });
+    }, toastData.duracao || 5000);
   };
 
   // Função para carregar logs
@@ -376,9 +419,25 @@ const Administracao = () => {
   // useEffect para carregar dados
   useEffect(() => {
     const loadData = async () => {
-      await carregarUsuarios();
-      await carregarLogs();
+      console.log("🚀 Iniciando carregamento de dados...");
+
+      try {
+        await carregarUsuarios();
+        console.log("✅ Usuários carregados");
+
+        await carregarLogs();
+        console.log("✅ Logs carregados");
+
+      } catch (error) {
+        console.error("❌ Erro no carregamento inicial:", error);
+        showToast({
+          tipo: "error",
+          titulo: "Erro",
+          mensagem: "Erro ao carregar dados iniciais"
+        });
+      }
     };
+
     loadData();
   }, []);
 
@@ -644,7 +703,6 @@ const Administracao = () => {
           title={confirmationModal.title}
           message={confirmationModal.message}
           confirmText={confirmationModal.confirmText}
-          cancelText={confirmationModal.cancelText}
           onConfirm={confirmationModal.onConfirm}
           onCancel={confirmationModal.onCancel}
           type={confirmationModal.type}
