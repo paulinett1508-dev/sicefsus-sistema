@@ -287,17 +287,29 @@ const Administracao = () => {
     });
   };
 
-  // 🔄 FUNÇÃO: Toggle status do usuário (COMPLETA)
+  // 🔄 FUNÇÃO: Toggle status do usuário (ALTERNATIVA DIRETA)
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
-
+    
     console.log(`🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`);
 
     try {
-      await updateUser(
-        usuario.id,
-        { status: novoStatus },
-        usuario.email
+      // ✅ SOLUÇÃO DIRETA: updateDoc apenas o campo status
+      const userRef = doc(db, "usuarios", usuario.id);
+      await updateDoc(userRef, {
+        status: novoStatus,
+        dataAtualizacao: serverTimestamp(),
+      });
+
+      // Log de auditoria
+      await auditService.logAction(
+        "UPDATE_USER_STATUS",
+        `Status do usuário ${usuario.nome} alterado para ${novoStatus}`,
+        {
+          usuarioId: usuario.id,
+          statusAnterior: usuario.status,
+          statusNovo: novoStatus,
+        }
       );
 
       showToast({
