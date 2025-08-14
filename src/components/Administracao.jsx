@@ -231,17 +231,128 @@ const Administracao = () => {
     }
   };
 
-  // 🎯 OUTROS HANDLERS (delete, toggle, reset) - Mantidos iguais mas limpos
+  // 🗑️ FUNÇÃO: Excluir usuário (COMPLETA)
   const handleDelete = async (usuario) => {
-    // ... implementação igual mas sem console.log excessivos
+    console.log("🗑️ handleDelete chamado com:", usuario);
+
+    // Verificar se usuário está inativo
+    if (usuario.status === "ativo") {
+      showToast({
+        tipo: "warning",
+        titulo: "Atenção",
+        mensagem: "Inative o usuário antes de excluí-lo",
+      });
+      return;
+    }
+
+    // Confirmar exclusão
+    setConfirmationModal({
+      isOpen: true,
+      title: "Excluir Usuário",
+      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          console.log("🗑️ Executando exclusão...");
+
+          // Usar ID correto do documento
+          const resultado = await deleteUserById(usuario.id);
+
+          if (resultado.success) {
+            showToast({
+              tipo: "success",
+              titulo: "Sucesso",
+              mensagem: resultado.message,
+            });
+
+            // Recarregar lista
+            await carregarUsuarios();
+          }
+        } catch (error) {
+          console.error("❌ Erro ao excluir usuário:", error);
+          showToast({
+            tipo: "error",
+            titulo: "Erro",
+            mensagem: error.message || "Erro ao excluir usuário",
+          });
+        }
+
+        setConfirmationModal({ isOpen: false });
+      },
+      onCancel: () => {
+        setConfirmationModal({ isOpen: false });
+      },
+    });
   };
 
+  // 🔄 FUNÇÃO: Toggle status do usuário (COMPLETA)
   const handleToggleStatus = async (usuario) => {
-    // ... implementação igual
+    const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
+
+    console.log(`🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`);
+
+    try {
+      await updateUser(
+        usuario.id,
+        { status: novoStatus },
+        usuario.email
+      );
+
+      showToast({
+        tipo: "success",
+        titulo: "Sucesso",
+        mensagem: `Usuário ${novoStatus === "ativo" ? "ativado" : "inativado"} com sucesso!`,
+      });
+
+      // Recarregar lista
+      await carregarUsuarios();
+    } catch (error) {
+      console.error("❌ Erro ao alterar status:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: error.message || "Erro ao alterar status do usuário",
+      });
+    }
   };
 
+  // 🔑 FUNÇÃO: Reset de senha (COMPLETA)
   const handleResetSenha = async (usuario) => {
-    // ... implementação igual
+    console.log("🔑 Resetando senha para:", usuario.email);
+
+    setConfirmationModal({
+      isOpen: true,
+      title: "Redefinir Senha",
+      message: `Enviar email de redefinição de senha para "${usuario.email}"?`,
+      confirmText: "Enviar",
+      cancelText: "Cancelar",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await sendPasswordReset(usuario.email);
+
+          showToast({
+            tipo: "success",
+            titulo: "Sucesso",
+            mensagem: "Email de redefinição enviado com sucesso!",
+          });
+        } catch (error) {
+          console.error("❌ Erro ao enviar reset:", error);
+          showToast({
+            tipo: "error",
+            titulo: "Erro",
+            mensagem: error.message || "Erro ao enviar email de redefinição",
+          });
+        }
+
+        setConfirmationModal({ isOpen: false });
+      },
+      onCancel: () => {
+        setConfirmationModal({ isOpen: false });
+      },
+    });
   };
 
   // 🎯 FUNÇÃO: Mostrar toast
