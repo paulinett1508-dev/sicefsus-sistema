@@ -583,9 +583,38 @@ const Administracao = () => {
     loadData();
   }, []);
 
+  // 🧪 BOTÃO DE TESTE TEMPORÁRIO
+  const testarExclusao = () => {
+    console.log("🧪 TESTE: Função handleDelete existe?", typeof handleDelete);
+    
+    if (usuarios.length > 0) {
+      const usuarioTeste = usuarios[0];
+      console.log("🧪 TESTE: Chamando handleDelete diretamente...");
+      handleDelete(usuarioTeste);
+    } else {
+      console.log("🧪 TESTE: Nenhum usuário disponível");
+    }
+  };
+
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
+      {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
+      <button 
+        onClick={testarExclusao}
+        style={{
+          background: 'red',
+          color: 'white',
+          padding: '10px',
+          margin: '10px',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        🧪 TESTAR EXCLUSÃO DIRETA
+      </button>
+
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
         <ConfirmationModal
