@@ -261,8 +261,8 @@ const Administracao = () => {
         try {
           console.log("🗑️ Executando exclusão...");
 
-          // Usar ID correto do documento
-          const resultado = await deleteUserById(usuario.id);
+          // Usar deleteUserById com ID do documento e UID para exclusão completa
+          const resultado = await deleteUserById(usuario.id, usuario.uid);
 
           if (resultado.success) {
             showToast({
@@ -322,7 +322,7 @@ const Administracao = () => {
           },
           metadata: {
             origem: "interface_administracao",
-            ip: "unknown", // Pode capturar se necessário
+            ip: "unknown",
           },
           relatedResources: {
             targetUserEmail: usuario.email,
@@ -366,7 +366,8 @@ const Administracao = () => {
       type: "warning",
       onConfirm: async () => {
         try {
-          await sendPasswordReset(usuario.email);
+          // Usar sendPasswordReset com email e uid para melhor funcionamento
+          await sendPasswordReset(usuario.email, usuario.uid);
 
           showToast({
             tipo: "success",
