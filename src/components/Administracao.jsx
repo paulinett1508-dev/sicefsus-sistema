@@ -244,20 +244,13 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   }, []);
 
-  // 🔥 FUNÇÃO: Excluir usuário via Admin SDK
+  // 🗑️ FUNÇÃO: Excluir usuário
   const handleDelete = async (usuario) => {
-    console.log("🗑️ === EXCLUSÃO VIA ADMIN SDK ===");
-    console.log("🗑️ Dados do usuário:", {
-      id: usuario?.id,
-      uid: usuario?.uid,
-      nome: usuario?.nome,
-      email: usuario?.email,
-      status: usuario?.status
-    });
+    console.log("🗑️ === EXCLUSÃO VIA CLOUD RUN ===");
+    console.log("🗑️ Dados do usuário:", usuario);
 
-    // Verificar dados básicos
+    // Validações básicas
     if (!usuario?.id) {
-      console.error("❌ ID do usuário não encontrado");
       showToast({
         tipo: "error",
         titulo: "Erro",
@@ -266,7 +259,6 @@ const Administracao = () => {
       return;
     }
 
-    // Verificar se usuário está inativo
     if (usuario.status === "ativo") {
       showToast({
         tipo: "warning",
@@ -276,121 +268,71 @@ const Administracao = () => {
       return;
     }
 
-    // ✅ CONFIRMAÇÃO COM AVISO SOBRE ADMIN SDK
+    // ✅ CONFIRMAÇÃO COM CLOUD RUN
     const confirmar = window.confirm(
-      `🔥 EXCLUSÃO COMPLETA VIA ADMIN SDK\n\n` +
-      `Nome: ${usuario.nome || 'N/A'}\n` +
-      `Email: ${usuario.email || 'N/A'}\n` +
-      `ID: ${usuario.id}\n` +
-      `UID: ${usuario.uid || usuario.id}\n\n` +
-      `⚡ O sistema irá:\n` +
-      `• Remover do Firestore (dados)\n` +
-      `• Remover do Firebase Auth (login)\n` +
-      `• Usar Admin SDK para exclusão completa\n\n` +
-      `Esta ação NÃO pode ser desfeita!\n\n` +
-      `Continuar?`
+      `🔥 EXCLUSÃO COMPLETA VIA CLOUD RUN\n\n` +
+      `Nome: ${usuario.nome}\n` +
+      `Email: ${usuario.email}\n\n` +
+      `✅ Será removido de:\n` +
+      `• Firebase Firestore (dados)\n` +
+      `• Firebase Auth (login)\n\n` +
+      `⚡ Usando Cloud Run Function com Admin SDK\n` +
+      `🎯 Email ficará disponível para reutilização\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
     );
 
     if (!confirmar) {
-      console.log("❌ Exclusão cancelada pelo usuário");
+      console.log("❌ Exclusão cancelada");
       return;
     }
 
     try {
-      console.log("🔥 === EXECUTANDO EXCLUSÃO VIA ADMIN SDK ===");
       setLoading(true);
+      console.log("🔥 Executando exclusão via Cloud Run...");
 
-      // ✅ USAR deleteUserById que JÁ TEM ADMIN SDK IMPLEMENTADO
-      console.log("⚡ Chamando deleteUserById com Admin SDK...");
-      
-      const userIdToDelete = usuario.id;
-      const userUidForAuth = usuario.uid || usuario.id;
-      
-      console.log("📊 Parâmetros para exclusão:", {
-        userIdToDelete,
-        userUidForAuth,
-        hasAdminSDK: true
-      });
+      // ✅ USAR CLOUD RUN FUNCTION
+      const resultado = await deleteUserComplete(
+        usuario.id,
+        usuario.uid || usuario.id
+      );
 
-      // ✅ USAR A FUNÇÃO QUE JÁ EXISTE COM ADMIN SDK
-      const resultado = await deleteUserById(userIdToDelete, userUidForAuth);
-      
-      console.log("✅ Resultado da exclusão Admin SDK:", resultado);
+      console.log("📊 Resultado:", resultado);
 
-      // ✅ LOG DE AUDITORIA
-      try {
-        if (auditService) {
-          await auditService.logAction({
-            action: "DELETE_USER_ADMIN_SDK",
-            resourceType: "usuarios", 
-            resourceId: usuario.id,
-            description: `Usuário ${usuario.nome} (${usuario.email}) excluído via Admin SDK`,
-            metadata: {
-              usuarioExcluido: {
-                id: usuario.id,
-                uid: usuario.uid,
-                nome: usuario.nome,
-                email: usuario.email,
-                municipio: usuario.municipio,
-                uf: usuario.uf,
-              },
-              resultadoAdminSDK: resultado
-            }
-          });
-          console.log("📝 Log de auditoria registrado");
-        }
-      } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
-      }
-
-      // ✅ MENSAGEM DE SUCESSO BASEADA NO RESULTADO
-      let mensagem = "Usuário excluído com sucesso!";
+      // ✅ MENSAGEM BASEADA NO RESULTADO
+      let tipo = "success";
       let titulo = "Exclusão Completa";
-      
-      if (resultado.success) {
-        if (resultado.method === "admin_api") {
-          mensagem = "Usuário excluído completamente (Firestore + Auth) via Admin SDK!";
-          titulo = "Exclusão Admin SDK";
-        } else if (resultado.method === "firestore_only") {
-          mensagem = "Usuário removido do Firestore. Auth permanece ativo.";
+      let mensagem = "Usuário excluído com sucesso!";
+
+      if (resultado.method === 'cloud_run') {
+        if (resultado.details.firestore && resultado.details.auth) {
+          mensagem = "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
+        } else if (resultado.details.firestore) {
+          tipo = "warning";
           titulo = "Exclusão Parcial";
+          mensagem = "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
         }
-        
-        if (resultado.message) {
-          mensagem += `\n\nDetalhes: ${resultado.message}`;
-        }
+      } else if (resultado.method === 'firestore_fallback') {
+        tipo = "warning";
+        titulo = "Exclusão Parcial";
+        mensagem = "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
       }
 
       showToast({
-        tipo: "success",
+        tipo: tipo,
         titulo: titulo,
-        mensagem: mensagem
+        mensagem: mensagem,
+        duracao: 10000 // 10 segundos para ler
       });
 
-      console.log("🔄 Recarregando lista de usuários...");
+      // Recarregar dados
       await carregarUsuarios();
-      console.log("🎉 === EXCLUSÃO ADMIN SDK CONCLUÍDA ===");
 
     } catch (error) {
-      console.error("❌ === ERRO NA EXCLUSÃO ADMIN SDK ===");
-      console.error("🔥 Error details:", error);
-      
-      let errorMessage = "Erro ao excluir usuário";
-      
-      if (error.message) {
-        errorMessage = error.message;
-      } else if (error.code === 'permission-denied') {
-        errorMessage = "Permissão negada para exclusão via Admin SDK";
-      } else if (error.code === 'not-found') {
-        errorMessage = "Usuário não encontrado no sistema";
-      } else if (error.code === 'functions/not-found') {
-        errorMessage = "Cloud Function de exclusão não encontrada";
-      }
-      
+      console.error("❌ Erro na exclusão:", error);
       showToast({
         tipo: "error",
-        titulo: "Erro Admin SDK",
-        mensagem: errorMessage
+        titulo: "Erro na Exclusão",
+        mensagem: `Erro: ${error.message}`
       });
     } finally {
       setLoading(false);
@@ -575,7 +517,7 @@ const Administracao = () => {
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
-      
+
 
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
@@ -647,7 +589,7 @@ const Administracao = () => {
           >
             📋 Logs ({logs.length})
           </button>
-          
+
         </div>
       </div>
 
