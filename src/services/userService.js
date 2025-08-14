@@ -23,6 +23,38 @@ import { db, auth } from "../firebase/firebaseConfig";
 // 🌐 URL DA ADMIN API
 const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL || "/api/admin";
 
+// 🔥 URL DA CLOUD RUN FUNCTION
+const CLOUD_RUN_URL = 'https://sicefsus-delete-user-578597529619.southamerica-east1.run.app';
+
+// 🔧 FUNÇÃO: Chamar Cloud Run
+const callCloudRun = async (action, data) => {
+  try {
+    const token = await getAuthToken();
+    
+    const response = await fetch(CLOUD_RUN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        action: action,
+        ...data
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Cloud Run Error: ${response.status} - ${errorData}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ [CLOUD RUN] Erro em ${action}:`, error);
+    throw error;
+  }
+};
+
 // 🔧 SEGUNDA INSTÂNCIA FIREBASE (mantida para fallback)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -178,21 +210,48 @@ const resetPasswordViaAdminAPI = async (uid) => {
 export const createUser = async (userData, options = {}) => {
   console.log("👤 === CRIAÇÃO DE USUÁRIO UNIVERSAL ===");
   console.log("📊 Dados:", userData);
-  console.log("🌐 Admin API URL:", ADMIN_API_URL);
 
   try {
-    // 🔄 TENTAR ADMIN API PRIMEIRO
+    // 🔥 TENTAR CLOUD RUN PRIMEIRO (NOVO)
+    try {
+      console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
+      
+      const result = await callCloudRun('createUser', {
+        email: userData.email,
+        userData: userData
+      });
+      
+      console.log("🎉 [SUCESSO] Usuário criado via Cloud Run");
+      return {
+        success: result.success,
+        method: 'cloud_run',
+        uid: result.uid,
+        resetLink: result.resetLink,
+        mensagem: 'Usuário criado via Cloud Run Admin SDK!'
+      };
+      
+    } catch (cloudRunError) {
+      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
+      
+      // Se erro é de email existente, não fazer fallback
+      if (cloudRunError.message.includes('email-already-exists')) {
+        throw {
+          codigo: 'auth/email-already-in-use',
+          mensagem: 'Este email já está sendo usado. Use a função de exclusão primeiro.',
+          detalhes: cloudRunError.message
+        };
+      }
+    }
+
+    // 🔄 TENTAR ADMIN API (MANTER LÓGICA EXISTENTE)
     try {
       const result = await createUserViaAdminAPI(userData);
       console.log("🎉 [SUCESSO] Usuário criado via Admin API");
       return result;
     } catch (adminError) {
-      console.warn(
-        "⚠️ [FALLBACK] Admin API falhou, usando método original:",
-        adminError.message,
-      );
+      console.warn("⚠️ [FALLBACK] Admin API falhou:", adminError.message);
 
-      // 🔄 FALLBACK: Método original
+      // 🔄 FALLBACK FINAL: Método original (MANTER)
       return await createUserInFirebase(
         userData,
         options.navigate,
@@ -209,24 +268,43 @@ export const createUser = async (userData, options = {}) => {
 export const deleteUserById = async (userId, userUid) => {
   console.log("🗑️ === EXCLUSÃO DE USUÁRIO UNIVERSAL ===");
   console.log("📊 Dados:", { userId, userUid });
-  console.log("🌐 Admin API URL:", ADMIN_API_URL);
 
   try {
-    // 🔄 TENTAR ADMIN API PRIMEIRO (exclusão completa)
+    // 🔥 TENTAR CLOUD RUN PRIMEIRO (NOVO)
+    if (userUid) {
+      try {
+        console.log("🔥 [CLOUD RUN] Tentando excluir usuário...");
+        
+        const result = await callCloudRun('deleteUser', {
+          uid: userUid,
+          firestoreId: userId
+        });
+        
+        console.log("🎉 [SUCESSO] Usuário excluído via Cloud Run");
+        return {
+          success: result.success,
+          method: 'cloud_run',
+          details: result.details,
+          message: result.message
+        };
+        
+      } catch (cloudRunError) {
+        console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
+      }
+    }
+
+    // 🔄 TENTAR ADMIN API (MANTER LÓGICA EXISTENTE)
     if (userUid) {
       try {
         const result = await deleteUserViaAdminAPI(userUid);
         console.log("🎉 [SUCESSO] Usuário excluído via Admin API");
         return result;
       } catch (adminError) {
-        console.warn(
-          "⚠️ [FALLBACK] Admin API falhou, usando método original:",
-          adminError.message,
-        );
+        console.warn("⚠️ [FALLBACK] Admin API falhou:", adminError.message);
       }
     }
 
-    // 🔄 FALLBACK: Exclusão apenas do Firestore
+    // 🔄 FALLBACK FINAL: Exclusão apenas do Firestore (MANTER)
     console.log("🔄 [FALLBACK] Excluindo apenas do Firestore...");
 
     await deleteDoc(doc(db, "usuarios", userId));
@@ -235,9 +313,8 @@ export const deleteUserById = async (userId, userUid) => {
     return {
       success: true,
       method: "firestore_only",
-      message:
-        "Usuário excluído do Firestore. Auth permanece (requer Admin API)",
-      warning: "Email ficará bloqueado até exclusão via Admin API",
+      message: "Usuário excluído do Firestore. Auth permanece (requer Admin SDK)",
+      warning: "Email ficará bloqueado até exclusão via Admin SDK",
     };
   } catch (error) {
     console.error("❌ Erro na exclusão:", error);
@@ -432,6 +509,65 @@ export const updateUser = async (userId, userData, originalEmail) => {
   }
 };
 
+// 🔄 FUNÇÃO: Toggle Status via Cloud Run
+export const toggleUserStatusCloudRun = async (usuario, newStatus) => {
+  try {
+    console.log("🔄 [CLOUD RUN] Alterando status...");
+    
+    const result = await callCloudRun('toggleUserStatus', {
+      uid: usuario.uid || usuario.id,
+      firestoreId: usuario.id,
+      newStatus: newStatus
+    });
+
+    return {
+      success: result.success,
+      method: 'cloud_run',
+      details: result.details,
+      newStatus: result.newStatus
+    };
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao alterar status:", error);
+    throw error;
+  }
+};
+
+// 🔍 FUNÇÃO: Verificar Status via Cloud Run
+export const checkUserStatusCloudRun = async (email) => {
+  try {
+    console.log("🔍 [CLOUD RUN] Verificando status...");
+    
+    const result = await callCloudRun('checkUserStatus', {
+      email: email
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao verificar status:", error);
+    throw error;
+  }
+};
+
+// 📋 FUNÇÃO: Carregar Usuários via Cloud Run
+export const loadUsersCloudRun = async (limit = 50, offset = 0) => {
+  try {
+    console.log("📋 [CLOUD RUN] Carregando usuários...");
+    
+    const result = await callCloudRun('listUsers', {
+      limit: limit,
+      offset: offset
+    });
+
+    return result.usuarios;
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao carregar usuários:", error);
+    throw error;
+  }
+};
+
 export default {
   createUser,
   createUserInFirebase,
@@ -440,4 +576,9 @@ export default {
   sendPasswordReset,
   checkAuthState,
   logoutUser,
+  // 🔥 NOVAS FUNÇÕES CLOUD RUN:
+  toggleUserStatusCloudRun,
+  checkUserStatusCloudRun,
+  loadUsersCloudRun,
+  callCloudRun
 };
