@@ -177,7 +177,7 @@ const UsersTable = ({
                         ? "Excluir usuário permanentemente"
                         : "Inative o usuário para poder excluir"
                     }
-                    disabled={loading || usuario.status === "ativo"}
+                    disabled={loading || usuario.status !== "inativo"}
                   >
                     🗑️
                   </button>
