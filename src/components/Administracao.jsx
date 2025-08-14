@@ -282,7 +282,7 @@ const Administracao = () => {
       type: "danger",
       onConfirm: async () => {
         console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
-        
+
         try {
           // STEP 4: Criar referência do documento
           console.log("📄 Criando referência do documento...");
@@ -296,7 +296,7 @@ const Administracao = () => {
           // STEP 5: Verificar se documento existe ANTES de excluir
           console.log("🔍 Verificando se documento existe...");
           const userDoc = await getDoc(userRef);
-          
+
           if (!userDoc.exists()) {
             console.log("⚠️ Documento não encontrado");
             showToast({
@@ -326,7 +326,7 @@ const Administracao = () => {
             console.error("❌ Documento ainda existe após exclusão!");
             throw new Error("Falha na exclusão - documento ainda existe");
           }
-          
+
           console.log("✅ Confirmado: documento foi excluído");
 
           showToast({
@@ -334,20 +334,20 @@ const Administracao = () => {
             titulo: "Sucesso",
             mensagem: "Usuário excluído permanentemente!",
           });
-          
+
           console.log("🔄 Recarregando lista de usuários...");
           await carregarUsuarios();
-          
+
           console.log("🎉 === EXCLUSÃO CONCLUÍDA COM SUCESSO ===");
-          
+
         } catch (error) {
           console.error("❌ === ERRO DETALHADO NA EXCLUSÃO ===");
           console.error("🔥 Error object:", error);
           console.error("🔥 Error code:", error.code);
           console.error("🔥 Error message:", error.message);
-          
+
           let errorMessage = "Erro ao excluir usuário";
-          
+
           if (error.code === 'permission-denied') {
             errorMessage = "Permissão negada para excluir usuário";
           } else if (error.code === 'not-found') {
@@ -355,14 +355,14 @@ const Administracao = () => {
           } else if (error.code === 'unavailable') {
             errorMessage = "Serviço temporariamente indisponível";
           }
-          
+
           showToast({
             tipo: "error",
             titulo: "Erro na Exclusão",
             mensagem: errorMessage,
           });
         }
-        
+
         setConfirmationModal({ isOpen: false });
       },
       onCancel: () => {
@@ -375,7 +375,7 @@ const Administracao = () => {
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
-    
+
     console.log(`🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`);
 
     try {
@@ -558,7 +558,7 @@ const Administracao = () => {
     console.log("🧪 === TESTE DE FUNÇÃO ===");
     console.log("🧪 Usuários disponíveis:", usuarios.length);
     console.log("🧪 Função handleDelete:", typeof handleDelete);
-    
+
     if (usuarios.length > 0) {
       const usuarioTeste = usuarios.find(u => u.status === "inativo") || usuarios[0];
       console.log("🧪 Testando com usuário:", usuarioTeste);
@@ -573,7 +573,7 @@ const Administracao = () => {
   return (
     <div style={styles.container}>
       {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
-      <button 
+      <button
         onClick={testarFuncao}
         style={{
           background: 'red',
