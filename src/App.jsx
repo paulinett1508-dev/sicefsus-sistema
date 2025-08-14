@@ -248,6 +248,18 @@ function AppContent() {
     setAuthError(null);
   }, []);
 
+  // Função para obter o nome da página atual
+  const getCurrentPageName = () => {
+    const path = location.pathname;
+    if (path.includes('/emendas')) return 'Emendas';
+    if (path.includes('/despesas')) return 'Despesas';
+    if (path.includes('/relatorios')) return 'Relatórios';
+    if (path.includes('/admin') || path.includes('/administracao')) return 'Administração';
+    if (path.includes('/sobre')) return 'Sobre';
+    if (path === '/dashboard') return 'Dashboard';
+    return 'SICEFSUS';
+  };
+
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
 
   if (loading) {
@@ -256,6 +268,44 @@ function AppContent() {
 
   return (
     <div style={styles.app}>
+      {/* Barra de Status Global */}
+      {usuario && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '32px',
+          backgroundColor: '#2c3e50',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 20px',
+          fontSize: '12px',
+          zIndex: 9999,
+          gap: '15px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif"
+        }}>
+          <span style={{ color: '#2ecc71' }}>✅ Operacional</span>
+          <span style={{ opacity: 0.5 }}>|</span>
+          <span>Versão: <strong>v2.3.51</strong></span>
+          <span style={{ opacity: 0.5 }}>|</span>
+          <span>👤 {usuario.nome || usuario.email}</span>
+          <span style={{ opacity: 0.5 }}>|</span>
+          <span>📊 {getCurrentPageName()}</span>
+          <span style={{ opacity: 0.5 }}>|</span>
+          <span style={{ 
+            backgroundColor: import.meta.env.MODE === 'production' ? '#e74c3c' : '#f39c12',
+            padding: '2px 8px',
+            borderRadius: '3px',
+            fontWeight: 'bold'
+          }}>
+            {import.meta.env.MODE === 'production' ? 'PROD' : 'DEV'}
+          </span>
+        </div>
+      )}
+
       {/* Modal de Login */}
       {showLogin && (
         <div style={styles.overlay}>
@@ -284,7 +334,10 @@ function AppContent() {
         </div>
       )}
 
-      <div style={styles.container}>
+      <div style={{
+        ...styles.container,
+        paddingTop: usuario ? '32px' : '0'
+      }}>
         {/* Sidebar */}
         {isAuthenticated && (
           <ProtectedSidebar
