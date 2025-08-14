@@ -244,9 +244,9 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   }, []);
 
-  // 🗑️ FUNÇÃO: Excluir usuário (VERSÃO ORIGINAL QUE FUNCIONAVA)
+  // 🔥 FUNÇÃO: Excluir usuário via Admin SDK
   const handleDelete = async (usuario) => {
-    console.log("🗑️ === EXCLUSÃO UNIVERSAL ===");
+    console.log("🗑️ === EXCLUSÃO VIA ADMIN SDK ===");
     console.log("🗑️ Dados do usuário:", {
       id: usuario?.id,
       uid: usuario?.uid,
@@ -276,13 +276,19 @@ const Administracao = () => {
       return;
     }
 
-    // ✅ WINDOW.CONFIRM SIMPLES (FUNCIONAVA!)
+    // ✅ CONFIRMAÇÃO COM AVISO SOBRE ADMIN SDK
     const confirmar = window.confirm(
-      `🗑️ EXCLUIR PERMANENTEMENTE?\n\n` +
+      `🔥 EXCLUSÃO COMPLETA VIA ADMIN SDK\n\n` +
       `Nome: ${usuario.nome || 'N/A'}\n` +
       `Email: ${usuario.email || 'N/A'}\n` +
-      `ID: ${usuario.id}\n\n` +
-      `Esta ação NÃO pode ser desfeita!`
+      `ID: ${usuario.id}\n` +
+      `UID: ${usuario.uid || usuario.id}\n\n` +
+      `⚡ O sistema irá:\n` +
+      `• Remover do Firestore (dados)\n` +
+      `• Remover do Firebase Auth (login)\n` +
+      `• Usar Admin SDK para exclusão completa\n\n` +
+      `Esta ação NÃO pode ser desfeita!\n\n` +
+      `Continuar?`
     );
 
     if (!confirmar) {
@@ -291,46 +297,100 @@ const Administracao = () => {
     }
 
     try {
-      console.log("🗑️ Executando exclusão...");
+      console.log("🔥 === EXECUTANDO EXCLUSÃO VIA ADMIN SDK ===");
       setLoading(true);
 
-      // ✅ EXCLUSÃO DIRETA DO FIRESTORE
-      await deleteDoc(doc(db, "usuarios", usuario.id));
-      console.log("✅ Usuário excluído do Firestore");
+      // ✅ USAR deleteUserById que JÁ TEM ADMIN SDK IMPLEMENTADO
+      console.log("⚡ Chamando deleteUserById com Admin SDK...");
+      
+      const userIdToDelete = usuario.id;
+      const userUidForAuth = usuario.uid || usuario.id;
+      
+      console.log("📊 Parâmetros para exclusão:", {
+        userIdToDelete,
+        userUidForAuth,
+        hasAdminSDK: true
+      });
 
-      // Log de auditoria
-      if (window.auditService) {
-        await window.auditService.logAction(
-          "DELETE_USER",
-          `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
-          {
-            usuarioExcluido: {
-              id: usuario.id,
-              uid: usuario.uid,
-              nome: usuario.nome,
-              email: usuario.email,
-              municipio: usuario.municipio,
-              uf: usuario.uf,
-            },
-          }
-        );
+      // ✅ USAR A FUNÇÃO QUE JÁ EXISTE COM ADMIN SDK
+      const resultado = await deleteUserById(userIdToDelete, userUidForAuth);
+      
+      console.log("✅ Resultado da exclusão Admin SDK:", resultado);
+
+      // ✅ LOG DE AUDITORIA
+      try {
+        if (auditService) {
+          await auditService.logAction({
+            action: "DELETE_USER_ADMIN_SDK",
+            resourceType: "usuarios", 
+            resourceId: usuario.id,
+            description: `Usuário ${usuario.nome} (${usuario.email}) excluído via Admin SDK`,
+            metadata: {
+              usuarioExcluido: {
+                id: usuario.id,
+                uid: usuario.uid,
+                nome: usuario.nome,
+                email: usuario.email,
+                municipio: usuario.municipio,
+                uf: usuario.uf,
+              },
+              resultadoAdminSDK: resultado
+            }
+          });
+          console.log("📝 Log de auditoria registrado");
+        }
+      } catch (auditError) {
+        console.warn("⚠️ Erro no log de auditoria:", auditError);
+      }
+
+      // ✅ MENSAGEM DE SUCESSO BASEADA NO RESULTADO
+      let mensagem = "Usuário excluído com sucesso!";
+      let titulo = "Exclusão Completa";
+      
+      if (resultado.success) {
+        if (resultado.method === "admin_api") {
+          mensagem = "Usuário excluído completamente (Firestore + Auth) via Admin SDK!";
+          titulo = "Exclusão Admin SDK";
+        } else if (resultado.method === "firestore_only") {
+          mensagem = "Usuário removido do Firestore. Auth permanece ativo.";
+          titulo = "Exclusão Parcial";
+        }
+        
+        if (resultado.message) {
+          mensagem += `\n\nDetalhes: ${resultado.message}`;
+        }
       }
 
       showToast({
         tipo: "success",
-        titulo: "Sucesso",
-        mensagem: "Usuário excluído permanentemente!"
+        titulo: titulo,
+        mensagem: mensagem
       });
 
-      // Recarregar lista
+      console.log("🔄 Recarregando lista de usuários...");
       await carregarUsuarios();
+      console.log("🎉 === EXCLUSÃO ADMIN SDK CONCLUÍDA ===");
 
     } catch (error) {
-      console.error("❌ Erro na exclusão:", error);
+      console.error("❌ === ERRO NA EXCLUSÃO ADMIN SDK ===");
+      console.error("🔥 Error details:", error);
+      
+      let errorMessage = "Erro ao excluir usuário";
+      
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code === 'permission-denied') {
+        errorMessage = "Permissão negada para exclusão via Admin SDK";
+      } else if (error.code === 'not-found') {
+        errorMessage = "Usuário não encontrado no sistema";
+      } else if (error.code === 'functions/not-found') {
+        errorMessage = "Cloud Function de exclusão não encontrada";
+      }
+      
       showToast({
         tipo: "error",
-        titulo: "Erro",
-        mensagem: `Erro ao excluir usuário: ${error.message}`
+        titulo: "Erro Admin SDK",
+        mensagem: errorMessage
       });
     } finally {
       setLoading(false);
