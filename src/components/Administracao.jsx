@@ -244,43 +244,51 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   };
 
-  // 🗑️ FUNÇÃO: Excluir usuário (COM USECALLBACK)
+  // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA)
   const handleDelete = useCallback(async (usuario) => {
-    console.log("🗑️ === INÍCIO DEBUG EXCLUSÃO ===");
-    console.log("📋 Dados do usuário recebido:", {
-      id: usuario.id,
-      uid: usuario.uid,
-      nome: usuario.nome,
-      email: usuario.email,
-      status: usuario.status,
-      tipo: typeof usuario,
+    console.log("🗑️ === INÍCIO EXCLUSÃO ===");
+    console.log("📋 Dados recebidos:", {
+      id: usuario?.id,
+      uid: usuario?.uid,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      status: usuario?.status,
     });
 
-    // STEP 1: Verificar se usuário está inativo
-    if (usuario.status === "ativo") {
-      console.log("⚠️ Usuário ainda está ativo");
-      showToast({
-        tipo: "warning",
-        titulo: "Atenção",
-        mensagem: "Inative o usuário antes de excluí-lo",
-      });
-      return;
-    }
-
-    // STEP 2: Verificar se tem ID válido
-    if (!usuario.id) {
-      console.error("❌ ID do usuário não encontrado");
+    // VALIDAÇÕES INICIAIS
+    if (!usuario) {
+      console.error("❌ Objeto usuário é null/undefined");
       showToast({
         tipo: "error",
         titulo: "Erro",
-        mensagem: "ID do usuário não encontrado",
+        mensagem: "Dados do usuário não encontrados",
       });
       return;
     }
 
-    console.log("✅ Validações iniciais passaram");
+    if (usuario.status !== "inativo") {
+      console.log("⚠️ Usuário não está inativo:", usuario.status);
+      showToast({
+        tipo: "warning",
+        titulo: "Atenção",
+        mensagem: "Apenas usuários inativos podem ser excluídos",
+      });
+      return;
+    }
 
-    // STEP 3: Confirmar exclusão
+    if (!usuario.id && !usuario.uid) {
+      console.error("❌ Nem ID nem UID encontrados");
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Identificador do usuário não encontrado",
+      });
+      return;
+    }
+
+    console.log("✅ Validações passaram, abrindo modal de confirmação");
+
+    // MODAL DE CONFIRMAÇÃO
     setConfirmationModal({
       isOpen: true,
       title: "Excluir Usuário",
@@ -290,78 +298,52 @@ const Administracao = () => {
       type: "danger",
       onConfirm: async () => {
         console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
+        setLoading(true);
 
         try {
-          // STEP 4: Criar referência do documento
-          console.log("📄 Criando referência do documento...");
-          const userRef = doc(db, "usuarios", usuario.id);
-          console.log("📄 Referência criada:", {
-            collection: "usuarios",
-            id: usuario.id,
-            path: userRef.path,
+          const userIdToDelete = usuario.id || usuario.uid;
+          const userUidForAPI = usuario.uid || usuario.id;
+
+          console.log("🎯 Tentando exclusão completa via userService...");
+          console.log("📊 IDs para exclusão:", {
+            userIdToDelete,
+            userUidForAPI,
+            method: "deleteUserById"
           });
 
-          // STEP 5: Verificar se documento existe ANTES de excluir
-          console.log("🔍 Verificando se documento existe...");
-          const userDoc = await getDoc(userRef);
+          // Usar o userService que já tem fallback automático
+          const resultado = await deleteUserById(userIdToDelete, userUidForAPI);
+          
+          console.log("✅ Resultado da exclusão:", resultado);
 
-          if (!userDoc.exists()) {
-            console.log("⚠️ Documento não encontrado");
-            showToast({
-              tipo: "warning",
-              titulo: "Aviso",
-              mensagem: "Usuário já foi excluído ou não encontrado",
-            });
-            setConfirmationModal({ isOpen: false });
-            await carregarUsuarios(); // Atualizar lista
-            return;
+          // Determinar mensagem baseada no método usado
+          let mensagem = "Usuário excluído com sucesso!";
+          if (resultado.method === "firestore_only") {
+            mensagem = "Usuário removido do sistema. Auth permanece ativo.";
+          } else if (resultado.method === "admin_api") {
+            mensagem = "Usuário excluído permanentemente do Auth e Firestore!";
           }
-
-          console.log("✅ Documento encontrado:", {
-            id: userDoc.id,
-            data: userDoc.data(),
-          });
-
-          // STEP 6: Executar exclusão
-          console.log("🗑️ Executando deleteDoc...");
-          await deleteDoc(userRef);
-          console.log("✅ deleteDoc executado com sucesso");
-
-          // STEP 7: Verificar se foi realmente excluído
-          console.log("🔍 Verificando exclusão...");
-          const checkDoc = await getDoc(userRef);
-          if (checkDoc.exists()) {
-            console.error("❌ Documento ainda existe após exclusão!");
-            throw new Error("Falha na exclusão - documento ainda existe");
-          }
-
-          console.log("✅ Confirmado: documento foi excluído");
 
           showToast({
             tipo: "success",
-            titulo: "Sucesso",
-            mensagem: "Usuário excluído permanentemente!",
+            titulo: "Exclusão Realizada",
+            mensagem: mensagem,
           });
 
           console.log("🔄 Recarregando lista de usuários...");
           await carregarUsuarios();
 
-          console.log("🎉 === EXCLUSÃO CONCLUÍDA COM SUCESSO ===");
-
         } catch (error) {
-          console.error("❌ === ERRO DETALHADO NA EXCLUSÃO ===");
-          console.error("🔥 Error object:", error);
-          console.error("🔥 Error code:", error.code);
-          console.error("🔥 Error message:", error.message);
+          console.error("❌ Erro na exclusão:", error);
 
-          let errorMessage = "Erro ao excluir usuário";
-
-          if (error.code === 'permission-denied') {
+          let errorMessage = "Erro desconhecido na exclusão";
+          
+          if (error.message) {
+            errorMessage = error.message;
+          } else if (error.code === 'permission-denied') {
             errorMessage = "Permissão negada para excluir usuário";
           } else if (error.code === 'not-found') {
-            errorMessage = "Usuário não encontrado";
-          } else if (error.code === 'unavailable') {
-            errorMessage = "Serviço temporariamente indisponível";
+            errorMessage = "Usuário não encontrado no sistema";
           }
 
           showToast({
@@ -369,16 +351,17 @@ const Administracao = () => {
             titulo: "Erro na Exclusão",
             mensagem: errorMessage,
           });
+        } finally {
+          setLoading(false);
+          setConfirmationModal({ isOpen: false });
         }
-
-        setConfirmationModal({ isOpen: false });
       },
       onCancel: () => {
-        console.log("❌ Exclusão cancelada pelo usuário");
+        console.log("❌ Exclusão cancelada");
         setConfirmationModal({ isOpen: false });
       },
     });
-  }, [carregarUsuarios, setConfirmationModal]);
+  }, [showToast, setConfirmationModal, setLoading, carregarUsuarios]);
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
@@ -555,40 +538,11 @@ const Administracao = () => {
     loadData();
   }, []);
 
-  // 🧪 FUNÇÃO DE TESTE SIMPLES
-  const testarFuncao = useCallback(() => {
-    console.log("🧪 === TESTE DE FUNÇÃO ===");
-    console.log("🧪 Usuários disponíveis:", usuarios.length);
-    console.log("🧪 Função handleDelete:", typeof handleDelete);
-
-    if (usuarios.length > 0) {
-      const usuarioTeste = usuarios.find(u => u.status === "inativo") || usuarios[0];
-      console.log("🧪 Testando com usuário:", usuarioTeste);
-      alert(`Testando exclusão do usuário: ${usuarioTeste.nome}`);
-      handleDelete(usuarioTeste);
-    } else {
-      alert("Nenhum usuário disponível para teste");
-    }
-  }, [usuarios, handleDelete]);
+  
 
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
-      {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
-      <button
-        onClick={testarFuncao}
-        style={{
-          background: 'red',
-          color: 'white',
-          padding: '10px',
-          margin: '10px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
-        🧪 TESTAR EXCLUSÃO DIRETA
-      </button>
 
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (

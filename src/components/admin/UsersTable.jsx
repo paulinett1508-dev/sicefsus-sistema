@@ -133,7 +133,17 @@ const UsersTable = ({
                   </button>
                   <button
                     onClick={() => {
-                      console.log("🗑️ Clique no botão excluir:", usuario);
+                      console.log("🗑️ === CLIQUE EXCLUIR ===");
+                      console.log("📊 Usuário completo:", usuario);
+                      console.log("📊 Status atual:", usuario.status);
+                      console.log("📊 Botão habilitado:", usuario.status === "inativo" && !loading);
+                      
+                      if (usuario.status === "ativo") {
+                        console.log("⚠️ Tentativa de excluir usuário ativo bloqueada");
+                        return;
+                      }
+                      
+                      console.log("✅ Chamando onDelete...");
                       onDelete(usuario);
                     }}
                     style={{
