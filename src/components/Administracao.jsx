@@ -552,42 +552,7 @@ const Administracao = () => {
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
-      {/* DEBUG TEMPORÁRIO - REMOVER DEPOIS */}
-      {process.env.NODE_ENV === "development" && (
-        <div
-          style={{
-            position: "fixed",
-            top: "10px",
-            right: "10px",
-            zIndex: 9999,
-            backgroundColor: "#ff9800",
-            padding: "5px 10px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            if (window.confirm("Abrir Debug de Usuários?")) {
-              const debugWindow = window.open(
-                "",
-                "_blank",
-                "width=1200,height=800",
-              );
-              debugWindow.document.write(`
-              <html>
-                <head><title>Debug Usuários SICEFSUS</title></head>
-                <body>
-                  <div id="debug-root"></div>
-                  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-                  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-                </body>
-              </html>
-            `);
-            }
-          }}
-        >
-          🔍 DEBUG
-        </div>
-      )}
+      
 
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
@@ -659,23 +624,7 @@ const Administracao = () => {
           >
             📋 Logs ({logs.length})
           </button>
-          {process.env.NODE_ENV === "development" && (
-            <button
-              style={{
-                padding: "10px 20px",
-                border: "none",
-                borderBottom:
-                  activeTab === "teste" ? "2px solid #ff9800" : "none",
-                backgroundColor:
-                  activeTab === "teste" ? "#fff3e0" : "transparent",
-                cursor: "pointer",
-                color: "#ff9800",
-              }}
-              onClick={() => setActiveTab("teste")}
-            >
-              🧪 Teste DB
-            </button>
-          )}
+          
         </div>
       </div>
 
@@ -691,19 +640,14 @@ const Administracao = () => {
           onResetPassword={handleResetSenha}
           loading={loading}
         />
-      ) : activeTab === "logs" ? (
+      ) : (
         <LogsSection
           logs={getFilteredLogs()}
           logFilters={logFilters}
           setLogFilters={setLogFilters}
           loading={loading}
         />
-      ) : activeTab === "teste" ? (
-        <div>
-          <h3>🧪 Teste de Conectividade do Banco de Dados</h3>
-          <TesteUsuarios />
-        </div>
-      ) : null}
+      )}
     </div>
   );
 };
