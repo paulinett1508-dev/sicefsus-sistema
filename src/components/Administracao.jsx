@@ -245,7 +245,7 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   };
 
-  // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA)
+  // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA COM DEBUG EXTRA)
   const handleDelete = useCallback(async (usuario) => {
     console.log("🗑️ === INÍCIO EXCLUSÃO ===");
     console.log("📋 Dados recebidos:", {
@@ -255,6 +255,11 @@ const Administracao = () => {
       email: usuario?.email,
       status: usuario?.status,
     });
+
+    // DEBUG EXTRA: Verificar se o objeto está sendo passado corretamente
+    console.log("🔍 DEBUG COMPLETO do usuário:", usuario);
+    console.log("🔍 Status EXATO:", JSON.stringify(usuario?.status));
+    console.log("🔍 Tipo do status:", typeof usuario?.status);
 
     // VALIDAÇÕES INICIAIS
     if (!usuario) {
