@@ -1,5 +1,5 @@
 // src/components/Administracao.jsx - VERSÃO REFATORADA E LIMPA
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   collection,
   addDoc,
@@ -24,6 +24,7 @@ import AdminHeader from "./admin/AdminHeader";
 // 📦 IMPORTS DE SERVIÇOS E UTILS
 import Toast from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
+import { UserContext } from "../context/UserContext";
 import {
   createUser,
   updateUser,
@@ -32,6 +33,9 @@ import {
 } from "../services/userService";
 
 const Administracao = () => {
+  // 🎯 CONTEXTO DO USUÁRIO
+  const { currentUser } = useContext(UserContext);
+
   // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);
   const [logs, setLogs] = useState([]);
@@ -287,7 +291,7 @@ const Administracao = () => {
     });
   };
 
-  // 🔄 FUNÇÃO: Toggle status do usuário (ALTERNATIVA DIRETA)
+  // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
     
@@ -301,16 +305,35 @@ const Administracao = () => {
         dataAtualizacao: serverTimestamp(),
       });
 
-      // Log de auditoria
-      await auditService.logAction(
-        "UPDATE_USER_STATUS",
-        `Status do usuário ${usuario.nome} alterado para ${novoStatus}`,
-        {
-          usuarioId: usuario.id,
-          statusAnterior: usuario.status,
-          statusNovo: novoStatus,
-        }
-      );
+      // ✅ CORREÇÃO: Log de auditoria com parâmetros CORRETOS (objeto único)
+      try {
+        await auditService.logAction({
+          action: "UPDATE_USER_STATUS",
+          resourceType: "usuarios",
+          resourceId: usuario.id,
+          dataBefore: { status: usuario.status },
+          dataAfter: { status: novoStatus },
+          user: {
+            uid: currentUser?.uid || "unknown",
+            email: currentUser?.email || "system",
+            tipo: currentUser?.tipo || "admin",
+            municipio: currentUser?.municipio || null,
+            uf: currentUser?.uf || null,
+          },
+          metadata: {
+            origem: "interface_administracao",
+            ip: "unknown", // Pode capturar se necessário
+          },
+          relatedResources: {
+            targetUserEmail: usuario.email,
+            targetUserNome: usuario.nome,
+          },
+        });
+        console.log("📝 Audit log registrado com sucesso");
+      } catch (auditError) {
+        console.warn("⚠️ Erro no log de auditoria:", auditError);
+        // Não falha a operação por causa do log
+      }
 
       showToast({
         tipo: "success",
