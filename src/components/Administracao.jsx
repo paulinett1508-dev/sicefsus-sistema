@@ -236,6 +236,14 @@ const Administracao = () => {
     }
   };
 
+  // 🎯 FUNÇÃO: Mostrar toast (MOVIDA PARA ANTES DE handleDelete)
+  const showToast = (toastData) => {
+    setToast({ ...toastData, show: true });
+    setTimeout(() => {
+      setToast({ show: false });
+    }, toastData.duracao || 5000);
+  };
+
   // 🗑️ FUNÇÃO: Excluir usuário (COM USECALLBACK)
   const handleDelete = useCallback(async (usuario) => {
     console.log("🗑️ === INÍCIO DEBUG EXCLUSÃO ===");
@@ -370,7 +378,7 @@ const Administracao = () => {
         setConfirmationModal({ isOpen: false });
       },
     });
-  }, [showToast, carregarUsuarios, setConfirmationModal]);
+  }, [carregarUsuarios, setConfirmationModal]);
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
@@ -472,13 +480,7 @@ const Administracao = () => {
     });
   };
 
-  // 🎯 FUNÇÃO: Mostrar toast
-  const showToast = (toastData) => {
-    setToast({ ...toastData, show: true });
-    setTimeout(() => {
-      setToast({ show: false });
-    }, toastData.duracao || 5000);
-  };
+  
 
   // 🎯 FUNÇÃO: Filtrar usuários
   const getFilteredUsers = () => {
