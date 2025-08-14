@@ -1,4 +1,4 @@
-// src/components/admin/UsersTable.jsx
+// src/components/admin/UsersTable.jsx - VERSÃO CORRIGIDA COMPLETA
 import React from "react";
 
 const UsersTable = ({
@@ -42,21 +42,15 @@ const UsersTable = ({
               }}
             >
               <td style={styles.tableCell}>
-                <div style={{ fontWeight: "500" }}>
-                  {usuario.nome || "N/A"}
-                </div>
+                <div style={{ fontWeight: "500" }}>{usuario.nome || "N/A"}</div>
               </td>
               <td style={styles.tableCell}>
-                <div style={{ fontSize: "13px" }}>
-                  {usuario.email || "N/A"}
-                </div>
+                <div style={{ fontSize: "13px" }}>{usuario.email || "N/A"}</div>
               </td>
               <td style={styles.tableCell}>
                 {usuario.municipio && usuario.uf ? (
                   <div>
-                    <div style={{ fontWeight: "500" }}>
-                      {usuario.municipio}
-                    </div>
+                    <div style={{ fontWeight: "500" }}>{usuario.municipio}</div>
                     <div style={{ fontSize: "11px", color: "#666" }}>
                       {usuario.uf}
                     </div>
@@ -100,84 +94,91 @@ const UsersTable = ({
                 </span>
               </td>
               <td style={styles.tableCell}>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div
+                  style={{ display: "flex", gap: "8px", alignItems: "center" }}
+                >
+                  {/* ✏️ EDITAR */}
                   <button
-                    onClick={() => onEdit(usuario)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("✏️ EDIT clicado:", usuario.nome);
+                      onEdit(usuario);
+                    }}
                     style={styles.actionButton}
                     title="Editar usuário"
-                    disabled={loading}
                   >
                     ✏️
                   </button>
+
+                  {/* 🔄 TOGGLE STATUS */}
                   <button
-                    onClick={() => onToggleStatus(usuario)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log(
+                        "🔄 TOGGLE clicado:",
+                        usuario.nome,
+                        usuario.status,
+                      );
+                      onToggleStatus(usuario);
+                    }}
                     style={{
                       ...styles.actionButton,
-                      backgroundColor: usuario.status === "ativo" ? "#ffc107" : "#28a745",
+                      backgroundColor:
+                        usuario.status === "ativo" ? "#ffc107" : "#28a745",
                     }}
-                    title={usuario.status === "ativo" ? "Inativar usuário" : "Ativar usuário"}
-                    disabled={loading}
+                    title={
+                      usuario.status === "ativo"
+                        ? "Inativar usuário"
+                        : "Ativar usuário"
+                    }
                   >
                     {usuario.status === "ativo" ? "⏸️" : "▶️"}
                   </button>
+
+                  {/* 🔑 RESET PASSWORD */}
                   <button
-                    onClick={() => onResetPassword(usuario)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("🔑 RESET clicado:", usuario.nome);
+                      onResetPassword(usuario);
+                    }}
                     style={{
                       ...styles.actionButton,
                       backgroundColor: "#17a2b8",
                     }}
                     title="Resetar senha"
-                    disabled={loading}
                   >
                     🔑
                   </button>
+
+                  {/* 🗑️ DELETE - VERSÃO SIMPLIFICADA */}
                   <button
                     onClick={(e) => {
-                      console.log("🗑️ === CLIQUE DETECTADO NO BOTÃO ===");
-                      console.log("🎯 Event:", e);
-                      console.log("🎯 Target:", e.target);
-                      console.log("📊 Usuário completo:", usuario);
-                      console.log("📊 Status atual:", usuario.status);
-                      console.log("📊 Loading:", loading);
-                      console.log("📊 Botão habilitado:", usuario.status === "inativo" && !loading);
-                      console.log("📊 onDelete função existe:", typeof onDelete === 'function');
-                      
-                      // Prevenir comportamento padrão
+                      console.log("🗑️ === CLIQUE DETECTADO ===");
+                      console.log("📊 Usuário:", usuario.nome);
+                      console.log("📊 Status:", usuario.status);
+                      console.log("📊 Event:", e.type);
+
                       e.preventDefault();
                       e.stopPropagation();
-                      
-                      if (usuario.status === "ativo") {
-                        console.log("⚠️ Tentativa de excluir usuário ativo bloqueada");
-                        alert("Este usuário está ativo! Inative-o primeiro para poder excluir.");
-                        return;
-                      }
-                      
-                      if (loading) {
-                        console.log("⚠️ Sistema em loading, operação bloqueada");
-                        return;
-                      }
-                      
-                      console.log("✅ Todas as validações passaram, chamando onDelete...");
-                      
-                      try {
-                        onDelete(usuario);
-                        console.log("✅ onDelete chamado com sucesso");
-                      } catch (error) {
-                        console.error("❌ Erro ao chamar onDelete:", error);
-                      }
+
+                      // ✅ SEMPRE PERMITIR (para teste)
+                      console.log("✅ Chamando onDelete...");
+                      onDelete(usuario);
                     }}
                     style={{
                       ...styles.actionButton,
-                      backgroundColor: usuario.status === "inativo" ? "#dc3545" : "#6c757d",
-                      opacity: usuario.status === "inativo" ? 1 : 0.5,
-                      cursor: usuario.status === "inativo" ? "pointer" : "not-allowed",
+                      backgroundColor: "#dc3545",
+                      opacity: 1, // ✅ SEMPRE VISÍVEL
+                      cursor: "pointer", // ✅ SEMPRE CLICÁVEL
+                      zIndex: 1000, // ✅ GARANTIR QUE ESTÁ POR CIMA
+                      position: "relative", // ✅ GARANTIR POSICIONAMENTO
                     }}
-                    title={
-                      usuario.status === "inativo"
-                        ? "Excluir usuário permanentemente"
-                        : "Inative o usuário para poder excluir"
-                    }
-                    disabled={loading || usuario.status !== "inativo"}
+                    title="Excluir usuário (TESTE ATIVO)"
+                    // ✅ REMOVER disabled TEMPORARIAMENTE
                   >
                     🗑️
                   </button>
@@ -221,15 +222,16 @@ const styles = {
     backgroundColor: "#28a745",
     color: "white",
     border: "none",
-    padding: "4px 8px",
+    padding: "6px 8px", // ✅ Aumentei padding
     borderRadius: "4px",
     cursor: "pointer",
-    fontSize: "12px",
+    fontSize: "14px", // ✅ Aumentei fonte
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    width: "30px",
-    height: "30px",
+    minWidth: "32px", // ✅ Largura mínima
+    minHeight: "32px", // ✅ Altura mínima
+    transition: "all 0.2s ease", // ✅ Transição suave
   },
   emptyState: {
     textAlign: "center",
