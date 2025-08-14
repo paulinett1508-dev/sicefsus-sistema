@@ -1,0 +1,231 @@
+// 🔧 SUBSTITUIR NO ADMINISTRACAO.JSX - ORDEM CORRETA DAS FUNÇÕES
+
+const Administracao = () => {
+  // 🎯 CONTEXTO DO USUÁRIO
+  const { currentUser } = useContext(UserContext);
+
+  // 🎯 ESTADOS PRINCIPAIS
+  const [usuarios, setUsuarios] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("users");
+
+  // 🎯 ESTADOS DO MODAL DE USUÁRIO
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    role: "user",
+    municipio: "",
+    uf: "",
+    status: "ativo",
+    departamento: "",
+    telefone: "",
+  });
+
+  // 🎯 ESTADOS DE FEEDBACK
+  const [toast, setToast] = useState({ show: false });
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "Confirmar",
+    cancelText: "Cancelar",
+    type: "warning",
+    onConfirm: () => {},
+    onCancel: () => {},
+  });
+
+  // 🎯 ESTADOS DE FILTROS
+  const [userFilter, setUserFilter] = useState("");
+  const [logFilters, setLogFilters] = useState({
+    usuario: "",
+    acao: "",
+    dataInicio: "",
+    dataFim: "",
+  });
+
+  // 🎯 FUNÇÃO: Mostrar toast (DECLARAR PRIMEIRO)
+  const showToast = useCallback((toastData) => {
+    setToast({ ...toastData, show: true });
+    setTimeout(() => {
+      setToast({ show: false });
+    }, toastData.duracao || 5000);
+  }, []);
+
+  // 📋 FUNÇÃO: Carregar usuários
+  const carregarUsuarios = useCallback(async () => {
+    try {
+      setLoading(true);
+      console.log("📋 Carregando usuários...");
+
+      const usuariosRef = collection(db, "usuarios");
+      const snapshot = await getDocs(usuariosRef);
+
+      const usuariosData = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          uid: data.uid || doc.id,
+          email: data.email,
+          nome: data.nome || data.name || "Nome não informado",
+          tipo: data.tipo || data.role || "operador",
+          status: data.status || "ativo",
+          departamento: data.departamento || "",
+          telefone: data.telefone || "",
+          municipio: data.municipio || "",
+          uf: data.uf || "",
+          ultimoAcesso: data.ultimoAcesso || data.ultimo_acesso,
+          criadoEm: data.criadoEm || data.data_criacao,
+          ...data,
+        };
+      });
+
+      setUsuarios(usuariosData);
+      console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
+    } catch (error) {
+      console.error("❌ Erro ao carregar usuários:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Erro ao carregar usuários",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
+  // 📋 FUNÇÃO: Carregar logs
+  const carregarLogs = useCallback(async () => {
+    try {
+      console.log("📋 Carregando logs de auditoria...");
+      const logsData = await auditService.getLogs({ limit: 50 });
+      setLogs(logsData);
+      console.log(`✅ ${logsData.length} logs carregados`);
+    } catch (error) {
+      console.error("❌ Erro ao carregar logs:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Erro ao carregar logs de auditoria",
+      });
+    }
+  }, [showToast]);
+
+  // 🗑️ FUNÇÃO: Excluir usuário (AGORA COM DEPENDÊNCIAS CORRETAS)
+  const handleDelete = useCallback(async (usuario) => {
+    console.log("🗑️ === INÍCIO DEBUG EXCLUSÃO ===");
+    console.log("📋 Dados do usuário recebido:", {
+      id: usuario.id,
+      uid: usuario.uid,
+      nome: usuario.nome,
+      email: usuario.email,
+      status: usuario.status,
+      tipo: typeof usuario,
+    });
+
+    // STEP 1: Verificar se usuário está inativo
+    if (usuario.status === "ativo") {
+      console.log("⚠️ Usuário ainda está ativo");
+      showToast({
+        tipo: "warning",
+        titulo: "Atenção",
+        mensagem: "Inative o usuário antes de excluí-lo",
+      });
+      return;
+    }
+
+    // STEP 2: Verificar se tem ID válido
+    if (!usuario.id) {
+      console.error("❌ ID do usuário não encontrado");
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "ID do usuário não encontrado",
+      });
+      return;
+    }
+
+    console.log("✅ Validações iniciais passaram");
+
+    // STEP 3: Confirmar exclusão
+    setConfirmationModal({
+      isOpen: true,
+      title: "Excluir Usuário",
+      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
+      confirmText: "Excluir",
+      cancelText: "Cancelar",
+      type: "danger",
+      onConfirm: async () => {
+        console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
+        
+        try {
+          console.log("📄 Criando referência do documento...");
+          const userRef = doc(db, "usuarios", usuario.id);
+          
+          console.log("🔍 Verificando se documento existe...");
+          const userDoc = await getDoc(userRef);
+          
+          if (!userDoc.exists()) {
+            console.log("⚠️ Documento não encontrado");
+            showToast({
+              tipo: "warning",
+              titulo: "Aviso",
+              mensagem: "Usuário já foi excluído ou não encontrado",
+            });
+            setConfirmationModal({ isOpen: false });
+            await carregarUsuarios();
+            return;
+          }
+
+          console.log("🗑️ Executando deleteDoc...");
+          await deleteDoc(userRef);
+          console.log("✅ deleteDoc executado com sucesso");
+
+          showToast({
+            tipo: "success",
+            titulo: "Sucesso",
+            mensagem: "Usuário excluído permanentemente!",
+          });
+          
+          await carregarUsuarios();
+          console.log("🎉 === EXCLUSÃO CONCLUÍDA COM SUCESSO ===");
+          
+        } catch (error) {
+          console.error("❌ === ERRO DETALHADO NA EXCLUSÃO ===");
+          console.error("🔥 Error:", error);
+          
+          showToast({
+            tipo: "error",
+            titulo: "Erro na Exclusão",
+            mensagem: error.message || "Erro ao excluir usuário",
+          });
+        }
+        
+        setConfirmationModal({ isOpen: false });
+      },
+      onCancel: () => {
+        console.log("❌ Exclusão cancelada pelo usuário");
+        setConfirmationModal({ isOpen: false });
+      },
+    });
+  }, [showToast, carregarUsuarios]);
+
+  // 🧪 FUNÇÃO DE TESTE SIMPLES
+  const testarFuncao = useCallback(() => {
+    console.log("🧪 === TESTE DE FUNÇÃO ===");
+    console.log("🧪 Usuários disponíveis:", usuarios.length);
+    
+    if (usuarios.length > 0) {
+      const usuarioTeste = usuarios.find(u => u.status === "inativo") || usuarios[0];
+      console.log("🧪 Testando com usuário:", usuarioTeste);
+      alert(`Testando exclusão do usuário: ${usuarioTeste.nome}`);
+      handleDelete(usuarioTeste);
+    } else {
+      alert("Nenhum usuário disponível para teste");
+    }
+  }, [usuarios, handleDelete]);
+
+  // ... resto do código (outras funções, useEffect, return) ...
