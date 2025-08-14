@@ -36,7 +36,11 @@ const UsersSection = ({
         <UsersTable
           users={users}
           onEdit={onEdit}
-          onDelete={onDelete}
+          onDelete={(usuario) => {
+            console.log("🔗 UsersSection: onDelete chamado para:", usuario.nome);
+            console.log("🔗 Função onDelete existe:", typeof onDelete === 'function');
+            onDelete(usuario);
+          }}
           onToggleStatus={onToggleStatus}
           onResetPassword={onResetPassword}
           loading={loading}

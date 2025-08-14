@@ -132,19 +132,39 @@ const UsersTable = ({
                     🔑
                   </button>
                   <button
-                    onClick={() => {
-                      console.log("🗑️ === CLIQUE EXCLUIR ===");
+                    onClick={(e) => {
+                      console.log("🗑️ === CLIQUE DETECTADO NO BOTÃO ===");
+                      console.log("🎯 Event:", e);
+                      console.log("🎯 Target:", e.target);
                       console.log("📊 Usuário completo:", usuario);
                       console.log("📊 Status atual:", usuario.status);
+                      console.log("📊 Loading:", loading);
                       console.log("📊 Botão habilitado:", usuario.status === "inativo" && !loading);
+                      console.log("📊 onDelete função existe:", typeof onDelete === 'function');
+                      
+                      // Prevenir comportamento padrão
+                      e.preventDefault();
+                      e.stopPropagation();
                       
                       if (usuario.status === "ativo") {
                         console.log("⚠️ Tentativa de excluir usuário ativo bloqueada");
+                        alert("Este usuário está ativo! Inative-o primeiro para poder excluir.");
                         return;
                       }
                       
-                      console.log("✅ Chamando onDelete...");
-                      onDelete(usuario);
+                      if (loading) {
+                        console.log("⚠️ Sistema em loading, operação bloqueada");
+                        return;
+                      }
+                      
+                      console.log("✅ Todas as validações passaram, chamando onDelete...");
+                      
+                      try {
+                        onDelete(usuario);
+                        console.log("✅ onDelete chamado com sucesso");
+                      } catch (error) {
+                        console.error("❌ Erro ao chamar onDelete:", error);
+                      }
                     }}
                     style={{
                       ...styles.actionButton,
