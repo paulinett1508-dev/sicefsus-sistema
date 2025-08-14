@@ -418,6 +418,7 @@ export default {
   deleteUserById,
   checkAuthState,
   logoutUser,
+  sendPasswordReset: sendPasswordResetEmail,
   // 🔥 FUNÇÕES CLOUD RUN:
   toggleUserStatusCloudRun,
   checkUserStatusCloudRun,

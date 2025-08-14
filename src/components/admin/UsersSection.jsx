@@ -9,7 +9,6 @@ const UsersSection = ({
   onEdit,
   onDelete,
   onToggleStatus,
-  onResetPassword,
   loading,
 }) => {
   return (
@@ -42,7 +41,6 @@ const UsersSection = ({
             onDelete(usuario);
           }}
           onToggleStatus={onToggleStatus}
-          onResetPassword={onResetPassword}
           loading={loading}
         />
       )}
