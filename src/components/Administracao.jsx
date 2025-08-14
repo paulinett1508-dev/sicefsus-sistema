@@ -244,13 +244,20 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   }, []);
 
-  // 🗑️ FUNÇÃO: Excluir usuário (VERSÃO SUPER SIMPLES)
+  // 🗑️ FUNÇÃO: Excluir usuário (VERSÃO ORIGINAL QUE FUNCIONAVA)
   const handleDelete = async (usuario) => {
-    console.log("🗑️ === EXCLUSÃO SIMPLIFICADA ===");
-    console.log("🗑️ Usuário:", usuario.nome);
+    console.log("🗑️ === EXCLUSÃO UNIVERSAL ===");
+    console.log("🗑️ Dados do usuário:", {
+      id: usuario?.id,
+      uid: usuario?.uid,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      status: usuario?.status
+    });
 
-    // Validações básicas
+    // Verificar dados básicos
     if (!usuario?.id) {
+      console.error("❌ ID do usuário não encontrado");
       showToast({
         tipo: "error",
         titulo: "Erro",
@@ -259,6 +266,7 @@ const Administracao = () => {
       return;
     }
 
+    // Verificar se usuário está inativo
     if (usuario.status === "ativo") {
       showToast({
         tipo: "warning",
@@ -268,47 +276,53 @@ const Administracao = () => {
       return;
     }
 
-    // ✅ MODAL SUPER SIMPLES - SEM ASYNC NO CALLBACK
-    setConfirmationModal({
-      isOpen: true,
-      title: "Confirmar Exclusão",
-      message: `Excluir permanentemente "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
-      confirmText: "Excluir",
-      cancelText: "Cancelar",
-      type: "danger",
-      onConfirm: () => {
-        console.log("✅ Confirmação recebida, executando exclusão...");
-        
-        // ✅ FECHAR MODAL IMEDIATAMENTE
-        setConfirmationModal({ isOpen: false });
-        
-        // ✅ EXECUTAR EXCLUSÃO EM FUNÇÃO SEPARADA
-        executarExclusao(usuario);
-      },
-      onCancel: () => {
-        console.log("❌ Exclusão cancelada");
-        setConfirmationModal({ isOpen: false });
-      }
-    });
-  };
+    // ✅ WINDOW.CONFIRM SIMPLES (FUNCIONAVA!)
+    const confirmar = window.confirm(
+      `🗑️ EXCLUIR PERMANENTEMENTE?\n\n` +
+      `Nome: ${usuario.nome || 'N/A'}\n` +
+      `Email: ${usuario.email || 'N/A'}\n` +
+      `ID: ${usuario.id}\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
+    );
 
-  // ✅ FUNÇÃO SEPARADA PARA EXCLUSÃO
-  const executarExclusao = async (usuario) => {
+    if (!confirmar) {
+      console.log("❌ Exclusão cancelada pelo usuário");
+      return;
+    }
+
     try {
-      console.log("🔥 Iniciando exclusão...");
+      console.log("🗑️ Executando exclusão...");
       setLoading(true);
 
-      // Exclusão direta
+      // ✅ EXCLUSÃO DIRETA DO FIRESTORE
       await deleteDoc(doc(db, "usuarios", usuario.id));
       console.log("✅ Usuário excluído do Firestore");
+
+      // Log de auditoria
+      if (window.auditService) {
+        await window.auditService.logAction(
+          "DELETE_USER",
+          `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
+          {
+            usuarioExcluido: {
+              id: usuario.id,
+              uid: usuario.uid,
+              nome: usuario.nome,
+              email: usuario.email,
+              municipio: usuario.municipio,
+              uf: usuario.uf,
+            },
+          }
+        );
+      }
 
       showToast({
         tipo: "success",
         titulo: "Sucesso",
-        mensagem: `${usuario.nome} foi excluído permanentemente!`
+        mensagem: "Usuário excluído permanentemente!"
       });
 
-      // Recarregar dados
+      // Recarregar lista
       await carregarUsuarios();
 
     } catch (error) {
@@ -316,7 +330,7 @@ const Administracao = () => {
       showToast({
         tipo: "error",
         titulo: "Erro",
-        mensagem: `Erro ao excluir: ${error.message}`
+        mensagem: `Erro ao excluir usuário: ${error.message}`
       });
     } finally {
       setLoading(false);
