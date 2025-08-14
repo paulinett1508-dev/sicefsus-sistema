@@ -296,7 +296,7 @@ function AppContent() {
           <span>📊 {getCurrentPageName()}</span>
           <span style={{ opacity: 0.5 }}>|</span>
           <span style={{ 
-            backgroundColor: import.meta.env.MODE === 'production' ? '#e74c3c' : '#f39c12',
+            backgroundColor: import.meta.env.MODE === 'production' ? '#28a745' : '#f39c12',
             padding: '2px 8px',
             borderRadius: '3px',
             fontWeight: 'bold'
