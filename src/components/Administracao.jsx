@@ -244,135 +244,98 @@ const Administracao = () => {
     }, toastData.duracao || 5000);
   }, []);
 
-  // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA COM DEBUG EXTRA)
-  const handleDelete = useCallback(
-    async (usuario) => {
-      console.log("🗑️ === INÍCIO EXCLUSÃO ===");
-      console.log("📋 Dados recebidos:", {
-        id: usuario?.id,
-        uid: usuario?.uid,
-        nome: usuario?.nome,
-        email: usuario?.email,
-        status: usuario?.status,
+  // 🗑️ FUNÇÃO: Excluir usuário (VERSÃO SIMPLIFICADA ORIGINAL)
+  const handleDelete = async (usuario) => {
+    console.log("🗑️ === EXCLUSÃO UNIVERSAL ===");
+    console.log("🗑️ Dados do usuário:", {
+      id: usuario?.id,
+      uid: usuario?.uid,
+      nome: usuario?.nome,
+      email: usuario?.email,
+      status: usuario?.status
+    });
+
+    // Verificar dados básicos
+    if (!usuario?.id) {
+      console.error("❌ ID do usuário não encontrado");
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Dados do usuário incompletos"
       });
+      return;
+    }
 
-      // DEBUG EXTRA: Verificar se o objeto está sendo passado corretamente
-      console.log("🔍 DEBUG COMPLETO do usuário:", usuario);
-      console.log("🔍 Status EXATO:", JSON.stringify(usuario?.status));
-      console.log("🔍 Tipo do status:", typeof usuario?.status);
+    // Verificar se usuário está inativo
+    if (usuario.status === "ativo") {
+      showToast({
+        tipo: "warning",
+        titulo: "Usuário Ativo",
+        mensagem: "Desative o usuário primeiro para poder excluir"
+      });
+      return;
+    }
 
-      // VALIDAÇÕES INICIAIS
-      if (!usuario) {
-        console.error("❌ Objeto usuário é null/undefined");
-        showToast({
-          tipo: "error",
-          titulo: "Erro",
-          mensagem: "Dados do usuário não encontrados",
-        });
-        return;
-      }
+    // ✅ USAR WINDOW.CONFIRM (ORIGINAL QUE FUNCIONAVA)
+    const confirmar = window.confirm(
+      `🗑️ EXCLUIR PERMANENTEMENTE?\n\n` +
+      `Nome: ${usuario.nome || 'N/A'}\n` +
+      `Email: ${usuario.email || 'N/A'}\n` +
+      `ID: ${usuario.id}\n\n` +
+      `Esta ação NÃO pode ser desfeita!`
+    );
 
-      if (usuario.status !== "inativo") {
-        console.log("⚠️ Usuário não está inativo:", usuario.status);
-        showToast({
-          tipo: "warning",
-          titulo: "Atenção",
-          mensagem: "Apenas usuários inativos podem ser excluídos",
-        });
-        return;
-      }
+    if (!confirmar) {
+      console.log("❌ Exclusão cancelada pelo usuário");
+      return;
+    }
 
-      if (!usuario.id && !usuario.uid) {
-        console.error("❌ Nem ID nem UID encontrados");
-        showToast({
-          tipo: "error",
-          titulo: "Erro",
-          mensagem: "Identificador do usuário não encontrado",
-        });
-        return;
-      }
+    try {
+      console.log("🗑️ Executando exclusão...");
+      setLoading(true);
 
-      console.log("✅ Validações passaram, abrindo modal de confirmação");
+      // ✅ EXCLUSÃO DIRETA DO FIRESTORE (ORIGINAL)
+      await deleteDoc(doc(db, "usuarios", usuario.id));
+      console.log("✅ Usuário excluído do Firestore");
 
-      // MODAL DE CONFIRMAÇÃO
-      setConfirmationModal({
-        isOpen: true,
-        title: "Excluir Usuário",
-        message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
-        confirmText: "Excluir",
-        cancelText: "Cancelar",
-        type: "danger",
-        onConfirm: async () => {
-          console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
-          setLoading(true);
-
-          try {
-            const userIdToDelete = usuario.id || usuario.uid;
-            const userUidForAPI = usuario.uid || usuario.id;
-
-            console.log("🎯 Tentando exclusão completa via userService...");
-            console.log("📊 IDs para exclusão:", {
-              userIdToDelete,
-              userUidForAPI,
-              method: "deleteUserById",
-            });
-
-            // Usar o userService que já tem fallback automático
-            const resultado = await deleteUserById(
-              userIdToDelete,
-              userUidForAPI,
-            );
-
-            console.log("✅ Resultado da exclusão:", resultado);
-
-            // Determinar mensagem baseada no método usado
-            let mensagem = "Usuário excluído com sucesso!";
-            if (resultado.method === "firestore_only") {
-              mensagem = "Usuário removido do sistema. Auth permanece ativo.";
-            } else if (resultado.method === "admin_api") {
-              mensagem =
-                "Usuário excluído permanentemente do Auth e Firestore!";
-            }
-
-            showToast({
-              tipo: "success",
-              titulo: "Exclusão Realizada",
-              mensagem: mensagem,
-            });
-
-            console.log("🔄 Recarregando lista de usuários...");
-            await carregarUsuarios();
-          } catch (error) {
-            console.error("❌ Erro na exclusão:", error);
-
-            let errorMessage = "Erro desconhecido na exclusão";
-
-            if (error.message) {
-              errorMessage = error.message;
-            } else if (error.code === "permission-denied") {
-              errorMessage = "Permissão negada para excluir usuário";
-            } else if (error.code === "not-found") {
-              errorMessage = "Usuário não encontrado no sistema";
-            }
-
-            showToast({
-              tipo: "error",
-              titulo: "Erro na Exclusão",
-              mensagem: errorMessage,
-            });
-          } finally {
-            setLoading(false);
-            setConfirmationModal({ isOpen: false });
+      // Log de auditoria
+      if (window.auditService) {
+        await window.auditService.logAction(
+          "DELETE_USER",
+          `Usuário ${usuario.nome} (${usuario.email}) excluído permanentemente`,
+          {
+            usuarioExcluido: {
+              id: usuario.id,
+              uid: usuario.uid,
+              nome: usuario.nome,
+              email: usuario.email,
+              municipio: usuario.municipio,
+              uf: usuario.uf,
+            },
           }
-        },
-        onCancel: () => {
-          console.log("❌ Exclusão cancelada");
-          setConfirmationModal({ isOpen: false });
-        },
+        );
+      }
+
+      showToast({
+        tipo: "success",
+        titulo: "Sucesso",
+        mensagem: "Usuário excluído permanentemente!"
       });
-    },
-    [showToast, carregarUsuarios],
-  );
+
+      // Recarregar lista
+      await carregarUsuarios();
+
+    } catch (error) {
+      console.error("❌ Erro na exclusão:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: `Erro ao excluir usuário: ${error.message}`
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
