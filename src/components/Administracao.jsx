@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  getDoc,
   query,
   where,
   serverTimestamp,
@@ -235,12 +236,21 @@ const Administracao = () => {
     }
   };
 
-  // 🗑️ FUNÇÃO: Excluir usuário (COMPLETA)
+  // 🗑️ FUNÇÃO: Excluir usuário (DEBUG COMPLETO)
   const handleDelete = async (usuario) => {
-    console.log("🗑️ handleDelete chamado com:", usuario);
+    console.log("🗑️ === INÍCIO DEBUG EXCLUSÃO ===");
+    console.log("📋 Dados do usuário recebido:", {
+      id: usuario.id,
+      uid: usuario.uid,
+      nome: usuario.nome,
+      email: usuario.email,
+      status: usuario.status,
+      tipo: typeof usuario,
+    });
 
-    // Verificar se usuário está inativo
+    // STEP 1: Verificar se usuário está inativo
     if (usuario.status === "ativo") {
+      console.log("⚠️ Usuário ainda está ativo");
       showToast({
         tipo: "warning",
         titulo: "Atenção",
@@ -249,7 +259,20 @@ const Administracao = () => {
       return;
     }
 
-    // Confirmar exclusão
+    // STEP 2: Verificar se tem ID válido
+    if (!usuario.id) {
+      console.error("❌ ID do usuário não encontrado");
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "ID do usuário não encontrado",
+      });
+      return;
+    }
+
+    console.log("✅ Validações iniciais passaram");
+
+    // STEP 3: Confirmar exclusão
     setConfirmationModal({
       isOpen: true,
       title: "Excluir Usuário",
@@ -258,34 +281,122 @@ const Administracao = () => {
       cancelText: "Cancelar",
       type: "danger",
       onConfirm: async () => {
+        console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
+        
         try {
-          console.log("🗑️ Executando exclusão...");
+          // STEP 4: Criar referência do documento
+          console.log("📄 Criando referência do documento...");
+          const userRef = doc(db, "usuarios", usuario.id);
+          console.log("📄 Referência criada:", {
+            collection: "usuarios",
+            id: usuario.id,
+            path: userRef.path,
+          });
 
-          // Usar deleteUserById com ID do documento e UID para exclusão completa
-          const resultado = await deleteUserById(usuario.id, usuario.uid);
-
-          if (resultado.success) {
+          // STEP 5: Verificar se documento existe ANTES de excluir
+          console.log("🔍 Verificando se documento existe...");
+          const userDoc = await getDoc(userRef);
+          
+          if (!userDoc.exists()) {
+            console.log("⚠️ Documento não encontrado");
             showToast({
-              tipo: "success",
-              titulo: "Sucesso",
-              mensagem: resultado.message,
+              tipo: "warning",
+              titulo: "Aviso",
+              mensagem: "Usuário já foi excluído ou não encontrado",
             });
-
-            // Recarregar lista
-            await carregarUsuarios();
+            setConfirmationModal({ isOpen: false });
+            await carregarUsuarios(); // Atualizar lista
+            return;
           }
+
+          console.log("✅ Documento encontrado:", {
+            id: userDoc.id,
+            data: userDoc.data(),
+          });
+
+          // STEP 6: Executar exclusão
+          console.log("🗑️ Executando deleteDoc...");
+          await deleteDoc(userRef);
+          console.log("✅ deleteDoc executado com sucesso");
+
+          // STEP 7: Verificar se foi realmente excluído
+          console.log("🔍 Verificando exclusão...");
+          const checkDoc = await getDoc(userRef);
+          if (checkDoc.exists()) {
+            console.error("❌ Documento ainda existe após exclusão!");
+            throw new Error("Falha na exclusão - documento ainda existe");
+          }
+          
+          console.log("✅ Confirmado: documento foi excluído");
+
+          // STEP 8: Log de auditoria (opcional)
+          try {
+            console.log("📝 Registrando audit log...");
+            await auditService.logAction({
+              action: "DELETE_USER",
+              resourceType: "usuarios",
+              resourceId: usuario.id,
+              dataBefore: usuario,
+              dataAfter: null,
+              user: {
+                uid: "admin_system",
+                email: "admin@sicefsus.gov.br",
+                tipo: "admin",
+                municipio: null,
+                uf: null,
+              },
+              metadata: {
+                origem: "interface_administracao",
+                timestamp: new Date().toISOString(),
+              },
+            });
+            console.log("✅ Audit log registrado");
+          } catch (auditError) {
+            console.warn("⚠️ Erro no audit log (não crítico):", auditError);
+          }
+
+          // STEP 9: Feedback e atualização
+          console.log("🎉 Mostrando toast de sucesso...");
+          showToast({
+            tipo: "success",
+            titulo: "Sucesso",
+            mensagem: "Usuário excluído permanentemente!",
+          });
+          
+          console.log("🔄 Recarregando lista de usuários...");
+          await carregarUsuarios();
+          
+          console.log("🎉 === EXCLUSÃO CONCLUÍDA COM SUCESSO ===");
+          
         } catch (error) {
-          console.error("❌ Erro ao excluir usuário:", error);
+          console.error("❌ === ERRO DETALHADO NA EXCLUSÃO ===");
+          console.error("🔥 Error object:", error);
+          console.error("🔥 Error code:", error.code);
+          console.error("🔥 Error message:", error.message);
+          console.error("🔥 Error stack:", error.stack);
+          
+          let errorMessage = "Erro ao excluir usuário";
+          
+          // Tratar erros específicos do Firebase
+          if (error.code === 'permission-denied') {
+            errorMessage = "Permissão negada para excluir usuário";
+          } else if (error.code === 'not-found') {
+            errorMessage = "Usuário não encontrado";
+          } else if (error.code === 'unavailable') {
+            errorMessage = "Serviço temporariamente indisponível";
+          }
+          
           showToast({
             tipo: "error",
-            titulo: "Erro",
-            mensagem: error.message || "Erro ao excluir usuário",
+            titulo: "Erro na Exclusão",
+            mensagem: errorMessage,
           });
         }
-
+        
         setConfirmationModal({ isOpen: false });
       },
       onCancel: () => {
+        console.log("❌ Exclusão cancelada pelo usuário");
         setConfirmationModal({ isOpen: false });
       },
     });
