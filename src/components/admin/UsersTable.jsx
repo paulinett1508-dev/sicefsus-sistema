@@ -6,7 +6,6 @@ const UsersTable = ({
   onEdit,
   onDelete,
   onToggleStatus,
-  onResetPassword,
   loading,
 }) => {
   if (users.length === 0) {
@@ -135,23 +134,6 @@ const UsersTable = ({
                     }
                   >
                     {usuario.status === "ativo" ? "⏸️" : "▶️"}
-                  </button>
-
-                  {/* 🔑 RESET PASSWORD */}
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("🔑 RESET clicado:", usuario.nome);
-                      onResetPassword(usuario);
-                    }}
-                    style={{
-                      ...styles.actionButton,
-                      backgroundColor: "#17a2b8",
-                    }}
-                    title="Resetar senha"
-                  >
-                    🔑
                   </button>
 
                   {/* 🗑️ DELETE - VERSÃO SIMPLIFICADA */}
