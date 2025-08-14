@@ -1,5 +1,5 @@
 // src/components/Administracao.jsx - VERSÃO REFATORADA E LIMPA
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
   collection,
   addDoc,
@@ -236,8 +236,8 @@ const Administracao = () => {
     }
   };
 
-  // 🗑️ FUNÇÃO: Excluir usuário (DEBUG COMPLETO)
-  const handleDelete = async (usuario) => {
+  // 🗑️ FUNÇÃO: Excluir usuário (COM USECALLBACK)
+  const handleDelete = useCallback(async (usuario) => {
     console.log("🗑️ === INÍCIO DEBUG EXCLUSÃO ===");
     console.log("📋 Dados do usuário recebido:", {
       id: usuario.id,
@@ -329,34 +329,6 @@ const Administracao = () => {
           
           console.log("✅ Confirmado: documento foi excluído");
 
-          // STEP 8: Log de auditoria (opcional)
-          try {
-            console.log("📝 Registrando audit log...");
-            await auditService.logAction({
-              action: "DELETE_USER",
-              resourceType: "usuarios",
-              resourceId: usuario.id,
-              dataBefore: usuario,
-              dataAfter: null,
-              user: {
-                uid: "admin_system",
-                email: "admin@sicefsus.gov.br",
-                tipo: "admin",
-                municipio: null,
-                uf: null,
-              },
-              metadata: {
-                origem: "interface_administracao",
-                timestamp: new Date().toISOString(),
-              },
-            });
-            console.log("✅ Audit log registrado");
-          } catch (auditError) {
-            console.warn("⚠️ Erro no audit log (não crítico):", auditError);
-          }
-
-          // STEP 9: Feedback e atualização
-          console.log("🎉 Mostrando toast de sucesso...");
           showToast({
             tipo: "success",
             titulo: "Sucesso",
@@ -373,11 +345,9 @@ const Administracao = () => {
           console.error("🔥 Error object:", error);
           console.error("🔥 Error code:", error.code);
           console.error("🔥 Error message:", error.message);
-          console.error("🔥 Error stack:", error.stack);
           
           let errorMessage = "Erro ao excluir usuário";
           
-          // Tratar erros específicos do Firebase
           if (error.code === 'permission-denied') {
             errorMessage = "Permissão negada para excluir usuário";
           } else if (error.code === 'not-found') {
@@ -400,7 +370,7 @@ const Administracao = () => {
         setConfirmationModal({ isOpen: false });
       },
     });
-  };
+  }, [showToast, carregarUsuarios, setConfirmationModal]);
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
@@ -583,25 +553,28 @@ const Administracao = () => {
     loadData();
   }, []);
 
-  // 🧪 BOTÃO DE TESTE TEMPORÁRIO
-  const testarExclusao = () => {
-    console.log("🧪 TESTE: Função handleDelete existe?", typeof handleDelete);
+  // 🧪 FUNÇÃO DE TESTE SIMPLES
+  const testarFuncao = useCallback(() => {
+    console.log("🧪 === TESTE DE FUNÇÃO ===");
+    console.log("🧪 Usuários disponíveis:", usuarios.length);
+    console.log("🧪 Função handleDelete:", typeof handleDelete);
     
     if (usuarios.length > 0) {
-      const usuarioTeste = usuarios[0];
-      console.log("🧪 TESTE: Chamando handleDelete diretamente...");
+      const usuarioTeste = usuarios.find(u => u.status === "inativo") || usuarios[0];
+      console.log("🧪 Testando com usuário:", usuarioTeste);
+      alert(`Testando exclusão do usuário: ${usuarioTeste.nome}`);
       handleDelete(usuarioTeste);
     } else {
-      console.log("🧪 TESTE: Nenhum usuário disponível");
+      alert("Nenhum usuário disponível para teste");
     }
-  };
+  }, [usuarios, handleDelete]);
 
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
       {/* 🧪 BOTÃO DE TESTE TEMPORÁRIO */}
       <button 
-        onClick={testarExclusao}
+        onClick={testarFuncao}
         style={{
           background: 'red',
           color: 'white',
