@@ -1,8 +1,9 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
 // ✅ CORREÇÃO COMPLETA: Layout e lógica idênticos ao DadosBasicos
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import CNPJInput from "../../../CNPJInput";
+import { UserContext } from "../../../../context/UserContext";
 
 const Identificacao = ({
   formData = {},
@@ -12,6 +13,8 @@ const Identificacao = ({
 }) => {
   const [municipios, setMunicipios] = useState([]);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
+  const { user } = useContext(UserContext);
+  const isOperador = user?.tipo === "operador";
 
   // Lista de UFs brasileiras
   const ufs = [
@@ -158,7 +161,7 @@ const Identificacao = ({
             name="uf"
             value={formData.uf || ""}
             onChange={handleUfChange}
-            disabled={disabled}
+            disabled={disabled || isOperador}
             style={{
               ...styles.input,
               ...(errors.uf && styles.inputError),
@@ -184,7 +187,9 @@ const Identificacao = ({
             name="municipio"
             value={formData.municipio || ""}
             onChange={onChange}
-            disabled={disabled || !formData?.uf || loadingMunicipios}
+            disabled={
+              disabled || !formData?.uf || loadingMunicipios || isOperador
+            }
             style={{
               ...styles.input,
               ...(errors.municipio && styles.inputError),
