@@ -21,7 +21,6 @@ import LogsSection from "./admin/LogsSection";
 import UserModal from "./admin/UserModal";
 import AdminTabs from "./admin/AdminTabs";
 import AdminHeader from "./admin/AdminHeader";
-import TesteUsuarios from "./TesteUsuarios";
 
 // 📦 IMPORTS DE SERVIÇOS E UTILS
 import Toast from "./Toast";
@@ -246,134 +245,142 @@ const Administracao = () => {
   }, []);
 
   // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA COM DEBUG EXTRA)
-  const handleDelete = useCallback(async (usuario) => {
-    console.log("🗑️ === INÍCIO EXCLUSÃO ===");
-    console.log("📋 Dados recebidos:", {
-      id: usuario?.id,
-      uid: usuario?.uid,
-      nome: usuario?.nome,
-      email: usuario?.email,
-      status: usuario?.status,
-    });
-
-    // DEBUG EXTRA: Verificar se o objeto está sendo passado corretamente
-    console.log("🔍 DEBUG COMPLETO do usuário:", usuario);
-    console.log("🔍 Status EXATO:", JSON.stringify(usuario?.status));
-    console.log("🔍 Tipo do status:", typeof usuario?.status);
-
-    // VALIDAÇÕES INICIAIS
-    if (!usuario) {
-      console.error("❌ Objeto usuário é null/undefined");
-      showToast({
-        tipo: "error",
-        titulo: "Erro",
-        mensagem: "Dados do usuário não encontrados",
+  const handleDelete = useCallback(
+    async (usuario) => {
+      console.log("🗑️ === INÍCIO EXCLUSÃO ===");
+      console.log("📋 Dados recebidos:", {
+        id: usuario?.id,
+        uid: usuario?.uid,
+        nome: usuario?.nome,
+        email: usuario?.email,
+        status: usuario?.status,
       });
-      return;
-    }
 
-    if (usuario.status !== "inativo") {
-      console.log("⚠️ Usuário não está inativo:", usuario.status);
-      showToast({
-        tipo: "warning",
-        titulo: "Atenção",
-        mensagem: "Apenas usuários inativos podem ser excluídos",
-      });
-      return;
-    }
+      // DEBUG EXTRA: Verificar se o objeto está sendo passado corretamente
+      console.log("🔍 DEBUG COMPLETO do usuário:", usuario);
+      console.log("🔍 Status EXATO:", JSON.stringify(usuario?.status));
+      console.log("🔍 Tipo do status:", typeof usuario?.status);
 
-    if (!usuario.id && !usuario.uid) {
-      console.error("❌ Nem ID nem UID encontrados");
-      showToast({
-        tipo: "error",
-        titulo: "Erro",
-        mensagem: "Identificador do usuário não encontrado",
-      });
-      return;
-    }
+      // VALIDAÇÕES INICIAIS
+      if (!usuario) {
+        console.error("❌ Objeto usuário é null/undefined");
+        showToast({
+          tipo: "error",
+          titulo: "Erro",
+          mensagem: "Dados do usuário não encontrados",
+        });
+        return;
+      }
 
-    console.log("✅ Validações passaram, abrindo modal de confirmação");
+      if (usuario.status !== "inativo") {
+        console.log("⚠️ Usuário não está inativo:", usuario.status);
+        showToast({
+          tipo: "warning",
+          titulo: "Atenção",
+          mensagem: "Apenas usuários inativos podem ser excluídos",
+        });
+        return;
+      }
 
-    // MODAL DE CONFIRMAÇÃO
-    setConfirmationModal({
-      isOpen: true,
-      title: "Excluir Usuário",
-      message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
-      confirmText: "Excluir",
-      cancelText: "Cancelar",
-      type: "danger",
-      onConfirm: async () => {
-        console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
-        setLoading(true);
+      if (!usuario.id && !usuario.uid) {
+        console.error("❌ Nem ID nem UID encontrados");
+        showToast({
+          tipo: "error",
+          titulo: "Erro",
+          mensagem: "Identificador do usuário não encontrado",
+        });
+        return;
+      }
 
-        try {
-          const userIdToDelete = usuario.id || usuario.uid;
-          const userUidForAPI = usuario.uid || usuario.id;
+      console.log("✅ Validações passaram, abrindo modal de confirmação");
 
-          console.log("🎯 Tentando exclusão completa via userService...");
-          console.log("📊 IDs para exclusão:", {
-            userIdToDelete,
-            userUidForAPI,
-            method: "deleteUserById"
-          });
+      // MODAL DE CONFIRMAÇÃO
+      setConfirmationModal({
+        isOpen: true,
+        title: "Excluir Usuário",
+        message: `Tem certeza que deseja excluir permanentemente o usuário "${usuario.nome}"?\n\nEsta ação não pode ser desfeita.`,
+        confirmText: "Excluir",
+        cancelText: "Cancelar",
+        type: "danger",
+        onConfirm: async () => {
+          console.log("🗑️ === EXECUTANDO EXCLUSÃO ===");
+          setLoading(true);
 
-          // Usar o userService que já tem fallback automático
-          const resultado = await deleteUserById(userIdToDelete, userUidForAPI);
-          
-          console.log("✅ Resultado da exclusão:", resultado);
+          try {
+            const userIdToDelete = usuario.id || usuario.uid;
+            const userUidForAPI = usuario.uid || usuario.id;
 
-          // Determinar mensagem baseada no método usado
-          let mensagem = "Usuário excluído com sucesso!";
-          if (resultado.method === "firestore_only") {
-            mensagem = "Usuário removido do sistema. Auth permanece ativo.";
-          } else if (resultado.method === "admin_api") {
-            mensagem = "Usuário excluído permanentemente do Auth e Firestore!";
+            console.log("🎯 Tentando exclusão completa via userService...");
+            console.log("📊 IDs para exclusão:", {
+              userIdToDelete,
+              userUidForAPI,
+              method: "deleteUserById",
+            });
+
+            // Usar o userService que já tem fallback automático
+            const resultado = await deleteUserById(
+              userIdToDelete,
+              userUidForAPI,
+            );
+
+            console.log("✅ Resultado da exclusão:", resultado);
+
+            // Determinar mensagem baseada no método usado
+            let mensagem = "Usuário excluído com sucesso!";
+            if (resultado.method === "firestore_only") {
+              mensagem = "Usuário removido do sistema. Auth permanece ativo.";
+            } else if (resultado.method === "admin_api") {
+              mensagem =
+                "Usuário excluído permanentemente do Auth e Firestore!";
+            }
+
+            showToast({
+              tipo: "success",
+              titulo: "Exclusão Realizada",
+              mensagem: mensagem,
+            });
+
+            console.log("🔄 Recarregando lista de usuários...");
+            await carregarUsuarios();
+          } catch (error) {
+            console.error("❌ Erro na exclusão:", error);
+
+            let errorMessage = "Erro desconhecido na exclusão";
+
+            if (error.message) {
+              errorMessage = error.message;
+            } else if (error.code === "permission-denied") {
+              errorMessage = "Permissão negada para excluir usuário";
+            } else if (error.code === "not-found") {
+              errorMessage = "Usuário não encontrado no sistema";
+            }
+
+            showToast({
+              tipo: "error",
+              titulo: "Erro na Exclusão",
+              mensagem: errorMessage,
+            });
+          } finally {
+            setLoading(false);
+            setConfirmationModal({ isOpen: false });
           }
-
-          showToast({
-            tipo: "success",
-            titulo: "Exclusão Realizada",
-            mensagem: mensagem,
-          });
-
-          console.log("🔄 Recarregando lista de usuários...");
-          await carregarUsuarios();
-
-        } catch (error) {
-          console.error("❌ Erro na exclusão:", error);
-
-          let errorMessage = "Erro desconhecido na exclusão";
-          
-          if (error.message) {
-            errorMessage = error.message;
-          } else if (error.code === 'permission-denied') {
-            errorMessage = "Permissão negada para excluir usuário";
-          } else if (error.code === 'not-found') {
-            errorMessage = "Usuário não encontrado no sistema";
-          }
-
-          showToast({
-            tipo: "error",
-            titulo: "Erro na Exclusão",
-            mensagem: errorMessage,
-          });
-        } finally {
-          setLoading(false);
+        },
+        onCancel: () => {
+          console.log("❌ Exclusão cancelada");
           setConfirmationModal({ isOpen: false });
-        }
-      },
-      onCancel: () => {
-        console.log("❌ Exclusão cancelada");
-        setConfirmationModal({ isOpen: false });
-      },
-    });
-  }, [showToast, carregarUsuarios]);
+        },
+      });
+    },
+    [showToast, carregarUsuarios],
+  );
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
 
-    console.log(`🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`);
+    console.log(
+      `🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`,
+    );
 
     try {
       // ✅ SOLUÇÃO DIRETA: updateDoc apenas o campo status
@@ -469,8 +476,6 @@ const Administracao = () => {
     });
   };
 
-  
-
   // 🎯 FUNÇÃO: Filtrar usuários
   const getFilteredUsers = () => {
     return usuarios.filter(
@@ -544,28 +549,30 @@ const Administracao = () => {
     loadData();
   }, []);
 
-  
-
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
-      
       {/* DEBUG TEMPORÁRIO - REMOVER DEPOIS */}
-      {process.env.NODE_ENV === 'development' && (
-        <div style={{ 
-          position: 'fixed', 
-          top: '10px', 
-          right: '10px', 
-          zIndex: 9999,
-          backgroundColor: '#ff9800',
-          padding: '5px 10px',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-        onClick={() => {
-          if (window.confirm('Abrir Debug de Usuários?')) {
-            const debugWindow = window.open('', '_blank', 'width=1200,height=800');
-            debugWindow.document.write(`
+      {process.env.NODE_ENV === "development" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "10px",
+            right: "10px",
+            zIndex: 9999,
+            backgroundColor: "#ff9800",
+            padding: "5px 10px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            if (window.confirm("Abrir Debug de Usuários?")) {
+              const debugWindow = window.open(
+                "",
+                "_blank",
+                "width=1200,height=800",
+              );
+              debugWindow.document.write(`
               <html>
                 <head><title>Debug Usuários SICEFSUS</title></head>
                 <body>
@@ -575,8 +582,9 @@ const Administracao = () => {
                 </body>
               </html>
             `);
-          }
-        }}>
+            }
+          }}
+        >
           🔍 DEBUG
         </div>
       )}
@@ -623,43 +631,47 @@ const Administracao = () => {
       />
 
       {/* NAVEGAÇÃO POR TABS */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ borderBottom: '1px solid #ddd' }}>
+      <div style={{ marginBottom: "20px" }}>
+        <div style={{ borderBottom: "1px solid #ddd" }}>
           <button
             style={{
-              padding: '10px 20px',
-              border: 'none',
-              borderBottom: activeTab === 'users' ? '2px solid #007bff' : 'none',
-              backgroundColor: activeTab === 'users' ? '#f8f9fa' : 'transparent',
-              cursor: 'pointer'
+              padding: "10px 20px",
+              border: "none",
+              borderBottom:
+                activeTab === "users" ? "2px solid #007bff" : "none",
+              backgroundColor:
+                activeTab === "users" ? "#f8f9fa" : "transparent",
+              cursor: "pointer",
             }}
-            onClick={() => setActiveTab('users')}
+            onClick={() => setActiveTab("users")}
           >
             👥 Usuários ({usuarios.length})
           </button>
           <button
             style={{
-              padding: '10px 20px',
-              border: 'none',
-              borderBottom: activeTab === 'logs' ? '2px solid #007bff' : 'none',
-              backgroundColor: activeTab === 'logs' ? '#f8f9fa' : 'transparent',
-              cursor: 'pointer'
+              padding: "10px 20px",
+              border: "none",
+              borderBottom: activeTab === "logs" ? "2px solid #007bff" : "none",
+              backgroundColor: activeTab === "logs" ? "#f8f9fa" : "transparent",
+              cursor: "pointer",
             }}
-            onClick={() => setActiveTab('logs')}
+            onClick={() => setActiveTab("logs")}
           >
             📋 Logs ({logs.length})
           </button>
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <button
               style={{
-                padding: '10px 20px',
-                border: 'none',
-                borderBottom: activeTab === 'teste' ? '2px solid #ff9800' : 'none',
-                backgroundColor: activeTab === 'teste' ? '#fff3e0' : 'transparent',
-                cursor: 'pointer',
-                color: '#ff9800'
+                padding: "10px 20px",
+                border: "none",
+                borderBottom:
+                  activeTab === "teste" ? "2px solid #ff9800" : "none",
+                backgroundColor:
+                  activeTab === "teste" ? "#fff3e0" : "transparent",
+                cursor: "pointer",
+                color: "#ff9800",
               }}
-              onClick={() => setActiveTab('teste')}
+              onClick={() => setActiveTab("teste")}
             >
               🧪 Teste DB
             </button>
