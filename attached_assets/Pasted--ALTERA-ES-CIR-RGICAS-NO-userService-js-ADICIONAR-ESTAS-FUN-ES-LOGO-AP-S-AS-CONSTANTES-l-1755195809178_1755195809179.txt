@@ -1,0 +1,227 @@
+// ✂️ ALTERAÇÕES CIRÚRGICAS NO userService.js
+// ADICIONAR ESTAS FUNÇÕES LOGO APÓS AS CONSTANTES (linha ~45)
+
+// 🔥 URL DA CLOUD RUN FUNCTION (ADICIONAR)
+const CLOUD_RUN_URL = 'https://sicefsus-delete-user-578597529619.southamerica-east1.run.app';
+
+// 🔧 FUNÇÃO: Chamar Cloud Run (ADICIONAR)
+const callCloudRun = async (action, data) => {
+  try {
+    const token = await getAuthToken();
+    
+    const response = await fetch(CLOUD_RUN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        action: action,
+        ...data
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Cloud Run Error: ${response.status} - ${errorData}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ [CLOUD RUN] Erro em ${action}:`, error);
+    throw error;
+  }
+};
+
+// ✂️ SUBSTITUIR A FUNÇÃO createUser EXISTENTE POR ESTA VERSÃO:
+export const createUser = async (userData, options = {}) => {
+  console.log("👤 === CRIAÇÃO DE USUÁRIO UNIVERSAL ===");
+  console.log("📊 Dados:", userData);
+
+  try {
+    // 🔥 TENTAR CLOUD RUN PRIMEIRO (NOVO)
+    try {
+      console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
+      
+      const result = await callCloudRun('createUser', {
+        email: userData.email,
+        userData: userData
+      });
+      
+      console.log("🎉 [SUCESSO] Usuário criado via Cloud Run");
+      return {
+        success: result.success,
+        method: 'cloud_run',
+        uid: result.uid,
+        resetLink: result.resetLink,
+        mensagem: 'Usuário criado via Cloud Run Admin SDK!'
+      };
+      
+    } catch (cloudRunError) {
+      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
+      
+      // Se erro é de email existente, não fazer fallback
+      if (cloudRunError.message.includes('email-already-exists')) {
+        throw {
+          codigo: 'auth/email-already-in-use',
+          mensagem: 'Este email já está sendo usado. Use a função de exclusão primeiro.',
+          detalhes: cloudRunError.message
+        };
+      }
+    }
+
+    // 🔄 TENTAR ADMIN API (MANTER LÓGICA EXISTENTE)
+    try {
+      const result = await createUserViaAdminAPI(userData);
+      console.log("🎉 [SUCESSO] Usuário criado via Admin API");
+      return result;
+    } catch (adminError) {
+      console.warn("⚠️ [FALLBACK] Admin API falhou:", adminError.message);
+
+      // 🔄 FALLBACK FINAL: Método original (MANTER)
+      return await createUserInFirebase(
+        userData,
+        options.navigate,
+        options.showToast,
+      );
+    }
+  } catch (error) {
+    console.error("❌ Erro total na criação:", error);
+    throw error;
+  }
+};
+
+// ✂️ SUBSTITUIR A FUNÇÃO deleteUserById EXISTENTE POR ESTA VERSÃO:
+export const deleteUserById = async (userId, userUid) => {
+  console.log("🗑️ === EXCLUSÃO DE USUÁRIO UNIVERSAL ===");
+  console.log("📊 Dados:", { userId, userUid });
+
+  try {
+    // 🔥 TENTAR CLOUD RUN PRIMEIRO (NOVO)
+    if (userUid) {
+      try {
+        console.log("🔥 [CLOUD RUN] Tentando excluir usuário...");
+        
+        const result = await callCloudRun('deleteUser', {
+          uid: userUid,
+          firestoreId: userId
+        });
+        
+        console.log("🎉 [SUCESSO] Usuário excluído via Cloud Run");
+        return {
+          success: result.success,
+          method: 'cloud_run',
+          details: result.details,
+          message: result.message
+        };
+        
+      } catch (cloudRunError) {
+        console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
+      }
+    }
+
+    // 🔄 TENTAR ADMIN API (MANTER LÓGICA EXISTENTE)
+    if (userUid) {
+      try {
+        const result = await deleteUserViaAdminAPI(userUid);
+        console.log("🎉 [SUCESSO] Usuário excluído via Admin API");
+        return result;
+      } catch (adminError) {
+        console.warn("⚠️ [FALLBACK] Admin API falhou:", adminError.message);
+      }
+    }
+
+    // 🔄 FALLBACK FINAL: Exclusão apenas do Firestore (MANTER)
+    console.log("🔄 [FALLBACK] Excluindo apenas do Firestore...");
+
+    await deleteDoc(doc(db, "usuarios", userId));
+    console.log("✅ Usuário excluído do Firestore");
+
+    return {
+      success: true,
+      method: "firestore_only",
+      message: "Usuário excluído do Firestore. Auth permanece (requer Admin SDK)",
+      warning: "Email ficará bloqueado até exclusão via Admin SDK",
+    };
+  } catch (error) {
+    console.error("❌ Erro na exclusão:", error);
+    throw new Error("Erro ao excluir usuário: " + error.message);
+  }
+};
+
+// 🔥 ADICIONAR NOVAS FUNÇÕES (SEM SUBSTITUIR NADA):
+
+// 🔄 FUNÇÃO: Toggle Status via Cloud Run
+export const toggleUserStatusCloudRun = async (usuario, newStatus) => {
+  try {
+    console.log("🔄 [CLOUD RUN] Alterando status...");
+    
+    const result = await callCloudRun('toggleUserStatus', {
+      uid: usuario.uid || usuario.id,
+      firestoreId: usuario.id,
+      newStatus: newStatus
+    });
+
+    return {
+      success: result.success,
+      method: 'cloud_run',
+      details: result.details,
+      newStatus: result.newStatus
+    };
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao alterar status:", error);
+    throw error;
+  }
+};
+
+// 🔍 FUNÇÃO: Verificar Status via Cloud Run
+export const checkUserStatusCloudRun = async (email) => {
+  try {
+    console.log("🔍 [CLOUD RUN] Verificando status...");
+    
+    const result = await callCloudRun('checkUserStatus', {
+      email: email
+    });
+
+    return result;
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao verificar status:", error);
+    throw error;
+  }
+};
+
+// 📋 FUNÇÃO: Carregar Usuários via Cloud Run
+export const loadUsersCloudRun = async (limit = 50, offset = 0) => {
+  try {
+    console.log("📋 [CLOUD RUN] Carregando usuários...");
+    
+    const result = await callCloudRun('listUsers', {
+      limit: limit,
+      offset: offset
+    });
+
+    return result.usuarios;
+
+  } catch (error) {
+    console.error("❌ [CLOUD RUN] Erro ao carregar usuários:", error);
+    throw error;
+  }
+};
+
+// ✂️ ATUALIZAR O EXPORT DEFAULT (ADICIONAR as novas funções):
+export default {
+  createUser,
+  createUserInFirebase,
+  updateUser,
+  deleteUserById,
+  sendPasswordReset,
+  checkAuthState,
+  logoutUser,
+  // 🔥 NOVAS FUNÇÕES CLOUD RUN:
+  toggleUserStatusCloudRun,
+  checkUserStatusCloudRun,
+  loadUsersCloudRun,
+  callCloudRun
+};

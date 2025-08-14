@@ -20,68 +20,6 @@ import {
 import { initializeApp } from "firebase/app";
 import { db, auth } from "../firebase/firebaseConfig";
 
-// ✅ FUNÇÃO: Excluir usuário via Cloud Run Function
-export const deleteUserComplete = async (firestoreId, authUid) => {
-  try {
-    console.log('🔥 Iniciando exclusão via Cloud Run...');
-    console.log('📊 Parâmetros:', { firestoreId, authUid });
-
-    // Obter token de autenticação
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('Usuário não autenticado');
-    }
-
-    const token = await currentUser.getIdToken();
-    console.log('✅ Token obtido');
-
-    // Chamar Cloud Run Function
-    const response = await fetch('https://sicefsus-delete-user-578597529619.southamerica-east1.run.app', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        uid: authUid || firestoreId,
-        firestoreId: firestoreId
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`HTTP ${response.status}: ${errorData}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ Resultado Cloud Run:', result);
-
-    return {
-      success: result.success,
-      method: 'cloud_run',
-      details: result.details,
-      message: result.message
-    };
-
-  } catch (error) {
-    console.error('❌ Erro na Cloud Run Function:', error);
-    
-    // Fallback para método original
-    console.log('🔄 Tentando fallback para Firestore apenas...');
-    try {
-      await deleteDoc(doc(db, "usuarios", firestoreId));
-      return {
-        success: true,
-        method: 'firestore_fallback',
-        message: 'Usuário removido apenas do Firestore (Cloud Run falhou)'
-      };
-    } catch (fallbackError) {
-      console.error('❌ Fallback também falhou:', fallbackError);
-      throw new Error(`Cloud Run e fallback falharam: ${error.message}`);
-    }
-  }
-};
-
 // 🌐 URL DA ADMIN API
 const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL || "/api/admin";
 
