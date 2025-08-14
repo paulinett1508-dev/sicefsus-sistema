@@ -254,7 +254,7 @@ const Administracao = () => {
       showToast({
         tipo: "error",
         titulo: "Erro",
-        mensagem: "Dados do usuário incompletos"
+        mensagem: "Dados do usuário incompletos",
       });
       return;
     }
@@ -263,7 +263,7 @@ const Administracao = () => {
       showToast({
         tipo: "warning",
         titulo: "Usuário Ativo",
-        mensagem: "Desative o usuário primeiro para poder excluir"
+        mensagem: "Desative o usuário primeiro para poder excluir",
       });
       return;
     }
@@ -271,14 +271,14 @@ const Administracao = () => {
     // ✅ CONFIRMAÇÃO COM CLOUD RUN
     const confirmar = window.confirm(
       `🔥 EXCLUSÃO COMPLETA VIA CLOUD RUN\n\n` +
-      `Nome: ${usuario.nome}\n` +
-      `Email: ${usuario.email}\n\n` +
-      `✅ Será removido de:\n` +
-      `• Firebase Firestore (dados)\n` +
-      `• Firebase Auth (login)\n\n` +
-      `⚡ Usando Cloud Run Function com Admin SDK\n` +
-      `🎯 Email ficará disponível para reutilização\n\n` +
-      `Esta ação NÃO pode ser desfeita!`
+        `Nome: ${usuario.nome}\n` +
+        `Email: ${usuario.email}\n\n` +
+        `✅ Será removido de:\n` +
+        `• Firebase Firestore (dados)\n` +
+        `• Firebase Auth (login)\n\n` +
+        `⚡ Usando Cloud Run Function com Admin SDK\n` +
+        `🎯 Email ficará disponível para reutilização\n\n` +
+        `Esta ação NÃO pode ser desfeita!`,
     );
 
     if (!confirmar) {
@@ -291,9 +291,9 @@ const Administracao = () => {
       console.log("🔥 Executando exclusão via Cloud Run...");
 
       // ✅ USAR CLOUD RUN FUNCTION
-      const resultado = await deleteUserComplete(
+      const resultado = await deleteUserById(
         usuario.id,
-        usuario.uid || usuario.id
+        usuario.uid || usuario.id,
       );
 
       console.log("📊 Resultado:", resultado);
@@ -303,36 +303,38 @@ const Administracao = () => {
       let titulo = "Exclusão Completa";
       let mensagem = "Usuário excluído com sucesso!";
 
-      if (resultado.method === 'cloud_run') {
+      if (resultado.method === "cloud_run") {
         if (resultado.details.firestore && resultado.details.auth) {
-          mensagem = "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
+          mensagem =
+            "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
         } else if (resultado.details.firestore) {
           tipo = "warning";
           titulo = "Exclusão Parcial";
-          mensagem = "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
+          mensagem =
+            "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
         }
-      } else if (resultado.method === 'firestore_fallback') {
+      } else if (resultado.method === "firestore_fallback") {
         tipo = "warning";
         titulo = "Exclusão Parcial";
-        mensagem = "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
+        mensagem =
+          "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
       }
 
       showToast({
         tipo: tipo,
         titulo: titulo,
         mensagem: mensagem,
-        duracao: 10000 // 10 segundos para ler
+        duracao: 10000, // 10 segundos para ler
       });
 
       // Recarregar dados
       await carregarUsuarios();
-
     } catch (error) {
       console.error("❌ Erro na exclusão:", error);
       showToast({
         tipo: "error",
         titulo: "Erro na Exclusão",
-        mensagem: `Erro: ${error.message}`
+        mensagem: `Erro: ${error.message}`,
       });
     } finally {
       setLoading(false);
@@ -517,8 +519,6 @@ const Administracao = () => {
   // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
     <div style={styles.container}>
-
-
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
         <ConfirmationModal
@@ -589,7 +589,6 @@ const Administracao = () => {
           >
             📋 Logs ({logs.length})
           </button>
-
         </div>
       </div>
 
