@@ -1,10 +1,12 @@
 {
   "name": "react-javascript",
-  "version": "2.3.47",
+  "version": "2.3.49",
   "type": "module",
   "description": "React TypeScript on Replit, using Vite bundler",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:api\"",
+    "dev:frontend": "vite",
+    "dev:api": "cd api && node server.js",
     "build": "node generate-version.js && vite build",
     "build:dev": "node scripts/auto-increment.js development && vite build --mode development",
     "build:prod": "node scripts/auto-increment.js production && vite build --mode production",
@@ -26,6 +28,7 @@
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
+    "concurrently": "^9.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "terser": "^5.43.1",

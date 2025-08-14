@@ -1,10 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
 
-// https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
-  // 🔧 CARREGAMENTO CORRETO DAS VARIÁVEIS DE AMBIENTE
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const isProduction = mode === "production";
 
@@ -13,35 +10,44 @@ export default defineConfig(({ command, mode }) => {
     VITE_FIREBASE_PROJECT_ID: env.VITE_FIREBASE_PROJECT_ID,
     VITE_FIREBASE_API_KEY: env.VITE_FIREBASE_API_KEY
       ? "***carregada***"
-      : "não encontrada",
+      : "❌ não encontrada",
   });
 
   return {
     plugins: [react()],
-    resolve: {
-      alias: {
-        "@": resolve(__dirname, "./src"),
+
+    // 🚀 PROXY PARA ADMIN API
+    server: {
+      port: 5173,
+      host: true,
+      proxy: {
+        "/api": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+          secure: false,
+          configure: (proxy) => {
+            proxy.on("error", (err) => {
+              console.log("🔌 [PROXY ERROR]:", err.message);
+            });
+            proxy.on("proxyReq", (proxyReq, req) => {
+              console.log("🔌 [PROXY]:", req.method, req.url);
+            });
+          },
+        },
       },
     },
 
-    // 🔧 CONFIGURAÇÃO CRÍTICA: Definir variáveis explicitamente
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(mode),
-      // 🚨 IMPORTANTE: Forçar inclusão das variáveis Firebase
-      __VITE_FIREBASE_PROJECT_ID__: JSON.stringify(
-        env.VITE_FIREBASE_PROJECT_ID,
-      ),
-      __VITE_FIREBASE_API_KEY__: JSON.stringify(env.VITE_FIREBASE_API_KEY),
-      __VITE_FIREBASE_AUTH_DOMAIN__: JSON.stringify(
-        env.VITE_FIREBASE_AUTH_DOMAIN,
-      ),
-      __VITE_FIREBASE_STORAGE_BUCKET__: JSON.stringify(
-        env.VITE_FIREBASE_STORAGE_BUCKET,
-      ),
-      __VITE_FIREBASE_MESSAGING_SENDER_ID__: JSON.stringify(
-        env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-      ),
-      __VITE_FIREBASE_APP_ID__: JSON.stringify(env.VITE_FIREBASE_APP_ID),
+    // 🚀 PROXY TAMBÉM NO PREVIEW (PRODUÇÃO)
+    preview: {
+      port: 4173,
+      host: true,
+      proxy: {
+        "/api": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
 
     build: {
@@ -51,26 +57,6 @@ export default defineConfig(({ command, mode }) => {
         compress: {
           drop_console: isProduction,
           drop_debugger: isProduction,
-          pure_funcs: isProduction
-            ? [
-                "console.log",
-                "console.info",
-                "console.debug",
-                "console.warn",
-                "console.error",
-                "console.trace",
-                "console.table",
-                "console.time",
-                "console.timeEnd",
-              ]
-            : [],
-          passes: 2,
-        },
-        mangle: {
-          safari10: true,
-        },
-        format: {
-          comments: false,
         },
       },
       rollupOptions: {
@@ -82,17 +68,5 @@ export default defineConfig(({ command, mode }) => {
         },
       },
     },
-    server: {
-      port: 5173,
-      host: true,
-    },
-    esbuild: {
-      drop: isProduction ? ["console", "debugger"] : [],
-      legalComments: "none",
-    },
-
-    // 🔧 CONFIGURAÇÃO ADICIONAL: Garantir que .env seja lido
-    envDir: "./",
-    envPrefix: "VITE_",
   };
 });

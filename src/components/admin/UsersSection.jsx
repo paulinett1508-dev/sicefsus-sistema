@@ -1,0 +1,87 @@
+// src/components/admin/UsersSection.jsx
+import React from "react";
+import UsersTable from "./UsersTable";
+
+const UsersSection = ({
+  users,
+  userFilter,
+  setUserFilter,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  onResetPassword,
+  loading,
+}) => {
+  return (
+    <div style={styles.tableContainer}>
+      <h3 style={styles.sectionTitle}>📋 Lista de Usuários ({users.length})</h3>
+
+      {/* Campo de busca */}
+      <div style={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="Buscar usuário por nome ou email..."
+          value={userFilter}
+          onChange={(e) => setUserFilter(e.target.value)}
+          style={styles.searchInput}
+        />
+      </div>
+
+      {loading ? (
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+          <p>Carregando usuários...</p>
+        </div>
+      ) : (
+        <UsersTable
+          users={users}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onToggleStatus={onToggleStatus}
+          onResetPassword={onResetPassword}
+          loading={loading}
+        />
+      )}
+    </div>
+  );
+};
+
+const styles = {
+  tableContainer: {
+    backgroundColor: "white",
+    borderRadius: "8px",
+    padding: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "bold",
+    marginBottom: "16px",
+    color: "#333",
+  },
+  searchContainer: {
+    marginBottom: "20px",
+  },
+  searchInput: {
+    width: "100%",
+    padding: "10px 15px",
+    border: "1px solid #ced4da",
+    borderRadius: "5px",
+    fontSize: "14px",
+  },
+  loading: {
+    textAlign: "center",
+    padding: "40px",
+  },
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "3px solid #f3f3f3",
+    borderTop: "3px solid #007bff",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 16px",
+  },
+};
+
+export default UsersSection;

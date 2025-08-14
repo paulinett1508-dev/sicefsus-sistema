@@ -1,4 +1,4 @@
-// src/services/userService.js - VERSÃO CORRIGIDA COM SEGUNDA INSTÂNCIA FIREBASE
+// src/services/userService.js - VERSÃO COM ADMIN SDK ATIVO
 import {
   createUserWithEmailAndPassword,
   signOut,
@@ -20,7 +20,10 @@ import {
 import { initializeApp } from "firebase/app";
 import { db, auth } from "../firebase/firebaseConfig";
 
-// 🔧 SOLUÇÃO: Segunda instância Firebase para criar usuários sem afetar admin
+// 🌐 URL DA ADMIN API
+const ADMIN_API_URL = import.meta.env.VITE_ADMIN_API_URL || "/api/admin";
+
+// 🔧 SEGUNDA INSTÂNCIA FIREBASE (mantida para fallback)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -33,20 +36,260 @@ const firebaseConfig = {
 const secondaryApp = initializeApp(firebaseConfig, "secondary");
 const secondaryAuth = getAuth(secondaryApp);
 
-// 🎯 FUNÇÃO CORRIGIDA: Criar usuário SEM deslogar admin
+// 🎯 FUNÇÃO: Obter token de autenticação
+const getAuthToken = async () => {
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error("Usuário não autenticado");
+    }
+    return await currentUser.getIdToken();
+  } catch (error) {
+    console.error("❌ Erro ao obter token:", error);
+    throw error;
+  }
+};
+
+// 🎯 FUNÇÃO: Excluir usuário via Admin API
+const deleteUserViaAdminAPI = async (uid) => {
+  try {
+    console.log("🗑️ [ADMIN API] Tentando excluir usuário:", uid);
+
+    const token = await getAuthToken();
+
+    const response = await fetch(`${ADMIN_API_URL}/api/admin/users/${uid}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Admin API Error: ${response.status} - ${errorData.message}`,
+      );
+    }
+
+    const result = await response.json();
+    console.log("✅ [ADMIN API] Usuário excluído:", result);
+
+    return {
+      success: true,
+      method: "admin_api",
+      message: "Usuário excluído permanentemente do Auth e Firestore",
+      details: result,
+    };
+  } catch (error) {
+    console.error("❌ [ADMIN API] Falha na exclusão:", error);
+    throw error;
+  }
+};
+
+// 🎯 FUNÇÃO: Criar usuário via Admin API
+const createUserViaAdminAPI = async (userData) => {
+  try {
+    console.log("👤 [ADMIN API] Tentando criar usuário:", userData.email);
+
+    const token = await getAuthToken();
+
+    const response = await fetch(`${ADMIN_API_URL}/api/admin/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email: userData.email,
+        nome: userData.nome,
+        role: userData.role,
+        municipio: userData.municipio,
+        uf: userData.uf,
+        departamento: userData.departamento,
+        telefone: userData.telefone,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Admin API Error: ${response.status} - ${errorData.message}`,
+      );
+    }
+
+    const result = await response.json();
+    console.log("✅ [ADMIN API] Usuário criado:", result);
+
+    return {
+      success: true,
+      method: "admin_api",
+      uid: result.user.uid,
+      senhaTemporaria: result.user.senhaTemporaria,
+      resetLink: result.user.resetLink,
+      mensagem: `Usuário criado via Admin API! Senha temporária: ${result.user.senhaTemporaria}`,
+    };
+  } catch (error) {
+    console.error("❌ [ADMIN API] Falha na criação:", error);
+    throw error;
+  }
+};
+
+// 🎯 FUNÇÃO: Reset de senha via Admin API
+const resetPasswordViaAdminAPI = async (uid) => {
+  try {
+    console.log("🔐 [ADMIN API] Tentando reset de senha:", uid);
+
+    const token = await getAuthToken();
+
+    const response = await fetch(
+      `${ADMIN_API_URL}/api/admin/users/${uid}/reset-password`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Admin API Error: ${response.status} - ${errorData.message}`,
+      );
+    }
+
+    const result = await response.json();
+    console.log("✅ [ADMIN API] Reset realizado:", result);
+
+    return {
+      success: true,
+      method: "admin_api",
+      message: "Link de reset gerado via Admin API",
+      resetLink: result.resetLink,
+    };
+  } catch (error) {
+    console.error("❌ [ADMIN API] Falha no reset:", error);
+    throw error;
+  }
+};
+
+// 🎯 FUNÇÃO PRINCIPAL: Criar usuário com fallback automático
+export const createUser = async (userData, options = {}) => {
+  console.log("👤 === CRIAÇÃO DE USUÁRIO UNIVERSAL ===");
+  console.log("📊 Dados:", userData);
+  console.log("🌐 Admin API URL:", ADMIN_API_URL);
+
+  try {
+    // 🔄 TENTAR ADMIN API PRIMEIRO
+    try {
+      const result = await createUserViaAdminAPI(userData);
+      console.log("🎉 [SUCESSO] Usuário criado via Admin API");
+      return result;
+    } catch (adminError) {
+      console.warn(
+        "⚠️ [FALLBACK] Admin API falhou, usando método original:",
+        adminError.message,
+      );
+
+      // 🔄 FALLBACK: Método original
+      return await createUserInFirebase(
+        userData,
+        options.navigate,
+        options.showToast,
+      );
+    }
+  } catch (error) {
+    console.error("❌ Erro total na criação:", error);
+    throw error;
+  }
+};
+
+// 🎯 FUNÇÃO PRINCIPAL: Excluir usuário com fallback automático
+export const deleteUserById = async (userId, userUid) => {
+  console.log("🗑️ === EXCLUSÃO DE USUÁRIO UNIVERSAL ===");
+  console.log("📊 Dados:", { userId, userUid });
+  console.log("🌐 Admin API URL:", ADMIN_API_URL);
+
+  try {
+    // 🔄 TENTAR ADMIN API PRIMEIRO (exclusão completa)
+    if (userUid) {
+      try {
+        const result = await deleteUserViaAdminAPI(userUid);
+        console.log("🎉 [SUCESSO] Usuário excluído via Admin API");
+        return result;
+      } catch (adminError) {
+        console.warn(
+          "⚠️ [FALLBACK] Admin API falhou, usando método original:",
+          adminError.message,
+        );
+      }
+    }
+
+    // 🔄 FALLBACK: Exclusão apenas do Firestore
+    console.log("🔄 [FALLBACK] Excluindo apenas do Firestore...");
+
+    await deleteDoc(doc(db, "usuarios", userId));
+    console.log("✅ Usuário excluído do Firestore");
+
+    return {
+      success: true,
+      method: "firestore_only",
+      message:
+        "Usuário excluído do Firestore. Auth permanece (requer Admin API)",
+      warning: "Email ficará bloqueado até exclusão via Admin API",
+    };
+  } catch (error) {
+    console.error("❌ Erro na exclusão:", error);
+    throw new Error("Erro ao excluir usuário: " + error.message);
+  }
+};
+
+// 🎯 FUNÇÃO: Reset de senha com fallback
+export const sendPasswordReset = async (email, uid = null) => {
+  console.log("🔐 === RESET DE SENHA UNIVERSAL ===");
+  console.log("📊 Dados:", { email, uid });
+  console.log("🌐 Admin API URL:", ADMIN_API_URL);
+
+  try {
+    // 🔄 TENTAR ADMIN API PRIMEIRO (se tiver UID)
+    if (uid) {
+      try {
+        const result = await resetPasswordViaAdminAPI(uid);
+        console.log("🎉 [SUCESSO] Reset via Admin API");
+        return result;
+      } catch (adminError) {
+        console.warn(
+          "⚠️ [FALLBACK] Admin API falhou, usando método original:",
+          adminError.message,
+        );
+      }
+    }
+
+    // 🔄 FALLBACK: Método original
+    console.log("🔄 [FALLBACK] Reset via Firebase Auth...");
+    await sendPasswordResetEmail(auth, email);
+    console.log("✅ Reset via Firebase Auth");
+
+    return {
+      success: true,
+      method: "firebase_auth",
+      message: "Email de redefinição enviado com sucesso!",
+    };
+  } catch (error) {
+    console.error("❌ Erro no reset:", error);
+    throw new Error("Erro ao enviar email de redefinição: " + error.message);
+  }
+};
+
+// 🎯 FUNÇÃO ORIGINAL: Criar usuário (fallback)
 export const createUserInFirebase = async (userData, navigate, showToast) => {
   let userCredential = null;
 
   try {
-    console.log("🔄 Iniciando criação de usuário...");
+    console.log("🔄 [FALLBACK] Criando via Firebase diretamente...");
 
-    // 1. Gerar senha temporária
     const senhaTemporaria = Math.random().toString(36).slice(-8);
-
-    // 2. ✅ CORREÇÃO: Usar instância secundária - admin não é afetado
-    console.log(
-      "📧 Criando usuário na instância secundária (admin preservado)...",
-    );
 
     userCredential = await createUserWithEmailAndPassword(
       secondaryAuth,
@@ -56,132 +299,59 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
 
     console.log("✅ Usuário criado no Firebase Auth:", userCredential.user.uid);
 
-    // 3. ✅ IMPORTANTE: Deslogar apenas da instância secundária
     await signOut(secondaryAuth);
-    console.log(
-      "✅ Usuário deslogado da instância secundária (admin preservado)",
-    );
+    console.log("✅ Usuário deslogado da instância secundária");
 
-    // 4. ✅ CORREÇÃO: Salvar dados com estrutura COMPLETA igual ao admin
     const userDoc = {
       uid: userCredential.user.uid,
       email: userData.email,
       nome: userData.nome,
-      tipo: userData.tipo || "operador",
+      tipo: userData.role || "operador",
       status: "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
-      municipio: userData.tipo === "admin" ? "" : userData.municipio || "",
-      uf: userData.tipo === "admin" ? "" : userData.uf || "",
-
-      // ✅ CAMPOS OBRIGATÓRIOS DO SISTEMA
+      municipio: userData.role === "admin" ? "" : userData.municipio || "",
+      uf: userData.role === "admin" ? "" : userData.uf || "",
       ativo: true,
       primeiroAcesso: true,
       ultimoAcesso: null,
-      ultimo_acesso: null,
-
-      // ✅ TIMESTAMPS PADRONIZADOS
       criadoEm: serverTimestamp(),
-      data_criacao: serverTimestamp(),
       dataAtualizacao: serverTimestamp(),
-      data_atualizacao: serverTimestamp(),
-
-      // ✅ CONFIGURAÇÕES PADRÃO
-      configuracoes: {
-        idioma: "pt-BR",
-        tema: "light",
-        timezone: "America/Sao_Paulo",
-        notificacoes_email: true,
-      },
-
-      // ✅ PERMISSÕES BASEADAS NO TIPO
-      permissoes:
-        userData.tipo === "admin"
-          ? {
-              // Permissões de administrador
-              criar_emenda: true,
-              editar_emenda: true,
-              excluir_emenda: true,
-              criar_despesa: true,
-              editar_despesa: true,
-              excluir_despesa: true,
-              criar_usuario: true,
-              editar_usuario: true,
-              desativar_usuario: true,
-              gerenciar_usuarios: true,
-              acessar_relatorios: true,
-              relatorios_avancados: true,
-              visualizar_auditoria: true,
-              visualizar_todas_emendas: true,
-              visualizar_todas_despesas: true,
-              configurar_sistema: true,
-              backup_dados: true,
-              exportar_dados: true,
-            }
-          : {
-              // Permissões de operador
-              criar_emenda: false,
-              editar_emenda: false,
-              excluir_emenda: false,
-              criar_despesa: true,
-              editar_despesa: true,
-              excluir_despesa: false,
-              criar_usuario: false,
-              editar_usuario: false,
-              desativar_usuario: false,
-              gerenciar_usuarios: false,
-              acessar_relatorios: true,
-              relatorios_avancados: false,
-              visualizar_auditoria: false,
-              visualizar_todas_emendas: false,
-              visualizar_todas_despesas: false,
-              configurar_sistema: false,
-              backup_dados: false,
-              exportar_dados: false,
-            },
-
-      // ✅ CAMPOS TEMPORÁRIOS
       senhaTemporaria: senhaTemporaria,
       primeiroLogin: true,
     };
 
-    // ✅ USAR setDoc com UID como ID do documento
     await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
-    console.log(
-      "✅ Dados do usuário salvos no Firestore com estrutura completa:",
-      userCredential.user.uid,
-    );
+    console.log("✅ Dados salvos no Firestore");
 
-    // 5. ✅ CORREÇÃO: Enviar email de configuração inicial (não reset)
-    console.log("📨 Enviando email de configuração inicial...");
     await sendPasswordResetEmail(auth, userData.email.trim());
     console.log("✅ Email de configuração enviado");
 
-    // 6. ✅ ALTERNATIVA: Mostrar senha temporária para admin
     if (showToast) {
       showToast({
         tipo: "sucesso",
-        titulo: "✅ Usuário Criado!",
+        titulo: "✅ Usuário Criado (Fallback)!",
         mensagem: `Usuário ${userData.nome} criado! Senha temporária: ${senhaTemporaria}`,
-        duracao: 8000, // Mais tempo para copiar senha
+        duracao: 8000,
       });
     }
 
     return {
-      sucesso: true,
-      adminPreserved: true,
+      success: true,
+      method: "firebase_fallback",
       uid: userCredential.user.uid,
-      senhaTemporaria: senhaTemporaria, // ✅ INCLUIR senha para o admin ver
-      mensagem: `Usuário criado! Senha temporária: ${senhaTemporaria}`,
+      senhaTemporaria: senhaTemporaria,
+      mensagem: `Usuário criado via fallback! Senha temporária: ${senhaTemporaria}`,
     };
   } catch (error) {
-    console.error("❌ Erro ao criar usuário:", error);
+    console.error("❌ Erro no fallback:", error);
 
-    // Se houver erro, tentar fazer logout da instância secundária
-    try {
-      await signOut(secondaryAuth);
-    } catch (signOutError) {
-      console.error("❌ Erro adicional no signOut secundário:", signOutError);
+    if (userCredential) {
+      try {
+        await signOut(secondaryAuth);
+      } catch (signOutError) {
+        console.error("❌ Erro adicional no signOut:", signOutError);
+      }
     }
 
     throw {
@@ -192,7 +362,7 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
   }
 };
 
-// 🎯 FUNÇÃO AUXILIAR: Melhorar mensagens de erro
+// 🎯 FUNÇÃO: Mensagens de erro
 const getErrorMessage = (error) => {
   switch (error.code) {
     case "auth/email-already-in-use":
@@ -208,13 +378,7 @@ const getErrorMessage = (error) => {
   }
 };
 
-// 🎯 WRAPPER FUNCTION: Para compatibilidade com código existente
-export const createUser = async (userData, options = {}) => {
-  const { navigate, showToast } = options;
-  return await createUserInFirebase(userData, navigate, showToast);
-};
-
-// 🎯 FUNÇÃO PARA VERIFICAR STATUS DA SESSÃO
+// 🎯 OUTRAS FUNÇÕES (mantidas iguais)
 export const checkAuthState = () => {
   return new Promise((resolve) => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -228,7 +392,6 @@ export const checkAuthState = () => {
   });
 };
 
-// 🎯 FUNÇÃO PARA LOGOUT MANUAL
 export const logoutUser = async () => {
   try {
     await signOut(auth);
@@ -240,7 +403,6 @@ export const logoutUser = async () => {
   }
 };
 
-// ✅ FUNÇÃO PARA ATUALIZAR USUÁRIO
 export const updateUser = async (userId, userData, originalEmail) => {
   try {
     console.log("✏️ Atualizando usuário:", userId, userData);
@@ -267,56 +429,6 @@ export const updateUser = async (userId, userData, originalEmail) => {
   } catch (error) {
     console.error("❌ Erro ao atualizar usuário:", error);
     throw new Error("Erro ao atualizar usuário: " + error.message);
-  }
-};
-
-// ✅ FUNÇÃO CORRIGIDA PARA EXCLUIR USUÁRIO COMPLETAMENTE
-export const deleteUserById = async (userId, userUid) => {
-  try {
-    console.log("🗑️ Excluindo usuário completo:", { userId, userUid });
-
-    // 1. EXCLUIR do Firestore primeiro
-    const userRef = doc(db, "usuarios", userId);
-    await deleteDoc(userRef);
-    console.log("✅ Usuário excluído do Firestore");
-
-    // 2. EXCLUIR do Firebase Auth usando Admin SDK (simulação)
-    // ⚠️ NOTA: Para produção real, isso deve ser feito no backend
-    // Por enquanto, apenas removemos do Firestore
-    console.log("⚠️ Exclusão do Firebase Auth deve ser implementada no backend");
-    console.log("🔧 UID para exclusão do Auth:", userUid);
-
-    return {
-      success: true,
-      message: "Usuário excluído do sistema (Firestore). Auth requer backend.",
-      details: {
-        firestoreDeleted: true,
-        authDeleteRequired: true,
-        uid: userUid
-      }
-    };
-  } catch (error) {
-    console.error("❌ Erro ao excluir usuário:", error);
-    throw new Error("Erro ao excluir usuário: " + error.message);
-  }
-};
-
-// ✅ FUNÇÃO PARA RESETAR SENHA
-export const sendPasswordReset = async (email) => {
-  try {
-    console.log("📨 Enviando reset de senha para:", email);
-
-    // Usar a instância principal de auth para enviar email
-    await sendPasswordResetEmail(auth, email);
-    console.log("✅ Email de reset enviado");
-
-    return {
-      success: true,
-      message: "Email de redefinição enviado com sucesso!",
-    };
-  } catch (error) {
-    console.error("❌ Erro ao enviar reset:", error);
-    throw new Error("Erro ao enviar email de redefinição: " + error.message);
   }
 };
 
