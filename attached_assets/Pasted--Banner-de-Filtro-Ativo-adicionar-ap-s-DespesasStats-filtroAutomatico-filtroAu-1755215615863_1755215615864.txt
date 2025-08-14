@@ -1,0 +1,70 @@
+{/* Banner de Filtro Ativo - adicionar após DespesasStats */}
+        {filtroAutomatico && filtroAutomatico.emenda && (
+          <div style={{
+            backgroundColor: '#d4edda',
+            border: '1px solid #c3e6cb',
+            borderRadius: '5px',
+            padding: '12px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <span style={{ fontSize: '20px' }}>🔍</span>
+            <span style={{
+              color: '#155724',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              <strong>Filtro Ativo:</strong> Exibindo apenas despesas da emenda {filtroAutomatico.emenda.numero} - {filtroAutomatico.emenda.objeto}
+              {filtroAutomatico.emenda.municipio && ` do município ${filtroAutomatico.emenda.municipio}/${filtroAutomatico.emenda.uf}`}
+            </span>
+            <button
+              onClick={() => {
+                setFiltroAutomatico(null);
+                navigate('/despesas');
+                carregarDados();
+              }}
+              style={{
+                marginLeft: 'auto',
+                backgroundColor: 'transparent',
+                border: '1px solid #155724',
+                color: '#155724',
+                padding: '4px 12px',
+                borderRadius: '3px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              ✕ Limpar Filtro
+            </button>
+          </div>
+        )}
+        
+        {/* Para operadores - mostrar filtro de município sempre ativo */}
+        {userRole === 'operador' && userMunicipio && !filtroAutomatico && (
+          <div style={{
+            backgroundColor: '#cce5ff',
+            border: '1px solid #b8daff',
+            borderRadius: '5px',
+            padding: '12px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}>
+            <span style={{ fontSize: '20px' }}>🏛️</span>
+            <span style={{
+              color: '#004085',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              <strong>Filtro Ativo:</strong> Exibindo apenas despesas de emendas do município <strong>{userMunicipio}/{userUf}</strong>
+            </span>
+          </div>
+        )}
