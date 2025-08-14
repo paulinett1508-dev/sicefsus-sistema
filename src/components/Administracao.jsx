@@ -30,7 +30,6 @@ import {
   createUser,
   updateUser,
   deleteUserById,
-  sendPasswordReset,
 } from "../services/userService";
 
 const Administracao = () => {
@@ -405,43 +404,7 @@ const Administracao = () => {
     }
   };
 
-  // 🔑 FUNÇÃO: Reset de senha (COMPLETA)
-  const handleResetSenha = async (usuario) => {
-    console.log("🔑 Resetando senha para:", usuario.email);
-
-    setConfirmationModal({
-      isOpen: true,
-      title: "Redefinir Senha",
-      message: `Enviar email de redefinição de senha para "${usuario.email}"?`,
-      confirmText: "Enviar",
-      cancelText: "Cancelar",
-      type: "warning",
-      onConfirm: async () => {
-        try {
-          // Usar sendPasswordReset com email e uid para melhor funcionamento
-          await sendPasswordReset(usuario.email, usuario.uid);
-
-          showToast({
-            tipo: "success",
-            titulo: "Sucesso",
-            mensagem: "Email de redefinição enviado com sucesso!",
-          });
-        } catch (error) {
-          console.error("❌ Erro ao enviar reset:", error);
-          showToast({
-            tipo: "error",
-            titulo: "Erro",
-            mensagem: error.message || "Erro ao enviar email de redefinição",
-          });
-        }
-
-        setConfirmationModal({ isOpen: false });
-      },
-      onCancel: () => {
-        setConfirmationModal({ isOpen: false });
-      },
-    });
-  };
+  
 
   // 🎯 FUNÇÃO: Filtrar usuários
   const getFilteredUsers = () => {
@@ -601,7 +564,6 @@ const Administracao = () => {
           onEdit={handleEditarUsuario}
           onDelete={handleDelete}
           onToggleStatus={handleToggleStatus}
-          onResetPassword={handleResetSenha}
           loading={loading}
         />
       ) : (
