@@ -238,12 +238,12 @@ const Administracao = () => {
   };
 
   // 🎯 FUNÇÃO: Mostrar toast (MOVIDA PARA ANTES DE handleDelete)
-  const showToast = (toastData) => {
+  const showToast = useCallback((toastData) => {
     setToast({ ...toastData, show: true });
     setTimeout(() => {
       setToast({ show: false });
     }, toastData.duracao || 5000);
-  };
+  }, []);
 
   // 🗑️ FUNÇÃO: Excluir usuário (CORRIGIDA COM DEBUG EXTRA)
   const handleDelete = useCallback(async (usuario) => {
@@ -367,7 +367,7 @@ const Administracao = () => {
         setConfirmationModal({ isOpen: false });
       },
     });
-  }, [showToast, setConfirmationModal, setLoading, carregarUsuarios]);
+  }, [showToast, carregarUsuarios]);
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
   const handleToggleStatus = async (usuario) => {
