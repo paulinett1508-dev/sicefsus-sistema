@@ -415,6 +415,49 @@ const Despesas = ({ usuario }) => {
           </div>
         )}
 
+        {/* Botões de Ação - Nova Despesa + Atualizar */}
+        <div style={styles.actionContainer}>
+          <button
+            onClick={handleCriar}
+            style={styles.primaryButton}
+            disabled={loading}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.target.style.backgroundColor = '#218838';
+                e.target.style.transform = 'translateY(-2px)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.target.style.backgroundColor = '#28a745';
+                e.target.style.transform = 'translateY(0)';
+              }
+            }}
+          >
+            ➕ Nova Despesa
+          </button>
+
+          <button
+            onClick={carregarDados}
+            style={styles.refreshButton}
+            disabled={loading}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.target.style.backgroundColor = '#0069d9';
+                e.target.style.transform = 'translateY(-2px)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.target.style.backgroundColor = '#007bff';
+                e.target.style.transform = 'translateY(0)';
+              }
+            }}
+          >
+            {loading ? '⏳ Carregando...' : '🔄 Atualizar'}
+          </button>
+        </div>
+
         <DespesasList
           despesas={despesas}
           emendas={emendas}
