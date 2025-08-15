@@ -204,21 +204,7 @@ export default function DespesasList({
 
   return (
     <div style={styles.container}>
-      {/* ✅ Banner informativo para filtro de emenda específica */}
-      {filtroInicial?.emendaId && (
-        <div style={styles.filtroAutomaticoInfo}>
-          <span style={styles.filtroIcon}>🔍</span>
-          <div style={styles.filtroContent}>
-            <span style={styles.filtroTexto}>
-              <strong>Filtro Automático:</strong> Exibindo despesas da emenda{" "}
-              <strong>{getEmendaDisplayName()}</strong>
-            </span>
-            <span style={styles.filtroSubtexto}>
-              {despesasFiltradas.length} despesa(s) encontrada(s)
-            </span>
-          </div>
-        </div>
-      )}
+      
 
       {/* ✅ Componente da Tabela */}
       <DespesasTable

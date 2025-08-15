@@ -395,6 +395,15 @@ const Despesas = ({ usuario }) => {
                   <strong>Emenda {filtroAutomatico.emenda.numero}</strong>
                 </span>
 
+                {filtroAutomatico.emenda.objeto && (
+                  <>
+                    <span style={{ color: "#6c757d" }}>•</span>
+                    <span style={{ fontStyle: "italic", color: "#495057" }}>
+                      {filtroAutomatico.emenda.objeto}
+                    </span>
+                  </>
+                )}
+
                 <span style={{ color: "#6c757d" }}>•</span>
 
                 <span
