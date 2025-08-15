@@ -1,0 +1,73 @@
+No arquivo Despesas.jsx, fazer as seguintes alterações:
+1. SIMPLIFICAR O DespesasListHeader:
+jsx        {/* Header do sistema - SIMPLIFICADO */}
+        <DespesasListHeader
+          usuario={usuario}
+          loading={loading}
+          totalDespesas={despesas.length}
+          onVoltarEmendas={params.id ? handleVoltarEmendas : null}
+          emenda={null}  // PASSAR NULL para não mostrar info da emenda
+        />
+2. GARANTIR QUE SÓ EXISTE O BANNER MINIMALISTA:
+jsx        {/* ÚNICO Banner Minimalista */}
+        {filtroAutomatico?.emenda && (
+          <div style={{
+            backgroundColor: '#e8f4f8',
+            borderLeft: '4px solid #0066cc',
+            padding: '10px 16px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '14px',
+            color: '#495057'
+          }}>
+            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
+            <span style={{ flex: 1 }}>
+              Emenda {filtroAutomatico.emenda.numero}
+            </span>
+            <button
+              onClick={() => {
+                setFiltroAutomatico(null);
+                navigate('/despesas');
+                carregarDados();
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6c757d',
+                cursor: 'pointer',
+                padding: '2px 6px',
+                fontSize: '20px',
+                lineHeight: '1',
+                borderRadius: '3px',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(0,0,0,0.08)';
+                e.target.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#6c757d';
+              }}
+              title="Limpar filtro"
+            >
+              ×
+            </button>
+          </div>
+        )}
+3. REMOVER QUALQUER OUTRO BANNER:
+Procure e remova no código qualquer instância de:
+
+Banner com "Filtro Automático:"
+Banner com informações da emenda duplicadas
+
+📝 RESULTADO FINAL:
+
+✅ Apenas UM banner minimalista "Filtro: Emenda 4512356"
+✅ Sem redundâncias
+✅ Interface limpa e profissional
+✅ Mantém funcionalidade do botão limpar
+
+A interface ficará muito mais limpa com apenas o banner essencial! 🎯
