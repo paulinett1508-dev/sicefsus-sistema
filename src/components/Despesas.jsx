@@ -346,11 +346,11 @@ const Despesas = ({ usuario }) => {
           userMunicipio={userMunicipio}
         />
 
-        {/* Banner de Filtro Ativo - adicionar após DespesasStats */}
-        {filtroAutomatico && filtroAutomatico.emenda && (
+        {/* Banner de Filtro Unificado - adicionar após DespesasStats */}
+        {(filtroAutomatico?.emenda || (userRole === 'operador' && userMunicipio)) && (
           <div style={{
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
+            backgroundColor: filtroAutomatico?.emenda ? '#d4edda' : '#cce5ff',
+            border: `1px solid ${filtroAutomatico?.emenda ? '#c3e6cb' : '#b8daff'}`,
             borderRadius: '5px',
             padding: '12px 20px',
             marginBottom: '20px',
@@ -359,61 +359,59 @@ const Despesas = ({ usuario }) => {
             gap: '10px',
             boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
           }}>
-            <span style={{ fontSize: '20px' }}>🔍</span>
-            <span style={{
-              color: '#155724',
-              fontSize: '14px',
-              fontWeight: '500'
-            }}>
-              <strong>Filtro Ativo:</strong> Exibindo apenas despesas da emenda {filtroAutomatico.emenda.numero} - {filtroAutomatico.emenda.objeto}
-              {filtroAutomatico.emenda.municipio && ` do município ${filtroAutomatico.emenda.municipio}/${filtroAutomatico.emenda.uf}`}
+            <span style={{ fontSize: '20px' }}>
+              {filtroAutomatico?.emenda ? '🔍' : '🏛️'}
             </span>
-            <button
-              onClick={() => {
-                setFiltroAutomatico(null);
-                navigate('/despesas');
-                carregarDados();
-              }}
-              style={{
-                marginLeft: 'auto',
-                backgroundColor: 'transparent',
-                border: '1px solid #155724',
-                color: '#155724',
-                padding: '4px 12px',
-                borderRadius: '3px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              ✕ Limpar Filtro
-            </button>
-          </div>
-        )}
-
-        {/* Para operadores - mostrar filtro de município sempre ativo */}
-        {userRole === 'operador' && userMunicipio && !filtroAutomatico && (
-          <div style={{
-            backgroundColor: '#cce5ff',
-            border: '1px solid #b8daff',
-            borderRadius: '5px',
-            padding: '12px 20px',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-          }}>
-            <span style={{ fontSize: '20px' }}>🏛️</span>
             <span style={{
-              color: '#004085',
+              color: filtroAutomatico?.emenda ? '#155724' : '#004085',
               fontSize: '14px',
-              fontWeight: '500'
+              fontWeight: '500',
+              flex: 1
             }}>
-              <strong>Filtro Ativo:</strong> Exibindo apenas despesas de emendas do município <strong>{userMunicipio}/{userUf}</strong>
+              <strong>Filtro Ativo:</strong> Exibindo despesas 
+              {filtroAutomatico?.emenda ? (
+                <>
+                  {' '}da emenda <strong>{filtroAutomatico.emenda.numero} - {filtroAutomatico.emenda.objeto}</strong>
+                  {filtroAutomatico.emenda.municipio && 
+                    ` do município ${filtroAutomatico.emenda.municipio}/${filtroAutomatico.emenda.uf}`
+                  }
+                </>
+              ) : (
+                <> de emendas do município <strong>{userMunicipio}/{userUf}</strong></>
+              )}
             </span>
+            {filtroAutomatico?.emenda && (
+              <button
+                onClick={() => {
+                  setFiltroAutomatico(null);
+                  navigate('/despesas');
+                  carregarDados();
+                }}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid #155724',
+                  color: '#155724',
+                  padding: '4px 12px',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#155724';
+                  e.target.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#155724';
+                }}
+              >
+                ✕ Limpar Filtro
+              </button>
+            )}
           </div>
         )}
 
