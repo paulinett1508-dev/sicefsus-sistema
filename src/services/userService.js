@@ -54,6 +54,10 @@ const callCloudRun = async (action, data) => {
 };
 
 // 🔧 SEGUNDA INSTÂNCIA FIREBASE (mantida para fallback)
+// ✅ Importar configuração do arquivo principal para consistência
+import app from "../firebase/firebaseConfig";
+
+// 🔧 Usar a mesma configuração do arquivo principal
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
