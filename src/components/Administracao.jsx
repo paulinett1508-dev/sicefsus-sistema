@@ -267,77 +267,102 @@ const Administracao = () => {
       return;
     }
 
-    // ✅ CONFIRMAÇÃO COM CLOUD RUN
-    const confirmar = window.confirm(
-      `🔥 EXCLUSÃO COMPLETA VIA CLOUD RUN\n\n` +
-        `Nome: ${usuario.nome}\n` +
-        `Email: ${usuario.email}\n\n` +
-        `✅ Será removido de:\n` +
-        `• Firebase Firestore (dados)\n` +
-        `• Firebase Auth (login)\n\n` +
-        `⚡ Usando Cloud Run Function com Admin SDK\n` +
-        `🎯 Email ficará disponível para reutilização\n\n` +
-        `Esta ação NÃO pode ser desfeita!`,
-    );
+    // ✅ USAR MODAL DE CONFIRMAÇÃO
+    setConfirmationModal({
+      isOpen: true,
+      title: "🔥 Exclusão Completa via Cloud Run",
+      message: (
+        <div style={{ textAlign: 'left' }}>
+          <p><strong>Usuário:</strong> {usuario.nome}</p>
+          <p><strong>Email:</strong> {usuario.email}</p>
+          <hr style={{ margin: '10px 0', opacity: 0.3 }} />
+          <p style={{ marginBottom: '10px' }}>✅ <strong>Será removido de:</strong></p>
+          <ul style={{ marginLeft: '20px', marginBottom: '10px' }}>
+            <li>Firebase Firestore (dados)</li>
+            <li>Firebase Auth (login)</li>
+          </ul>
+          <p style={{ fontSize: '14px', color: '#666' }}>
+            ⚡ Usando Cloud Run Function com Admin SDK<br />
+            🎯 Email ficará disponível para reutilização
+          </p>
+          <p style={{ 
+            marginTop: '15px', 
+            padding: '10px', 
+            backgroundColor: '#fff3cd', 
+            border: '1px solid #ffeaa7',
+            borderRadius: '5px',
+            color: '#856404',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ⚠️ Esta ação NÃO pode ser desfeita!
+          </p>
+        </div>
+      ),
+      confirmText: "Sim, Excluir Permanentemente",
+      cancelText: "Cancelar",
+      type: "danger",
+      onConfirm: async () => {
+        setConfirmationModal({ isOpen: false });
+        
+        // Continuar com a exclusão
+        try {
+          setLoading(true);
+          console.log("🔥 Executando exclusão via Cloud Run...");
 
-    if (!confirmar) {
-      console.log("❌ Exclusão cancelada");
-      return;
-    }
+          const resultado = await deleteUserById(
+            usuario.id,
+            usuario.uid || usuario.id,
+          );
 
-    try {
-      setLoading(true);
-      console.log("🔥 Executando exclusão via Cloud Run...");
+          console.log("📊 Resultado:", resultado);
 
-      // ✅ USAR CLOUD RUN FUNCTION
-      const resultado = await deleteUserById(
-        usuario.id,
-        usuario.uid || usuario.id,
-      );
+          // ✅ MENSAGEM BASEADA NO RESULTADO
+          let tipo = "success";
+          let titulo = "Exclusão Completa";
+          let mensagem = "Usuário excluído com sucesso!";
 
-      console.log("📊 Resultado:", resultado);
+          if (resultado.method === "cloud_run") {
+            if (resultado.details.firestore && resultado.details.auth) {
+              mensagem =
+                "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
+            } else if (resultado.details.firestore) {
+              tipo = "warning";
+              titulo = "Exclusão Parcial";
+              mensagem =
+                "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
+            }
+          } else if (resultado.method === "firestore_fallback") {
+            tipo = "warning";
+            titulo = "Exclusão Parcial";
+            mensagem =
+              "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
+          }
 
-      // ✅ MENSAGEM BASEADA NO RESULTADO
-      let tipo = "success";
-      let titulo = "Exclusão Completa";
-      let mensagem = "Usuário excluído com sucesso!";
+          showToast({
+            tipo: tipo,
+            titulo: titulo,
+            mensagem: mensagem,
+            duracao: 10000,
+          });
 
-      if (resultado.method === "cloud_run") {
-        if (resultado.details.firestore && resultado.details.auth) {
-          mensagem =
-            "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
-        } else if (resultado.details.firestore) {
-          tipo = "warning";
-          titulo = "Exclusão Parcial";
-          mensagem =
-            "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
+          await carregarUsuarios();
+        } catch (error) {
+          console.error("❌ Erro na exclusão:", error);
+          showToast({
+            tipo: "error",
+            titulo: "Erro na Exclusão",
+            mensagem: `Erro: ${error.message}`,
+          });
+        } finally {
+          setLoading(false);
         }
-      } else if (resultado.method === "firestore_fallback") {
-        tipo = "warning";
-        titulo = "Exclusão Parcial";
-        mensagem =
-          "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
-      }
-
-      showToast({
-        tipo: tipo,
-        titulo: titulo,
-        mensagem: mensagem,
-        duracao: 10000, // 10 segundos para ler
-      });
-
-      // Recarregar dados
-      await carregarUsuarios();
-    } catch (error) {
-      console.error("❌ Erro na exclusão:", error);
-      showToast({
-        tipo: "error",
-        titulo: "Erro na Exclusão",
-        mensagem: `Erro: ${error.message}`,
-      });
-    } finally {
-      setLoading(false);
-    }
+      },
+      onCancel: () => {
+        console.log("❌ Exclusão cancelada");
+        setConfirmationModal({ isOpen: false });
+      },
+    });
   };
 
   // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
@@ -492,9 +517,11 @@ const Administracao = () => {
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
         <ConfirmationModal
+          isVisible={confirmationModal.isOpen}
           title={confirmationModal.title}
           message={confirmationModal.message}
           confirmText={confirmationModal.confirmText}
+          cancelText={confirmationModal.cancelText}
           onConfirm={confirmationModal.onConfirm}
           onCancel={confirmationModal.onCancel}
           type={confirmationModal.type}

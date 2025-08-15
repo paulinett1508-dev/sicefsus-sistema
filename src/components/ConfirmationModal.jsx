@@ -57,7 +57,11 @@ const ConfirmationModal = ({
         </div>
 
         <div style={styles.body}>
-          <p style={styles.message}>{message}</p>
+          {typeof message === 'string' ? (
+            <p style={styles.message}>{message}</p>
+          ) : (
+            <div style={styles.message}>{message}</div>
+          )}
         </div>
 
         <div style={styles.footer}>
