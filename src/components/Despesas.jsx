@@ -346,28 +346,40 @@ const Despesas = ({ usuario }) => {
           userMunicipio={userMunicipio}
         />
 
-        {/* Banner Minimalista e Objetivo - adicionar após DespesasStats */}
-        {(filtroAutomatico?.emenda || (userRole === 'operador' && userMunicipio)) && (
+        {/* Banner Unificado - Substitui TODOS os outros banners */}
+        {filtroAutomatico?.emenda && (
           <div style={{
             backgroundColor: '#e8f4f8',
             borderLeft: '4px solid #0066cc',
-            padding: '10px 16px',
+            padding: '12px 20px',
             marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
             fontSize: '14px',
             color: '#495057'
           }}>
-            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
-            <span style={{ flex: 1 }}>
-              {filtroAutomatico?.emenda ? (
-                <>Emenda {filtroAutomatico.emenda.numero}</>
-              ) : (
-                <>{userMunicipio}/{userUf}</>
-              )}
-            </span>
-            {filtroAutomatico?.emenda && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px'
+            }}>
+              <div style={{ flex: 1 }}>
+                <strong style={{ color: '#0066cc' }}>Filtro:</strong>
+                {' '}Emenda {filtroAutomatico.emenda.numero}
+                {filtroAutomatico.emenda.municipio && (
+                  <span> • {filtroAutomatico.emenda.municipio}/{filtroAutomatico.emenda.uf}</span>
+                )}
+                <span> • Valor: R$ {(filtroAutomatico.emenda.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+              </div>
+              
+              <div style={{ 
+                borderLeft: '1px solid #d1d5db', 
+                paddingLeft: '20px',
+                display: 'flex',
+                gap: '16px',
+                fontSize: '13px'
+              }}>
+                <span><strong>{despesas.filter(d => d.emendaId === filtroAutomatico.emenda.id).length}</strong> despesas</span>
+              </div>
+              
               <button
                 onClick={() => {
                   setFiltroAutomatico(null);
@@ -397,7 +409,22 @@ const Despesas = ({ usuario }) => {
               >
                 ×
               </button>
-            )}
+            </div>
+          </div>
+        )}
+
+        {/* Para operadores sem filtro de emenda específica */}
+        {userRole === 'operador' && userMunicipio && !filtroAutomatico?.emenda && (
+          <div style={{
+            backgroundColor: '#e8f4f8',
+            borderLeft: '4px solid #0066cc',
+            padding: '10px 16px',
+            marginBottom: '20px',
+            fontSize: '14px',
+            color: '#495057'
+          }}>
+            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
+            {' '}{userMunicipio}/{userUf}
           </div>
         )}
 
