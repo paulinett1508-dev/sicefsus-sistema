@@ -343,48 +343,6 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       detalhes: error.message,
     };
   }
-  let userCredential = null;
-
-  try {
-    console.log("🔄 [FALLBACK] Criando via Firebase diretamente...");
-
-    const senhaTemporaria = Math.random().toString(36).slice(-8);
-
-    userCredential = await createUserWithEmailAndPassword(
-      secondaryAuth,
-      userData.email.trim(),
-      senhaTemporaria,
-    );
-
-    console.log("✅ Usuário criado no Firebase Auth:", userCredential.user.uid);
-
-    await signOut(secondaryAuth);
-    console.log("✅ Usuário deslogado da instância secundária");
-
-    const userDoc = {
-      uid: userCredential.user.uid,
-      email: userData.email,
-      nome: userData.nome,
-      tipo: userData.role || "operador",
-      status: "ativo",
-      departamento: userData.departamento || "",
-      telefone: userData.telefone || "",
-      municipio: userData.role === "admin" ? "" : userData.municipio || "",
-      uf: userData.role === "admin" ? "" : userData.uf || "",
-      ativo: true,
-      primeiroAcesso: true,
-      ultimoAcesso: null,
-      criadoEm: serverTimestamp(),
-      dataAtualizacao: serverTimestamp(),
-      senhaTemporaria: senhaTemporaria,
-      primeiroLogin: true,
-    };
-
-    await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
-    console.log("✅ Dados salvos no Firestore");
-
-    await sendPasswordResetEmail(auth, userData.email.trim());
-    console.log("✅ Email de configuração enviado");
 
     if (showToast) {
       showToast({
