@@ -349,8 +349,15 @@ const Administracao = () => {
     );
 
     try {
-      // ✅ SOLUÇÃO DIRETA: updateDoc apenas o campo status
+      // ADICIONAR: Verificar se o documento existe antes de atualizar
       const userRef = doc(db, "usuarios", usuario.id);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        throw new Error("Usuário não encontrado no banco de dados");
+      }
+
+      // ✅ SOLUÇÃO DIRETA: updateDoc apenas o campo status
       await updateDoc(userRef, {
         status: novoStatus,
         dataAtualizacao: serverTimestamp(),
@@ -404,7 +411,7 @@ const Administracao = () => {
     }
   };
 
-  
+
 
   // 🎯 FUNÇÃO: Filtrar usuários
   const getFilteredUsers = () => {

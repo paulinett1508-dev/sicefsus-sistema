@@ -136,31 +136,29 @@ const UsersTable = ({
                     {usuario.status === "ativo" ? "⏸️" : "▶️"}
                   </button>
 
-                  {/* 🗑️ DELETE - VERSÃO SIMPLIFICADA */}
+                  {/* 🗑️ DELETE - SÓ PERMITE SE INATIVO */}
                   <button
                     onClick={(e) => {
-                      console.log("🗑️ === CLIQUE DETECTADO ===");
-                      console.log("📊 Usuário:", usuario.nome);
-                      console.log("📊 Status:", usuario.status);
-                      console.log("📊 Event:", e.type);
-
                       e.preventDefault();
                       e.stopPropagation();
-
-                      // ✅ SEMPRE PERMITIR (para teste)
-                      console.log("✅ Chamando onDelete...");
-                      onDelete(usuario);
+                      
+                      if (usuario.status !== "ativo") {
+                        console.log("🗑️ Excluindo usuário inativo:", usuario.nome);
+                        onDelete(usuario);
+                      }
                     }}
                     style={{
                       ...styles.actionButton,
-                      backgroundColor: "#dc3545",
-                      opacity: 1, // ✅ SEMPRE VISÍVEL
-                      cursor: "pointer", // ✅ SEMPRE CLICÁVEL
-                      zIndex: 1000, // ✅ GARANTIR QUE ESTÁ POR CIMA
-                      position: "relative", // ✅ GARANTIR POSICIONAMENTO
+                      backgroundColor: usuario.status === "ativo" ? "#6c757d" : "#dc3545",
+                      opacity: usuario.status === "ativo" ? 0.5 : 1,
+                      cursor: usuario.status === "ativo" ? "not-allowed" : "pointer",
                     }}
-                    title="Excluir usuário (TESTE ATIVO)"
-                    // ✅ REMOVER disabled TEMPORARIAMENTE
+                    title={
+                      usuario.status === "ativo" 
+                        ? "Inative o usuário primeiro para excluir" 
+                        : "Excluir usuário"
+                    }
+                    disabled={usuario.status === "ativo"}
                   >
                     🗑️
                   </button>
