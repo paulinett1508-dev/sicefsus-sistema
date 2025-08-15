@@ -1,0 +1,165 @@
+// 🔧 CORREÇÃO ROBUSTA - Substituir a função createUser (linha ~65)
+
+export const createUser = async (userData, options = {}) => {
+  console.log("👤 === CRIAÇÃO DE USUÁRIO ===");
+  console.log("📊 Dados:", userData);
+
+  try {
+    // 🔥 TENTAR CLOUD RUN PRIMEIRO (mas com timeout curto)
+    try {
+      console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
+
+      // 🔧 TIMEOUT DE 5 SEGUNDOS para não travar
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      );
+
+      const cloudRunPromise = callCloudRun("createUser", {
+        email: userData.email,
+        userData: userData,
+      });
+
+      const result = await Promise.race([cloudRunPromise, timeoutPromise]);
+
+      console.log("🎉 [SUCESSO] Usuário criado via Cloud Run");
+      return {
+        success: result.success,
+        method: "cloud_run",
+        uid: result.uid,
+        resetLink: result.resetLink,
+        mensagem: "Usuário criado via Cloud Run Admin SDK!",
+      };
+    } catch (cloudRunError) {
+      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
+
+      // 🔧 VERIFICAR SE É ERRO DE EMAIL EXISTENTE
+      const errorMessage = cloudRunError.message || '';
+      if (errorMessage.includes("email-already-exists") || 
+          errorMessage.includes("email-already-in-use")) {
+        throw {
+          codigo: "auth/email-already-in-use",
+          mensagem: "Este email já está sendo usado. Use a função de exclusão primeiro.",
+          detalhes: cloudRunError.message,
+        };
+      }
+
+      // ⚡ IGNORAR ERROS DE CORS/TIMEOUT e ir para fallback
+      console.log("🔄 Prosseguindo para fallback Firebase...");
+    }
+
+    // 📄 FALLBACK GARANTIDO: Método Firebase direto
+    console.log("📄 [FALLBACK] Criando via Firebase diretamente...");
+    return await createUserInFirebase(
+      userData,
+      options.navigate,
+      options.showToast,
+    );
+  } catch (error) {
+    console.error("❌ Erro total na criação:", error);
+    throw error;
+  }
+};
+
+// 🔧 FUNÇÃO FALLBACK MAIS ROBUSTA (substituir linha ~120)
+export const createUserInFirebase = async (userData, navigate, showToast) => {
+  let userCredential = null;
+
+  try {
+    console.log("📄 [FALLBACK] Criando via Firebase diretamente...");
+
+    const senhaTemporaria = Math.random().toString(36).slice(-8);
+
+    // 🔧 TENTAR INSTÂNCIA SECUNDÁRIA PRIMEIRO
+    let authInstance = secondaryAuth;
+    
+    try {
+      userCredential = await createUserWithEmailAndPassword(
+        authInstance,
+        userData.email.trim(),
+        senhaTemporaria,
+      );
+      
+      await signOut(secondaryAuth);
+      console.log("✅ Usuário criado via instância secundária");
+      
+    } catch (secondaryError) {
+      console.warn("⚠️ Instância secundária falhou, usando principal:", secondaryError.message);
+      
+      // 🔧 FALLBACK PARA INSTÂNCIA PRINCIPAL
+      authInstance = auth;
+      
+      userCredential = await createUserWithEmailAndPassword(
+        auth,
+        userData.email.trim(),
+        senhaTemporaria,
+      );
+      
+      console.log("✅ Usuário criado via instância principal");
+    }
+
+    const userDoc = {
+      uid: userCredential.user.uid,
+      email: userData.email,
+      nome: userData.nome,
+      tipo: userData.role || "operador",
+      status: "ativo",
+      departamento: userData.departamento || "",
+      telefone: userData.telefone || "",
+      municipio: userData.role === "admin" ? "" : userData.municipio || "",
+      uf: userData.role === "admin" ? "" : userData.uf || "",
+      ativo: true,
+      primeiroAcesso: true,
+      ultimoAcesso: null,
+      criadoEm: serverTimestamp(),
+      dataAtualizacao: serverTimestamp(),
+      senhaTemporaria: senhaTemporaria,
+      primeiroLogin: true,
+    };
+
+    await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
+    console.log("✅ Dados salvos no Firestore");
+
+    // 🔧 TENTAR ENVIAR EMAIL (não travar se falhar)
+    try {
+      await sendPasswordResetEmail(auth, userData.email.trim());
+      console.log("✅ Email de configuração enviado");
+    } catch (emailError) {
+      console.warn("⚠️ Erro ao enviar email:", emailError.message);
+    }
+
+    if (showToast) {
+      showToast({
+        tipo: "sucesso",
+        titulo: "✅ Usuário Criado!",
+        mensagem: `Usuário ${userData.nome} criado com sucesso!`,
+        duracao: 6000,
+      });
+    }
+
+    return {
+      success: true,
+      method: "firebase_fallback",
+      uid: userCredential.user.uid,
+      senhaTemporaria: senhaTemporaria,
+      mensagem: `Usuário criado com sucesso!`,
+    };
+  } catch (error) {
+    console.error("❌ Erro no fallback:", error);
+
+    // 🔧 LIMPEZA EM CASO DE ERRO
+    if (userCredential) {
+      try {
+        await signOut(secondaryAuth);
+        await signOut(auth);
+      } catch (signOutError) {
+        console.error("❌ Erro adicional no signOut:", signOutError);
+      }
+    }
+
+    throw {
+      codigo: error.code,
+      mensagem: getErrorMessage(error),
+      detalhes: error.message,
+    };
+  }
+};
