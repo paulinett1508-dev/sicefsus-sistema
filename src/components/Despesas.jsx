@@ -329,13 +329,13 @@ const Despesas = ({ usuario }) => {
           />
         )}
 
-        {/* Header do sistema */}
+        {/* Header do sistema - SIMPLIFICADO */}
         <DespesasListHeader
           usuario={usuario}
           loading={loading}
           totalDespesas={despesas.length}
           onVoltarEmendas={params.id ? handleVoltarEmendas : null}
-          emenda={filtroAutomatico?.emenda}
+          emenda={null}  // PASSAR NULL para não mostrar info da emenda
         />
 
         {/* Estatísticas */}
@@ -346,70 +346,52 @@ const Despesas = ({ usuario }) => {
           userMunicipio={userMunicipio}
         />
 
-        {/* Banner Unificado - Substitui TODOS os outros banners */}
+        {/* ÚNICO Banner Minimalista */}
         {filtroAutomatico?.emenda && (
           <div style={{
             backgroundColor: '#e8f4f8',
             borderLeft: '4px solid #0066cc',
-            padding: '12px 20px',
+            padding: '10px 16px',
             marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
             fontSize: '14px',
             color: '#495057'
           }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '20px'
-            }}>
-              <div style={{ flex: 1 }}>
-                <strong style={{ color: '#0066cc' }}>Filtro:</strong>
-                {' '}Emenda {filtroAutomatico.emenda.numero}
-                {filtroAutomatico.emenda.municipio && (
-                  <span> • {filtroAutomatico.emenda.municipio}/{filtroAutomatico.emenda.uf}</span>
-                )}
-                <span> • Valor: R$ {(filtroAutomatico.emenda.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              
-              <div style={{ 
-                borderLeft: '1px solid #d1d5db', 
-                paddingLeft: '20px',
-                display: 'flex',
-                gap: '16px',
-                fontSize: '13px'
-              }}>
-                <span><strong>{despesas.filter(d => d.emendaId === filtroAutomatico.emenda.id).length}</strong> despesas</span>
-              </div>
-              
-              <button
-                onClick={() => {
-                  setFiltroAutomatico(null);
-                  navigate('/despesas');
-                  carregarDados();
-                }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#6c757d',
-                  cursor: 'pointer',
-                  padding: '2px 6px',
-                  fontSize: '20px',
-                  lineHeight: '1',
-                  borderRadius: '3px',
-                  transition: 'all 0.15s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'rgba(0,0,0,0.08)';
-                  e.target.style.color = '#000';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = '#6c757d';
-                }}
-                title="Limpar filtro"
-              >
-                ×
-              </button>
-            </div>
+            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
+            <span style={{ flex: 1 }}>
+              Emenda {filtroAutomatico.emenda.numero}
+            </span>
+            <button
+              onClick={() => {
+                setFiltroAutomatico(null);
+                navigate('/despesas');
+                carregarDados();
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6c757d',
+                cursor: 'pointer',
+                padding: '2px 6px',
+                fontSize: '20px',
+                lineHeight: '1',
+                borderRadius: '3px',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(0,0,0,0.08)';
+                e.target.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = '#6c757d';
+              }}
+              title="Limpar filtro"
+            >
+              ×
+            </button>
           </div>
         )}
 
