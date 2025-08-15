@@ -143,55 +143,6 @@ export const createUser = async (userData, options = {}) => {
     console.error("❌ Erro total na criação:", error);
     throw error;
   }
-  console.log("👤 === CRIAÇÃO DE USUÁRIO ===");
-  console.log("📊 Dados:", userData);
-
-  try {
-    // 🔥 TENTAR CLOUD RUN PRIMEIRO
-    try {
-      console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
-
-      const result = await callCloudRun("createUser", {
-        email: userData.email,
-        userData: userData,
-      });
-
-      console.log("🎉 [SUCESSO] Usuário criado via Cloud Run");
-      return {
-        success: result.success,
-        method: "cloud_run",
-        uid: result.uid,
-        resetLink: result.resetLink,
-        mensagem: "Usuário criado via Cloud Run Admin SDK!",
-      };
-    } catch (cloudRunError) {
-      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
-
-      // Se erro é de email existente, não fazer fallback
-      if (
-        cloudRunError.message.includes("email-already-exists") ||
-        cloudRunError.message.includes("email-already-in-use")
-      ) {
-        throw {
-          codigo: "auth/email-already-in-use",
-          mensagem:
-            "Este email já está sendo usado. Use a função de exclusão primeiro.",
-          detalhes: cloudRunError.message,
-        };
-      }
-    }
-
-    // 🔄 FALLBACK: Método Firebase direto
-    console.log("🔄 [FALLBACK] Criando via Firebase diretamente...");
-    return await createUserInFirebase(
-      userData,
-      options.navigate,
-      options.showToast,
-    );
-  } catch (error) {
-    console.error("❌ Erro total na criação:", error);
-    throw error;
-  }
 };
 
 // 🎯 FUNÇÃO PRINCIPAL: Excluir usuário com fallback automático
@@ -344,28 +295,21 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
     };
   }
 
-    if (showToast) {
-      showToast({
-        tipo: "sucesso",
-        titulo: "✅ Usuário Criado (Fallback)!",
-        mensagem: `Usuário ${userData.nome} criado! Senha temporária: ${senhaTemporaria}`,
-        duracao: 8000,
-      });
-    }
-
     return {
       success: true,
       method: "firebase_fallback",
       uid: userCredential.user.uid,
       senhaTemporaria: senhaTemporaria,
-      mensagem: `Usuário criado via fallback! Senha temporária: ${senhaTemporaria}`,
+      mensagem: `Usuário criado com sucesso!`,
     };
   } catch (error) {
     console.error("❌ Erro no fallback:", error);
 
+    // 🔧 LIMPEZA EM CASO DE ERRO
     if (userCredential) {
       try {
         await signOut(secondaryAuth);
+        await signOut(auth);
       } catch (signOutError) {
         console.error("❌ Erro adicional no signOut:", signOutError);
       }
