@@ -1,0 +1,134 @@
+🔧 CORREÇÃO 1: Remover Banner Azul do DespesasList.jsx
+REMOVER as linhas 182-199:
+jsx// REMOVER ESTAS LINHAS (182-199):
+      {/* ✅ Banner informativo para filtro de emenda específica */}
+      {filtroInicial?.emendaId && (
+        <div style={styles.filtroAutomaticoInfo}>
+          <span style={styles.filtroIcon}>🔍</span>
+          <div style={styles.filtroContent}>
+            <span style={styles.filtroTexto}>
+              <strong>Filtro Automático:</strong> Exibindo despesas da emenda{" "}
+              <strong>{getEmendaDisplayName()}</strong>
+            </span>
+            <span style={styles.filtroSubtexto}>
+              {despesasFiltradas.length} despesa(s) encontrada(s)
+            </span>
+          </div>
+        </div>
+      )}
+🔧 CORREÇÃO 2: Adicionar "Objeto" no Banner Minimalista do Despesas.jsx
+ATUALIZAR o banner minimalista (linhas ~370-380):
+jsx        {/* ÚNICO Banner Minimalista com TODAS as informações */}
+        {filtroAutomatico?.emenda && (
+          <div style={{
+            backgroundColor: '#f8f9fa',
+            borderLeft: '4px solid #0066cc',
+            padding: '12px 20px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            fontSize: '14px',
+            color: '#495057',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            borderRadius: '0 4px 4px 0'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              flex: 1
+            }}>
+              <span style={{ 
+                fontWeight: '600', 
+                color: '#0066cc',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '0.5px'
+              }}>
+                Filtro
+              </span>
+              
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '15px',
+                fontSize: '14px',
+                flex: 1,
+                flexWrap: 'wrap'
+              }}>
+                <span>
+                  <strong>Emenda {filtroAutomatico.emenda.numero}</strong>
+                </span>
+                
+                {filtroAutomatico.emenda.objeto && (
+                  <>
+                    <span style={{ color: '#6c757d' }}>•</span>
+                    <span style={{ fontStyle: 'italic', color: '#495057' }}>
+                      {filtroAutomatico.emenda.objeto}
+                    </span>
+                  </>
+                )}
+                
+                <span style={{ color: '#6c757d' }}>•</span>
+                
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  📍 {filtroAutomatico.emenda.municipio}/{filtroAutomatico.emenda.uf}
+                </span>
+                
+                <span style={{ color: '#6c757d' }}>•</span>
+                
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  💰 R$ {(filtroAutomatico.emenda.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+                
+                <span style={{ color: '#6c757d' }}>•</span>
+                
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  📊 {despesas.filter(d => d.emendaId === filtroAutomatico.emenda.id).length} despesa(s)
+                </span>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                setFiltroAutomatico(null);
+                navigate('/despesas');
+                carregarDados();
+              }}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid #dee2e6',
+                color: '#6c757d',
+                padding: '6px 12px',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.borderColor = '#adb5bd';
+                e.currentTarget.style.color = '#495057';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = '#dee2e6';
+                e.currentTarget.style.color = '#6c757d';
+              }}
+            >
+              <span style={{ fontSize: '16px', lineHeight: '0' }}>×</span>
+              Limpar
+            </button>
+          </div>
+        )}
+📝 RESUMO:
+
+✅ Remover o banner azul do DespesasList.jsx
+✅ Adicionar o campo "objeto" no banner minimalista
+✅ O objeto aparecerá em itálico após o número da emenda
+
+Agora terá apenas UM banner com todas as informações incluindo o objeto da proposta! 🎯

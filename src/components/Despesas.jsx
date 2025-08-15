@@ -329,13 +329,13 @@ const Despesas = ({ usuario }) => {
           />
         )}
 
-        {/* Header do sistema - SIMPLIFICADO */}
+        {/* Header do sistema */}
         <DespesasListHeader
           usuario={usuario}
           loading={loading}
           totalDespesas={despesas.length}
           onVoltarEmendas={params.id ? handleVoltarEmendas : null}
-          emenda={null}  // PASSAR NULL para não mostrar info da emenda
+          emenda={null} // PASSAR NULL para não mostrar info da emenda
         />
 
         {/* Estatísticas */}
@@ -346,152 +346,171 @@ const Despesas = ({ usuario }) => {
           userMunicipio={userMunicipio}
         />
 
-        {/* Banner Minimalista com Informações Completas da Emenda */}
+        {/* ÚNICO Banner Minimalista com TODAS as informações */}
         {filtroAutomatico?.emenda && (
-          <div style={{
-            backgroundColor: '#f8f9fa',
-            border: '1px solid #dee2e6',
-            borderRadius: '8px',
-            padding: '16px 20px',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '14px',
-            color: '#495057',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-          }}>
-            <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flex: 1 }}>
-              {/* Número e Descrição da Emenda */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: 'bold', color: '#154360', fontSize: '15px' }}>
-                  Emenda {filtroAutomatico.emenda.numero || filtroAutomatico.emenda.id}
-                </span>
-                <span style={{ fontSize: '13px', color: '#6c757d' }}>
-                  {filtroAutomatico.emenda.objeto || 'Sem descrição'}
-                </span>
-              </div>
+          <div
+            style={{
+              backgroundColor: "#f8f9fa",
+              borderLeft: "4px solid #0066cc",
+              padding: "12px 20px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              fontSize: "14px",
+              color: "#495057",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              borderRadius: "0 4px 4px 0",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                flex: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: "600",
+                  color: "#0066cc",
+                  textTransform: "uppercase",
+                  fontSize: "12px",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Filtro
+              </span>
 
-              {/* Município/UF */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '600', color: '#495057' }}>📍 Localização</span>
-                <span style={{ fontSize: '13px' }}>
-                  {filtroAutomatico.emenda.municipio}/{filtroAutomatico.emenda.uf}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "15px",
+                  fontSize: "14px",
+                  flex: 1,
+                }}
+              >
+                <span>
+                  <strong>Emenda {filtroAutomatico.emenda.numero}</strong>
                 </span>
-              </div>
 
-              {/* Valor da Emenda */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '600', color: '#495057' }}>💰 Valor</span>
-                <span style={{ fontSize: '13px', color: '#28a745', fontWeight: '600' }}>
-                  {(Number(filtroAutomatico.emenda.valorRecurso) || Number(filtroAutomatico.emenda.valor) || 0).toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                  })}
+                <span style={{ color: "#6c757d" }}>•</span>
+
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  📍 {filtroAutomatico.emenda.municipio}/
+                  {filtroAutomatico.emenda.uf}
                 </span>
-              </div>
 
-              {/* Quantidade de Despesas */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontWeight: '600', color: '#495057' }}>📊 Despesas</span>
-                <span style={{ fontSize: '13px', color: '#007bff', fontWeight: '600' }}>
-                  {despesas.filter(d => d.emendaId === filtroAutomatico.emenda.id).length} despesa(s)
+                <span style={{ color: "#6c757d" }}>•</span>
+
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  💰 R${" "}
+                  {(filtroAutomatico.emenda.valor || 0).toLocaleString(
+                    "pt-BR",
+                    { minimumFractionDigits: 2 },
+                  )}
+                </span>
+
+                <span style={{ color: "#6c757d" }}>•</span>
+
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  📊{" "}
+                  {
+                    despesas.filter(
+                      (d) => d.emendaId === filtroAutomatico.emenda.id,
+                    ).length
+                  }{" "}
+                  despesa(s)
                 </span>
               </div>
             </div>
 
-            {/* Botão Fechar */}
             <button
               onClick={() => {
                 setFiltroAutomatico(null);
-                navigate('/despesas');
+                navigate("/despesas");
                 carregarDados();
               }}
               style={{
-                background: 'none',
-                border: 'none',
-                color: '#6c757d',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                fontSize: '18px',
-                lineHeight: '1',
-                borderRadius: '4px',
-                transition: 'all 0.15s',
-                marginLeft: '16px'
+                backgroundColor: "transparent",
+                border: "1px solid #dee2e6",
+                color: "#6c757d",
+                padding: "6px 12px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
-                e.target.style.color = '#dc3545';
+                e.currentTarget.style.backgroundColor = "#f8f9fa";
+                e.currentTarget.style.borderColor = "#adb5bd";
+                e.currentTarget.style.color = "#495057";
               }}
               onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'transparent';
-                e.target.style.color = '#6c757d';
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.borderColor = "#dee2e6";
+                e.currentTarget.style.color = "#6c757d";
               }}
-              title="Remover filtro"
             >
-              ✕
+              <span style={{ fontSize: "16px", lineHeight: "0" }}>×</span>
+              Limpar
             </button>
           </div>
         )}
 
         {/* Para operadores sem filtro de emenda específica */}
-        {userRole === 'operador' && userMunicipio && !filtroAutomatico?.emenda && (
-          <div style={{
-            backgroundColor: '#e8f4f8',
-            borderLeft: '4px solid #0066cc',
-            padding: '10px 16px',
-            marginBottom: '20px',
-            fontSize: '14px',
-            color: '#495057'
-          }}>
-            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
-            {' '}{userMunicipio}/{userUf}
-          </div>
-        )}
+        {userRole === "operador" &&
+          userMunicipio &&
+          !filtroAutomatico?.emenda && (
+            <div
+              style={{
+                backgroundColor: "#f8f9fa",
+                borderLeft: "4px solid #0066cc",
+                padding: "10px 16px",
+                marginBottom: "20px",
+                fontSize: "14px",
+                color: "#495057",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                borderRadius: "0 4px 4px 0",
+              }}
+            >
+              <strong style={{ color: "#0066cc" }}>Filtro:</strong>{" "}
+              {userMunicipio}/{userUf}
+            </div>
+          )}
 
-        {/* Botões de Ação - Nova Despesa + Atualizar */}
+        {/* Botões de ação */}
         <div style={styles.actionContainer}>
           <button
-            onClick={handleCriar}
             style={styles.primaryButton}
-            disabled={loading}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.target.style.backgroundColor = '#218838';
-                e.target.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.target.style.backgroundColor = '#28a745';
-                e.target.style.transform = 'translateY(0)';
-              }
+            onClick={() => {
+              console.log("🖱️ Clicou em Nova Despesa");
+              handleCriar();
             }}
           >
             ➕ Nova Despesa
           </button>
-
           <button
-            onClick={carregarDados}
             style={styles.refreshButton}
+            onClick={carregarDados}
             disabled={loading}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.target.style.backgroundColor = '#0069d9';
-                e.target.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.target.style.backgroundColor = '#007bff';
-                e.target.style.transform = 'translateY(0)';
-              }
-            }}
           >
-            {loading ? '⏳ Carregando...' : '🔄 Atualizar'}
+            🔄 {loading ? "Atualizando..." : "Atualizar"}
           </button>
         </div>
 
+        {/* Lista de despesas */}
         <DespesasList
           despesas={despesas}
           emendas={emendas}
