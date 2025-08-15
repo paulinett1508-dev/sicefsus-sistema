@@ -346,38 +346,25 @@ const Despesas = ({ usuario }) => {
           userMunicipio={userMunicipio}
         />
 
-        {/* Banner de Filtro Unificado - adicionar após DespesasStats */}
+        {/* Banner Minimalista e Objetivo - adicionar após DespesasStats */}
         {(filtroAutomatico?.emenda || (userRole === 'operador' && userMunicipio)) && (
           <div style={{
-            backgroundColor: filtroAutomatico?.emenda ? '#d4edda' : '#cce5ff',
-            border: `1px solid ${filtroAutomatico?.emenda ? '#c3e6cb' : '#b8daff'}`,
-            borderRadius: '5px',
-            padding: '12px 20px',
+            backgroundColor: '#e8f4f8',
+            borderLeft: '4px solid #0066cc',
+            padding: '10px 16px',
             marginBottom: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+            gap: '8px',
+            fontSize: '14px',
+            color: '#495057'
           }}>
-            <span style={{ fontSize: '20px' }}>
-              {filtroAutomatico?.emenda ? '🔍' : '🏛️'}
-            </span>
-            <span style={{
-              color: filtroAutomatico?.emenda ? '#155724' : '#004085',
-              fontSize: '14px',
-              fontWeight: '500',
-              flex: 1
-            }}>
-              <strong>Filtro Ativo:</strong> Exibindo despesas 
+            <strong style={{ color: '#0066cc' }}>Filtro:</strong>
+            <span style={{ flex: 1 }}>
               {filtroAutomatico?.emenda ? (
-                <>
-                  {' '}da emenda <strong>{filtroAutomatico.emenda.numero} - {filtroAutomatico.emenda.objeto}</strong>
-                  {filtroAutomatico.emenda.municipio && 
-                    ` do município ${filtroAutomatico.emenda.municipio}/${filtroAutomatico.emenda.uf}`
-                  }
-                </>
+                <>Emenda {filtroAutomatico.emenda.numero}</>
               ) : (
-                <> de emendas do município <strong>{userMunicipio}/{userUf}</strong></>
+                <>{userMunicipio}/{userUf}</>
               )}
             </span>
             {filtroAutomatico?.emenda && (
@@ -388,28 +375,27 @@ const Despesas = ({ usuario }) => {
                   carregarDados();
                 }}
                 style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid #155724',
-                  color: '#155724',
-                  padding: '4px 12px',
-                  borderRadius: '3px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#6c757d',
                   cursor: 'pointer',
-                  fontSize: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  transition: 'all 0.2s ease'
+                  padding: '2px 6px',
+                  fontSize: '20px',
+                  lineHeight: '1',
+                  borderRadius: '3px',
+                  transition: 'all 0.15s'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = '#155724';
-                  e.target.style.color = 'white';
+                  e.target.style.backgroundColor = 'rgba(0,0,0,0.08)';
+                  e.target.style.color = '#000';
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.backgroundColor = 'transparent';
-                  e.target.style.color = '#155724';
+                  e.target.style.color = '#6c757d';
                 }}
+                title="Limpar filtro"
               >
-                ✕ Limpar Filtro
+                ×
               </button>
             )}
           </div>
