@@ -467,6 +467,72 @@ const DespesaForm = ({
       return;
     }
 
+    // 🚨 NOVA VALIDAÇÃO CRÍTICA: SALDO BLOQUEANTE
+    const valorDespesa = parseValorMonetario(formData.valor);
+    const emendaAtual = emendaInfoDinamica || emendaInfo;
+    
+    // 🔒 VALIDAÇÃO DUPLA DE SEGURANÇA
+    if (!emendaAtual) {
+      setToast({
+        show: true,
+        message: "❌ ERRO: Informações da emenda não encontradas!\n\nSelecione uma emenda válida e tente novamente.",
+        type: "error",
+        duration: 8000
+      });
+      return; // ⛔ BLOQUEIA SALVAMENTO
+    }
+
+    const saldoDisponivel = emendaAtual.saldoDisponivel || 0;
+
+    // 🚨 VALIDAÇÃO PARA NOVA DESPESA
+    if (!despesaParaEditar && valorDespesa > saldoDisponivel) {
+      setToast({
+        show: true,
+        message: `❌ SALDO INSUFICIENTE!\n\nSaldo disponível: ${formatarMoedaDisplay(saldoDisponivel)}\nValor da despesa: ${formatarMoedaDisplay(valorDespesa)}\n\nReduza o valor ou escolha outra emenda.`,
+        type: "error",
+        duration: 10000
+      });
+      setSalvando(false);
+      return; // ⛔ BLOQUEIA SALVAMENTO
+    }
+
+    // 🚨 VALIDAÇÃO PARA EDIÇÃO DE DESPESA
+    if (despesaParaEditar) {
+      const valorAnterior = despesaParaEditar.valor || 0;
+      const novoSaldoDisponivel = saldoDisponivel + valorAnterior;
+      
+      if (valorDespesa > novoSaldoDisponivel) {
+        setToast({
+          show: true,
+          message: `❌ SALDO INSUFICIENTE PARA ALTERAÇÃO!\n\nSaldo atual: ${formatarMoedaDisplay(saldoDisponivel)}\nValor anterior: ${formatarMoedaDisplay(valorAnterior)}\nSaldo disponível: ${formatarMoedaDisplay(novoSaldoDisponivel)}\nValor tentado: ${formatarMoedaDisplay(valorDespesa)}`,
+          type: "error",
+          duration: 12000
+        });
+        setSalvando(false);
+        return; // ⛔ BLOQUEIA SALVAMENTO
+      }
+    }
+
+    // 🔒 VALIDAÇÃO EXTRA: Verificar se valor é positivo
+    if (valorDespesa <= 0) {
+      setToast({
+        show: true,
+        message: "❌ VALOR INVÁLIDO!\n\nO valor da despesa deve ser maior que zero.",
+        type: "error",
+        duration: 6000
+      });
+      setSalvando(false);
+      return; // ⛔ BLOQUEIA SALVAMENTO
+    }
+
+    // ✅ Log de auditoria para debugging
+    console.log("🔒 VALIDAÇÃO DE SALDO APROVADA:", {
+      valorDespesa,
+      saldoDisponivel,
+      emendaId: emendaAtual.id,
+      modo: despesaParaEditar ? "edição" : "criação"
+    });
+
     setSalvando(true); // Ativa estado de salvando
 
     try {
