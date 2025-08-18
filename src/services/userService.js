@@ -1,4 +1,4 @@
-// src/services/userService.js - VERSÃO SIMPLIFICADA
+// src/services/userService.js - VERSÃO CORRIGIDA
 import {
   createUserWithEmailAndPassword,
   signOut,
@@ -95,8 +95,8 @@ export const createUser = async (userData, options = {}) => {
       console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
 
       // 🔧 TIMEOUT DE 5 SEGUNDOS para não travar
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 5000),
       );
 
       const cloudRunPromise = callCloudRun("createUser", {
@@ -118,12 +118,15 @@ export const createUser = async (userData, options = {}) => {
       console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
 
       // 🔧 VERIFICAR SE É ERRO DE EMAIL EXISTENTE
-      const errorMessage = cloudRunError.message || '';
-      if (errorMessage.includes("email-already-exists") || 
-          errorMessage.includes("email-already-in-use")) {
+      const errorMessage = cloudRunError.message || "";
+      if (
+        errorMessage.includes("email-already-exists") ||
+        errorMessage.includes("email-already-in-use")
+      ) {
         throw {
           codigo: "auth/email-already-in-use",
-          mensagem: "Este email já está sendo usado. Use a função de exclusão primeiro.",
+          mensagem:
+            "Este email já está sendo usado. Use a função de exclusão primeiro.",
           detalhes: cloudRunError.message,
         };
       }
@@ -173,8 +176,8 @@ export const deleteUserById = async (userId, userUid) => {
       }
     }
 
-    // 🔄 FALLBACK: Exclusão apenas do Firestore
-    console.log("🔄 [FALLBACK] Excluindo apenas do Firestore...");
+    // 📄 FALLBACK: Exclusão apenas do Firestore
+    console.log("📄 [FALLBACK] Excluindo apenas do Firestore...");
 
     await deleteDoc(doc(db, "usuarios", userId));
     console.log("✅ Usuário excluído do Firestore");
@@ -192,7 +195,7 @@ export const deleteUserById = async (userId, userUid) => {
   }
 };
 
-// 🎯 FUNÇÃO ORIGINAL: Criar usuário (fallback)
+// 🎯 FUNÇÃO ORIGINAL: Criar usuário (fallback) - CORRIGIDA
 export const createUserInFirebase = async (userData, navigate, showToast) => {
   let userCredential = null;
 
@@ -202,30 +205,28 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
     const senhaTemporaria = Math.random().toString(36).slice(-8);
 
     // 🔧 TENTAR INSTÂNCIA SECUNDÁRIA PRIMEIRO
-    let authInstance = secondaryAuth;
-    
     try {
       userCredential = await createUserWithEmailAndPassword(
-        authInstance,
+        secondaryAuth,
         userData.email.trim(),
         senhaTemporaria,
       );
-      
+
       await signOut(secondaryAuth);
       console.log("✅ Usuário criado via instância secundária");
-      
     } catch (secondaryError) {
-      console.warn("⚠️ Instância secundária falhou, usando principal:", secondaryError.message);
-      
+      console.warn(
+        "⚠️ Instância secundária falhou, usando principal:",
+        secondaryError.message,
+      );
+
       // 🔧 FALLBACK PARA INSTÂNCIA PRINCIPAL
-      authInstance = auth;
-      
       userCredential = await createUserWithEmailAndPassword(
         auth,
         userData.email.trim(),
         senhaTemporaria,
       );
-      
+
       console.log("✅ Usuário criado via instância principal");
     }
 
@@ -267,33 +268,6 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
         duracao: 6000,
       });
     }
-
-    return {
-      success: true,
-      method: "firebase_fallback",
-      uid: userCredential.user.uid,
-      senhaTemporaria: senhaTemporaria,
-      mensagem: `Usuário criado com sucesso!`,
-    };
-  } catch (error) {
-    console.error("❌ Erro no fallback:", error);
-
-    // 🔧 LIMPEZA EM CASO DE ERRO
-    if (userCredential) {
-      try {
-        await signOut(secondaryAuth);
-        await signOut(auth);
-      } catch (signOutError) {
-        console.error("❌ Erro adicional no signOut:", signOutError);
-      }
-    }
-
-    throw {
-      codigo: error.code,
-      mensagem: getErrorMessage(error),
-      detalhes: error.message,
-    };
-  }
 
     return {
       success: true,
@@ -391,7 +365,7 @@ export const updateUser = async (userId, userData, originalEmail) => {
       console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
     }
 
-    // 🔄 FALLBACK: Atualizar apenas Firestore
+    // 📄 FALLBACK: Atualizar apenas Firestore
     const userRef = doc(db, "usuarios", userId);
     const updateData = {
       nome: userData.nome,
@@ -418,10 +392,10 @@ export const updateUser = async (userId, userData, originalEmail) => {
   }
 };
 
-// 🔄 FUNÇÃO: Toggle Status via Cloud Run
+// 📄 FUNÇÃO: Toggle Status via Cloud Run
 export const toggleUserStatusCloudRun = async (usuario, newStatus) => {
   try {
-    console.log("🔄 [CLOUD RUN] Alterando status...");
+    console.log("📄 [CLOUD RUN] Alterando status...");
 
     const result = await callCloudRun("toggleUserStatus", {
       uid: usuario.uid || usuario.id,
