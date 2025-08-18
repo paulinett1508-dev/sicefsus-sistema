@@ -1,4 +1,3 @@
-
 // src/components/despesa/DespesasListHeader.jsx
 // Header da página de listagem de despesas (diferente do DespesaFormHeader)
 import React from "react";
@@ -25,7 +24,7 @@ const DespesasListHeader = ({
         </button>
       )}
 
-      {/* Header compacto com informações do sistema */}
+      {/* Header com informações */}
       <div style={styles.compactHeader}>
         <div style={styles.statusInfo}>
           <span style={styles.statusText}>Status:</span>
@@ -43,10 +42,7 @@ const DespesasListHeader = ({
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Dados:</span>
           <span style={styles.versionValue}>
-            {loading 
-              ? "Carregando..." 
-              : `${totalDespesas} despesas`
-            }
+            {loading ? "Carregando..." : `${totalDespesas} despesas`}
           </span>
         </div>
       </div>
@@ -119,45 +115,46 @@ const styles = {
   },
 
   compactHeader: {
-    backgroundColor: '#f8f9fa',
-    borderBottom: '1px solid #dee2e6',
-    padding: '8px 16px',
-    marginBottom: '16px',
-    borderRadius: '6px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    display: "flex",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #154360, #4A90E2)",
+    color: "white",
+    padding: "8px 20px",
+    borderRadius: "8px",
+    marginBottom: "20px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    fontSize: "14px",
+    gap: "8px",
   },
 
   statusInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '8px',
-    fontSize: '13px',
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    fontFamily: "Arial, sans-serif",
   },
 
   statusText: {
-    color: '#6c757d',
-    fontWeight: '500',
+    fontWeight: "normal",
   },
 
   statusValue: {
-    color: '#28a745',
-    fontWeight: '600',
+    fontWeight: "500",
   },
 
   versionText: {
-    color: '#6c757d',
-    fontWeight: '500',
+    fontWeight: "normal",
   },
 
   versionValue: {
-    color: '#495057',
-    fontWeight: '600',
+    fontWeight: "500",
   },
 
   divider: {
-    color: '#dee2e6',
-    fontWeight: 'normal',
+    opacity: 0.7,
+    margin: "0 4px",
   },
 
   permissaoInfo: {

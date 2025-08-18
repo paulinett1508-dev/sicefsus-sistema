@@ -24,6 +24,7 @@ import Toast from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
 import { UserContext } from "../context/UserContext";
 import AdminHeader from "./admin/AdminHeader";
+import GlobalHeader from "./GlobalHeader";
 
 const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
@@ -559,6 +560,15 @@ const Administracao = () => {
           usuario={currentUser} // ✅ ADICIONAR: Prop usuario necessária
         />
       )}
+
+      <GlobalHeader
+        usuario={currentUser}
+        loading={loading}
+        customData={activeTab === "users"
+          ? `${usuarios.length} usuários`
+          : `${logs.length} logs de auditoria`
+        }
+      />
 
       {/* CABEÇALHO BÁSICO */}
       <div

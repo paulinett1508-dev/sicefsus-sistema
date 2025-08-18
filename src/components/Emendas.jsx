@@ -374,7 +374,7 @@ const Emendas = () => {
   }).length;
 
   const valorExecutado = emendasFiltradas.reduce((sum, emenda) => {
-    const executado = parseFloat(e.valorExecutado || 0);
+    const executado = parseFloat(emenda.valorExecutado || 0);
     return sum + executado;
   }, 0);
 
@@ -455,7 +455,7 @@ const Emendas = () => {
         loading={modalExclusao.loading}
       />
 
-      {/* Header compacto com informações do sistema */}
+      {/* Header com informações do sistema */}
       <div style={styles.compactHeader}>
         <div style={styles.statusInfo}>
           <span style={styles.statusText}>Status:</span>
@@ -473,10 +473,7 @@ const Emendas = () => {
           <span style={styles.divider}>|</span>
           <span style={styles.statusText}>Dados:</span>
           <span style={styles.versionValue}>
-            {loading 
-              ? "Carregando..." 
-              : `${emendasFiltradas.length} emendas`
-            }
+            {loading ? "Carregando..." : `${totalEmendas} emendas`}
           </span>
         </div>
       </div>
