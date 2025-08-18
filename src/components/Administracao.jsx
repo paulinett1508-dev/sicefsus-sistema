@@ -24,6 +24,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { UserContext } from "../context/UserContext";
 
 // 📦 COMPONENTES MODULARES
+import SystemHeader from "./shared/SystemHeader";
 import AdminHeader from "./admin/AdminHeader";
 import AdminTabs from "./admin/AdminTabs";
 import UsersSection from "./admin/UsersSection";
@@ -512,6 +513,45 @@ const Administracao = () => {
   // 🎯 RENDER PRINCIPAL - ORQUESTRADOR LIMPO
   return (
     <div style={styles.container}>
+      {/* ✅ SYSTEMHEADER IMPLEMENTADO */}
+      <SystemHeader
+        usuario={currentUser}
+        loading={loading}
+        modulo="Administração"
+        dadosTexto="usuários cadastrados"
+        dadosContador={usuarios.length}
+      >
+        {/* Banner específico de Administração */}
+        <div style={styles.adminBanner}>
+          <span style={styles.bannerIcon}>👑</span>
+          <div style={styles.bannerContent}>
+            <span style={styles.bannerTexto}>
+              <strong>Painel Administrativo:</strong> Gerencie usuários, permissões 
+              e monitore atividades do sistema SICEFSUS.
+            </span>
+          </div>
+        </div>
+      </SystemHeader>
+
+      {/* ✅ BOTÕES DE AÇÃO */}
+      <div style={styles.actionButtons}>
+        <button
+          style={styles.primaryButton}
+          onClick={handleNovoUsuario}
+          disabled={loading}
+        >
+          ➕ Novo Usuário
+        </button>
+        
+        <button
+          style={styles.secondaryButton}
+          onClick={carregarLogs}
+          disabled={loading}
+        >
+          🔄 Atualizar Logs
+        </button>
+      </div>
+
       {/* MODAIS E TOASTS */}
       {confirmationModal.isOpen && (
         <ConfirmationModal
@@ -597,6 +637,67 @@ const styles = {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
+  },
+  
+  adminBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px 20px",
+    backgroundColor: "#e3f2fd",
+    border: "2px solid #2196f3",
+    borderRadius: 12,
+    marginBottom: "20px",
+    fontSize: 14,
+    color: "#1565c0",
+    boxShadow: "0 4px 12px rgba(33, 150, 243, 0.15)",
+  },
+  
+  bannerIcon: {
+    fontSize: 20,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+  
+  bannerContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    flex: 1,
+  },
+  
+  bannerTexto: {
+    fontSize: 14,
+    lineHeight: 1.4,
+    fontWeight: "500",
+  },
+  
+  actionButtons: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px",
+  },
+  
+  primaryButton: {
+    padding: "10px 20px",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+  },
+  
+  secondaryButton: {
+    padding: "10px 20px",
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
   },
 };
 
