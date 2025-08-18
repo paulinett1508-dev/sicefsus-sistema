@@ -3,7 +3,7 @@
 import BaseRelatorio from "./BaseRelatorio";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
-export class RelatorioAnalitico extends BaseRelatorio {
+class RelatorioAnalitico extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 

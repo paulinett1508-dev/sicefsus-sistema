@@ -1,14 +1,14 @@
 
 import { useEffect } from 'react';
 
-export export const usePageTitle = (title) => {
+const usePageTitle = (title) => {
   useEffect(() => {
-    const baseTitle = 'SICEFSUS';
-    document.title = title ? `${title} - ${baseTitle}` : baseTitle;
-
-    // Cleanup: volta ao título padrão quando o componente desmonta
-    return () => {
-      document.title = baseTitle;
-    };
+    if (title) {
+      document.title = `${title} - SICEFSUS`;
+    } else {
+      document.title = 'SICEFSUS - Sistema de Controle de Execuções Financeiras do SUS';
+    }
   }, [title]);
 };
+
+export default usePageTitle;

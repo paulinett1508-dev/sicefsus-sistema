@@ -2,7 +2,9 @@
 // src/components/relatorios/geradores/BaseRelatorio.js
 import { formatCurrency, formatDate } from "../../../utils/formatters";
 
-export class BaseRelatorio {
+import { formatCurrency, formatDate } from "../../../utils/formatters";
+
+class BaseRelatorio {
   constructor() {
     this.doc = null;
     this.emendas = [];
