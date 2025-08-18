@@ -1,8 +1,10 @@
 // src/components/Relatorios.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { usePageTitle } from "../hooks/usePageTitle";
 import { useRelatoriosData } from "../hooks/useRelatoriosData";
 import RelatoriosCards from "./relatorios/RelatoriosCards";
 import RelatoriosFiltros from "./relatorios/RelatoriosFiltros";
+import GlobalHeader from "./GlobalHeader";
 import { RelatorioExecucao } from "./relatorios/geradores/RelatorioExecucao";
 import { RelatorioPrestacao } from "./relatorios/geradores/RelatorioPrestacao";
 import { RelatorioAnalitico } from "./relatorios/geradores/RelatorioAnalitico";
@@ -63,6 +65,24 @@ export default function Relatorios({ usuario }) {
     parlamentares,
     ufs,
   } = useRelatoriosData(usuario);
+
+  // Calcular preview dos dados
+  const getPreviewData = () => {
+    const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
+    return {
+      totalEmendas: emendasFiltradas.length,
+      totalDespesas: despesasFiltradas.length,
+      valorTotal: emendasFiltradas.reduce(
+        (sum, e) => sum + (e.valorTotal || 0),
+        0,
+      ),
+    };
+  };
+
+  // Use useMemo to memoize the filteredData based on filtros
+  const filteredData = useMemo(() => {
+    return aplicarFiltros(filtros);
+  }, [filtros, aplicarFiltros]);
 
   // Handlers
   const handleFiltroChange = (e) => {
@@ -161,19 +181,6 @@ export default function Relatorios({ usuario }) {
     }
   };
 
-  // Calcular preview dos dados
-  const getPreviewData = () => {
-    const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
-    return {
-      totalEmendas: emendasFiltradas.length,
-      totalDespesas: despesasFiltradas.length,
-      valorTotal: emendasFiltradas.reduce(
-        (sum, e) => sum + (e.valorTotal || 0),
-        0,
-      ),
-    };
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -194,67 +201,85 @@ export default function Relatorios({ usuario }) {
   }
 
   return (
-    <div className="relatorios-container">
-      {/* Header */}
-      <div className="relatorios-header">
-        <h1 className="relatorios-title">📑 Central de Relatórios</h1>
-        <p className="relatorios-subtitle">
-          Gere relatórios profissionais em PDF com os dados do sistema
-        </p>
-      </div>
-
-      {/* Conteúdo Principal */}
-      {!selectedReport ? (
-        <RelatoriosCards onSelectReport={handleSelecionarRelatorio} />
-      ) : (
-        <div className="relatorios-config">
-          {/* Header da Configuração */}
-          <div className="relatorios-config-header">
-            <button className="relatorios-back-btn" onClick={handleVoltar}>
-              ← Voltar
-            </button>
-            <h2 className="relatorios-config-title">{selectedReport.titulo}</h2>
-          </div>
-
-          {/* Filtros */}
-          <RelatoriosFiltros
-            selectedReport={selectedReport}
-            filtros={filtros}
-            onFiltroChange={handleFiltroChange}
-            onLimparFiltros={handleLimparFiltros}
-            parlamentares={parlamentares}
-            ufs={ufs}
-            previewData={getPreviewData()}
-          />
-
-          {/* Botões de Ação */}
-          <div className="relatorios-actions">
-            <button
-              className="relatorios-generate-btn"
-              onClick={handleGerarRelatorio}
-              disabled={generating}
-            >
-              {generating ? (
-                <>
-                  <span className="relatorios-btn-spinner"></span>
-                  Gerando...
-                </>
-              ) : (
-                <>📄 Gerar PDF</>
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Sucesso */}
-      <ModalSucesso
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
+    <div style={styles.container}>
+      <GlobalHeader 
+        usuario={usuario}
+        loading={loading}
+        dataCount={filteredData.emendas?.length || 0}
+        dataLabel="emendas"
       />
+      <div style={styles.content}>
+        {/* Conteúdo Principal */}
+        {!selectedReport ? (
+          <RelatoriosCards onSelectReport={handleSelecionarRelatorio} />
+        ) : (
+          <div className="relatorios-config">
+            {/* Header da Configuração */}
+            <div className="relatorios-config-header">
+              <button className="relatorios-back-btn" onClick={handleVoltar}>
+                ← Voltar
+              </button>
+              <h2 className="relatorios-config-title">{selectedReport.titulo}</h2>
+            </div>
+
+            {/* Filtros */}
+            <RelatoriosFiltros
+              selectedReport={selectedReport}
+              filtros={filtros}
+              onFiltroChange={handleFiltroChange}
+              onLimparFiltros={handleLimparFiltros}
+              parlamentares={parlamentares}
+              ufs={ufs}
+              previewData={getPreviewData()}
+            />
+
+            {/* Botões de Ação */}
+            <div className="relatorios-actions">
+              <button
+                className="relatorios-generate-btn"
+                onClick={handleGerarRelatorio}
+                disabled={generating}
+              >
+                {generating ? (
+                  <>
+                    <span className="relatorios-btn-spinner"></span>
+                    Gerando...
+                  </>
+                ) : (
+                  <>📄 Gerar PDF</>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Sucesso */}
+        <ModalSucesso
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+        />
+      </div>
     </div>
   );
 }
+
+// Define styles object, assuming it's used elsewhere or intended to be used.
+// If 'styles' is defined in another file and imported, this part might be redundant.
+// For completeness, let's assume a basic definition if not provided.
+const styles = {
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    overflowX: "hidden",
+  },
+  content: {
+    flex: 1,
+    padding: "20px",
+    overflowY: "auto",
+  },
+};
 
 // CSS Animation
 if (typeof document !== "undefined") {

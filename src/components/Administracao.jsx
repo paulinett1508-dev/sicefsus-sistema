@@ -23,6 +23,8 @@ import UserForm from "./UserForm"; // ✅ UserForm existe
 import Toast from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
 import { UserContext } from "../context/UserContext";
+import AdminHeader from "./admin/AdminHeader";
+import GlobalHeader from "./GlobalHeader";
 
 const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
@@ -173,7 +175,7 @@ const Administracao = () => {
     setShowUserModal(true);
   };
 
-  // ✅ CORREÇÃO: Função handleSalvarUsuario com userService correto
+  // ✅ CORREÇÃO: handleSalvarUsuario com userService correto
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
 
@@ -240,7 +242,7 @@ const Administracao = () => {
     }
   };
 
-  // ✅ CORREÇÃO: Função handleDelete com userService correto
+  // ✅ CORREÇÃO: handleDelete com userService correto
   const handleDelete = async (usuario) => {
     console.log("🗑️ === EXCLUSÃO VIA CLOUD RUN ===");
     console.log("🗑️ Dados do usuário:", usuario);
@@ -558,6 +560,15 @@ const Administracao = () => {
           usuario={currentUser} // ✅ ADICIONAR: Prop usuario necessária
         />
       )}
+
+      <GlobalHeader
+        usuario={currentUser}
+        loading={loading}
+        customData={activeTab === "users"
+          ? `${usuarios.length} usuários`
+          : `${logs.length} logs de auditoria`
+        }
+      />
 
       {/* CABEÇALHO BÁSICO */}
       <div

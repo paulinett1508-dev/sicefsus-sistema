@@ -2,6 +2,7 @@
 // Header da página de listagem de despesas (diferente do DespesaFormHeader)
 import React from "react";
 import { useVersion } from "../../hooks/useVersion";
+import GlobalHeader from "../GlobalHeader";
 
 const DespesasListHeader = ({
   usuario,
@@ -25,27 +26,12 @@ const DespesasListHeader = ({
       )}
 
       {/* Header com informações */}
-      <div style={styles.compactHeader}>
-        <div style={styles.statusInfo}>
-          <span style={styles.statusText}>Status:</span>
-          <span style={styles.statusValue}>✅ Operacional</span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>{formatVersion()}</span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.statusText}>Usuário:</span>
-          <span style={styles.versionValue}>
-            {userRole === "admin"
-              ? "👑 Admin"
-              : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
-          </span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.statusText}>Dados:</span>
-          <span style={styles.versionValue}>
-            {loading ? "Carregando..." : `${totalDespesas} despesas`}
-          </span>
-        </div>
-      </div>
+      <GlobalHeader 
+        usuario={usuario}
+        loading={loading}
+        dataCount={totalDespesas}
+        dataLabel="despesas"
+      />
 
       {/* Banner de informação para operadores */}
       {userRole === "operador" && userMunicipio && !emenda && (
