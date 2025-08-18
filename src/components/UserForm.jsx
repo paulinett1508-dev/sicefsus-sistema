@@ -473,7 +473,7 @@ const UserForm = ({
             </div>
           </fieldset>
 
-          {/* ✅ SEÇÃO DE LOCALIZAÇÃO (APENAS OPERADORES) */}
+          {/* 🔧 CORREÇÃO: Seção de Localização - Permitir Admin editar Operador */}
           {formData.role === "user" && (
             <fieldset
               style={{
@@ -513,7 +513,59 @@ const UserForm = ({
               )}
 
               <div style={styles.formGroup}>
-                {editingUser ? (
+                {/* 🔧 CORREÇÃO: Lógica de edição vs criação */}
+                {editingUser && editingUser.role === "admin" && formData.role === "admin" ? (
+                  /* 
+                  ❌ CENÁRIO 1: Editando admin que continua admin 
+                  → Campos desabilitados (não precisa de localização)
+                  */
+                  <>
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelRequired}>
+                        Estado (UF) <span style={styles.required}>*</span>
+                        <span
+                          style={styles.infoIcon}
+                          title="Administradores não precisam de localização"
+                        >
+                          ℹ️
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        style={{
+                          ...styles.input,
+                          borderColor: "var(--secondary)",
+                          backgroundColor: "var(--theme-surface-secondary)",
+                          color: "var(--text-muted)",
+                        }}
+                        value="N/A - Acesso Total"
+                        disabled={true}
+                      />
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.labelRequired}>
+                        Município <span style={styles.required}>*</span>
+                        <span
+                          style={styles.infoIcon}
+                          title="Administradores têm acesso a todos os municípios"
+                        >
+                          ℹ️
+                        </span>
+                      </label>
+                      <input
+                        type="text"
+                        style={{
+                          ...styles.input,
+                          borderColor: "var(--secondary)",
+                          backgroundColor: "var(--theme-surface-secondary)",
+                          color: "var(--text-muted)",
+                        }}
+                        value="N/A - Acesso Total"
+                        disabled={true}
+                      />
+                    </div>
+                  </>
+                ) : editingUser ? (
                   <>
                     {/* Durante edição, mostrar campos somente leitura */}
                     <div style={styles.formGroup}>
