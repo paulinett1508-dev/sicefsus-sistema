@@ -1,7 +1,7 @@
 {
-  "version": "2.3.60",
-  "buildDate": "2025-08-18T20:17:12.759Z",
-  "buildDateBR": "18/08/2025 às 20:17",
+  "version": "2.3.61",
+  "buildDate": "2025-08-18T20:28:39.514Z",
+  "buildDateBR": "18/08/2025 às 20:28",
   "environment": "production",
   "changes": [
     "🚀 Sistema de versionamento centralizado implementado",
@@ -11,5 +11,5 @@
     "🎯 Interface consistente para todos os componentes"
   ],
   "date": "18/08/2025",
-  "timestamp": "18/08/2025 às 20:17"
+  "timestamp": "18/08/2025 às 20:28"
 }
