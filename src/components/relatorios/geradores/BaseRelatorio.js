@@ -1,8 +1,6 @@
 
 // src/components/relatorios/geradores/BaseRelatorio.js
-import { formatCurrency, formatDate } from "../../../utils/formatters";
-
-import { formatCurrency, formatDate } from "../../../utils/formatters";
+import { formatarMoeda, formatarData } from "../../../utils/formatters";
 
 class BaseRelatorio {
   constructor() {
@@ -28,7 +26,7 @@ class BaseRelatorio {
     // Data de geração
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "normal");
-    this.doc.text(`Gerado em: ${formatDate(new Date())}`, 20, 30);
+    this.doc.text(`Gerado em: ${this.formatDate(new Date())}`, 20, 30);
   }
 
   addFooter() {
@@ -59,11 +57,11 @@ class BaseRelatorio {
   }
 
   formatCurrency(value) {
-    return formatCurrency(value);
+    return formatarMoeda(value);
   }
 
   formatDate(date) {
-    return formatDate(date);
+    return formatarData(date);
   }
 
   async gerar(filtros) {
