@@ -69,4 +69,3 @@ export class BaseRelatorio {
 }
 
 export default BaseRelatorio;
-export { BaseRelatorio };
