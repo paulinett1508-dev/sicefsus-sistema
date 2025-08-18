@@ -3,6 +3,8 @@ import { BaseRelatorio } from "./BaseRelatorio";
 import { COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
+import BaseRelatorio from "./BaseRelatorio";
+
 export class RelatorioConsolidado extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
@@ -403,3 +405,5 @@ export class RelatorioConsolidado extends BaseRelatorio {
     this.addFooter();
   }
 }
+
+export default RelatorioConsolidado;

@@ -2,6 +2,8 @@
 import { BaseRelatorio } from "./BaseRelatorio";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
+import BaseRelatorio from "./BaseRelatorio";
+
 export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
@@ -319,3 +321,5 @@ export class RelatorioDespesas extends BaseRelatorio {
     this.addFooter();
   }
 }
+
+export default RelatorioDespesas;

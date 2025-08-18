@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 
-export const usePageTitle = (title) => {
+export export const usePageTitle = (title) => {
   useEffect(() => {
     const baseTitle = 'SICEFSUS';
     document.title = title ? `${title} - ${baseTitle}` : baseTitle;
