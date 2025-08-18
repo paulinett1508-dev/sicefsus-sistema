@@ -19,6 +19,12 @@ const UserForm = ({
   
   // ✅ Estado para controlar erros do formulário
   const [errors, setErrors] = React.useState({});
+  
+  // 🆕 NOVO ESTADO: Controlar se houve mudança de tipo durante edição
+  const [tipoAlteradoDuranteEdicao, setTipoAlteradoDuranteEdicao] = React.useState(false);
+  
+  // 🆕 NOVO ESTADO: Forçar re-render do MunicipioSelector
+  const [municipioSelectorKey, setMunicipioSelectorKey] = React.useState(0);
 
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
@@ -89,12 +95,25 @@ const UserForm = ({
     TO: "Tocantins",
   };
 
-  // ✅ HANDLER PARA MUDANÇA DE TIPO DE USUÁRIO
+  // 🔧 HANDLER ATUALIZADO PARA MUDANÇA DE TIPO
   const handleTipoChange = (newTipo) => {
     console.log("🔄 Mudando tipo de usuário para:", newTipo);
+    
+    // 🆕 Detectar se está editando E mudou o tipo
+    const mudouTipoEdicao = editingUser && editingUser.role !== newTipo;
+    
+    if (mudouTipoEdicao) {
+      console.log("🔄 Mudança de tipo detectada durante edição!");
+      setTipoAlteradoDuranteEdicao(true);
+      
+      // 🆕 Forçar re-render do MunicipioSelector
+      setMunicipioSelectorKey(prev => prev + 1);
+    }
+
     setFormData({
       ...formData,
       role: newTipo,
+      // 🔧 Se mudou para admin, limpa localização
       municipio: newTipo === "admin" ? "" : formData.municipio,
       uf: newTipo === "admin" ? "" : formData.uf,
     });
@@ -190,6 +209,263 @@ const UserForm = ({
       }));
     }
   }, [editingUser, currentUser, setFormData]);
+
+  // 🆕 FUNÇÃO PARA RENDERIZAR LOCALIZAÇÃO DINAMICAMENTE
+  const renderLocalizacaoSection = () => {
+    // ❌ Se não é operador, não mostra nada
+    if (formData.role !== "user") return null;
+
+    // ✅ Se está criando usuário OU se houve mudança de tipo, mostra campos habilitados
+    const mostrarCamposHabilitados = !editingUser || tipoAlteradoDuranteEdicao;
+
+    return (
+      <fieldset
+        style={{
+          ...styles.fieldset,
+          borderColor: "var(--primary)",
+          backgroundColor: "rgba(52, 152, 219, 0.05)",
+        }}
+      >
+        <legend
+          style={{
+            ...styles.legend,
+            borderColor: "var(--primary)",
+            color: "var(--primary)",
+            fontWeight: "600",
+          }}
+        >
+          <span style={styles.legendIcon}>📍</span>
+          Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
+          <span
+            style={styles.infoIcon}
+            title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
+          >
+            ℹ️
+          </span>
+        </legend>
+
+        {/* 🆕 BANNER INFORMATIVO PARA MUDANÇA DE TIPO */}
+        {tipoAlteradoDuranteEdicao && (
+          <div style={{
+            ...styles.operatorBanner,
+            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            borderColor: "rgba(76, 175, 80, 0.3)",
+          }}>
+            <div style={styles.operatorBannerIcon}>🔄</div>
+            <div style={styles.operatorBannerContent}>
+              <strong>Tipo alterado para Operador:</strong>
+              <br />
+              Defina a localização de acesso para este usuário.
+            </div>
+          </div>
+        )}
+
+        {/* 🆕 Banner informativo para operadores */}
+        {currentUser?.tipo === 'operador' && !editingUser && (
+          <div style={styles.operatorBanner}>
+            <div style={styles.operatorBannerIcon}>📍</div>
+            <div style={styles.operatorBannerContent}>
+              <strong>Pré-preenchimento automático:</strong>
+              <br />
+              Como operador, você só pode criar usuários para o seu município ({currentUser.municipio}/{currentUser.uf})
+            </div>
+          </div>
+        )}
+
+        <div style={styles.formGroup}>
+          {mostrarCamposHabilitados ? (
+            /* ✅ CAMPOS HABILITADOS - Criação OU Mudança de tipo */
+            <>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>
+                  Estado (UF) <span style={styles.required}>*</span>
+                  {tipoAlteradoDuranteEdicao && (
+                    <span
+                      style={{...styles.infoIcon, color: "var(--success)"}}
+                      title="Admin pode definir localização após mudança de tipo"
+                    >
+                      🔓
+                    </span>
+                  )}
+                </label>
+                
+                {/* 🆕 MUNICIPIO SELECTOR COM KEY PARA FORÇAR RE-RENDER */}
+                <MunicipioSelector
+                  key={`municipio-${municipioSelectorKey}-${formData.uf}`} // ✅ Key dinâmica
+                  ufSelecionada={formData.uf || ""}
+                  municipioSelecionado={formData.municipio || ""}
+                  onUfChange={(uf) => {
+                    // 🆕 Bloquear mudança se operador
+                    if (currentUser?.tipo === 'operador') return;
+
+                    setFormData({
+                      ...formData,
+                      uf: uf,
+                      municipio: "" // Limpar município quando UF mudar
+                    });
+                  }}
+                  onMunicipioChange={(municipio) => {
+                    // 🆕 Bloquear mudança se operador
+                    if (currentUser?.tipo === 'operador') return;
+
+                    setFormData({
+                      ...formData,
+                      municipio: municipio
+                    });
+                  }}
+                  disabled={saving || currentUser?.tipo === 'operador'} // 🆕 Desabilitar para operadores
+                  style={{
+                    borderColor: tipoAlteradoDuranteEdicao ? "var(--success)" : "var(--primary)",
+                    backgroundColor: tipoAlteradoDuranteEdicao ? "rgba(39, 174, 96, 0.05)" : "transparent",
+                  }}
+                />
+                
+                {tipoAlteradoDuranteEdicao && (
+                  <small style={{...styles.helpText, color: "var(--success)"}}>
+                    ✅ Selecione o estado e município para o operador
+                  </small>
+                )}
+              </div>
+            </>
+          ) : (
+            /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
+            <>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>
+                  Estado (UF) <span style={styles.required}>*</span>
+                  <span
+                    style={styles.infoIcon}
+                    title="UF não pode ser alterada após criação (apenas mudando tipo)"
+                  >
+                    🔒
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  style={{
+                    ...styles.input,
+                    borderColor: "var(--secondary)",
+                    backgroundColor: "var(--theme-surface-secondary)",
+                  }}
+                  value={formData.uf || "Não definido"}
+                  disabled={true}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.labelRequired}>
+                  Município <span style={styles.required}>*</span>
+                  <span
+                    style={styles.infoIcon}
+                    title="Município não pode ser alterado após criação (apenas mudando tipo)"
+                  >
+                    🔒
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  style={{
+                    ...styles.input,
+                    borderColor: "var(--secondary)",
+                    backgroundColor: "var(--theme-surface-secondary)",
+                  }}
+                  value={formData.municipio || "Não definido"}
+                  disabled={true}
+                />
+              </div>
+              
+              {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
+              <div style={{
+                textAlign: "center",
+                marginTop: "16px",
+                padding: "16px",
+                backgroundColor: "rgba(52, 152, 219, 0.1)",
+                borderRadius: "8px",
+                border: "1px dashed rgba(52, 152, 219, 0.3)"
+              }}>
+                <p style={{
+                  margin: "0 0 12px 0",
+                  fontSize: "14px",
+                  color: "var(--primary)"
+                }}>
+                  💡 <strong>Dica:</strong> Para alterar a localização, use o botão abaixo.
+                </p>
+                <button
+                  type="button"
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "var(--primary)",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                  onClick={() => {
+                    // Forçar mudança para admin e depois permitir volta para operador
+                    handleTipoChange("admin");
+                    setTimeout(() => {
+                      handleTipoChange("user");
+                    }, 100);
+                  }}
+                  disabled={saving}
+                >
+                  🔄 Habilitar Edição de Localização
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
+        {formData.municipio && formData.uf && (
+          <div
+            style={{
+              ...styles.emendaInfo,
+              backgroundColor: "rgba(39, 174, 96, 0.1)",
+              borderColor: "var(--success)",
+              marginTop: "24px",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--success)",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              ✅ <strong>Configuração de Acesso:</strong>
+              {tipoAlteradoDuranteEdicao && <span style={{fontSize: "12px", color: "var(--warning)"}}>(Modificado)</span>}
+            </div>
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "12px",
+                backgroundColor: "rgba(39, 174, 96, 0.05)",
+                borderRadius: "6px",
+                fontFamily: "monospace",
+                fontSize: "0.9em",
+              }}
+            >
+              📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
+              <br />
+              🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
+              <br />
+              👤 <strong>Permissões:</strong> Visualizar, criar despesas
+              {currentUser?.tipo === 'operador' && (
+                <>
+                  <br />
+                  🔒 <strong>Restrito:</strong> Criado por operador de {currentUser.municipio}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </fieldset>
+    );
+  };
 
 
   return (
@@ -473,222 +749,8 @@ const UserForm = ({
             </div>
           </fieldset>
 
-          {/* 🔧 CORREÇÃO: Seção de Localização - Permitir Admin editar Operador */}
-          {formData.role === "user" && (
-            <fieldset
-              style={{
-                ...styles.fieldset,
-                borderColor: "var(--primary)",
-                backgroundColor: "rgba(52, 152, 219, 0.05)",
-              }}
-            >
-              <legend
-                style={{
-                  ...styles.legend,
-                  borderColor: "var(--primary)",
-                  color: "var(--primary)",
-                  fontWeight: "600",
-                }}
-              >
-                <span style={styles.legendIcon}>📍</span>
-                Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
-                <span
-                  style={styles.infoIcon}
-                  title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
-                >
-                  ℹ️
-                </span>
-              </legend>
-
-              {/* 🆕 Banner informativo para operadores */}
-              {currentUser?.tipo === 'operador' && !editingUser && (
-                <div style={styles.operatorBanner}>
-                  <div style={styles.operatorBannerIcon}>📍</div>
-                  <div style={styles.operatorBannerContent}>
-                    <strong>Pré-preenchimento automático:</strong>
-                    <br />
-                    Como operador, você só pode criar usuários para o seu município ({currentUser.municipio}/{currentUser.uf})
-                  </div>
-                </div>
-              )}
-
-              <div style={styles.formGroup}>
-                {/* 🔧 CORREÇÃO: Lógica de edição vs criação */}
-                {editingUser && editingUser.role === "admin" && formData.role === "admin" ? (
-                  /* 
-                  ❌ CENÁRIO 1: Editando admin que continua admin 
-                  → Campos desabilitados (não precisa de localização)
-                  */
-                  <>
-                    <div style={styles.formGroup}>
-                      <label style={styles.labelRequired}>
-                        Estado (UF) <span style={styles.required}>*</span>
-                        <span
-                          style={styles.infoIcon}
-                          title="Administradores não precisam de localização"
-                        >
-                          ℹ️
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        style={{
-                          ...styles.input,
-                          borderColor: "var(--secondary)",
-                          backgroundColor: "var(--theme-surface-secondary)",
-                          color: "var(--text-muted)",
-                        }}
-                        value="N/A - Acesso Total"
-                        disabled={true}
-                      />
-                    </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.labelRequired}>
-                        Município <span style={styles.required}>*</span>
-                        <span
-                          style={styles.infoIcon}
-                          title="Administradores têm acesso a todos os municípios"
-                        >
-                          ℹ️
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        style={{
-                          ...styles.input,
-                          borderColor: "var(--secondary)",
-                          backgroundColor: "var(--theme-surface-secondary)",
-                          color: "var(--text-muted)",
-                        }}
-                        value="N/A - Acesso Total"
-                        disabled={true}
-                      />
-                    </div>
-                  </>
-                ) : editingUser ? (
-                  <>
-                    {/* Durante edição, mostrar campos somente leitura */}
-                    <div style={styles.formGroup}>
-                      <label style={styles.labelRequired}>
-                        Estado (UF) <span style={styles.required}>*</span>
-                        <span
-                          style={styles.infoIcon}
-                          title="UF não pode ser alterada após criação"
-                        >
-                          ℹ️
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        style={{
-                          ...styles.input,
-                          borderColor: "var(--warning)",
-                          backgroundColor: "var(--theme-surface-secondary)",
-                        }}
-                        value={formData.uf || ""}
-                        disabled={true}
-                        required={formData.role === "user"}
-                      />
-                    </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.labelRequired}>
-                        Município <span style={styles.required}>*</span>
-                        <span
-                          style={styles.infoIcon}
-                          title="Localização não pode ser alterada após criação"
-                        >
-                          ℹ️
-                        </span>
-                      </label>
-                      <input
-                        type="text"
-                        style={{
-                          ...styles.input,
-                          borderColor: "var(--warning)",
-                          backgroundColor: "var(--theme-surface-secondary)",
-                        }}
-                        value={formData.municipio || ""}
-                        disabled={true}
-                        required={formData.role === "user"}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  /* Durante criação, verificar se deve ser readonly */
-                  <MunicipioSelector
-                    ufSelecionada={formData.uf || ""}
-                    municipioSelecionado={formData.municipio || ""}
-                    onUfChange={(uf) => {
-                      // 🆕 Bloquear mudança se operador
-                      if (currentUser?.tipo === 'operador') return;
-
-                      setFormData({
-                        ...formData,
-                        uf: uf,
-                        municipio: "" // Limpar município quando UF mudar
-                      });
-                    }}
-                    onMunicipioChange={(municipio) => {
-                      // 🆕 Bloquear mudança se operador
-                      if (currentUser?.tipo === 'operador') return;
-
-                      setFormData({
-                        ...formData,
-                        municipio: municipio
-                      });
-                    }}
-                    disabled={saving || currentUser?.tipo === 'operador'} // 🆕 Desabilitar para operadores
-                  />
-                )}
-              </div>
-
-              {/* ✅ PREVIEW DA CONFIGURAÇÃO existente... */}
-              {formData.municipio && formData.uf && (
-                <div
-                  style={{
-                    ...styles.emendaInfo,
-                    backgroundColor: "rgba(39, 174, 96, 0.1)",
-                    borderColor: "var(--success)",
-                    marginTop: "24px",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "var(--success)",
-                      fontWeight: "600",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    ✅ <strong>Configuração de Acesso:</strong>
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "8px",
-                      padding: "12px",
-                      backgroundColor: "rgba(39, 174, 96, 0.05)",
-                      borderRadius: "6px",
-                      fontFamily: "monospace",
-                      fontSize: "0.9em",
-                    }}
-                  >
-                    📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
-                    <br />
-                    🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
-                    <br />
-                    👤 <strong>Permissões:</strong> Visualizar, criar despesas
-                    {currentUser?.tipo === 'operador' && (
-                      <>
-                        <br />
-                        🔒 <strong>Restrito:</strong> Criado por operador de {currentUser.municipio}
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-            </fieldset>
-          )}
+          {/* 🔧 SEÇÃO DE LOCALIZAÇÃO RENDERIZADA DINAMICAMENTE */}
+          {renderLocalizacaoSection()}
 
           {/* ✅ PREVIEW PARA ADMINISTRADORES */}
           {formData.role === "admin" && (
