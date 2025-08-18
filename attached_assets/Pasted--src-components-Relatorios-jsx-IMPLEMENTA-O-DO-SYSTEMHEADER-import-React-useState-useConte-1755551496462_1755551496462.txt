@@ -1,0 +1,74 @@
+// src/components/Relatorios.jsx - IMPLEMENTAÇÃO DO SYSTEMHEADER
+import React, { useState, useContext } from "react";
+import { UserContext } from "../context/UserContext";
+import SystemHeader from "./shared/SystemHeader"; // ✅ IMPORT DO HEADER GENÉRICO
+
+const Relatorios = () => {
+  const { currentUser } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
+  const [relatoriosGerados] = useState([]); // Estado dos relatórios
+
+  return (
+    <div style={{ padding: "20px" }}>
+      {/* ✅ SYSTEMHEADER IMPLEMENTADO */}
+      <SystemHeader
+        usuario={currentUser}
+        loading={loading}
+        modulo="Relatórios"
+        dadosTexto="relatórios disponíveis"
+        dadosContador={relatoriosGerados.length}
+      >
+        {/* Banner específico de Relatórios */}
+        {currentUser?.tipo === "operador" && (
+          <div style={styles.relatoriosBanner}>
+            <span style={styles.bannerIcon}>📊</span>
+            <div style={styles.bannerContent}>
+              <span style={styles.bannerTexto}>
+                <strong>Acesso aos Relatórios:</strong> Você pode gerar relatórios apenas 
+                para emendas e despesas do seu município.
+              </span>
+            </div>
+          </div>
+        )}
+      </SystemHeader>
+
+      {/* Resto do componente Relatórios */}
+      <h1>Relatórios SICEFSUS</h1>
+      {/* ... conteúdo existente ... */}
+    </div>
+  );
+};
+
+const styles = {
+  relatoriosBanner: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "12px",
+    padding: "16px 20px",
+    backgroundColor: "#e8f5e8",
+    border: "2px solid #4caf50",
+    borderRadius: 12,
+    marginBottom: "20px",
+    fontSize: 14,
+    color: "#2e7d32",
+    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
+  },
+  bannerIcon: {
+    fontSize: 20,
+    flexShrink: 0,
+    marginTop: 2,
+  },
+  bannerContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    flex: 1,
+  },
+  bannerTexto: {
+    fontSize: 14,
+    lineHeight: 1.4,
+    fontWeight: "500",
+  },
+};
+
+export default Relatorios;
