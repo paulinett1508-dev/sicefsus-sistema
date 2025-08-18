@@ -4,7 +4,6 @@ import { usePageTitle } from "../hooks/usePageTitle";
 import { useRelatoriosData } from "../hooks/useRelatoriosData";
 import RelatoriosCards from "./relatorios/RelatoriosCards";
 import RelatoriosFiltros from "./relatorios/RelatoriosFiltros";
-import GlobalHeader from "./GlobalHeader";
 import { RelatorioExecucao } from "./relatorios/geradores/RelatorioExecucao";
 import { RelatorioPrestacao } from "./relatorios/geradores/RelatorioPrestacao";
 import { RelatorioAnalitico } from "./relatorios/geradores/RelatorioAnalitico";
@@ -202,12 +201,6 @@ export default function Relatorios({ usuario }) {
 
   return (
     <div style={styles.container}>
-      <GlobalHeader 
-        usuario={usuario}
-        loading={loading}
-        dataCount={filteredData.emendas?.length || 0}
-        dataLabel="emendas"
-      />
       <div style={styles.content}>
         {/* Conteúdo Principal */}
         {!selectedReport ? (

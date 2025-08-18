@@ -17,7 +17,6 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import { useVersion } from "../hooks/useVersion";
-import GlobalHeader from "./GlobalHeader";
 import EmendasFilters from "./EmendasFilters";
 import EmendasTable from "./EmendasTable";
 import Toast from "./Toast";
@@ -456,13 +455,31 @@ const Emendas = () => {
         loading={modalExclusao.loading}
       />
 
-      {/* Header com informações do sistema */}
-      <GlobalHeader
-        usuario={user}
-        loading={loading}
-        dataCount={emendasFiltradas.length}
-        dataLabel="emendas"
-      />
+      {/* Header compacto com informações do sistema */}
+      <div style={styles.compactHeader}>
+        <div style={styles.statusInfo}>
+          <span style={styles.statusText}>Status:</span>
+          <span style={styles.statusValue}>✅ Operacional</span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.versionText}>Versão:</span>
+          <span style={styles.versionValue}>{formatVersion()}</span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.statusText}>Usuário:</span>
+          <span style={styles.versionValue}>
+            {userRole === "admin"
+              ? "👑 Admin"
+              : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.statusText}>Dados:</span>
+          <span style={styles.versionValue}>
+            {loading 
+              ? "Carregando..." 
+              : `${emendasFiltradas.length} emendas`
+            }
+          </span>
+        </div>
+      </div>
 
       {/* Banner de informação de permissões para operadores */}
       {userRole === "operador" && userMunicipio && (

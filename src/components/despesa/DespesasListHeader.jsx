@@ -1,8 +1,8 @@
+
 // src/components/despesa/DespesasListHeader.jsx
 // Header da página de listagem de despesas (diferente do DespesaFormHeader)
 import React from "react";
 import { useVersion } from "../../hooks/useVersion";
-import GlobalHeader from "../GlobalHeader";
 
 const DespesasListHeader = ({
   usuario,
@@ -25,13 +25,31 @@ const DespesasListHeader = ({
         </button>
       )}
 
-      {/* Header com informações */}
-      <GlobalHeader 
-        usuario={usuario}
-        loading={loading}
-        dataCount={totalDespesas}
-        dataLabel="despesas"
-      />
+      {/* Header compacto com informações do sistema */}
+      <div style={styles.compactHeader}>
+        <div style={styles.statusInfo}>
+          <span style={styles.statusText}>Status:</span>
+          <span style={styles.statusValue}>✅ Operacional</span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.versionText}>Versão:</span>
+          <span style={styles.versionValue}>{formatVersion()}</span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.statusText}>Usuário:</span>
+          <span style={styles.versionValue}>
+            {userRole === "admin"
+              ? "👑 Admin"
+              : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
+          </span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.statusText}>Dados:</span>
+          <span style={styles.versionValue}>
+            {loading 
+              ? "Carregando..." 
+              : `${totalDespesas} despesas`
+            }
+          </span>
+        </div>
+      </div>
 
       {/* Banner de informação para operadores */}
       {userRole === "operador" && userMunicipio && !emenda && (
@@ -101,46 +119,45 @@ const styles = {
   },
 
   compactHeader: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    background: "linear-gradient(135deg, #154360, #4A90E2)",
-    color: "white",
-    padding: "8px 20px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    fontSize: "14px",
-    gap: "8px",
+    backgroundColor: '#f8f9fa',
+    borderBottom: '1px solid #dee2e6',
+    padding: '8px 16px',
+    marginBottom: '16px',
+    borderRadius: '6px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
 
   statusInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontSize: "14px",
-    fontFamily: "Arial, sans-serif",
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '8px',
+    fontSize: '13px',
   },
 
   statusText: {
-    fontWeight: "normal",
+    color: '#6c757d',
+    fontWeight: '500',
   },
 
   statusValue: {
-    fontWeight: "500",
+    color: '#28a745',
+    fontWeight: '600',
   },
 
   versionText: {
-    fontWeight: "normal",
+    color: '#6c757d',
+    fontWeight: '500',
   },
 
   versionValue: {
-    fontWeight: "500",
+    color: '#495057',
+    fontWeight: '600',
   },
 
   divider: {
-    opacity: 0.7,
-    margin: "0 4px",
+    color: '#dee2e6',
+    fontWeight: 'normal',
   },
 
   permissaoInfo: {
