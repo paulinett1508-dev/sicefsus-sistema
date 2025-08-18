@@ -1,4 +1,7 @@
-// src/components/Administracao.jsx - VERSÃO REFATORADA E LIMPA
+
+// 🔧 CORREÇÕES CRÍTICAS para src/components/Administracao.jsx
+
+// ✅ CORREÇÃO 1: Imports corretos
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import {
   collection,
@@ -15,62 +18,24 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 
-// 📦 IMPORTS DOS COMPONENTES SEGMENTADOS
-import UsersSection from "./admin/UsersSection";
-import LogsSection from "./admin/LogsSection";
-import UserModal from "./admin/UserModal";
-import AdminTabs from "./admin/AdminTabs";
-import AdminHeader from "./admin/AdminHeader";
+// 🔧 CORREÇÃO: Import correto do userService
+import userService from "../services/userService"; // ✅ Import default
 
-// 📦 IMPORTS DE SERVIÇOS E UTILS
+// 🔧 CORREÇÃO: Remover imports de componentes inexistentes e usar UserForm
+import UserForm from "./UserForm"; // ✅ UserForm existe
 import Toast from "./Toast";
 import ConfirmationModal from "./ConfirmationModal";
 import { UserContext } from "../context/UserContext";
-import {
-  createUser,
-  updateUser,
-  deleteUserById,
-} from "../services/userService";
 
 const Administracao = () => {
-  // 🎯 CONTEXTO DO USUÁRIO
   const { currentUser } = useContext(UserContext);
-
-  // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);
   const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("users");
-
-  // 🎯 ESTADOS DO MODAL DE USUÁRIO
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    role: "user",
-    municipio: "",
-    uf: "",
-    status: "ativo",
-    departamento: "",
-    telefone: "",
-  });
-
-  // 🎯 ESTADOS DE FEEDBACK
-  const [toast, setToast] = useState({ show: false });
-  const [confirmationModal, setConfirmationModal] = useState({
-    isOpen: false,
-    title: "",
-    message: "",
-    confirmText: "Confirmar",
-    cancelText: "Cancelar",
-    type: "warning",
-    onConfirm: () => {},
-    onCancel: () => {},
-  });
-
-  // 🎯 ESTADOS DE FILTROS
   const [userFilter, setUserFilter] = useState("");
   const [logFilters, setLogFilters] = useState({
     usuario: "",
@@ -78,39 +43,42 @@ const Administracao = () => {
     dataInicio: "",
     dataFim: "",
   });
+  const [confirmationModal, setConfirmationModal] = useState({ isOpen: false });
 
-  // 📋 FUNÇÃO: Carregar usuários
-  const carregarUsuarios = async () => {
+  const [formData, setFormData] = useState({
+    nome: "",
+    email: "",
+    role: "operador",
+    municipio: "",
+    uf: "",
+    status: "ativo",
+    departamento: "",
+    telefone: "",
+  });
+
+  const [toast, setToast] = useState({ isVisible: false });
+
+  const showToast = ({ tipo, titulo, mensagem, duracao = 5000 }) => {
+    setToast({
+      isVisible: true,
+      tipo,
+      titulo,
+      mensagem,
+      duracao,
+    });
+  };
+
+  const carregarUsuarios = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("📋 Carregando usuários...");
-
-      const usuariosRef = collection(db, "usuarios");
-      const snapshot = await getDocs(usuariosRef);
-
-      const usuariosData = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          uid: data.uid || doc.id,
-          email: data.email,
-          nome: data.nome || data.name || "Nome não informado",
-          tipo: data.tipo || data.role || "operador",
-          status: data.status || "ativo",
-          departamento: data.departamento || "",
-          telefone: data.telefone || "",
-          municipio: data.municipio || "",
-          uf: data.uf || "",
-          ultimoAcesso: data.ultimoAcesso || data.ultimo_acesso,
-          criadoEm: data.criadoEm || data.data_criacao,
-          ...data,
-        };
-      });
-
+      const querySnapshot = await getDocs(collection(db, "usuarios"));
+      const usuariosData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setUsuarios(usuariosData);
-      console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
     } catch (error) {
-      console.error("❌ Erro ao carregar usuários:", error);
+      console.error("Erro ao carregar usuários:", error);
       showToast({
         tipo: "error",
         titulo: "Erro",
@@ -119,58 +87,69 @@ const Administracao = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // 📋 FUNÇÃO: Carregar logs
-  const carregarLogs = async () => {
+  const carregarLogs = useCallback(async () => {
     try {
-      console.log("📋 Carregando logs de auditoria...");
-      const logsData = await auditService.getLogs({ limit: 50 });
-      setLogs(logsData);
-      console.log(`✅ ${logsData.length} logs carregados`);
+      setLoading(true);
+      const querySnapshot = await getDocs(collection(db, "audit_logs"));
+      const logsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setLogs(logsData.sort((a, b) => {
+        const dateA = a.timestamp?.seconds || 0;
+        const dateB = b.timestamp?.seconds || 0;
+        return dateB - dateA;
+      }));
     } catch (error) {
-      console.error("❌ Erro ao carregar logs:", error);
+      console.error("Erro ao carregar logs:", error);
       showToast({
         tipo: "error",
         titulo: "Erro",
-        mensagem: "Erro ao carregar logs de auditoria",
+        mensagem: "Erro ao carregar logs",
       });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // 🎯 HANDLERS DE USUÁRIOS
+  useEffect(() => {
+    carregarUsuarios();
+    carregarLogs();
+  }, [carregarUsuarios, carregarLogs]);
+
   const handleNovoUsuario = () => {
-    console.log("🆕 Abrindo modal de novo usuário");
-    setEditingUser(null);
     setFormData({
       nome: "",
       email: "",
-      role: "user",
+      role: "operador",
       municipio: "",
       uf: "",
       status: "ativo",
       departamento: "",
       telefone: "",
     });
+    setEditingUser(null);
     setShowUserModal(true);
   };
 
   const handleEditarUsuario = (usuario) => {
-    console.log("✏️ Editando usuário:", usuario);
-    setEditingUser(usuario);
     setFormData({
       nome: usuario.nome || "",
       email: usuario.email || "",
-      role: usuario.tipo === "admin" ? "admin" : "user",
+      role: usuario.role || usuario.tipo || "operador",
       municipio: usuario.municipio || "",
       uf: usuario.uf || "",
       status: usuario.status || "ativo",
       departamento: usuario.departamento || "",
       telefone: usuario.telefone || "",
     });
+    setEditingUser(usuario);
     setShowUserModal(true);
   };
 
+  // ✅ CORREÇÃO 2: Função handleSalvarUsuario
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
 
@@ -179,7 +158,8 @@ const Administracao = () => {
       console.log("💾 Salvando usuário:", formData);
 
       if (editingUser) {
-        await updateUser(
+        // ✅ USAR userService.updateUser
+        await userService.updateUser(
           editingUser.id,
           {
             nome: formData.nome,
@@ -200,7 +180,8 @@ const Administracao = () => {
           mensagem: "Usuário atualizado com sucesso!",
         });
       } else {
-        const resultado = await createUser({
+        // ✅ USAR userService.createUser
+        const resultado = await userService.createUser({
           email: formData.email,
           nome: formData.nome,
           role: formData.role === "admin" ? "admin" : "operador",
@@ -235,15 +216,34 @@ const Administracao = () => {
     }
   };
 
-  // 🎯 FUNÇÃO: Mostrar toast (MOVIDA PARA ANTES DE handleDelete)
-  const showToast = useCallback((toastData) => {
-    setToast({ ...toastData, show: true });
-    setTimeout(() => {
-      setToast({ show: false });
-    }, toastData.duracao || 5000);
-  }, []);
+  const handleToggleStatus = async (usuario) => {
+    try {
+      const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
+      
+      await userService.updateUser(
+        usuario.id,
+        { status: novoStatus },
+        usuario.email,
+      );
 
-  // 🗑️ FUNÇÃO: Excluir usuário
+      showToast({
+        tipo: "success",
+        titulo: "Status Atualizado",
+        mensagem: `Usuário ${novoStatus === "ativo" ? "ativado" : "desativado"} com sucesso!`,
+      });
+
+      await carregarUsuarios();
+    } catch (error) {
+      console.error("❌ Erro ao alterar status:", error);
+      showToast({
+        tipo: "error",
+        titulo: "Erro",
+        mensagem: "Erro ao alterar status do usuário",
+      });
+    }
+  };
+
+  // ✅ CORREÇÃO 3: Função handleDelete
   const handleDelete = async (usuario) => {
     console.log("🗑️ === EXCLUSÃO VIA CLOUD RUN ===");
     console.log("🗑️ Dados do usuário:", usuario);
@@ -310,7 +310,8 @@ const Administracao = () => {
           setLoading(true);
           console.log("🔥 Executando exclusão via Cloud Run...");
 
-          const resultado = await deleteUserById(
+          // ✅ USAR userService.deleteUserById
+          const resultado = await userService.deleteUserById(
             usuario.id,
             usuario.uid || usuario.id,
           );
@@ -365,259 +366,333 @@ const Administracao = () => {
     });
   };
 
-  // 🔄 FUNÇÃO: Toggle status do usuário (AUDITSERVICE CORRETO)
-  const handleToggleStatus = async (usuario) => {
-    const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
-
-    console.log(
-      `🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`,
-    );
-
-    try {
-      // ADICIONAR: Verificar se o documento existe antes de atualizar
-      const userRef = doc(db, "usuarios", usuario.id);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) {
-        throw new Error("Usuário não encontrado no banco de dados");
-      }
-
-      // ✅ SOLUÇÃO DIRETA: updateDoc apenas o campo status
-      await updateDoc(userRef, {
-        status: novoStatus,
-        dataAtualizacao: serverTimestamp(),
-      });
-
-      // ✅ CORREÇÃO: Log de auditoria com parâmetros CORRETOS (objeto único)
-      try {
-        await auditService.logAction({
-          action: "UPDATE_USER_STATUS",
-          resourceType: "usuarios",
-          resourceId: usuario.id,
-          dataBefore: { status: usuario.status },
-          dataAfter: { status: novoStatus },
-          user: {
-            uid: currentUser?.uid || "unknown",
-            email: currentUser?.email || "system",
-            tipo: currentUser?.tipo || "admin",
-            municipio: currentUser?.municipio || null,
-            uf: currentUser?.uf || null,
-          },
-          metadata: {
-            origem: "interface_administracao",
-            ip: "unknown",
-          },
-          relatedResources: {
-            targetUserEmail: usuario.email,
-            targetUserNome: usuario.nome,
-          },
-        });
-        console.log("📝 Audit log registrado com sucesso");
-      } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
-        // Não falha a operação por causa do log
-      }
-
-      showToast({
-        tipo: "success",
-        titulo: "Sucesso",
-        mensagem: `Usuário ${novoStatus === "ativo" ? "ativado" : "inativado"} com sucesso!`,
-      });
-
-      // Recarregar lista
-      await carregarUsuarios();
-    } catch (error) {
-      console.error("❌ Erro ao alterar status:", error);
-      showToast({
-        tipo: "error",
-        titulo: "Erro",
-        mensagem: error.message || "Erro ao alterar status do usuário",
-      });
-    }
-  };
-
-
-
-  // 🎯 FUNÇÃO: Filtrar usuários
   const getFilteredUsers = () => {
-    return usuarios.filter(
-      (user) =>
-        user.nome.toLowerCase().includes(userFilter.toLowerCase()) ||
-        user.email.toLowerCase().includes(userFilter.toLowerCase()),
+    return usuarios.filter((usuario) =>
+      usuario.nome?.toLowerCase().includes(userFilter.toLowerCase()) ||
+      usuario.email?.toLowerCase().includes(userFilter.toLowerCase())
     );
   };
 
-  // 🎯 FUNÇÃO: Filtrar logs
   const getFilteredLogs = () => {
     return logs.filter((log) => {
-      let matches = true;
-
-      if (logFilters.usuario) {
-        matches =
-          matches &&
-          (log.userEmail || "")
-            .toLowerCase()
-            .includes(logFilters.usuario.toLowerCase());
+      const matchUsuario = !logFilters.usuario || 
+        log.userEmail?.toLowerCase().includes(logFilters.usuario.toLowerCase());
+      const matchAcao = !logFilters.acao || 
+        log.action?.toLowerCase().includes(logFilters.acao.toLowerCase());
+      
+      let matchDataInicio = true;
+      let matchDataFim = true;
+      
+      if (logFilters.dataInicio || logFilters.dataFim) {
+        const logDate = new Date(log.timestamp?.seconds * 1000 || log.timestamp);
+        if (logFilters.dataInicio) {
+          matchDataInicio = logDate >= new Date(logFilters.dataInicio);
+        }
+        if (logFilters.dataFim) {
+          matchDataFim = logDate <= new Date(logFilters.dataFim + "T23:59:59");
+        }
       }
-
-      if (logFilters.acao) {
-        matches =
-          matches &&
-          (log.action || "")
-            .toLowerCase()
-            .includes(logFilters.acao.toLowerCase());
-      }
-
-      if (logFilters.dataInicio) {
-        const inicio = new Date(logFilters.dataInicio);
-        const logDate =
-          log.timestamp instanceof Date
-            ? log.timestamp
-            : new Date(log.timestamp?.seconds * 1000 || log.timestamp);
-        matches = matches && logDate >= inicio;
-      }
-
-      if (logFilters.dataFim) {
-        const fim = new Date(logFilters.dataFim);
-        fim.setHours(23, 59, 59, 999);
-        const logDate =
-          log.timestamp instanceof Date
-            ? log.timestamp
-            : new Date(log.timestamp?.seconds * 1000 || log.timestamp);
-        matches = matches && logDate <= fim;
-      }
-
-      return matches;
+      
+      return matchUsuario && matchAcao && matchDataInicio && matchDataFim;
     });
   };
 
-  // 🎯 USE EFFECT: Carregamento inicial
-  useEffect(() => {
-    const loadData = async () => {
-      console.log("🚀 Iniciando carregamento de dados...");
-      try {
-        await carregarUsuarios();
-        await carregarLogs();
-      } catch (error) {
-        console.error("❌ Erro no carregamento inicial:", error);
-        showToast({
-          tipo: "error",
-          titulo: "Erro",
-          mensagem: "Erro ao carregar dados iniciais",
-        });
-      }
-    };
-
-    loadData();
-  }, []);
-
-  // 🎯 RENDER PRINCIPAL - LIMPO E ORGANIZADO
   return (
-    <div style={styles.container}>
-      {/* MODAIS E TOASTS */}
+    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+      <h1>🛡️ Administração do Sistema</h1>
+
+      {/* SEÇÃO TEMPORÁRIA - Substituir por básica até criar componentes */}
+      <div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
+        <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={handleNovoUsuario}
+          disabled={loading}
+        >
+          ➕ Novo Usuário
+        </button>
+        
+        <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#6c757d",
+            color: "white", 
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={carregarLogs}
+          disabled={loading}
+        >
+          🔄 Atualizar Logs
+        </button>
+      </div>
+
+      {/* TABS SIMPLIFICADAS */}
+      <div style={{ borderBottom: "1px solid #ddd", marginBottom: "20px" }}>
+        <button
+          style={{
+            padding: "10px 20px",
+            border: "none",
+            borderBottom: activeTab === "users" ? "2px solid #007bff" : "none",
+            backgroundColor: activeTab === "users" ? "#f8f9fa" : "transparent",
+            cursor: "pointer",
+          }}
+          onClick={() => setActiveTab("users")}
+        >
+          👥 Usuários ({usuarios.length})
+        </button>
+        <button
+          style={{
+            padding: "10px 20px",
+            border: "none",
+            borderBottom: activeTab === "logs" ? "2px solid #007bff" : "none",
+            backgroundColor: activeTab === "logs" ? "#f8f9fa" : "transparent",
+            cursor: "pointer",
+          }}
+          onClick={() => setActiveTab("logs")}
+        >
+          📋 Logs ({logs.length})
+        </button>
+      </div>
+
+      {/* CONTEÚDO BÁSICO - Substituir componentes inexistentes */}
+      {activeTab === "users" ? (
+        <div>
+          {/* FILTRO BÁSICO */}
+          <div style={{ marginBottom: "20px" }}>
+            <input
+              type="text"
+              placeholder="Filtrar usuários..."
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              style={{
+                padding: "8px 12px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                width: "300px",
+              }}
+            />
+          </div>
+
+          {/* TABELA BÁSICA DE USUÁRIOS */}
+          {loading ? (
+            <div>Carregando usuários...</div>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f8f9fa" }}>
+                  <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+                    Nome
+                  </th>
+                  <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+                    Email
+                  </th>
+                  <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+                    Tipo
+                  </th>
+                  <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+                    Status
+                  </th>
+                  <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {getFilteredUsers().map((usuario) => (
+                  <tr key={usuario.id}>
+                    <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                      {usuario.nome}
+                    </td>
+                    <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                      {usuario.email}
+                    </td>
+                    <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                      {(usuario.tipo || usuario.role) === "admin" ? "👑 Admin" : "👤 Operador"}
+                    </td>
+                    <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                      <span
+                        style={{
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          fontSize: "12px",
+                          backgroundColor: usuario.status === "ativo" ? "#d4edda" : "#f8d7da",
+                          color: usuario.status === "ativo" ? "#155724" : "#721c24",
+                        }}
+                      >
+                        {usuario.status === "ativo" ? "✅ Ativo" : "⏸️ Inativo"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
+                      <button
+                        style={{
+                          padding: "4px 8px",
+                          margin: "0 2px",
+                          backgroundColor: "#28a745",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                        }}
+                        onClick={() => handleEditarUsuario(usuario)}
+                      >
+                        ✏️ Editar
+                      </button>
+                      <button
+                        style={{
+                          padding: "4px 8px",
+                          margin: "0 2px",
+                          backgroundColor: usuario.status === "ativo" ? "#ffc107" : "#007bff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                        }}
+                        onClick={() => handleToggleStatus(usuario)}
+                      >
+                        {usuario.status === "ativo" ? "⏸️ Inativar" : "▶️ Ativar"}
+                      </button>
+                      {usuario.status !== "ativo" && (
+                        <button
+                          style={{
+                            padding: "4px 8px",
+                            margin: "0 2px",
+                            backgroundColor: "#dc3545",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "3px",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                          }}
+                          onClick={() => handleDelete(usuario)}
+                        >
+                          🗑️ Excluir
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      ) : (
+        <div>
+          {/* SEÇÃO DE LOGS BÁSICA */}
+          <div style={{ marginBottom: "20px" }}>
+            <h3>📋 Logs de Auditoria</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+              <input
+                type="text"
+                placeholder="Filtrar por usuário..."
+                value={logFilters.usuario}
+                onChange={(e) => setLogFilters({...logFilters, usuario: e.target.value})}
+                style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+              />
+              <input
+                type="text"
+                placeholder="Filtrar por ação..."
+                value={logFilters.acao}
+                onChange={(e) => setLogFilters({...logFilters, acao: e.target.value})}
+                style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+              />
+              <input
+                type="date"
+                placeholder="Data início"
+                value={logFilters.dataInicio}
+                onChange={(e) => setLogFilters({...logFilters, dataInicio: e.target.value})}
+                style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+              />
+              <input
+                type="date"
+                placeholder="Data fim"
+                value={logFilters.dataFim}
+                onChange={(e) => setLogFilters({...logFilters, dataFim: e.target.value})}
+                style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+              />
+            </div>
+          </div>
+
+          {loading ? (
+            <div>Carregando logs...</div>
+          ) : (
+            <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+              {getFilteredLogs().map((log, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "12px",
+                    border: "1px solid #ddd",
+                    borderRadius: "4px",
+                    marginBottom: "8px",
+                    backgroundColor: "#f8f9fa",
+                  }}
+                >
+                  <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+                    {log.action} - {log.userEmail}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#666" }}>
+                    {new Date(log.timestamp?.seconds * 1000 || log.timestamp).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ✅ CORREÇÃO 4: Seção de renderização do modal */}
+      {showUserModal && (
+        <UserForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleSalvarUsuario}
+          onCancel={() => {
+            setShowUserModal(false);
+            setEditingUser(null);
+          }}
+          editingUser={editingUser}
+          saving={saving}
+          usuario={currentUser} // ✅ ADICIONAR: Prop usuario necessária
+        />
+      )}
+
+      {/* MODAL DE CONFIRMAÇÃO */}
       {confirmationModal.isOpen && (
         <ConfirmationModal
-          isVisible={confirmationModal.isOpen}
+          isOpen={confirmationModal.isOpen}
           title={confirmationModal.title}
           message={confirmationModal.message}
           confirmText={confirmationModal.confirmText}
           cancelText={confirmationModal.cancelText}
+          type={confirmationModal.type}
           onConfirm={confirmationModal.onConfirm}
           onCancel={confirmationModal.onCancel}
-          type={confirmationModal.type}
         />
       )}
 
-      {toast.show && (
+      {/* TOAST */}
+      {toast.isVisible && (
         <Toast
           tipo={toast.tipo}
           titulo={toast.titulo}
           mensagem={toast.mensagem}
-          onClose={() => setToast({ show: false })}
+          isVisible={toast.isVisible}
+          onClose={() => setToast({ isVisible: false })}
           duracao={toast.duracao}
-        />
-      )}
-
-      {showUserModal && (
-        <UserModal
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={handleSalvarUsuario}
-          onCancel={() => setShowUserModal(false)}
-          editingUser={editingUser}
-          saving={saving}
-        />
-      )}
-
-      {/* CABEÇALHO */}
-      <AdminHeader
-        activeTab={activeTab}
-        onNovoUsuario={handleNovoUsuario}
-        onAtualizarLogs={carregarLogs}
-        loading={loading || saving}
-      />
-
-      {/* NAVEGAÇÃO POR TABS */}
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ borderBottom: "1px solid #ddd" }}>
-          <button
-            style={{
-              padding: "10px 20px",
-              border: "none",
-              borderBottom:
-                activeTab === "users" ? "2px solid #007bff" : "none",
-              backgroundColor:
-                activeTab === "users" ? "#f8f9fa" : "transparent",
-              cursor: "pointer",
-            }}
-            onClick={() => setActiveTab("users")}
-          >
-            👥 Usuários ({usuarios.length})
-          </button>
-          <button
-            style={{
-              padding: "10px 20px",
-              border: "none",
-              borderBottom: activeTab === "logs" ? "2px solid #007bff" : "none",
-              backgroundColor: activeTab === "logs" ? "#f8f9fa" : "transparent",
-              cursor: "pointer",
-            }}
-            onClick={() => setActiveTab("logs")}
-          >
-            📋 Logs ({logs.length})
-          </button>
-        </div>
-      </div>
-
-      {/* CONTEÚDO CONDICIONAL */}
-      {activeTab === "users" ? (
-        <UsersSection
-          users={getFilteredUsers()}
-          userFilter={userFilter}
-          setUserFilter={setUserFilter}
-          onEdit={handleEditarUsuario}
-          onDelete={handleDelete}
-          onToggleStatus={handleToggleStatus}
-          loading={loading}
-        />
-      ) : (
-        <LogsSection
-          logs={getFilteredLogs()}
-          logFilters={logFilters}
-          setLogFilters={setLogFilters}
-          loading={loading}
         />
       )}
     </div>
   );
-};
-
-// 🎨 ESTILOS BÁSICOS (movidos para arquivo separado depois)
-const styles = {
-  container: {
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-  },
 };
 
 export default Administracao;
