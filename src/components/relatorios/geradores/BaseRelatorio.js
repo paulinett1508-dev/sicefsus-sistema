@@ -67,3 +67,6 @@ export class BaseRelatorio {
     console.log(`Relatório ${nomeArquivo} gerado com sucesso!`);
   }
 }
+
+export default BaseRelatorio;
+export { BaseRelatorio };
