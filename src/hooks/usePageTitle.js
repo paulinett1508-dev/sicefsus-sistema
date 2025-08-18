@@ -1,4 +1,4 @@
-// src/hooks/usePageTitle.js
+
 import { useEffect } from 'react';
 
 export const usePageTitle = (title) => {
@@ -12,29 +12,3 @@ export const usePageTitle = (title) => {
     };
   }, [title]);
 };
-
-// Como usar nos componentes:
-
-// Em Dashboard.jsx
-import { usePageTitle } from '../hooks/usePageTitle';
-
-export default function Dashboard() {
-  usePageTitle('Dashboard');
-  // resto do componente...
-}
-
-// Em Relatorios.jsx
-import { usePageTitle } from '../hooks/usePageTitle';
-
-export default function Relatorios() {
-  usePageTitle('Relatórios');
-  // resto do componente...
-}
-
-// Em Despesas.jsx
-import { usePageTitle } from '../hooks/usePageTitle';
-
-export default function Despesas() {
-  usePageTitle('Despesas');
-  // resto do componente...
-}
