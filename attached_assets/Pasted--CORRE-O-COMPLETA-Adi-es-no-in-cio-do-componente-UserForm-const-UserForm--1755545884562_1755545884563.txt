@@ -1,0 +1,342 @@
+// 🔧 CORREÇÃO COMPLETA: Adições no início do componente UserForm
+
+const UserForm = ({ ... }) => {
+  const { user: currentUser } = useUser();
+  
+  // ✅ Estados existentes...
+  const [showSecurityPolicy, setShowSecurityPolicy] = React.useState(false);
+  const [errors, setErrors] = React.useState({});
+  
+  // 🆕 NOVO ESTADO: Controlar se houve mudança de tipo durante edição
+  const [tipoAlteradoDuranteEdicao, setTipoAlteradoDuranteEdicao] = React.useState(false);
+  
+  // 🆕 NOVO ESTADO: Forçar re-render do MunicipioSelector
+  const [municipioSelectorKey, setMunicipioSelectorKey] = React.useState(0);
+
+  // ✅ UFS_VALIDAS e UF_NAMES existentes...
+
+  // 🔧 HANDLER ATUALIZADO PARA MUDANÇA DE TIPO
+  const handleTipoChange = (newTipo) => {
+    console.log("🔄 Mudando tipo de usuário para:", newTipo);
+    
+    // 🆕 Detectar se está editando E mudou o tipo
+    const mudouTipoEdicao = editingUser && editingUser.role !== newTipo;
+    
+    if (mudouTipoEdicao) {
+      console.log("🔄 Mudança de tipo detectada durante edição!");
+      setTipoAlteradoDuranteEdicao(true);
+      
+      // 🆕 Forçar re-render do MunicipioSelector
+      setMunicipioSelectorKey(prev => prev + 1);
+    }
+
+    setFormData({
+      ...formData,
+      role: newTipo,
+      // 🔧 Se mudou para admin, limpa localização
+      municipio: newTipo === "admin" ? "" : formData.municipio,
+      uf: newTipo === "admin" ? "" : formData.uf,
+    });
+  };
+
+  // 🆕 FUNÇÃO PARA RENDERIZAR LOCALIZAÇÃO DINAMICAMENTE
+  const renderLocalizacaoSection = () => {
+    // ❌ Se não é operador, não mostra nada
+    if (formData.role !== "user") return null;
+
+    // ✅ Se está criando usuário OU se houve mudança de tipo, mostra campos habilitados
+    const mostrarCamposHabilitados = !editingUser || tipoAlteradoDuranteEdicao;
+
+    return (
+      <fieldset
+        style={{
+          ...styles.fieldset,
+          borderColor: "var(--primary)",
+          backgroundColor: "rgba(52, 152, 219, 0.05)",
+        }}
+      >
+        <legend
+          style={{
+            ...styles.legend,
+            borderColor: "var(--primary)",
+            color: "var(--primary)",
+            fontWeight: "600",
+          }}
+        >
+          <span style={styles.legendIcon}>📍</span>
+          Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
+          <span
+            style={styles.infoIcon}
+            title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
+          >
+            ℹ️
+          </span>
+        </legend>
+
+        {/* 🆕 BANNER INFORMATIVO PARA MUDANÇA DE TIPO */}
+        {tipoAlteradoDuranteEdicao && (
+          <div style={{
+            ...styles.operatorBanner,
+            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            borderColor: "rgba(76, 175, 80, 0.3)",
+          }}>
+            <div style={styles.operatorBannerIcon}>🔄</div>
+            <div style={styles.operatorBannerContent}>
+              <strong>Tipo alterado para Operador:</strong>
+              <br />
+              Defina a localização de acesso para este usuário.
+            </div>
+          </div>
+        )}
+
+        {mostrarCamposHabilitados ? (
+          /* ✅ CAMPOS HABILITADOS - Criação OU Mudança de tipo */
+          <div style={styles.formGroup}>
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>
+                Estado (UF) <span style={styles.required}>*</span>
+                {tipoAlteradoDuranteEdicao && (
+                  <span
+                    style={{...styles.infoIcon, color: "var(--success)"}}
+                    title="Admin pode definir localização após mudança de tipo"
+                  >
+                    🔓
+                  </span>
+                )}
+              </label>
+              <select
+                style={{
+                  ...styles.select,
+                  borderColor: tipoAlteradoDuranteEdicao ? "var(--success)" : "var(--primary)",
+                  backgroundColor: tipoAlteradoDuranteEdicao ? "rgba(39, 174, 96, 0.05)" : "transparent",
+                }}
+                value={formData.uf || ""}
+                onChange={(e) => {
+                  console.log("🔄 UF selecionada:", e.target.value);
+                  setFormData({
+                    ...formData,
+                    uf: e.target.value,
+                    municipio: "" // Limpar município quando UF mudar
+                  });
+                }}
+                disabled={saving}
+                required={formData.role === "user"}
+              >
+                <option value="">Selecione a UF</option>
+                {UFS_VALIDAS.map((uf) => (
+                  <option key={uf} value={uf}>
+                    {uf} - {UF_NAMES[uf]}
+                  </option>
+                ))}
+              </select>
+              {tipoAlteradoDuranteEdicao && (
+                <small style={{...styles.helpText, color: "var(--success)"}}>
+                  ✅ Selecione o estado para o operador
+                </small>
+              )}
+            </div>
+            
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>
+                Município <span style={styles.required}>*</span>
+                {tipoAlteradoDuranteEdicao && (
+                  <span
+                    style={{...styles.infoIcon, color: "var(--success)"}}
+                    title="Admin pode definir município após mudança de tipo"
+                  >
+                    🔓
+                  </span>
+                )}
+              </label>
+              
+              {/* 🆕 MUNICIPIO SELECTOR COM KEY PARA FORÇAR RE-RENDER */}
+              <MunicipioSelector
+                key={`municipio-${municipioSelectorKey}-${formData.uf}`} // ✅ Key dinâmica
+                ufSelecionada={formData.uf || ""}
+                municipioSelecionado={formData.municipio || ""}
+                onUfChange={(uf) => {
+                  console.log("🔄 UF mudou via MunicipioSelector:", uf);
+                  setFormData({
+                    ...formData,
+                    uf: uf,
+                    municipio: ""
+                  });
+                }}
+                onMunicipioChange={(municipio) => {
+                  console.log("🔄 Município selecionado:", municipio);
+                  setFormData({
+                    ...formData,
+                    municipio: municipio
+                  });
+                }}
+                disabled={saving}
+                style={{
+                  borderColor: tipoAlteradoDuranteEdicao ? "var(--success)" : "var(--primary)",
+                  backgroundColor: tipoAlteradoDuranteEdicao ? "rgba(39, 174, 96, 0.05)" : "transparent",
+                }}
+              />
+              
+              {tipoAlteradoDuranteEdicao && (
+                <small style={{...styles.helpText, color: "var(--success)"}}>
+                  ✅ Selecione o município para o operador
+                </small>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
+          <div style={styles.formGroup}>
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>
+                Estado (UF) <span style={styles.required}>*</span>
+                <span
+                  style={styles.infoIcon}
+                  title="UF não pode ser alterada após criação (apenas mudando tipo)"
+                >
+                  🔒
+                </span>
+              </label>
+              <input
+                type="text"
+                style={{
+                  ...styles.input,
+                  borderColor: "var(--secondary)",
+                  backgroundColor: "var(--theme-surface-secondary)",
+                }}
+                value={formData.uf || "Não definido"}
+                disabled={true}
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.labelRequired}>
+                Município <span style={styles.required}>*</span>
+                <span
+                  style={styles.infoIcon}
+                  title="Município não pode ser alterado após criação (apenas mudando tipo)"
+                >
+                  🔒
+                </span>
+              </label>
+              <input
+                type="text"
+                style={{
+                  ...styles.input,
+                  borderColor: "var(--secondary)",
+                  backgroundColor: "var(--theme-surface-secondary)",
+                }}
+                value={formData.municipio || "Não definido"}
+                disabled={true}
+              />
+            </div>
+            
+            {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
+            <div style={{
+              textAlign: "center",
+              marginTop: "16px",
+              padding: "16px",
+              backgroundColor: "rgba(52, 152, 219, 0.1)",
+              borderRadius: "8px",
+              border: "1px dashed rgba(52, 152, 219, 0.3)"
+            }}>
+              <p style={{
+                margin: "0 0 12px 0",
+                fontSize: "14px",
+                color: "var(--primary)"
+              }}>
+                💡 <strong>Dica:</strong> Para alterar a localização, mude o tipo de usuário acima.
+              </p>
+              <button
+                type="button"
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "var(--primary)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease"
+                }}
+                onClick={() => {
+                  // Forçar mudança para admin e depois permitir volta para operador
+                  handleTipoChange("admin");
+                  setTimeout(() => {
+                    handleTipoChange("user");
+                  }, 100);
+                }}
+                disabled={saving}
+              >
+                🔄 Habilitar Edição de Localização
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
+        {formData.municipio && formData.uf && (
+          <div
+            style={{
+              ...styles.emendaInfo,
+              backgroundColor: "rgba(39, 174, 96, 0.1)",
+              borderColor: "var(--success)",
+              marginTop: "24px",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--success)",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              ✅ <strong>Configuração de Acesso:</strong>
+              {tipoAlteradoDuranteEdicao && <span style={{fontSize: "12px", color: "var(--warning)"}}>(Modificado)</span>}
+            </div>
+            <div
+              style={{
+                marginTop: "8px",
+                padding: "12px",
+                backgroundColor: "rgba(39, 174, 96, 0.05)",
+                borderRadius: "6px",
+                fontFamily: "monospace",
+                fontSize: "0.9em",
+              }}
+            >
+              📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
+              <br />
+              🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
+              <br />
+              👤 <strong>Permissões:</strong> Visualizar, criar despesas
+            </div>
+          </div>
+        )}
+      </fieldset>
+    );
+  };
+
+  // ✅ Resto do código do componente continua igual...
+  // useEffects, handleSubmit, etc.
+
+  return (
+    <div style={styles.overlay} onClick={...}>
+      <div style={styles.modal} onClick={...}>
+        {/* ✅ Header e Política de Segurança existentes... */}
+        
+        <form style={styles.container} onSubmit={handleSubmit}>
+          {/* ✅ Seção Dados Pessoais existente... */}
+          
+          {/* ✅ Seção Configurações de Acesso existente... */}
+          
+          {/* 🔧 SEÇÃO DE LOCALIZAÇÃO RENDERIZADA DINAMICAMENTE */}
+          {renderLocalizacaoSection()}
+          
+          {/* ✅ Preview para Administradores existente... */}
+          
+          {/* ✅ Ações do Formulário existentes... */}
+        </form>
+      </div>
+    </div>
+  );
+};
