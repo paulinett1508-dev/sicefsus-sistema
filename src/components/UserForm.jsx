@@ -1,8 +1,8 @@
-// src/components/UserForm.jsx - VERSÃO COMPLETA COM MELHORIAS
+// src/components/UserForm.jsx - VERSÃO COMPLETA COM CORREÇÕES PARA EDIÇÃO ADMIN→OPERADOR
 import React, { useEffect } from "react";
 import MunicipioSelector from "./MunicipioSelector";
-import { useUser } from '../context/UserContext';
-import { formStyles, addFormInteractivity } from '../utils/formStyles';
+import { useUser } from "../context/UserContext";
+import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
 const UserForm = ({
   formData,
@@ -11,103 +11,41 @@ const UserForm = ({
   onCancel,
   editingUser,
   saving = false,
+  usuario, // ✅ PROP NECESSÁRIA
 }) => {
   const { user: currentUser } = useUser(); // Usuário logado atual
 
   // ✅ Estado para controlar exibição da política de segurança
   const [showSecurityPolicy, setShowSecurityPolicy] = React.useState(false);
-  
+
   // ✅ Estado para controlar erros do formulário
   const [errors, setErrors] = React.useState({});
-  
-  // 🆕 NOVO ESTADO: Controlar se houve mudança de tipo durante edição
-  const [tipoAlteradoDuranteEdicao, setTipoAlteradoDuranteEdicao] = React.useState(false);
-  
-  // 🆕 NOVO ESTADO: Forçar re-render do MunicipioSelector
+
+  // 🆕 ESTADOS PARA CONTROLE DE EDIÇÃO DINÂMICA
+  const [tipoAlteradoDuranteEdicao, setTipoAlteradoDuranteEdicao] =
+    React.useState(false);
   const [municipioSelectorKey, setMunicipioSelectorKey] = React.useState(0);
 
   // ✅ Adicionar interatividade dos formulários
   useEffect(() => {
-    if (typeof addFormInteractivity === 'function') {
+    if (typeof addFormInteractivity === "function") {
       addFormInteractivity();
     }
   }, []);
 
-  // ✅ LISTA DE UFS CONFORME DOCUMENTAÇÃO SICEFSUS
-  const UFS_VALIDAS = [
-    "AC",
-    "AL",
-    "AP",
-    "AM",
-    "BA",
-    "CE",
-    "DF",
-    "ES",
-    "GO",
-    "MA",
-    "MT",
-    "MS",
-    "MG",
-    "PA",
-    "PB",
-    "PR",
-    "PE",
-    "PI",
-    "RJ",
-    "RN",
-    "RS",
-    "RO",
-    "RR",
-    "SC",
-    "SP",
-    "SE",
-    "TO",
-  ];
-
-  // ✅ MAPEAMENTO DE NOMES DE ESTADOS
-  const UF_NAMES = {
-    AC: "Acre",
-    AL: "Alagoas",
-    AP: "Amapá",
-    AM: "Amazonas",
-    BA: "Bahia",
-    CE: "Ceará",
-    DF: "Distrito Federal",
-    ES: "Espírito Santo",
-    GO: "Goiás",
-    MA: "Maranhão",
-    MT: "Mato Grosso",
-    MS: "Mato Grosso do Sul",
-    MG: "Minas Gerais",
-    PA: "Pará",
-    PB: "Paraíba",
-    PR: "Paraná",
-    PE: "Pernambuco",
-    PI: "Piauí",
-    RJ: "Rio de Janeiro",
-    RN: "Rio Grande do Norte",
-    RS: "Rio Grande do Sul",
-    RO: "Rondônia",
-    RR: "Roraima",
-    SC: "Santa Catarina",
-    SP: "São Paulo",
-    SE: "Sergipe",
-    TO: "Tocantins",
-  };
-
   // 🔧 HANDLER ATUALIZADO PARA MUDANÇA DE TIPO
   const handleTipoChange = (newTipo) => {
     console.log("🔄 Mudando tipo de usuário para:", newTipo);
-    
+
     // 🆕 Detectar se está editando E mudou o tipo
     const mudouTipoEdicao = editingUser && editingUser.role !== newTipo;
-    
+
     if (mudouTipoEdicao) {
       console.log("🔄 Mudança de tipo detectada durante edição!");
       setTipoAlteradoDuranteEdicao(true);
-      
+
       // 🆕 Forçar re-render do MunicipioSelector
-      setMunicipioSelectorKey(prev => prev + 1);
+      setMunicipioSelectorKey((prev) => prev + 1);
     }
 
     setFormData({
@@ -160,7 +98,6 @@ const UserForm = ({
         // ✅ FALLBACK: caso não tenha adminPreserved (edição não afeta)
         console.log("✅ Usuário criado com sucesso");
       }
-
     } catch (error) {
       console.error("❌ Erro no envio do formulário:", error);
       throw error;
@@ -176,7 +113,8 @@ const UserForm = ({
         senha: "", // Nunca pré-preencher senha
         municipio: editingUser.municipio || "",
         uf: editingUser.uf || "",
-        role: editingUser.role || "user",
+        role:
+          editingUser.role || editingUser.tipo === "admin" ? "admin" : "user",
         status: editingUser.status || "ativo",
         telefone: editingUser.telefone || "",
         departamento: editingUser.departamento || "",
@@ -195,17 +133,25 @@ const UserForm = ({
       });
     }
     setErrors({});
+    // Reset estados de edição
+    setTipoAlteradoDuranteEdicao(false);
+    setMunicipioSelectorKey(0);
   }, [editingUser, setFormData]);
 
   // ✅ useEffect para pré-preencher município/UF para operadores ao criar novo usuário
   useEffect(() => {
     // Pré-preencher município/UF para operadores
-    if (!editingUser && currentUser?.tipo === 'operador' && currentUser?.municipio && currentUser?.uf) {
-      setFormData(prev => ({
+    if (
+      !editingUser &&
+      currentUser?.tipo === "operador" &&
+      currentUser?.municipio &&
+      currentUser?.uf
+    ) {
+      setFormData((prev) => ({
         ...prev,
         municipio: currentUser.municipio,
         uf: currentUser.uf,
-        role: 'user' // Operadores só podem criar outros operadores
+        role: "user", // Operadores só podem criar outros operadores
       }));
     }
   }, [editingUser, currentUser, setFormData]);
@@ -246,11 +192,13 @@ const UserForm = ({
 
         {/* 🆕 BANNER INFORMATIVO PARA MUDANÇA DE TIPO */}
         {tipoAlteradoDuranteEdicao && (
-          <div style={{
-            ...styles.operatorBanner,
-            backgroundColor: "rgba(76, 175, 80, 0.1)",
-            borderColor: "rgba(76, 175, 80, 0.3)",
-          }}>
+          <div
+            style={{
+              ...styles.operatorBanner,
+              backgroundColor: "rgba(76, 175, 80, 0.1)",
+              borderColor: "rgba(76, 175, 80, 0.3)",
+            }}
+          >
             <div style={styles.operatorBannerIcon}>🔄</div>
             <div style={styles.operatorBannerContent}>
               <strong>Tipo alterado para Operador:</strong>
@@ -260,162 +208,125 @@ const UserForm = ({
           </div>
         )}
 
-        {/* 🆕 Banner informativo para operadores */}
-        {currentUser?.tipo === 'operador' && !editingUser && (
+        {/* 🆕 Banner informativo para operadores criando usuário */}
+        {currentUser?.tipo === "operador" && !editingUser && (
           <div style={styles.operatorBanner}>
             <div style={styles.operatorBannerIcon}>📍</div>
             <div style={styles.operatorBannerContent}>
               <strong>Pré-preenchimento automático:</strong>
               <br />
-              Como operador, você só pode criar usuários para o seu município ({currentUser.municipio}/{currentUser.uf})
+              Como operador, você só pode criar usuários para o seu município (
+              {currentUser.municipio}/{currentUser.uf})
             </div>
           </div>
         )}
 
-        <div style={styles.formGroup}>
-          {mostrarCamposHabilitados ? (
-            /* ✅ CAMPOS HABILITADOS - Criação OU Mudança de tipo */
-            <>
-              <div style={styles.formGroup}>
-                <label style={styles.labelRequired}>
-                  Estado (UF) <span style={styles.required}>*</span>
-                  {tipoAlteradoDuranteEdicao && (
-                    <span
-                      style={{...styles.infoIcon, color: "var(--success)"}}
-                      title="Admin pode definir localização após mudança de tipo"
-                    >
-                      🔓
-                    </span>
-                  )}
-                </label>
-                
-                {/* 🆕 MUNICIPIO SELECTOR COM KEY PARA FORÇAR RE-RENDER */}
-                <MunicipioSelector
-                  key={`municipio-${municipioSelectorKey}-${formData.uf}`} // ✅ Key dinâmica
-                  ufSelecionada={formData.uf || ""}
-                  municipioSelecionado={formData.municipio || ""}
-                  onUfChange={(uf) => {
-                    // 🆕 Bloquear mudança se operador
-                    if (currentUser?.tipo === 'operador') return;
+        {mostrarCamposHabilitados ? (
+          /* ✅ CAMPOS HABILITADOS - Criação OU Mudança de tipo */
+          <div style={styles.formGroup}>
+            {/* 🆕 MUNICIPIO SELECTOR COM KEY PARA FORÇAR RE-RENDER */}
+            <MunicipioSelector
+              key={`municipio-${municipioSelectorKey}-${formData.uf}`} // ✅ Key dinâmica
+              ufSelecionada={formData.uf || ""}
+              municipioSelecionado={formData.municipio || ""}
+              onUfChange={(uf) => {
+                console.log("🔄 UF mudou via MunicipioSelector:", uf);
+                setFormData({
+                  ...formData,
+                  uf: uf,
+                  municipio: "",
+                });
+              }}
+              onMunicipioChange={(municipio) => {
+                console.log("🔄 Município selecionado:", municipio);
+                setFormData({
+                  ...formData,
+                  municipio: municipio,
+                });
+              }}
+              disabled={
+                saving ||
+                (currentUser?.tipo === "operador" && !tipoAlteradoDuranteEdicao)
+              }
+              style={{
+                borderColor: tipoAlteradoDuranteEdicao
+                  ? "var(--success)"
+                  : "var(--primary)",
+                backgroundColor: tipoAlteradoDuranteEdicao
+                  ? "rgba(39, 174, 96, 0.05)"
+                  : "transparent",
+              }}
+            />
 
-                    setFormData({
-                      ...formData,
-                      uf: uf,
-                      municipio: "" // Limpar município quando UF mudar
-                    });
-                  }}
-                  onMunicipioChange={(municipio) => {
-                    // 🆕 Bloquear mudança se operador
-                    if (currentUser?.tipo === 'operador') return;
+            {tipoAlteradoDuranteEdicao && (
+              <small style={{ ...styles.helpText, color: "var(--success)" }}>
+                ✅ Selecione o estado e município para o operador
+              </small>
+            )}
+          </div>
+        ) : (
+          /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
+          <div style={styles.formGroup}>
+            {/* Usar MunicipioSelector desabilitado para manter consistência */}
+            <MunicipioSelector
+              ufSelecionada={formData.uf || ""}
+              municipioSelecionado={formData.municipio || ""}
+              onUfChange={() => {}} // Não faz nada quando desabilitado
+              onMunicipioChange={() => {}} // Não faz nada quando desabilitado
+              disabled={true} // Sempre desabilitado neste caso
+              style={{
+                borderColor: "var(--secondary)",
+                backgroundColor: "var(--theme-surface-secondary)",
+              }}
+            />
 
-                    setFormData({
-                      ...formData,
-                      municipio: municipio
-                    });
-                  }}
-                  disabled={saving || currentUser?.tipo === 'operador'} // 🆕 Desabilitar para operadores
-                  style={{
-                    borderColor: tipoAlteradoDuranteEdicao ? "var(--success)" : "var(--primary)",
-                    backgroundColor: tipoAlteradoDuranteEdicao ? "rgba(39, 174, 96, 0.05)" : "transparent",
-                  }}
-                />
-                
-                {tipoAlteradoDuranteEdicao && (
-                  <small style={{...styles.helpText, color: "var(--success)"}}>
-                    ✅ Selecione o estado e município para o operador
-                  </small>
-                )}
-              </div>
-            </>
-          ) : (
-            /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
-            <>
-              <div style={styles.formGroup}>
-                <label style={styles.labelRequired}>
-                  Estado (UF) <span style={styles.required}>*</span>
-                  <span
-                    style={styles.infoIcon}
-                    title="UF não pode ser alterada após criação (apenas mudando tipo)"
-                  >
-                    🔒
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  style={{
-                    ...styles.input,
-                    borderColor: "var(--secondary)",
-                    backgroundColor: "var(--theme-surface-secondary)",
-                  }}
-                  value={formData.uf || "Não definido"}
-                  disabled={true}
-                />
-              </div>
-              <div style={styles.formGroup}>
-                <label style={styles.labelRequired}>
-                  Município <span style={styles.required}>*</span>
-                  <span
-                    style={styles.infoIcon}
-                    title="Município não pode ser alterado após criação (apenas mudando tipo)"
-                  >
-                    🔒
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  style={{
-                    ...styles.input,
-                    borderColor: "var(--secondary)",
-                    backgroundColor: "var(--theme-surface-secondary)",
-                  }}
-                  value={formData.municipio || "Não definido"}
-                  disabled={true}
-                />
-              </div>
-              
-              {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
-              <div style={{
+            {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
+            <div
+              style={{
                 textAlign: "center",
                 marginTop: "16px",
                 padding: "16px",
                 backgroundColor: "rgba(52, 152, 219, 0.1)",
                 borderRadius: "8px",
-                border: "1px dashed rgba(52, 152, 219, 0.3)"
-              }}>
-                <p style={{
+                border: "1px dashed rgba(52, 152, 219, 0.3)",
+              }}
+            >
+              <p
+                style={{
                   margin: "0 0 12px 0",
                   fontSize: "14px",
-                  color: "var(--primary)"
-                }}>
-                  💡 <strong>Dica:</strong> Para alterar a localização, use o botão abaixo.
-                </p>
-                <button
-                  type="button"
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: "var(--primary)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                  onClick={() => {
-                    // Forçar mudança para admin e depois permitir volta para operador
-                    handleTipoChange("admin");
-                    setTimeout(() => {
-                      handleTipoChange("user");
-                    }, 100);
-                  }}
-                  disabled={saving}
-                >
-                  🔄 Habilitar Edição de Localização
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+                  color: "var(--primary)",
+                }}
+              >
+                💡 <strong>Dica:</strong> Para alterar a localização, mude o
+                tipo de usuário acima.
+              </p>
+              <button
+                type="button"
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "var(--primary)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onClick={() => {
+                  // Forçar mudança para admin e depois permitir volta para operador
+                  handleTipoChange("admin");
+                  setTimeout(() => {
+                    handleTipoChange("user");
+                  }, 100);
+                }}
+                disabled={saving}
+              >
+                🔄 Habilitar Edição de Localização
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
         {formData.municipio && formData.uf && (
@@ -437,7 +348,11 @@ const UserForm = ({
               }}
             >
               ✅ <strong>Configuração de Acesso:</strong>
-              {tipoAlteradoDuranteEdicao && <span style={{fontSize: "12px", color: "var(--warning)"}}>(Modificado)</span>}
+              {tipoAlteradoDuranteEdicao && (
+                <span style={{ fontSize: "12px", color: "var(--warning)" }}>
+                  (Modificado)
+                </span>
+              )}
             </div>
             <div
               style={{
@@ -449,24 +364,18 @@ const UserForm = ({
                 fontSize: "0.9em",
               }}
             >
-              📍 <strong>Localização:</strong> {formData.municipio} / {formData.uf}
+              📍 <strong>Localização:</strong> {formData.municipio} /{" "}
+              {formData.uf}
               <br />
               🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
               <br />
               👤 <strong>Permissões:</strong> Visualizar, criar despesas
-              {currentUser?.tipo === 'operador' && (
-                <>
-                  <br />
-                  🔒 <strong>Restrito:</strong> Criado por operador de {currentUser.municipio}
-                </>
-              )}
             </div>
           </div>
         )}
       </fieldset>
     );
   };
-
 
   return (
     <div
@@ -499,7 +408,7 @@ const UserForm = ({
           </button>
         </div>
 
-        {/* ✅ SEÇÃO DE POLÍTICA DE SEGURANÇA - COLAPSÁVEL NO TOPO */}
+        {/* ✅ SEÇÃO DE POLÍTICA DE SEGURANÇA - COLAPSÍVEL NO TOPO */}
         {!editingUser && (
           <div style={styles.securityPolicyWrapper}>
             <button
@@ -711,7 +620,12 @@ const UserForm = ({
                   style={styles.select}
                   value={formData.role || "user"}
                   onChange={(e) => handleTipoChange(e.target.value)}
-                  disabled={saving || (editingUser && currentUser?.tipo === 'operador' && editingUser.id !== currentUser.id)} // 🆕 Impedir que operadores editem outros admins, ou que usuários editem seu próprio tipo se não for admin
+                  disabled={
+                    saving ||
+                    (editingUser &&
+                      currentUser?.tipo === "operador" &&
+                      editingUser.id !== currentUser.id)
+                  }
                   required
                 >
                   <option value="user">👤 Operador</option>
@@ -878,33 +792,31 @@ const styles = {
   },
 
   modal: {
-    backgroundColor: "var(--theme-surface)",
+    backgroundColor: "white",
     borderRadius: "12px",
-    boxShadow: "var(--shadow-lg)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
     maxWidth: "900px",
     width: "100%",
     maxHeight: "90vh",
     overflowY: "auto",
-    border: "2px solid var(--primary)",
-    color: "var(--theme-text)",
+    border: "2px solid #3498db",
+    color: "#2c3e50",
     animation: "userFormSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
     transition: "all 0.3s ease",
   },
 
   header: {
-    ...formStyles.header,
+    padding: "20px",
     borderRadius: "12px 12px 0 0",
-    borderBottom: "2px solid var(--theme-border)",
+    borderBottom: "2px solid #ecf0f1",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background:
-      "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+    background: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
     color: "white",
   },
 
   headerTitle: {
-    ...formStyles.headerTitle,
     margin: 0,
     fontSize: "1.4em",
     fontWeight: "600",
@@ -927,45 +839,87 @@ const styles = {
     backdropFilter: "blur(10px)",
   },
 
-  container: formStyles.container,
-
-  fieldset: {
-    ...formStyles.fieldset,
-    marginBottom: "24px", // Espaçamento entre fieldsets
+  container: {
+    padding: "24px",
   },
 
-  legend: formStyles.legend,
-  legendIcon: formStyles.legendIcon,
+  fieldset: {
+    border: "2px solid #154360",
+    borderRadius: "10px",
+    padding: "20px",
+    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    marginBottom: "24px",
+  },
+
+  legend: {
+    background: "white",
+    padding: "5px 15px",
+    borderRadius: "20px",
+    border: "2px solid #154360",
+    color: "#154360",
+    fontWeight: "600",
+    fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+
+  legendIcon: {
+    fontSize: "16px",
+  },
 
   formGrid: {
-    ...formStyles.formGrid,
-    gap: "24px", // Espaçamento entre colunas
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: "24px",
   },
 
   formGroup: {
-    ...formStyles.formGroup,
-    marginBottom: "20px", // Espaçamento entre campos
+    marginBottom: "20px",
   },
 
   label: {
-    ...formStyles.label,
-    marginBottom: "8px", // Espaçamento entre label e input
+    display: "block",
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: "8px",
+    fontSize: "14px",
   },
 
   labelRequired: {
-    ...formStyles.labelRequired,
-    marginBottom: "8px", // Espaçamento entre label e input
+    display: "block",
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: "8px",
+    fontSize: "14px",
   },
 
-  required: formStyles.required,
+  required: {
+    color: "#e74c3c",
+    marginLeft: "4px",
+  },
 
   input: {
-    ...formStyles.input,
-    marginBottom: "4px", // Pequeno espaço para helpText
+    width: "100%",
+    padding: "12px",
+    border: "2px solid #bdc3c7",
+    borderRadius: "8px",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    backgroundColor: "white",
+    marginBottom: "4px",
+    boxSizing: "border-box",
   },
 
   select: {
-    ...formStyles.select,
+    width: "100%",
+    padding: "12px",
+    border: "2px solid #bdc3c7",
+    borderRadius: "8px",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    backgroundColor: "white",
     appearance: "none",
     WebkitAppearance: "none",
     MozAppearance: "none",
@@ -974,25 +928,60 @@ const styles = {
     backgroundPosition: "right 12px center",
     backgroundSize: "20px",
     paddingRight: "40px",
+    boxSizing: "border-box",
   },
 
   helpText: {
-    ...formStyles.helpText,
-    marginBottom: "8px", // Espaço após helpText
+    fontSize: "12px",
+    color: "#7f8c8d",
+    fontStyle: "italic",
+    marginBottom: "8px",
   },
 
-  emendaInfo: formStyles.emendaInfo,
-  emendaInfoTitle: formStyles.emendaInfoTitle,
-  emendaInfoGrid: formStyles.emendaInfoGrid,
-  emendaInfoRow: formStyles.emendaInfoRow,
-  buttonContainer: formStyles.buttonContainer,
-  cancelButtonStyle: formStyles.cancelButtonStyle,
-  submitButton: formStyles.submitButton,
+  emendaInfo: {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #e9ecef",
+    borderRadius: "8px",
+    padding: "16px",
+  },
+
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+    marginTop: "24px",
+    paddingTop: "20px",
+    borderTop: "1px solid #e9ecef",
+  },
+
+  cancelButtonStyle: {
+    padding: "12px 24px",
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
+
+  submitButton: {
+    padding: "12px 24px",
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+  },
 
   infoIcon: {
     marginLeft: "6px",
     cursor: "help",
-    color: "var(--primary)",
+    color: "#3498db",
     fontSize: "14px",
     fontWeight: "bold",
   },
@@ -1019,7 +1008,6 @@ const styles = {
     lineHeight: "1.4",
   },
 
-
   spinner: {
     width: "16px",
     height: "16px",
@@ -1029,13 +1017,13 @@ const styles = {
     animation: "userFormSpin 1s linear infinite",
   },
 
-  // ✅ NOVOS ESTILOS PARA SEÇÃO COLAPSÁVEL
+  // ✅ NOVOS ESTILOS PARA SEÇÃO COLAPSÍVEL
   securityPolicyWrapper: {
     margin: "0 24px 20px 24px",
     borderRadius: "12px",
     overflow: "hidden",
-    backgroundColor: "var(--theme-surface)",
-    border: "1px solid var(--theme-border)",
+    backgroundColor: "white",
+    border: "1px solid #e9ecef",
   },
 
   securityToggleButton: {
@@ -1051,9 +1039,6 @@ const styles = {
     fontSize: "16px",
     fontWeight: "600",
     color: "#1a237e",
-    "&:hover": {
-      background: "linear-gradient(135deg, #bbdefb 0%, #c5cae9 100%)",
-    },
   },
 
   securityToggleIcon: {
@@ -1078,7 +1063,7 @@ const styles = {
   },
 
   securityPolicyContent: {
-    borderTop: "1px solid var(--theme-border)",
+    borderTop: "1px solid #e9ecef",
     animation: "slideDown 0.3s ease-out",
     overflow: "hidden",
   },
@@ -1104,61 +1089,6 @@ const securityStyles = {
       "radial-gradient(circle, rgba(33, 150, 243, 0.1) 0%, transparent 70%)",
     borderRadius: "50%",
     pointerEvents: "none",
-  },
-
-  header: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-    marginBottom: "32px",
-    position: "relative",
-    zIndex: 1,
-  },
-
-  iconWrapper: {
-    width: "64px",
-    height: "64px",
-    background: "linear-gradient(135deg, #2196f3 0%, #1976d2 100%)",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    animation: "securityPulse 2s infinite",
-  },
-
-  mainIcon: {
-    fontSize: "32px",
-    filter: "brightness(2)",
-  },
-
-  title: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#1a237e",
-    margin: "0",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    letterSpacing: "-0.5px",
-  },
-
-  subtitle: {
-    fontSize: "14px",
-    color: "#607d8b",
-    margin: "4px 0 0 0",
-  },
-
-  badge: {
-    background: "linear-gradient(135deg, #4caf50 0%, #388e3c 100%)",
-    color: "white",
-    fontSize: "12px",
-    padding: "6px 16px",
-    borderRadius: "24px",
-    fontWeight: "600",
-    letterSpacing: "0.5px",
-    display: "inline-block",
-    animation: "badgeGlow 3s ease-in-out infinite",
   },
 
   cardsGrid: {
@@ -1293,28 +1223,6 @@ if (!document.getElementById("userform-animations")) {
       }
     }
 
-    @keyframes securityPulse {
-      0% {
-        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-      }
-      50% {
-        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.5);
-      }
-      100% {
-        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
-      }
-    }
-
-    @keyframes badgeGlow {
-      0%, 100% {
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-      }
-      50% {
-        box-shadow: 0 2px 12px rgba(76, 175, 80, 0.5);
-      }
-    }
-
-    /* Correção para selects */
     select {
       -webkit-appearance: none !important;
       -moz-appearance: none !important;
@@ -1322,27 +1230,21 @@ if (!document.getElementById("userform-animations")) {
     }
 
     select:hover {
-      border-color: var(--primary) !important;
+      border-color: #3498db !important;
     }
 
     select:focus {
-      border-color: var(--primary) !important;
+      border-color: #3498db !important;
       box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
     }
 
-    /* Hover nos cards de segurança */
-    .security-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    }
-
-    /* Hover no botão de toggle */
-    .security-toggle-btn:hover {
-      background: linear-gradient(135deg, #bbdefb 0%, #c5cae9 100%);
+    input:focus {
+      border-color: #3498db !important;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
+      outline: none !important;
     }
   `;
   document.head.appendChild(styleSheet);
 }
 
-// ✅ EXPORT DEFAULT DO COMPONENTE
 export default UserForm;
