@@ -1,0 +1,494 @@
+// 🔧 CORREÇÕES CRÍTICAS para src/components/Administracao.jsx
+
+// ✅ CORREÇÃO 1: Imports corretos (SUBSTITUIR LINHAS 1-29)
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import { auditService } from "../services/auditService";
+
+// 🔧 CORREÇÃO: Import correto do userService
+import userService from "../services/userService"; // ✅ Import default
+
+// 🔧 CORREÇÃO: Remover imports de componentes inexistentes e usar UserForm
+import UserForm from "./UserForm"; // ✅ UserForm existe
+import Toast from "./Toast";
+import ConfirmationModal from "./ConfirmationModal";
+import { UserContext } from "../context/UserContext";
+
+// ✅ CORREÇÃO 2: Função handleSalvarUsuario (SUBSTITUIR LINHAS 158-203)
+const handleSalvarUsuario = async (e) => {
+  e.preventDefault();
+
+  try {
+    setSaving(true);
+    console.log("💾 Salvando usuário:", formData);
+
+    if (editingUser) {
+      // ✅ USAR userService.updateUser
+      await userService.updateUser(
+        editingUser.id,
+        {
+          nome: formData.nome,
+          email: formData.email,
+          role: formData.role === "admin" ? "admin" : "operador",
+          municipio: formData.role === "admin" ? "" : formData.municipio,
+          uf: formData.role === "admin" ? "" : formData.uf,
+          status: formData.status,
+          departamento: formData.departamento,
+          telefone: formData.telefone,
+        },
+        editingUser.email,
+      );
+
+      showToast({
+        tipo: "success",
+        titulo: "Sucesso",
+        mensagem: "Usuário atualizado com sucesso!",
+      });
+    } else {
+      // ✅ USAR userService.createUser
+      const resultado = await userService.createUser({
+        email: formData.email,
+        nome: formData.nome,
+        role: formData.role === "admin" ? "admin" : "operador",
+        municipio: formData.role === "admin" ? "" : formData.municipio,
+        uf: formData.role === "admin" ? "" : formData.uf,
+        status: formData.status,
+        departamento: formData.departamento,
+        telefone: formData.telefone,
+      });
+
+      if (resultado.success) {
+        showToast({
+          tipo: "success",
+          titulo: "Sucesso",
+          mensagem:
+            "Usuário criado com sucesso! Email de configuração enviado.",
+        });
+      }
+    }
+
+    setShowUserModal(false);
+    await carregarUsuarios();
+  } catch (error) {
+    console.error("❌ Erro ao salvar usuário:", error);
+    showToast({
+      tipo: "error",
+      titulo: "Erro",
+      mensagem: error.message || "Erro ao salvar usuário",
+    });
+  } finally {
+    setSaving(false);
+  }
+};
+
+// ✅ CORREÇÃO 3: Função handleDelete (SUBSTITUIR a partir da linha 244)
+const handleDelete = async (usuario) => {
+  console.log("🗑️ === EXCLUSÃO VIA CLOUD RUN ===");
+  console.log("🗑️ Dados do usuário:", usuario);
+
+  // Validações básicas
+  if (!usuario?.id) {
+    showToast({
+      tipo: "error",
+      titulo: "Erro",
+      mensagem: "Dados do usuário incompletos",
+    });
+    return;
+  }
+
+  if (usuario.status === "ativo") {
+    showToast({
+      tipo: "warning",
+      titulo: "Usuário Ativo",
+      mensagem: "Desative o usuário primeiro para poder excluir",
+    });
+    return;
+  }
+
+  // ✅ USAR MODAL DE CONFIRMAÇÃO
+  setConfirmationModal({
+    isOpen: true,
+    title: "🔥 Exclusão Completa via Cloud Run",
+    message: (
+      <div style={{ textAlign: 'left' }}>
+        <p><strong>Usuário:</strong> {usuario.nome}</p>
+        <p><strong>Email:</strong> {usuario.email}</p>
+        <hr style={{ margin: '10px 0', opacity: 0.3 }} />
+        <p style={{ marginBottom: '10px' }}>✅ <strong>Será removido de:</strong></p>
+        <ul style={{ marginLeft: '20px', marginBottom: '10px' }}>
+          <li>Firebase Firestore (dados)</li>
+          <li>Firebase Auth (login)</li>
+        </ul>
+        <p style={{ fontSize: '14px', color: '#666' }}>
+          ⚡ Usando Cloud Run Function com Admin SDK<br />
+          🎯 Email ficará disponível para reutilização
+        </p>
+        <p style={{ 
+          marginTop: '15px', 
+          padding: '10px', 
+          backgroundColor: '#fff3cd', 
+          border: '1px solid #ffeaa7',
+          borderRadius: '5px',
+          color: '#856404',
+          fontWeight: 'bold',
+          textAlign: 'center'
+        }}>
+          ⚠️ Esta ação NÃO pode ser desfeita!
+        </p>
+      </div>
+    ),
+    confirmText: "Sim, Excluir Permanentemente",
+    cancelText: "Cancelar",
+    type: "danger",
+    onConfirm: async () => {
+      setConfirmationModal({ isOpen: false });
+      
+      // Continuar com a exclusão
+      try {
+        setLoading(true);
+        console.log("🔥 Executando exclusão via Cloud Run...");
+
+        // ✅ USAR userService.deleteUserById
+        const resultado = await userService.deleteUserById(
+          usuario.id,
+          usuario.uid || usuario.id,
+        );
+
+        console.log("📊 Resultado:", resultado);
+
+        // ✅ MENSAGEM BASEADA NO RESULTADO
+        let tipo = "success";
+        let titulo = "Exclusão Completa";
+        let mensagem = "Usuário excluído com sucesso!";
+
+        if (resultado.method === "cloud_run") {
+          if (resultado.details.firestore && resultado.details.auth) {
+            mensagem =
+              "🎉 EXCLUSÃO COMPLETA!\n\n✅ Removido do Firestore\n✅ Removido do Firebase Auth\n✅ Email liberado para reutilização\n\n⚡ Processado via Cloud Run";
+          } else if (resultado.details.firestore) {
+            tipo = "warning";
+            titulo = "Exclusão Parcial";
+            mensagem =
+              "⚠️ Usuário removido do Firestore.\nProblema ao remover do Auth.\n\nVerifique os logs da Cloud Function.";
+          }
+        } else if (resultado.method === "firestore_fallback") {
+          tipo = "warning";
+          titulo = "Exclusão Parcial";
+          mensagem =
+            "⚠️ Cloud Run indisponível.\nUsuário removido apenas do Firestore.\n\nEmail permanece no Auth.";
+        }
+
+        showToast({
+          tipo: tipo,
+          titulo: titulo,
+          mensagem: mensagem,
+          duracao: 10000,
+        });
+
+        await carregarUsuarios();
+      } catch (error) {
+        console.error("❌ Erro na exclusão:", error);
+        showToast({
+          tipo: "error",
+          titulo: "Erro na Exclusão",
+          mensagem: `Erro: ${error.message}`,
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    onCancel: () => {
+      console.log("❌ Exclusão cancelada");
+      setConfirmationModal({ isOpen: false });
+    },
+  });
+};
+
+// ✅ CORREÇÃO 4: Seção de renderização do modal (SUBSTITUIR LINHAS 475-485)
+{showUserModal && (
+  <UserForm
+    formData={formData}
+    setFormData={setFormData}
+    onSubmit={handleSalvarUsuario}
+    onCancel={() => {
+      setShowUserModal(false);
+      setEditingUser(null);
+    }}
+    editingUser={editingUser}
+    saving={saving}
+    usuario={currentUser} // ✅ ADICIONAR: Prop usuario necessária
+  />
+)}
+
+// ✅ CORREÇÃO 5: Remover ou comentar componentes inexistentes (LINHAS 495-550)
+// Comentar ou remover as seções que usam componentes inexistentes:
+
+{/* TEMPORARIAMENTE COMENTADO - Componentes não existem
+<AdminHeader
+  activeTab={activeTab}
+  onNovoUsuario={handleNovoUsuario}
+  onAtualizarLogs={carregarLogs}
+  loading={loading || saving}
+/>
+*/}
+
+{/* SEÇÃO TEMPORÁRIA - Substituir por básica até criar componentes */}
+<div style={{ marginBottom: "20px", display: "flex", gap: "10px" }}>
+  <button
+    style={{
+      padding: "10px 20px",
+      backgroundColor: "#007bff",
+      color: "white",
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+    }}
+    onClick={handleNovoUsuario}
+    disabled={loading}
+  >
+    ➕ Novo Usuário
+  </button>
+  
+  <button
+    style={{
+      padding: "10px 20px",
+      backgroundColor: "#6c757d",
+      color: "white", 
+      border: "none",
+      borderRadius: "5px",
+      cursor: "pointer",
+    }}
+    onClick={carregarLogs}
+    disabled={loading}
+  >
+    🔄 Atualizar Logs
+  </button>
+</div>
+
+{/* TABS SIMPLIFICADAS */}
+<div style={{ borderBottom: "1px solid #ddd", marginBottom: "20px" }}>
+  <button
+    style={{
+      padding: "10px 20px",
+      border: "none",
+      borderBottom: activeTab === "users" ? "2px solid #007bff" : "none",
+      backgroundColor: activeTab === "users" ? "#f8f9fa" : "transparent",
+      cursor: "pointer",
+    }}
+    onClick={() => setActiveTab("users")}
+  >
+    👥 Usuários ({usuarios.length})
+  </button>
+  <button
+    style={{
+      padding: "10px 20px",
+      border: "none",
+      borderBottom: activeTab === "logs" ? "2px solid #007bff" : "none",
+      backgroundColor: activeTab === "logs" ? "#f8f9fa" : "transparent",
+      cursor: "pointer",
+    }}
+    onClick={() => setActiveTab("logs")}
+  >
+    📋 Logs ({logs.length})
+  </button>
+</div>
+
+{/* CONTEÚDO BÁSICO - Substituir componentes inexistentes */}
+{activeTab === "users" ? (
+  <div>
+    {/* FILTRO BÁSICO */}
+    <div style={{ marginBottom: "20px" }}>
+      <input
+        type="text"
+        placeholder="Filtrar usuários..."
+        value={userFilter}
+        onChange={(e) => setUserFilter(e.target.value)}
+        style={{
+          padding: "8px 12px",
+          border: "1px solid #ddd",
+          borderRadius: "4px",
+          width: "300px",
+        }}
+      />
+    </div>
+
+    {/* TABELA BÁSICA DE USUÁRIOS */}
+    {loading ? (
+      <div>Carregando usuários...</div>
+    ) : (
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ backgroundColor: "#f8f9fa" }}>
+            <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+              Nome
+            </th>
+            <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+              Email
+            </th>
+            <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+              Tipo
+            </th>
+            <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>
+              Status
+            </th>
+            <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
+              Ações
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {getFilteredUsers().map((usuario) => (
+            <tr key={usuario.id}>
+              <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                {usuario.nome}
+              </td>
+              <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                {usuario.email}
+              </td>
+              <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                {usuario.tipo === "admin" ? "👑 Admin" : "👤 Operador"}
+              </td>
+              <td style={{ padding: "12px", border: "1px solid #ddd" }}>
+                <span
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    backgroundColor: usuario.status === "ativo" ? "#d4edda" : "#f8d7da",
+                    color: usuario.status === "ativo" ? "#155724" : "#721c24",
+                  }}
+                >
+                  {usuario.status === "ativo" ? "✅ Ativo" : "⏸️ Inativo"}
+                </span>
+              </td>
+              <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
+                <button
+                  style={{
+                    padding: "4px 8px",
+                    margin: "0 2px",
+                    backgroundColor: "#28a745",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                  onClick={() => handleEditarUsuario(usuario)}
+                >
+                  ✏️ Editar
+                </button>
+                <button
+                  style={{
+                    padding: "4px 8px",
+                    margin: "0 2px",
+                    backgroundColor: usuario.status === "ativo" ? "#ffc107" : "#007bff",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "3px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                  onClick={() => handleToggleStatus(usuario)}
+                >
+                  {usuario.status === "ativo" ? "⏸️ Inativar" : "▶️ Ativar"}
+                </button>
+                {usuario.status !== "ativo" && (
+                  <button
+                    style={{
+                      padding: "4px 8px",
+                      margin: "0 2px",
+                      backgroundColor: "#dc3545",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "3px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                    }}
+                    onClick={() => handleDelete(usuario)}
+                  >
+                    🗑️ Excluir
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+) : (
+  <div>
+    {/* SEÇÃO DE LOGS BÁSICA */}
+    <div style={{ marginBottom: "20px" }}>
+      <h3>📋 Logs de Auditoria</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Filtrar por usuário..."
+          value={logFilters.usuario}
+          onChange={(e) => setLogFilters({...logFilters, usuario: e.target.value})}
+          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+        />
+        <input
+          type="text"
+          placeholder="Filtrar por ação..."
+          value={logFilters.acao}
+          onChange={(e) => setLogFilters({...logFilters, acao: e.target.value})}
+          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+        />
+        <input
+          type="date"
+          placeholder="Data início"
+          value={logFilters.dataInicio}
+          onChange={(e) => setLogFilters({...logFilters, dataInicio: e.target.value})}
+          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+        />
+        <input
+          type="date"
+          placeholder="Data fim"
+          value={logFilters.dataFim}
+          onChange={(e) => setLogFilters({...logFilters, dataFim: e.target.value})}
+          style={{ padding: "8px 12px", border: "1px solid #ddd", borderRadius: "4px" }}
+        />
+      </div>
+    </div>
+
+    {loading ? (
+      <div>Carregando logs...</div>
+    ) : (
+      <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+        {getFilteredLogs().map((log, index) => (
+          <div
+            key={index}
+            style={{
+              padding: "12px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              marginBottom: "8px",
+              backgroundColor: "#f8f9fa",
+            }}
+          >
+            <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+              {log.action} - {log.userEmail}
+            </div>
+            <div style={{ fontSize: "12px", color: "#666" }}>
+              {new Date(log.timestamp?.seconds * 1000 || log.timestamp).toLocaleString()}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
