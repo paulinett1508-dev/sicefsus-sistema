@@ -515,9 +515,9 @@ export const createErrorReport = (context, error, additionalData = {}) => {
 export const useCNPJValidation = () => {
   const [cnpjError, setCnpjError] = useState("");
 
-  const handleCNPJChange = (valor, setFormData) => {
-    // Import CNPJ functions from cnpjUtils
-    const { formatarCNPJ, validarCNPJ } = require("./cnpjUtils");
+  const handleCNPJChange = async (valor, setFormData) => {
+    // Import CNPJ functions from cnpjUtils using dynamic import
+    const { formatarCNPJ, validarCNPJ } = await import("./cnpjUtils");
 
     // Formata o CNPJ
     const cnpjFormatado = formatarCNPJ(valor);
@@ -681,6 +681,40 @@ export const useValidacaoDatasDespesa = (emenda) => {
     obterLimitesData,
     formatarPeriodoVigencia: () => formatarPeriodoVigenciaEmenda(emenda),
   };
+};
+
+/**
+ * ✅ NORMALIZAR entrada de data
+ * @param {string|Date} dataInput - Data a ser normalizada
+ * @returns {string|null} - Data normalizada no formato YYYY-MM-DD ou null
+ */
+export const normalizarDataInput = (dataInput) => {
+  if (!dataInput) return null;
+
+  let data;
+
+  // Se já é Date
+  if (dataInput instanceof Date) {
+    data = dataInput;
+  }
+  // Se é string
+  else if (typeof dataInput === "string") {
+    // Limpar espaços
+    const dataLimpa = dataInput.trim();
+    if (!dataLimpa) return null;
+
+    // Tentar converter
+    data = new Date(dataLimpa);
+  }
+  else {
+    return null;
+  }
+
+  // Verificar se é válida
+  if (isNaN(data.getTime())) return null;
+
+  // Retornar no formato padrão
+  return data.toISOString().split('T')[0];
 };
 
 /**
