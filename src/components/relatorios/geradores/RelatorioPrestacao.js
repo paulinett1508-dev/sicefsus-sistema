@@ -1,8 +1,8 @@
 // src/components/relatorios/geradores/RelatorioPrestacao.js
-import BaseRelatorio from "./BaseRelatorio";
+import { BaseRelatorio } from "./BaseRelatorio";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
-class RelatorioPrestacao extends BaseRelatorio {
+export class RelatorioPrestacao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
@@ -208,5 +208,3 @@ class RelatorioPrestacao extends BaseRelatorio {
     this.addFooter();
   }
 }
-
-export default RelatorioPrestacao;

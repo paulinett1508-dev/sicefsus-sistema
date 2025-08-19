@@ -46,22 +46,6 @@ const SystemHeader = ({
 
       {/* Banners específicos de cada módulo */}
       {children}
-
-      {/* Aviso para usuário sem município (genérico para operadores) */}
-      {userRole === "operador" && !userMunicipio && (
-        <div style={styles.avisoMunicipio}>
-          <span style={styles.avisoIcon}>⚠️</span>
-          <div style={styles.avisoContent}>
-            <span style={styles.avisoTexto}>
-              <strong>Configuração Pendente:</strong> Seu usuário não possui
-              município/UF cadastrado no sistema.
-            </span>
-            <span style={styles.avisoSubtexto}>
-              Entre em contato com o administrador para configurar seu acesso.
-            </span>
-          </div>
-        </div>
-      )}
     </>
   );
 };
@@ -108,45 +92,6 @@ const styles = {
   divider: {
     opacity: 0.7,
     margin: "0 4px",
-  },
-
-  avisoMunicipio: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "16px 20px",
-    backgroundColor: "#fff3cd",
-    border: "2px solid #ffc107",
-    borderRadius: 12,
-    marginBottom: "20px",
-    fontSize: 14,
-    color: "#856404",
-    boxShadow: "0 4px 12px rgba(255, 193, 7, 0.15)",
-  },
-
-  avisoIcon: {
-    fontSize: 20,
-    flexShrink: 0,
-    marginTop: 2,
-  },
-
-  avisoContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 4,
-    flex: 1,
-  },
-
-  avisoTexto: {
-    fontSize: 14,
-    lineHeight: 1.4,
-    fontWeight: "500",
-  },
-
-  avisoSubtexto: {
-    fontSize: 12,
-    opacity: 0.8,
-    fontWeight: "400",
   },
 };
 

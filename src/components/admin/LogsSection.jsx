@@ -1,7 +1,13 @@
 // src/components/admin/LogsSection.jsx
 import React from "react";
 
-const LogsSection = ({ logs, logFilters, setLogFilters, loading }) => {
+const LogsSection = ({
+  logs,
+  logFilters,
+  setLogFilters,
+  onAtualizarLogs, // ✅ NOVA PROP
+  loading,
+}) => {
   // Funções auxiliares para logs
   const getActionColor = (action) => {
     switch (action) {
@@ -43,9 +49,20 @@ const LogsSection = ({ logs, logFilters, setLogFilters, loading }) => {
 
   return (
     <div style={styles.tableContainer}>
-      <h3 style={styles.sectionTitle}>
-        📋 Logs de Auditoria do Sistema ({logs.length})
-      </h3>
+      {/* Cabeçalho da seção com botão */}
+      <div style={styles.sectionHeader}>
+        <h3 style={styles.sectionTitle}>
+          📋 Logs de Auditoria do Sistema ({logs.length})
+        </h3>
+        <button
+          onClick={onAtualizarLogs}
+          style={styles.refreshButton}
+          disabled={loading}
+          title="Atualizar logs de auditoria"
+        >
+          🔄 Atualizar Logs
+        </button>
+      </div>
 
       {/* Filtros */}
       <div style={styles.filtersContainer}>
@@ -248,12 +265,36 @@ const styles = {
     padding: "20px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
+
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+
   sectionTitle: {
     fontSize: "18px",
     fontWeight: "bold",
-    marginBottom: "16px",
+    margin: 0,
     color: "#333",
   },
+
+  refreshButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+
   filtersContainer: {
     marginBottom: "20px",
     padding: "16px",

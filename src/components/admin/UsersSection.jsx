@@ -9,11 +9,25 @@ const UsersSection = ({
   onEdit,
   onDelete,
   onToggleStatus,
+  onNovoUsuario, // ✅ NOVA PROP
   loading,
 }) => {
   return (
     <div style={styles.tableContainer}>
-      <h3 style={styles.sectionTitle}>📋 Lista de Usuários ({users.length})</h3>
+      {/* Cabeçalho da seção com botão */}
+      <div style={styles.sectionHeader}>
+        <h3 style={styles.sectionTitle}>
+          📋 Lista de Usuários ({users.length})
+        </h3>
+        <button
+          onClick={onNovoUsuario}
+          style={styles.newUserButton}
+          disabled={loading}
+          title="Criar novo usuário"
+        >
+          ➕ Novo Usuário
+        </button>
+      </div>
 
       {/* Campo de busca */}
       <div style={styles.searchContainer}>
@@ -36,8 +50,14 @@ const UsersSection = ({
           users={users}
           onEdit={onEdit}
           onDelete={(usuario) => {
-            console.log("🔗 UsersSection: onDelete chamado para:", usuario.nome);
-            console.log("🔗 Função onDelete existe:", typeof onDelete === 'function');
+            console.log(
+              "🔗 UsersSection: onDelete chamado para:",
+              usuario.nome,
+            );
+            console.log(
+              "🔗 Função onDelete existe:",
+              typeof onDelete === "function",
+            );
             onDelete(usuario);
           }}
           onToggleStatus={onToggleStatus}
@@ -55,15 +75,40 @@ const styles = {
     padding: "20px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
+
+  sectionHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+  },
+
   sectionTitle: {
     fontSize: "18px",
     fontWeight: "bold",
-    marginBottom: "16px",
+    margin: 0,
     color: "#333",
   },
+
+  newUserButton: {
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+
   searchContainer: {
     marginBottom: "20px",
   },
+
   searchInput: {
     width: "100%",
     padding: "10px 15px",
@@ -71,10 +116,12 @@ const styles = {
     borderRadius: "5px",
     fontSize: "14px",
   },
+
   loading: {
     textAlign: "center",
     padding: "40px",
   },
+
   spinner: {
     width: "40px",
     height: "40px",

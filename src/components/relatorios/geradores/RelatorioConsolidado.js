@@ -1,9 +1,9 @@
 // src/components/relatorios/geradores/RelatorioConsolidado.js
-import BaseRelatorio from "./BaseRelatorio";
+import { BaseRelatorio } from "./BaseRelatorio";
 import { COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
-class RelatorioConsolidado extends BaseRelatorio {
+export class RelatorioConsolidado extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
@@ -403,5 +403,3 @@ class RelatorioConsolidado extends BaseRelatorio {
     this.addFooter();
   }
 }
-
-export default RelatorioConsolidado;

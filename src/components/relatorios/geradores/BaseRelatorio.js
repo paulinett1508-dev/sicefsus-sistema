@@ -1,79 +1,69 @@
-
 // src/components/relatorios/geradores/BaseRelatorio.js
-import { formatarMoeda, formatarData } from "../../../utils/formatters";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import {
+  addHeader,
+  addFooter,
+  formatCurrency,
+  formatDate,
+  getLogoBase64,
+  gerarNomeArquivo,
+} from "../../../utils/pdfHelpers";
 
-class BaseRelatorio {
-  constructor() {
-    this.doc = null;
-    this.emendas = [];
-    this.despesas = [];
-    this.pageWidth = 210; // A4 width in mm
-    this.pageHeight = 297; // A4 height in mm
+export class BaseRelatorio {
+  constructor(tipoRelatorio, emendasFiltradas, despesasFiltradas, usuario) {
+    this.tipoRelatorio = tipoRelatorio;
+    this.emendas = emendasFiltradas;
+    this.despesas = despesasFiltradas;
+    this.usuario = usuario;
+    this.doc = new jsPDF();
     this.pageNum = 1;
+    this.logoBase64 = null;
+
+    // Configurações da página
+    this.pageWidth = this.doc.internal.pageSize.width;
+    this.pageHeight = this.doc.internal.pageSize.height;
+    this.margins = { top: 20, left: 20, right: 20, bottom: 30 };
   }
 
   async inicializar() {
-    // Importar jsPDF dinamicamente
-    const { jsPDF } = await import('jspdf');
-    this.doc = new jsPDF();
+    this.logoBase64 = await getLogoBase64();
   }
 
   addHeader(titulo) {
-    this.doc.setFontSize(16);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text(titulo, 20, 20);
-    
-    // Data de geração
-    this.doc.setFontSize(10);
-    this.doc.setFont("helvetica", "normal");
-    this.doc.text(`Gerado em: ${this.formatDate(new Date())}`, 20, 30);
+    addHeader(this.doc, titulo, this.logoBase64);
   }
 
   addFooter() {
-    const pageCount = this.doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      this.doc.setPage(i);
-      this.doc.setFontSize(8);
-      this.doc.setFont("helvetica", "normal");
-      this.doc.text(
-        `Página ${i} de ${pageCount}`,
-        this.pageWidth - 30,
-        this.pageHeight - 10
-      );
-      this.doc.text(
-        "SICEFSUS - Sistema de Controle de Execuções Financeiras do SUS",
-        20,
-        this.pageHeight - 10
-      );
-    }
+    addFooter(this.doc, this.pageNum, this.usuario);
   }
 
-  checkNewPage(currentY, requiredSpace) {
-    if (currentY + requiredSpace > this.pageHeight - 30) {
+  checkNewPage(yPosition, minSpace = 40) {
+    if (yPosition + minSpace > this.pageHeight - this.margins.bottom) {
       this.doc.addPage();
-      return 70; // Nova posição Y após header
+      this.pageNum++;
+      return 70; // Retorna nova posição Y após adicionar página
     }
-    return currentY;
+    return yPosition;
   }
 
   formatCurrency(value) {
-    return formatarMoeda(value);
+    return formatCurrency(value);
   }
 
   formatDate(date) {
-    return formatarData(date);
+    return formatDate(date);
   }
 
-  async gerar(filtros) {
-    throw new Error("Método gerar deve ser implementado pela classe filha");
+  async gerar() {
+    await this.inicializar();
+    // Método a ser implementado pelas subclasses
+    throw new Error("Método gerar() deve ser implementado pela subclasse");
   }
 
-  save(filename) {
-    if (!this.doc) {
-      throw new Error("Documento não inicializado");
-    }
-    this.doc.save(filename);
+  salvar() {
+    const nomeArquivo = gerarNomeArquivo(this.tipoRelatorio.id);
+    this.doc.save(nomeArquivo);
+    console.log(`Relatório ${nomeArquivo} gerado com sucesso!`);
   }
 }
-
-export default BaseRelatorio;
