@@ -36,6 +36,18 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     }
   };
 
+  // 🐛 DEBUG TEMPORÁRIO - REMOVER DEPOIS
+  console.log("🔍 DEBUG FormData:", {
+    objeto: `"${formData.objeto}"`,
+    objetoLength: formData.objeto?.length,
+    autor: `"${formData.autor}"`, 
+    autorLength: formData.autor?.length,
+    valor: `"${formData.valor}"`,
+    valorLength: formData.valor?.toString().length
+  });
+
+  console.log("🔍 DEBUG FieldErrors:", fieldErrors);
+
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
