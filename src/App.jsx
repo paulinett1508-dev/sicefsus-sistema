@@ -36,10 +36,21 @@ import UpdateNotification from "./components/UpdateNotification";
 import { configureConsole } from "./utils/DisableConsole";
 
 // Configurar console inteligente apenas uma vez
+// Configurar console apenas uma vez
 if (!window.__consoleConfigured) {
   configureConsole();
   window.__consoleConfigured = true;
 }
+
+// Tratar erros não capturados globalmente
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('🚨 Promise rejeitada não tratada:', event.reason);
+  event.preventDefault(); // Previne que apareça no console como erro
+});
+
+window.addEventListener('error', (event) => {
+  console.error('🚨 Erro global capturado:', event.error);
+});
 
 // Context para proteção de navegaçãovegação
 const NavigationProtectionContext = React.createContext({

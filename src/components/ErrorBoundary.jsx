@@ -21,6 +21,12 @@ class ErrorBoundary extends React.Component {
       errorInfo: errorInfo
     });
 
+    // Verificar se é erro específico de require
+    if (error.message && error.message.includes('require is not defined')) {
+      console.error('🔥 ERRO CRÍTICO: Uso de require() detectado no cliente!');
+      console.error('Verifique se não há imports usando require() em arquivos JSX');
+    }
+
     // Log para monitoramento
     if (import.meta.env.DEV) {
       console.group('🐛 Error Details');

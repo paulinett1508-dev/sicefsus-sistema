@@ -154,7 +154,29 @@ export default function Login({ onLoginSuccess }) {
       }
     } catch (err) {
       console.error("❌ Erro no login:", err);
-      setErro(traduzirErroFirebase(err));
+      
+      // Tratar diferentes tipos de erro
+      let mensagemErro = "Erro inesperado no login";
+      
+      if (err.code) {
+        switch (err.code) {
+          case 'auth/user-not-found':
+            mensagemErro = "Usuário não encontrado";
+            break;
+          case 'auth/wrong-password':
+            mensagemErro = "Senha incorreta";
+            break;
+          case 'auth/too-many-requests':
+            mensagemErro = "Muitas tentativas. Tente novamente mais tarde";
+            break;
+          default:
+            mensagemErro = err.message || "Erro de autenticação";
+        }
+      } else if (err.message) {
+        mensagemErro = err.message;
+      }
+      
+      setErro(mensagemErro);zirErroFirebase(err));
     } finally {
       setCarregando(false);
     }

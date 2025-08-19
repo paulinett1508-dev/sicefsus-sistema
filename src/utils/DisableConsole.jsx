@@ -222,5 +222,5 @@ export const clearLogCache = () => {
 export const disableConsoleInProduction = configureConsole;
 
 // Como usar no main.jsx:
-// import { disableConsoleInProduction } from './utils/DisableConsole';
-// disableConsoleInProduction();
+// import { configureConsole } from './utils/DisableConsole';
+// configureConsole();

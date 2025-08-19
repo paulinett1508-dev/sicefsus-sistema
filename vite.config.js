@@ -18,11 +18,14 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY PARA ADMIN API
     server: {
-      port: 5173,
       host: "0.0.0.0",
+      port: 5173,
       hmr: {
         port: 5173,
-        host: "0.0.0.0"
+        clientPort: 443,
+      },
+      watch: {
+        usePolling: true,
       },
       proxy: {
         "/api": {
