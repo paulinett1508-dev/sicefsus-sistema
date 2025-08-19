@@ -1,4 +1,4 @@
-// src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO PARA SUBSTITUIÇÃO
+// src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO CORRIGIDO
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -66,18 +66,33 @@ export const useEmendaFormData = () => {
   const mountedRef = useRef(true);
   const isEdicao = Boolean(id);
 
+  // 🛡️ FUNÇÃO DE LIMPEZA UNIVERSAL - RESOLVE PROBLEMAS DE CARACTERES INVISÍVEIS
+  const cleanField = (value) => {
+    if (!value) return "";
+    return value
+      .toString()
+      .replace(/\s+/g, " ") // Remove espaços múltiplos e caracteres invisíveis
+      .trim() // Remove espaços das extremidades
+      .replace(/\u00A0/g, " ") // Remove espaços não-quebráveis (nbsp)
+      .replace(/\u200B/g, "") // Remove zero-width spaces
+      .replace(/\u2003/g, " ") // Remove em-spaces
+      .replace(/\u2002/g, " ") // Remove en-spaces
+      .replace(/\u2009/g, " ") // Remove thin spaces
+      .replace(/\uFEFF/g, ""); // Remove BOM (Byte Order Mark)
+  };
+
   // ✅ DETECÇÃO DE MUDANÇAS
   const isFormModified = () => {
     const fieldsToCheck = ["autor", "municipio", "valor", "programa", "objeto"];
     return fieldsToCheck.some((field) => {
-      const value = formData[field];
-      return value && value.toString().trim() !== "";
+      const value = cleanField(formData[field]);
+      return value && value.length > 0;
     });
   };
 
   const hasUnsavedChanges = isFormModified();
 
-  // 🚨 VALIDAÇÕES ABSOLUTAS - TODAS AS DATAS OBRIGATÓRIAS
+  // 🚨 VALIDAÇÕES ABSOLUTAS - TODAS CORRIGIDAS COM LIMPEZA UNIVERSAL
   const getFieldErrors = () => {
     const errors = {};
     const hoje = new Date();
@@ -86,28 +101,51 @@ export const useEmendaFormData = () => {
     // ============================================
     // 🚨 SEÇÃO IDENTIFICAÇÃO - OBRIGATÓRIA
     // ============================================
-    if (!formData.numero?.trim()) {
-      errors.numero = "🚨 Número da emenda é obrigatório";
+    const numeroLimpo = cleanField(formData.numero);
+    if (!numeroLimpo || numeroLimpo.length < 3) {
+      errors.numero = numeroLimpo
+        ? "🚨 Número da emenda deve ter pelo menos 3 caracteres"
+        : "🚨 Número da emenda é obrigatório";
     }
-    if (!formData.autor?.trim()) {
-      errors.autor = "🚨 Parlamentar é obrigatório";
+
+    const autorLimpo = cleanField(formData.autor);
+    if (!autorLimpo || autorLimpo.length < 3) {
+      errors.autor = autorLimpo
+        ? "🚨 Parlamentar deve ter pelo menos 3 caracteres"
+        : "🚨 Parlamentar é obrigatório";
     }
-    if (!formData.municipio?.trim()) {
-      errors.municipio = "🚨 Município é obrigatório";
+
+    const municipioLimpo = cleanField(formData.municipio);
+    if (!municipioLimpo || municipioLimpo.length < 2) {
+      errors.municipio = municipioLimpo
+        ? "🚨 Município deve ter pelo menos 2 caracteres"
+        : "🚨 Município é obrigatório";
     }
-    if (!formData.uf?.trim()) {
-      errors.uf = "🚨 UF é obrigatória";
+
+    const ufLimpo = cleanField(formData.uf);
+    if (!ufLimpo || ufLimpo.length !== 2) {
+      errors.uf = ufLimpo
+        ? "🚨 UF deve ter exatamente 2 caracteres"
+        : "🚨 UF é obrigatória";
     }
 
     // ============================================
     // 🚨 SEÇÃO DADOS BÁSICOS - OBRIGATÓRIA
     // ============================================
-    if (!formData.programa?.trim()) {
-      errors.programa = "🚨 Programa é obrigatório";
+    const programaLimpo = cleanField(formData.programa);
+    if (!programaLimpo || programaLimpo.length < 5) {
+      errors.programa = programaLimpo
+        ? "🚨 Programa deve ter pelo menos 5 caracteres"
+        : "🚨 Programa é obrigatório";
     }
-    if (!formData.objeto?.trim()) {
-      errors.objeto = "🚨 Objeto da Proposta é obrigatório";
+
+    const objetoLimpo = cleanField(formData.objeto);
+    if (!objetoLimpo || objetoLimpo.length < 10) {
+      errors.objeto = objetoLimpo
+        ? "🚨 Objeto da Proposta deve ter pelo menos 10 caracteres"
+        : "🚨 Objeto da Proposta é obrigatório";
     }
+
     if (!formData.valor?.toString().trim()) {
       errors.valor = "🚨 Valor do Recurso é obrigatório";
     } else {
@@ -126,7 +164,8 @@ export const useEmendaFormData = () => {
     // ============================================
     // 🚨 SEÇÃO BENEFICIÁRIO - OBRIGATÓRIA
     // ============================================
-    if (!formData.beneficiario?.trim()) {
+    const beneficiarioLimpo = cleanField(formData.beneficiario);
+    if (!beneficiarioLimpo) {
       errors.beneficiario = "🚨 Beneficiário (CNPJ) é obrigatório";
     } else {
       const cnpjLimpo = limparCNPJ(formData.beneficiario);
@@ -142,29 +181,32 @@ export const useEmendaFormData = () => {
     // ============================================
     // 🚨 SEÇÃO DADOS BANCÁRIOS - OBRIGATÓRIA
     // ============================================
-    if (!formData.banco?.trim()) {
+    const bancoLimpo = cleanField(formData.banco);
+    if (!bancoLimpo) {
       errors.banco = "🚨 Banco é obrigatório";
     } else {
-      const bancoNumerico = formData.banco.replace(/\D/g, "");
+      const bancoNumerico = bancoLimpo.replace(/\D/g, "");
       if (bancoNumerico.length !== 3) {
-        errors.banco = "🚨 Código do banco deve ter 3 dígitos";
+        errors.banco = "🚨 Código do banco deve ter exatamente 3 dígitos";
       }
     }
 
-    if (!formData.agencia?.trim()) {
+    const agenciaLimpa = cleanField(formData.agencia);
+    if (!agenciaLimpa) {
       errors.agencia = "🚨 Agência é obrigatória";
     } else {
-      const agenciaLimpa = formData.agencia.replace(/\D/g, "");
-      if (agenciaLimpa.length < 4) {
+      const agenciaNumeros = agenciaLimpa.replace(/\D/g, "");
+      if (agenciaNumeros.length < 4) {
         errors.agencia = "🚨 Agência deve ter pelo menos 4 dígitos";
       }
     }
 
-    if (!formData.conta?.trim()) {
+    const contaLimpa = cleanField(formData.conta);
+    if (!contaLimpa) {
       errors.conta = "🚨 Conta é obrigatória";
     } else {
-      const contaLimpa = formData.conta.replace(/\D/g, "");
-      if (contaLimpa.length < 5) {
+      const contaNumeros = contaLimpa.replace(/\D/g, "");
+      if (contaNumeros.length < 5) {
         errors.conta = "🚨 Conta deve ter pelo menos 5 dígitos";
       }
     }
@@ -335,12 +377,17 @@ export const useEmendaFormData = () => {
       let hasValidMeta = false;
 
       formData.acoesServicos.forEach((meta, index) => {
-        if (meta.descricao?.trim() && meta.quantidade > 0) {
+        const descricaoLimpa = cleanField(meta.descricao);
+        if (
+          descricaoLimpa &&
+          descricaoLimpa.length >= 5 &&
+          meta.quantidade > 0
+        ) {
           hasValidMeta = true;
         } else {
-          if (!meta.descricao?.trim()) {
+          if (!descricaoLimpa || descricaoLimpa.length < 5) {
             errors[`meta_${index}_descricao`] =
-              "🚨 Descrição da meta é obrigatória";
+              "🚨 Descrição da meta deve ter pelo menos 5 caracteres";
           }
           if (!meta.quantidade || meta.quantidade <= 0) {
             errors[`meta_${index}_quantidade`] =
@@ -597,39 +644,56 @@ export const useEmendaFormData = () => {
     }
   };
 
-  // 🚨 VALIDAÇÃO CRÍTICA - TODAS AS DATAS OBRIGATÓRIAS
+  // 🚨 VALIDAÇÃO CRÍTICA - CORRIGIDA COM LIMPEZA UNIVERSAL
   const criticalValidation = () => {
     const errors = [];
 
-    // SEÇÃO IDENTIFICAÇÃO
-    if (!formData.numero?.trim())
-      errors.push("❌ CRÍTICO: Número da emenda obrigatório");
-    if (!formData.autor?.trim())
-      errors.push("❌ CRÍTICO: Parlamentar obrigatório");
-    if (!formData.municipio?.trim())
-      errors.push("❌ CRÍTICO: Município obrigatório");
-    if (!formData.uf?.trim()) errors.push("❌ CRÍTICO: UF obrigatória");
+    // SEÇÃO IDENTIFICAÇÃO - LIMPEZA APLICADA
+    const numeroLimpo = cleanField(formData.numero);
+    if (!numeroLimpo || numeroLimpo.length < 3)
+      errors.push(
+        "❌ CRÍTICO: Número da emenda obrigatório (mín. 3 caracteres)",
+      );
 
-    // SEÇÃO DADOS BÁSICOS
-    if (!formData.programa?.trim())
-      errors.push("❌ CRÍTICO: Programa obrigatório");
-    // Validação crítica melhorada do objeto
-    const objetoLimpo = formData.objeto?.toString().replace(/\s+/g, ' ').trim();
-    if (!objetoLimpo || objetoLimpo.length < 3) {
-      errors.push("❌ CRÍTICO: Objeto da Proposta obrigatório (mín. 3 caracteres)");
-    }
+    const autorLimpo = cleanField(formData.autor);
+    if (!autorLimpo || autorLimpo.length < 3)
+      errors.push("❌ CRÍTICO: Parlamentar obrigatório (mín. 3 caracteres)");
+
+    const municipioLimpo = cleanField(formData.municipio);
+    if (!municipioLimpo || municipioLimpo.length < 2)
+      errors.push("❌ CRÍTICO: Município obrigatório (mín. 2 caracteres)");
+
+    const ufLimpo = cleanField(formData.uf);
+    if (!ufLimpo || ufLimpo.length !== 2)
+      errors.push("❌ CRÍTICO: UF obrigatória (exatos 2 caracteres)");
+
+    // SEÇÃO DADOS BÁSICOS - LIMPEZA APLICADA
+    const programaLimpo = cleanField(formData.programa);
+    if (!programaLimpo || programaLimpo.length < 5)
+      errors.push("❌ CRÍTICO: Programa obrigatório (mín. 5 caracteres)");
+
+    const objetoLimpo = cleanField(formData.objeto);
+    if (!objetoLimpo || objetoLimpo.length < 10)
+      errors.push(
+        "❌ CRÍTICO: Objeto da Proposta obrigatório (mín. 10 caracteres)",
+      );
+
     if (!formData.valor?.toString().trim())
       errors.push("❌ CRÍTICO: Valor do Recurso obrigatório");
 
-    // SEÇÃO BENEFICIÁRIO
-    if (!formData.beneficiario?.trim())
-      errors.push("❌ CRÍTICO: Beneficiário obrigatório");
+    // SEÇÃO BENEFICIÁRIO - LIMPEZA APLICADA
+    const beneficiarioLimpo = cleanField(formData.beneficiario);
+    if (!beneficiarioLimpo) errors.push("❌ CRÍTICO: Beneficiário obrigatório");
 
-    // SEÇÃO DADOS BANCÁRIOS
-    if (!formData.banco?.trim()) errors.push("❌ CRÍTICO: Banco obrigatório");
-    if (!formData.agencia?.trim())
-      errors.push("❌ CRÍTICO: Agência obrigatória");
-    if (!formData.conta?.trim()) errors.push("❌ CRÍTICO: Conta obrigatória");
+    // SEÇÃO DADOS BANCÁRIOS - LIMPEZA APLICADA
+    const bancoLimpo = cleanField(formData.banco);
+    if (!bancoLimpo) errors.push("❌ CRÍTICO: Banco obrigatório");
+
+    const agenciaLimpa = cleanField(formData.agencia);
+    if (!agenciaLimpa) errors.push("❌ CRÍTICO: Agência obrigatória");
+
+    const contaLimpa = cleanField(formData.conta);
+    if (!contaLimpa) errors.push("❌ CRÍTICO: Conta obrigatória");
 
     // 🚨 SEÇÃO CRONOGRAMA - TODAS AS DATAS OBRIGATÓRIAS
     if (
@@ -660,16 +724,19 @@ export const useEmendaFormData = () => {
       errors.push("❌ CRÍTICO: Data de Validade obrigatória");
     }
 
-    // SEÇÃO AÇÕES E SERVIÇOS
+    // SEÇÃO AÇÕES E SERVIÇOS - LIMPEZA APLICADA
     if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
       errors.push("❌ CRÍTICO: Pelo menos uma meta deve ser cadastrada");
     } else {
-      const hasValidMeta = formData.acoesServicos.some(
-        (meta) => meta.descricao?.trim() && meta.quantidade > 0,
-      );
+      const hasValidMeta = formData.acoesServicos.some((meta) => {
+        const descricaoLimpa = cleanField(meta.descricao);
+        return (
+          descricaoLimpa && descricaoLimpa.length >= 5 && meta.quantidade > 0
+        );
+      });
       if (!hasValidMeta) {
         errors.push(
-          "❌ CRÍTICO: Pelo menos uma meta válida deve ser preenchida",
+          "❌ CRÍTICO: Pelo menos uma meta válida deve ser preenchida (mín. 5 caracteres)",
         );
       }
     }
@@ -735,16 +802,9 @@ export const useEmendaFormData = () => {
           dataFinal <= dataVal
         )
       ) {
-        if (
-          !errors.dataAprovacao &&
-          !errors.dataOb &&
-          !errors.inicioExecucao &&
-          !errors.finalExecucao &&
-          !errors.dataValidade
-        ) {
-          errors.cronogramaGeral =
-            "🚨 Sequência cronológica inválida: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade";
-        }
+        errors.push(
+          "❌ CRÍTICO: Sequência cronológica inválida - Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade",
+        );
       }
     }
 
@@ -776,7 +836,7 @@ export const useEmendaFormData = () => {
           .map((err) => `• ${err}`)
           .join(
             "\n",
-          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n⚠️ TODAS AS DATAS DO CRONOGRAMA SÃO OBRIGATÓRIAS.`,
+          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n❌ TODAS AS DATAS DO CRONOGRAMA SÃO OBRIGATÓRIAS.`,
         type: "error",
       });
 
@@ -814,33 +874,33 @@ export const useEmendaFormData = () => {
       );
 
       const dadosParaSalvar = {
-        numero: formData.numero?.trim(),
-        autor: formData.autor?.trim(),
-        parlamentar: formData.autor?.trim(),
-        municipio: formData.municipio?.trim(),
-        uf: formData.uf?.trim(),
-        cnpj: formData.cnpj?.trim(),
+        numero: cleanField(formData.numero),
+        autor: cleanField(formData.autor),
+        parlamentar: cleanField(formData.autor),
+        municipio: cleanField(formData.municipio),
+        uf: cleanField(formData.uf),
+        cnpj: cleanField(formData.cnpj),
         valor: valorNumerico,
         valorRecurso: valorNumerico,
-        programa: formData.programa?.trim(),
-        beneficiario: formData.beneficiario?.trim(),
-        cnpjBeneficiario: formData.cnpjBeneficiario?.trim(),
+        programa: cleanField(formData.programa),
+        beneficiario: cleanField(formData.beneficiario),
+        cnpjBeneficiario: cleanField(formData.cnpjBeneficiario),
         tipo: formData.tipo,
-        modalidade: formData.modalidade?.trim(),
-        objeto: formData.objeto?.trim(),
-        banco: formData.banco?.trim(),
-        agencia: formData.agencia?.trim(),
-        conta: formData.conta?.trim(),
+        modalidade: cleanField(formData.modalidade),
+        objeto: cleanField(formData.objeto),
+        banco: cleanField(formData.banco),
+        agencia: cleanField(formData.agencia),
+        conta: cleanField(formData.conta),
         // 🚨 TODAS AS DATAS OBRIGATÓRIAS
         dataAprovacao: formData.dataAprovacao?.trim(),
         dataOb: formData.dataOb?.trim(),
         inicioExecucao: formData.inicioExecucao?.trim(),
         finalExecucao: formData.finalExecucao?.trim(),
         dataValidade: formData.dataValidade?.trim(),
-        numeroProposta: formData.numeroProposta?.trim(),
-        funcional: formData.funcional?.trim(),
+        numeroProposta: cleanField(formData.numeroProposta),
+        funcional: cleanField(formData.funcional),
         acoesServicos: formData.acoesServicos || [],
-        observacoes: formData.observacoes?.trim(),
+        observacoes: cleanField(formData.observacoes),
         valorExecutado: 0,
         status: "Ativa",
         dataUltimaAtualizacao: dataAtual,
@@ -939,6 +999,7 @@ export const useEmendaFormData = () => {
     getOrderedFieldErrors,
     focusFirstErrorField,
     clearFieldError,
+    cleanField, // 🆕 FUNÇÃO EXPOSTA PARA USO EXTERNO
 
     // Handlers
     handleInputChange,
