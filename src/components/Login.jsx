@@ -176,7 +176,7 @@ export default function Login({ onLoginSuccess }) {
         mensagemErro = err.message;
       }
       
-      setErro(mensagemErro);zirErroFirebase(err));
+      setErro(mensagemErro);
     } finally {
       setCarregando(false);
     }
