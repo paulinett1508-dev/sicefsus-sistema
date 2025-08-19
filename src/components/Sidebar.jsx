@@ -20,12 +20,15 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const isAdmin = usuario?.tipo === "admin";
 
   // ✅ ADICIONADO: Detectar se está em processo de criação/edição
-  const isCreatingEmenda = location.pathname.includes('/emendas') && 
-                          (location.search.includes('nova') || location.pathname.includes('nova') || 
-                           window.location.href.includes('nova'));
+  const isCreatingEmenda =
+    location.pathname.includes("/emendas") &&
+    (location.search.includes("nova") ||
+      location.pathname.includes("nova") ||
+      window.location.href.includes("nova"));
 
-  const isEditingEmenda = location.pathname.includes('/emendas/') && 
-                         (location.search.includes('editar') || location.search.includes('modo='));
+  const isEditingEmenda =
+    location.pathname.includes("/emendas/") &&
+    (location.search.includes("editar") || location.search.includes("modo="));
 
   const isInFormMode = isCreatingEmenda || isEditingEmenda;
 
@@ -77,12 +80,12 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
       currentPath: location.pathname,
       isInFormMode,
       isCreatingEmenda,
-      isEditingEmenda
+      isEditingEmenda,
     });
 
     // Se está no processo de criação/edição
     if (isInFormMode) {
-      const confirmMessage = isCreatingEmenda 
+      const confirmMessage = isCreatingEmenda
         ? "Você está criando uma emenda. Deseja cancelar e voltar à listagem? Todas as alterações serão perdidas."
         : "Você está editando uma emenda. Deseja cancelar e voltar à listagem? Todas as alterações serão perdidas.";
 
@@ -90,7 +93,9 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
         console.log("✅ Usuário confirmou navegação - saindo do formulário");
         onNavigate("/emendas");
       } else {
-        console.log("❌ Usuário cancelou navegação - permanecendo no formulário");
+        console.log(
+          "❌ Usuário cancelou navegação - permanecendo no formulário",
+        );
       }
     } else {
       // Navegação normal
@@ -198,7 +203,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             color: "#fff3cd",
           }}
         >
-          ⚠️ <strong>Formulário ativo:</strong> Confirme antes de navegar para não perder alterações.
+          ⚠️ <strong>Formulário ativo:</strong> Confirme antes de navegar para
+          não perder alterações.
         </div>
       )}
 
@@ -305,52 +311,55 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
         <div style={{ flex: 1 }}></div>
 
         {/* Menu Inferior - Sobre */}
-        {bottomItems.map((item) => (
-          <div
-            key={item.path}
-            onClick={() => handleItemClick(item)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: collapsed ? "12px 0" : "12px 24px",
-              cursor: "pointer",
-              background:
-                activePath === item.path ? "var(--accent)" : "transparent",
-              color:
-                activePath === item.path ? "var(--white)" : "var(--gray-200)",
-              fontWeight: activePath === item.path ? "bold" : "normal",
-              fontSize: 16,
-              transition: "all 0.2s ease",
-              justifyContent: collapsed ? "center" : "flex-start",
-              borderTop: collapsed ? "none" : "1px solid rgba(255,255,255,0.1)",
-              marginBottom: 8,
-            }}
-            onMouseOver={(e) => {
-              if (activePath !== item.path) {
-                e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
-                e.target.style.color = "var(--white)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (activePath !== item.path) {
-                e.target.style.backgroundColor = "transparent";
-                e.target.style.color = "var(--gray-200)";
-              }
-            }}
-            title={collapsed ? item.label : ""}
-          >
-            <span
+        {isAdmin &&
+          bottomItems.map((item) => (
+            <div
+              key={item.path}
+              onClick={() => handleItemClick(item)}
               style={{
-                fontSize: 20,
-                marginRight: collapsed ? 0 : 12,
-                filter: activePath === item.path ? "brightness(1.2)" : "none",
+                display: "flex",
+                alignItems: "center",
+                padding: collapsed ? "12px 0" : "12px 24px",
+                cursor: "pointer",
+                background:
+                  activePath === item.path ? "var(--accent)" : "transparent",
+                color:
+                  activePath === item.path ? "var(--white)" : "var(--gray-200)",
+                fontWeight: activePath === item.path ? "bold" : "normal",
+                fontSize: 16,
+                transition: "all 0.2s ease",
+                justifyContent: collapsed ? "center" : "flex-start",
+                borderTop: collapsed
+                  ? "none"
+                  : "1px solid rgba(255,255,255,0.1)",
+                marginBottom: 8,
               }}
+              onMouseOver={(e) => {
+                if (activePath !== item.path) {
+                  e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
+                  e.target.style.color = "var(--white)";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (activePath !== item.path) {
+                  e.target.style.backgroundColor = "transparent";
+                  e.target.style.color = "var(--gray-200)";
+                }
+              }}
+              title={collapsed ? item.label : ""}
             >
-              {item.icon}
-            </span>
-            {!collapsed && item.label}
-          </div>
-        ))}
+              <span
+                style={{
+                  fontSize: 20,
+                  marginRight: collapsed ? 0 : 12,
+                  filter: activePath === item.path ? "brightness(1.2)" : "none",
+                }}
+              >
+                {item.icon}
+              </span>
+              {!collapsed && item.label}
+            </div>
+          ))}
       </nav>
 
       {/* Footer com informações do usuário (mantido original) */}
@@ -395,9 +404,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
               <span
                 style={{
                   backgroundColor:
-                    usuario.tipo === "admin"
-                      ? "#dc3545"
-                      : "#28a745",
+                    usuario.tipo === "admin" ? "#dc3545" : "#28a745",
                   color: "#ffffff",
                   borderRadius: "6px",
                   padding: "3px 10px",

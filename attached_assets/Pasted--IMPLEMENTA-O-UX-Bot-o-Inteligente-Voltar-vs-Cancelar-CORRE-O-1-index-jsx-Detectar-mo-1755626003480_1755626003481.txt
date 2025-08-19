@@ -1,0 +1,207 @@
+🎯 IMPLEMENTAÇÃO UX: Botão Inteligente "Voltar" vs "Cancelar"
+🔧 CORREÇÃO 1: index.jsx - Detectar modificações reais
+ANTES/DEPOIS (próximo ao useState, linha ~30):
+javascript// ANTES (linha ~50):
+const [toast, setToast] = useState({ show: false, message: "", type: "" });
+
+// DEPOIS (ADICIONAR):
+const [toast, setToast] = useState({ show: false, message: "", type: "" });
+
+// ✅ NOVA FUNÇÃO: Detectar se formulário foi modificado
+const isFormModified = () => {
+  const fieldsToCheck = [
+    'numero', 'autor', 'municipio', 'valor', 'programa', 
+    'objeto', 'beneficiario', 'banco', 'agencia', 'conta'
+  ];
+  
+  return fieldsToCheck.some(field => {
+    const value = formData[field];
+    return value && value.toString().trim() !== '';
+  });
+};
+
+// ✅ NOVO ESTADO: Calcular modificações em tempo real
+const hasUnsavedChanges = isFormModified();
+🔧 CORREÇÃO 2: index.jsx - Passar estado correto para Actions
+ANTES/DEPOIS (linha ~417):
+javascript// ANTES:
+<EmendaFormActions
+  modo={isEdicao ? "editar" : "criar"}
+  onCancel={handleCancel}
+  onSubmit={handleSubmit}
+  isEdit={isEdicao}
+  salvando={salvando}
+  loading={saving}
+  hasUnsavedChanges={true}
+/>
+
+// DEPOIS:
+<EmendaFormActions
+  modo={isEdicao ? "editar" : "criar"}
+  onCancel={handleCancel}
+  onSubmit={handleSubmit}
+  isEdit={isEdicao}
+  salvando={salvando}
+  loading={saving}
+  hasUnsavedChanges={hasUnsavedChanges}
+/>
+🔧 CORREÇÃO 3: index.jsx - Handler de navegação simples
+ANTES/DEPOIS (após handleCancel, linha ~320):
+javascript// ANTES:
+const handleCancel = () => {
+  setShowCancelModal(true);
+};
+
+// DEPOIS:
+const handleCancel = () => {
+  setShowCancelModal(true);
+};
+
+// ✅ NOVO HANDLER: Voltar simples (sem modal)
+const handleSimpleBack = () => {
+  console.log("🔙 Navegação simples - formulário vazio");
+  navigate("/emendas", { replace: true });
+};
+🔧 CORREÇÃO 4: index.jsx - Passar handler de voltar
+ANTES/DEPOIS (EmendaFormActions props, linha ~417):
+javascript// ANTES:
+<EmendaFormActions
+  modo={isEdicao ? "editar" : "criar"}
+  onCancel={handleCancel}
+  onSubmit={handleSubmit}
+  isEdit={isEdicao}
+  salvando={salvando}
+  loading={saving}
+  hasUnsavedChanges={hasUnsavedChanges}
+/>
+
+// DEPOIS:
+<EmendaFormActions
+  modo={isEdicao ? "editar" : "criar"}
+  onCancel={handleCancel}
+  onSimpleBack={handleSimpleBack}
+  onSubmit={handleSubmit}
+  isEdit={isEdicao}
+  salvando={salvando}
+  loading={saving}
+  hasUnsavedChanges={hasUnsavedChanges}
+/>
+🔧 CORREÇÃO 5: EmendaFormActions.jsx - Lógica condicional
+ANTES/DEPOIS (todo o return, linha ~55):
+javascript// ANTES (linha ~55):
+return (
+  <div style={styles.buttonContainer}>
+    {/* Botão Voltar apenas no modo edição */}
+    {modo === "editar" && (
+      <button
+        type="button"
+        onClick={handleVoltar}
+        style={styles.backButton}
+        onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a6268")}
+        onMouseLeave={(e) => (e.target.style.backgroundColor = "#6c757d")}
+      >
+        ← Voltar
+      </button>
+    )}
+
+    {/* Botões principais (não mostrar no modo visualização) */}
+    {!modoVisualizacao && (
+      <>
+        <button
+          type="button"
+          onClick={handleCancel}
+          style={styles.cancelButton}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#c82333")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#dc3545")}
+        >
+          ❌ Cancelar
+        </button>
+
+        <button
+          type="submit"
+          onClick={handleSubmit}
+          style={styles.submitButton}
+          disabled={salvando || loading}
+        >
+          {(salvando || loading) ? (
+            "Processando..."
+          ) : (
+            isEdit ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
+          )}
+        </button>
+      </>
+    )}
+  </div>
+);
+
+// DEPOIS:
+return (
+  <div style={styles.buttonContainer}>
+    {/* Botões principais (não mostrar no modo visualização) */}
+    {!modoVisualizacao && (
+      <>
+        {/* ✅ BOTÃO INTELIGENTE: Voltar vs Cancelar */}
+        {!hasUnsavedChanges ? (
+          <button
+            type="button"
+            onClick={onSimpleBack || handleCancel}
+            style={styles.backButton}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a6268")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#6c757d")}
+          >
+            ← Voltar
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleCancel}
+            style={styles.cancelButton}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#c82333")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#dc3545")}
+          >
+            ❌ Cancelar
+          </button>
+        )}
+
+        <button
+          type="submit"
+          onClick={handleSubmit}
+          style={styles.submitButton}
+          disabled={salvando || loading}
+        >
+          {(salvando || loading) ? (
+            "Processando..."
+          ) : (
+            isEdit ? "↻ Atualizar Emenda" : "✓ Cadastrar Emenda"
+          )}
+        </button>
+      </>
+    )}
+  </div>
+);
+🔧 CORREÇÃO 6: EmendaFormActions.jsx - Adicionar prop onSimpleBack
+ANTES/DEPOIS (parâmetros da função, linha ~5):
+javascript// ANTES:
+const EmendaFormActions = ({
+  modo = "criar",
+  loading = false,
+  modoVisualizacao = false,
+  onSubmit,
+  onCancel,
+  hasUnsavedChanges = false,
+  isEdit = false,
+  salvando = false,
+}) => {
+
+// DEPOIS:
+const EmendaFormActions = ({
+  modo = "criar",
+  loading = false,
+  modoVisualizacao = false,
+  onSubmit,
+  onCancel,
+  onSimpleBack, // ✅ NOVA PROP
+  hasUnsavedChanges = false,
+  isEdit = false,
+  salvando = false,
+}) => {
