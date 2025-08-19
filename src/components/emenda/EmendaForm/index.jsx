@@ -50,6 +50,22 @@ const EmendaForm = () => {
   const [salvando, setSalvando] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
+  // ✅ NOVA FUNÇÃO: Detectar se formulário foi modificado
+  const isFormModified = () => {
+    const fieldsToCheck = [
+      'numero', 'autor', 'municipio', 'valor', 'programa', 
+      'objeto', 'beneficiario', 'banco', 'agencia', 'conta'
+    ];
+    
+    return fieldsToCheck.some(field => {
+      const value = formData[field];
+      return value && value.toString().trim() !== '';
+    });
+  };
+
+  // ✅ NOVO ESTADO: Calcular modificações em tempo real
+  const hasUnsavedChanges = isFormModified();
+
   const [formData, setFormData] = useState({
     numero: "",
     autor: "",
@@ -405,6 +421,12 @@ const EmendaForm = () => {
     setShowCancelModal(true);
   };
 
+  // ✅ NOVO HANDLER: Voltar simples (sem modal)
+  const handleSimpleBack = () => {
+    console.log("🔙 Navegação simples - formulário vazio");
+    navigate("/emendas", { replace: true });
+  };
+
   const buscarDadosFornecedor = async (cnpj) => {
     try {
       const cnpjLimpo = cnpj.replace(/\D/g, "");
@@ -539,11 +561,12 @@ const EmendaForm = () => {
         <EmendaFormActions
           modo={isEdicao ? "editar" : "criar"}
           onCancel={handleCancel}
+          onSimpleBack={handleSimpleBack}
           onSubmit={handleSubmit}
           isEdit={isEdicao}
           salvando={salvando}
           loading={saving}
-          hasUnsavedChanges={true}
+          hasUnsavedChanges={hasUnsavedChanges}
         />
       </form>
 

@@ -13,6 +13,7 @@ const EmendaFormActions = ({
   modoVisualizacao = false,
   onSubmit,
   onCancel,
+  onSimpleBack, // ✅ NOVA PROP
   hasUnsavedChanges = false,
   isEdit = false,
   salvando = false,
@@ -65,31 +66,31 @@ const EmendaFormActions = ({
 
   return (
     <div style={styles.buttonContainer}>
-      {/* Botão Voltar apenas no modo edição */}
-      {modo === "editar" && (
-        <button
-          type="button"
-          onClick={handleVoltar}
-          style={styles.backButton}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a6268")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#6c757d")}
-        >
-          ← Voltar
-        </button>
-      )}
-
       {/* Botões principais (não mostrar no modo visualização) */}
       {!modoVisualizacao && (
         <>
-          <button
-            type="button"
-            onClick={handleCancel}
-            style={styles.cancelButton}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#c82333")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "#dc3545")}
-          >
-            ❌ Cancelar
-          </button>
+          {/* ✅ BOTÃO INTELIGENTE: Voltar vs Cancelar */}
+          {!hasUnsavedChanges ? (
+            <button
+              type="button"
+              onClick={onSimpleBack || handleCancel}
+              style={styles.backButton}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#5a6268")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#6c757d")}
+            >
+              ← Voltar
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleCancel}
+              style={styles.cancelButton}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#c82333")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#dc3545")}
+            >
+              ❌ Cancelar
+            </button>
+          )}
 
           <button
             type="submit"
