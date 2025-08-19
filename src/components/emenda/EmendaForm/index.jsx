@@ -50,22 +50,6 @@ const EmendaForm = () => {
   const [salvando, setSalvando] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
-  // ✅ NOVA FUNÇÃO: Detectar se formulário foi modificado
-  const isFormModified = () => {
-    const fieldsToCheck = [
-      'numero', 'autor', 'municipio', 'valor', 'programa', 
-      'objeto', 'beneficiario', 'banco', 'agencia', 'conta'
-    ];
-    
-    return fieldsToCheck.some(field => {
-      const value = formData[field];
-      return value && value.toString().trim() !== '';
-    });
-  };
-
-  // ✅ NOVO ESTADO: Calcular modificações em tempo real
-  const hasUnsavedChanges = isFormModified();
-
   const [formData, setFormData] = useState({
     numero: "",
     autor: "",
@@ -94,6 +78,22 @@ const EmendaForm = () => {
     acoesServicos: [],
     observacoes: "",
   });
+
+  // ✅ FUNÇÃO MOVIDA PARA APÓS formData: Detectar se formulário foi modificado
+  const isFormModified = () => {
+    const fieldsToCheck = [
+      'numero', 'autor', 'municipio', 'valor', 'programa', 
+      'objeto', 'beneficiario', 'banco', 'agencia', 'conta'
+    ];
+    
+    return fieldsToCheck.some(field => {
+      const value = formData[field];
+      return value && value.toString().trim() !== '';
+    });
+  };
+
+  // ✅ CALCULAR MODIFICAÇÕES: Estado calculado em tempo real
+  const hasUnsavedChanges = isFormModified();
 
   const [expandedSections, setExpandedSections] = useState({
     identificacao: true,
