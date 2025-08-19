@@ -81,7 +81,6 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             name="objeto"
             value={formData.objeto || ""}
             onChange={onChange}
-            placeholder="Ex: Custeio da atenção primária à saúde"
             style={{
               ...styles.input,
               ...(fieldErrors.objeto && styles.inputError),
@@ -222,7 +221,6 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             name="valor"
             value={formData.valor || ""}
             onChange={handleInputChange}
-            placeholder="R$ 0,00"
             style={{
               ...styles.input,
               ...styles.inputMoney,
@@ -320,7 +318,7 @@ const styles = {
     display: "block",
     fontWeight: "500",
   },
-  
+
 };
 
 export default DadosBasicos;

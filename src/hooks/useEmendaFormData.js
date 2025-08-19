@@ -77,169 +77,48 @@ export const useEmendaFormData = () => {
 
   const hasUnsavedChanges = isFormModified();
 
-  // 🚨 VALIDAÇÕES ABSOLUTAS DE DATAS - ZERO TOLERÂNCIA
+  // ✅ VALIDAÇÃO RIGOROSA - ZERO TOLERÂNCIA
   const getFieldErrors = () => {
     const errors = {};
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
 
-    // CAMPOS OBRIGATÓRIOS
-    if (!formData.numero?.trim())
-      errors.numero = "Número da emenda é obrigatório";
-    if (!formData.autor?.trim()) errors.autor = "Parlamentar é obrigatório";
-    if (!formData.municipio?.trim())
-      errors.municipio = "Município é obrigatório";
-    if (!formData.uf?.trim()) errors.uf = "UF é obrigatória";
-    if (!formData.programa?.trim()) errors.programa = "Programa é obrigatório";
-    if (!formData.objeto?.trim())
-      errors.objeto = "Objeto da Proposta é obrigatório";
-    if (!formData.beneficiario?.trim())
-      errors.beneficiario = "Beneficiário (CNPJ) é obrigatório";
-    if (!formData.valor?.toString().trim())
-      errors.valor = "Valor do Recurso é obrigatório";
+    // CAMPOS OBRIGATÓRIOS - ZERO TOLERÂNCIA
+    if (!formData.numero?.trim()) errors.numero = "🚨 Número da emenda é obrigatório";
+    if (!formData.autor?.trim()) errors.autor = "🚨 Parlamentar é obrigatório";
+    if (!formData.municipio?.trim()) errors.municipio = "🚨 Município é obrigatório";
+    if (!formData.uf?.trim()) errors.uf = "🚨 UF é obrigatória";
+    if (!formData.programa?.trim()) errors.programa = "🚨 Programa é obrigatório";
+    if (!formData.objeto?.trim()) errors.objeto = "🚨 Objeto da Proposta é obrigatório";
+    if (!formData.beneficiario?.trim()) errors.beneficiario = "🚨 Beneficiário é obrigatório";
+    if (!formData.valor?.toString().trim()) errors.valor = "🚨 Valor é obrigatório";
 
-    // PARSING SEGURO DE DATAS
-    const parseDate = (dateString) => {
-      if (!dateString || !dateString.trim()) return null;
-      const date = new Date(dateString);
-      return isNaN(date.getTime()) ? "INVALID" : date;
-    };
-
-    const dataAprov = parseDate(formData.dataAprovacao);
-    const dataVal = parseDate(formData.dataValidade);
-    const dataOB = parseDate(formData.dataOb);
-    const dataInicio = parseDate(formData.inicioExecucao);
-    const dataFinal = parseDate(formData.finalExecucao);
-
-    // 🚨 VALIDAÇÕES CRÍTICAS DE DATAS
-    // 1️⃣ DATA DE APROVAÇÃO - OBRIGATÓRIA
-    if (!formData.dataAprovacao?.trim()) {
+    // DATAS OBRIGATÓRIAS
+    if (!formData.dataAprovacao?.trim() || formData.dataAprovacao === "dd/mm/aaaa") {
       errors.dataAprovacao = "🚨 Data de Aprovação é obrigatória";
-    } else if (dataAprov === "INVALID") {
-      errors.dataAprovacao = "🚨 Data de Aprovação inválida";
-    } else {
-      if (dataAprov.getFullYear() < 2020) {
-        errors.dataAprovacao =
-          "🚨 Data de Aprovação não pode ser anterior a 2020";
-      }
-      if (dataAprov > hoje) {
-        errors.dataAprovacao = "🚨 Data de Aprovação não pode ser futura";
-      }
     }
-
-    // 2️⃣ DATA DE VALIDADE - OBRIGATÓRIA
-    if (!formData.dataValidade?.trim()) {
+    if (!formData.dataValidade?.trim() || formData.dataValidade === "dd/mm/aaaa") {
       errors.dataValidade = "🚨 Data de Validade é obrigatória";
-    } else if (dataVal === "INVALID") {
-      errors.dataValidade = "🚨 Data de Validade inválida";
+    }
+
+    // AÇÕES E SERVIÇOS OBRIGATÓRIAS
+    if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
+      errors.acoesServicos = "🚨 Pelo menos uma meta deve ser cadastrada";
     } else {
-      if (dataVal <= hoje) {
-        errors.dataValidade = "🚨 Data de Validade deve ser futura";
-      }
-      if (dataAprov && dataAprov !== "INVALID" && dataVal <= dataAprov) {
-        errors.dataValidade =
-          "🚨 Data de Validade deve ser posterior à Data de Aprovação";
-      }
-    }
-
-    // 3️⃣ DATA OB - SE PREENCHIDA, VALIDAR
-    if (formData.dataOb?.trim()) {
-      if (dataOB === "INVALID") {
-        errors.dataOb = "🚨 Data do OB inválida";
-      } else {
-        if (dataAprov && dataAprov !== "INVALID" && dataOB < dataAprov) {
-          errors.dataOb =
-            "🚨 Data do OB não pode ser anterior à Data de Aprovação";
-        }
-        if (dataInicio && dataInicio !== "INVALID" && dataOB > dataInicio) {
-          errors.dataOb =
-            "🚨 Data do OB deve ser anterior ou igual ao Início da Execução";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataOB > dataVal) {
-          errors.dataOb =
-            "🚨 Data do OB não pode ser posterior à Data de Validade";
-        }
-      }
-    }
-
-    // 4️⃣ INÍCIO DA EXECUÇÃO - SE PREENCHIDA
-    if (formData.inicioExecucao?.trim()) {
-      if (dataInicio === "INVALID") {
-        errors.inicioExecucao = "🚨 Data de Início de Execução inválida";
-      } else {
-        if (dataAprov && dataAprov !== "INVALID" && dataInicio < dataAprov) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução não pode ser anterior à Data de Aprovação";
-        }
-        if (dataOB && dataOB !== "INVALID" && dataInicio < dataOB) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução deve ser posterior ou igual à Data do OB";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataInicio > dataVal) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução não pode ser posterior à Data de Validade";
-        }
-      }
-    }
-
-    // 5️⃣ FINAL DA EXECUÇÃO - SE PREENCHIDA
-    if (formData.finalExecucao?.trim()) {
-      if (dataFinal === "INVALID") {
-        errors.finalExecucao = "🚨 Data de Final de Execução inválida";
-      } else {
-        if (dataInicio && dataInicio !== "INVALID" && dataFinal <= dataInicio) {
-          errors.finalExecucao =
-            "🚨 Final da Execução deve ser posterior ao Início da Execução";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataFinal > dataVal) {
-          errors.finalExecucao =
-            "🚨 Final da Execução não pode ser posterior à Data de Validade";
-        }
-        if (dataAprov && dataAprov !== "INVALID" && dataFinal < dataAprov) {
-          errors.finalExecucao =
-            "🚨 Final da Execução não pode ser anterior à Data de Aprovação";
-        }
-        if (dataOB && dataOB !== "INVALID" && dataFinal < dataOB) {
-          errors.finalExecucao =
-            "🚨 Final da Execução deve ser posterior à Data do OB";
-        }
-      }
-    }
-
-    // VALIDAÇÕES DE CNPJ
-    if (formData.cnpj) {
-      const cnpjLimpo = limparCNPJ(formData.cnpj);
-      if (cnpjLimpo && cnpjLimpo.length === 14) {
-        if (!validarCNPJ(formData.cnpj)) {
-          errors.cnpj = "CNPJ do município é inválido";
-        }
-      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
-        errors.cnpj = "CNPJ do município está incompleto";
-      }
-    }
-
-    if (formData.beneficiario) {
-      const cnpjLimpo = limparCNPJ(formData.beneficiario);
-      if (cnpjLimpo && cnpjLimpo.length === 14) {
-        if (!validarCNPJ(formData.beneficiario)) {
-          errors.beneficiario = "CNPJ do beneficiário é inválido";
-        }
-      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
-        errors.beneficiario = "CNPJ do beneficiário está incompleto";
-      }
-    }
-
-    // VALIDAÇÃO DE VALOR
-    if (formData.valor) {
-      const valorNumerico = parseFloat(
-        formData.valor
-          .toString()
-          .replace(/[R$\s]/g, "")
-          .replace(/\./g, "")
-          .replace(",", "."),
+      const hasValidMeta = formData.acoesServicos.some(meta => 
+        meta.descricao?.trim() && meta.quantidade > 0
       );
-      if (isNaN(valorNumerico) || valorNumerico <= 0) {
-        errors.valor = "Valor deve ser maior que zero";
+      if (!hasValidMeta) {
+        errors.acoesServicos = "🚨 Pelo menos uma meta válida deve ser preenchida";
+      }
+    }
+
+    // Validação de datas (se preenchidas)
+    const hoje = new Date();
+    const dataAprovacao = formData.dataAprovacao ? new Date(formData.dataAprovacao) : null;
+    const dataValidade = formData.dataValidade ? new Date(formData.dataValidade) : null;
+
+    if (dataAprovacao && dataValidade) {
+      if (dataValidade <= dataAprovacao) {
+        errors.dataValidade = "Data de validade deve ser posterior à data de aprovação";
       }
     }
 
@@ -559,45 +438,51 @@ export const useEmendaFormData = () => {
   // 💾 LÓGICA DE SALVAMENTO
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
+    setToast({ show: false, message: "", type: "" });
 
-    // VALIDAÇÃO COM FEEDBACK VISUAL
-    const fieldErrorsResult = getOrderedFieldErrors();
-
-    if (Object.keys(fieldErrorsResult).length > 0) {
-      setFieldErrors(fieldErrorsResult);
-
-      const errorList = Object.values(fieldErrorsResult);
-      setToast({
-        show: true,
-        message: `🚨 Existem campos que precisam ser preenchidos corretamente:\n\n${errorList.map((err) => `• ${err}`).join("\n")}\n\n🔍 Os campos com erro estão destacados em vermelho.`,
-        type: "error",
-      });
-
-      setTimeout(() => {
-        focusFirstErrorField(fieldErrorsResult);
-      }, 100);
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    // VALIDAÇÃO CRÍTICA
-    const criticalErrors = criticalValidation();
-    if (criticalErrors.length > 0) {
-      setToast({
-        show: true,
-        message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n⚠️ O sistema não pode salvar emendas com datas inválidas.`,
-        type: "error",
-      });
-      return;
-    }
-
-    setFieldErrors({});
-
-    if (salvando) return;
-    setSalvando(true);
+    // Atualizar data automaticamente
+    const dataAtual = new Date().toISOString().split("T")[0];
+    setFormData(prev => ({ ...prev, dataUltimaAtualizacao: dataAtual }));
 
     try {
+      // VALIDAÇÃO COM FEEDBACK VISUAL
+      const fieldErrorsResult = getOrderedFieldErrors();
+
+      if (Object.keys(fieldErrorsResult).length > 0) {
+        setFieldErrors(fieldErrorsResult);
+
+        const errorList = Object.values(fieldErrorsResult);
+        setToast({
+          show: true,
+          message: `🚨 Existem campos que precisam ser preenchidos corretamente:\n\n${errorList.map((err) => `• ${err}`).join("\n")}\n\n🔍 Os campos com erro estão destacados em vermelho.`,
+          type: "error",
+        });
+
+        setTimeout(() => {
+          focusFirstErrorField(fieldErrorsResult);
+        }, 100);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+
+      // VALIDAÇÃO CRÍTICA
+      const criticalErrors = criticalValidation();
+      if (criticalErrors.length > 0) {
+        setToast({
+          show: true,
+          message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n⚠️ O sistema não pode salvar emendas com datas inválidas.`,
+          type: "error",
+        });
+        return;
+      }
+
+      setFieldErrors({});
+
+      if (salvando) return;
+      setSalvando(true);
+
       const valorNumerico = parseFloat(
         formData.valor
           ?.toString()

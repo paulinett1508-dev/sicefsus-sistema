@@ -507,20 +507,53 @@ const styles = {
   },
 
   removeButton: {
-    background: "none",
+    backgroundColor: "#dc3545",
+    color: "white",
     border: "none",
-    fontSize: "16px",
-    cursor: "pointer",
-    padding: "4px 8px",
+    padding: "6px 12px",
     borderRadius: "4px",
-    transition: "background-color 0.2s ease",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "500",
   },
-
-  metaDetails: {
-    fontSize: "13px",
+  requiredBadge: {
+    color: "#dc3545",
+    fontSize: "11px",
+    fontWeight: "600",
+    marginLeft: "10px",
+    backgroundColor: "#f8d7da",
+    padding: "3px 8px",
+    borderRadius: "4px",
+    border: "1px solid #f5c6cb",
+  },
+  emptyAlert: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "#fff3cd",
+    border: "1px solid #ffeaa7",
+    borderRadius: "8px",
+    marginBottom: "20px",
+  },
+  alertIcon: {
+    fontSize: "24px",
+  },
+  alertText: {
+    color: "#856404",
+    fontSize: "14px",
     lineHeight: "1.4",
   },
-
+  globalError: {
+    backgroundColor: "#f8d7da",
+    color: "#721c24",
+    padding: "12px 16px",
+    borderRadius: "6px",
+    border: "1px solid #f5c6cb",
+    marginBottom: "20px",
+    fontSize: "14px",
+    fontWeight: "500",
+  },
   metasTotal: {
     marginTop: "16px",
     padding: "12px",

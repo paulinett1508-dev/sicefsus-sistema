@@ -222,6 +222,48 @@ const Identificacao = ({
             <small style={styles.errorText}>{errors.municipio}</small>
           )}
         </div>
+
+        {/* Campo Número (adicionado conforme patch) */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Número da Emenda <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="numero"
+            value={formData.numero || ""}
+            onChange={onChange}
+            style={{
+              ...styles.input,
+              ...(errors.numero ? styles.inputError : {}),
+            }}
+            required
+          />
+          {errors.numero && (
+            <small style={styles.errorText}>{errors.numero}</small>
+          )}
+        </div>
+
+        {/* Campo Autor (adicionado conforme patch) */}
+        <div style={styles.formGroup}>
+          <label style={styles.label}>
+            Autor da Emenda <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            name="autor"
+            value={formData.autor || ""}
+            onChange={onChange}
+            style={{
+              ...styles.input,
+              ...(errors.autor ? styles.inputError : {}),
+            }}
+            required
+          />
+          {errors.autor && (
+            <small style={styles.errorText}>{errors.autor}</small>
+          )}
+        </div>
       </div>
     </fieldset>
   );

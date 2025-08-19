@@ -380,6 +380,33 @@ const styles = {
     flexShrink: 0,
     marginRight: "4px",
   },
+  autoLabel: {
+    color: "#28a745",
+    fontSize: "11px",
+    fontWeight: "500",
+    marginLeft: "8px",
+    backgroundColor: "#d4edda",
+    padding: "2px 6px",
+    borderRadius: "3px",
+  },
+  requiredLabel: {
+    color: "#dc3545",
+    fontSize: "11px",
+    fontWeight: "500",
+    marginLeft: "8px",
+    backgroundColor: "#f8d7da",
+    padding: "2px 6px",
+    borderRadius: "3px",
+  },
+  optionalLabel: {
+    color: "#6c757d",
+    fontSize: "11px",
+    fontWeight: "500",
+    marginLeft: "8px",
+    backgroundColor: "#e9ecef",
+    padding: "2px 6px",
+    borderRadius: "3px",
+  },
 };
 
 export default Cronograma;
