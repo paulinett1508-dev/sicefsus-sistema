@@ -613,8 +613,11 @@ export const useEmendaFormData = () => {
     // SEÇÃO DADOS BÁSICOS
     if (!formData.programa?.trim())
       errors.push("❌ CRÍTICO: Programa obrigatório");
-    if (!formData.objeto?.trim())
-      errors.push("❌ CRÍTICO: Objeto da Proposta obrigatório");
+    // Validação crítica melhorada do objeto
+    const objetoLimpo = formData.objeto?.toString().replace(/\s+/g, ' ').trim();
+    if (!objetoLimpo || objetoLimpo.length < 3) {
+      errors.push("❌ CRÍTICO: Objeto da Proposta obrigatório (mín. 3 caracteres)");
+    }
     if (!formData.valor?.toString().trim())
       errors.push("❌ CRÍTICO: Valor do Recurso obrigatório");
 
@@ -732,9 +735,16 @@ export const useEmendaFormData = () => {
           dataFinal <= dataVal
         )
       ) {
-        errors.push(
-          "❌ CRÍTICO: Sequência cronológica inválida - Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade",
-        );
+        if (
+          !errors.dataAprovacao &&
+          !errors.dataOb &&
+          !errors.inicioExecucao &&
+          !errors.finalExecucao &&
+          !errors.dataValidade
+        ) {
+          errors.cronogramaGeral =
+            "🚨 Sequência cronológica inválida: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade";
+        }
       }
     }
 
@@ -766,7 +776,7 @@ export const useEmendaFormData = () => {
           .map((err) => `• ${err}`)
           .join(
             "\n",
-          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n❌ TODAS AS DATAS DO CRONOGRAMA SÃO OBRIGATÓRIAS.`,
+          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n⚠️ TODAS AS DATAS DO CRONOGRAMA SÃO OBRIGATÓRIAS.`,
         type: "error",
       });
 
