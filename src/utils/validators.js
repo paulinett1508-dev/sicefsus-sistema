@@ -690,111 +690,133 @@ export const useValidacaoDatasDespesa = (emenda) => {
  */
 export const validarCronogramaEmenda = (cronograma) => {
   const erros = {};
-  const hoje = new Date();
-  hoje.setHours(23, 59, 59, 999); // Até final do dia atual
+  const alertas = [];
 
-  // Normalizar datas
-  const normalizarData = (dataStr) => {
-    if (!dataStr) return null;
-    const data = new Date(dataStr);
-    return isNaN(data.getTime()) ? null : data;
+  const {
+    dataAprovacao,
+    dataOb,
+    inicioExecucao,
+    finalExecucao,
+    dataValidade
+  } = cronograma || {};
+
+  // Normalizar todas as datas
+  const normalizarDataInput = (dataInput) => {
+    if (!dataInput) return null;
+
+    let data;
+
+    // Se já é Date
+    if (dataInput instanceof Date) {
+      data = dataInput;
+    }
+    // Se é string
+    else if (typeof dataInput === "string") {
+      // Limpar espaços
+      const dataLimpa = dataInput.trim();
+      if (!dataLimpa) return null;
+
+      // Tentar converter
+      data = new Date(dataLimpa);
+    }
+    else {
+      return null;
+    }
+
+    // Verificar se é válida
+    if (isNaN(data.getTime())) return null;
+
+    // Retornar no formato padrão
+    return data.toISOString().split('T')[0];
   };
 
-  const dataAprovacao = normalizarData(cronograma.dataAprovacao);
-  const dataOb = normalizarData(cronograma.dataOb);
-  const inicioExecucao = normalizarData(cronograma.inicioExecucao);
-  const finalExecucao = normalizarData(cronograma.finalExecucao);
-  const dataValidade = normalizarData(cronograma.dataValidade);
+  const datas = {
+    dataAprovacao: normalizarDataInput(dataAprovacao),
+    dataOb: normalizarDataInput(dataOb),
+    inicioExecucao: normalizarDataInput(inicioExecucao),
+    finalExecucao: normalizarDataInput(finalExecucao),
+    dataValidade: normalizarDataInput(dataValidade)
+  };
 
-  // VALIDAÇÃO 1: Data de Aprovação (obrigatória)
+  // Data atual para comparações
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  // Validações de sequência temporal
+  if (datas.dataAprovacao && datas.dataOb) {
+    if (datas.dataOb < datas.dataAprovacao) {
+      erros.dataOb = "Data do OB não pode ser anterior à data de aprovação";
+    }
+  }
+
+  if (datas.dataOb && datas.inicioExecucao) {
+    if (datas.inicioExecucao < datas.dataOb) {
+      erros.inicioExecucao = "Início da execução não pode ser anterior à data do OB";
+    }
+  }
+
+  if (datas.inicioExecucao && datas.finalExecucao) {
+    if (datas.finalExecucao < datas.inicioExecucao) {
+      erros.finalExecucao = "Final da execução não pode ser anterior ao início";
+    }
+  }
+
+  if (datas.dataAprovacao && datas.dataValidade) {
+    if (datas.dataValidade < datas.dataAprovacao) {
+      erros.dataValidade = "Data de validade não pode ser anterior à aprovação";
+    }
+  }
+
+  // Alertas para datas próximas ao vencimento
+  if (datas.dataValidade) {
+    const diasParaVencimento = Math.ceil((new Date(datas.dataValidade) - hoje) / (1000 * 60 * 60 * 24));
+
+    if (diasParaVencimento < 0) {
+      erros.dataValidade = "Emenda já vencida";
+    } else if (diasParaVencimento <= 30) {
+      alertas.push(`Emenda vence em ${diasParaVencimento} dias`);
+    }
+  }
+
+  // Validar se final da execução não ultrapassa validade
+  if (datas.finalExecucao && datas.dataValidade) {
+    if (datas.finalExecucao > datas.dataValidade) {
+      erros.finalExecucao = "Final da execução não pode ser após a data de validade";
+    }
+  }
+
+  // Validações de obrigatoriedade das datas principais do cronograma
   if (!cronograma.dataAprovacao) {
     erros.dataAprovacao = "Data de aprovação é obrigatória";
-  } else if (!dataAprovacao) {
+  } else if (!datas.dataAprovacao) {
     erros.dataAprovacao = "Data de aprovação inválida";
-  } else if (dataAprovacao > hoje) {
+  } else if (datas.dataAprovacao > hoje) {
     erros.dataAprovacao = "Data de aprovação não pode ser futura";
   }
 
-  // VALIDAÇÃO 2: Data de Validade (obrigatória)
   if (!cronograma.dataValidade) {
     erros.dataValidade = "Data de validade é obrigatória";
-  } else if (!dataValidade) {
+  } else if (!datas.dataValidade) {
     erros.dataValidade = "Data de validade inválida";
   }
 
-  // VALIDAÇÕES CRONOLÓGICAS (apenas se datas existem e são válidas)
-  if (dataAprovacao && dataOb) {
-    if (dataOb < dataAprovacao) {
-      erros.dataOb = "Data OB deve ser posterior à data de aprovação";
-    }
-    if (dataOb > hoje) {
-      erros.dataOb = "Data OB não pode ser futura";
-    }
+  // OB (Ordem de Bloqueio) é opcional, mas se presente, deve ser válida
+  if (cronograma.dataOb && !datas.dataOb) {
+    erros.dataOb = "Data OB inválida";
   }
 
-  if (dataAprovacao && inicioExecucao) {
-    if (inicioExecucao < dataAprovacao) {
-      erros.inicioExecucao = "Início de execução deve ser posterior à aprovação";
-    }
+  // Início e Fim da Execução são opcionais, mas se presentes, devem ser válidos e sequenciais
+  if (cronograma.inicioExecucao && !datas.inicioExecucao) {
+    erros.inicioExecucao = "Início de execução inválido";
   }
-
-  if (inicioExecucao && finalExecucao) {
-    if (finalExecucao < inicioExecucao) {
-      erros.finalExecucao = "Final deve ser posterior ao início de execução";
-    }
-  }
-
-  // VALIDAÇÃO CONTRA VALIDADE DA EMENDA
-  if (dataValidade) {
-    if (dataOb && dataOb > dataValidade) {
-      erros.dataOb = "Data OB deve ser anterior à validade da emenda";
-    }
-    if (inicioExecucao && inicioExecucao > dataValidade) {
-      erros.inicioExecucao = "Início não pode ser posterior à validade";
-    }
-    if (finalExecucao && finalExecucao > dataValidade) {
-      erros.finalExecucao = "Final não pode ser posterior à validade";
-    }
+  if (cronograma.finalExecucao && !datas.finalExecucao) {
+    erros.finalExecucao = "Final de execução inválido";
   }
 
   return {
     valido: Object.keys(erros).length === 0,
     erros,
-    sequenciaCorreta: dataAprovacao && dataOb && dataAprovacao <= dataOb,
-    dentroValidade: dataValidade && (!finalExecucao || finalExecucao <= dataValidade)
+    alertas,
+    datas // Retornar datas normalizadas
   };
-};
-
-/**
- * ✅ NORMALIZAR data de entrada (aceita vários formatos)
- * @param {string|Date} dataInput - Data a ser normalizada
- * @returns {string|null} - Data no formato YYYY-MM-DD ou null
- */
-export const normalizarDataInput = (dataInput) => {
-  if (!dataInput) return null;
-
-  let data;
-  
-  // Se já é Date
-  if (dataInput instanceof Date) {
-    data = dataInput;
-  }
-  // Se é string
-  else if (typeof dataInput === "string") {
-    // Limpar espaços
-    const dataLimpa = dataInput.trim();
-    if (!dataLimpa) return null;
-
-    // Tentar converter
-    data = new Date(dataLimpa);
-  }
-  else {
-    return null;
-  }
-
-  // Verificar se é válida
-  if (isNaN(data.getTime())) return null;
-
-  // Retornar no formato padrão
-  return data.toISOString().split('T')[0];
 };

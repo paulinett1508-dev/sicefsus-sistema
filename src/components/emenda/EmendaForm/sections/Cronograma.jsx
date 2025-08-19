@@ -1,6 +1,9 @@
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx
 import React from "react";
 
+// Importar validação centralizada fora da função para evitar re-importações
+const { validarCronogramaEmenda, normalizarDataInput } = require('../../../utils/validators');
+
 const Cronograma = ({
   formData = {},
   onChange,
@@ -10,14 +13,13 @@ const Cronograma = ({
   // Handler com validação de datas em tempo real
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Normalizar data antes de salvar
-    const { normalizarDataInput } = require('../../../utils/validators');
     const dataNormalizada = normalizarDataInput(value);
-    
+
     // Só aceitar se for válida ou vazia
     const valorFinal = dataNormalizada || value;
-    
+
     onChange?.({ target: { name, value: valorFinal } });
   };
 
@@ -55,7 +57,7 @@ const Cronograma = ({
   const isOBAnteriorAprovacao = (dataOB, dataAprovacao) => {
     if (!dataOB || !dataAprovacao) return false;
     if (!isDataValidaComparacao(dataOB) || !isDataValidaComparacao(dataAprovacao)) return false;
-    
+
     const ob = new Date(dataOB);
     const aprovacao = new Date(dataAprovacao);
     return ob < aprovacao;
@@ -63,9 +65,6 @@ const Cronograma = ({
 
   // Função para obter mensagem de erro específica
   const getDataErrorMessage = (fieldName, value) => {
-    // Importar validação centralizada
-    const { validarCronogramaEmenda, normalizarDataInput } = require('../../../utils/validators');
-    
     if (!value) return null;
 
     // Normalizar entrada
@@ -86,7 +85,7 @@ const Cronograma = ({
 
     // Validar cronograma completo
     const validacao = validarCronogramaEmenda(cronogramaAtual);
-    
+
     // Retornar erro específico do campo
     return validacao.erros[fieldName] || null;
   };
@@ -102,7 +101,7 @@ const Cronograma = ({
       <div style={styles.fluxoBanner}>
         <div style={styles.fluxoIcon}>🔄</div>
         <div style={styles.fluxoContent}>
-          <strong>Fluxo Cronológico:</strong> 
+          <strong>Fluxo Cronológico:</strong>
           <span style={styles.fluxoSequence}>
             Aprovação → OB → Início → Final → Validade
           </span>
