@@ -1,411 +1,421 @@
-// src/components/emenda/EmendaForm/sections/Cronograma.jsx
+// src/components/emenda/EmendaForm/sections/Cronograma.jsx - SIMPLIFICADO
 import React from "react";
 
-// Importar validação centralizada fora da função para evitar re-importações
-import { validarCronogramaEmenda, normalizarDataInput } from '../../../../utils/validators';
-
-const Cronograma = ({
-  formData = {},
-  onChange,
-  disabled = false,
-  fieldErrors = {},
-}) => {
-  // Handler com validação de datas em tempo real
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    // Normalizar data antes de salvar
-    const dataNormalizada = normalizarDataInput(value);
-
-    // Só aceitar se for válida ou vazia
-    const valorFinal = dataNormalizada || value;
-
-    onChange?.({ target: { name, value: valorFinal } });
-  };
-
-  // Validação: Data não pode ser futura (exceto Data de Validade)
-  const isDataFutura = (dataInput) => {
-    if (!dataInput) return false;
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const data = new Date(dataInput);
-    return data > hoje;
-  };
-
-  // Validação: Data deve ser válida para comparação
-  const isDataValidaComparacao = (dataInput) => {
-    if (!dataInput) return false;
-    const data = new Date(dataInput);
-    return !isNaN(data.getTime());
-  };
-
-  // Validação: Verificar se data excede validade da emenda
-  const isDataExcedeValidade = (dataInput, dataValidade) => {
-    if (!dataInput || !dataValidade) return false;
-    if (
-      !isDataValidaComparacao(dataInput) ||
-      !isDataValidaComparacao(dataValidade)
-    )
-      return false;
-
-    const data = new Date(dataInput);
-    const validade = new Date(dataValidade);
-    return data > validade;
-  };
-
-  // Validação específica: OB anterior à aprovação
-  const isOBAnteriorAprovacao = (dataOB, dataAprovacao) => {
-    if (!dataOB || !dataAprovacao) return false;
-    if (!isDataValidaComparacao(dataOB) || !isDataValidaComparacao(dataAprovacao)) return false;
-
-    const ob = new Date(dataOB);
-    const aprovacao = new Date(dataAprovacao);
-    return ob < aprovacao;
-  };
-
-  // Função para obter mensagem de erro específica
-  const getDataErrorMessage = (fieldName, value) => {
-    if (!value) return null;
-
-    // Normalizar entrada
-    const dataNormalizada = normalizarDataInput(value);
-    if (!dataNormalizada) {
-      return "Data inválida";
+const Cronograma = ({ formData, onChange, errors, onClearError }) => {
+  // Handler para limpar erro ao digitar
+  const handleChange = (e) => {
+    const { name } = e.target;
+    onChange(e);
+    if (onClearError && errors[name]) {
+      onClearError(name);
     }
-
-    // Criar cronograma atual para validação completa
-    const cronogramaAtual = {
-      dataAprovacao: normalizarDataInput(formData?.dataAprovacao),
-      dataOb: normalizarDataInput(formData?.dataOb),
-      inicioExecucao: normalizarDataInput(formData?.inicioExecucao),
-      finalExecucao: normalizarDataInput(formData?.finalExecucao),
-      dataValidade: normalizarDataInput(formData?.dataValidade),
-      [fieldName]: dataNormalizada // Aplicar o valor atual
-    };
-
-    // Validar cronograma completo
-    const validacao = validarCronogramaEmenda(cronogramaAtual);
-
-    // Retornar erro específico do campo
-    return validacao.erros[fieldName] || null;
   };
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📅</span>
-        Cronograma
-      </legend>
-
-      {/* 🎯 BANNER EXPLICATIVO DO FLUXO CRONOLÓGICO */}
-      <div style={styles.fluxoBanner}>
-        <div style={styles.fluxoIcon}>🔄</div>
-        <div style={styles.fluxoContent}>
-          <strong>Fluxo Cronológico:</strong>
-          <span style={styles.fluxoSequence}>
-            Aprovação → OB → Início → Final → Validade
-          </span>
-        </div>
+    <div style={styles.sectionContainer}>
+      <div style={styles.sectionHeader}>
+        <h3 style={styles.sectionTitle}>📅 Cronograma</h3>
       </div>
 
-      <div style={styles.formGrid}>
-        {/* 1️⃣ PRIMEIRO: Data de Aprovação - BASE DO PROCESSO */}
+      {/* GRID DE DATAS */}
+      <div style={styles.dateGrid}>
+        {/* DATA DE APROVAÇÃO - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>1</span>
-            Data de Aprovação <span style={styles.required}>*</span>
+            🏛️ Data de Aprovação *
+            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
             name="dataAprovacao"
-            value={formData?.dataAprovacao || ""}
-            onChange={handleInputChange}
+            value={formData.dataAprovacao || ""}
+            onChange={handleChange}
+            required
             style={{
               ...styles.input,
-              ...(fieldErrors?.dataAprovacao && styles.inputError),
-              ...(getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && styles.inputError),
-              borderColor: '#3498db',
-              borderWidth: '2px'
+              ...(errors.dataAprovacao ? styles.inputError : {}),
+              borderColor: errors.dataAprovacao ? "#dc3545" : "#ced4da",
             }}
-            disabled={disabled}
-            required
           />
-          {getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
-            <small style={styles.errorText}>
-              {getDataErrorMessage("dataAprovacao", formData?.dataAprovacao)}
-            </small>
+          {errors.dataAprovacao && (
+            <div style={styles.errorText}>
+              <span style={styles.errorIcon}>🚨</span>
+              {errors.dataAprovacao}
+            </div>
           )}
-          {fieldErrors?.dataAprovacao && !getDataErrorMessage("dataAprovacao", formData?.dataAprovacao) && (
-            <small style={styles.errorText}>Campo obrigatório</small>
-          )}
-          <small style={styles.helperText}>🏛️ Aprovação pelo Congresso Nacional</small>
+          <div style={styles.helperText}>
+            📋 Aprovação pelo Congresso Nacional
+          </div>
         </div>
 
-        {/* 2️⃣ SEGUNDO: Data OB */}
+        {/* DATA OB - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>2</span>
-            Data OB
+            📄 Data OB *<span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
             name="dataOb"
-            value={formData?.dataOb || ""}
-            onChange={handleInputChange}
+            value={formData.dataOb || ""}
+            onChange={handleChange}
+            required
             style={{
               ...styles.input,
-              ...(getDataErrorMessage("dataOb", formData?.dataOb) && styles.inputError),
-              opacity: formData?.dataAprovacao ? 1 : 0.6
+              ...(errors.dataOb ? styles.inputError : {}),
+              borderColor: errors.dataOb ? "#dc3545" : "#ced4da",
             }}
-            disabled={disabled || !formData?.dataAprovacao}
           />
-          {getDataErrorMessage("dataOb", formData?.dataOb) && (
-            <small style={styles.errorText}>
-              {getDataErrorMessage("dataOb", formData?.dataOb)}
-            </small>
+          {errors.dataOb && (
+            <div style={styles.errorText}>
+              <span style={styles.errorIcon}>🚨</span>
+              {errors.dataOb}
+            </div>
           )}
-          <small style={styles.helperText}>🏦 Ordem Bancária (após aprovação)</small>
+          <div style={styles.helperText}>
+            📄 Ordem Bancária (após aprovação)
+          </div>
         </div>
 
-        {/* 3️⃣ TERCEIRO: Início da Execução */}
+        {/* INÍCIO DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>3</span>
-            Início da Execução
+            🚀 Início da Execução *
+            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
             name="inicioExecucao"
-            value={formData?.inicioExecucao || ""}
-            onChange={handleInputChange}
+            value={formData.inicioExecucao || ""}
+            onChange={handleChange}
+            required
             style={{
               ...styles.input,
-              ...(getDataErrorMessage("inicioExecucao", formData?.inicioExecucao) && styles.inputError),
-              opacity: formData?.dataAprovacao ? 1 : 0.6
+              ...(errors.inicioExecucao ? styles.inputError : {}),
+              borderColor: errors.inicioExecucao ? "#dc3545" : "#ced4da",
             }}
-            disabled={disabled || !formData?.dataAprovacao}
           />
-          {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao) && (
-            <small style={styles.errorText}>
-              {getDataErrorMessage("inicioExecucao", formData?.inicioExecucao)}
-            </small>
+          {errors.inicioExecucao && (
+            <div style={styles.errorText}>
+              <span style={styles.errorIcon}>🚨</span>
+              {errors.inicioExecucao}
+            </div>
           )}
-          <small style={styles.helperText}>🚀 Início das ações executivas</small>
+          <div style={styles.helperText}>🚀 Início das ações executivas</div>
         </div>
 
-        {/* 4️⃣ QUARTO: Final da Execução */}
+        {/* FINAL DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>4</span>
-            Final da Execução
+            🏁 Final da Execução *
+            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
             name="finalExecucao"
-            value={formData?.finalExecucao || ""}
-            onChange={handleInputChange}
+            value={formData.finalExecucao || ""}
+            onChange={handleChange}
+            required
             style={{
               ...styles.input,
-              ...(getDataErrorMessage("finalExecucao", formData?.finalExecucao) && styles.inputError),
-              opacity: formData?.inicioExecucao ? 1 : 0.6
+              ...(errors.finalExecucao ? styles.inputError : {}),
+              borderColor: errors.finalExecucao ? "#dc3545" : "#ced4da",
             }}
-            disabled={disabled || !formData?.inicioExecucao}
           />
-          {getDataErrorMessage("finalExecucao", formData?.finalExecucao) && (
-            <small style={styles.errorText}>
-              {getDataErrorMessage("finalExecucao", formData?.finalExecucao)}
-            </small>
+          {errors.finalExecucao && (
+            <div style={styles.errorText}>
+              <span style={styles.errorIcon}>🚨</span>
+              {errors.finalExecucao}
+            </div>
           )}
-          <small style={styles.helperText}>🏁 Conclusão das ações</small>
+          <div style={styles.helperText}>🏁 Conclusão das ações</div>
         </div>
 
-        {/* 5️⃣ QUINTO: Data de Validade */}
+        {/* DATA DE VALIDADE - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>5</span>
-            Data de Validade <span style={styles.required}>*</span>
+            ⏰ Data de Validade *
+            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
             name="dataValidade"
-            value={formData?.dataValidade || ""}
-            onChange={handleInputChange}
+            value={formData.dataValidade || ""}
+            onChange={handleChange}
+            required
             style={{
               ...styles.input,
-              ...(fieldErrors?.dataValidade && styles.inputError),
-              borderColor: '#e74c3c',
-              borderWidth: '2px'
+              ...(errors.dataValidade ? styles.inputError : {}),
+              borderColor: errors.dataValidade ? "#dc3545" : "#ced4da",
             }}
-            disabled={disabled}
-            required
           />
-          {fieldErrors?.dataValidade && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+          {errors.dataValidade && (
+            <div style={styles.errorText}>
+              <span style={styles.errorIcon}>🚨</span>
+              {errors.dataValidade}
+            </div>
           )}
-          <small style={styles.helperText}>⏰ Prazo legal final</small>
+          <div style={styles.helperText}>⏰ Prazo legal final</div>
         </div>
 
-        {/* 📊 ÚLTIMO: Data da Última Atualização */}
+        {/* DATA DA ÚLTIMA ATUALIZAÇÃO - AUTOMÁTICA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            <span style={styles.stepBadge}>📊</span>
-            Data da Última Atualização
+            📅 Data da Última Atualização
+            <span style={styles.autoLabel}>AUTOMÁTICA</span>
           </label>
           <input
             type="date"
-            value={formData?.dataUltimaAtualizacao || ""}
+            name="dataUltimaAtualizacao"
+            value={new Date().toISOString().split("T")[0]}
+            readOnly
+            disabled
             style={{
               ...styles.input,
               backgroundColor: "#f8f9fa",
+              color: "#6c757d",
               cursor: "not-allowed",
             }}
-            disabled={true}
-            readOnly
           />
-          <small style={styles.helperText}>🔄 Atualizada automaticamente</small>
+          <div style={styles.helperText}>
+            ✅ Atualizada automaticamente pelo sistema
+          </div>
         </div>
       </div>
-    </fieldset>
+
+      {/* ERRO GERAL DE CRONOGRAMA */}
+      {errors.cronogramaGeral && (
+        <div style={styles.globalError}>
+          <div style={styles.errorIcon}>🚨</div>
+          <div>
+            <strong>Erro na Sequência Cronológica:</strong>
+            <br />
+            {errors.cronogramaGeral}
+          </div>
+        </div>
+      )}
+
+      {/* VALIDAÇÃO VISUAL DAS DATAS */}
+      <div style={styles.validationSummary}>
+        <div style={styles.validationHeader}>
+          📊 Status das Datas Obrigatórias:
+        </div>
+        <div style={styles.validationGrid}>
+          <div
+            style={{
+              ...styles.validationItem,
+              ...(formData.dataAprovacao
+                ? styles.validationValid
+                : styles.validationInvalid),
+            }}
+          >
+            {formData.dataAprovacao ? "✅" : "❌"} Aprovação
+          </div>
+          <div
+            style={{
+              ...styles.validationItem,
+              ...(formData.dataOb
+                ? styles.validationValid
+                : styles.validationInvalid),
+            }}
+          >
+            {formData.dataOb ? "✅" : "❌"} OB
+          </div>
+          <div
+            style={{
+              ...styles.validationItem,
+              ...(formData.inicioExecucao
+                ? styles.validationValid
+                : styles.validationInvalid),
+            }}
+          >
+            {formData.inicioExecucao ? "✅" : "❌"} Início
+          </div>
+          <div
+            style={{
+              ...styles.validationItem,
+              ...(formData.finalExecucao
+                ? styles.validationValid
+                : styles.validationInvalid),
+            }}
+          >
+            {formData.finalExecucao ? "✅" : "❌"} Final
+          </div>
+          <div
+            style={{
+              ...styles.validationItem,
+              ...(formData.dataValidade
+                ? styles.validationValid
+                : styles.validationInvalid),
+            }}
+          >
+            {formData.dataValidade ? "✅" : "❌"} Validade
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-// ✅ ESTILOS MANTIDOS (sem o infoBox)
+// ============================================
+// 🎨 ESTILOS SIMPLIFICADOS
+// ============================================
+
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  sectionContainer: {
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    padding: "24px",
+    backgroundColor: "#fdfdfd",
+    marginBottom: "24px",
   },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+
+  sectionHeader: {
+    marginBottom: "20px",
+    paddingBottom: "12px",
+    borderBottom: "2px solid #007bff",
+  },
+
+  sectionTitle: {
+    margin: "0 0 8px 0",
+    color: "#333",
+    fontSize: "20px",
+    fontWeight: "600",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
-  legendIcon: {
-    fontSize: "18px",
-  },
-  formGrid: {
+
+  dateGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
-    marginBottom: "20px",
+    marginBottom: "24px",
   },
+
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
   },
+
   label: {
-    fontWeight: "bold",
-    color: "#333",
     fontSize: "14px",
+    fontWeight: "500",
+    marginBottom: "6px",
+    color: "#333",
     display: "flex",
     alignItems: "center",
-    gap: "5px",
+    gap: "4px",
   },
-  required: {
+
+  requiredLabel: {
     color: "#dc3545",
+    fontSize: "10px",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    marginLeft: "4px",
+    backgroundColor: "#fff5f5",
+    padding: "2px 6px",
+    borderRadius: "8px",
+    border: "1px solid #f8d7da",
   },
+
+  autoLabel: {
+    color: "#28a745",
+    fontSize: "10px",
+    fontWeight: "500",
+    textTransform: "uppercase",
+    marginLeft: "4px",
+    backgroundColor: "#d4edda",
+    padding: "2px 6px",
+    borderRadius: "8px",
+    border: "1px solid #c3e6cb",
+  },
+
   input: {
-    padding: "12px",
-    borderWidth: "2px",
-    borderStyle: "solid",
-    borderColor: "#dee2e6",
-    borderRadius: "6px",
+    padding: "10px 12px",
+    border: "1px solid #ced4da",
+    borderRadius: "4px",
     fontSize: "14px",
-    transition: "all 0.3s ease",
-    backgroundColor: "white",
+    transition: "all 0.2s ease",
+    fontFamily: "monospace",
   },
+
   inputError: {
     borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+    backgroundColor: "#fff5f5",
+    boxShadow: "0 0 8px rgba(220, 53, 69, 0.4)",
   },
+
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "4px",
-    display: "block",
-    fontWeight: "bold",
+    fontWeight: "500",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
   },
+
+  errorIcon: {
+    fontSize: "14px",
+  },
+
   helperText: {
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6c757d",
     marginTop: "4px",
+    fontStyle: "italic",
   },
-  fluxoBanner: {
-    backgroundColor: "#e8f4fd",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    marginBottom: "20px",
-    border: "1px solid #3498db",
+
+  globalError: {
     display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  fluxoIcon: {
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-  fluxoContent: {
-    fontSize: "14px",
-    color: "#2c3e50",
-  },
-  fluxoSequence: {
-    marginLeft: "8px",
-    fontFamily: "monospace",
-    color: "#3498db",
-    fontWeight: "bold",
-  },
-  stepBadge: {
-    width: "18px",
-    height: "18px",
-    borderRadius: "50%",
-    backgroundColor: "#3498db",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
-    fontWeight: "bold",
-    flexShrink: 0,
-    marginRight: "4px",
-  },
-  autoLabel: {
-    color: "#28a745",
-    fontSize: "11px",
-    fontWeight: "500",
-    marginLeft: "8px",
-    backgroundColor: "#d4edda",
-    padding: "2px 6px",
-    borderRadius: "3px",
-  },
-  requiredLabel: {
-    color: "#dc3545",
-    fontSize: "11px",
-    fontWeight: "500",
-    marginLeft: "8px",
+    alignItems: "flex-start",
+    gap: "8px",
     backgroundColor: "#f8d7da",
-    padding: "2px 6px",
-    borderRadius: "3px",
+    border: "1px solid #f5c6cb",
+    borderRadius: "6px",
+    padding: "12px",
+    marginBottom: "16px",
   },
-  optionalLabel: {
-    color: "#6c757d",
-    fontSize: "11px",
+
+  validationSummary: {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #dee2e6",
+    borderRadius: "6px",
+    padding: "16px",
+  },
+
+  validationHeader: {
+    fontSize: "14px",
     fontWeight: "500",
-    marginLeft: "8px",
-    backgroundColor: "#e9ecef",
-    padding: "2px 6px",
-    borderRadius: "3px",
+    color: "#495057",
+    marginBottom: "12px",
+  },
+
+  validationGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(5, 1fr)",
+    gap: "8px",
+  },
+
+  validationItem: {
+    padding: "8px 12px",
+    borderRadius: "4px",
+    fontSize: "12px",
+    fontWeight: "500",
+    textAlign: "center",
+  },
+
+  validationValid: {
+    backgroundColor: "#d4edda",
+    color: "#155724",
+    border: "1px solid #c3e6cb",
+  },
+
+  validationInvalid: {
+    backgroundColor: "#f8d7da",
+    color: "#721c24",
+    border: "1px solid #f5c6cb",
   },
 };
 

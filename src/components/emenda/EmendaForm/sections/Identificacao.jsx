@@ -1,5 +1,5 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// ✅ CORREÇÃO COMPLETA: Layout e lógica idênticos ao DadosBasicos
+// ✅ CORREÇÃO COMPLETA: Removidos campos redundantes (Número e Autor)
 
 import React, { useState, useEffect, useContext } from "react";
 import CNPJInput from "../../../CNPJInput";
@@ -135,7 +135,6 @@ const Identificacao = ({
               });
             }}
             required={true}
-            placeholder="00.000.000/0000-00"
             showValidation={true}
             disabled={disabled}
             style={styles.formGroup}
@@ -220,48 +219,6 @@ const Identificacao = ({
 
           {errors.municipio && (
             <small style={styles.errorText}>{errors.municipio}</small>
-          )}
-        </div>
-
-        {/* Campo Número (adicionado conforme patch) */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Número da Emenda <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="numero"
-            value={formData.numero || ""}
-            onChange={onChange}
-            style={{
-              ...styles.input,
-              ...(errors.numero ? styles.inputError : {}),
-            }}
-            required
-          />
-          {errors.numero && (
-            <small style={styles.errorText}>{errors.numero}</small>
-          )}
-        </div>
-
-        {/* Campo Autor (adicionado conforme patch) */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Autor da Emenda <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="autor"
-            value={formData.autor || ""}
-            onChange={onChange}
-            style={{
-              ...styles.input,
-              ...(errors.autor ? styles.inputError : {}),
-            }}
-            required
-          />
-          {errors.autor && (
-            <small style={styles.errorText}>{errors.autor}</small>
           )}
         </div>
       </div>

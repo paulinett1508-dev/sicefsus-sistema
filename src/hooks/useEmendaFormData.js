@@ -1,4 +1,4 @@
-// src/hooks/useEmendaFormData.js - Estado e Lógica Completa
+// src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO PARA SUBSTITUIÇÃO
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -77,48 +77,295 @@ export const useEmendaFormData = () => {
 
   const hasUnsavedChanges = isFormModified();
 
-  // ✅ VALIDAÇÃO RIGOROSA - ZERO TOLERÂNCIA
+  // 🚨 VALIDAÇÕES ABSOLUTAS - TODAS AS DATAS OBRIGATÓRIAS
   const getFieldErrors = () => {
     const errors = {};
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
 
-    // CAMPOS OBRIGATÓRIOS - ZERO TOLERÂNCIA
-    if (!formData.numero?.trim()) errors.numero = "🚨 Número da emenda é obrigatório";
-    if (!formData.autor?.trim()) errors.autor = "🚨 Parlamentar é obrigatório";
-    if (!formData.municipio?.trim()) errors.municipio = "🚨 Município é obrigatório";
-    if (!formData.uf?.trim()) errors.uf = "🚨 UF é obrigatória";
-    if (!formData.programa?.trim()) errors.programa = "🚨 Programa é obrigatório";
-    if (!formData.objeto?.trim()) errors.objeto = "🚨 Objeto da Proposta é obrigatório";
-    if (!formData.beneficiario?.trim()) errors.beneficiario = "🚨 Beneficiário é obrigatório";
-    if (!formData.valor?.toString().trim()) errors.valor = "🚨 Valor é obrigatório";
-
-    // DATAS OBRIGATÓRIAS
-    if (!formData.dataAprovacao?.trim() || formData.dataAprovacao === "dd/mm/aaaa") {
-      errors.dataAprovacao = "🚨 Data de Aprovação é obrigatória";
+    // ============================================
+    // 🚨 SEÇÃO IDENTIFICAÇÃO - OBRIGATÓRIA
+    // ============================================
+    if (!formData.numero?.trim()) {
+      errors.numero = "🚨 Número da emenda é obrigatório";
     }
-    if (!formData.dataValidade?.trim() || formData.dataValidade === "dd/mm/aaaa") {
-      errors.dataValidade = "🚨 Data de Validade é obrigatória";
+    if (!formData.autor?.trim()) {
+      errors.autor = "🚨 Parlamentar é obrigatório";
+    }
+    if (!formData.municipio?.trim()) {
+      errors.municipio = "🚨 Município é obrigatório";
+    }
+    if (!formData.uf?.trim()) {
+      errors.uf = "🚨 UF é obrigatória";
     }
 
-    // AÇÕES E SERVIÇOS OBRIGATÓRIAS
-    if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
-      errors.acoesServicos = "🚨 Pelo menos uma meta deve ser cadastrada";
+    // ============================================
+    // 🚨 SEÇÃO DADOS BÁSICOS - OBRIGATÓRIA
+    // ============================================
+    if (!formData.programa?.trim()) {
+      errors.programa = "🚨 Programa é obrigatório";
+    }
+    if (!formData.objeto?.trim()) {
+      errors.objeto = "🚨 Objeto da Proposta é obrigatório";
+    }
+    if (!formData.valor?.toString().trim()) {
+      errors.valor = "🚨 Valor do Recurso é obrigatório";
     } else {
-      const hasValidMeta = formData.acoesServicos.some(meta => 
-        meta.descricao?.trim() && meta.quantidade > 0
+      const valorNumerico = parseFloat(
+        formData.valor
+          .toString()
+          .replace(/[R$\s]/g, "")
+          .replace(/\./g, "")
+          .replace(",", "."),
       );
-      if (!hasValidMeta) {
-        errors.acoesServicos = "🚨 Pelo menos uma meta válida deve ser preenchida";
+      if (isNaN(valorNumerico) || valorNumerico <= 0) {
+        errors.valor = "🚨 Valor deve ser maior que zero";
       }
     }
 
-    // Validação de datas (se preenchidas)
-    const hoje = new Date();
-    const dataAprovacao = formData.dataAprovacao ? new Date(formData.dataAprovacao) : null;
-    const dataValidade = formData.dataValidade ? new Date(formData.dataValidade) : null;
+    // ============================================
+    // 🚨 SEÇÃO BENEFICIÁRIO - OBRIGATÓRIA
+    // ============================================
+    if (!formData.beneficiario?.trim()) {
+      errors.beneficiario = "🚨 Beneficiário (CNPJ) é obrigatório";
+    } else {
+      const cnpjLimpo = limparCNPJ(formData.beneficiario);
+      if (cnpjLimpo && cnpjLimpo.length === 14) {
+        if (!validarCNPJ(formData.beneficiario)) {
+          errors.beneficiario = "🚨 CNPJ do beneficiário é inválido";
+        }
+      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
+        errors.beneficiario = "🚨 CNPJ do beneficiário está incompleto";
+      }
+    }
 
-    if (dataAprovacao && dataValidade) {
-      if (dataValidade <= dataAprovacao) {
-        errors.dataValidade = "Data de validade deve ser posterior à data de aprovação";
+    // ============================================
+    // 🚨 SEÇÃO DADOS BANCÁRIOS - OBRIGATÓRIA
+    // ============================================
+    if (!formData.banco?.trim()) {
+      errors.banco = "🚨 Banco é obrigatório";
+    } else {
+      const bancoNumerico = formData.banco.replace(/\D/g, "");
+      if (bancoNumerico.length !== 3) {
+        errors.banco = "🚨 Código do banco deve ter 3 dígitos";
+      }
+    }
+
+    if (!formData.agencia?.trim()) {
+      errors.agencia = "🚨 Agência é obrigatória";
+    } else {
+      const agenciaLimpa = formData.agencia.replace(/\D/g, "");
+      if (agenciaLimpa.length < 4) {
+        errors.agencia = "🚨 Agência deve ter pelo menos 4 dígitos";
+      }
+    }
+
+    if (!formData.conta?.trim()) {
+      errors.conta = "🚨 Conta é obrigatória";
+    } else {
+      const contaLimpa = formData.conta.replace(/\D/g, "");
+      if (contaLimpa.length < 5) {
+        errors.conta = "🚨 Conta deve ter pelo menos 5 dígitos";
+      }
+    }
+
+    // ============================================
+    // 🚨 SEÇÃO CRONOGRAMA - TODAS AS DATAS OBRIGATÓRIAS
+    // ============================================
+
+    const parseDate = (dateString) => {
+      if (!dateString || !dateString.trim() || dateString === "dd/mm/aaaa")
+        return null;
+      const date = new Date(dateString);
+      return isNaN(date.getTime()) ? "INVALID" : date;
+    };
+
+    const dataAprov = parseDate(formData.dataAprovacao);
+    const dataVal = parseDate(formData.dataValidade);
+    const dataOB = parseDate(formData.dataOb);
+    const dataInicio = parseDate(formData.inicioExecucao);
+    const dataFinal = parseDate(formData.finalExecucao);
+
+    // 🚨 1️⃣ DATA DE APROVAÇÃO - OBRIGATÓRIA
+    if (
+      !formData.dataAprovacao?.trim() ||
+      formData.dataAprovacao === "dd/mm/aaaa"
+    ) {
+      errors.dataAprovacao = "🚨 Data de Aprovação é obrigatória";
+    } else if (dataAprov === "INVALID") {
+      errors.dataAprovacao = "🚨 Data de Aprovação inválida";
+    } else {
+      if (dataAprov.getFullYear() < 2020) {
+        errors.dataAprovacao =
+          "🚨 Data de Aprovação não pode ser anterior a 2020";
+      }
+      if (dataAprov > hoje) {
+        errors.dataAprovacao = "🚨 Data de Aprovação não pode ser futura";
+      }
+    }
+
+    // 🚨 2️⃣ DATA OB - AGORA OBRIGATÓRIA
+    if (!formData.dataOb?.trim() || formData.dataOb === "dd/mm/aaaa") {
+      errors.dataOb = "🚨 Data do OB é obrigatória";
+    } else if (dataOB === "INVALID") {
+      errors.dataOb = "🚨 Data do OB inválida";
+    } else {
+      if (dataAprov && dataAprov !== "INVALID" && dataOB < dataAprov) {
+        errors.dataOb =
+          "🚨 Data do OB não pode ser anterior à Data de Aprovação";
+      }
+      if (dataVal && dataVal !== "INVALID" && dataOB > dataVal) {
+        errors.dataOb =
+          "🚨 Data do OB não pode ser posterior à Data de Validade";
+      }
+    }
+
+    // 🚨 3️⃣ INÍCIO DA EXECUÇÃO - AGORA OBRIGATÓRIA
+    if (
+      !formData.inicioExecucao?.trim() ||
+      formData.inicioExecucao === "dd/mm/aaaa"
+    ) {
+      errors.inicioExecucao = "🚨 Data de Início da Execução é obrigatória";
+    } else if (dataInicio === "INVALID") {
+      errors.inicioExecucao = "🚨 Data de Início da Execução inválida";
+    } else {
+      if (dataAprov && dataAprov !== "INVALID" && dataInicio < dataAprov) {
+        errors.inicioExecucao =
+          "🚨 Início da Execução não pode ser anterior à Data de Aprovação";
+      }
+      if (dataOB && dataOB !== "INVALID" && dataInicio < dataOB) {
+        errors.inicioExecucao =
+          "🚨 Início da Execução deve ser posterior ou igual à Data do OB";
+      }
+      if (dataVal && dataVal !== "INVALID" && dataInicio > dataVal) {
+        errors.inicioExecucao =
+          "🚨 Início da Execução não pode ser posterior à Data de Validade";
+      }
+    }
+
+    // 🚨 4️⃣ FINAL DA EXECUÇÃO - AGORA OBRIGATÓRIA
+    if (
+      !formData.finalExecucao?.trim() ||
+      formData.finalExecucao === "dd/mm/aaaa"
+    ) {
+      errors.finalExecucao = "🚨 Data de Final da Execução é obrigatória";
+    } else if (dataFinal === "INVALID") {
+      errors.finalExecucao = "🚨 Data de Final da Execução inválida";
+    } else {
+      if (dataInicio && dataInicio !== "INVALID" && dataFinal <= dataInicio) {
+        errors.finalExecucao =
+          "🚨 Final da Execução deve ser posterior ao Início da Execução";
+      }
+      if (dataVal && dataVal !== "INVALID" && dataFinal > dataVal) {
+        errors.finalExecucao =
+          "🚨 Final da Execução não pode ser posterior à Data de Validade";
+      }
+      if (dataAprov && dataAprov !== "INVALID" && dataFinal < dataAprov) {
+        errors.finalExecucao =
+          "🚨 Final da Execução não pode ser anterior à Data de Aprovação";
+      }
+      if (dataOB && dataOB !== "INVALID" && dataFinal < dataOB) {
+        errors.finalExecucao =
+          "🚨 Final da Execução deve ser posterior à Data do OB";
+      }
+    }
+
+    // 🚨 5️⃣ DATA DE VALIDADE - OBRIGATÓRIA
+    if (
+      !formData.dataValidade?.trim() ||
+      formData.dataValidade === "dd/mm/aaaa"
+    ) {
+      errors.dataValidade = "🚨 Data de Validade é obrigatória";
+    } else if (dataVal === "INVALID") {
+      errors.dataValidade = "🚨 Data de Validade inválida";
+    } else {
+      if (dataVal <= hoje) {
+        errors.dataValidade = "🚨 Data de Validade deve ser futura";
+      }
+      if (dataAprov && dataAprov !== "INVALID" && dataVal <= dataAprov) {
+        errors.dataValidade =
+          "🚨 Data de Validade deve ser posterior à Data de Aprovação";
+      }
+    }
+
+    // ============================================
+    // 🚨 VERIFICAÇÃO DE SEQUÊNCIA CRONOLÓGICA COMPLETA
+    // ============================================
+    if (
+      dataAprov &&
+      dataAprov !== "INVALID" &&
+      dataOB &&
+      dataOB !== "INVALID" &&
+      dataInicio &&
+      dataInicio !== "INVALID" &&
+      dataFinal &&
+      dataFinal !== "INVALID" &&
+      dataVal &&
+      dataVal !== "INVALID"
+    ) {
+      // Sequência obrigatória: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade
+      if (
+        !(
+          dataAprov <= dataOB &&
+          dataOB <= dataInicio &&
+          dataInicio <= dataFinal &&
+          dataFinal <= dataVal
+        )
+      ) {
+        if (
+          !errors.dataAprovacao &&
+          !errors.dataOb &&
+          !errors.inicioExecucao &&
+          !errors.finalExecucao &&
+          !errors.dataValidade
+        ) {
+          errors.cronogramaGeral =
+            "🚨 Sequência cronológica inválida: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade";
+        }
+      }
+    }
+
+    // ============================================
+    // 🚨 SEÇÃO AÇÕES E SERVIÇOS - OBRIGATÓRIA
+    // ============================================
+    if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
+      errors.acoesServicos =
+        "🚨 Pelo menos uma meta deve ser cadastrada em Ações e Serviços";
+    } else {
+      let hasValidMeta = false;
+
+      formData.acoesServicos.forEach((meta, index) => {
+        if (meta.descricao?.trim() && meta.quantidade > 0) {
+          hasValidMeta = true;
+        } else {
+          if (!meta.descricao?.trim()) {
+            errors[`meta_${index}_descricao`] =
+              "🚨 Descrição da meta é obrigatória";
+          }
+          if (!meta.quantidade || meta.quantidade <= 0) {
+            errors[`meta_${index}_quantidade`] =
+              "🚨 Quantidade da meta é obrigatória";
+          }
+        }
+      });
+
+      if (!hasValidMeta) {
+        errors.acoesServicos =
+          "🚨 Pelo menos uma meta válida deve ser preenchida";
+      }
+    }
+
+    // ============================================
+    // VALIDAÇÃO CNPJ MUNICÍPIO (OPCIONAL)
+    // ============================================
+    if (formData.cnpj) {
+      const cnpjLimpo = limparCNPJ(formData.cnpj);
+      if (cnpjLimpo && cnpjLimpo.length === 14) {
+        if (!validarCNPJ(formData.cnpj)) {
+          errors.cnpj = "CNPJ do município é inválido";
+        }
+      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
+        errors.cnpj = "CNPJ do município está incompleto";
       }
     }
 
@@ -137,15 +384,16 @@ export const useEmendaFormData = () => {
       "programa",
       "objeto",
       "valor",
-      "dataAprovacao",
-      "dataOb",
-      "dataValidade",
-      "inicioExecucao",
-      "finalExecucao",
       "beneficiario",
       "banco",
       "agencia",
       "conta",
+      "dataAprovacao",
+      "dataOb",
+      "inicioExecucao",
+      "finalExecucao",
+      "dataValidade",
+      "acoesServicos",
     ];
 
     const orderedErrors = {};
@@ -349,14 +597,87 @@ export const useEmendaFormData = () => {
     }
   };
 
-  // 🚨 VALIDAÇÃO CRÍTICA ANTES DO FIREBASE
+  // 🚨 VALIDAÇÃO CRÍTICA - TODAS AS DATAS OBRIGATÓRIAS
   const criticalValidation = () => {
     const errors = [];
+
+    // SEÇÃO IDENTIFICAÇÃO
+    if (!formData.numero?.trim())
+      errors.push("❌ CRÍTICO: Número da emenda obrigatório");
+    if (!formData.autor?.trim())
+      errors.push("❌ CRÍTICO: Parlamentar obrigatório");
+    if (!formData.municipio?.trim())
+      errors.push("❌ CRÍTICO: Município obrigatório");
+    if (!formData.uf?.trim()) errors.push("❌ CRÍTICO: UF obrigatória");
+
+    // SEÇÃO DADOS BÁSICOS
+    if (!formData.programa?.trim())
+      errors.push("❌ CRÍTICO: Programa obrigatório");
+    if (!formData.objeto?.trim())
+      errors.push("❌ CRÍTICO: Objeto da Proposta obrigatório");
+    if (!formData.valor?.toString().trim())
+      errors.push("❌ CRÍTICO: Valor do Recurso obrigatório");
+
+    // SEÇÃO BENEFICIÁRIO
+    if (!formData.beneficiario?.trim())
+      errors.push("❌ CRÍTICO: Beneficiário obrigatório");
+
+    // SEÇÃO DADOS BANCÁRIOS
+    if (!formData.banco?.trim()) errors.push("❌ CRÍTICO: Banco obrigatório");
+    if (!formData.agencia?.trim())
+      errors.push("❌ CRÍTICO: Agência obrigatória");
+    if (!formData.conta?.trim()) errors.push("❌ CRÍTICO: Conta obrigatória");
+
+    // 🚨 SEÇÃO CRONOGRAMA - TODAS AS DATAS OBRIGATÓRIAS
+    if (
+      !formData.dataAprovacao?.trim() ||
+      formData.dataAprovacao === "dd/mm/aaaa"
+    ) {
+      errors.push("❌ CRÍTICO: Data de Aprovação obrigatória");
+    }
+    if (!formData.dataOb?.trim() || formData.dataOb === "dd/mm/aaaa") {
+      errors.push("❌ CRÍTICO: Data do OB obrigatória");
+    }
+    if (
+      !formData.inicioExecucao?.trim() ||
+      formData.inicioExecucao === "dd/mm/aaaa"
+    ) {
+      errors.push("❌ CRÍTICO: Data de Início da Execução obrigatória");
+    }
+    if (
+      !formData.finalExecucao?.trim() ||
+      formData.finalExecucao === "dd/mm/aaaa"
+    ) {
+      errors.push("❌ CRÍTICO: Data de Final da Execução obrigatória");
+    }
+    if (
+      !formData.dataValidade?.trim() ||
+      formData.dataValidade === "dd/mm/aaaa"
+    ) {
+      errors.push("❌ CRÍTICO: Data de Validade obrigatória");
+    }
+
+    // SEÇÃO AÇÕES E SERVIÇOS
+    if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
+      errors.push("❌ CRÍTICO: Pelo menos uma meta deve ser cadastrada");
+    } else {
+      const hasValidMeta = formData.acoesServicos.some(
+        (meta) => meta.descricao?.trim() && meta.quantidade > 0,
+      );
+      if (!hasValidMeta) {
+        errors.push(
+          "❌ CRÍTICO: Pelo menos uma meta válida deve ser preenchida",
+        );
+      }
+    }
+
+    // VALIDAÇÕES DE DATAS
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
     const parseDate = (dateString, fieldName) => {
-      if (!dateString || !dateString.trim()) return null;
+      if (!dateString || !dateString.trim() || dateString === "dd/mm/aaaa")
+        return null;
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
         errors.push(`❌ CRÍTICO: ${fieldName} com formato inválido`);
@@ -366,18 +687,11 @@ export const useEmendaFormData = () => {
     };
 
     const dataAprov = parseDate(formData.dataAprovacao, "Data de Aprovação");
-    const dataVal = parseDate(formData.dataValidade, "Data de Validade");
     const dataOB = parseDate(formData.dataOb, "Data OB");
     const dataInicio = parseDate(formData.inicioExecucao, "Início da Execução");
     const dataFinal = parseDate(formData.finalExecucao, "Final da Execução");
+    const dataVal = parseDate(formData.dataValidade, "Data de Validade");
 
-    // VERIFICAÇÕES OBRIGATÓRIAS
-    if (!formData.dataAprovacao)
-      errors.push("❌ CRÍTICO: Data de Aprovação obrigatória");
-    if (!formData.dataValidade)
-      errors.push("❌ CRÍTICO: Data de Validade obrigatória");
-
-    // VERIFICAÇÕES DE CONSISTÊNCIA
     if (dataAprov && dataAprov !== "INVALID") {
       if (dataAprov > hoje)
         errors.push("❌ CRÍTICO: Data de Aprovação não pode ser futura");
@@ -397,37 +711,29 @@ export const useEmendaFormData = () => {
       }
     }
 
-    // VERIFICAÇÕES ADICIONAIS DE SEQUÊNCIA
-    if (dataOB && dataOB !== "INVALID") {
-      if (dataAprov && dataAprov !== "INVALID" && dataOB < dataAprov) {
+    // Verificação de sequência cronológica
+    if (
+      dataAprov &&
+      dataAprov !== "INVALID" &&
+      dataOB &&
+      dataOB !== "INVALID" &&
+      dataInicio &&
+      dataInicio !== "INVALID" &&
+      dataFinal &&
+      dataFinal !== "INVALID" &&
+      dataVal &&
+      dataVal !== "INVALID"
+    ) {
+      if (
+        !(
+          dataAprov <= dataOB &&
+          dataOB <= dataInicio &&
+          dataInicio <= dataFinal &&
+          dataFinal <= dataVal
+        )
+      ) {
         errors.push(
-          "❌ CRÍTICO: Data do OB não pode ser anterior à Data de Aprovação",
-        );
-      }
-    }
-
-    if (dataInicio && dataInicio !== "INVALID") {
-      if (dataAprov && dataAprov !== "INVALID" && dataInicio < dataAprov) {
-        errors.push(
-          "❌ CRÍTICO: Início da Execução não pode ser anterior à Data de Aprovação",
-        );
-      }
-      if (dataOB && dataOB !== "INVALID" && dataInicio < dataOB) {
-        errors.push(
-          "❌ CRÍTICO: Início da Execução deve ser posterior ou igual à Data do OB",
-        );
-      }
-    }
-
-    if (dataFinal && dataFinal !== "INVALID") {
-      if (dataInicio && dataInicio !== "INVALID" && dataFinal <= dataInicio) {
-        errors.push(
-          "❌ CRÍTICO: Final da Execução deve ser posterior ao Início da Execução",
-        );
-      }
-      if (dataVal && dataVal !== "INVALID" && dataFinal > dataVal) {
-        errors.push(
-          "❌ CRÍTICO: Final da Execução não pode ser posterior à Data de Validade",
+          "❌ CRÍTICO: Sequência cronológica inválida - Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade",
         );
       }
     }
@@ -438,51 +744,57 @@ export const useEmendaFormData = () => {
   // 💾 LÓGICA DE SALVAMENTO
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
-    setToast({ show: false, message: "", type: "" });
 
-    // Atualizar data automaticamente
+    // 🚨 ATUALIZAR DATA AUTOMATICAMENTE
     const dataAtual = new Date().toISOString().split("T")[0];
-    setFormData(prev => ({ ...prev, dataUltimaAtualizacao: dataAtual }));
+    setFormData((prev) => ({
+      ...prev,
+      dataUltimaAtualizacao: dataAtual,
+    }));
+
+    // VALIDAÇÃO COM FEEDBACK VISUAL
+    const fieldErrorsResult = getOrderedFieldErrors();
+
+    if (Object.keys(fieldErrorsResult).length > 0) {
+      setFieldErrors(fieldErrorsResult);
+
+      const errorList = Object.values(fieldErrorsResult);
+      setToast({
+        show: true,
+        message: `🚨 CAMPOS OBRIGATÓRIOS FALTANDO:\n\n${errorList
+          .slice(0, 8)
+          .map((err) => `• ${err}`)
+          .join(
+            "\n",
+          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n❌ TODAS AS DATAS DO CRONOGRAMA SÃO OBRIGATÓRIAS.`,
+        type: "error",
+      });
+
+      setTimeout(() => {
+        focusFirstErrorField(fieldErrorsResult);
+      }, 100);
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // VALIDAÇÃO CRÍTICA
+    const criticalErrors = criticalValidation();
+    if (criticalErrors.length > 0) {
+      setToast({
+        show: true,
+        message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n⚠️ Todas as datas do cronograma devem estar preenchidas.`,
+        type: "error",
+      });
+      return;
+    }
+
+    setFieldErrors({});
+
+    if (salvando) return;
+    setSalvando(true);
 
     try {
-      // VALIDAÇÃO COM FEEDBACK VISUAL
-      const fieldErrorsResult = getOrderedFieldErrors();
-
-      if (Object.keys(fieldErrorsResult).length > 0) {
-        setFieldErrors(fieldErrorsResult);
-
-        const errorList = Object.values(fieldErrorsResult);
-        setToast({
-          show: true,
-          message: `🚨 Existem campos que precisam ser preenchidos corretamente:\n\n${errorList.map((err) => `• ${err}`).join("\n")}\n\n🔍 Os campos com erro estão destacados em vermelho.`,
-          type: "error",
-        });
-
-        setTimeout(() => {
-          focusFirstErrorField(fieldErrorsResult);
-        }, 100);
-
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-
-      // VALIDAÇÃO CRÍTICA
-      const criticalErrors = criticalValidation();
-      if (criticalErrors.length > 0) {
-        setToast({
-          show: true,
-          message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n⚠️ O sistema não pode salvar emendas com datas inválidas.`,
-          type: "error",
-        });
-        return;
-      }
-
-      setFieldErrors({});
-
-      if (salvando) return;
-      setSalvando(true);
-
       const valorNumerico = parseFloat(
         formData.valor
           ?.toString()
@@ -509,61 +821,40 @@ export const useEmendaFormData = () => {
         banco: formData.banco?.trim(),
         agencia: formData.agencia?.trim(),
         conta: formData.conta?.trim(),
-        dataAprovacao: formData.dataAprovacao?.trim() || null,
-        dataValidade: formData.dataValidade?.trim() || null,
-        inicioExecucao: formData.inicioExecucao?.trim() || null,
-        finalExecucao: formData.finalExecucao?.trim() || null,
+        // 🚨 TODAS AS DATAS OBRIGATÓRIAS
+        dataAprovacao: formData.dataAprovacao?.trim(),
+        dataOb: formData.dataOb?.trim(),
+        inicioExecucao: formData.inicioExecucao?.trim(),
+        finalExecucao: formData.finalExecucao?.trim(),
+        dataValidade: formData.dataValidade?.trim(),
         numeroProposta: formData.numeroProposta?.trim(),
         funcional: formData.funcional?.trim(),
-        dataOb: formData.dataOb,
         acoesServicos: formData.acoesServicos || [],
         observacoes: formData.observacoes?.trim(),
         valorExecutado: 0,
         status: "Ativa",
-        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
+        dataUltimaAtualizacao: dataAtual,
         atualizadoEm: serverTimestamp(),
         atualizadoPor: user.uid || user.email,
       };
 
-      // VERIFICAÇÃO FINAL ABSOLUTA
-      if (!dadosParaSalvar.dataAprovacao || !dadosParaSalvar.dataValidade) {
+      // VERIFICAÇÃO FINAL ABSOLUTA - TODAS AS DATAS
+      const datasObrigatorias = [
+        "dataAprovacao",
+        "dataOb",
+        "inicioExecucao",
+        "finalExecucao",
+        "dataValidade",
+      ];
+
+      const datasFaltando = datasObrigatorias.filter(
+        (campo) => !dadosParaSalvar[campo],
+      );
+
+      if (datasFaltando.length > 0) {
         setToast({
           show: true,
-          message:
-            "🚨 ERRO CRÍTICO: Não é possível salvar emenda sem Data de Aprovação e Data de Validade válidas.",
-          type: "error",
-        });
-        setSalvando(false);
-        return;
-      }
-
-      // VALIDAÇÕES FINAIS DE CONSISTÊNCIA
-      const finalDataAprov = new Date(dadosParaSalvar.dataAprovacao);
-      const finalDataVal = new Date(dadosParaSalvar.dataValidade);
-      const finalHoje = new Date();
-      finalHoje.setHours(0, 0, 0, 0);
-
-      const finalErrors = [];
-      if (isNaN(finalDataAprov.getTime()))
-        finalErrors.push("Data de Aprovação inválida");
-      if (isNaN(finalDataVal.getTime()))
-        finalErrors.push("Data de Validade inválida");
-
-      if (!isNaN(finalDataAprov.getTime()) && !isNaN(finalDataVal.getTime())) {
-        if (finalDataVal <= finalDataAprov)
-          finalErrors.push(
-            "Data de Validade deve ser posterior à Data de Aprovação",
-          );
-        if (finalDataVal <= finalHoje)
-          finalErrors.push("Data de Validade deve ser futura");
-        if (finalDataAprov > finalHoje)
-          finalErrors.push("Data de Aprovação não pode ser futura");
-      }
-
-      if (finalErrors.length > 0) {
-        setToast({
-          show: true,
-          message: `🚨 ERRO CRÍTICO - Dados inconsistentes detectados:\n\n${finalErrors.map((err) => `• ${err}`).join("\n")}\n\n❌ Salvamento bloqueado para proteger a integridade dos dados.`,
+          message: `🚨 ERRO CRÍTICO: Datas obrigatórias não preenchidas:\n\n${datasFaltando.map((d) => `• ${d}`).join("\n")}\n\n❌ TODAS as datas do cronograma são obrigatórias.`,
           type: "error",
         });
         setSalvando(false);
@@ -575,7 +866,8 @@ export const useEmendaFormData = () => {
         await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
         setToast({
           show: true,
-          message: "✅ Emenda atualizada com sucesso!",
+          message:
+            "✅ Emenda atualizada com sucesso! Todas as datas foram salvas.",
           type: "success",
         });
       } else {
@@ -584,7 +876,8 @@ export const useEmendaFormData = () => {
         await addDoc(collection(db, "emendas"), dadosParaSalvar);
         setToast({
           show: true,
-          message: "✅ Emenda cadastrada com sucesso!",
+          message:
+            "✅ Emenda cadastrada com sucesso! Cronograma completo salvo.",
           type: "success",
         });
       }

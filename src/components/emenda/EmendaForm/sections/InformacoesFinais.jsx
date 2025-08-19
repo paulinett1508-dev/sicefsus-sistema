@@ -17,7 +17,7 @@ const InformacoesFinais = ({ formData = {}, onChange, fieldErrors = {} }) => {
       <div style={styles.headerContainer} onClick={toggleExpanded}>
         <legend style={styles.legend}>
           <span style={styles.legendIcon}>📋</span>
-          Informações Complementares (Opcional)
+          Informações Adicionais do Beneficiário (Opcional)
         </legend>
         <div style={styles.toggleButton}>
           <span style={styles.toggleIcon}>{isExpanded ? "−" : "+"}</span>
@@ -30,29 +30,32 @@ const InformacoesFinais = ({ formData = {}, onChange, fieldErrors = {} }) => {
       {/* Conteúdo colapsável */}
       {isExpanded && (
         <div style={styles.content}>
+          {/* PRIMEIRA LINHA - Informações do Beneficiário */}
           <div style={styles.formGrid}>
-            {/* Área de Atuação */}
+            {/* Nome/Razão Social */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Área de Atuação Principal</label>
-              <select
-                name="areaAtuacao"
-                value={formData.areaAtuacao || ""}
+              <label style={styles.label}>
+                Nome/Razão Social do Beneficiário
+              </label>
+              <input
+                type="text"
+                name="nomeRazaoSocial"
+                value={formData.nomeRazaoSocial || ""}
                 onChange={handleInputChange}
                 style={styles.input}
-              >
-                <option value="">Selecione a área</option>
-                <option value="saude">Saúde</option>
-                <option value="educacao">Educação</option>
-                <option value="assistencia-social">Assistência Social</option>
-                <option value="esporte-lazer">Esporte e Lazer</option>
-                <option value="cultura">Cultura</option>
-                <option value="meio-ambiente">Meio Ambiente</option>
-                <option value="infraestrutura">Infraestrutura</option>
-                <option value="desenvolvimento-social">
-                  Desenvolvimento Social
-                </option>
-                <option value="outros">Outros</option>
-              </select>
+              />
+            </div>
+
+            {/* Endereço */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Endereço do Beneficiário</label>
+              <input
+                type="text"
+                name="enderecoBeneficiario"
+                value={formData.enderecoBeneficiario || ""}
+                onChange={handleInputChange}
+                style={styles.input}
+              />
             </div>
 
             {/* Telefone */}
@@ -60,71 +63,33 @@ const InformacoesFinais = ({ formData = {}, onChange, fieldErrors = {} }) => {
               <label style={styles.label}>Telefone de Contato</label>
               <input
                 type="tel"
-                name="telefone"
-                value={formData.telefone || ""}
+                name="telefoneContato"
+                value={formData.telefoneContato || ""}
                 onChange={handleInputChange}
-                placeholder="(00) 00000-0000"
                 style={styles.input}
               />
             </div>
 
             {/* Email */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>E-mail de Contato</label>
+              <label style={styles.label}>E-mail do Beneficiário</label>
               <input
                 type="email"
-                name="emailContato"
-                value={formData.emailContato || ""}
+                name="emailBeneficiario"
+                value={formData.emailBeneficiario || ""}
                 onChange={handleInputChange}
-                placeholder="contato@entidade.org.br"
                 style={styles.input}
               />
             </div>
 
-            {/* Modalidade de Aplicação */}
+            {/* Responsável Legal */}
             <div style={styles.formGroup}>
-              <label style={styles.label}>Modalidade de Aplicação</label>
-              <select
-                name="modalidadeAplicacao"
-                value={formData.modalidadeAplicacao || ""}
-                onChange={handleInputChange}
-                style={styles.input}
-              >
-                <option value="">Selecione</option>
-                <option value="transferencia-direta">
-                  Transferência Direta
-                </option>
-                <option value="convenio">Convênio</option>
-                <option value="termo-parceria">Termo de Parceria</option>
-                <option value="contrato-repasse">Contrato de Repasse</option>
-              </select>
-            </div>
-
-            {/* Público-Alvo */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Público-Alvo Beneficiado</label>
+              <label style={styles.label}>Responsável Legal</label>
               <input
                 type="text"
-                name="publicoAlvo"
-                value={formData.publicoAlvo || ""}
+                name="responsavelLegal"
+                value={formData.responsavelLegal || ""}
                 onChange={handleInputChange}
-                placeholder="Ex: Crianças de 0 a 6 anos, Idosos..."
-                style={styles.input}
-              />
-            </div>
-
-            {/* Número de Beneficiários */}
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Número de Beneficiários Estimado
-              </label>
-              <input
-                type="number"
-                name="numeroBeneficiarios"
-                value={formData.numeroBeneficiarios || ""}
-                onChange={handleInputChange}
-                placeholder="0"
-                min="1"
                 style={styles.input}
               />
             </div>
@@ -133,36 +98,27 @@ const InformacoesFinais = ({ formData = {}, onChange, fieldErrors = {} }) => {
           {/* Campos de texto maiores */}
           <div style={styles.textAreaGroup}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Justificativa da Emenda</label>
+              <label style={styles.label}>
+                Observações sobre o Beneficiário
+              </label>
               <textarea
-                name="justificativa"
-                value={formData.justificativa || ""}
+                name="observacoesBeneficiario"
+                value={formData.observacoesBeneficiario || ""}
                 onChange={handleInputChange}
-                placeholder="Justifique a necessidade e importância desta emenda..."
                 rows="3"
                 style={styles.textarea}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Observações Adicionais</label>
+              <label style={styles.label}>Informações Adicionais</label>
               <textarea
-                name="observacoesFinais"
-                value={formData.observacoesFinais || ""}
+                name="informacoesAdicionais"
+                value={formData.informacoesAdicionais || ""}
                 onChange={handleInputChange}
-                placeholder="Informações complementares que julgar necessárias..."
                 rows="3"
                 style={styles.textarea}
               />
-            </div>
-          </div>
-
-          {/* Banner informativo */}
-          <div style={styles.infoBanner}>
-            <div style={styles.infoIcon}>ℹ️</div>
-            <div style={styles.infoText}>
-              Estas informações são opcionais e complementam os dados da emenda.
-              Podem ser úteis para acompanhamento e relatórios posteriores.
             </div>
           </div>
         </div>
@@ -264,24 +220,6 @@ const styles = {
     backgroundColor: "white",
     resize: "vertical",
     fontFamily: "inherit",
-  },
-  infoBanner: {
-    display: "flex",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#e3f2fd",
-    border: "1px solid #bbdefb",
-    borderRadius: "6px",
-    marginTop: "20px",
-  },
-  infoIcon: {
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-  infoText: {
-    fontSize: "14px",
-    color: "#1565c0",
-    lineHeight: "1.4",
   },
 };
 

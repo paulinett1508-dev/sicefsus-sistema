@@ -64,7 +64,6 @@ const InformacoesComplementares = ({
                 name="telefone"
                 value={formData.telefone || ""}
                 onChange={handleInputChange}
-                placeholder="(00) 00000-0000"
                 style={styles.input}
               />
             </div>
@@ -77,7 +76,6 @@ const InformacoesComplementares = ({
                 name="emailContato"
                 value={formData.emailContato || ""}
                 onChange={handleInputChange}
-                placeholder="contato@entidade.org.br"
                 style={styles.input}
               />
             </div>
@@ -109,7 +107,6 @@ const InformacoesComplementares = ({
                 name="publicoAlvo"
                 value={formData.publicoAlvo || ""}
                 onChange={handleInputChange}
-                placeholder="Ex: Crianças, Idosos, População geral"
                 style={styles.input}
               />
             </div>
@@ -122,7 +119,6 @@ const InformacoesComplementares = ({
                 name="numeroBeneficiarios"
                 value={formData.numeroBeneficiarios || ""}
                 onChange={handleInputChange}
-                placeholder="0"
                 min="1"
                 style={styles.input}
               />
@@ -137,7 +133,6 @@ const InformacoesComplementares = ({
                 name="justificativa"
                 value={formData.justificativa || ""}
                 onChange={handleInputChange}
-                placeholder="Justifique a necessidade da emenda..."
                 rows="3"
                 style={styles.textarea}
               />
@@ -149,7 +144,6 @@ const InformacoesComplementares = ({
                 name="observacoesFinais"
                 value={formData.observacoesFinais || ""}
                 onChange={handleInputChange}
-                placeholder="Informações complementares..."
                 rows="3"
                 style={styles.textarea}
               />

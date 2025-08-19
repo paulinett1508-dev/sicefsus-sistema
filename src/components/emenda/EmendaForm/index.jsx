@@ -1,4 +1,4 @@
-// src/components/emenda/EmendaForm/index.jsx - ORQUESTRADOR REFATORADO
+// src/components/emenda/EmendaForm/index.jsx - ORQUESTRADOR REFATORADO (SEM BANNER AMARELO)
 import React from "react";
 
 // ✅ HOOKS ESPECIALIZADOS
@@ -78,7 +78,7 @@ const EmendaForm = () => {
     return (
       <div style={styles.container}>
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>❌</div>
+          <div style={styles.errorIcon}>⌫</div>
           <h3>Erro no Formulário</h3>
           <p>{error}</p>
           <div style={styles.errorActions}>
@@ -180,7 +180,7 @@ const EmendaForm = () => {
         />
       </form>
 
-      {/* 🔔 MODAL DE CANCELAMENTO */}
+      {/* 🔒 MODAL DE CANCELAMENTO */}
       {showCancelModal && (
         <EmendaFormCancelModal
           show={showCancelModal}
@@ -213,7 +213,7 @@ const EmendaForm = () => {
   );
 };
 
-// 🎨 ESTILOS (preservados do original)
+// 🎨 ESTILOS (preservados, removido apenas criticalNotice)
 const styles = {
   container: {
     padding: "16px",
@@ -289,9 +289,13 @@ const styles = {
 };
 
 // 🎭 ANIMAÇÃO CSS (preservada do original)
-if (!document.querySelector('style[data-component="emenda-form-refactored"]')) {
+if (
+  !document.querySelector(
+    'style[data-component="emenda-form-refactored-dates"]',
+  )
+) {
   const styleSheet = document.createElement("style");
-  styleSheet.setAttribute("data-component", "emenda-form-refactored");
+  styleSheet.setAttribute("data-component", "emenda-form-refactored-dates");
   styleSheet.textContent = `
     @keyframes spin {
       0% { transform: rotate(0deg); }
