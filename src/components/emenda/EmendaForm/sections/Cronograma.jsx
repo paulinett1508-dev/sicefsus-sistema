@@ -55,60 +55,32 @@ const Cronograma = ({
 
   // Função para obter mensagem de erro específica
   const getDataErrorMessage = (fieldName, value) => {
+    // Importar validação centralizada
+    const { validarCronogramaEmenda, normalizarDataInput } = require('../../../utils/validators');
+    
     if (!value) return null;
 
-    if (!isDataValidaComparacao(value)) {
+    // Normalizar entrada
+    const dataNormalizada = normalizarDataInput(value);
+    if (!dataNormalizada) {
       return "Data inválida";
     }
 
-    // Data de Validade é livre - sem restrições
-    if (fieldName === "dataValidade") {
-      return null;
-    }
+    // Criar cronograma atual para validação completa
+    const cronogramaAtual = {
+      dataAprovacao: normalizarDataInput(formData?.dataAprovacao),
+      dataOb: normalizarDataInput(formData?.dataOb),
+      inicioExecucao: normalizarDataInput(formData?.inicioExecucao),
+      finalExecucao: normalizarDataInput(formData?.finalExecucao),
+      dataValidade: normalizarDataInput(formData?.dataValidade),
+      [fieldName]: dataNormalizada // Aplicar o valor atual
+    };
 
-    if (fieldName === "dataAprovacao" && isDataFutura(value)) {
-      return "Data de aprovação não pode ser futura";
-    }
-
-    if (fieldName === "dataOb") {
-      if (isDataFutura(value)) {
-        return "Data OB não pode ser futura";
-      }
-      
-      // ✅ NOVA VALIDAÇÃO: OB anterior à aprovação
-      if (formData.dataAprovacao && isOBAnteriorAprovacao(value, formData.dataAprovacao)) {
-        return "Data OB não pode ser anterior à Data de Aprovação (fluxo irregular)";
-      }
-    }
-
-    // Verificar contra data de validade
-    if (fieldName === "finalExecucao" && formData.dataValidade) {
-      if (isDataExcedeValidade(value, formData.dataValidade)) {
-        return "Data final não pode ser posterior à validade da emenda";
-      }
-    }
-
-    if (fieldName === "inicioExecucao" && formData.dataValidade) {
-      if (isDataExcedeValidade(value, formData.dataValidade)) {
-        return "Data início não pode ser posterior à validade da emenda";
-      }
-    }
-
-    // Início deve ser antes do fim
-    if (fieldName === "finalExecucao" && formData.inicioExecucao) {
-      if (
-        isDataValidaComparacao(value) &&
-        isDataValidaComparacao(formData.inicioExecucao)
-      ) {
-        const inicio = new Date(formData.inicioExecucao);
-        const fim = new Date(value);
-        if (fim < inicio) {
-          return "Data final deve ser posterior à data de início";
-        }
-      }
-    }
-
-    return null;
+    // Validar cronograma completo
+    const validacao = validarCronogramaEmenda(cronogramaAtual);
+    
+    // Retornar erro específico do campo
+    return validacao.erros[fieldName] || null;
   };
 
   return (
