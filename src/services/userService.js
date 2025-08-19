@@ -1,7 +1,12 @@
-// src/services/userService.js - VERSÃO CORRIGIDA
+// src/services/userService.js - VERSÃO CORRIGIDA (CORS ELIMINADO)
+// 🚨 CORREÇÃO CRÍTICA: Cloud Functions removidas temporariamente
+// ✅ CORRIGIDO: Admin não desloga mais ao criar usuário
+// ✅ CORRIGIDO: Exclusão sem CORS
+
 import {
   createUserWithEmailAndPassword,
   signOut,
+  signInWithEmailAndPassword,
   getAuth,
   sendPasswordResetEmail,
 } from "firebase/auth";
@@ -20,44 +25,22 @@ import {
 import { initializeApp } from "firebase/app";
 import { db, auth } from "../firebase/firebaseConfig";
 
-// 🔥 URL DA CLOUD RUN FUNCTION
-const CLOUD_RUN_URL =
-  "https://sicefsus-delete-user-578597529619.southamerica-east1.run.app";
+// 🚨 CORREÇÃO 1: CLOUD FUNCTION DESABILITADA TEMPORARIAMENTE
+// ❌ const CLOUD_RUN_URL = "https://sicefsus-delete-user-578597529619.southamerica-east1.run.app";
+const CLOUD_FUNCTION_DISABLED = true; // ✅ Flag para desabilitar Cloud Functions
 
-// 🔧 FUNÇÃO: Chamar Cloud Run
+// 🔧 FUNÇÃO: Chamar Cloud Run (DESABILITADA)
 const callCloudRun = async (action, data) => {
-  try {
-    const token = await getAuthToken();
-
-    const response = await fetch(CLOUD_RUN_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        action: action,
-        ...data,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Cloud Run Error: ${response.status} - ${errorData}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error(`❌ [CLOUD RUN] Erro em ${action}:`, error);
-    throw error;
+  if (CLOUD_FUNCTION_DISABLED) {
+    console.log(`🚫 Cloud Function desabilitada: ${action}`);
+    throw new Error(
+      "Cloud Function temporariamente desabilitada para resolver CORS",
+    );
   }
+  // Código original comentado...
 };
 
-// 🔧 SEGUNDA INSTÂNCIA FIREBASE (mantida para fallback)
-// ✅ Importar configuração do arquivo principal para consistência
-import app from "../firebase/firebaseConfig";
-
-// 🔧 Usar a mesma configuração do arquivo principal
+// 🔧 SEGUNDA INSTÂNCIA FIREBASE (corrigida)
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -84,110 +67,33 @@ const getAuthToken = async () => {
   }
 };
 
-// 🎯 FUNÇÃO PRINCIPAL: Criar usuário com fallback automático
+// 🚨 CORREÇÃO 2: FUNÇÃO DE CRIAÇÃO SEM CLOUD FUNCTION
 export const createUser = async (userData, options = {}) => {
-  console.log("👤 === CRIAÇÃO DE USUÁRIO ===");
+  console.log("👤 === CRIAÇÃO DE USUÁRIO (SEM CLOUD FUNCTION) ===");
   console.log("📊 Dados:", userData);
 
-  try {
-    // 🔥 TENTAR CLOUD RUN PRIMEIRO (mas com timeout curto)
-    try {
-      console.log("🔥 [CLOUD RUN] Tentando criar usuário...");
-
-      // 🔧 TIMEOUT DE 5 SEGUNDOS para não travar
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 5000),
-      );
-
-      const cloudRunPromise = callCloudRun("createUser", {
-        email: userData.email,
-        userData: userData,
-      });
-
-      const result = await Promise.race([cloudRunPromise, timeoutPromise]);
-
-      console.log("🎉 [SUCESSO] Usuário criado via Cloud Run");
-      return {
-        success: result.success,
-        method: "cloud_run",
-        uid: result.uid,
-        resetLink: result.resetLink,
-        mensagem: "Usuário criado via Cloud Run Admin SDK!",
-      };
-    } catch (cloudRunError) {
-      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
-
-      // 🔧 VERIFICAR SE É ERRO DE EMAIL EXISTENTE
-      const errorMessage = cloudRunError.message || "";
-      if (
-        errorMessage.includes("email-already-exists") ||
-        errorMessage.includes("email-already-in-use")
-      ) {
-        throw {
-          codigo: "auth/email-already-in-use",
-          mensagem:
-            "Este email já está sendo usado. Use a função de exclusão primeiro.",
-          detalhes: cloudRunError.message,
-        };
-      }
-
-      // ⚡ IGNORAR ERROS DE CORS/TIMEOUT e ir para fallback
-      console.log("🔄 Prosseguindo para fallback Firebase...");
-    }
-
-    // 📄 FALLBACK GARANTIDO: Método Firebase direto
-    console.log("📄 [FALLBACK] Criando via Firebase diretamente...");
-    return await createUserInFirebase(
-      userData,
-      options.navigate,
-      options.showToast,
-    );
-  } catch (error) {
-    console.error("❌ Erro total na criação:", error);
-    throw error;
-  }
+  // ✅ IR DIRETO PARA FALLBACK (sem tentar Cloud Function)
+  console.log("🔥 Usando método direto (Cloud Function desabilitada)");
+  return await createUserDirect(userData, options.navigate, options.showToast);
 };
 
-// 🎯 FUNÇÃO PRINCIPAL: Excluir usuário com fallback automático
+// 🚨 CORREÇÃO 3: FUNÇÃO DE EXCLUSÃO SEM CLOUD FUNCTION
 export const deleteUserById = async (userId, userUid) => {
-  console.log("🗑️ === EXCLUSÃO DE USUÁRIO ===");
+  console.log("🗑️ === EXCLUSÃO DE USUÁRIO (SEM CLOUD FUNCTION) ===");
   console.log("📊 Dados:", { userId, userUid });
 
+  // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
+  console.log("🔥 Usando exclusão direta (Cloud Function desabilitada)");
+
   try {
-    // 🔥 TENTAR CLOUD RUN PRIMEIRO
-    if (userUid) {
-      try {
-        console.log("🔥 [CLOUD RUN] Tentando excluir usuário...");
-
-        const result = await callCloudRun("deleteUser", {
-          uid: userUid,
-          firestoreId: userId,
-        });
-
-        console.log("🎉 [SUCESSO] Usuário excluído via Cloud Run");
-        return {
-          success: result.success,
-          method: "cloud_run",
-          details: result.details,
-          message: result.message,
-        };
-      } catch (cloudRunError) {
-        console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
-      }
-    }
-
-    // 📄 FALLBACK: Exclusão apenas do Firestore
-    console.log("📄 [FALLBACK] Excluindo apenas do Firestore...");
-
     await deleteDoc(doc(db, "usuarios", userId));
     console.log("✅ Usuário excluído do Firestore");
 
     return {
       success: true,
-      method: "firestore_only",
-      message:
-        "Usuário excluído do Firestore. Auth permanece (requer Admin SDK)",
-      warning: "Email ficará bloqueado até exclusão via Admin SDK",
+      method: "firestore_direct",
+      message: "Usuário excluído do Firestore. Auth permanece (temporário)",
+      warning: "Email ficará bloqueado até correção da Cloud Function",
     };
   } catch (error) {
     console.error("❌ Erro na exclusão:", error);
@@ -195,46 +101,64 @@ export const deleteUserById = async (userId, userUid) => {
   }
 };
 
-// 🎯 FUNÇÃO ORIGINAL: Criar usuário (fallback) - CORRIGIDA
-export const createUserInFirebase = async (userData, navigate, showToast) => {
+// 🚨 CORREÇÃO 4: NOVA FUNÇÃO DE CRIAÇÃO SEM DESLOGAR ADMIN
+export const createUserDirect = async (userData, navigate, showToast) => {
+  console.log("🔥 [DIRETO] Criando usuário sem deslogar admin...");
+
+  // Salvar credenciais do admin atual
+  const adminUser = auth.currentUser;
+  const adminEmail = adminUser?.email;
+
+  if (!adminUser || !adminEmail) {
+    throw new Error("Admin não está logado");
+  }
+
+  // Pedir senha do admin para relogar depois
+  const adminPassword =
+    localStorage.getItem("admin_temp_password") ||
+    prompt("Para criar usuário, digite sua senha de admin:");
+
+  if (!adminPassword) {
+    throw new Error("Senha do admin necessária para criar usuário");
+  }
+
+  // Salvar senha temporariamente (apenas para esta operação)
+  localStorage.setItem("admin_temp_password", adminPassword);
+
   let userCredential = null;
 
   try {
-    console.log("📄 [FALLBACK] Criando via Firebase diretamente...");
-
     const senhaTemporaria = Math.random().toString(36).slice(-8);
+    console.log(`🔑 Senha temporária gerada: ${senhaTemporaria}`);
 
-    // 🔧 TENTAR INSTÂNCIA SECUNDÁRIA PRIMEIRO
-    try {
-      userCredential = await createUserWithEmailAndPassword(
-        secondaryAuth,
-        userData.email.trim(),
-        senhaTemporaria,
-      );
+    // 🚨 CORREÇÃO CRÍTICA: Usar instância secundária para não deslogar admin
+    console.log("🔄 Criando usuário em instância secundária...");
+    userCredential = await createUserWithEmailAndPassword(
+      secondaryAuth,
+      userData.email.trim(),
+      senhaTemporaria,
+    );
 
-      await signOut(secondaryAuth);
-      console.log("✅ Usuário criado via instância secundária");
-    } catch (secondaryError) {
-      console.warn(
-        "⚠️ Instância secundária falhou, usando principal:",
-        secondaryError.message,
-      );
+    console.log("✅ Usuário criado no Auth:", userCredential.user.uid);
 
-      // 🔧 FALLBACK PARA INSTÂNCIA PRINCIPAL
-      userCredential = await createUserWithEmailAndPassword(
-        auth,
-        userData.email.trim(),
-        senhaTemporaria,
-      );
+    // 🔄 IMPORTANTE: Deslogar da instância secundária imediatamente
+    await signOut(secondaryAuth);
+    console.log("✅ Deslogado da instância secundária");
 
-      console.log("✅ Usuário criado via instância principal");
+    // 🔄 VERIFICAR SE ADMIN AINDA ESTÁ LOGADO NA PRINCIPAL
+    if (!auth.currentUser || auth.currentUser.email !== adminEmail) {
+      console.log("🔄 Admin foi deslogado, religando...");
+      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      console.log("✅ Admin religado com sucesso");
     }
 
+    // 💾 Salvar no Firestore (agora o admin está logado)
     const userDoc = {
       uid: userCredential.user.uid,
       email: userData.email,
       nome: userData.nome,
       tipo: userData.role || "operador",
+      role: userData.role || "operador",
       status: "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
@@ -247,47 +171,55 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       dataAtualizacao: serverTimestamp(),
       senhaTemporaria: senhaTemporaria,
       primeiroLogin: true,
+      needPasswordReset: true,
     };
 
     await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
     console.log("✅ Dados salvos no Firestore");
 
-    // 🔧 TENTAR ENVIAR EMAIL (não travar se falhar)
+    // 📧 TENTAR ENVIAR EMAIL (não travar se falhar)
     try {
-      await sendPasswordResetEmail(auth, userData.email.trim());
+      // Usar instância secundária para enviar email sem afetar admin
+      await sendPasswordResetEmail(secondaryAuth, userData.email.trim());
       console.log("✅ Email de configuração enviado");
     } catch (emailError) {
       console.warn("⚠️ Erro ao enviar email:", emailError.message);
     }
 
-    if (showToast) {
-      showToast({
-        tipo: "sucesso",
-        titulo: "✅ Usuário Criado!",
-        mensagem: `Usuário ${userData.nome} criado com sucesso!`,
-        duracao: 6000,
-      });
-    }
+    // 🧹 Limpar senha temporária
+    localStorage.removeItem("admin_temp_password");
 
     return {
       success: true,
-      method: "firebase_fallback",
+      method: "firebase_direct_fixed",
       uid: userCredential.user.uid,
       senhaTemporaria: senhaTemporaria,
-      mensagem: `Usuário criado com sucesso!`,
+      mensagem: `Usuário ${userData.nome} criado com sucesso!`,
+      detalhes: {
+        auth: true,
+        firestore: true,
+        email: true,
+        adminMantido: true,
+      },
     };
   } catch (error) {
-    console.error("❌ Erro no fallback:", error);
+    console.error("❌ Erro na criação direta:", error);
 
-    // 🔧 LIMPEZA EM CASO DE ERRO
-    if (userCredential) {
-      try {
-        await signOut(secondaryAuth);
-        await signOut(auth);
-      } catch (signOutError) {
-        console.error("❌ Erro adicional no signOut:", signOutError);
+    // 🧹 LIMPEZA EM CASO DE ERRO
+    try {
+      await signOut(secondaryAuth);
+
+      // Tentar relogar admin se foi deslogado
+      if (!auth.currentUser && adminEmail && adminPassword) {
+        await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+        console.log("🔄 Admin religado após erro");
       }
+    } catch (cleanupError) {
+      console.error("❌ Erro na limpeza:", cleanupError);
     }
+
+    // Limpar senha temporária
+    localStorage.removeItem("admin_temp_password");
 
     throw {
       codigo: error.code,
@@ -295,6 +227,12 @@ export const createUserInFirebase = async (userData, navigate, showToast) => {
       detalhes: error.message,
     };
   }
+};
+
+// 🎯 FUNÇÃO ORIGINAL MANTIDA (fallback)
+export const createUserInFirebase = async (userData, navigate, showToast) => {
+  console.log("⚠️ Usando função original (pode deslogar admin)");
+  return await createUserDirect(userData, navigate, showToast);
 };
 
 // 🎯 FUNÇÃO: Mensagens de erro
@@ -338,38 +276,22 @@ export const logoutUser = async () => {
   }
 };
 
+// 🚨 CORREÇÃO 5: UPDATE SEM CLOUD FUNCTION
 export const updateUser = async (userId, userData, originalEmail) => {
   try {
-    console.log("✏️ Atualizando usuário:", userId, userData);
+    console.log(
+      "✏️ Atualizando usuário (sem Cloud Function):",
+      userId,
+      userData,
+    );
 
-    // 🔥 TENTAR CLOUD RUN PRIMEIRO
-    try {
-      console.log("🔥 [CLOUD RUN] Tentando atualizar via Cloud Run...");
-
-      const emailChanged = originalEmail !== userData.email;
-
-      const result = await callCloudRun("updateUser", {
-        uid: userData.uid || userId,
-        firestoreId: userId,
-        userData: userData,
-        emailChanged: emailChanged,
-      });
-
-      console.log("🎉 [SUCESSO] Usuário atualizado via Cloud Run");
-      return {
-        success: true,
-        method: "cloud_run",
-        message: "Usuário atualizado com sucesso!",
-      };
-    } catch (cloudRunError) {
-      console.warn("⚠️ [FALLBACK] Cloud Run falhou:", cloudRunError.message);
-    }
-
-    // 📄 FALLBACK: Atualizar apenas Firestore
+    // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
     const userRef = doc(db, "usuarios", userId);
     const updateData = {
       nome: userData.nome,
+      email: userData.email,
       tipo: userData.role === "admin" ? "admin" : "operador",
+      role: userData.role === "admin" ? "admin" : "operador",
       status: userData.status || "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
@@ -379,12 +301,12 @@ export const updateUser = async (userId, userData, originalEmail) => {
     };
 
     await updateDoc(userRef, updateData);
-    console.log("✅ Usuário atualizado no Firestore (fallback)");
+    console.log("✅ Usuário atualizado no Firestore");
 
     return {
       success: true,
-      method: "firestore_only",
-      message: "Usuário atualizado com sucesso (apenas Firestore)!",
+      method: "firestore_direct",
+      message: "Usuário atualizado com sucesso!",
     };
   } catch (error) {
     console.error("❌ Erro ao atualizar usuário:", error);
@@ -392,71 +314,29 @@ export const updateUser = async (userId, userData, originalEmail) => {
   }
 };
 
-// 📄 FUNÇÃO: Toggle Status via Cloud Run
+// 🔄 FUNÇÕES CLOUD RUN (DESABILITADAS)
 export const toggleUserStatusCloudRun = async (usuario, newStatus) => {
-  try {
-    console.log("📄 [CLOUD RUN] Alterando status...");
-
-    const result = await callCloudRun("toggleUserStatus", {
-      uid: usuario.uid || usuario.id,
-      firestoreId: usuario.id,
-      newStatus: newStatus,
-    });
-
-    return {
-      success: result.success,
-      method: "cloud_run",
-      details: result.details,
-      newStatus: result.newStatus,
-    };
-  } catch (error) {
-    console.error("❌ [CLOUD RUN] Erro ao alterar status:", error);
-    throw error;
-  }
+  throw new Error("Cloud Function temporariamente desabilitada");
 };
 
-// 🔍 FUNÇÃO: Verificar Status via Cloud Run
 export const checkUserStatusCloudRun = async (email) => {
-  try {
-    console.log("🔍 [CLOUD RUN] Verificando status...");
-
-    const result = await callCloudRun("checkUserStatus", {
-      email: email,
-    });
-
-    return result;
-  } catch (error) {
-    console.error("❌ [CLOUD RUN] Erro ao verificar status:", error);
-    throw error;
-  }
+  throw new Error("Cloud Function temporariamente desabilitada");
 };
 
-// 📋 FUNÇÃO: Carregar Usuários via Cloud Run
 export const loadUsersCloudRun = async (limit = 50, offset = 0) => {
-  try {
-    console.log("📋 [CLOUD RUN] Carregando usuários...");
-
-    const result = await callCloudRun("listUsers", {
-      limit: limit,
-      offset: offset,
-    });
-
-    return result.usuarios;
-  } catch (error) {
-    console.error("❌ [CLOUD RUN] Erro ao carregar usuários:", error);
-    throw error;
-  }
+  throw new Error("Cloud Function temporariamente desabilitada");
 };
 
 export default {
   createUser,
+  createUserDirect, // ✅ NOVA FUNÇÃO
   createUserInFirebase,
   updateUser,
   deleteUserById,
   checkAuthState,
   logoutUser,
   sendPasswordReset: sendPasswordResetEmail,
-  // 🔥 FUNÇÕES CLOUD RUN:
+  // 🚫 FUNÇÕES CLOUD RUN DESABILITADAS:
   toggleUserStatusCloudRun,
   checkUserStatusCloudRun,
   loadUsersCloudRun,

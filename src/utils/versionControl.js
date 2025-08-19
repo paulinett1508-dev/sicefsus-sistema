@@ -2,9 +2,9 @@
 
 // ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 export const APP_VERSION = {
-  number: "2.3.62",
+  number: "2.3.68",
   date: "19/08/2025",
-  timestamp: "19/08/2025 às 00:16",
+  timestamp: "19/08/2025 às 02:31",
   changes: [
     "🚀 Sistema de versionamento centralizado implementado",
     "✅ Fonte única da verdade em versionControl.js",
@@ -64,9 +64,9 @@ function showUpdateNotification() {
         </p>
       </div>
       <div class="version-notification-footer">
-        <button class="version-notification-btn-reload" onclick="window.location.reload(true)">
-          🔄 Atualizar Agora
-        </button>
+<button class="version-notification-btn-reload" onclick="window.location.href='/'">
+  🔄 Atualizar Agora
+</button>
         <button class="version-notification-btn-later" onclick="this.parentElement.parentElement.parentElement.remove()">
           Mais Tarde
         </button>
@@ -294,7 +294,7 @@ export function getCurrentVersion() {
   return {
     ...APP_VERSION,
     timestamp: new Date().toISOString(),
-    environment: import.meta.env.MODE || 'development',
+    environment: import.meta.env.MODE || "development",
   };
 }
 
@@ -303,15 +303,15 @@ export function getCurrentVersion() {
  * @param {string} type - Tipo de incremento: 'major', 'minor', 'patch'
  * @returns {string} Nova versão incrementada
  */
-export function incrementVersion(type = 'patch') {
-  const [major, minor, patch] = APP_VERSION.number.split('.').map(Number);
-  
+export function incrementVersion(type = "patch") {
+  const [major, minor, patch] = APP_VERSION.number.split(".").map(Number);
+
   switch (type) {
-    case 'major':
+    case "major":
       return `${major + 1}.0.0`;
-    case 'minor':
+    case "minor":
       return `${major}.${minor + 1}.0`;
-    case 'patch':
+    case "patch":
     default:
       return `${major}.${minor}.${patch + 1}`;
   }

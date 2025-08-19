@@ -52,8 +52,8 @@ const UpdateNotification = () => {
       });
     }
 
-    // Forçar recarga completa
-    window.location.reload(true);
+    // Redirecionar para login para evitar problemas de autenticação
+    window.location.href = "/";
   };
 
   if (!showUpdate) return null;

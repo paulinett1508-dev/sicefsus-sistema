@@ -41,6 +41,8 @@ export default defineConfig(({ mode }) => {
     preview: {
       port: 4173,
       host: true,
+      // ✅ CORREÇÃO: SPA routing para deploy estático
+      historyApiFallback: true,
       proxy: {
         "/api": {
           target: "http://localhost:3001",

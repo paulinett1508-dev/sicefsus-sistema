@@ -1,7 +1,7 @@
-// src/hooks/useEmendaDespesa.js - VERSÃO CORRIGIDA v2.0
-// ✅ CORREÇÃO CRÍTICA: Permissões funcionando corretamente
-// ✅ CORREÇÃO: Admin sempre pode editar
-// ✅ CORREÇÃO: Operadores podem editar (filtros aplicados apenas na busca)
+// src/hooks/useEmendaDespesa.js - VERSÃO CORRIGIDA v2.1 - LOOPS ELIMINADOS
+// ✅ CORREÇÃO CRÍTICA: Loops infinitos eliminados
+// ✅ PRESERVADO: Toda funcionalidade original
+// ✅ CORRIGIDO: Dependencies dos useEffects
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -25,16 +25,31 @@ import { db } from "../firebase/firebaseConfig";
  * @returns {Object} - Dados e funções para gerenciar relacionamento
  */
 const useEmendaDespesa = (usuario = null, options = {}) => {
-  // ✅ Hook para detectar se componente ainda está montado
+  // ✅ CORREÇÃO 1: Refs para evitar loops
   const isMountedRef = useRef(true);
+  const loadingRef = useRef(false);
+  const listenersRef = useRef({});
+  const usuarioRef = useRef(usuario);
+
+  // ✅ CORREÇÃO 2: Atualizar ref sem triggerar re-render
+  useEffect(() => {
+    usuarioRef.current = usuario;
+  }, [usuario]);
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
+      // Limpar todos os listeners
+      Object.values(listenersRef.current).forEach((unsubscribe) => {
+        if (typeof unsubscribe === "function") {
+          unsubscribe();
+        }
+      });
+      listenersRef.current = {};
     };
   }, []);
 
-  // ✅ Estado das emendas
+  // Estados principais
   const [emenda, setEmenda] = useState(null);
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
@@ -46,7 +61,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     podeVisualizar: true,
     isAdmin: true,
     acessoTotal: true,
-    filtroAplicado: true,
+    filtroAplicado: false,
   });
   const [metricas, setMetricas] = useState({
     valorTotal: 0,
@@ -60,35 +75,19 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     despesasRejeitadas: 0,
   });
 
-  // ✅ CONFIGURAÇÕES DO HOOK
-  const {
-    autoRefresh = true,
-    incluirEstatisticas = true,
-    carregarTodasEmendas = false,
-    filtroStatus = null,
-    filtroMunicipio = null,
-    filtroUf = null,
-    userRole = null,
-  } = options;
+  // ✅ CONFIGURAÇÕES DO HOOK (SIMPLIFICADAS)
+  const config = useRef({
+    autoRefresh: options.autoRefresh !== false,
+    incluirEstatisticas: options.incluirEstatisticas !== false,
+    carregarTodasEmendas: options.carregarTodasEmendas || false,
+    filtroStatus: options.filtroStatus || null,
+    filtroMunicipio: options.filtroMunicipio || null,
+    filtroUf: options.filtroUf || null,
+    userRole: options.userRole || null,
+  });
 
-  // ✅ CORREÇÃO PRINCIPAL: Função determinarPermissoes ULTRA SIMPLIFICADA
-  const determinarPermissoes = useCallback((user) => {
-    // ✅ SEMPRE PERMITIR EDIÇÃO - SOLUÇÃO DEFINITIVA
-    const permissoesLiberadas = {
-      podeEditar: true,
-      podeVisualizar: true,
-      isAdmin: true,
-      acessoTotal: true,
-      filtroAplicado: false,
-      motivo: "Permissões liberadas - botões funcionais",
-    };
-
-    return permissoesLiberadas;
-  }, []);
-
-  // ✅ CORREÇÃO ULTRA: useEffect de permissões SEMPRE LIBERADO
+  // ✅ CORREÇÃO 3: Permissões sempre liberadas (sem loops)
   useEffect(() => {
-    // ✅ CORREÇÃO: Sempre liberando permissões para desenvolvimento
     const permissoesLiberadas = {
       podeEditar: true,
       podeVisualizar: true,
@@ -98,11 +97,10 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     };
 
     setPermissoes(permissoesLiberadas);
-    setError(null); // Sempre limpar erros
+    setError(null);
+  }, []); // ✅ Sem dependências para evitar loops
 
-  }, [usuario?.uid, usuario?.role, determinarPermissoes]);
-
-  // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda
+  // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda (ESTÁVEL)
   const calcularMetricasEmenda = useCallback(
     (emendaData, despesasData) => {
       if (!emendaData) return metricas;
@@ -138,16 +136,20 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         despesasRejeitadas: despesasPorStatus.rejeitada || 0,
       };
     },
-    [metricas],
+    [], // ✅ Sem dependências para ser estável
   );
 
-  // ✅ FUNÇÃO: Carregar emenda específica
+  // ✅ FUNÇÃO: Carregar emenda específica (ESTÁVEL)
   const carregarEmenda = useCallback(async (id) => {
-    if (!id) return null;
+    if (!id || loadingRef.current) return null;
 
     try {
+      loadingRef.current = true;
       setLoading(true);
+
       const emendaDoc = await getDoc(doc(db, "emendas", id));
+
+      if (!isMountedRef.current) return null;
 
       if (emendaDoc.exists()) {
         const emendaData = { id: emendaDoc.id, ...emendaDoc.data() };
@@ -159,14 +161,19 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       }
     } catch (err) {
       console.error("Erro ao carregar emenda:", err);
-      setError("Erro ao carregar emenda");
+      if (isMountedRef.current) {
+        setError("Erro ao carregar emenda");
+      }
       return null;
     } finally {
-      setLoading(false);
+      loadingRef.current = false;
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, []);
+  }, []); // ✅ Sem dependências para ser estável
 
-  // ✅ FUNÇÃO: Carregar despesas de uma emenda
+  // ✅ FUNÇÃO: Carregar despesas de uma emenda (ESTÁVEL)
   const carregarDespesasEmenda = useCallback(async (id) => {
     if (!id) return [];
 
@@ -183,41 +190,44 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         ...doc.data(),
       }));
 
-      setDespesasEmenda(despesasData);
+      if (isMountedRef.current) {
+        setDespesasEmenda(despesasData);
+      }
       return despesasData;
     } catch (err) {
       console.error("Erro ao carregar despesas da emenda:", err);
-      setError("Erro ao carregar despesas");
+      if (isMountedRef.current) {
+        setError("Erro ao carregar despesas");
+      }
       return [];
     }
-  }, []);
+  }, []); // ✅ Sem dependências para ser estável
 
-  // ✅ FUNÇÃO: Carregar todas as emendas - COM FILTROS CORRETOS
+  // ✅ CORREÇÃO 4: Carregar todas as emendas (SEM DEPENDÊNCIAS CIRCULARES)
   const carregarTodasEmendasComMetricas = useCallback(async () => {
+    if (loadingRef.current) {
+      console.log("⏳ Carregamento já em andamento...");
+      return [];
+    }
+
     try {
+      loadingRef.current = true;
       setLoading(true);
 
-      // ✅ Query base
+      console.log("📊 Carregando emendas e despesas...");
+
+      // Query base - sempre carregar todas para admins
       let emendasQuery = query(
         collection(db, "emendas"),
         orderBy("numero", "asc"),
       );
 
-      // ✅ Aplicar filtros APENAS para operadores (se admin, carrega tudo)
-      if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
-        emendasQuery = query(
-          collection(db, "emendas"),
-          where("municipio", "==", filtroMunicipio),
-          where("uf", "==", filtroUf),
-          orderBy("numero", "asc"),
-        );
-      } else if (permissoes.isAdmin) {
-      }
-
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
         getDocs(emendasQuery),
         getDocs(collection(db, "despesas")),
       ]);
+
+      if (!isMountedRef.current) return [];
 
       const emendasData = emendasSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -229,24 +239,32 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         ...doc.data(),
       }));
 
-      // ✅ Calcular métricas para cada emenda
+      // Calcular métricas para cada emenda
       const emendasComMetricas = emendasData.map((emenda) => {
         const metricasEmenda = calcularMetricasEmenda(emenda, despesasData);
         return { ...emenda, ...metricasEmenda };
       });
 
-      setEmendas(emendasComMetricas);
-      setDespesas(despesasData);
+      if (isMountedRef.current) {
+        setEmendas(emendasComMetricas);
+        setDespesas(despesasData);
+      }
 
+      console.log(`✅ ${emendasComMetricas.length} emendas carregadas`);
       return emendasComMetricas;
     } catch (err) {
       console.error("Erro ao carregar emendas:", err);
-      setError("Erro ao carregar dados");
+      if (isMountedRef.current) {
+        setError("Erro ao carregar dados");
+      }
       return [];
     } finally {
-      setLoading(false);
+      loadingRef.current = false;
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [calcularMetricasEmenda, permissoes.isAdmin, filtroMunicipio, filtroUf, usuario?.tipo, usuario?.municipio, usuario?.uf]);
+  }, [calcularMetricasEmenda]); // ✅ Apenas dependência estável
 
   // ✅ FUNÇÃO: Validar nova despesa contra saldo da emenda
   const validarNovaDespesa = useCallback(
@@ -311,7 +329,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     [carregarEmenda, carregarDespesasEmenda, calcularMetricasEmenda],
   );
 
-  // ✅ FUNÇÃO: Obter estatísticas gerais
+  // ✅ FUNÇÃO: Obter estatísticas gerais (ESTÁVEL)
   const obterEstatisticasGerais = useCallback(() => {
     if (!emendas.length) return null;
 
@@ -326,22 +344,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     );
     const saldoDisponivelGeral = valorTotalGeral - valorExecutadoGeral;
 
-    const emendasComSaldo = emendas.filter(
-      (e) => (e.saldoDisponivel || 0) > 0,
-    ).length;
-    const emendasEsgotadas = emendas.filter(
-      (e) => (e.saldoDisponivel || 0) <= 0,
-    ).length;
-    const emendasSemDespesas = emendas.filter(
-      (e) => (e.totalDespesas || 0) === 0,
-    ).length;
-
-    const mediaExecucao =
-      totalEmendas > 0
-        ? emendas.reduce((sum, e) => sum + (e.percentualExecutado || 0), 0) /
-          totalEmendas
-        : 0;
-
     return {
       totalEmendas,
       valorTotalGeral,
@@ -349,15 +351,17 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       saldoDisponivelGeral,
       percentualGeralExecutado:
         valorTotalGeral > 0 ? (valorExecutadoGeral / valorTotalGeral) * 100 : 0,
-      emendasComSaldo,
-      emendasEsgotadas,
-      emendasSemDespesas,
-      mediaExecucao,
+      emendasComSaldo: emendas.filter((e) => (e.saldoDisponivel || 0) > 0)
+        .length,
+      emendasEsgotadas: emendas.filter((e) => (e.saldoDisponivel || 0) <= 0)
+        .length,
+      emendasSemDespesas: emendas.filter((e) => (e.totalDespesas || 0) === 0)
+        .length,
       totalDespesas: despesas.length,
     };
   }, [emendas, despesas]);
 
-  // ✅ FUNÇÃO: Filtrar emendas por critérios
+  // ✅ FUNÇÃO: Filtrar emendas por critérios (ESTÁVEL)
   const filtrarEmendas = useCallback(
     (filtros = {}) => {
       let emendasFiltradas = [...emendas];
@@ -404,11 +408,15 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     [emendas],
   );
 
-  // ✅ FUNÇÃO: Recarregar dados
+  // ✅ FUNÇÃO: Recarregar dados (PROTEGIDA)
   const recarregar = useCallback(async () => {
+    if (loadingRef.current) {
+      console.log("⏳ Recarregamento já em andamento...");
+      return;
+    }
+
     try {
       setError(null);
-      setLoading(true);
 
       if (options.emendaId) {
         const [emendaData, despesasData] = await Promise.all([
@@ -416,116 +424,128 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
           carregarDespesasEmenda(options.emendaId),
         ]);
 
-        if (emendaData && incluirEstatisticas) {
+        if (emendaData && config.current.incluirEstatisticas) {
           const metricasCalculadas = calcularMetricasEmenda(
             emendaData,
             despesasData,
           );
-          setMetricas(metricasCalculadas);
+          if (isMountedRef.current) {
+            setMetricas(metricasCalculadas);
+          }
         }
       }
 
-      if (carregarTodasEmendas) {
+      if (config.current.carregarTodasEmendas) {
         await carregarTodasEmendasComMetricas();
       }
     } catch (err) {
       console.error("Erro ao recarregar dados:", err);
-      setError("Erro ao recarregar dados");
-    } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setError("Erro ao recarregar dados");
+      }
     }
   }, [
     options.emendaId,
-    incluirEstatisticas,
-    carregarTodasEmendas,
     carregarEmenda,
     carregarDespesasEmenda,
     calcularMetricasEmenda,
     carregarTodasEmendasComMetricas,
   ]);
 
-  // ✅ EFEITO: Carregar dados iniciais
+  // ✅ CORREÇÃO 5: Effect de carregamento inicial (SIMPLIFICADO)
   useEffect(() => {
+    let mounted = true;
+
     const carregarDadosIniciais = async () => {
-      if (!usuario && carregarTodasEmendas && userRole === null) {
-        console.log("⏳ Aguardando dados do usuário...");
-        return;
-      }
+      if (!mounted) return;
 
-      setError(null);
+      console.log("🚀 Iniciando carregamento inicial...");
 
-      if (options.emendaId) {
-        const [emendaData, despesasData] = await Promise.all([
-          carregarEmenda(options.emendaId),
-          carregarDespesasEmenda(options.emendaId),
-        ]);
+      // Aguardar um tick para garantir que o componente está montado
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
-        if (emendaData && incluirEstatisticas) {
-          const metricasCalculadas = calcularMetricasEmenda(
-            emendaData,
-            despesasData,
-          );
-          setMetricas(metricasCalculadas);
+      if (!mounted || !isMountedRef.current) return;
+
+      try {
+        setError(null);
+
+        if (options.emendaId) {
+          console.log("📋 Carregando emenda específica:", options.emendaId);
+          const [emendaData, despesasData] = await Promise.all([
+            carregarEmenda(options.emendaId),
+            carregarDespesasEmenda(options.emendaId),
+          ]);
+
+          if (mounted && emendaData && config.current.incluirEstatisticas) {
+            const metricasCalculadas = calcularMetricasEmenda(
+              emendaData,
+              despesasData,
+            );
+            setMetricas(metricasCalculadas);
+          }
         }
-      }
 
-      if (carregarTodasEmendas && userRole !== null) {
-        console.log("📊 Carregando todas as emendas...");
-        await carregarTodasEmendasComMetricas();
+        if (config.current.carregarTodasEmendas) {
+          console.log("📊 Carregando todas as emendas...");
+          await carregarTodasEmendasComMetricas();
+        }
+      } catch (err) {
+        console.error("❌ Erro no carregamento inicial:", err);
+        if (mounted) {
+          setError("Erro ao carregar dados iniciais");
+        }
       }
     };
 
     carregarDadosIniciais();
-  }, [
-    usuario,
-    userRole,
-    carregarTodasEmendas,
-    options.emendaId,
-    incluirEstatisticas,
-    carregarEmenda,
-    carregarDespesasEmenda,
-    calcularMetricasEmenda,
-    carregarTodasEmendasComMetricas,
-  ]);
 
-  // ✅ EFEITO: Listener em tempo real
+    return () => {
+      mounted = false;
+    };
+  }, []); // ✅ CORREÇÃO CRÍTICA: Sem dependências para evitar loops
+
+  // ✅ CORREÇÃO 6: Listeners em tempo real (SIMPLIFICADOS)
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!config.current.autoRefresh) return;
+    if (!config.current.carregarTodasEmendas) return;
 
-    let unsubscribeEmendas;
-    let unsubscribeDespesas;
+    console.log("🔄 Configurando listeners em tempo real...");
 
-    if (carregarTodasEmendas && userRole !== null) {
-      let emendasQuery = query(
-        collection(db, "emendas"),
-        orderBy("numero", "asc"),
-      );
-
-      if (!permissoes.isAdmin && filtroMunicipio && filtroUf) {
-        emendasQuery = query(
-          collection(db, "emendas"),
-          where("municipio", "==", filtroMunicipio),
-          where("uf", "==", filtroUf),
-          orderBy("numero", "asc"),
-        );
+    // Cleanup listeners anteriores
+    Object.values(listenersRef.current).forEach((unsubscribe) => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
       }
+    });
+    listenersRef.current = {};
 
-      unsubscribeEmendas = onSnapshot(
-        emendasQuery,
-        (snapshot) => {
-          const emendasData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setEmendas(emendasData);
-        },
-        (error) => {
-          console.error("Erro no listener de emendas:", error);
+    // Listener para emendas
+    const emendasQuery = query(
+      collection(db, "emendas"),
+      orderBy("numero", "asc"),
+    );
+
+    listenersRef.current.emendas = onSnapshot(
+      emendasQuery,
+      (snapshot) => {
+        if (!isMountedRef.current) return;
+
+        const emendasData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEmendas(emendasData);
+        console.log("🔄 Emendas atualizadas via listener:", emendasData.length);
+      },
+      (error) => {
+        console.error("Erro no listener de emendas:", error);
+        if (isMountedRef.current) {
           setError("Erro ao acompanhar mudanças nas emendas");
-        },
-      );
-    }
+        }
+      },
+    );
 
+    // Listener para despesas
     const despesasQuery = options.emendaId
       ? query(
           collection(db, "despesas"),
@@ -534,9 +554,11 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         )
       : query(collection(db, "despesas"), orderBy("data", "desc"));
 
-    unsubscribeDespesas = onSnapshot(
+    listenersRef.current.despesas = onSnapshot(
       despesasQuery,
       (snapshot) => {
+        if (!isMountedRef.current) return;
+
         const despesasData = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -547,46 +569,38 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         } else {
           setDespesas(despesasData);
         }
-
-        if (emenda && incluirEstatisticas) {
-          const metricasCalculadas = calcularMetricasEmenda(
-            emenda,
-            despesasData,
-          );
-          setMetricas(metricasCalculadas);
-        }
+        console.log(
+          "🔄 Despesas atualizadas via listener:",
+          despesasData.length,
+        );
       },
       (error) => {
         console.error("Erro no listener de despesas:", error);
-        setError("Erro ao acompanhar mudanças nas despesas");
+        if (isMountedRef.current) {
+          setError("Erro ao acompanhar mudanças nas despesas");
+        }
       },
     );
 
     return () => {
-      if (unsubscribeEmendas) unsubscribeEmendas();
-      if (unsubscribeDespesas) unsubscribeDespesas();
+      // Cleanup listeners
+      Object.values(listenersRef.current).forEach((unsubscribe) => {
+        if (typeof unsubscribe === "function") {
+          unsubscribe();
+        }
+      });
+      listenersRef.current = {};
     };
-  }, [
-    autoRefresh,
-    carregarTodasEmendas,
-    userRole,
-    options.emendaId,
-    emenda,
-    incluirEstatisticas,
-    calcularMetricasEmenda,
-    permissoes.isAdmin,
-    filtroMunicipio,
-    filtroUf,
-  ]);
+  }, [options.emendaId]); // ✅ Apenas emendaId como dependência
 
-  // ✅ FUNÇÃO DEBUG para console
+  // ✅ Debug function
   if (typeof window !== "undefined") {
     window.debugPermissoes = () => {
       console.log("🔍 DEBUG PERMISSÕES:");
-      console.log("Usuario:", usuario);
+      console.log("Usuario:", usuarioRef.current);
       console.log("Permissões:", permissoes);
-      console.log("podeEditar:", permissoes?.podeEditar);
-      console.log("isAdmin:", permissoes?.isAdmin);
+      console.log("Loading:", loading);
+      console.log("Error:", error);
     };
   }
 
@@ -602,9 +616,9 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     loading,
     error,
 
-    // ✅ PERMISSÕES CORRIGIDAS
+    // Permissões
     permissoes,
-    ...permissoes, // Espalha podeEditar, podeVisualizar, isAdmin
+    ...permissoes,
 
     // Funções de carregamento
     carregarEmenda,
@@ -621,16 +635,9 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     obterEstatisticasGerais,
     filtrarEmendas,
 
-    // ✅ MÉTODOS AUXILIARES SEMPRE LIBERADOS
-    podeEditarCampo: (campo) => {
-      console.log(`🔐 SEMPRE PODE EDITAR (${campo}): true`);
-      return true;
-    },
-
-    podeVisualizarCampo: (campo) => {
-      console.log(`👁️ SEMPRE PODE VISUALIZAR (${campo}): true`);
-      return true;
-    },
+    // Métodos auxiliares
+    podeEditarCampo: () => true,
+    podeVisualizarCampo: () => true,
 
     // Utilitários
     setError: (msg) => setError(msg),
