@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import CNPJInput from "../../../CNPJInput";
-import MunicipioSelector from "../../../MunicipioSelector";
 
 const DadosBeneficiario = ({
   formData,
@@ -225,83 +223,7 @@ const DadosBeneficiario = ({
               />
             </div>
 
-            {/* CNPJ do Beneficiário - USANDO CNPJInput COM VALIDAÇÃO */}
-            <div style={customStyles.formGroup}>
-              <CNPJInput
-                label="CNPJ do Beneficiário (Opcional)"
-                value={formData?.cnpjBeneficiario || ""}
-                onChange={(e) => {
-                  console.log("🔧 DadosBeneficiario CNPJ change:", e.target.value);
-                  onChange({
-                    target: {
-                      name: "cnpjBeneficiario",
-                      value: e.target.value,
-                    },
-                  });
-                }}
-                required={false}
-                placeholder="00.000.000/0000-00"
-                showValidation={true}
-                style={customStyles.formGroup}
-                inputStyle={customStyles.input}
-                onValidChange={(isValid, value) => {
-                  console.log("🎯 DadosBeneficiario CNPJ validation:", isValid, value);
-                }}
-              />
             </div>
-
-            {/* CPF do Responsável */}
-            <div style={customStyles.formGroup}>
-              <label style={customStyles.label}>CPF do Responsável</label>
-              <input
-                type="text"
-                name="cpfResponsavel"
-                value={formData?.cpfResponsavel || ""}
-                onChange={onChange}
-                placeholder="000.000.000-00"
-                style={customStyles.input}
-              />
-            </div>
-          </div>
-
-          {/* Seção de Localização do Beneficiário */}
-          <div style={customStyles.localizacaoSection}>
-            <h4 style={customStyles.sectionTitle}>
-              📍 Localização do Beneficiário
-            </h4>
-            <div style={customStyles.localizacaoContainer}>
-              <MunicipioSelector
-                ufSelecionada={formData?.ufBeneficiario || ""}
-                municipioSelecionado={formData?.municipioBeneficiario || ""}
-                onUfChange={(uf) => {
-                  onChange({
-                    target: {
-                      name: "ufBeneficiario",
-                      value: uf,
-                    },
-                  });
-                  // Limpar município quando UF mudar
-                  if (formData?.municipioBeneficiario) {
-                    onChange({
-                      target: {
-                        name: "municipioBeneficiario",
-                        value: "",
-                      },
-                    });
-                  }
-                }}
-                onMunicipioChange={(municipio) => {
-                  onChange({
-                    target: {
-                      name: "municipioBeneficiario",
-                      value: municipio,
-                    },
-                  });
-                }}
-                disabled={false}
-              />
-            </div>
-          </div>
 
           {/* Campos de texto maiores - MESMO FORMATO */}
           <div style={customStyles.textAreaGrid}>
@@ -490,27 +412,7 @@ const customStyles = {
     fontStyle: "italic",
   },
 
-  localizacaoSection: {
-    marginTop: "24px",
-    padding: "20px",
-    backgroundColor: "#f0f8ff",
-    border: "2px solid #4a90e2",
-    borderRadius: "8px",
-  },
-
-  sectionTitle: {
-    margin: "0 0 16px 0",
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#154360",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  localizacaoContainer: {
-    display: "block",
-  },
+  
 };
 
 export default DadosBeneficiario;
