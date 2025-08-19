@@ -23,7 +23,6 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         <div style={styles.formGroup}>
           <label style={styles.label}>
             🏛️ Data de Aprovação *
-            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
@@ -51,7 +50,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         {/* DATA OB - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            📄 Data OB *<span style={styles.requiredLabel}>OBRIGATÓRIA</span>
+            📄 Data OB *
           </label>
           <input
             type="date"
@@ -80,7 +79,6 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         <div style={styles.formGroup}>
           <label style={styles.label}>
             🚀 Início da Execução *
-            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
@@ -107,7 +105,6 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         <div style={styles.formGroup}>
           <label style={styles.label}>
             🏁 Final da Execução *
-            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
@@ -134,7 +131,6 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         <div style={styles.formGroup}>
           <label style={styles.label}>
             ⏰ Data de Validade *
-            <span style={styles.requiredLabel}>OBRIGATÓRIA</span>
           </label>
           <input
             type="date"
@@ -160,8 +156,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
         {/* DATA DA ÚLTIMA ATUALIZAÇÃO - AUTOMÁTICA */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            📅 Data da Última Atualização
-            <span style={styles.autoLabel}>AUTOMÁTICA</span>
+            🔄 Data de Última Atualização
           </label>
           <input
             type="date"
