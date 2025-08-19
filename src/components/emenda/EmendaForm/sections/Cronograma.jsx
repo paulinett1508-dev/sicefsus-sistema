@@ -2,7 +2,7 @@
 import React from "react";
 
 // Importar validação centralizada fora da função para evitar re-importações
-const { validarCronogramaEmenda, normalizarDataInput } = require('../../../utils/validators');
+import { validarCronogramaEmenda, normalizarDataInput } from '../../../utils/validators';
 
 const Cronograma = ({
   formData = {},
