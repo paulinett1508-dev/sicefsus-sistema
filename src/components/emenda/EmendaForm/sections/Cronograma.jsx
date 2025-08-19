@@ -10,7 +10,15 @@ const Cronograma = ({
   // Handler com validação de datas em tempo real
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    onChange?.({ target: { name, value } });
+    
+    // Normalizar data antes de salvar
+    const { normalizarDataInput } = require('../../../utils/validators');
+    const dataNormalizada = normalizarDataInput(value);
+    
+    // Só aceitar se for válida ou vazia
+    const valorFinal = dataNormalizada || value;
+    
+    onChange?.({ target: { name, value: valorFinal } });
   };
 
   // Validação: Data não pode ser futura (exceto Data de Validade)
