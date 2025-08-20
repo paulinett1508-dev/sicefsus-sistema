@@ -588,19 +588,42 @@ export const useEmendaFormData = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
+    // 🔄 Atualizar formData imediatamente
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
 
-    // Limpar erro do campo
-    if (fieldErrors[name]) {
-      setFieldErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
+    // 🧹 LIMPEZA AGRESSIVA DE ERROS - sempre que o usuário digitar
+    setFieldErrors((prev) => {
+      const newErrors = { ...prev };
+      
+      // Remove erro do campo específico
+      delete newErrors[name];
+      
+      // Remove erros relacionados se houver valor
+      const cleanValue = cleanField(value);
+      if (cleanValue && cleanValue.length > 0) {
+        // Remove erros de campos relacionados
+        if (name === 'autor') {
+          delete newErrors.autor;
+        }
+        if (name === 'objeto') {
+          delete newErrors.objeto;
+        }
+        if (name === 'valor') {
+          delete newErrors.valor;
+        }
+        if (name === 'programa') {
+          delete newErrors.programa;
+        }
+      }
+      
+      return newErrors;
+    });
+
+    // 🔍 DEBUG: Remover depois
+    console.log(`🔄 Campo ${name} alterado para: "${value}"`);
   };
 
   const clearFieldError = (fieldName) => {
