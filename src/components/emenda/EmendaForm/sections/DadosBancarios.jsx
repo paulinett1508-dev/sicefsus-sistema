@@ -140,7 +140,7 @@ const DadosBancarios = ({
         </div>
       </div>
 
-      {/* Seção colapsável de códigos bancários */}
+      {/* Seção colapsível de códigos bancários */}
       <div style={styles.collapsibleSection}>
         <button
           type="button"
@@ -148,12 +148,8 @@ const DadosBancarios = ({
           style={styles.toggleButton}
           disabled={disabled}
         >
-          <span style={styles.toggleIcon}>
-            {showBankCodes ? "▼" : "▶"}
-          </span>
-          <span style={styles.toggleText}>
-            Códigos de Bancos Mais Comuns
-          </span>
+          <span style={styles.toggleIcon}>{showBankCodes ? "▼" : "▶"}</span>
+          <span style={styles.toggleText}>Códigos de Bancos Mais Comuns</span>
         </button>
 
         {showBankCodes && (
@@ -172,10 +168,12 @@ const DadosBancarios = ({
   );
 };
 
-// ✅ ESTILOS EXTRAÍDOS DO ORIGINAL
+// ✅ ESTILOS CORRIGIDOS - CSS CONFLICT RESOLVIDO
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -185,7 +183,9 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     color: "#154360",
     fontWeight: "bold",
     fontSize: "16px",
@@ -220,7 +220,9 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
@@ -239,7 +241,9 @@ const styles = {
   },
   collapsibleSection: {
     marginTop: "20px",
-    border: "1px solid #dee2e6",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
     borderRadius: "8px",
     backgroundColor: "#f8f9fa",
     overflow: "hidden",
@@ -270,7 +274,9 @@ const styles = {
   bankCodesContent: {
     padding: "15px",
     backgroundColor: "white",
-    borderTop: "1px solid #dee2e6",
+    borderTopWidth: "1px",
+    borderTopStyle: "solid",
+    borderTopColor: "#dee2e6",
   },
   bankList: {
     display: "grid",

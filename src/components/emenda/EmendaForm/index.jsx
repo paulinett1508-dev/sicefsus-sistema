@@ -57,7 +57,7 @@ const EmendaForm = () => {
     handleSimpleBack,
   } = useEmendaFormNavigation(hasUnsavedChanges, isEdicao);
 
-  // 🔄 RENDERIZAÇÃO CONDICIONAL: Loading
+  // 📄 RENDERIZAÇÃO CONDICIONAL: Loading
   if (loading) {
     return (
       <div style={styles.container}>
@@ -73,12 +73,12 @@ const EmendaForm = () => {
     );
   }
 
-  // 🔄 RENDERIZAÇÃO CONDICIONAL: Erro
+  // 📄 RENDERIZAÇÃO CONDICIONAL: Erro
   if (error) {
     return (
       <div style={styles.container}>
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⌫</div>
+          <div style={styles.errorIcon}>⚫</div>
           <h3>Erro no Formulário</h3>
           <p>{error}</p>
           <div style={styles.errorActions}>
@@ -110,7 +110,7 @@ const EmendaForm = () => {
         <Identificacao
           formData={formData}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 
@@ -118,7 +118,7 @@ const EmendaForm = () => {
         <DadosBasicos
           formData={formData}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 
@@ -127,7 +127,7 @@ const EmendaForm = () => {
           formData={formData}
           onChange={handleInputChange}
           setFormData={undefined} // Hook gerencia isso agora
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
           styles={styles}
           buscarDadosFornecedor={buscarDadosFornecedor}
@@ -139,15 +139,15 @@ const EmendaForm = () => {
         <DadosBancarios
           formData={formData}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 
         {/* ✅ SEÇÃO: Cronograma */}
         <Cronograma
-          formData={formData}
+          formData={formData || {}}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 
@@ -155,7 +155,7 @@ const EmendaForm = () => {
         <AcoesServicos
           formData={formData}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 
@@ -163,7 +163,7 @@ const EmendaForm = () => {
         <InformacoesComplementares
           formData={formData}
           onChange={handleInputChange}
-          errors={fieldErrors}
+          fieldErrors={fieldErrors}
           onClearError={clearFieldError}
         />
 

@@ -5,7 +5,7 @@ entrypoint = "index.html"
 
 [nix]
 channel = "stable-24_05"
-packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano"]
+packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano", "tree"]
 
 [unitTest]
 language = "nodejs"

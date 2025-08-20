@@ -1,12 +1,17 @@
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx - SIMPLIFICADO
 import React from "react";
 
-const Cronograma = ({ formData, onChange, errors, onClearError }) => {
+const Cronograma = ({
+  formData = {},
+  onChange,
+  fieldErrors = {},
+  onClearError,
+}) => {
   // Handler para limpar erro ao digitar
   const handleChange = (e) => {
     const { name } = e.target;
     onChange(e);
-    if (onClearError && errors[name]) {
+    if (onClearError && fieldErrors[name]) {
       onClearError(name);
     }
   };
@@ -21,9 +26,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
       <div style={styles.dateGrid}>
         {/* DATA DE APROVAÇÃO - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            🏛️ Data de Aprovação *
-          </label>
+          <label style={styles.label}>🏛️ Data de Aprovação *</label>
           <input
             type="date"
             name="dataAprovacao"
@@ -32,14 +35,14 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
             required
             style={{
               ...styles.input,
-              ...(errors.dataAprovacao ? styles.inputError : {}),
-              borderColor: errors.dataAprovacao ? "#dc3545" : "#ced4da",
+              ...(fieldErrors.dataAprovacao ? styles.inputError : {}),
+              borderColor: fieldErrors.dataAprovacao ? "#dc3545" : "#ced4da",
             }}
           />
-          {errors.dataAprovacao && (
+          {fieldErrors.dataAprovacao && (
             <div style={styles.errorText}>
               <span style={styles.errorIcon}>🚨</span>
-              {errors.dataAprovacao}
+              {fieldErrors.dataAprovacao}
             </div>
           )}
           <div style={styles.helperText}>
@@ -49,9 +52,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
 
         {/* DATA OB - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            📄 Data OB *
-          </label>
+          <label style={styles.label}>📄 Data OB *</label>
           <input
             type="date"
             name="dataOb"
@@ -60,14 +61,14 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
             required
             style={{
               ...styles.input,
-              ...(errors.dataOb ? styles.inputError : {}),
-              borderColor: errors.dataOb ? "#dc3545" : "#ced4da",
+              ...(fieldErrors.dataOb ? styles.inputError : {}),
+              borderColor: fieldErrors.dataOb ? "#dc3545" : "#ced4da",
             }}
           />
-          {errors.dataOb && (
+          {fieldErrors.dataOb && (
             <div style={styles.errorText}>
               <span style={styles.errorIcon}>🚨</span>
-              {errors.dataOb}
+              {fieldErrors.dataOb}
             </div>
           )}
           <div style={styles.helperText}>
@@ -77,9 +78,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
 
         {/* INÍCIO DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            🚀 Início da Execução *
-          </label>
+          <label style={styles.label}>🚀 Início da Execução *</label>
           <input
             type="date"
             name="inicioExecucao"
@@ -88,14 +87,14 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
             required
             style={{
               ...styles.input,
-              ...(errors.inicioExecucao ? styles.inputError : {}),
-              borderColor: errors.inicioExecucao ? "#dc3545" : "#ced4da",
+              ...(fieldErrors.inicioExecucao ? styles.inputError : {}),
+              borderColor: fieldErrors.inicioExecucao ? "#dc3545" : "#ced4da",
             }}
           />
-          {errors.inicioExecucao && (
+          {fieldErrors.inicioExecucao && (
             <div style={styles.errorText}>
               <span style={styles.errorIcon}>🚨</span>
-              {errors.inicioExecucao}
+              {fieldErrors.inicioExecucao}
             </div>
           )}
           <div style={styles.helperText}>🚀 Início das ações executivas</div>
@@ -103,9 +102,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
 
         {/* FINAL DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            🏁 Final da Execução *
-          </label>
+          <label style={styles.label}>🏁 Final da Execução *</label>
           <input
             type="date"
             name="finalExecucao"
@@ -114,14 +111,14 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
             required
             style={{
               ...styles.input,
-              ...(errors.finalExecucao ? styles.inputError : {}),
-              borderColor: errors.finalExecucao ? "#dc3545" : "#ced4da",
+              ...(fieldErrors.finalExecucao ? styles.inputError : {}),
+              borderColor: fieldErrors.finalExecucao ? "#dc3545" : "#ced4da",
             }}
           />
-          {errors.finalExecucao && (
+          {fieldErrors.finalExecucao && (
             <div style={styles.errorText}>
               <span style={styles.errorIcon}>🚨</span>
-              {errors.finalExecucao}
+              {fieldErrors.finalExecucao}
             </div>
           )}
           <div style={styles.helperText}>🏁 Conclusão das ações</div>
@@ -129,9 +126,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
 
         {/* DATA DE VALIDADE - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            ⏰ Data de Validade *
-          </label>
+          <label style={styles.label}>⏰ Data de Validade *</label>
           <input
             type="date"
             name="dataValidade"
@@ -140,14 +135,14 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
             required
             style={{
               ...styles.input,
-              ...(errors.dataValidade ? styles.inputError : {}),
-              borderColor: errors.dataValidade ? "#dc3545" : "#ced4da",
+              ...(fieldErrors.dataValidade ? styles.inputError : {}),
+              borderColor: fieldErrors.dataValidade ? "#dc3545" : "#ced4da",
             }}
           />
-          {errors.dataValidade && (
+          {fieldErrors.dataValidade && (
             <div style={styles.errorText}>
               <span style={styles.errorIcon}>🚨</span>
-              {errors.dataValidade}
+              {fieldErrors.dataValidade}
             </div>
           )}
           <div style={styles.helperText}>⏰ Prazo legal final</div>
@@ -155,9 +150,7 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
 
         {/* DATA DA ÚLTIMA ATUALIZAÇÃO - AUTOMÁTICA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            🔄 Data de Última Atualização
-          </label>
+          <label style={styles.label}>📄 Data de Última Atualização</label>
           <input
             type="date"
             name="dataUltimaAtualizacao"
@@ -178,13 +171,13 @@ const Cronograma = ({ formData, onChange, errors, onClearError }) => {
       </div>
 
       {/* ERRO GERAL DE CRONOGRAMA */}
-      {errors.cronogramaGeral && (
+      {fieldErrors.cronogramaGeral && (
         <div style={styles.globalError}>
           <div style={styles.errorIcon}>🚨</div>
           <div>
             <strong>Erro na Sequência Cronológica:</strong>
             <br />
-            {errors.cronogramaGeral}
+            {fieldErrors.cronogramaGeral}
           </div>
         </div>
       )}
