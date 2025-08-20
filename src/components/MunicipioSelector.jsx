@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { carregarMunicipios as carregarMunicipiosCache } from "../utils/municipiosCache";
 
 const MunicipioSelector = ({
   uf,
@@ -25,18 +26,11 @@ const MunicipioSelector = ({
       try {
         console.log(`🏙️ Carregando municípios para UF: ${uf}`);
 
-        const response = await fetch(
-          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`,
-        );
+        // ✅ Usar sistema de cache inteligente
+        const municipiosCarregados = await carregarMunicipiosCache(uf);
 
-        if (!response.ok) {
-          throw new Error("Erro ao carregar municípios");
-        }
-
-        const data = await response.json();
-
-        // 📊 Formatar dados para o select
-        const municipiosFormatados = data.map((municipio) => ({
+        // 📊 Formatar dados mantendo estrutura original
+        const municipiosFormatados = municipiosCarregados.map((municipio) => ({
           id: municipio.id,
           nome: municipio.nome,
           codigo: municipio.id,
