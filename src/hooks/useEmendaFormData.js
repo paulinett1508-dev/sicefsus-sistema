@@ -98,6 +98,47 @@ export const useEmendaFormData = () => {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
+    // 🐛 DEBUG CRÍTICO - ADICIONAR NO INÍCIO
+    console.log("🔥 VALIDAÇÃO EXECUTADA - FormData completo:", {
+      objeto: `"${formData.objeto}"`,
+      objetoTrim: `"${formData.objeto?.trim()}"`,
+      objetoLength: formData.objeto?.length,
+      autor: `"${formData.autor}"`,
+      autorTrim: `"${formData.autor?.trim()}"`, 
+      autorLength: formData.autor?.length,
+      valor: `"${formData.valor}"`,
+      valorTrim: `"${formData.valor?.toString().trim()}"`,
+      valorLength: formData.valor?.toString().length,
+      programa: `"${formData.programa}"`,
+      programaTrim: `"${formData.programa?.trim()}"`,
+      programaLength: formData.programa?.length,
+      municipio: `"${formData.municipio}"`,
+      municipioTrim: `"${formData.municipio?.trim()}"`,
+      municipioLength: formData.municipio?.length,
+      numero: `"${formData.numero}"`,
+      numeroTrim: `"${formData.numero?.trim()}"`,
+      numeroLength: formData.numero?.length,
+      beneficiario: `"${formData.beneficiario}"`,
+      beneficiarioTrim: `"${formData.beneficiario?.trim()}"`,
+      beneficiarioLength: formData.beneficiario?.length,
+      banco: `"${formData.banco}"`,
+      bancoTrim: `"${formData.banco?.trim()}"`,
+      bancoLength: formData.banco?.length,
+      agencia: `"${formData.agencia}"`,
+      agenciaTrim: `"${formData.agencia?.trim()}"`,
+      agenciaLength: formData.agencia?.length,
+      conta: `"${formData.conta}"`,
+      contaTrim: `"${formData.conta?.trim()}"`,
+      contaLength: formData.conta?.length,
+      dataAprovacao: `"${formData.dataAprovacao}"`,
+      dataOb: `"${formData.dataOb}"`,
+      inicioExecucao: `"${formData.inicioExecucao}"`,
+      finalExecucao: `"${formData.finalExecucao}"`,
+      dataValidade: `"${formData.dataValidade}"`,
+      acoesServicos: formData.acoesServicos,
+      acoesServicosLength: formData.acoesServicos?.length
+    });
+
     // ============================================
     // 🚨 SEÇÃO IDENTIFICAÇÃO - OBRIGATÓRIA
     // ============================================
