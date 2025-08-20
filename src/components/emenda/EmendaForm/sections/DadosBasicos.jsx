@@ -2,6 +2,14 @@ import React from "react";
 import CNPJInput from "../../../CNPJInput";
 
 const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
+  
+  // 🐛 DEBUG - RENDERIZAÇÃO DO COMPONENTE
+  console.log("🔍 DadosBasicos renderizou com:", {
+    formData: formData,
+    fieldErrors: fieldErrors,
+    onChangeFunction: onChange
+  });
+
   const programas = [
     "Incremento ao custeio de serviços da atenção primária à saúde",
     "Aquisição de equipamentos",
@@ -27,26 +35,18 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // 🐛 DEBUG - MUDANÇAS NOS CAMPOS
+    console.log(`🔄 DadosBasicos handleInputChange: ${name} = "${value}"`);
 
     if (name === "valor" || name === "valorRecurso") {
       const valorFormatado = formatarMoeda(value);
+      console.log(`💰 Valor formatado: ${valorFormatado}`);
       onChange({ target: { name, value: valorFormatado } });
     } else {
       onChange(e);
     }
   };
-
-  // 🐛 DEBUG TEMPORÁRIO - REMOVER DEPOIS
-  console.log("🔍 DEBUG FormData:", {
-    objeto: `"${formData.objeto}"`,
-    objetoLength: formData.objeto?.length,
-    autor: `"${formData.autor}"`, 
-    autorLength: formData.autor?.length,
-    valor: `"${formData.valor}"`,
-    valorLength: formData.valor?.toString().length
-  });
-
-  console.log("🔍 DEBUG FieldErrors:", fieldErrors);
 
   return (
     <fieldset style={styles.fieldset}>
@@ -64,7 +64,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           <select
             name="programa"
             value={formData.programa || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(fieldErrors.programa && styles.inputError),
@@ -92,7 +92,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="objeto"
             value={formData.objeto || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={{
               ...styles.input,
               ...(fieldErrors.objeto && styles.inputError),
@@ -113,7 +113,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="autor"
             value={formData.autor || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Nome do parlamentar"
             style={{
               ...styles.input,
@@ -135,7 +135,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="numero"
             value={formData.numero || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Ex: 30460003"
             style={{
               ...styles.input,
@@ -156,7 +156,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           <select
             name="tipo"
             value={formData.tipo || "Individual"}
-            onChange={onChange}
+            onChange={handleInputChange}
             style={styles.input}
             required
           >
@@ -174,7 +174,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="numeroProposta"
             value={formData.numeroProposta || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Ex: 36000660361202500"
             style={styles.input}
           />
@@ -187,7 +187,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="funcional"
             value={formData.funcional || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Ex: 10301311928590021"
             style={styles.input}
           />
@@ -199,7 +199,8 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             label="Beneficiário (CNPJ)"
             value={formData.beneficiario || ""}
             onChange={(e) => {
-              onChange({
+              console.log(`🔄 CNPJInput mudança: beneficiario = "${e.target.value}"`);
+              handleInputChange({
                 target: {
                   name: "beneficiario",
                   value: e.target.value,
