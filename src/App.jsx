@@ -26,33 +26,39 @@ import Administracao from "./components/Administracao";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 import DespesaForm from "./components/DespesaForm";
-import { useUser } from "./context/UserContext"; // Importar useUser
+import { useUser } from "./context/UserContext";
 import { checkVersion } from "./utils/versionControl";
+import { useVersion } from "./hooks/useVersion";
 import ErrorBoundary from "./components/ErrorBoundary";
 import UpdateNotification from "./components/UpdateNotification";
 
+console.log("🔥 PROD Firebase Check:", {
+  mode: import.meta.env.MODE,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+});
 
 // Sistema inteligente de controle de logs
 import { configureConsole } from "./utils/DisableConsole";
 
 // Configurar console inteligente apenas uma vez
-// Configurar console apenas uma vez
 if (!window.__consoleConfigured) {
   configureConsole();
   window.__consoleConfigured = true;
 }
 
 // Tratar erros não capturados globalmente
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('🚨 Promise rejeitada não tratada:', event.reason);
-  event.preventDefault(); // Previne que apareça no console como erro
+window.addEventListener("unhandledrejection", (event) => {
+  console.error("🚨 Promise rejeitada não tratada:", event.reason);
+  event.preventDefault();
 });
 
-window.addEventListener('error', (event) => {
-  console.error('🚨 Erro global capturado:', event.error);
+window.addEventListener("error", (event) => {
+  console.error("🚨 Erro global capturado:", event.error);
 });
 
-// Context para proteção de navegaçãovegação
+// Context para proteção de navegação
 const NavigationProtectionContext = React.createContext({
   isFormActive: false,
   setFormActive: () => {},
@@ -165,22 +171,14 @@ function LoadingSpinner() {
   );
 }
 
-// ErrorBoundary já é importado do arquivo separado
-
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
-  const { user: usuario, loading } = useUser(); // ✅ USAR APENAS O UserContext PARA GERENCIAR USUÁRIO
+  const { user: usuario, loading } = useUser();
+  const { version, loading: versionLoading } = useVersion();
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();
-
-  // ✅ USUÁRIO GERENCIADO CENTRALIZADAMENTE PELO UserContext
-
-  // Verificar versão ao carregar a aplicação
-  // useEffect(() => {
-  //   checkVersion();
-  // }, []);
 
   // Redirecionamento
   useEffect(() => {
@@ -201,8 +199,6 @@ function AppContent() {
     }
     try {
       await signOut(auth);
-      // A lógica de limpar o usuário será tratada pelo onAuthStateChanged e UserContext
-      // setUsuario(null); // Remover esta linha
       setShowLogin(false);
       setAuthError(null);
       navigate("/");
@@ -226,26 +222,21 @@ function AppContent() {
     setAuthError(null);
   }, []);
 
-  // ✅ FUNÇÃO CORRIGIDA PARA RECEBER DADOS COMPLETOS DO LOGIN
   const handleLoginSuccess = useCallback(
     (dadosUsuario) => {
       console.log("✅ handleLoginSuccess chamado:", dadosUsuario);
 
-      // Se recebeu dados do usuário (login com dados), usar diretamente
       if (dadosUsuario && dadosUsuario.uid) {
         console.log(
           "📋 Definindo usuário com dados completos do Login.jsx:",
           dadosUsuario,
         );
-        // O UserContext deve ser responsável por atualizar o estado do usuário
-        // setUsuario(dadosUsuario); // Remover esta linha
         setShowLogin(false);
         setAuthError(null);
         navigate("/dashboard");
         return;
       }
 
-      // Caso contrário (auto-registro), só fechar modal e navegar
       console.log("📋 Login sem dados - deixar onAuthStateChanged carregar");
       setShowLogin(false);
       setAuthError(null);
@@ -262,13 +253,14 @@ function AppContent() {
   // Função para obter o nome da página atual
   const getCurrentPageName = () => {
     const path = location.pathname;
-    if (path.includes('/emendas')) return 'Emendas';
-    if (path.includes('/despesas')) return 'Despesas';
-    if (path.includes('/relatorios')) return 'Relatórios';
-    if (path.includes('/admin') || path.includes('/administracao')) return 'Administração';
-    if (path.includes('/sobre')) return 'Sobre';
-    if (path === '/dashboard') return 'Dashboard';
-    return 'SICEFSUS';
+    if (path.includes("/emendas")) return "Emendas";
+    if (path.includes("/despesas")) return "Despesas";
+    if (path.includes("/relatorios")) return "Relatórios";
+    if (path.includes("/admin") || path.includes("/administracao"))
+      return "Administração";
+    if (path.includes("/sobre")) return "Sobre";
+    if (path === "/dashboard") return "Dashboard";
+    return "SICEFSUS";
   };
 
   const isAuthenticated = useMemo(() => !!usuario, [usuario]);
@@ -281,38 +273,45 @@ function AppContent() {
     <div style={styles.app}>
       {/* Barra de Status Global */}
       {usuario && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '32px',
-          backgroundColor: '#2c3e50',
-          color: 'white',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 20px',
-          fontSize: '12px',
-          zIndex: 9999,
-          gap: '15px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif"
-        }}>
-          <span style={{ color: '#2ecc71' }}>✅ Operacional</span>
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "32px",
+            backgroundColor: "#2c3e50",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            padding: "0 20px",
+            fontSize: "12px",
+            zIndex: 9999,
+            gap: "15px",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
+          }}
+        >
+          <span style={{ color: "#2ecc71" }}>✅ Operacional</span>
           <span style={{ opacity: 0.5 }}>|</span>
-          <span>Versão: <strong>v2.3.51</strong></span>
+          <span>
+            Versão: <strong>{versionLoading ? "..." : `v${version}`}</strong>
+          </span>
           <span style={{ opacity: 0.5 }}>|</span>
           <span>👤 {usuario.nome || usuario.email}</span>
           <span style={{ opacity: 0.5 }}>|</span>
           <span>📊 {getCurrentPageName()}</span>
           <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ 
-            backgroundColor: import.meta.env.MODE === 'production' ? '#28a745' : '#f39c12',
-            padding: '2px 8px',
-            borderRadius: '3px',
-            fontWeight: 'bold'
-          }}>
-            {import.meta.env.MODE === 'production' ? 'PROD' : 'DEV'}
+          <span
+            style={{
+              backgroundColor:
+                import.meta.env.MODE === "production" ? "#28a745" : "#f39c12",
+              padding: "2px 8px",
+              borderRadius: "3px",
+              fontWeight: "bold",
+            }}
+          >
+            {import.meta.env.MODE === "production" ? "PROD" : "DEV"}
           </span>
         </div>
       )}
@@ -345,10 +344,12 @@ function AppContent() {
         </div>
       )}
 
-      <div style={{
-        ...styles.container,
-        paddingTop: usuario ? '32px' : '0'
-      }}>
+      <div
+        style={{
+          ...styles.container,
+          paddingTop: usuario ? "32px" : "0",
+        }}
+      >
         {/* Sidebar */}
         {isAuthenticated && (
           <ProtectedSidebar
@@ -402,17 +403,23 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTAS DE EMENDA - COMPLETAS */}
-              <Route path="/emendas/criar" element={
-              <PrivateRoute usuario={usuario}>
-                <EmendaForm usuario={usuario} />
-              </PrivateRoute>
-            } />
-            <Route path="/emendas/:id/editar" element={
-              <PrivateRoute usuario={usuario}>
-                <EmendaForm usuario={usuario} />
-              </PrivateRoute>
-            } />
+              {/* Rotas de emenda */}
+              <Route
+                path="/emendas/criar"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <EmendaForm usuario={usuario} />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/emendas/:id/editar"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <EmendaForm usuario={usuario} />
+                  </PrivateRoute>
+                }
+              />
               <Route
                 path="/emendas/:id"
                 element={
@@ -424,19 +431,7 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTA PARA DESPESAS DE UMA EMENDA ESPECÍFICA */}
-              <Route
-                path="/emendas/:id/despesas"
-                element={
-                  <PrivateRoute usuario={usuario}>
-                    <ProtectedRouteWrapper usuario={usuario}>
-                      <Despesas usuario={usuario} />
-                    </ProtectedRouteWrapper>
-                  </PrivateRoute>
-                }
-              />
-
-              {/* ✅ ROTA PARA DESPESAS DE UMA EMENDA ESPECÍFICA */}
+              {/* Rota para despesas de uma emenda específica */}
               <Route
                 path="/emendas/:id/despesas"
                 element={
@@ -523,7 +518,7 @@ function AppContent() {
                 }
               />
 
-              {/* ✅ ROTAS ADMINISTRATIVAS - CORRIGIDAS */}
+              {/* Rotas administrativas */}
               <Route
                 path="/admin"
                 element={<Navigate to="/administracao" replace />}
@@ -606,7 +601,6 @@ function App() {
   );
 }
 
-// ✅ EXPORTAR COMO DEFAULT
 export default App;
 
 // Estilos
@@ -672,40 +666,6 @@ const styles = {
     maxHeight: "90vh",
     overflow: "auto",
     boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-  },
-  errorContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f4f6f8",
-    color: "#212529",
-    padding: 32,
-    textAlign: "center",
-  },
-  errorTitle: {
-    color: "#E74C3C",
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 12,
-  },
-  errorMessage: {
-    color: "#666",
-    fontSize: 16,
-    marginBottom: 24,
-    maxWidth: 400,
-  },
-  errorButton: {
-    backgroundColor: "#E74C3C",
-    color: "white",
-    border: "none",
-    padding: "12px 24px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 16,
-    fontWeight: "500",
-    transition: "background-color 0.2s ease",
   },
   authErrorContainer: {
     position: "fixed",
