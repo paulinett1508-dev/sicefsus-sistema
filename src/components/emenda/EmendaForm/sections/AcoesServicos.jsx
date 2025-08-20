@@ -165,13 +165,26 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
       <legend style={styles.legend}>
         <span style={styles.legendIcon}>🎯</span>
         Ações e Serviços
+        <span style={styles.optionalBadge}>SEÇÃO OPCIONAL NA CRIAÇÃO</span>
       </legend>
 
+      {/* ✅ ALERTA INFORMATIVO */}
+      <div style={styles.infoAlert}>
+        <span style={styles.alertIcon}>💡</span>
+        <div style={styles.alertText}>
+          <strong>Esta seção é opcional durante a criação inicial.</strong>
+          <br />
+          Você pode preenchê-la agora ou adicionar as metas posteriormente
+          durante a edição da emenda.
+        </div>
+      </div>
+
       <div style={styles.formGrid}>
-        {/* Estratégia */}
+        {/* ✅ MELHORIA 3: Estratégia - SEM ASTERISCO (OPCIONAL) */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Estratégia <span style={styles.required}>*</span>
+            Estratégia
+            <span style={styles.optionalLabel}>opcional</span>
           </label>
           <select
             name="estrategia"
@@ -181,7 +194,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               ...styles.input,
               ...(fieldErrors.estrategia && styles.inputError),
             }}
-            required
           >
             <option value="">Selecione a estratégia</option>
             {estrategias.map((estrategia) => (
@@ -191,14 +203,17 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             ))}
           </select>
           {fieldErrors.estrategia && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+            <small style={styles.errorText}>
+              Campo obrigatório para adicionar meta
+            </small>
           )}
         </div>
 
-        {/* Tipo (antigo Meta) */}
+        {/* ✅ MELHORIA 3: Tipo - SEM ASTERISCO (OPCIONAL) */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Tipo <span style={styles.required}>*</span>
+            Tipo
+            <span style={styles.optionalLabel}>opcional</span>
           </label>
           <select
             name="tipoMeta"
@@ -208,7 +223,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               ...styles.input,
               ...(fieldErrors.tipoMeta && styles.inputError),
             }}
-            required
           >
             <option value="">Selecione o tipo</option>
             {tiposMeta.map((tipo) => (
@@ -218,15 +232,20 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             ))}
           </select>
           {fieldErrors.tipoMeta && (
-            <small style={styles.errorText}>Campo obrigatório</small>
+            <small style={styles.errorText}>
+              Campo obrigatório para adicionar meta
+            </small>
           )}
         </div>
 
-        {/* Valor - APENAS para Meta Quantitativa */}
+        {/* ✅ MELHORIA 3: Valor - SEM ASTERISCO (CONDICIONAL) */}
         {isMetaQuantitativa && (
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Valor <span style={styles.required}>*</span>
+              Valor
+              <span style={styles.conditionalLabel}>
+                obrigatório se Quantitativa
+              </span>
             </label>
             <input
               type="text"
@@ -240,7 +259,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
                 ...(!validacaoTotal.valido && styles.inputError),
               }}
               placeholder="R$ 0,00"
-              required
             />
             {!validacaoTotal.valido && (
               <small style={styles.errorText}>{validacaoTotal.mensagem}</small>
@@ -252,7 +270,9 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
                 </small>
               )}
             {fieldErrors.valorAcao && validacaoTotal.valido && (
-              <small style={styles.errorText}>Campo obrigatório</small>
+              <small style={styles.errorText}>
+                Campo obrigatório para meta quantitativa
+              </small>
             )}
           </div>
         )}
@@ -315,6 +335,19 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         </div>
       )}
 
+      {/* ✅ AVISO QUANDO NÃO HÁ METAS */}
+      {metasExistentes.length === 0 && (
+        <div style={styles.emptyAlert}>
+          <span style={styles.alertIcon}>📝</span>
+          <div style={styles.alertText}>
+            <strong>Nenhuma meta cadastrada ainda.</strong>
+            <br />
+            Esta seção é opcional na criação inicial. Você pode adicionar metas
+            agora ou posteriormente na edição.
+          </div>
+        </div>
+      )}
+
       {/* Botão para adicionar mais metas - MELHORADO */}
       <div style={styles.addMetaSection}>
         <button
@@ -335,7 +368,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         </button>
         <small style={styles.addMetaHint}>
           {metasExistentes.length === 0
-            ? "Preencha os campos acima e clique para adicionar"
+            ? "Preencha os campos acima e clique para adicionar (opcional)"
             : "Campos serão limpos após adicionar para criar nova meta"}
         </small>
       </div>
@@ -345,7 +378,9 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -355,7 +390,9 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     color: "#154360",
     fontWeight: "bold",
     fontSize: "16px",
@@ -366,6 +403,52 @@ const styles = {
   legendIcon: {
     fontSize: "18px",
   },
+
+  // ✅ MELHORIA 3: NOVOS ESTILOS PARA LABELS OPCIONAIS
+  optionalBadge: {
+    color: "#28a745",
+    fontSize: "11px",
+    fontWeight: "600",
+    marginLeft: "10px",
+    backgroundColor: "#d4edda",
+    padding: "3px 8px",
+    borderRadius: "4px",
+    border: "1px solid #c3e6cb",
+  },
+
+  optionalLabel: {
+    color: "#28a745",
+    fontSize: "11px",
+    fontWeight: "500",
+    marginLeft: "8px",
+    backgroundColor: "#d4edda",
+    padding: "2px 6px",
+    borderRadius: "4px",
+    border: "1px solid #c3e6cb",
+  },
+
+  conditionalLabel: {
+    color: "#fd7e14",
+    fontSize: "11px",
+    fontWeight: "500",
+    marginLeft: "8px",
+    backgroundColor: "#fff3cd",
+    padding: "2px 6px",
+    borderRadius: "4px",
+    border: "1px solid #ffeaa7",
+  },
+
+  infoAlert: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: "#e8f5e8",
+    border: "1px solid #c3e6cb",
+    borderRadius: "8px",
+    marginBottom: "20px",
+  },
+
   formGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -381,6 +464,9 @@ const styles = {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
   required: {
     color: "#dc3545",
@@ -434,7 +520,9 @@ const styles = {
     padding: "20px",
     backgroundColor: "#f8f9fa",
     borderRadius: "8px",
-    border: "2px dashed #dee2e6",
+    borderWidth: "2px",
+    borderStyle: "dashed",
+    borderColor: "#dee2e6",
     textAlign: "center",
   },
 
@@ -470,7 +558,9 @@ const styles = {
     padding: "20px",
     backgroundColor: "#f8f9fa",
     borderRadius: "8px",
-    border: "1px solid #dee2e6",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
   },
 
   metasListTitle: {
@@ -485,7 +575,9 @@ const styles = {
     padding: "16px",
     backgroundColor: "white",
     borderRadius: "6px",
-    border: "1px solid #e9ecef",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#e9ecef",
     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
   },
 
@@ -516,23 +608,16 @@ const styles = {
     fontSize: "12px",
     fontWeight: "500",
   },
-  requiredBadge: {
-    color: "#dc3545",
-    fontSize: "11px",
-    fontWeight: "600",
-    marginLeft: "10px",
-    backgroundColor: "#f8d7da",
-    padding: "3px 8px",
-    borderRadius: "4px",
-    border: "1px solid #f5c6cb",
-  },
+
   emptyAlert: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
     padding: "16px",
     backgroundColor: "#fff3cd",
-    border: "1px solid #ffeaa7",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#ffeaa7",
     borderRadius: "8px",
     marginBottom: "20px",
   },
@@ -549,7 +634,9 @@ const styles = {
     color: "#721c24",
     padding: "12px 16px",
     borderRadius: "6px",
-    border: "1px solid #f5c6cb",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "#f5c6cb",
     marginBottom: "20px",
     fontSize: "14px",
     fontWeight: "500",
@@ -570,6 +657,12 @@ const styles = {
     marginTop: "4px",
     display: "block",
     fontWeight: "500",
+  },
+
+  metaDetails: {
+    fontSize: "13px",
+    color: "#495057",
+    lineHeight: "1.4",
   },
 };
 

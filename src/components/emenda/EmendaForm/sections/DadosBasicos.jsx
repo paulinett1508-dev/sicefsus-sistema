@@ -2,12 +2,11 @@ import React from "react";
 import CNPJInput from "../../../CNPJInput";
 
 const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
-
-  // 🐛 DEBUG - RENDERIZAÇÃO DO COMPONENTE
-  console.log("🔍 DadosBasicos renderizou com:", {
+  // 🔥 DEBUG RESTAURADO - DEVE FUNCIONAR AGORA
+  console.log("🔥 VALIDAÇÃO DEBUG - DadosBasicos renderizou!", {
     formData: formData,
     fieldErrors: fieldErrors,
-    onChangeFunction: onChange
+    onChangeFunction: onChange,
   });
 
   const programas = [
@@ -36,8 +35,8 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // 🐛 DEBUG - MUDANÇAS NOS CAMPOS
-    console.log(`🔄 DadosBasicos handleInputChange: ${name} = "${value}"`);
+    // 🔥 DEBUG CRÍTICO - MUDANÇAS NOS CAMPOS
+    console.log(`🔥 VALIDAÇÃO DEBUG - Campo ${name} alterado para: "${value}"`);
 
     if (name === "valor" || name === "valorRecurso") {
       const valorFormatado = formatarMoeda(value);
@@ -88,14 +87,13 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           <label style={styles.label}>
             Objeto da Proposta <span style={styles.required}>*</span>
           </label>
-          <textarea
+          <input
+            type="text"
             name="objeto"
             value={formData.objeto || ""}
-            onChange={onChange}
-            placeholder="Descrição detalhada do objeto da proposta"
-            rows="3"
+            onChange={handleInputChange}
             style={{
-              ...styles.textarea,
+              ...styles.input,
               ...(fieldErrors.objeto && styles.inputError),
             }}
             required
@@ -105,7 +103,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           )}
         </div>
 
-        {/* Parlamentar */}
+        {/* Parlamentar/Autor */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
             Parlamentar/Autor <span style={styles.required}>*</span>
@@ -114,7 +112,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="autor"
             value={formData.autor || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Nome do parlamentar"
             style={{
               ...styles.input,
@@ -136,7 +134,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="numero"
             value={formData.numero || ""}
-            onChange={onChange}
+            onChange={handleInputChange}
             placeholder="Ex: 30460003"
             style={{
               ...styles.input,
@@ -200,7 +198,9 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             label="Beneficiário (CNPJ)"
             value={formData.beneficiario || ""}
             onChange={(e) => {
-              console.log(`🔄 CNPJInput mudança: beneficiario = "${e.target.value}"`);
+              console.log(
+                `🔥 VALIDAÇÃO DEBUG - CNPJInput mudança: beneficiario = "${e.target.value}"`,
+              );
               handleInputChange({
                 target: {
                   name: "beneficiario",
@@ -214,10 +214,12 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             style={styles.formGroup}
             inputStyle={{
               ...styles.input,
-              padding: "12px", // ✅ ALINHAMENTO: mesmo padding dos outros campos
-              fontSize: "14px", // ✅ ALINHAMENTO: mesmo font-size dos outros campos
-              border: "2px solid #dee2e6", // ✅ ALINHAMENTO: mesma borda dos outros campos
-              borderRadius: "6px", // ✅ ALINHAMENTO: mesmo border-radius dos outros campos
+              padding: "12px",
+              fontSize: "14px",
+              borderWidth: "2px",
+              borderStyle: "solid",
+              borderColor: "#dee2e6",
+              borderRadius: "6px",
             }}
           />
           {fieldErrors.beneficiario && (
@@ -253,7 +255,9 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -263,7 +267,9 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #154360",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#154360",
     color: "#154360",
     fontWeight: "bold",
     fontSize: "16px",
@@ -302,17 +308,6 @@ const styles = {
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
   },
-  textarea: {
-    padding: "12px",
-    borderWidth: "2px",
-    borderStyle: "solid",
-    borderColor: "#dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    resize: "vertical",
-  },
   inputMoney: {
     fontWeight: "600",
     color: "#059669",
@@ -343,7 +338,6 @@ const styles = {
     display: "block",
     fontWeight: "500",
   },
-
 };
 
 export default DadosBasicos;

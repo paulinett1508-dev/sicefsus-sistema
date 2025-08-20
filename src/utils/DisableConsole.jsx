@@ -6,15 +6,15 @@ const LOG_LEVELS = {
   WARN: 1,
   INFO: 2,
   DEBUG: 3,
-  VERBOSE: 4
+  VERBOSE: 4,
 };
 
 // Configuração de nível de log baseada no ambiente
 const getLogLevel = () => {
   if (import.meta.env.PROD) return LOG_LEVELS.ERROR;
-  if (import.meta.env.VITE_LOG_LEVEL === 'quiet') return LOG_LEVELS.WARN;
-  if (import.meta.env.VITE_LOG_LEVEL === 'minimal') return LOG_LEVELS.INFO;
-  return LOG_LEVELS.DEBUG; // Padrão para desenvolvimento
+  if (import.meta.env.VITE_LOG_LEVEL === "quiet") return LOG_LEVELS.WARN;
+  if (import.meta.env.VITE_LOG_LEVEL === "minimal") return LOG_LEVELS.INFO;
+  return LOG_LEVELS.VERBOSE; // ✅ MUDADO PARA VERBOSE EM DEV
 };
 
 // Cache para logs já exibidos
@@ -28,8 +28,9 @@ export const configureConsole = () => {
     return;
   }
 
-  const environment = import.meta.env.VITE_ENV || import.meta.env.NODE_ENV || 'development';
-  const enableLogs = import.meta.env.VITE_ENABLE_LOGS !== 'false';
+  const environment =
+    import.meta.env.VITE_ENV || import.meta.env.NODE_ENV || "development";
+  const enableLogs = import.meta.env.VITE_ENABLE_LOGS !== "false";
 
   const currentLogLevel = getLogLevel();
 
@@ -59,31 +60,40 @@ export const configureConsole = () => {
     profile: console.profile,
     profileEnd: console.profileEnd,
     timeLog: console.timeLog,
-    timeStamp: console.timeStamp
+    timeStamp: console.timeStamp,
   };
 
-  // Função para verificar se é um log repetitivo
-  const isRepetitiveLog = (message, level = 'log') => {
-    if (typeof message !== 'string') return false;
+  // ✅ FUNÇÃO MELHORADA: Permite logs de debug em desenvolvimento
+  const isRepetitiveLog = (message, level = "log") => {
+    if (typeof message !== "string") return false;
 
-    // Lista de padrões de logs repetitivos
+    // ✅ EM DESENVOLVIMENTO, NUNCA BLOQUEAR LOGS DE DEBUG
+    if (
+      import.meta.env.DEV &&
+      (message.includes("🚨") ||
+        message.includes("📄") ||
+        message.includes("🔥 VALIDAÇÃO") ||
+        message.includes("DEBUG") ||
+        message.includes("Campo autor") ||
+        message.includes("MUDANÇA DETECTADA"))
+    ) {
+      return false; // ✅ NUNCA BLOQUEAR LOGS DE DEBUG
+    }
+
+    // Lista de padrões de logs repetitivos (APENAS LOGS DE SISTEMA)
     const repetitivePatterns = [
-      '🔥 Firebase Config Status',
-      '✅ Firebase inicializado com sucesso',
-      '🔒 AuditService inicializado',
-      '🔥 Firebase Environment:',
-      '[vite] connecting...',
-      '[vite] connected.',
-      '[vite] server connection lost',
-      '[vite] polling for restart',
-      'Firebase App',
-      'Firebase Configuration',
-      '🚪 Usuário deslogado'
+      "Firebase App",
+      "Firebase Configuration",
+      "[vite] connecting...",
+      "[vite] connected.",
+      "[vite] server connection lost",
+      "[vite] polling for restart",
+      "🚪 Usuário deslogado",
     ];
 
     // Verificar se corresponde a algum padrão repetitivo
-    const isRepetitive = repetitivePatterns.some(pattern =>
-      message.includes(pattern)
+    const isRepetitive = repetitivePatterns.some((pattern) =>
+      message.includes(pattern),
     );
 
     if (!isRepetitive) return false;
@@ -99,9 +109,22 @@ export const configureConsole = () => {
     return false; // É repetitivo mas ainda não foi mostrado
   };
 
-  // Função para verificar rate limiting
+  // ✅ FUNÇÃO MELHORADA: Não throttle logs de debug
   const shouldThrottle = (message) => {
-    if (typeof message !== 'string') return false;
+    if (typeof message !== "string") return false;
+
+    // ✅ EM DESENVOLVIMENTO, NUNCA THROTTLE LOGS DE DEBUG
+    if (
+      import.meta.env.DEV &&
+      (message.includes("🚨") ||
+        message.includes("📄") ||
+        message.includes("🔥 VALIDAÇÃO") ||
+        message.includes("DEBUG") ||
+        message.includes("Campo autor") ||
+        message.includes("MUDANÇA DETECTADA"))
+    ) {
+      return false; // ✅ NUNCA THROTTLE LOGS DE DEBUG
+    }
 
     const now = Date.now();
     const throttleTime = 5000; // 5 segundos
@@ -120,40 +143,42 @@ export const configureConsole = () => {
     return false;
   };
 
-  // Sistema de log inteligente
+  // ✅ SISTEMA DE LOG SIMPLIFICADO PARA DEV
   const createLogWrapper = (level, method) => {
     return (...args) => {
-      if (currentLogLevel >= level) {
+      // ✅ EM DESENVOLVIMENTO, SEMPRE PERMITIR LOGS DE DEBUG/INFO/WARN/ERROR
+      if (import.meta.env.DEV) {
         const message = args[0];
 
-        // Verificar se é repetitivo ou deve ser throttled
+        // ✅ LOGS DE DEBUG SEMPRE PASSAM
+        if (
+          typeof message === "string" &&
+          (message.includes("🚨") ||
+            message.includes("📄") ||
+            message.includes("🔥 VALIDAÇÃO") ||
+            message.includes("DEBUG") ||
+            message.includes("Campo autor") ||
+            message.includes("MUDANÇA DETECTADA"))
+        ) {
+          originalConsole[method](...args);
+          return;
+        }
+
+        // Para outros logs, aplicar filtros normais
         if (isRepetitiveLog(message, method) || shouldThrottle(message)) {
           return;
         }
 
-        // Filtros específicos para desenvolvimento
-        if (import.meta.env.DEV) {
-          // Reduzir logs muito verbosos do Vite
-          if (typeof message === 'string' && (
-            message.includes('[vite] connecting') ||
-            message.includes('[vite] connected') ||
-            message.includes('[vite] server connection lost') ||
-            message.includes('polling for restart') ||
-            message.includes('🚪 Usuário deslogado') ||
-            message.includes('🔥 Firebase Environment') ||
-            message.includes('🔒 AuditService inicializado')
-          )) {
-            // Throttle agressivo para estes logs
-            const throttleKey = message.substring(0, 20);
-            const now = Date.now();
-            if (logCache.has(throttleKey)) {
-              const lastTime = logCache.get(throttleKey);
-              if (now - lastTime < 30000) { // 30 segundos
-                return;
-              }
-            }
-            logCache.set(throttleKey, now);
-          }
+        originalConsole[method](...args);
+        return;
+      }
+
+      // ✅ EM PRODUÇÃO, APLICAR FILTROS NORMAIS
+      if (currentLogLevel >= level) {
+        const message = args[0];
+
+        if (isRepetitiveLog(message, method) || shouldThrottle(message)) {
+          return;
         }
 
         originalConsole[method](...args);
@@ -161,29 +186,35 @@ export const configureConsole = () => {
     };
   };
 
-  // Configurar níveis de log
-  if (currentLogLevel < LOG_LEVELS.VERBOSE) {
-    console.debug = currentLogLevel >= LOG_LEVELS.DEBUG ? createLogWrapper(LOG_LEVELS.DEBUG, 'debug') : noop;
-    console.log = currentLogLevel >= LOG_LEVELS.DEBUG ? createLogWrapper(LOG_LEVELS.DEBUG, 'log') : noop;
-  }
-
-  if (currentLogLevel < LOG_LEVELS.INFO) {
-    console.info = currentLogLevel >= LOG_LEVELS.INFO ? createLogWrapper(LOG_LEVELS.INFO, 'info') : noop;
-  }
-
-  if (currentLogLevel < LOG_LEVELS.WARN) {
-    console.warn = currentLogLevel >= LOG_LEVELS.WARN ? createLogWrapper(LOG_LEVELS.WARN, 'warn') : noop;
-  }
-
-  // Sempre manter error em desenvolvimento, desabilitar só em produção
-  if (import.meta.env.PROD) {
-    console.error = noop;
+  // ✅ CONFIGURAÇÃO SIMPLIFICADA PARA DESENVOLVIMENTO
+  if (import.meta.env.DEV) {
+    // ✅ EM DEV, TODOS OS LOGS FUNCIONAM
+    console.debug = createLogWrapper(LOG_LEVELS.DEBUG, "debug");
+    console.log = createLogWrapper(LOG_LEVELS.DEBUG, "log");
+    console.info = createLogWrapper(LOG_LEVELS.INFO, "info");
+    console.warn = createLogWrapper(LOG_LEVELS.WARN, "warn");
+    console.error = createLogWrapper(LOG_LEVELS.ERROR, "error");
   } else {
-    console.error = createLogWrapper(LOG_LEVELS.ERROR, 'error');
-  }
+    // ✅ EM PRODUÇÃO, APLICAR FILTROS RIGOROSOS
+    console.debug =
+      currentLogLevel >= LOG_LEVELS.DEBUG
+        ? createLogWrapper(LOG_LEVELS.DEBUG, "debug")
+        : noop;
+    console.log =
+      currentLogLevel >= LOG_LEVELS.DEBUG
+        ? createLogWrapper(LOG_LEVELS.DEBUG, "log")
+        : noop;
+    console.info =
+      currentLogLevel >= LOG_LEVELS.INFO
+        ? createLogWrapper(LOG_LEVELS.INFO, "info")
+        : noop;
+    console.warn =
+      currentLogLevel >= LOG_LEVELS.WARN
+        ? createLogWrapper(LOG_LEVELS.WARN, "warn")
+        : noop;
+    console.error = noop;
 
-  // Desabilitar métodos de debug em produção
-  if (import.meta.env.PROD) {
+    // Desabilitar métodos de debug em produção
     console.trace = noop;
     console.table = noop;
     console.time = noop;
@@ -203,10 +234,12 @@ export const configureConsole = () => {
     console.timeStamp = noop;
   }
 
-  // Logging de inicialização apenas uma vez
-  if (currentLogLevel >= LOG_LEVELS.INFO && !SESSION_LOGS.has('console_configured')) {
-    originalConsole.info(`🔧 Console configurado - Nível: ${Object.keys(LOG_LEVELS)[currentLogLevel]} (${currentLogLevel})`);
-    SESSION_LOGS.add('console_configured');
+  // ✅ Logging de inicialização apenas uma vez
+  if (!SESSION_LOGS.has("console_configured")) {
+    originalConsole.info(
+      `🔧 Console configurado - Nível: ${Object.keys(LOG_LEVELS)[currentLogLevel]} (${currentLogLevel}) - DEV: ${!!import.meta.env.DEV}`,
+    );
+    SESSION_LOGS.add("console_configured");
   }
   isConfigured = true;
 };
@@ -215,7 +248,46 @@ export const configureConsole = () => {
 export const clearLogCache = () => {
   logCache.clear();
   SESSION_LOGS.clear();
-  console.info('🧹 Cache de logs limpo');
+  console.info("🧹 Cache de logs limpo");
+};
+
+// ✅ FUNÇÃO DE EMERGENCY: Restaurar console original
+export const restoreOriginalConsole = () => {
+  const originalMethods = [
+    "log",
+    "info",
+    "warn",
+    "error",
+    "debug",
+    "trace",
+    "table",
+    "time",
+    "timeEnd",
+    "group",
+    "groupEnd",
+    "groupCollapsed",
+    "assert",
+    "clear",
+    "count",
+    "countReset",
+    "dir",
+    "dirxml",
+    "profile",
+    "profileEnd",
+    "timeLog",
+    "timeStamp",
+  ];
+
+  originalMethods.forEach((method) => {
+    if (
+      console[`original${method.charAt(0).toUpperCase() + method.slice(1)}`]
+    ) {
+      console[method] =
+        console[`original${method.charAt(0).toUpperCase() + method.slice(1)}`];
+    }
+  });
+
+  console.info("🔧 Console original restaurado");
 };
 
 // Compatibilidade com função anterior

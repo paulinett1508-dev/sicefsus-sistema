@@ -1,5 +1,5 @@
 // src/components/emenda/EmendaForm/sections/Identificacao.jsx
-// ✅ CORREÇÃO COMPLETA: Removidos campos redundantes (Número e Autor)
+// ✅ CORREÇÃO CRÍTICA: Props alinhadas com EmendaForm
 
 import React, { useState, useEffect, useContext } from "react";
 import CNPJInput from "../../../CNPJInput";
@@ -8,7 +8,8 @@ import { UserContext } from "../../../../context/UserContext";
 const Identificacao = ({
   formData = {},
   onChange,
-  errors = {},
+  fieldErrors = {}, // ✅ CORREÇÃO: errors → fieldErrors
+  onClearError, // ✅ ADICIONADO: prop faltante
   disabled = false,
 }) => {
   const [municipios, setMunicipios] = useState([]);
@@ -92,10 +93,20 @@ const Identificacao = ({
     carregarMunicipios();
   }, [formData?.uf]);
 
+  // ✅ HANDLER COM LIMPEZA DE ERRO
+  const handleChange = (e) => {
+    const { name } = e.target;
+    onChange(e);
+
+    // Limpar erro se campo foi preenchido
+    if (onClearError && fieldErrors[name]) {
+      onClearError(name);
+    }
+  };
+
   // Handler específico para UF (limpa município)
   const handleUfChange = (e) => {
-    // Primeiro atualiza a UF
-    onChange(e);
+    handleChange(e);
 
     // Depois limpa o município se houver
     if (formData?.municipio) {
@@ -121,13 +132,13 @@ const Identificacao = ({
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ - IDÊNTICO ao Beneficiário de DadosBasicos */}
+        {/* CNPJ */}
         <div style={styles.formGroup}>
           <CNPJInput
             label="CNPJ"
             value={formData.cnpj || ""}
             onChange={(e) => {
-              onChange({
+              handleChange({
                 target: {
                   name: "cnpj",
                   value: e.target.value,
@@ -144,11 +155,13 @@ const Identificacao = ({
               fontSize: "14px",
               borderWidth: "2px",
               borderStyle: "solid",
-              borderColor: "#dee2e6",
+              borderColor: fieldErrors.cnpj ? "#dc3545" : "#dee2e6", // ✅ USANDO fieldErrors
               borderRadius: "6px",
             }}
           />
-          {errors.cnpj && <small style={styles.errorText}>{errors.cnpj}</small>}
+          {fieldErrors.cnpj && (
+            <small style={styles.errorText}>{fieldErrors.cnpj}</small>
+          )}
         </div>
 
         {/* UF */}
@@ -163,7 +176,7 @@ const Identificacao = ({
             disabled={disabled || isOperador}
             style={{
               ...styles.input,
-              ...(errors.uf && styles.inputError),
+              ...(fieldErrors.uf && styles.inputError), // ✅ USANDO fieldErrors
             }}
             required
           >
@@ -174,7 +187,9 @@ const Identificacao = ({
               </option>
             ))}
           </select>
-          {errors.uf && <small style={styles.errorText}>{errors.uf}</small>}
+          {fieldErrors.uf && (
+            <small style={styles.errorText}>{fieldErrors.uf}</small>
+          )}
         </div>
 
         {/* Município */}
@@ -185,13 +200,13 @@ const Identificacao = ({
           <select
             name="municipio"
             value={formData.municipio || ""}
-            onChange={onChange}
+            onChange={handleChange}
             disabled={
               disabled || !formData?.uf || loadingMunicipios || isOperador
             }
             style={{
               ...styles.input,
-              ...(errors.municipio && styles.inputError),
+              ...(fieldErrors.municipio && styles.inputError), // ✅ USANDO fieldErrors
               ...(loadingMunicipios && styles.inputLoading),
             }}
             required
@@ -217,8 +232,8 @@ const Identificacao = ({
             </div>
           )}
 
-          {errors.municipio && (
-            <small style={styles.errorText}>{errors.municipio}</small>
+          {fieldErrors.municipio && (
+            <small style={styles.errorText}>{fieldErrors.municipio}</small>
           )}
         </div>
       </div>
@@ -226,7 +241,7 @@ const Identificacao = ({
   );
 };
 
-// ✅ ESTILOS IDÊNTICOS AO DadosBasicos
+// ✅ ESTILOS MANTIDOS
 const styles = {
   fieldset: {
     border: "2px solid #154360",

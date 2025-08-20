@@ -1,3 +1,6 @@
+// src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
+// ✅ CORREÇÃO CRÍTICA: Props alinhadas com EmendaForm
+
 import React, { useState } from "react";
 
 const DadosBeneficiario = ({
@@ -6,7 +9,8 @@ const DadosBeneficiario = ({
   setFormData,
   styles,
   buscarDadosFornecedor,
-  errors = {},
+  fieldErrors = {}, // ✅ CORREÇÃO: errors → fieldErrors
+  onClearError, // ✅ ADICIONADO: prop faltante
   expanded,
   onToggle,
 }) => {
@@ -24,6 +28,17 @@ const DadosBeneficiario = ({
 
   // Use external expanded state if provided, otherwise use internal state
   const currentExpanded = expanded !== undefined ? expanded : isExpanded;
+
+  // ✅ HANDLER COM LIMPEZA DE ERRO
+  const handleChange = (e) => {
+    const { name } = e.target;
+    onChange(e);
+
+    // Limpar erro se campo foi preenchido
+    if (onClearError && fieldErrors[name]) {
+      onClearError(name);
+    }
+  };
 
   // Função para buscar dados do CNPJ automaticamente
   const buscarDadosCNPJ = async (cnpj) => {
@@ -71,7 +86,7 @@ const DadosBeneficiario = ({
           // Se não tiver setFormData, usar onChange para cada campo
           Object.entries(novosValores).forEach(([key, value]) => {
             if (value && value !== formData[key]) {
-              onChange({
+              handleChange({
                 target: {
                   name: key,
                   value: value,
@@ -131,7 +146,7 @@ const DadosBeneficiario = ({
         </div>
       )}
 
-      {/* HEADER COLAPSÁVEL - MESMO FORMATO DE InformacoesComplementares */}
+      {/* HEADER COLAPSÍVEL - MESMO FORMATO DE InformacoesComplementares */}
       <div style={customStyles.headerContainer} onClick={toggleExpanded}>
         <legend style={customStyles.legend}>
           <span style={customStyles.legendIcon}>📋</span>
@@ -147,7 +162,7 @@ const DadosBeneficiario = ({
         </div>
       </div>
 
-      {/* CONTEÚDO COLAPSÁVEL - MESMO FORMATO DE InformacoesComplementares */}
+      {/* CONTEÚDO COLAPSÍVEL - MESMO FORMATO DE InformacoesComplementares */}
       {currentExpanded && (
         <div style={customStyles.content}>
           <div style={customStyles.formGrid}>
@@ -160,13 +175,16 @@ const DadosBeneficiario = ({
                 type="text"
                 name="beneficiario"
                 value={formData?.beneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="Nome completo da instituição beneficiária"
-                style={customStyles.input}
+                style={{
+                  ...customStyles.input,
+                  ...(fieldErrors?.beneficiario && customStyles.inputError), // ✅ USANDO fieldErrors
+                }}
               />
-              {errors?.beneficiario && (
+              {fieldErrors?.beneficiario && (
                 <span style={customStyles.errorText}>
-                  {errors.beneficiario}
+                  {fieldErrors.beneficiario}
                 </span>
               )}
             </div>
@@ -178,10 +196,19 @@ const DadosBeneficiario = ({
                 type="text"
                 name="enderecoBeneficiario"
                 value={formData?.enderecoBeneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="Rua, número, bairro, cidade/UF"
-                style={customStyles.input}
+                style={{
+                  ...customStyles.input,
+                  ...(fieldErrors?.enderecoBeneficiario &&
+                    customStyles.inputError),
+                }}
               />
+              {fieldErrors?.enderecoBeneficiario && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.enderecoBeneficiario}
+                </span>
+              )}
             </div>
 
             {/* Telefone */}
@@ -191,10 +218,19 @@ const DadosBeneficiario = ({
                 type="tel"
                 name="telefoneBeneficiario"
                 value={formData?.telefoneBeneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="(00) 00000-0000"
-                style={customStyles.input}
+                style={{
+                  ...customStyles.input,
+                  ...(fieldErrors?.telefoneBeneficiario &&
+                    customStyles.inputError),
+                }}
               />
+              {fieldErrors?.telefoneBeneficiario && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.telefoneBeneficiario}
+                </span>
+              )}
             </div>
 
             {/* Email */}
@@ -204,10 +240,19 @@ const DadosBeneficiario = ({
                 type="email"
                 name="emailBeneficiario"
                 value={formData?.emailBeneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="email@instituicao.com.br"
-                style={customStyles.input}
+                style={{
+                  ...customStyles.input,
+                  ...(fieldErrors?.emailBeneficiario &&
+                    customStyles.inputError),
+                }}
               />
+              {fieldErrors?.emailBeneficiario && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.emailBeneficiario}
+                </span>
+              )}
             </div>
 
             {/* Responsável Legal */}
@@ -217,13 +262,20 @@ const DadosBeneficiario = ({
                 type="text"
                 name="responsavelLegal"
                 value={formData?.responsavelLegal || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="Nome do responsável pela instituição"
-                style={customStyles.input}
+                style={{
+                  ...customStyles.input,
+                  ...(fieldErrors?.responsavelLegal && customStyles.inputError),
+                }}
               />
+              {fieldErrors?.responsavelLegal && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.responsavelLegal}
+                </span>
+              )}
             </div>
-
-            </div>
+          </div>
 
           {/* Campos de texto maiores - MESMO FORMATO */}
           <div style={customStyles.textAreaGrid}>
@@ -234,11 +286,20 @@ const DadosBeneficiario = ({
               <textarea
                 name="observacoesBeneficiario"
                 value={formData.observacoesBeneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="Informações complementares sobre o beneficiário..."
                 rows="3"
-                style={customStyles.textarea}
+                style={{
+                  ...customStyles.textarea,
+                  ...(fieldErrors?.observacoesBeneficiario &&
+                    customStyles.inputError),
+                }}
               />
+              {fieldErrors?.observacoesBeneficiario && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.observacoesBeneficiario}
+                </span>
+              )}
             </div>
 
             <div style={customStyles.formGroup}>
@@ -246,11 +307,20 @@ const DadosBeneficiario = ({
               <textarea
                 name="infoAdicionaisBeneficiario"
                 value={formData.infoAdicionaisBeneficiario || ""}
-                onChange={onChange}
+                onChange={handleChange}
                 placeholder="Outras informações relevantes..."
                 rows="3"
-                style={customStyles.textarea}
+                style={{
+                  ...customStyles.textarea,
+                  ...(fieldErrors?.infoAdicionaisBeneficiario &&
+                    customStyles.inputError),
+                }}
               />
+              {fieldErrors?.infoAdicionaisBeneficiario && (
+                <span style={customStyles.errorText}>
+                  {fieldErrors.infoAdicionaisBeneficiario}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -259,7 +329,7 @@ const DadosBeneficiario = ({
   );
 };
 
-// Estilos customizados - MESMO FORMATO DE InformacoesComplementares
+// ✅ ESTILOS MANTIDOS
 const customStyles = {
   section: {
     border: "2px solid #154360",
@@ -358,6 +428,12 @@ const customStyles = {
     backgroundColor: "white",
   },
 
+  inputError: {
+    borderColor: "#dc3545",
+    backgroundColor: "#fef2f2",
+    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+  },
+
   textarea: {
     padding: "12px",
     border: "2px solid #dee2e6",
@@ -411,8 +487,6 @@ const customStyles = {
     color: "#666",
     fontStyle: "italic",
   },
-
-  
 };
 
 export default DadosBeneficiario;
