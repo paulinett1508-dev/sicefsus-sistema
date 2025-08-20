@@ -399,6 +399,9 @@ export const useEmendaFormData = () => {
       agenciaLimpa &&
       contaLimpa;
 
+    // ============================================
+    // ✅ CORREÇÃO: AÇÕES E SERVIÇOS - ESTRUTURA CORRETA
+    // ============================================
     if (isEdicao || formularioAvancado) {
       if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
         errors.acoesServicos =
@@ -407,21 +410,31 @@ export const useEmendaFormData = () => {
         let hasValidMeta = false;
 
         formData.acoesServicos.forEach((meta, index) => {
-          const descricaoLimpa = cleanField(meta.descricao);
-          if (
-            descricaoLimpa &&
-            descricaoLimpa.length >= 5 &&
-            meta.quantidade > 0
-          ) {
+          // ✅ CORREÇÃO: Usar campos que realmente existem
+          const estrategiaLimpa = cleanField(meta.estrategia);
+          const tipoMetaValido = meta.tipoMeta && meta.tipoMeta.trim();
+
+          // Para metas quantitativas, verificar se tem valor
+          const isQuantitativa = meta.tipoMeta === "Quantitativa";
+          const temValorValido = isQuantitativa ?
+            (meta.valorAcao && parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0) :
+            true; // Metas simples não precisam de valor
+
+          if (estrategiaLimpa && estrategiaLimpa.length >= 5 && tipoMetaValido && temValorValido) {
             hasValidMeta = true;
           } else {
-            if (!descricaoLimpa || descricaoLimpa.length < 5) {
-              errors[`meta_${index}_descricao`] =
-                "🚨 Descrição da meta deve ter pelo menos 5 caracteres";
+            // ✅ CORREÇÃO: Erros específicos para campos reais
+            if (!estrategiaLimpa || estrategiaLimpa.length < 5) {
+              errors[`meta_${index}_estrategia`] =
+                "🚨 Estratégia da meta deve ter pelo menos 5 caracteres";
             }
-            if (!meta.quantidade || meta.quantidade <= 0) {
-              errors[`meta_${index}_quantidade`] =
-                "🚨 Quantidade da meta é obrigatória";
+            if (!tipoMetaValido) {
+              errors[`meta_${index}_tipo`] =
+                "🚨 Tipo da meta é obrigatório";
+            }
+            if (isQuantitativa && !temValorValido) {
+              errors[`meta_${index}_valor`] =
+                "🚨 Valor é obrigatório para metas quantitativas";
             }
           }
         });
@@ -775,9 +788,20 @@ export const useEmendaFormData = () => {
         errors.push("❌ CRÍTICO: Pelo menos uma meta deve ser cadastrada");
       } else {
         const hasValidMeta = formData.acoesServicos.some((meta) => {
-          const descricaoLimpa = cleanField(meta.descricao);
+          const descricaoLimpa = cleanField(meta.estrategia);
+          const valorLimpo = cleanField(meta.valorAcao);
+          const tipoMetaValido = meta.tipoMeta && meta.tipoMeta.trim();
+          const isQuantitativa = meta.tipoMeta === "Quantitativa";
+          const temValorValido = isQuantitativa ?
+            (meta.valorAcao && parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0) :
+            true;
+
+
           return (
-            descricaoLimpa && descricaoLimpa.length >= 5 && meta.quantidade > 0
+            descricaoLimpa &&
+            descricaoLimpa.length >= 5 &&
+            tipoMetaValido &&
+            temValorValido
           );
         });
         if (!hasValidMeta) {
