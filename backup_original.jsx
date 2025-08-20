@@ -496,89 +496,6 @@ const EmendaForm = () => {
     return orderedErrors;
   };
 
-  // ✅ NOVO: Focar no primeiro campo com erro que existe no DOM
-  const focusFirstErrorField = (fieldErrors) => {
-    const errorFields = Object.keys(fieldErrors);
-
-    console.log("🎯 Tentando focar em campos com erro:", errorFields);
-
-    for (const fieldName of errorFields) {
-      // Tentar diferentes seletores para encontrar o campo
-      const selectors = [
-        `input[name="${fieldName}"]`,
-        `select[name="${fieldName}"]`,
-        `textarea[name="${fieldName}"]`,
-        `input[type="date"][name="${fieldName}"]`, // Para campos de data
-        `[data-field="${fieldName}"]`, // Para campos customizados
-        `#${fieldName}`, // Por ID
-        `[data-testid="${fieldName}"]`, // Para testes
-      ];
-
-      for (const selector of selectors) {
-        const errorInput = document.querySelector(selector);
-        if (errorInput && errorInput.offsetParent !== null) {
-          // Verificar se está visível
-          console.log(
-            `🎯 Focando no campo com erro: ${fieldName} (${selector})`,
-          );
-
-          // Garantir que o elemento seja focável
-          if (errorInput.disabled || errorInput.readOnly) {
-            console.log(
-              `⚠️ Campo ${fieldName} não é focável (disabled/readonly)`,
-            );
-            continue;
-          }
-
-          // Foco com scroll suave
-          errorInput.focus();
-          errorInput.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
-          });
-
-          // Adicionar destaque visual temporário mais chamativo
-          const originalBoxShadow = errorInput.style.boxShadow;
-          const originalBorder = errorInput.style.border;
-
-          errorInput.style.transition = "all 0.3s ease";
-          errorInput.style.boxShadow =
-            "0 0 15px #dc3545, 0 0 25px rgba(220, 53, 69, 0.3)";
-          errorInput.style.border = "2px solid #dc3545";
-
-          // Remover destaque após 3 segundos
-          setTimeout(() => {
-            errorInput.style.boxShadow = originalBoxShadow;
-            errorInput.style.border = originalBorder;
-          }, 3000);
-
-          // Se for campo de data, destacar também com placeholder
-          if (
-            errorInput.type === "date" ||
-            errorInput.type === "datetime-local"
-          ) {
-            const originalPlaceholder = errorInput.placeholder;
-            errorInput.placeholder = "🚨 CORRIGIR ESTA DATA";
-            setTimeout(() => {
-              errorInput.placeholder = originalPlaceholder;
-            }, 3000);
-          }
-
-          return fieldName; // Retorna o campo que foi focado
-        }
-      }
-
-      console.log(`⚠️ Campo ${fieldName} não encontrado no DOM`);
-    }
-
-    console.log(
-      "⚠️ Nenhum campo com erro encontrado no DOM - fazendo scroll para o topo",
-    );
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return null;
-  };
-
   // ✅ MONITORAR mudanças em tempo real para debug
   useEffect(() => {
     console.log("📊 Estado dos botões:", {
@@ -957,7 +874,7 @@ const EmendaForm = () => {
 
       // ✅ FOCO INTELIGENTE: No primeiro campo que AINDA tem erro
       setTimeout(() => {
-        const focusedField = focusFirstErrorField(fieldErrorsResult);
+        const focusedField = null; // Removido o foco automático
         console.log(`📍 Campo focado: ${focusedField || "nenhum"}`);
       }, 100);
 

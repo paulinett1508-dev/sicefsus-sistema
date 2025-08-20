@@ -518,56 +518,7 @@ export const useEmendaFormData = () => {
     return orderedErrors;
   };
 
-  // 🚨 FUNÇÃO DESABILITADA - CAUSAVA CONFLITOS CSS
-  /*
-  const focusFirstErrorField = (fieldErrors) => {
-    const errorFields = Object.keys(fieldErrors);
-
-    for (const fieldName of errorFields) {
-      const selectors = [
-        `input[name="${fieldName}"]`,
-        `select[name="${fieldName}"]`,
-        `textarea[name="${fieldName}"]`,
-        `input[type="date"][name="${fieldName}"]`,
-        `[data-field="${fieldName}"]`,
-        `#${fieldName}`,
-      ];
-
-      for (const selector of selectors) {
-        const errorInput = document.querySelector(selector);
-        if (errorInput && errorInput.offsetParent !== null) {
-          if (errorInput.disabled || errorInput.readOnly) continue;
-
-          errorInput.focus();
-          errorInput.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-            inline: "nearest",
-          });
-
-          // Destaque visual
-          const originalBoxShadow = errorInput.style.boxShadow;
-          const originalBorder = errorInput.style.border;
-
-          errorInput.style.transition = "all 0.3s ease";
-          errorInput.style.boxShadow =
-            "0 0 15px #dc3545, 0 0 25px rgba(220, 53, 69, 0.3)";
-          errorInput.style.border = "2px solid #dc3545";
-
-          setTimeout(() => {
-            errorInput.style.boxShadow = originalBoxShadow;
-            errorInput.style.border = originalBorder;
-          }, 3000);
-
-          return fieldName;
-        }
-      }
-    }
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    return null;
-  };
-  */
+  
 
   // ✅ INICIALIZAÇÃO
   useEffect(() => {
