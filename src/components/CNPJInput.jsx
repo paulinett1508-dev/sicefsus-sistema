@@ -65,7 +65,6 @@ const CNPJInput = ({
   required = false,
   placeholder = "00.000.000/0000-00",
   disabled = false,
-  autoFocus = false,
   showValidation = true,
   style = {},
   inputStyle = {},
@@ -157,7 +156,6 @@ const CNPJInput = ({
           onKeyPress={handleKeyPress}
           placeholder={placeholder}
           disabled={disabled}
-          autoFocus={autoFocus}
           maxLength={18}
           style={{
             ...styles.input,
