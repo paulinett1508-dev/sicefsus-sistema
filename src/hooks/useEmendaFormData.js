@@ -1,5 +1,7 @@
-// src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO COM MELHORIAS APLICADAS
-import { useState, useEffect, useRef } from "react";
+// src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO OTIMIZADO
+// ✅ CORREÇÕES: Re-renderização + Foco removido + Modal simples + Performance
+
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   doc,
@@ -67,7 +69,7 @@ export const useEmendaFormData = () => {
   const isEdicao = Boolean(id);
 
   // 🛡️ FUNÇÃO DE LIMPEZA UNIVERSAL - RESOLVE PROBLEMAS DE CARACTERES INVISÍVEIS
-  const cleanField = (value) => {
+  const cleanField = useCallback((value) => {
     if (!value) return "";
     return value
       .toString()
@@ -79,65 +81,33 @@ export const useEmendaFormData = () => {
       .replace(/\u2002/g, " ") // Remove en-spaces
       .replace(/\u2009/g, " ") // Remove thin spaces
       .replace(/\uFEFF/g, ""); // Remove BOM (Byte Order Mark)
-  };
+  }, []);
 
-  // ✅ DETECÇÃO DE MUDANÇAS
-  const isFormModified = () => {
+  // ✅ DETECÇÃO DE MUDANÇAS OTIMIZADA
+  const isFormModified = useCallback(() => {
     const fieldsToCheck = ["autor", "municipio", "valor", "programa", "objeto"];
     return fieldsToCheck.some((field) => {
       const value = cleanField(formData[field]);
       return value && value.length > 0;
     });
-  };
+  }, [formData, cleanField]);
 
   const hasUnsavedChanges = isFormModified();
 
   // 🚨 VALIDAÇÕES ABSOLUTAS - TODAS CORRIGIDAS COM MELHORIAS APLICADAS
-  const getFieldErrors = () => {
+  const getFieldErrors = useCallback(() => {
     const errors = {};
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    // 🛠 DEBUG CRÍTICO - ADICIONAR NO INÍCIO
-    console.log("🔥 VALIDAÇÃO EXECUTADA - FormData completo:", {
-      objeto: `"${formData.objeto}"`,
-      objetoTrim: `"${formData.objeto?.trim()}"`,
-      objetoLength: formData.objeto?.length,
-      autor: `"${formData.autor}"`,
-      autorTrim: `"${formData.autor?.trim()}"`,
-      autorLength: formData.autor?.length,
-      valor: `"${formData.valor}"`,
-      valorTrim: `"${formData.valor?.toString().trim()}"`,
-      valorLength: formData.valor?.toString().length,
-      programa: `"${formData.programa}"`,
-      programaTrim: `"${formData.programa?.trim()}"`,
-      programaLength: formData.programa?.length,
-      municipio: `"${formData.municipio}"`,
-      municipioTrim: `"${formData.municipio?.trim()}"`,
-      municipioLength: formData.municipio?.length,
-      numero: `"${formData.numero}"`,
-      numeroTrim: `"${formData.numero?.trim()}"`,
-      numeroLength: formData.numero?.length,
-      beneficiario: `"${formData.beneficiario}"`,
-      beneficiarioTrim: `"${formData.beneficiario?.trim()}"`,
-      beneficiarioLength: formData.beneficiario?.length,
-      banco: `"${formData.banco}"`,
-      bancoTrim: `"${formData.banco?.trim()}"`,
-      bancoLength: formData.banco?.length,
-      agencia: `"${formData.agencia}"`,
-      agenciaTrim: `"${formData.agencia?.trim()}"`,
-      agenciaLength: formData.agencia?.length,
-      conta: `"${formData.conta}"`,
-      contaTrim: `"${formData.conta?.trim()}"`,
-      contaLength: formData.conta?.length,
-      dataAprovacao: `"${formData.dataAprovacao}"`,
-      dataOb: `"${formData.dataOb}"`,
-      inicioExecucao: `"${formData.inicioExecucao}"`,
-      finalExecucao: `"${formData.finalExecucao}"`,
-      dataValidade: `"${formData.dataValidade}"`,
-      acoesServicos: formData.acoesServicos,
-      acoesServicosLength: formData.acoesServicos?.length,
-    });
+    // ✅ LOGS OTIMIZADOS: Menos verbose
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔍 Validação executada - campos:", {
+        objeto: formData.objeto?.length || 0,
+        autor: formData.autor?.length || 0,
+        numero: formData.numero?.length || 0,
+      });
+    }
 
     // ============================================
     // 🚨 SEÇÃO IDENTIFICAÇÃO - OBRIGATÓRIA
@@ -406,9 +376,11 @@ export const useEmendaFormData = () => {
         }
       }
     } else {
-      console.log(
-        "⚠️ CRONOGRAMA: Validação de sequência pulada - nem todas as datas preenchidas",
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "⚠️ CRONOGRAMA: Validação de sequência pulada - nem todas as datas preenchidas",
+        );
+      }
     }
 
     // ============================================
@@ -460,9 +432,11 @@ export const useEmendaFormData = () => {
         }
       }
     } else {
-      console.log(
-        "⚠️ AÇÕES E SERVIÇOS: Validação pulada - criação inicial permitida",
-      );
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "⚠️ AÇÕES E SERVIÇOS: Validação pulada - criação inicial permitida",
+        );
+      }
     }
 
     // ============================================
@@ -480,10 +454,10 @@ export const useEmendaFormData = () => {
     }
 
     return errors;
-  };
+  }, [formData, isEdicao, cleanField]);
 
   // ✅ ORDENAR ERROS POR PRIORIDADE
-  const getOrderedFieldErrors = () => {
+  const getOrderedFieldErrors = useCallback(() => {
     const errors = getFieldErrors();
     const fieldOrder = [
       "numero",
@@ -516,9 +490,23 @@ export const useEmendaFormData = () => {
     });
 
     return orderedErrors;
-  };
+  }, [getFieldErrors]);
 
-  
+  // 🚨 MODAL SIMPLES - SUBSTITUINDO FOCO INTELIGENTE
+  const showSimpleErrorModal = useCallback((fieldErrors) => {
+    const errorCount = Object.keys(fieldErrors).length;
+    const errorList = Object.values(fieldErrors)
+      .slice(0, 5)
+      .map((err) => `• ${err.replace("🚨 ", "")}`)
+      .join("\n");
+
+    alert(
+      `⚠️ FORMULÁRIO INCOMPLETO\n\n` +
+        `${errorCount} campo(s) obrigatório(s):\n\n${errorList}\n\n` +
+        `${errorCount > 5 ? `... e mais ${errorCount - 5} campos\n\n` : ""}` +
+        `✅ Preencha os campos em vermelho e tente novamente.`,
+    );
+  }, []);
 
   // ✅ INICIALIZAÇÃO
   useEffect(() => {
@@ -600,64 +588,86 @@ export const useEmendaFormData = () => {
     }
   }, [user, id, isEdicao]);
 
-  // ✅ HANDLERS
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  // ✅ HANDLER PRINCIPAL OTIMIZADO
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
 
-    // 📄 Atualizar formData imediatamente
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+      // ✅ OTIMIZAÇÃO: Batch updates
+      const updateStates = () => {
+        // 📄 Atualizar formData
+        setFormData((prev) => {
+          // ✅ OTIMIZAÇÃO: Só atualizar se valor realmente mudou
+          if (prev[name] === value) return prev;
 
-    // 🧹 LIMPEZA AGRESSIVA DE ERROS - sempre que o usuário digitar
-    setFieldErrors((prev) => {
-      const newErrors = { ...prev };
+          return {
+            ...prev,
+            [name]: value,
+          };
+        });
 
-      // Remove erro do campo específico
-      delete newErrors[name];
+        // 🧹 Limpeza de erros OTIMIZADA
+        setFieldErrors((prev) => {
+          // ✅ OTIMIZAÇÃO: Só limpar se erro existir
+          if (!prev[name]) return prev;
 
-      // Remove erros relacionados se houver valor
-      const cleanValue = cleanField(value);
-      if (cleanValue && cleanValue.length > 0) {
-        // Remove erros de campos relacionados
-        if (name === "autor") {
-          delete newErrors.autor;
-        }
-        if (name === "objeto") {
-          delete newErrors.objeto;
-        }
-        if (name === "valor") {
-          delete newErrors.valor;
-        }
-        if (name === "programa") {
-          delete newErrors.programa;
-        }
+          const newErrors = { ...prev };
+          delete newErrors[name];
+
+          // Limpeza condicional de erros relacionados
+          const cleanValue = cleanField(value);
+          if (cleanValue && cleanValue.length > 0) {
+            // Remove erros relacionados
+            const relatedFields = {
+              autor: ["autor"],
+              objeto: ["objeto"],
+              valor: ["valor"],
+              programa: ["programa"],
+              numero: ["numero"],
+              municipio: ["municipio"],
+              uf: ["uf"],
+            };
+
+            if (relatedFields[name]) {
+              relatedFields[name].forEach((field) => {
+                delete newErrors[field];
+              });
+            }
+          }
+
+          return newErrors;
+        });
+      };
+
+      updateStates();
+
+      // ✅ LOGS OTIMIZADOS: Menos verbose
+      if (
+        process.env.NODE_ENV === "development" &&
+        ["objeto", "autor", "numero", "valor"].includes(name)
+      ) {
+        console.log(`📄 Campo ${name} alterado para: "${value}"`);
       }
+    },
+    [cleanField],
+  );
 
-      return newErrors;
-    });
-
-    // 📝 DEBUG: Remover depois
-    console.log(`📄 Campo ${name} alterado para: "${value}"`);
-  };
-
-  const clearFieldError = (fieldName) => {
+  const clearFieldError = useCallback((fieldName) => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[fieldName];
       return newErrors;
     });
-  };
+  }, []);
 
-  const toggleSection = (sectionName) => {
+  const toggleSection = useCallback((sectionName) => {
     setExpandedSections((prev) => ({
       ...prev,
       [sectionName]: !prev[sectionName],
     }));
-  };
+  }, []);
 
-  const buscarDadosFornecedor = async (cnpj) => {
+  const buscarDadosFornecedor = useCallback(async (cnpj) => {
     try {
       const cnpjLimpo = cnpj.replace(/\D/g, "");
       const response = await fetch(
@@ -681,10 +691,10 @@ export const useEmendaFormData = () => {
     } catch (error) {
       console.error("Erro ao buscar CNPJ:", error);
     }
-  };
+  }, []);
 
   // 🚨 VALIDAÇÃO CRÍTICA - CORRIGIDA COM LIMPEZA UNIVERSAL
-  const criticalValidation = () => {
+  const criticalValidation = useCallback(() => {
     const errors = [];
 
     // SEÇÃO IDENTIFICAÇÃO - LIMPEZA APLICADA
@@ -779,151 +789,148 @@ export const useEmendaFormData = () => {
     }
 
     return errors;
-  };
+  }, [formData, isEdicao, cleanField]);
 
-  // 💾 LÓGICA DE SALVAMENTO
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // 💾 LÓGICA DE SALVAMENTO - FOCO REMOVIDO + MODAL SIMPLES
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-    // 🚨 ATUALIZAR DATA AUTOMATICAMENTE
-    const dataAtual = new Date().toISOString().split("T")[0];
-    setFormData((prev) => ({
-      ...prev,
-      dataUltimaAtualizacao: dataAtual,
-    }));
-
-    // VALIDAÇÃO COM FEEDBACK VISUAL
-    const fieldErrorsResult = getOrderedFieldErrors();
-
-    if (Object.keys(fieldErrorsResult).length > 0) {
-      setFieldErrors(fieldErrorsResult);
-
-      const errorList = Object.values(fieldErrorsResult);
-      setToast({
-        show: true,
-        message: `🚨 CAMPOS OBRIGATÓRIOS FALTANDO:\n\n${errorList
-          .slice(0, 8)
-          .map((err) => `• ${err}`)
-          .join(
-            "\n",
-          )}\n\n${errorList.length > 8 ? `\n... e mais ${errorList.length - 8} campos` : ""}\n\n✅ Melhorias aplicadas: validação inteligente ativa.`,
-        type: "error",
-      });
-
-      setTimeout(() => {
-        // 🚨 FOCO INTELIGENTE DESABILITADO - CAUSAVA CONFLITOS CSS
-        // focusFirstErrorField(fieldErrorsResult);
-        console.log("🎯 Foco inteligente desabilitado para evitar conflitos CSS");
-      }, 100);
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    // VALIDAÇÃO CRÍTICA
-    const criticalErrors = criticalValidation();
-    if (criticalErrors.length > 0) {
-      setToast({
-        show: true,
-        message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n✅ Sistema com melhorias aplicadas.`,
-        type: "error",
-      });
-      return;
-    }
-
-    setFieldErrors({});
-
-    if (salvando) return;
-    setSalvando(true);
-
-    try {
-      const valorNumerico = parseFloat(
-        formData.valor
-          ?.toString()
-          .replace(/[R$\s]/g, "")
-          .replace(/\./g, "")
-          .replace(",", "."),
-      );
-
-      const dadosParaSalvar = {
-        numero: cleanField(formData.numero),
-        autor: cleanField(formData.autor),
-        parlamentar: cleanField(formData.autor),
-        municipio: cleanField(formData.municipio),
-        uf: cleanField(formData.uf),
-        cnpj: cleanField(formData.cnpj),
-        valor: valorNumerico,
-        valorRecurso: valorNumerico,
-        programa: cleanField(formData.programa),
-        beneficiario: cleanField(formData.beneficiario),
-        cnpjBeneficiario: cleanField(formData.cnpjBeneficiario),
-        tipo: formData.tipo,
-        modalidade: cleanField(formData.modalidade),
-        objeto: cleanField(formData.objeto),
-        banco: cleanField(formData.banco),
-        agencia: cleanField(formData.agencia),
-        conta: cleanField(formData.conta),
-        // ✅ DATAS OPCIONAIS NA CRIAÇÃO INICIAL
-        dataAprovacao: formData.dataAprovacao?.trim() || null,
-        dataOb: formData.dataOb?.trim() || null,
-        inicioExecucao: formData.inicioExecucao?.trim() || null,
-        finalExecucao: formData.finalExecucao?.trim() || null,
-        dataValidade: formData.dataValidade?.trim() || null,
-        numeroProposta: cleanField(formData.numeroProposta),
-        funcional: cleanField(formData.funcional),
-        acoesServicos: formData.acoesServicos || [],
-        observacoes: cleanField(formData.observacoes),
-        valorExecutado: 0,
-        status: "Ativa",
+      // 🚨 ATUALIZAR DATA AUTOMATICAMENTE
+      const dataAtual = new Date().toISOString().split("T")[0];
+      setFormData((prev) => ({
+        ...prev,
         dataUltimaAtualizacao: dataAtual,
-        atualizadoEm: serverTimestamp(),
-        atualizadoPor: user.uid || user.email,
-      };
+      }));
 
-      // SALVAR NO FIREBASE
-      if (isEdicao) {
-        await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
-        setToast({
-          show: true,
-          message:
-            "✅ Emenda atualizada com sucesso! Melhorias aplicadas funcionando.",
-          type: "success",
-        });
-      } else {
-        dadosParaSalvar.criadoEm = serverTimestamp();
-        dadosParaSalvar.criadoPor = user.uid || user.email;
-        await addDoc(collection(db, "emendas"), dadosParaSalvar);
-        setToast({
-          show: true,
-          message:
-            "✅ Emenda cadastrada com sucesso! Sistema com melhorias implementadas.",
-          type: "success",
-        });
+      // VALIDAÇÃO COM MODAL SIMPLES
+      const fieldErrorsResult = getOrderedFieldErrors();
+
+      if (Object.keys(fieldErrorsResult).length > 0) {
+        setFieldErrors(fieldErrorsResult);
+
+        // 🚨 MODAL SIMPLES - SEM FOCO NEM SCROLL
+        showSimpleErrorModal(fieldErrorsResult);
+        return;
       }
 
-      setTimeout(() => {
-        navigate("/emendas", { replace: true });
-      }, 800);
-    } catch (error) {
-      let mensagemErro = "❌ Erro ao salvar emenda. ";
-
-      if (error.code === "permission-denied") {
-        mensagemErro += "Você não tem permissão para esta operação.";
-      } else if (error.code === "already-exists") {
-        mensagemErro += "Já existe uma emenda com este número.";
-      } else {
-        mensagemErro += "Tente novamente.";
+      // VALIDAÇÃO CRÍTICA
+      const criticalErrors = criticalValidation();
+      if (criticalErrors.length > 0) {
+        setToast({
+          show: true,
+          message: `🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n${criticalErrors.join("\n")}\n\n✅ Sistema com melhorias aplicadas.`,
+          type: "error",
+        });
+        return;
       }
 
-      setToast({
-        show: true,
-        message: mensagemErro,
-        type: "error",
-      });
-    } finally {
-      setSalvando(false);
-    }
-  };
+      setFieldErrors({});
+
+      if (salvando) return;
+      setSalvando(true);
+
+      try {
+        const valorNumerico = parseFloat(
+          formData.valor
+            ?.toString()
+            .replace(/[R$\s]/g, "")
+            .replace(/\./g, "")
+            .replace(",", "."),
+        );
+
+        const dadosParaSalvar = {
+          numero: cleanField(formData.numero),
+          autor: cleanField(formData.autor),
+          parlamentar: cleanField(formData.autor),
+          municipio: cleanField(formData.municipio),
+          uf: cleanField(formData.uf),
+          cnpj: cleanField(formData.cnpj),
+          valor: valorNumerico,
+          valorRecurso: valorNumerico,
+          programa: cleanField(formData.programa),
+          beneficiario: cleanField(formData.beneficiario),
+          cnpjBeneficiario: cleanField(formData.cnpjBeneficiario),
+          tipo: formData.tipo,
+          modalidade: cleanField(formData.modalidade),
+          objeto: cleanField(formData.objeto),
+          banco: cleanField(formData.banco),
+          agencia: cleanField(formData.agencia),
+          conta: cleanField(formData.conta),
+          // ✅ DATAS OPCIONAIS NA CRIAÇÃO INICIAL
+          dataAprovacao: formData.dataAprovacao?.trim() || null,
+          dataOb: formData.dataOb?.trim() || null,
+          inicioExecucao: formData.inicioExecucao?.trim() || null,
+          finalExecucao: formData.finalExecucao?.trim() || null,
+          dataValidade: formData.dataValidade?.trim() || null,
+          numeroProposta: cleanField(formData.numeroProposta),
+          funcional: cleanField(formData.funcional),
+          acoesServicos: formData.acoesServicos || [],
+          observacoes: cleanField(formData.observacoes),
+          valorExecutado: 0,
+          status: "Ativa",
+          dataUltimaAtualizacao: dataAtual,
+          atualizadoEm: serverTimestamp(),
+          atualizadoPor: user.uid || user.email,
+        };
+
+        // SALVAR NO FIREBASE
+        if (isEdicao) {
+          await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
+          setToast({
+            show: true,
+            message:
+              "✅ Emenda atualizada com sucesso! Melhorias aplicadas funcionando.",
+            type: "success",
+          });
+        } else {
+          dadosParaSalvar.criadoEm = serverTimestamp();
+          dadosParaSalvar.criadoPor = user.uid || user.email;
+          await addDoc(collection(db, "emendas"), dadosParaSalvar);
+          setToast({
+            show: true,
+            message:
+              "✅ Emenda cadastrada com sucesso! Sistema com melhorias implementadas.",
+            type: "success",
+          });
+        }
+
+        setTimeout(() => {
+          navigate("/emendas", { replace: true });
+        }, 800);
+      } catch (error) {
+        let mensagemErro = "❌ Erro ao salvar emenda. ";
+
+        if (error.code === "permission-denied") {
+          mensagemErro += "Você não tem permissão para esta operação.";
+        } else if (error.code === "already-exists") {
+          mensagemErro += "Já existe uma emenda com este número.";
+        } else {
+          mensagemErro += "Tente novamente.";
+        }
+
+        setToast({
+          show: true,
+          message: mensagemErro,
+          type: "error",
+        });
+      } finally {
+        setSalvando(false);
+      }
+    },
+    [
+      formData,
+      getOrderedFieldErrors,
+      showSimpleErrorModal,
+      criticalValidation,
+      cleanField,
+      salvando,
+      isEdicao,
+      id,
+      user,
+      navigate,
+    ],
+  );
 
   return {
     // Estados
@@ -946,8 +953,9 @@ export const useEmendaFormData = () => {
     // Funções de validação
     getFieldErrors,
     getOrderedFieldErrors,
+    // focusFirstErrorField, // 🚨 REMOVIDO COMPLETAMENTE
     clearFieldError,
-    cleanField, // 🆕 FUNÇÃO EXPOSTA PARA USO EXTERNO
+    cleanField,
 
     // Handlers
     handleInputChange,

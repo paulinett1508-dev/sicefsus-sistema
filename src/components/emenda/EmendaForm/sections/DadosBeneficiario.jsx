@@ -1,15 +1,16 @@
 // src/components/emenda/EmendaForm/sections/DadosBeneficiario.jsx
-// ✅ CORREÇÃO CRÍTICA: Props alinhadas com EmendaForm
+// ✅ CORREÇÃO CRÍTICA: Props limpas + Re-renderização otimizada
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 
 const DadosBeneficiario = ({
   formData,
   onChange,
-  styles,
+  // setFormData, // 🚨 REMOVIDO - Prop desnecessária
+  // styles,      // 🚨 REMOVIDO - Não usado
   buscarDadosFornecedor,
-  fieldErrors = {}, // ✅ CORREÇÃO: errors → fieldErrors
-  onClearError, // ✅ ADICIONADO: prop faltante
+  fieldErrors = {},
+  onClearError,
   expanded,
   onToggle,
 }) => {
@@ -17,110 +18,115 @@ const DadosBeneficiario = ({
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
-  const toggleExpanded = () => {
+  // ✅ OTIMIZAÇÃO: useCallback para evitar re-renderizações
+  const toggleExpanded = useCallback(() => {
     if (onToggle) {
       onToggle();
     } else {
       setIsExpanded(!isExpanded);
     }
-  };
+  }, [onToggle, isExpanded]);
 
-  // Use external expanded state if provided, otherwise use internal state
   const currentExpanded = expanded !== undefined ? expanded : isExpanded;
 
-  // ✅ HANDLER COM LIMPEZA DE ERRO
-  const handleChange = (e) => {
-    const { name } = e.target;
-    onChange(e);
+  // ✅ OTIMIZAÇÃO: useCallback para handleChange
+  const handleChange = useCallback(
+    (e) => {
+      const { name } = e.target;
+      onChange(e);
 
-    // Limpar erro se campo foi preenchido
-    if (onClearError && fieldErrors[name]) {
-      onClearError(name);
-    }
-  };
+      // Limpar erro se campo foi preenchido
+      if (onClearError && fieldErrors[name]) {
+        onClearError(name);
+      }
+    },
+    [onChange, onClearError, fieldErrors],
+  );
 
-  // Função para buscar dados do CNPJ automaticamente
-  const buscarDadosCNPJ = async (cnpj) => {
-    try {
-      const cnpjLimpo = cnpj.replace(/\D/g, "");
+  // ✅ CORREÇÃO: Função de busca CNPJ otimizada - SEM setFormData
+  const buscarDadosCNPJ = useCallback(
+    async (cnpj) => {
+      try {
+        const cnpjLimpo = cnpj.replace(/\D/g, "");
 
-      if (cnpjLimpo.length !== 14) return;
+        if (cnpjLimpo.length !== 14) return;
 
-      setLoading(true);
+        setLoading(true);
 
-      // API pública para consulta de CNPJ
-      const response = await fetch(
-        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
-      );
+        const response = await fetch(
+          `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+        );
 
-      if (response.ok) {
-        const dados = await response.json();
+        if (response.ok) {
+          const dados = await response.json();
 
-        // Preencher campos automaticamente
-        const novosValores = {
-          beneficiario:
-            dados.razao_social || dados.nome_fantasia || formData.beneficiario,
-          enderecoBeneficiario:
-            dados.logradouro && dados.numero
-              ? `${dados.logradouro}, ${dados.numero} - ${dados.bairro}, ${dados.municipio}/${dados.uf}`
-              : formData.enderecoBeneficiario,
-          telefoneBeneficiario:
-            dados.ddd_telefone_1 && dados.telefone_1
-              ? `(${dados.ddd_telefone_1}) ${dados.telefone_1}`
-              : formData.telefoneBeneficiario,
-          emailBeneficiario: dados.email || formData.emailBeneficiario,
-          responsavelLegal:
-            dados.qsa && dados.qsa[0] && dados.qsa[0].nome
-              ? dados.qsa[0].nome
-              : formData.responsavelLegal,
-        };
+          // ✅ CORREÇÃO: Usar APENAS onChange - SEM setFormData
+          const novosValores = {
+            beneficiario:
+              dados.razao_social ||
+              dados.nome_fantasia ||
+              formData.beneficiario,
+            enderecoBeneficiario:
+              dados.logradouro && dados.numero
+                ? `${dados.logradouro}, ${dados.numero} - ${dados.bairro}, ${dados.municipio}/${dados.uf}`
+                : formData.enderecoBeneficiario,
+            telefoneBeneficiario:
+              dados.ddd_telefone_1 && dados.telefone_1
+                ? `(${dados.ddd_telefone_1}) ${dados.telefone_1}`
+                : formData.telefoneBeneficiario,
+            emailBeneficiario: dados.email || formData.emailBeneficiario,
+            responsavelLegal:
+              dados.qsa && dados.qsa[0] && dados.qsa[0].nome
+                ? dados.qsa[0].nome
+                : formData.responsavelLegal,
+          };
 
-        // Atualizar formData com múltiplos campos usando onChange
-        Object.entries(novosValores).forEach(([key, value]) => {
-          if (value && value !== formData[key]) {
-            handleChange({
-              target: {
-                name: key,
-                value: value,
-              },
-            });
+          // ✅ SOLUÇÃO OTIMIZADA: Usar apenas onChange
+          Object.entries(novosValores).forEach(([key, value]) => {
+            if (value && value !== formData[key]) {
+              onChange({
+                target: {
+                  name: key,
+                  value: value,
+                },
+              });
+            }
+          });
+
+          // Expandir automaticamente para mostrar os dados preenchidos
+          if (onToggle) {
+            onToggle();
+          } else {
+            setIsExpanded(true);
           }
-        });
 
-        // Expandir automaticamente para mostrar os dados preenchidos se usando estado interno
-        if (onToggle) {
-          onToggle(); // Use external toggle function if provided
-        } else {
-          setIsExpanded(true);
+          setToast({
+            show: true,
+            message: `✅ Dados carregados: ${dados.nome_fantasia || dados.razao_social}`,
+            type: "success",
+          });
+
+          setTimeout(() => {
+            setToast({ show: false, message: "", type: "" });
+          }, 3000);
         }
-
-        // Mostrar feedback de sucesso
+      } catch (error) {
+        console.error("Erro ao buscar CNPJ:", error);
         setToast({
           show: true,
-          message: `✅ Dados carregados: ${dados.nome_fantasia || dados.razao_social}`,
-          type: "success",
+          message: "⚠️ Erro ao buscar dados do CNPJ",
+          type: "error",
         });
 
-        // Ocultar toast após 3 segundos
         setTimeout(() => {
           setToast({ show: false, message: "", type: "" });
         }, 3000);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Erro ao buscar CNPJ:", error);
-      setToast({
-        show: true,
-        message: "⚠️ Erro ao buscar dados do CNPJ",
-        type: "error",
-      });
-
-      setTimeout(() => {
-        setToast({ show: false, message: "", type: "" });
-      }, 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [formData, onChange, onToggle],
+  );
 
   return (
     <div style={customStyles.section}>
@@ -137,7 +143,7 @@ const DadosBeneficiario = ({
         </div>
       )}
 
-      {/* HEADER COLAPSÍVEL - MESMO FORMATO DE InformacoesComplementares */}
+      {/* HEADER COLAPSÍVEL */}
       <div style={customStyles.headerContainer} onClick={toggleExpanded}>
         <legend style={customStyles.legend}>
           <span style={customStyles.legendIcon}>📋</span>
@@ -153,7 +159,7 @@ const DadosBeneficiario = ({
         </div>
       </div>
 
-      {/* CONTEÚDO COLAPSÍVEL - MESMO FORMATO DE InformacoesComplementares */}
+      {/* CONTEÚDO COLAPSÍVEL */}
       {currentExpanded && (
         <div style={customStyles.content}>
           <div style={customStyles.formGrid}>
@@ -170,7 +176,7 @@ const DadosBeneficiario = ({
                 placeholder="Nome completo da instituição beneficiária"
                 style={{
                   ...customStyles.input,
-                  ...(fieldErrors?.beneficiario && customStyles.inputError), // ✅ USANDO fieldErrors
+                  ...(fieldErrors?.beneficiario && customStyles.inputError),
                 }}
               />
               {fieldErrors?.beneficiario && (
@@ -189,17 +195,8 @@ const DadosBeneficiario = ({
                 value={formData?.enderecoBeneficiario || ""}
                 onChange={handleChange}
                 placeholder="Rua, número, bairro, cidade/UF"
-                style={{
-                  ...customStyles.input,
-                  ...(fieldErrors?.enderecoBeneficiario &&
-                    customStyles.inputError),
-                }}
+                style={customStyles.input}
               />
-              {fieldErrors?.enderecoBeneficiario && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.enderecoBeneficiario}
-                </span>
-              )}
             </div>
 
             {/* Telefone */}
@@ -211,17 +208,8 @@ const DadosBeneficiario = ({
                 value={formData?.telefoneBeneficiario || ""}
                 onChange={handleChange}
                 placeholder="(00) 00000-0000"
-                style={{
-                  ...customStyles.input,
-                  ...(fieldErrors?.telefoneBeneficiario &&
-                    customStyles.inputError),
-                }}
+                style={customStyles.input}
               />
-              {fieldErrors?.telefoneBeneficiario && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.telefoneBeneficiario}
-                </span>
-              )}
             </div>
 
             {/* Email */}
@@ -233,17 +221,8 @@ const DadosBeneficiario = ({
                 value={formData?.emailBeneficiario || ""}
                 onChange={handleChange}
                 placeholder="email@instituicao.com.br"
-                style={{
-                  ...customStyles.input,
-                  ...(fieldErrors?.emailBeneficiario &&
-                    customStyles.inputError),
-                }}
+                style={customStyles.input}
               />
-              {fieldErrors?.emailBeneficiario && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.emailBeneficiario}
-                </span>
-              )}
             </div>
 
             {/* Responsável Legal */}
@@ -255,20 +234,12 @@ const DadosBeneficiario = ({
                 value={formData?.responsavelLegal || ""}
                 onChange={handleChange}
                 placeholder="Nome do responsável pela instituição"
-                style={{
-                  ...customStyles.input,
-                  ...(fieldErrors?.responsavelLegal && customStyles.inputError),
-                }}
+                style={customStyles.input}
               />
-              {fieldErrors?.responsavelLegal && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.responsavelLegal}
-                </span>
-              )}
             </div>
           </div>
 
-          {/* Campos de texto maiores - MESMO FORMATO */}
+          {/* Campos de texto maiores */}
           <div style={customStyles.textAreaGrid}>
             <div style={customStyles.formGroup}>
               <label style={customStyles.label}>
@@ -280,17 +251,8 @@ const DadosBeneficiario = ({
                 onChange={handleChange}
                 placeholder="Informações complementares sobre o beneficiário..."
                 rows="3"
-                style={{
-                  ...customStyles.textarea,
-                  ...(fieldErrors?.observacoesBeneficiario &&
-                    customStyles.inputError),
-                }}
+                style={customStyles.textarea}
               />
-              {fieldErrors?.observacoesBeneficiario && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.observacoesBeneficiario}
-                </span>
-              )}
             </div>
 
             <div style={customStyles.formGroup}>
@@ -301,17 +263,8 @@ const DadosBeneficiario = ({
                 onChange={handleChange}
                 placeholder="Outras informações relevantes..."
                 rows="3"
-                style={{
-                  ...customStyles.textarea,
-                  ...(fieldErrors?.infoAdicionaisBeneficiario &&
-                    customStyles.inputError),
-                }}
+                style={customStyles.textarea}
               />
-              {fieldErrors?.infoAdicionaisBeneficiario && (
-                <span style={customStyles.errorText}>
-                  {fieldErrors.infoAdicionaisBeneficiario}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -470,13 +423,6 @@ const customStyles = {
     zIndex: 1000,
     fontSize: "14px",
     fontWeight: "500",
-  },
-
-  loadingIndicator: {
-    marginTop: "8px",
-    fontSize: "14px",
-    color: "#666",
-    fontStyle: "italic",
   },
 };
 

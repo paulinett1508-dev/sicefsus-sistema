@@ -1,11 +1,11 @@
-// src/components/emenda/EmendaForm/index.jsx - ORQUESTRADOR REFATORADO (SEM BANNER AMARELO)
+// src/components/emenda/EmendaForm/index.jsx - ARQUIVO COMPLETO CORRIGIDO
 import React from "react";
 
 // ✅ HOOKS ESPECIALIZADOS
 import { useEmendaFormData } from "../../../hooks/useEmendaFormData";
 import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation";
 
-// ✅ SEÇÕES MODULARES (já existentes)
+// ✅ SEÇÕES MODULARES
 import Identificacao from "./sections/Identificacao";
 import DadosBasicos from "./sections/DadosBasicos";
 import DadosBeneficiario from "./sections/DadosBeneficiario";
@@ -14,7 +14,7 @@ import Cronograma from "./sections/Cronograma";
 import AcoesServicos from "./sections/AcoesServicos";
 import InformacoesComplementares from "./sections/InformacoesComplementares";
 
-// ✅ COMPONENTES AUXILIARES (já existentes)
+// ✅ COMPONENTES AUXILIARES
 import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
@@ -78,7 +78,7 @@ const EmendaForm = () => {
     return (
       <div style={styles.container}>
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⚫</div>
+          <div style={styles.errorIcon}>⚠️</div>
           <h3>Erro no Formulário</h3>
           <p>{error}</p>
           <div style={styles.errorActions}>
@@ -122,13 +122,13 @@ const EmendaForm = () => {
           onClearError={clearFieldError}
         />
 
-        {/* ✅ SEÇÃO: Beneficiário */}
+        {/* ✅ SEÇÃO: Beneficiário - PROPS CORRIGIDAS */}
         <DadosBeneficiario
           formData={formData}
           onChange={handleInputChange}
+          // setFormData REMOVIDO - Hook gerencia isso agora
           fieldErrors={fieldErrors}
           onClearError={clearFieldError}
-          styles={styles}
           buscarDadosFornecedor={buscarDadosFornecedor}
           expanded={expandedSections.beneficiario}
           onToggle={() => toggleSection("beneficiario")}
@@ -144,7 +144,7 @@ const EmendaForm = () => {
 
         {/* ✅ SEÇÃO: Cronograma */}
         <Cronograma
-          formData={formData || {}}
+          formData={formData}
           onChange={handleInputChange}
           fieldErrors={fieldErrors}
           onClearError={clearFieldError}
@@ -212,7 +212,7 @@ const EmendaForm = () => {
   );
 };
 
-// 🎨 ESTILOS (preservados, removido apenas criticalNotice)
+// 🎨 ESTILOS PRESERVADOS
 const styles = {
   container: {
     padding: "16px",
@@ -287,7 +287,7 @@ const styles = {
   },
 };
 
-// 🎭 ANIMAÇÃO CSS (preservada do original)
+// 🎭 ANIMAÇÃO CSS PRESERVADA
 if (
   !document.querySelector(
     'style[data-component="emenda-form-refactored-dates"]',

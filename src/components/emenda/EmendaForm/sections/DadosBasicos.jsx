@@ -1,258 +1,279 @@
-import React from "react";
+// src/components/emenda/EmendaForm/sections/DadosBasicos.jsx
+// ✅ ARQUIVO COMPLETO OTIMIZADO - React.memo + Logs limpos + useCallback
+
+import React, { useCallback } from "react";
 import CNPJInput from "../../../CNPJInput";
 
-const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
-  // 🔥 DEBUG RESTAURADO - DEVE FUNCIONAR AGORA
-  console.log("🔥 VALIDAÇÃO DEBUG - DadosBasicos renderizou!", {
-    formData: formData,
-    fieldErrors: fieldErrors,
-    onChangeFunction: onChange,
-  });
-
-  const programas = [
-    "Incremento ao custeio de serviços da atenção primária à saúde",
-    "Aquisição de equipamentos",
-    "Construção e ampliação",
-    "Reforma e adequação",
-    "Custeio de serviços especializados",
-    "Apoio à gestão do SUS",
-    "Vigilância em Saúde",
-    "Assistência Farmacêutica",
-    "Outro",
-  ];
-
-  const formatarMoeda = (valor) => {
-    const numero = valor.replace(/\D/g, "");
-    if (!numero) return "";
-    const centavos = parseInt(numero, 10);
-    const reais = centavos / 100;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(reais);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    // 🔥 DEBUG CRÍTICO - MUDANÇAS NOS CAMPOS
-    console.log(`🔥 VALIDAÇÃO DEBUG - Campo ${name} alterado para: "${value}"`);
-
-    if (name === "valor" || name === "valorRecurso") {
-      const valorFormatado = formatarMoeda(value);
-      console.log(`💰 Valor formatado: ${valorFormatado}`);
-      onChange({ target: { name, value: valorFormatado } });
-    } else {
-      onChange(e);
+const DadosBasicos = React.memo(
+  ({ formData = {}, onChange, fieldErrors = {}, onClearError }) => {
+    // ✅ LOGS OTIMIZADOS: Menos verbose
+    if (process.env.NODE_ENV === "development") {
+      console.log("📋 DadosBasicos renderizado");
     }
-  };
 
-  return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>💰</span>
-        Dados Básicos
-      </legend>
+    const programas = [
+      "Incremento ao custeio de serviços da atenção primária à saúde",
+      "Aquisição de equipamentos",
+      "Construção e ampliação",
+      "Reforma e adequação",
+      "Custeio de serviços especializados",
+      "Apoio à gestão do SUS",
+      "Vigilância em Saúde",
+      "Assistência Farmacêutica",
+      "Outro",
+    ];
 
-      <div style={styles.formGrid}>
-        {/* Programa */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Programa <span style={styles.required}>*</span>
-          </label>
-          <select
-            name="programa"
-            value={formData.programa || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.programa && styles.inputError),
-            }}
-            required
-          >
-            <option value="">Selecione o programa</option>
-            {programas.map((prog) => (
-              <option key={prog} value={prog}>
-                {prog}
-              </option>
-            ))}
-          </select>
-          {fieldErrors.programa && (
-            <small style={styles.errorText}>{fieldErrors.programa}</small>
-          )}
+    const formatarMoeda = useCallback((valor) => {
+      const numero = valor.replace(/\D/g, "");
+      if (!numero) return "";
+      const centavos = parseInt(numero, 10);
+      const reais = centavos / 100;
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(reais);
+    }, []);
+
+    // ✅ HANDLER OTIMIZADO COM useCallback
+    const handleInputChange = useCallback(
+      (e) => {
+        const { name, value } = e.target;
+
+        // ✅ LOGS OTIMIZADOS: Apenas campos importantes
+        if (
+          process.env.NODE_ENV === "development" &&
+          ["objeto", "autor", "numero", "valor"].includes(name)
+        ) {
+          console.log(`📄 Campo ${name} alterado para: "${value}"`);
+        }
+
+        // ✅ LIMPEZA DE ERRO OTIMIZADA
+        if (onClearError && fieldErrors[name]) {
+          onClearError(name);
+        }
+
+        if (name === "valor" || name === "valorRecurso") {
+          const valorFormatado = formatarMoeda(value);
+          onChange({ target: { name, value: valorFormatado } });
+        } else {
+          onChange(e);
+        }
+      },
+      [onChange, onClearError, fieldErrors, formatarMoeda],
+    );
+
+    return (
+      <fieldset style={styles.fieldset}>
+        <legend style={styles.legend}>
+          <span style={styles.legendIcon}>💰</span>
+          Dados Básicos
+        </legend>
+
+        <div style={styles.formGrid}>
+          {/* Programa */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Programa <span style={styles.required}>*</span>
+            </label>
+            <select
+              name="programa"
+              value={formData.programa || ""}
+              onChange={handleInputChange}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.programa && styles.inputError),
+              }}
+              required
+            >
+              <option value="">Selecione o programa</option>
+              {programas.map((prog) => (
+                <option key={prog} value={prog}>
+                  {prog}
+                </option>
+              ))}
+            </select>
+            {fieldErrors.programa && (
+              <small style={styles.errorText}>{fieldErrors.programa}</small>
+            )}
+          </div>
+
+          {/* Objeto da Proposta */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Objeto da Proposta <span style={styles.required}>*</span>
+            </label>
+            <input
+              type="text"
+              name="objeto"
+              value={formData.objeto || ""}
+              onChange={handleInputChange}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.objeto && styles.inputError),
+              }}
+              required
+            />
+            {fieldErrors.objeto && (
+              <small style={styles.errorText}>{fieldErrors.objeto}</small>
+            )}
+          </div>
+
+          {/* Parlamentar/Autor */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Parlamentar/Autor <span style={styles.required}>*</span>
+            </label>
+            <input
+              type="text"
+              name="autor"
+              value={formData.autor || ""}
+              onChange={handleInputChange}
+              placeholder="Nome do parlamentar"
+              style={{
+                ...styles.input,
+                ...(fieldErrors.autor && styles.inputError),
+              }}
+              required
+            />
+            {fieldErrors.autor && (
+              <small style={styles.errorText}>{fieldErrors.autor}</small>
+            )}
+          </div>
+
+          {/* Número da Emenda */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Número da Emenda <span style={styles.required}>*</span>
+            </label>
+            <input
+              type="text"
+              name="numero"
+              value={formData.numero || ""}
+              onChange={handleInputChange}
+              placeholder="Ex: 30460003"
+              style={{
+                ...styles.input,
+                ...(fieldErrors.numero && styles.inputError),
+              }}
+              required
+            />
+            {fieldErrors.numero && (
+              <small style={styles.errorText}>{fieldErrors.numero}</small>
+            )}
+          </div>
+
+          {/* Tipo de Emenda */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Tipo de Emenda <span style={styles.required}>*</span>
+            </label>
+            <select
+              name="tipo"
+              value={formData.tipo || "Individual"}
+              onChange={handleInputChange}
+              style={styles.input}
+              required
+            >
+              <option value="Individual">Emenda Individual</option>
+              <option value="Bancada">Emenda de Bancada</option>
+              <option value="Comissao">Emenda de Comissão</option>
+              <option value="Relator">Emenda de Relator</option>
+            </select>
+          </div>
+
+          {/* Nº da Proposta */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Nº da Proposta</label>
+            <input
+              type="text"
+              name="numeroProposta"
+              value={formData.numeroProposta || ""}
+              onChange={handleInputChange}
+              placeholder="Ex: 36000660361202500"
+              style={styles.input}
+            />
+          </div>
+
+          {/* Funcional */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Funcional</label>
+            <input
+              type="text"
+              name="funcional"
+              value={formData.funcional || ""}
+              onChange={handleInputChange}
+              placeholder="Ex: 10301311928590021"
+              style={styles.input}
+            />
+          </div>
+
+          {/* Beneficiário - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}
+          <div style={styles.formGroup}>
+            <CNPJInput
+              label="Beneficiário (CNPJ)"
+              value={formData.beneficiario || ""}
+              onChange={(e) => {
+                // ✅ LOGS OTIMIZADOS: Menos verbose
+                if (process.env.NODE_ENV === "development") {
+                  console.log(`📄 CNPJInput beneficiario: "${e.target.value}"`);
+                }
+                handleInputChange({
+                  target: {
+                    name: "beneficiario",
+                    value: e.target.value,
+                  },
+                });
+              }}
+              required={true}
+              placeholder="00.000.000/0000-00"
+              showValidation={true}
+              style={styles.formGroup}
+              inputStyle={{
+                ...styles.input,
+                padding: "12px",
+                fontSize: "14px",
+                borderWidth: "2px",
+                borderStyle: "solid",
+                borderColor: fieldErrors.beneficiario ? "#dc3545" : "#dee2e6",
+                borderRadius: "6px",
+              }}
+            />
+            {fieldErrors.beneficiario && (
+              <small style={styles.errorText}>{fieldErrors.beneficiario}</small>
+            )}
+          </div>
+
+          {/* Valor do Recurso */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Valor do Recurso <span style={styles.required}>*</span>
+            </label>
+            <input
+              type="text"
+              name="valor"
+              value={formData.valor || ""}
+              onChange={handleInputChange}
+              style={{
+                ...styles.input,
+                ...styles.inputMoney,
+                ...(fieldErrors.valor && styles.inputError),
+              }}
+              required
+            />
+            {fieldErrors.valor && (
+              <small style={styles.errorText}>{fieldErrors.valor}</small>
+            )}
+          </div>
         </div>
+      </fieldset>
+    );
+  },
+);
 
-        {/* Objeto da Proposta */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Objeto da Proposta <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="objeto"
-            value={formData.objeto || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.objeto && styles.inputError),
-            }}
-            required
-          />
-          {fieldErrors.objeto && (
-            <small style={styles.errorText}>{fieldErrors.objeto}</small>
-          )}
-        </div>
+// ✅ ADICIONADO: DisplayName para React DevTools
+DadosBasicos.displayName = "DadosBasicos";
 
-        {/* Parlamentar/Autor */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Parlamentar/Autor <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="autor"
-            value={formData.autor || ""}
-            onChange={handleInputChange}
-            placeholder="Nome do parlamentar"
-            style={{
-              ...styles.input,
-              ...(fieldErrors.autor && styles.inputError),
-            }}
-            required
-          />
-          {fieldErrors.autor && (
-            <small style={styles.errorText}>{fieldErrors.autor}</small>
-          )}
-        </div>
-
-        {/* Número da Emenda */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Número da Emenda <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="numero"
-            value={formData.numero || ""}
-            onChange={handleInputChange}
-            placeholder="Ex: 30460003"
-            style={{
-              ...styles.input,
-              ...(fieldErrors.numero && styles.inputError),
-            }}
-            required
-          />
-          {fieldErrors.numero && (
-            <small style={styles.errorText}>{fieldErrors.numero}</small>
-          )}
-        </div>
-
-        {/* Tipo de Emenda */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Tipo de Emenda <span style={styles.required}>*</span>
-          </label>
-          <select
-            name="tipo"
-            value={formData.tipo || "Individual"}
-            onChange={handleInputChange}
-            style={styles.input}
-            required
-          >
-            <option value="Individual">Emenda Individual</option>
-            <option value="Bancada">Emenda de Bancada</option>
-            <option value="Comissao">Emenda de Comissão</option>
-            <option value="Relator">Emenda de Relator</option>
-          </select>
-        </div>
-
-        {/* Nº da Proposta */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Nº da Proposta</label>
-          <input
-            type="text"
-            name="numeroProposta"
-            value={formData.numeroProposta || ""}
-            onChange={handleInputChange}
-            placeholder="Ex: 36000660361202500"
-            style={styles.input}
-          />
-        </div>
-
-        {/* Funcional */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Funcional</label>
-          <input
-            type="text"
-            name="funcional"
-            value={formData.funcional || ""}
-            onChange={handleInputChange}
-            placeholder="Ex: 10301311928590021"
-            style={styles.input}
-          />
-        </div>
-
-        {/* Beneficiário - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}
-        <div style={styles.formGroup}>
-          <CNPJInput
-            label="Beneficiário (CNPJ)"
-            value={formData.beneficiario || ""}
-            onChange={(e) => {
-              console.log(
-                `🔥 VALIDAÇÃO DEBUG - CNPJInput mudança: beneficiario = "${e.target.value}"`,
-              );
-              handleInputChange({
-                target: {
-                  name: "beneficiario",
-                  value: e.target.value,
-                },
-              });
-            }}
-            required={true}
-            placeholder="00.000.000/0000-00"
-            showValidation={true}
-            style={styles.formGroup}
-            inputStyle={{
-              ...styles.input,
-              padding: "12px",
-              fontSize: "14px",
-              borderWidth: "2px",
-              borderStyle: "solid",
-              borderColor: "#dee2e6",
-              borderRadius: "6px",
-            }}
-          />
-          {fieldErrors.beneficiario && (
-            <small style={styles.errorText}>{fieldErrors.beneficiario}</small>
-          )}
-        </div>
-
-        {/* Valor do Recurso */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Valor do Recurso <span style={styles.required}>*</span>
-          </label>
-          <input
-            type="text"
-            name="valor"
-            value={formData.valor || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...styles.inputMoney,
-              ...(fieldErrors.valor && styles.inputError),
-            }}
-            required
-          />
-          {fieldErrors.valor && (
-            <small style={styles.errorText}>{fieldErrors.valor}</small>
-          )}
-        </div>
-      </div>
-    </fieldset>
-  );
-};
-
+// ✅ ESTILOS PRESERVADOS
 const styles = {
   fieldset: {
     borderWidth: "2px",

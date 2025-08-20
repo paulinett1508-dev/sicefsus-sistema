@@ -38,21 +38,17 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     onChange({ target: { name, value: valorFormatado } });
   };
 
-  // ✅ NOVA FUNÇÃO: Adicionar nova meta
   const handleAdicionarMeta = () => {
-    // Validar se campos obrigatórios estão preenchidos
     if (!formData.estrategia || !formData.tipoMeta) {
       alert("⚠️ Preencha Estratégia e Tipo antes de adicionar a meta!");
       return;
     }
 
-    // Validar valor para meta quantitativa
     if (formData.tipoMeta === "Quantitativa" && !formData.valorAcao) {
       alert("⚠️ Preencha o Valor para meta do tipo Quantitativa!");
       return;
     }
 
-    // Criar nova meta
     const novaMeta = {
       id: Date.now(),
       estrategia: formData.estrategia,
@@ -61,29 +57,21 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         formData.tipoMeta === "Quantitativa" ? formData.valorAcao : "0",
     };
 
-    // Obter metas existentes
     const metasExistentes = formData.acoesServicos || [];
-
-    // Adicionar nova meta ao array
     const novasMetas = [...metasExistentes, novaMeta];
 
-    // Limpar campos para nova meta
     onChange({ target: { name: "estrategia", value: "" } });
     onChange({ target: { name: "tipoMeta", value: "" } });
     onChange({ target: { name: "valorAcao", value: "" } });
 
-    // Atualizar array de metas
     onChange({
       target: {
         name: "acoesServicos",
         value: novasMetas,
       },
     });
-
-    console.log("✅ Nova meta adicionada:", novaMeta);
   };
 
-  // ✅ FUNÇÃO: Remover meta
   const handleRemoverMeta = (metaId) => {
     const metasExistentes = formData.acoesServicos || [];
     const metasAtualizadas = metasExistentes.filter(
@@ -96,11 +84,8 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         value: metasAtualizadas,
       },
     });
-
-    console.log("🗑️ Meta removida:", metaId);
   };
 
-  // ✅ VALIDAÇÃO INTELIGENTE: Total de metas vs valor da emenda
   const validarTotalMetas = () => {
     if (!formData.valorRecurso) return { valido: true, mensagem: "" };
 
@@ -112,7 +97,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         .replace(",", "."),
     );
 
-    // Somar valores de todas as metas quantitativas existentes
     const metasExistentes = formData.acoesServicos || [];
     const totalMetasExistentes = metasExistentes.reduce((sum, meta) => {
       if (meta.tipoMeta === "Quantitativa") {
@@ -127,7 +111,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
       return sum;
     }, 0);
 
-    // Valor da meta atual (se quantitativa)
     let valorMetaAtual = 0;
     if (formData.tipoMeta === "Quantitativa" && formData.valorAcao) {
       valorMetaAtual = parseFloat(
@@ -144,7 +127,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     if (totalGeral > valorEmenda) {
       return {
         valido: false,
-        mensagem: `❌ Valor de Meta incorreto. Já foi consumido R$ ${totalMetasExistentes.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} do valor da Emenda. Saldo disponível: R$ ${saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+        mensagem: `⚠️ Valor excede saldo disponível: R$ ${saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
         saldoDisponivel: saldoDisponivel,
       };
     }
@@ -165,27 +148,12 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
       <legend style={styles.legend}>
         <span style={styles.legendIcon}>🎯</span>
         Ações e Serviços
-        <span style={styles.optionalBadge}>SEÇÃO OPCIONAL NA CRIAÇÃO</span>
       </legend>
 
-      {/* ✅ ALERTA INFORMATIVO */}
-      <div style={styles.infoAlert}>
-        <span style={styles.alertIcon}>💡</span>
-        <div style={styles.alertText}>
-          <strong>Esta seção é opcional durante a criação inicial.</strong>
-          <br />
-          Você pode preenchê-la agora ou adicionar as metas posteriormente
-          durante a edição da emenda.
-        </div>
-      </div>
-
+      {/* Formulário Compacto */}
       <div style={styles.formGrid}>
-        {/* ✅ MELHORIA 3: Estratégia - SEM ASTERISCO (OPCIONAL) */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Estratégia
-            <span style={styles.optionalLabel}>opcional</span>
-          </label>
+          <label style={styles.label}>Estratégia</label>
           <select
             name="estrategia"
             value={formData.estrategia || ""}
@@ -202,19 +170,10 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               </option>
             ))}
           </select>
-          {fieldErrors.estrategia && (
-            <small style={styles.errorText}>
-              Campo obrigatório para adicionar meta
-            </small>
-          )}
         </div>
 
-        {/* ✅ MELHORIA 3: Tipo - SEM ASTERISCO (OPCIONAL) */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
-            Tipo
-            <span style={styles.optionalLabel}>opcional</span>
-          </label>
+          <label style={styles.label}>Tipo</label>
           <select
             name="tipoMeta"
             value={formData.tipoMeta || ""}
@@ -231,22 +190,11 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               </option>
             ))}
           </select>
-          {fieldErrors.tipoMeta && (
-            <small style={styles.errorText}>
-              Campo obrigatório para adicionar meta
-            </small>
-          )}
         </div>
 
-        {/* ✅ MELHORIA 3: Valor - SEM ASTERISCO (CONDICIONAL) */}
         {isMetaQuantitativa && (
           <div style={styles.formGroup}>
-            <label style={styles.label}>
-              Valor
-              <span style={styles.conditionalLabel}>
-                obrigatório se Quantitativa
-              </span>
-            </label>
+            <label style={styles.label}>Valor</label>
             <input
               type="text"
               name="valorAcao"
@@ -263,58 +211,40 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             {!validacaoTotal.valido && (
               <small style={styles.errorText}>{validacaoTotal.mensagem}</small>
             )}
-            {validacaoTotal.valido &&
-              validacaoTotal.saldoDisponivel !== undefined && (
-                <small style={styles.successText}>
-                  {validacaoTotal.mensagem}
-                </small>
-              )}
-            {fieldErrors.valorAcao && validacaoTotal.valido && (
-              <small style={styles.errorText}>
-                Campo obrigatório para meta quantitativa
-              </small>
-            )}
           </div>
         )}
+
+        <div style={styles.formGroup}>
+          <button
+            type="button"
+            style={{
+              ...styles.addButton,
+              ...((!formData.estrategia ||
+                !formData.tipoMeta ||
+                !validacaoTotal.valido) &&
+                styles.addButtonDisabled),
+            }}
+            onClick={handleAdicionarMeta}
+            disabled={
+              !formData.estrategia ||
+              !formData.tipoMeta ||
+              !validacaoTotal.valido
+            }
+          >
+            ➕ Adicionar Meta
+          </button>
+        </div>
       </div>
 
-      {/* ✅ LISTAGEM DE METAS ADICIONADAS */}
+      {/* Lista de Metas - Layout Compacto */}
       {metasExistentes.length > 0 && (
-        <div style={styles.metasListContainer}>
-          <h4 style={styles.metasListTitle}>📋 Metas Cadastradas</h4>
-          {metasExistentes.map((meta, index) => (
-            <div key={meta.id} style={styles.metaItem}>
-              <div style={styles.metaContent}>
-                <div style={styles.metaHeader}>
-                  <span style={styles.metaNumber}>Meta {index + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoverMeta(meta.id)}
-                    style={styles.removeButton}
-                    title="Remover meta"
-                  >
-                    🗑️
-                  </button>
-                </div>
-                <div style={styles.metaDetails}>
-                  <p>
-                    <strong>Estratégia:</strong> {meta.estrategia}
-                  </p>
-                  <p>
-                    <strong>Tipo:</strong> {meta.tipoMeta}
-                  </p>
-                  {meta.tipoMeta === "Quantitativa" && (
-                    <p>
-                      <strong>Valor:</strong> {meta.valorAcao}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          <div style={styles.metasTotal}>
-            <strong>
-              Total Quantitativo:{" "}
+        <div style={styles.metasContainer}>
+          <div style={styles.metasHeader}>
+            <span style={styles.metasTitle}>
+              📋 {metasExistentes.length} Meta(s) Cadastrada(s)
+            </span>
+            <span style={styles.metasTotal}>
+              Total:{" "}
               {metasExistentes
                 .filter((meta) => meta.tipoMeta === "Quantitativa")
                 .reduce((sum, meta) => {
@@ -330,48 +260,33 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
                   style: "currency",
                   currency: "BRL",
                 })}
-            </strong>
+            </span>
+          </div>
+
+          <div style={styles.metasList}>
+            {metasExistentes.map((meta, index) => (
+              <div key={meta.id} style={styles.metaItem}>
+                <div style={styles.metaInfo}>
+                  <span style={styles.metaNumber}>#{index + 1}</span>
+                  <span style={styles.metaStrategy}>{meta.estrategia}</span>
+                  <span style={styles.metaType}>{meta.tipoMeta}</span>
+                  {meta.tipoMeta === "Quantitativa" && (
+                    <span style={styles.metaValue}>{meta.valorAcao}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemoverMeta(meta.id)}
+                  style={styles.removeButton}
+                  title="Remover meta"
+                >
+                  🗑️
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
-
-      {/* ✅ AVISO QUANDO NÃO HÁ METAS */}
-      {metasExistentes.length === 0 && (
-        <div style={styles.emptyAlert}>
-          <span style={styles.alertIcon}>📝</span>
-          <div style={styles.alertText}>
-            <strong>Nenhuma meta cadastrada ainda.</strong>
-            <br />
-            Esta seção é opcional na criação inicial. Você pode adicionar metas
-            agora ou posteriormente na edição.
-          </div>
-        </div>
-      )}
-
-      {/* Botão para adicionar mais metas - MELHORADO */}
-      <div style={styles.addMetaSection}>
-        <button
-          type="button"
-          style={{
-            ...styles.addMetaButton,
-            ...((!formData.estrategia ||
-              !formData.tipoMeta ||
-              !validacaoTotal.valido) &&
-              styles.addMetaButtonDisabled),
-          }}
-          onClick={handleAdicionarMeta}
-          disabled={
-            !formData.estrategia || !formData.tipoMeta || !validacaoTotal.valido
-          }
-        >
-          ➕ Adicionar Nova Meta
-        </button>
-        <small style={styles.addMetaHint}>
-          {metasExistentes.length === 0
-            ? "Preencha os campos acima e clique para adicionar (opcional)"
-            : "Campos serão limpos após adicionar para criar nova meta"}
-        </small>
-      </div>
     </fieldset>
   );
 };
@@ -382,9 +297,10 @@ const styles = {
     borderStyle: "solid",
     borderColor: "#154360",
     borderRadius: "10px",
-    padding: "20px",
+    padding: "16px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    marginBottom: "16px",
   },
   legend: {
     background: "white",
@@ -404,265 +320,187 @@ const styles = {
     fontSize: "18px",
   },
 
-  // ✅ MELHORIA 3: NOVOS ESTILOS PARA LABELS OPCIONAIS
-  optionalBadge: {
-    color: "#28a745",
-    fontSize: "11px",
-    fontWeight: "600",
-    marginLeft: "10px",
-    backgroundColor: "#d4edda",
-    padding: "3px 8px",
-    borderRadius: "4px",
-    border: "1px solid #c3e6cb",
-  },
-
-  optionalLabel: {
-    color: "#28a745",
-    fontSize: "11px",
-    fontWeight: "500",
-    marginLeft: "8px",
-    backgroundColor: "#d4edda",
-    padding: "2px 6px",
-    borderRadius: "4px",
-    border: "1px solid #c3e6cb",
-  },
-
-  conditionalLabel: {
-    color: "#fd7e14",
-    fontSize: "11px",
-    fontWeight: "500",
-    marginLeft: "8px",
-    backgroundColor: "#fff3cd",
-    padding: "2px 6px",
-    borderRadius: "4px",
-    border: "1px solid #ffeaa7",
-  },
-
-  infoAlert: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#e8f5e8",
-    border: "1px solid #c3e6cb",
-    borderRadius: "8px",
-    marginBottom: "20px",
-  },
-
+  // Grid Compacto - 4 colunas em telas grandes
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "20px",
-    marginBottom: "20px",
+    gridTemplateColumns: "2fr 1fr 1fr 1fr",
+    gap: "12px",
+    alignItems: "end",
+    marginBottom: "16px",
   },
+
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "4px",
   },
+
   label: {
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#333",
-    fontSize: "14px",
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
+    fontSize: "13px",
+    marginBottom: "2px",
   },
-  required: {
-    color: "#dc3545",
-  },
+
   input: {
-    padding: "12px",
-    borderWidth: "2px",
+    padding: "8px 12px",
+    borderWidth: "1px",
     borderStyle: "solid",
     borderColor: "#dee2e6",
-    borderRadius: "6px",
+    borderRadius: "4px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
+    transition: "border-color 0.2s ease",
     backgroundColor: "white",
+    height: "38px",
   },
+
   inputMoney: {
     fontWeight: "600",
     color: "#059669",
     textAlign: "right",
-    fontSize: "16px",
     backgroundColor: "#f0fdf4",
     borderColor: "#22c55e",
   },
-  textarea: {
-    padding: "12px",
-    borderWidth: "2px",
-    borderStyle: "solid",
-    borderColor: "#dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    resize: "vertical",
-    fontFamily: "inherit",
-  },
+
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
   },
+
   errorText: {
     color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-    fontWeight: "bold",
+    fontSize: "11px",
+    marginTop: "2px",
+    fontWeight: "500",
   },
 
-  // ✅ NOVOS ESTILOS: Seção de adicionar meta
-  addMetaSection: {
-    marginTop: "20px",
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    borderWidth: "2px",
-    borderStyle: "dashed",
-    borderColor: "#dee2e6",
-    textAlign: "center",
-  },
-
-  addMetaButton: {
+  addButton: {
     backgroundColor: "#28a745",
     color: "white",
     border: "none",
-    padding: "12px 20px",
-    borderRadius: "6px",
-    fontSize: "14px",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    marginBottom: "8px",
+    transition: "all 0.2s ease",
+    height: "38px",
+    whiteSpace: "nowrap",
   },
 
-  addMetaButtonDisabled: {
+  addButtonDisabled: {
     backgroundColor: "#6c757d",
     cursor: "not-allowed",
     opacity: 0.6,
   },
 
-  addMetaHint: {
-    display: "block",
-    color: "#6c757d",
-    fontSize: "12px",
-    fontStyle: "italic",
-  },
-
-  // ✅ NOVOS ESTILOS: Lista de metas
-  metasListContainer: {
-    marginTop: "20px",
-    padding: "20px",
+  // Layout de Metas Compacto
+  metasContainer: {
     backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#dee2e6",
+    borderRadius: "6px",
+    border: "1px solid #dee2e6",
+    overflow: "hidden",
   },
 
-  metasListTitle: {
-    margin: "0 0 16px 0",
-    fontSize: "16px",
+  metasHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "8px 12px",
+    backgroundColor: "#e9ecef",
+    borderBottom: "1px solid #dee2e6",
+  },
+
+  metasTitle: {
+    fontSize: "14px",
     fontWeight: "600",
     color: "#154360",
   },
 
+  metasTotal: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#28a745",
+  },
+
+  metasList: {
+    maxHeight: "200px",
+    overflowY: "auto",
+  },
+
   metaItem: {
-    marginBottom: "12px",
-    padding: "16px",
-    backgroundColor: "white",
-    borderRadius: "6px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#e9ecef",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-  },
-
-  metaContent: {
-    width: "100%",
-  },
-
-  metaHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "8px",
+    padding: "8px 12px",
+    borderBottom: "1px solid #e9ecef",
+    backgroundColor: "white",
+  },
+
+  metaInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    flex: 1,
   },
 
   metaNumber: {
-    fontSize: "14px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#6c757d",
+    minWidth: "24px",
+  },
+
+  metaStrategy: {
+    fontSize: "12px",
+    color: "#495057",
+    flex: 1,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+  },
+
+  metaType: {
+    fontSize: "11px",
+    fontWeight: "500",
+    color: "#007bff",
+    backgroundColor: "#e7f3ff",
+    padding: "2px 6px",
+    borderRadius: "4px",
+    minWidth: "80px",
+    textAlign: "center",
+  },
+
+  metaValue: {
+    fontSize: "12px",
     fontWeight: "600",
     color: "#28a745",
+    minWidth: "80px",
+    textAlign: "right",
   },
 
   removeButton: {
     backgroundColor: "#dc3545",
     color: "white",
     border: "none",
-    padding: "6px 12px",
+    padding: "4px 8px",
     borderRadius: "4px",
     cursor: "pointer",
     fontSize: "12px",
-    fontWeight: "500",
+    marginLeft: "8px",
   },
 
-  emptyAlert: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#fff3cd",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#ffeaa7",
-    borderRadius: "8px",
-    marginBottom: "20px",
-  },
-  alertIcon: {
-    fontSize: "24px",
-  },
-  alertText: {
-    color: "#856404",
-    fontSize: "14px",
-    lineHeight: "1.4",
-  },
-  globalError: {
-    backgroundColor: "#f8d7da",
-    color: "#721c24",
-    padding: "12px 16px",
-    borderRadius: "6px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#f5c6cb",
-    marginBottom: "20px",
-    fontSize: "14px",
-    fontWeight: "500",
-  },
-  metasTotal: {
-    marginTop: "16px",
-    padding: "12px",
-    backgroundColor: "#e8f5e8",
-    borderRadius: "6px",
-    textAlign: "center",
-    fontSize: "14px",
-    color: "#155724",
-  },
-
-  successText: {
-    color: "#28a745",
-    fontSize: "12px",
-    marginTop: "4px",
-    display: "block",
-    fontWeight: "500",
-  },
-
-  metaDetails: {
-    fontSize: "13px",
-    color: "#495057",
-    lineHeight: "1.4",
+  // Responsividade
+  "@media (max-width: 768px)": {
+    formGrid: {
+      gridTemplateColumns: "1fr",
+      gap: "8px",
+    },
+    metaInfo: {
+      flexDirection: "column",
+      alignItems: "flex-start",
+      gap: "4px",
+    },
   },
 };
 
