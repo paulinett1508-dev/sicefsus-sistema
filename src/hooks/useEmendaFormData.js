@@ -995,7 +995,6 @@ export const useEmendaFormData = () => {
     // Funções de validação
     getFieldErrors,
     getOrderedFieldErrors,
-    focusFirstErrorField,
     clearFieldError,
     cleanField, // 🆕 FUNÇÃO EXPOSTA PARA USO EXTERNO
 
