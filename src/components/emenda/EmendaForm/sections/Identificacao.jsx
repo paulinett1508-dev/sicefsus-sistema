@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import CNPJInput from "../../../CNPJInput";
 import { UserContext } from "../../../../context/UserContext";
+import { carregarMunicipios as carregarMunicipiosCache } from "../../../../utils/municipiosCache";
 
 const Identificacao = ({
   formData = {},
@@ -61,27 +62,11 @@ const Identificacao = ({
       setLoadingMunicipios(true);
 
       try {
-        console.log(`🏙️ Carregando municípios para ${uf}...`);
+        // ✅ Usar sistema de cache inteligente
+        const municipiosCarregados = await carregarMunicipiosCache(uf);
+        setMunicipios(municipiosCarregados);
 
-        const response = await fetch(
-          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`,
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao carregar municípios");
-        }
-
-        const data = await response.json();
-
-        const municipiosFormatados = data.map((municipio) => ({
-          id: municipio.id,
-          nome: municipio.nome,
-        }));
-
-        setMunicipios(municipiosFormatados);
-        console.log(
-          `✅ ${municipiosFormatados.length} municípios carregados para ${uf}`,
-        );
+        console.log(`✅ ${municipiosCarregados.length} municípios carregados para ${uf}`);
       } catch (error) {
         console.error("❌ Erro ao carregar municípios:", error);
         setMunicipios([]);
