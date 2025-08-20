@@ -6,7 +6,6 @@ import React, { useState } from "react";
 const DadosBeneficiario = ({
   formData,
   onChange,
-  setFormData,
   styles,
   buscarDadosFornecedor,
   fieldErrors = {}, // ✅ CORREÇÃO: errors → fieldErrors
@@ -76,25 +75,17 @@ const DadosBeneficiario = ({
               : formData.responsavelLegal,
         };
 
-        // Atualizar formData com múltiplos campos
-        if (setFormData) {
-          setFormData((prev) => ({
-            ...prev,
-            ...novosValores,
-          }));
-        } else {
-          // Se não tiver setFormData, usar onChange para cada campo
-          Object.entries(novosValores).forEach(([key, value]) => {
-            if (value && value !== formData[key]) {
-              handleChange({
-                target: {
-                  name: key,
-                  value: value,
-                },
-              });
-            }
-          });
-        }
+        // Atualizar formData com múltiplos campos usando onChange
+        Object.entries(novosValores).forEach(([key, value]) => {
+          if (value && value !== formData[key]) {
+            handleChange({
+              target: {
+                name: key,
+                value: value,
+              },
+            });
+          }
+        });
 
         // Expandir automaticamente para mostrar os dados preenchidos se usando estado interno
         if (onToggle) {

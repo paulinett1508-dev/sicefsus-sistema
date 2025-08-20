@@ -126,7 +126,6 @@ const EmendaForm = () => {
         <DadosBeneficiario
           formData={formData}
           onChange={handleInputChange}
-          setFormData={undefined} // Hook gerencia isso agora
           fieldErrors={fieldErrors}
           onClearError={clearFieldError}
           styles={styles}
