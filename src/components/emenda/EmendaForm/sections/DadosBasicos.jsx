@@ -2,7 +2,7 @@ import React from "react";
 import CNPJInput from "../../../CNPJInput";
 
 const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
-  
+
   // 🐛 DEBUG - RENDERIZAÇÃO DO COMPONENTE
   console.log("🔍 DadosBasicos renderizou com:", {
     formData: formData,
@@ -35,7 +35,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // 🐛 DEBUG - MUDANÇAS NOS CAMPOS
     console.log(`🔄 DadosBasicos handleInputChange: ${name} = "${value}"`);
 
@@ -88,13 +88,14 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
           <label style={styles.label}>
             Objeto da Proposta <span style={styles.required}>*</span>
           </label>
-          <input
-            type="text"
+          <textarea
             name="objeto"
             value={formData.objeto || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
+            placeholder="Descrição detalhada do objeto da proposta"
+            rows="3"
             style={{
-              ...styles.input,
+              ...styles.textarea,
               ...(fieldErrors.objeto && styles.inputError),
             }}
             required
@@ -113,7 +114,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="autor"
             value={formData.autor || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
             placeholder="Nome do parlamentar"
             style={{
               ...styles.input,
@@ -135,7 +136,7 @@ const DadosBasicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
             type="text"
             name="numero"
             value={formData.numero || ""}
-            onChange={handleInputChange}
+            onChange={onChange}
             placeholder="Ex: 30460003"
             style={{
               ...styles.input,
@@ -300,6 +301,17 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
+  },
+  textarea: {
+    padding: "12px",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+    transition: "border-color 0.3s ease",
+    backgroundColor: "white",
+    resize: "vertical",
   },
   inputMoney: {
     fontWeight: "600",
