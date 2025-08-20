@@ -518,7 +518,8 @@ export const useEmendaFormData = () => {
     return orderedErrors;
   };
 
-  // ✅ FOCO INTELIGENTE EM ERROS
+  // 🚨 FUNÇÃO DESABILITADA - CAUSAVA CONFLITOS CSS
+  /*
   const focusFirstErrorField = (fieldErrors) => {
     const errorFields = Object.keys(fieldErrors);
 
@@ -566,6 +567,7 @@ export const useEmendaFormData = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     return null;
   };
+  */
 
   // ✅ INICIALIZAÇÃO
   useEffect(() => {
@@ -858,7 +860,9 @@ export const useEmendaFormData = () => {
       });
 
       setTimeout(() => {
-        focusFirstErrorField(fieldErrorsResult);
+        // 🚨 FOCO INTELIGENTE DESABILITADO - CAUSAVA CONFLITOS CSS
+        // focusFirstErrorField(fieldErrorsResult);
+        console.log("🎯 Foco inteligente desabilitado para evitar conflitos CSS");
       }, 100);
 
       window.scrollTo({ top: 0, behavior: "smooth" });
