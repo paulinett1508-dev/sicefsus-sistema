@@ -8,7 +8,6 @@ import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation"
 // ✅ SEÇÕES MODULARES
 import Identificacao from "./sections/Identificacao";
 import DadosBasicos from "./sections/DadosBasicos";
-import DadosBeneficiario from "./sections/DadosBeneficiario";
 import DadosBancarios from "./sections/DadosBancarios";
 import Cronograma from "./sections/Cronograma";
 import AcoesServicos from "./sections/AcoesServicos";
@@ -122,17 +121,7 @@ const EmendaForm = () => {
           onClearError={clearFieldError}
         />
 
-        {/* ✅ SEÇÃO: Beneficiário - PROPS CORRIGIDAS */}
-        <DadosBeneficiario
-          formData={formData}
-          onChange={handleInputChange}
-          // setFormData REMOVIDO - Hook gerencia isso agora
-          fieldErrors={fieldErrors}
-          onClearError={clearFieldError}
-          buscarDadosFornecedor={buscarDadosFornecedor}
-          expanded={expandedSections.beneficiario}
-          onToggle={() => toggleSection("beneficiario")}
-        />
+        
 
         {/* ✅ SEÇÃO: Dados Bancários */}
         <DadosBancarios
