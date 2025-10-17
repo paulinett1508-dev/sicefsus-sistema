@@ -213,6 +213,7 @@ export default function DespesasTable({
           <thead>
             <tr style={styles.headerRow}>
               <th style={styles.th}>Emenda</th>
+              <th style={styles.th}>Tipo</th>
               <th style={styles.th}>Fornecedor</th>
               <th style={styles.th}>Valor</th>
               <th style={styles.th}>Saldo</th>
@@ -241,6 +242,29 @@ export default function DespesasTable({
                     <div style={styles.emendaCell}>
                       {getEmendaInfo(despesa.emendaId)}
                     </div>
+                  </td>
+                  <td style={styles.td}>
+                    {(() => {
+                      const emenda = emendas.find((e) => e.id === despesa.emendaId);
+                      const tipo = emenda?.tipo || "-";
+                      return (
+                        <span style={{
+                          ...styles.tipoBadge,
+                          backgroundColor: 
+                            tipo === "Individual" ? "#007bff" :
+                            tipo === "Bancada" ? "#28a745" :
+                            tipo === "Custeio PAP" ? "#007bff" :
+                            tipo === "Custeio MAC" ? "#28a745" :
+                            tipo === "Investimento PAP" ? "#ffc107" :
+                            tipo === "Investimento MAC" ? "#6f42c1" :
+                            tipo === "Custeio PAP – Estadual" ? "#17a2b8" :
+                            tipo === "Custeio MAC – Estadual" ? "#fd7e14" :
+                            "#adb5bd"
+                        }}>
+                          {tipo}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td style={styles.td}>
                     <div style={styles.fornecedorCell}>
@@ -648,6 +672,16 @@ const styles = {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     fontSize: 11,
+  },
+
+  tipoBadge: {
+    fontSize: "11px",
+    fontWeight: "600",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    color: "white",
+    display: "inline-block",
+    whiteSpace: "nowrap",
   },
 
   actionsContainer: {

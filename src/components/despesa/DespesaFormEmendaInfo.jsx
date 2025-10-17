@@ -16,6 +16,9 @@ const DespesaFormEmendaInfo = ({ emendaInfo }) => {
           {emendaInfo.numero || emendaInfo.numeroEmenda}
         </div>
         <div style={styles.emendaInfoRow}>
+          <strong>Tipo:</strong> {emendaInfo.tipo || "Não informado"}
+        </div>
+        <div style={styles.emendaInfoRow}>
           <strong>Município:</strong> {emendaInfo.municipio}/{emendaInfo.uf}
         </div>
         <div style={styles.emendaInfoRow}>
