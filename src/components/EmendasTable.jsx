@@ -293,7 +293,7 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                   (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("tipo")}>
-                Tipo{" "}
+                Objeto{" "}
                 {sortField === "tipo" && (sortDirection === "asc" ? "↑" : "↓")}
               </th>
               <th style={styles.th} onClick={() => handleSort("municipio")}>
@@ -360,7 +360,19 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                           ? "#007bff"
                           : emenda.tipo === "Bancada"
                             ? "#28a745"
-                            : "#ffc107",
+                            : emenda.tipo === "Custeio PAP"
+                              ? "#007bff"
+                              : emenda.tipo === "Custeio MAC"
+                                ? "#28a745"
+                                : emenda.tipo === "Investimento PAP"
+                                  ? "#ffc107"
+                                  : emenda.tipo === "Investimento MAC"
+                                    ? "#6f42c1"
+                                    : emenda.tipo === "Custeio PAP – Estadual"
+                                      ? "#17a2b8"
+                                      : emenda.tipo === "Custeio MAC – Estadual"
+                                        ? "#fd7e14"
+                                        : "#adb5bd", // Cor padrão caso não corresponda
                     }}
                   >
                     {emenda.tipo}

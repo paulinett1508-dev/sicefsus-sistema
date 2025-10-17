@@ -19,7 +19,7 @@ export const EMENDA_SCHEMA = {
   programa: "",
   parlamentar: "",
   numeroEmenda: "", // Nº DA EMENDA
-  tipoEmenda: "Individual", // TIPO DE EMENDA
+  tipoEmenda: "Custeio PAP", // OBJETO DA EMENDA
   numeroProposta: "", // Nº DA PROPOSTA
   funcional: "", // FUNCIONAL
   valorRecurso: 0, // VALOR DO RECURSO (R$)

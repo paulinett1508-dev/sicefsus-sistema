@@ -65,7 +65,7 @@ const EmendasFilters = ({
               onChange={(e) => onFiltroChange("tipo", e.target.value)}
               style={styles.filterSelect}
             >
-              <option value="">Todos os tipos</option>
+              <option value="">Todos os objetos</option>
               {tiposUnicos.map((tipo) => (
                 <option key={tipo} value={tipo}>
                   {tipo}

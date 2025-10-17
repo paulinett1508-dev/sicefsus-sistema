@@ -162,23 +162,32 @@ const DadosBasicos = React.memo(
             )}
           </div>
 
-          {/* Tipo de Emenda */}
+          {/* Objeto da Emenda */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Tipo de Emenda <span style={styles.required}>*</span>
+              Objeto da Emenda <span style={styles.required}>*</span>
             </label>
             <select
               name="tipo"
-              value={formData.tipo || "Individual"}
+              value={formData.tipo || ""}
               onChange={handleInputChange}
-              style={styles.input}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.tipo && styles.inputError),
+              }}
               required
             >
-              <option value="Individual">Emenda Individual</option>
-              <option value="Bancada">Emenda de Bancada</option>
-              <option value="Comissao">Emenda de Comissão</option>
-              <option value="Relator">Emenda de Relator</option>
+              <option value="">Selecione o objeto...</option>
+              <option value="Custeio PAP">Custeio PAP</option>
+              <option value="Custeio MAC">Custeio MAC</option>
+              <option value="Investimento PAP">Investimento PAP</option>
+              <option value="Investimento MAC">Investimento MAC</option>
+              <option value="Custeio PAP – Estadual">Custeio PAP – Estadual</option>
+              <option value="Custeio MAC – Estadual">Custeio MAC – Estadual</option>
             </select>
+            {fieldErrors.tipo && (
+              <small style={styles.errorText}>{fieldErrors.tipo}</small>
+            )}
           </div>
 
           {/* Nº da Proposta */}

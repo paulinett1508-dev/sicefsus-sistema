@@ -110,7 +110,7 @@ const EmendaForm = () => {
     programa: "",
     beneficiario: "",
     cnpjBeneficiario: "",
-    tipo: "Individual",
+    tipo: "Custeio PAP",
     modalidade: "",
     objeto: "",
     banco: "",

@@ -40,7 +40,7 @@ export const useEmendaFormData = () => {
     programa: "",
     beneficiario: "",
     cnpjBeneficiario: "",
-    tipo: "Individual",
+    tipo: "Custeio PAP",
     modalidade: "",
     objeto: "",
     banco: "",
