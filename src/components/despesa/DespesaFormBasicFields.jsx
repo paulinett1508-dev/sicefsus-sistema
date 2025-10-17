@@ -157,7 +157,7 @@ const DespesaFormBasicFields = ({
           </span>
         </div>
 
-        <div style={styles.formGroupFull}>
+        <div style={styles.formGroupDiscriminacao}>
           <label style={styles.labelRequired}>Discriminação *</label>
           <input
             type="text"
@@ -217,6 +217,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
+  },
+  formGroupDiscriminacao: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    gridColumn: "span 2",
   },
   labelRequired: {
     fontWeight: "bold",
