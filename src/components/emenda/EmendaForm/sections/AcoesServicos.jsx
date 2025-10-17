@@ -28,29 +28,26 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   };
 
   const handleAdicionarMeta = () => {
-    if (!formData.estrategia || !formData.tipoMeta) {
-      alert("⚠️ Preencha Natureza de Despesas e Valor antes de adicionar a meta!");
+    if (!formData.estrategia) {
+      alert("⚠️ Preencha Natureza de Despesas antes de adicionar a meta!");
       return;
     }
 
-    if (formData.tipoMeta === "Quantitativa" && !formData.valorAcao) {
-      alert("⚠️ Preencha o Valor para meta do tipo Quantitativa!");
-      return;
-    }
+    // Determinar tipo de meta baseado se há valor preenchido
+    const temValor = formData.valorAcao && parseValorMonetario(formData.valorAcao) > 0;
+    const tipoMeta = temValor ? "Quantitativa" : "Simples";
 
     const novaMeta = {
       id: Date.now(),
       estrategia: formData.estrategia,
-      tipoMeta: formData.tipoMeta,
-      valorAcao:
-        formData.tipoMeta === "Quantitativa" ? formData.valorAcao : "0",
+      tipoMeta: tipoMeta,
+      valorAcao: temValor ? formData.valorAcao : "0",
     };
 
     const metasExistentes = formData.acoesServicos || [];
     const novasMetas = [...metasExistentes, novaMeta];
 
     onChange({ target: { name: "estrategia", value: "" } });
-    onChange({ target: { name: "tipoMeta", value: "" } });
     onChange({ target: { name: "valorAcao", value: "" } });
 
     onChange({
@@ -90,7 +87,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     }, 0);
 
     let valorMetaAtual = 0;
-    if (formData.tipoMeta === "Quantitativa" && formData.valorAcao) {
+    if (formData.valorAcao) {
       valorMetaAtual = parseValorMonetario(formData.valorAcao);
     }
 
@@ -113,7 +110,6 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   };
 
   const validacaoTotal = validarTotalMetas();
-  const isMetaQuantitativa = formData.tipoMeta === "Quantitativa";
   const metasExistentes = formData.acoesServicos || [];
 
   return (
@@ -146,63 +142,38 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Valor</label>
-          <select
-            name="tipoMeta"
-            value={formData.tipoMeta || ""}
-            onChange={handleInputChange}
+          <label style={styles.label}>Valor (opcional)</label>
+          <input
+            type="text"
+            name="valorAcao"
+            value={formData.valorAcao || ""}
+            onChange={handleValorChange}
             style={{
               ...styles.input,
-              ...(fieldErrors.tipoMeta && styles.inputError),
+              ...styles.inputMoney,
+              ...(fieldErrors.valorAcao && styles.inputError),
+              ...(!validacaoTotal.valido && styles.inputError),
             }}
-          >
-            <option value="">Selecione o valor</option>
-            {tiposMeta.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
-          </select>
+            placeholder="R$ 0,00"
+          />
+          {!validacaoTotal.valido && (
+            <small style={styles.errorText}>{validacaoTotal.mensagem}</small>
+          )}
+          <small style={styles.helpText}>
+            Deixe em branco para meta simples
+          </small>
         </div>
-
-        {isMetaQuantitativa && (
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Valor</label>
-            <input
-              type="text"
-              name="valorAcao"
-              value={formData.valorAcao || ""}
-              onChange={handleValorChange}
-              style={{
-                ...styles.input,
-                ...styles.inputMoney,
-                ...(fieldErrors.valorAcao && styles.inputError),
-                ...(!validacaoTotal.valido && styles.inputError),
-              }}
-              placeholder="R$ 0,00"
-            />
-            {!validacaoTotal.valido && (
-              <small style={styles.errorText}>{validacaoTotal.mensagem}</small>
-            )}
-          </div>
-        )}
 
         <div style={styles.formGroup}>
           <button
             type="button"
             style={{
               ...styles.addButton,
-              ...((!formData.estrategia ||
-                !formData.tipoMeta ||
-                !validacaoTotal.valido) &&
+              ...((!formData.estrategia || !validacaoTotal.valido) &&
                 styles.addButtonDisabled),
             }}
             onClick={handleAdicionarMeta}
-            disabled={
-              !formData.estrategia ||
-              !formData.tipoMeta ||
-              !validacaoTotal.valido
-            }
+            disabled={!formData.estrategia || !validacaoTotal.valido}
           >
             ➕ Adicionar Meta
           </button>
@@ -288,10 +259,10 @@ const styles = {
     fontSize: "18px",
   },
 
-  // Grid Compacto - 4 colunas em telas grandes
+  // Grid Compacto - 3 colunas em telas grandes
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "2fr 1fr 1fr 1fr",
+    gridTemplateColumns: "2fr 1.5fr 1fr",
     gap: "12px",
     alignItems: "end",
     marginBottom: "16px",
@@ -340,6 +311,12 @@ const styles = {
     fontSize: "11px",
     marginTop: "2px",
     fontWeight: "500",
+  },
+
+  helpText: {
+    color: "#6c757d",
+    fontSize: "11px",
+    marginTop: "2px",
   },
 
   addButton: {
