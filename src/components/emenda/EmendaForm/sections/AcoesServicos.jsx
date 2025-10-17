@@ -1,4 +1,5 @@
 import React from "react";
+import { formatarMoedaInput, parseValorMonetario } from "../../../utils/formatters";
 
 const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const estrategias = [
@@ -20,21 +21,9 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     onChange(e);
   };
 
-  const formatarMoeda = (valor) => {
-    if (!valor) return "";
-    const numero = valor.replace(/\D/g, "");
-    if (!numero) return "";
-    const centavos = parseInt(numero, 10);
-    const reais = centavos / 100;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(reais);
-  };
-
   const handleValorChange = (e) => {
     const { name, value } = e.target;
-    const valorFormatado = formatarMoeda(value);
+    const valorFormatado = formatarMoedaInput(value);
     onChange({ target: { name, value: valorFormatado } });
   };
 
@@ -89,23 +78,12 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
   const validarTotalMetas = () => {
     if (!formData.valorRecurso) return { valido: true, mensagem: "" };
 
-    const valorEmenda = parseFloat(
-      formData.valorRecurso
-        .toString()
-        .replace(/[R$\s]/g, "")
-        .replace(/\./g, "")
-        .replace(",", "."),
-    );
+    const valorEmenda = parseValorMonetario(formData.valorRecurso);
 
     const metasExistentes = formData.acoesServicos || [];
     const totalMetasExistentes = metasExistentes.reduce((sum, meta) => {
       if (meta.tipoMeta === "Quantitativa") {
-        const valor = parseFloat(
-          meta.valorAcao
-            .replace(/[R$\s]/g, "")
-            .replace(/\./g, "")
-            .replace(",", "."),
-        );
+        const valor = parseValorMonetario(meta.valorAcao);
         return sum + valor;
       }
       return sum;
@@ -113,12 +91,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
     let valorMetaAtual = 0;
     if (formData.tipoMeta === "Quantitativa" && formData.valorAcao) {
-      valorMetaAtual = parseFloat(
-        formData.valorAcao
-          .replace(/[R$\s]/g, "")
-          .replace(/\./g, "")
-          .replace(",", "."),
-      );
+      valorMetaAtual = parseValorMonetario(formData.valorAcao);
     }
 
     const totalGeral = totalMetasExistentes + valorMetaAtual;
@@ -248,12 +221,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               {metasExistentes
                 .filter((meta) => meta.tipoMeta === "Quantitativa")
                 .reduce((sum, meta) => {
-                  const valor = parseFloat(
-                    meta.valorAcao
-                      .replace(/[R$\s]/g, "")
-                      .replace(/\./g, "")
-                      .replace(",", "."),
-                  );
+                  const valor = parseValorMonetario(meta.valorAcao);
                   return sum + valor;
                 }, 0)
                 .toLocaleString("pt-BR", {
