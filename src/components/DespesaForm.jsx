@@ -202,7 +202,7 @@ const DespesaForm = ({
           ...emendaData,
           saldoDisponivel,
           totalExecutado,
-          percentualExecutado: emendaData.valor > 0 ? (totalExecutado / emendaData.valor) * 100 : 0
+          percentualExecucao: emendaData.valor > 0 ? (totalExecutado / emendaData.valor) * 100 : 0
         };
 
         setEmendaInfoDinamica(emendaCompleta);
@@ -285,7 +285,7 @@ const DespesaForm = ({
       // Tratamento especial para mudança de emenda
       if (name === "emendaId") {
         setFormData((prev) => ({ ...prev, [name]: value }));
-        
+
         // Limpar erro do campo
         if (errors[name]) {
           setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -470,7 +470,7 @@ const DespesaForm = ({
     // 🚨 NOVA VALIDAÇÃO CRÍTICA: SALDO BLOQUEANTE
     const valorDespesa = parseValorMonetario(formData.valor);
     const emendaAtual = emendaInfoDinamica || emendaInfo;
-    
+
     // 🔒 VALIDAÇÃO DUPLA DE SEGURANÇA
     if (!emendaAtual) {
       setToast({
@@ -500,7 +500,7 @@ const DespesaForm = ({
     if (despesaParaEditar) {
       const valorAnterior = despesaParaEditar.valor || 0;
       const novoSaldoDisponivel = saldoDisponivel + valorAnterior;
-      
+
       if (valorDespesa > novoSaldoDisponivel) {
         setToast({
           show: true,

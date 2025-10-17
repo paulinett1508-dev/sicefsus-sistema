@@ -2,6 +2,7 @@
 // ✅ Componente especializado para campos básicos da despesa
 
 import React from "react";
+import CNPJInput from "../CNPJInput";
 
 const DespesaFormBasicFields = ({
   formData,
@@ -95,6 +96,37 @@ const DespesaFormBasicFields = ({
           />
           {errors.fornecedor && (
             <span style={styles.errorText}>{errors.fornecedor}</span>
+          )}
+        </div>
+
+        <div style={styles.formGroup}>
+          <CNPJInput
+            label="CNPJ do Fornecedor"
+            value={formData.cnpjFornecedor || ""}
+            onChange={(e) => {
+              handleInputChange({
+                target: {
+                  name: "cnpjFornecedor",
+                  value: e.target.value,
+                },
+              });
+            }}
+            required={false}
+            showValidation={true}
+            disabled={modoVisualizacao}
+            placeholder="00.000.000/0000-00"
+            style={{ marginBottom: 0 }}
+            inputStyle={{
+              padding: "12px",
+              fontSize: "14px",
+              borderWidth: "2px",
+              borderStyle: "solid",
+              borderColor: errors.cnpjFornecedor ? "#dc3545" : "#dee2e6",
+              borderRadius: "6px",
+            }}
+          />
+          {errors.cnpjFornecedor && (
+            <span style={styles.errorText}>{errors.cnpjFornecedor}</span>
           )}
         </div>
 
