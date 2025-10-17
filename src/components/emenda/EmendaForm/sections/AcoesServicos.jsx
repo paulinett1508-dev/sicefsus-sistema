@@ -259,13 +259,13 @@ const styles = {
     fontSize: "18px",
   },
 
-  // Grid Compacto - 3 colunas em telas grandes
+  // Grid Compacto - 2 colunas em telas grandes
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "2fr 1.5fr 1fr",
-    gap: "12px",
-    alignItems: "end",
-    marginBottom: "16px",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "20px",
+    marginBottom: "24px",
+    alignItems: "start",
   },
 
   formGroup: {
