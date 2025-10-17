@@ -157,7 +157,7 @@ const DespesaFormBasicFields = ({
           </span>
         </div>
 
-        <div style={styles.formGroup}>
+        <div style={styles.formGroupFull}>
           <label style={styles.labelRequired}>Discriminação *</label>
           <input
             type="text"
