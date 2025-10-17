@@ -156,27 +156,23 @@ const DespesaFormBasicFields = ({
             Digite o valor normalmente. Formatação automática.
           </span>
         </div>
-      </div>
 
-      <div style={styles.formGroup}>
-        <label style={styles.labelRequired}>Discriminação *</label>
-        <textarea
-          name="discriminacao"
-          value={formData.discriminacao}
-          onChange={handleInputChange}
-          style={
-            errors.discriminacao
-              ? { ...styles.textarea, borderColor: "#dc3545" }
-              : styles.textarea
-          }
-          readOnly={modoVisualizacao}
-          placeholder="Descreva detalhadamente a discriminação da despesa..."
-          rows={3}
-          required
-        />
-        {errors.discriminacao && (
-          <span style={styles.errorText}>{errors.discriminacao}</span>
-        )}
+        <div style={styles.formGroup}>
+          <label style={styles.labelRequired}>Discriminação *</label>
+          <input
+            type="text"
+            name="discriminacao"
+            value={formData.discriminacao}
+            onChange={handleInputChange}
+            style={errors.discriminacao ? styles.inputError : styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="Descreva a discriminação da despesa..."
+            required
+          />
+          {errors.discriminacao && (
+            <span style={styles.errorText}>{errors.discriminacao}</span>
+          )}
+        </div>
       </div>
     </fieldset>
   );
