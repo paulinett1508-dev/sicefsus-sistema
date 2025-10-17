@@ -40,7 +40,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
   const handleAdicionarMeta = () => {
     if (!formData.estrategia || !formData.tipoMeta) {
-      alert("⚠️ Preencha Estratégia e Tipo antes de adicionar a meta!");
+      alert("⚠️ Preencha Natureza de Despesas e Valor antes de adicionar a meta!");
       return;
     }
 
@@ -147,13 +147,13 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
         <span style={styles.legendIcon}>🎯</span>
-        Ações e Serviços
+        Planejamento de Despesas
       </legend>
 
       {/* Formulário Compacto */}
       <div style={styles.formGrid}>
         <div style={styles.formGroup}>
-          <label style={styles.label}>Estratégia</label>
+          <label style={styles.label}>Natureza de Despesas</label>
           <select
             name="estrategia"
             value={formData.estrategia || ""}
@@ -163,7 +163,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               ...(fieldErrors.estrategia && styles.inputError),
             }}
           >
-            <option value="">Selecione a estratégia</option>
+            <option value="">Selecione a natureza de despesas</option>
             {estrategias.map((estrategia) => (
               <option key={estrategia} value={estrategia}>
                 {estrategia}
@@ -173,7 +173,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Tipo</label>
+          <label style={styles.label}>Valor</label>
           <select
             name="tipoMeta"
             value={formData.tipoMeta || ""}
@@ -183,7 +183,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               ...(fieldErrors.tipoMeta && styles.inputError),
             }}
           >
-            <option value="">Selecione o tipo</option>
+            <option value="">Selecione o valor</option>
             {tiposMeta.map((tipo) => (
               <option key={tipo} value={tipo}>
                 {tipo}
