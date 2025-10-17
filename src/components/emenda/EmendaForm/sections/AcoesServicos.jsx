@@ -142,7 +142,7 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Valor (opcional)</label>
+          <label style={styles.label}>Valor</label>
           <input
             type="text"
             name="valorAcao"
@@ -259,10 +259,10 @@ const styles = {
     fontSize: "18px",
   },
 
-  // Grid Compacto - 2 colunas em telas grandes
+  // Grid Compacto - Campo Valor mais estreito
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "2fr 1fr auto",
     gap: "20px",
     marginBottom: "24px",
     alignItems: "start",
