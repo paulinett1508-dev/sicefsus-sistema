@@ -1,5 +1,6 @@
+
 // src/components/despesa/DespesaFormOrcamentoFields.jsx
-// ✅ Componente especializado para campos de classificação orçamentária
+// ✅ Componente unificado para classificação funcional-programática
 
 import React from "react";
 
@@ -12,8 +13,8 @@ const DespesaFormOrcamentoFields = ({
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>💰</span>
-        Classificação Orçamentária
+        <span style={styles.legendIcon}>📊</span>
+        Classificação Funcional - Programática
       </legend>
 
       <div style={styles.formGrid}>
@@ -75,30 +76,132 @@ const DespesaFormOrcamentoFields = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>
-            Classificação Funcional-Programática *
-            <span style={styles.infoIcon} title="Ex: 10.302.0002.20AD.0001">
-              ℹ️
-            </span>
-          </label>
+          <label style={styles.label}>Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="pendente">Pendente</option>
+            <option value="empenhado">Empenhado</option>
+            <option value="liquidado">Liquidado</option>
+            <option value="pago">Pago</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Categoria</label>
+          <select
+            name="categoria"
+            value={formData.categoria}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="">Selecione a categoria</option>
+            <option value="equipamentos">Equipamentos</option>
+            <option value="reformas">Reformas</option>
+            <option value="construcao">Construção</option>
+            <option value="servicos">Serviços</option>
+            <option value="medicamentos">Medicamentos</option>
+            <option value="materiais">Materiais</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Centro de Custo</label>
           <input
             type="text"
-            name="classificacaoFuncional"
-            value={formData.classificacaoFuncional}
+            name="centroCusto"
+            value={formData.centroCusto}
             onChange={handleInputChange}
-            style={
-              errors.classificacaoFuncional ? styles.inputError : styles.input
-            }
+            style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="Classificação funcional-programática"
-            required
+            placeholder="Código do centro de custo"
           />
-          {errors.classificacaoFuncional && (
-            <span style={styles.errorText}>
-              {errors.classificacaoFuncional}
-            </span>
-          )}
         </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Natureza da Despesa</label>
+          <select
+            name="naturezaDespesa"
+            value={formData.naturezaDespesa}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="3.3.9.0.30">3.3.9.0.30 – Material de Despesa</option>
+          </select>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Elemento de Despesa</label>
+          <select
+            name="elementoDespesa"
+            value={formData.elementoDespesa}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="3.3.90.30.99">3.3.90.30.99 - Outros Materiais de Consumo</option>
+          </select>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Telefone do Fornecedor</label>
+          <input
+            type="text"
+            name="telefoneFornecedor"
+            value={formData.telefoneFornecedor}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="(00) 00000-0000"
+          />
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Email do Fornecedor</label>
+          <input
+            type="email"
+            name="emailFornecedor"
+            value={formData.emailFornecedor}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="fornecedor@email.com"
+          />
+        </div>
+      </div>
+
+      <div style={styles.formGroup}>
+        <label style={styles.label}>Endereço do Fornecedor</label>
+        <textarea
+          name="enderecoFornecedor"
+          value={formData.enderecoFornecedor}
+          onChange={handleInputChange}
+          style={styles.textarea}
+          readOnly={modoVisualizacao}
+          placeholder="Endereço completo do fornecedor..."
+          rows={3}
+        />
+      </div>
+
+      <div style={styles.formGroup}>
+        <label style={styles.label}>Observações</label>
+        <textarea
+          name="observacoes"
+          value={formData.observacoes}
+          onChange={handleInputChange}
+          style={styles.textarea}
+          readOnly={modoVisualizacao}
+          placeholder="Observações adicionais sobre a despesa..."
+          rows={3}
+        />
       </div>
     </fieldset>
   );
@@ -131,6 +234,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
+    marginBottom: "20px",
   },
   formGroup: {
     display: "flex",
@@ -138,6 +242,14 @@ const styles = {
     gap: "8px",
   },
   labelRequired: {
+    fontWeight: "bold",
+    color: "#333",
+    fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+  },
+  label: {
     fontWeight: "bold",
     color: "#333",
     fontSize: "14px",
@@ -172,16 +284,20 @@ const styles = {
     cursor: "pointer",
     boxSizing: "border-box",
   },
+  textarea: {
+    padding: "12px",
+    border: "2px solid #dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+    resize: "vertical",
+    minHeight: "100px",
+    fontFamily: "Arial, sans-serif",
+    boxSizing: "border-box",
+  },
   errorText: {
     color: "#dc3545",
     fontSize: "12px",
     marginTop: "5px",
-  },
-  infoIcon: {
-    fontSize: "14px",
-    color: "#0066cc",
-    cursor: "help",
-    userSelect: "none",
   },
 };
 

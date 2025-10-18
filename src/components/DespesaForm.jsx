@@ -16,7 +16,7 @@ import {
   getDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+import { db } from "../firebase/firestore";
 
 // ✅ COMPONENTES MODULARES EXISTENTES REUTILIZADOS
 import DespesaFormHeader from "./despesa/DespesaFormHeader";
@@ -36,10 +36,7 @@ import {
   parseValorMonetario,
   formatarMoedaDisplay,
 } from "../utils/formatters";
-import { useCNPJValidation } from "../utils/validators";
 import LoadingOverlay from './LoadingOverlay';
-import { validarCNPJ } from "../utils/cnpjUtils";
-import CNPJInput from "./CNPJInput";
 
 
 const DespesaForm = ({
@@ -61,7 +58,7 @@ const DespesaForm = ({
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
   const { valorError, handleValorChange } = useMoedaFormatting();
-  const {cnpjError, handleCNPJChange } = useCNPJValidation();
+  // const {cnpjError, handleCNPJChange } = useCNPJValidation(); // REMOVIDO
 
   // ✅ DADOS DO USUÁRIO SIMPLIFICADOS
   const userRole = usuario?.role || usuario?.tipo;
@@ -81,15 +78,15 @@ const DespesaForm = ({
     dataPagamento: "",
     acao: "",
     dotacaoOrcamentaria: "",
-    classificacaoFuncional: "",
+    // classificacaoFuncional: "", // REMOVIDO
     numeroContrato: "",
     categoria: "",
     descricao: "",
     observacoes: "",
     status: "pendente",
     centroCusto: "",
-    naturezaDespesa: "",
-    elementoDespesa: "",
+    naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // Valor pré-definido
+    elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // Valor pré-definido
     fonteRecurso: "",
     programaTrabalho: "",
     planoInterno: "",
@@ -99,7 +96,7 @@ const DespesaForm = ({
     coordenadasGeograficas: "",
     populacaoBeneficiada: "",
     impactoSocial: "",
-    cnpjFornecedor: "",
+    // cnpjFornecedor: "", // REMOVIDO
     enderecoFornecedor: "",
     telefoneFornecedor: "",
     emailFornecedor: "",
@@ -299,12 +296,6 @@ const DespesaForm = ({
         return;
       }
 
-      // Tratamento especial para CNPJ
-      if (name === "cnpjFornecedor") {
-        handleCNPJChange(value, setFormData);
-        return;
-      }
-
       // Outros campos
       setFormData((prev) => ({ ...prev, [name]: value }));
 
@@ -313,7 +304,7 @@ const DespesaForm = ({
         setErrors((prev) => ({ ...prev, [name]: "" }));
       }
     },
-    [errors, emendaInfoDinamica, emendaInfo, handleValorChange, handleCNPJChange],
+    [errors, emendaInfoDinamica, emendaInfo, handleValorChange],
   );
 
   // ✅ VALIDAÇÃO SIMPLIFICADA
@@ -333,7 +324,9 @@ const DespesaForm = ({
       dataPagamento: "Data do Pagamento é obrigatória",
       acao: "Ação é obrigatória",
       dotacaoOrcamentaria: "Dotação Orçamentária é obrigatória",
-      classificacaoFuncional: "Classificação Funcional é obrigatória",
+      // classificacaoFuncional: "Classificação Funcional é obrigatória", // REMOVIDO
+      naturezaDespesa: "Natureza da Despesa é obrigatória", // Adicionado
+      elementoDespesa: "Elemento de Despesa é obrigatório", // Adicionado
     };
 
     Object.keys(camposObrigatorios).forEach((campo) => {
@@ -433,13 +426,13 @@ const DespesaForm = ({
       novosErrors.valor = valorError;
     }
 
-    if (formData.cnpjFornecedor && cnpjError) {
-      novosErrors.cnpjFornecedor = cnpjError;
-    }
+    // if (formData.cnpjFornecedor && cnpjError) { // REMOVIDO
+    //   novosErrors.cnpjFornecedor = cnpjError;
+    // }
 
     setErrors(novosErrors);
     return Object.keys(novosErrors).length === 0;
-  }, [formData, emendaInfoDinamica, emendaInfo, valorError, cnpjError]);
+  }, [formData, emendaInfoDinamica, emendaInfo, valorError]); // REMOVIDO cnpjError
 
   // ✅ SUBMISSÃO SIMPLIFICADA
   const handleSubmit = async (e) => {
@@ -448,15 +441,15 @@ const DespesaForm = ({
     // Prevenir duplo clique
     if (salvando) return;
 
-    // Validar CNPJs antes de salvar
-    if (formData.cnpjFornecedor && !validarCNPJ(formData.cnpjFornecedor)) {
-      setToast({
-        show: true,
-        message: "❌ CNPJ do fornecedor inválido!",
-        type: "error",
-      });
-      return;
-    }
+    // Validar CNPJs antes de salvar (Removido a validação do CNPJ do fornecedor)
+    // if (formData.cnpjFornecedor && !validarCNPJ(formData.cnpjFornecedor)) {
+    //   setToast({
+    //     show: true,
+    //     message: "❌ CNPJ do fornecedor inválido!",
+    //     type: "error",
+    //   });
+    //   return;
+    // }
 
     if (!validarFormulario()) {
       setToast({
@@ -498,7 +491,7 @@ const DespesaForm = ({
 
     // 🚨 VALIDAÇÃO PARA EDIÇÃO DE DESPESA
     if (despesaParaEditar) {
-      const valorAnterior = despesaParaEditar.valor || 0;
+      const valorAnterior = parseValorMonetario(despesaParaEditar.valor) || 0; // Parse para garantir consistência
       const novoSaldoDisponivel = saldoDisponivel + valorAnterior;
 
       if (valorDespesa > novoSaldoDisponivel) {
@@ -631,15 +624,15 @@ const DespesaForm = ({
       dataPagamento: "",
       acao: "",
       dotacaoOrcamentaria: "",
-      classificacaoFuncional: "",
+      // classificacaoFuncional: "", // REMOVIDO
       numeroContrato: "",
       categoria: "",
       descricao: "",
       observacoes: "",
       status: "pendente",
       centroCusto: "",
-      naturezaDespesa: "",
-      elementoDespesa: "",
+      naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // Valor pré-definido
+      elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // Valor pré-definido
       fonteRecurso: "",
       programaTrabalho: "",
       planoInterno: "",
@@ -649,7 +642,7 @@ const DespesaForm = ({
       coordenadasGeograficas: "",
       populacaoBeneficiada: "",
       impactoSocial: "",
-      cnpjFornecedor: "",
+      // cnpjFornecedor: "", // REMOVIDO
       enderecoFornecedor: "",
       telefoneFornecedor: "",
       emailFornecedor: "",
@@ -658,36 +651,8 @@ const DespesaForm = ({
     setErrors({});
   };
 
-  // Função para buscar dados da empresa via CNPJ
-  const buscarDadosFornecedor = async (cnpj) => {
-    try {
-      // Remover formatação
-      const cnpjLimpo = cnpj.replace(/\D/g, '');
-
-      // Usar API pública da Receita
-      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`);
-
-      if (response.ok) {
-        const dados = await response.json();
-
-        // Preencher automaticamente outros campos
-        setFormData(prev => ({
-          ...prev,
-          fornecedor: dados.nome_fantasia || dados.razao_social,
-          razaoSocial: dados.razao_social,
-        }));
-
-        // Mostrar notificação de sucesso
-        setToast({
-          show: true,
-          message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
-          type: 'success'
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao buscar CNPJ:', error);
-    }
-  };
+  // Função para buscar dados da empresa via CNPJ (Removida, pois o campo CNPJ foi removido)
+  // const buscarDadosFornecedor = async (cnpj) => { ... };
 
   return (
     <div style={styles.container}>
@@ -756,34 +721,70 @@ const DespesaForm = ({
           emendaInfo={emendaInfoDinamica || emendaInfo} // ✅ NOVO: Passar emendaInfo
         />
 
-        <DespesaFormOrcamentoFields
-          formData={formData}
-          errors={errors}
-          modoVisualizacao={modoVisualizacao}
-          handleInputChange={handleInputChange}
-        />
-
-        {/* ✅ CAMPOS AVANÇADOS COM TOGGLE */}
+        {/* Seção unificada "Classificação Funcional - Programática" */}
         {!modoVisualizacao && (
-          <button
-            type="button"
-            onClick={() => setMostrarCamposAvancados(!mostrarCamposAvancados)}
-            style={styles.toggleButton}
-          >
-            {mostrarCamposAvancados ? "🔼 Ocultar" : "🔽 Mostrar"} Campos
-            Avançados
-          </button>
+            <div style={styles.section}>
+                <h3>Classificação Funcional - Programática</h3>
+                <div style={styles.formGrid}>
+                    <div style={styles.formGroup}>
+                        <label htmlFor="naturezaDespesa">Natureza da Despesa:</label>
+                        <input
+                            type="text"
+                            id="naturezaDespesa"
+                            name="naturezaDespesa"
+                            value={formData.naturezaDespesa}
+                            onChange={handleInputChange}
+                            readOnly // Campo pré-definido
+                            style={styles.readOnlyInput}
+                        />
+                        {errors.naturezaDespesa && <p style={styles.errorText}>{errors.naturezaDespesa}</p>}
+                    </div>
+                    <div style={styles.formGroup}>
+                        <label htmlFor="elementoDespesa">Elemento de Despesa:</label>
+                        <input
+                            type="text"
+                            id="elementoDespesa"
+                            name="elementoDespesa"
+                            value={formData.elementoDespesa}
+                            onChange={handleInputChange}
+                            readOnly // Campo pré-definido
+                            style={styles.readOnlyInput}
+                        />
+                        {errors.elementoDespesa && <p style={styles.errorText}>{errors.elementoDespesa}</p>}
+                    </div>
+                    <div style={styles.formGroup}>
+                        <label htmlFor="acao">Ação:</label>
+                        <input
+                            type="text"
+                            id="acao"
+                            name="acao"
+                            value={formData.acao}
+                            onChange={handleInputChange}
+                            className={errors.acao ? "input-error" : ""}
+                        />
+                        {errors.acao && <p style={styles.errorText}>{errors.acao}</p>}
+                    </div>
+                    <div style={styles.formGroup}>
+                        <label htmlFor="dotacaoOrcamentaria">Dotação Orçamentária:</label>
+                        <input
+                            type="text"
+                            id="dotacaoOrcamentaria"
+                            name="dotacaoOrcamentaria"
+                            value={formData.dotacaoOrcamentaria}
+                            onChange={handleInputChange}
+                            className={errors.dotacaoOrcamentaria ? "input-error" : ""}
+                        />
+                        {errors.dotacaoOrcamentaria && <p style={styles.errorText}>{errors.dotacaoOrcamentaria}</p>}
+                    </div>
+                </div>
+            </div>
         )}
 
-        {(mostrarCamposAvancados || modoVisualizacao) && (
-          <DespesaFormAdvancedFields
-            formData={formData}
-            errors={errors}
-            cnpjError={cnpjError}
-            modoVisualizacao={modoVisualizacao}
-            handleInputChange={handleInputChange}
-          />
-        )}
+
+        {/* Renderização condicional de DespesaFormOrcamentoFields e DespesaFormAdvancedFields removida, pois a lógica foi incorporada acima ou removida */}
+
+        {/* ✅ CAMPOS AVANÇADOS COM TOGGLE (A lógica foi movida para dentro da nova seção) */}
+        {/* A lógica de mostrar/ocultar campos avançados pode ser reimplementada se necessário, mas a solicitação foi para unificar e remover campos. */}
 
         {/* ✅ AÇÕES DO FORMULÁRIO */}
         {!modoVisualizacao && (
@@ -854,6 +855,32 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "30px",
+  },
+  section: { // Estilo para a nova seção
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    padding: "20px",
+    backgroundColor: "#f9f9f9",
+    marginBottom: "30px",
+  },
+  formGrid: { // Estilo para o layout em grid dentro da seção
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", // Ajuste conforme necessário
+    gap: "20px",
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
+  },
+  readOnlyInput: { // Estilo para campos pré-definidos
+    backgroundColor: "#e9ecef",
+    cursor: "not-allowed",
+  },
+  errorText: {
+    color: "#dc3545",
+    fontSize: "0.875em",
+    marginTop: "5px",
   },
   toggleButton: {
     backgroundColor: "#17a2b8",
