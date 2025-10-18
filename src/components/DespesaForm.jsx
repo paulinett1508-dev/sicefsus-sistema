@@ -78,15 +78,15 @@ const DespesaForm = ({
     dataPagamento: "",
     acao: "",
     dotacaoOrcamentaria: "",
-    // classificacaoFuncional: "", // REMOVIDO
+    classificacaoFuncional: "",
     numeroContrato: "",
     categoria: "",
     descricao: "",
     observacoes: "",
     status: "pendente",
     centroCusto: "",
-    naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // Valor pré-definido
-    elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // Valor pré-definido
+    naturezaDespesa: "",
+    elementoDespesa: "",
     fonteRecurso: "",
     programaTrabalho: "",
     planoInterno: "",
@@ -96,7 +96,7 @@ const DespesaForm = ({
     coordenadasGeograficas: "",
     populacaoBeneficiada: "",
     impactoSocial: "",
-    // cnpjFornecedor: "", // REMOVIDO
+    cnpjFornecedor: "",
     enderecoFornecedor: "",
     telefoneFornecedor: "",
     emailFornecedor: "",
@@ -324,9 +324,7 @@ const DespesaForm = ({
       dataPagamento: "Data do Pagamento é obrigatória",
       acao: "Ação é obrigatória",
       dotacaoOrcamentaria: "Dotação Orçamentária é obrigatória",
-      // classificacaoFuncional: "Classificação Funcional é obrigatória", // REMOVIDO
-      naturezaDespesa: "Natureza da Despesa é obrigatória", // Adicionado
-      elementoDespesa: "Elemento de Despesa é obrigatório", // Adicionado
+      classificacaoFuncional: "Classificação Funcional é obrigatória",
     };
 
     Object.keys(camposObrigatorios).forEach((campo) => {
@@ -721,70 +719,37 @@ const DespesaForm = ({
           emendaInfo={emendaInfoDinamica || emendaInfo} // ✅ NOVO: Passar emendaInfo
         />
 
-        {/* Seção unificada "Classificação Funcional - Programática" */}
+        <DespesaFormOrcamentoFields
+          formData={formData}
+          errors={errors}
+          modoVisualizacao={modoVisualizacao}
+          handleInputChange={handleInputChange}
+        />
+
         {!modoVisualizacao && (
-            <div style={styles.section}>
-                <h3>Classificação Funcional - Programática</h3>
-                <div style={styles.formGrid}>
-                    <div style={styles.formGroup}>
-                        <label htmlFor="naturezaDespesa">Natureza da Despesa:</label>
-                        <input
-                            type="text"
-                            id="naturezaDespesa"
-                            name="naturezaDespesa"
-                            value={formData.naturezaDespesa}
-                            onChange={handleInputChange}
-                            readOnly // Campo pré-definido
-                            style={styles.readOnlyInput}
-                        />
-                        {errors.naturezaDespesa && <p style={styles.errorText}>{errors.naturezaDespesa}</p>}
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label htmlFor="elementoDespesa">Elemento de Despesa:</label>
-                        <input
-                            type="text"
-                            id="elementoDespesa"
-                            name="elementoDespesa"
-                            value={formData.elementoDespesa}
-                            onChange={handleInputChange}
-                            readOnly // Campo pré-definido
-                            style={styles.readOnlyInput}
-                        />
-                        {errors.elementoDespesa && <p style={styles.errorText}>{errors.elementoDespesa}</p>}
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label htmlFor="acao">Ação:</label>
-                        <input
-                            type="text"
-                            id="acao"
-                            name="acao"
-                            value={formData.acao}
-                            onChange={handleInputChange}
-                            className={errors.acao ? "input-error" : ""}
-                        />
-                        {errors.acao && <p style={styles.errorText}>{errors.acao}</p>}
-                    </div>
-                    <div style={styles.formGroup}>
-                        <label htmlFor="dotacaoOrcamentaria">Dotação Orçamentária:</label>
-                        <input
-                            type="text"
-                            id="dotacaoOrcamentaria"
-                            name="dotacaoOrcamentaria"
-                            value={formData.dotacaoOrcamentaria}
-                            onChange={handleInputChange}
-                            className={errors.dotacaoOrcamentaria ? "input-error" : ""}
-                        />
-                        {errors.dotacaoOrcamentaria && <p style={styles.errorText}>{errors.dotacaoOrcamentaria}</p>}
-                    </div>
-                </div>
-            </div>
+          <div style={{ textAlign: "center", margin: "20px 0" }}>
+            <button
+              type="button"
+              onClick={() =>
+                setMostrarCamposAvancados(!mostrarCamposAvancados)
+              }
+              style={styles.toggleButton}
+            >
+              {mostrarCamposAvancados
+                ? "▲ Ocultar Campos Avançados"
+                : "▼ Mostrar Campos Avançados"}
+            </button>
+          </div>
         )}
 
-
-        {/* Renderização condicional de DespesaFormOrcamentoFields e DespesaFormAdvancedFields removida, pois a lógica foi incorporada acima ou removida */}
-
-        {/* ✅ CAMPOS AVANÇADOS COM TOGGLE (A lógica foi movida para dentro da nova seção) */}
-        {/* A lógica de mostrar/ocultar campos avançados pode ser reimplementada se necessário, mas a solicitação foi para unificar e remover campos. */}
+        {mostrarCamposAvancados && (
+          <DespesaFormAdvancedFields
+            formData={formData}
+            errors={errors}
+            modoVisualizacao={modoVisualizacao}
+            handleInputChange={handleInputChange}
+          />
+        )}
 
         {/* ✅ AÇÕES DO FORMULÁRIO */}
         {!modoVisualizacao && (
@@ -856,32 +821,7 @@ const styles = {
     flexDirection: "column",
     gap: "30px",
   },
-  section: { // Estilo para a nova seção
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    padding: "20px",
-    backgroundColor: "#f9f9f9",
-    marginBottom: "30px",
-  },
-  formGrid: { // Estilo para o layout em grid dentro da seção
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", // Ajuste conforme necessário
-    gap: "20px",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "5px",
-  },
-  readOnlyInput: { // Estilo para campos pré-definidos
-    backgroundColor: "#e9ecef",
-    cursor: "not-allowed",
-  },
-  errorText: {
-    color: "#dc3545",
-    fontSize: "0.875em",
-    marginTop: "5px",
-  },
+  
   toggleButton: {
     backgroundColor: "#17a2b8",
     color: "white",

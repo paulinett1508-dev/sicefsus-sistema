@@ -1,6 +1,6 @@
 
 // src/components/despesa/DespesaFormOrcamentoFields.jsx
-// ✅ Componente unificado para classificação funcional-programática
+// ✅ Componente para campos de classificação orçamentária
 
 import React from "react";
 
@@ -14,7 +14,7 @@ const DespesaFormOrcamentoFields = ({
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
         <span style={styles.legendIcon}>📊</span>
-        Classificação Funcional - Programática
+        Classificação Orçamentária
       </legend>
 
       <div style={styles.formGrid}>
@@ -76,6 +76,25 @@ const DespesaFormOrcamentoFields = ({
         </div>
 
         <div style={styles.formGroup}>
+          <label style={styles.labelRequired}>Classificação Funcional-Programática *</label>
+          <input
+            type="text"
+            name="classificacaoFuncional"
+            value={formData.classificacaoFuncional}
+            onChange={handleInputChange}
+            style={
+              errors.classificacaoFuncional ? styles.inputError : styles.input
+            }
+            readOnly={modoVisualizacao}
+            placeholder="Ex: 10.301.0001.2001"
+            required
+          />
+          {errors.classificacaoFuncional && (
+            <span style={styles.errorText}>{errors.classificacaoFuncional}</span>
+          )}
+        </div>
+
+        <div style={styles.formGroup}>
           <label style={styles.label}>Status</label>
           <select
             name="status"
@@ -126,29 +145,16 @@ const DespesaFormOrcamentoFields = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Natureza da Despesa</label>
-          <select
-            name="naturezaDespesa"
-            value={formData.naturezaDespesa}
+          <label style={styles.label}>CNPJ do Fornecedor</label>
+          <input
+            type="text"
+            name="cnpjFornecedor"
+            value={formData.cnpjFornecedor}
             onChange={handleInputChange}
-            style={styles.select}
-            disabled={modoVisualizacao}
-          >
-            <option value="3.3.9.0.30">3.3.9.0.30 – Material de Despesa</option>
-          </select>
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Elemento de Despesa</label>
-          <select
-            name="elementoDespesa"
-            value={formData.elementoDespesa}
-            onChange={handleInputChange}
-            style={styles.select}
-            disabled={modoVisualizacao}
-          >
-            <option value="3.3.90.30.99">3.3.90.30.99 - Outros Materiais de Consumo</option>
-          </select>
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="00.000.000/0000-00"
+          />
         </div>
 
         <div style={styles.formGroup}>
