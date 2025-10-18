@@ -16,7 +16,7 @@ import {
   getDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 
 // ✅ COMPONENTES MODULARES EXISTENTES REUTILIZADOS
 import DespesaFormHeader from "./despesa/DespesaFormHeader";
