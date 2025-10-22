@@ -1,15 +1,16 @@
 // src/utils/versionControl.js
-// ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 
+// ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 export const APP_VERSION = {
-  number: "2.3.78",
-  date: "22/10/2025",
-  timestamp: "22/10/2025 às 17:06",
+  number: "2.3.68",
+  date: "19/08/2025",
+  timestamp: "19/08/2025 às 02:31",
   changes: [
-    "🎯 Sistema de versionamento simplificado",
-    "🔄 Incremento manual antes do Republish",
-    "✅ Logo agora redireciona para Dashboard",
-    "🧹 Limpeza de arquivos desnecessários",
+    "🚀 Sistema de versionamento centralizado implementado",
+    "✅ Fonte única da verdade em versionControl.js",
+    "🔧 Sincronização automática com package.json",
+    "📊 Funções de incremento de versão automático",
+    "🎯 Interface consistente para todos os componentes",
   ],
 };
 
@@ -43,6 +44,7 @@ export function checkVersion() {
  * Exibe notificação de atualização
  */
 function showUpdateNotification() {
+  // Criar container da notificação
   const notification = document.createElement("div");
   notification.className = "version-notification";
   notification.innerHTML = `
@@ -62,9 +64,9 @@ function showUpdateNotification() {
         </p>
       </div>
       <div class="version-notification-footer">
-        <button class="version-notification-btn-reload" onclick="window.location.reload(true)">
-          🔄 Atualizar Agora
-        </button>
+<button class="version-notification-btn-reload" onclick="window.location.href='/'">
+  🔄 Atualizar Agora
+</button>
         <button class="version-notification-btn-later" onclick="this.parentElement.parentElement.parentElement.remove()">
           Mais Tarde
         </button>
@@ -72,10 +74,13 @@ function showUpdateNotification() {
     </div>
   `;
 
+  // Adicionar ao body
   document.body.appendChild(notification);
+
+  // Adicionar estilos CSS
   addNotificationStyles();
 
-  // Auto-remover após 30 segundos
+  // Auto-remover após 30 segundos se não interagir
   setTimeout(() => {
     if (document.body.contains(notification)) {
       notification.classList.add("fade-out");
@@ -88,6 +93,7 @@ function showUpdateNotification() {
  * Adiciona estilos CSS para a notificação
  */
 function addNotificationStyles() {
+  // Verificar se os estilos já foram adicionados
   if (document.getElementById("version-notification-styles")) return;
 
   const styles = document.createElement("style");
@@ -130,6 +136,7 @@ function addNotificationStyles() {
 
     .version-notification-content {
       padding: 0;
+      position: relative;
     }
 
     .version-notification-header {
@@ -234,6 +241,7 @@ function addNotificationStyles() {
       background: #e8e8e8;
     }
 
+    /* Responsivo */
     @media (max-width: 500px) {
       .version-notification {
         top: 10px;
@@ -280,11 +288,45 @@ export function forceVersionCheck() {
 
 /**
  * Obtém a versão atual - INTERFACE CONSISTENTE
+ * @returns {object} Informações da versão atual
  */
 export function getCurrentVersion() {
   return {
     ...APP_VERSION,
     timestamp: new Date().toISOString(),
-    environment: import.meta.env.MODE || "production",
+    environment: import.meta.env.MODE || "development",
   };
+}
+
+/**
+ * Incrementa a versão automaticamente
+ * @param {string} type - Tipo de incremento: 'major', 'minor', 'patch'
+ * @returns {string} Nova versão incrementada
+ */
+export function incrementVersion(type = "patch") {
+  const [major, minor, patch] = APP_VERSION.number.split(".").map(Number);
+
+  switch (type) {
+    case "major":
+      return `${major + 1}.0.0`;
+    case "minor":
+      return `${major}.${minor + 1}.0`;
+    case "patch":
+    default:
+      return `${major}.${minor}.${patch + 1}`;
+  }
+}
+
+/**
+ * Verifica se deve exibir badge de "Novo" em algum menu
+ * baseado na última vez que o usuário viu a versão
+ */
+export function shouldShowNewBadge(featureDate) {
+  const lastCheck = localStorage.getItem(LAST_CHECK_KEY);
+  if (!lastCheck) return true;
+
+  const lastCheckDate = new Date(lastCheck);
+  const feature = new Date(featureDate);
+
+  return feature > lastCheckDate;
 }

@@ -18,15 +18,8 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY PARA ADMIN API
     server: {
-      host: "0.0.0.0",
-      port: 5000,
-      hmr: {
-        port: 5000,
-        clientPort: 443,
-      },
-      watch: {
-        usePolling: true,
-      },
+      port: 5173,
+      host: true,
       proxy: {
         "/api": {
           target: "http://localhost:3001",
