@@ -1,3 +1,8 @@
+// src/components/DespesasFilters.jsx
+// ✅ Filtro otimizado para visualização de pagamentos por emenda
+// 🎯 FOCO: Filtrar despesas de forma simples e eficiente
+// ❌ REMOVIDO: Campos desnecessários de Saldo e %
+
 import React, { useState, useEffect } from "react";
 
 const DespesasFilters = ({
@@ -6,28 +11,30 @@ const DespesasFilters = ({
   onFilterChange,
   totalDespesas = 0,
 }) => {
-  // ✅ FILTROS BÁSICOS (4 campos como Emendas)
   const [filtros, setFiltros] = useState({
     termoBusca: "",
     emendaId: "",
-    valorMin: "",
-    valorMax: "",
+    status: "",
+    dataInicio: "",
+    dataFim: "",
   });
 
   // ✅ FUNÇÃO FILTRAR DESPESAS
   const filtrarDespesas = (despesas, filtros) => {
     return despesas.filter((despesa) => {
-      // Filtro Busca Geral (fornecedor, descrição, CNPJ)
+      // Filtro Busca Geral (fornecedor, discriminação, número empenho)
       if (filtros.termoBusca) {
         const termo = filtros.termoBusca.toLowerCase();
         const fornecedor = despesa.fornecedor?.toLowerCase() || "";
-        const descricao = despesa.descricao?.toLowerCase() || "";
-        const cnpj = despesa.cnpj?.toLowerCase() || "";
+        const discriminacao = despesa.discriminacao?.toLowerCase() || "";
+        const numeroEmpenho = despesa.numeroEmpenho?.toLowerCase() || "";
+        const numeroNota = despesa.numeroNota?.toLowerCase() || "";
 
         if (
           !fornecedor.includes(termo) &&
-          !descricao.includes(termo) &&
-          !cnpj.includes(termo)
+          !discriminacao.includes(termo) &&
+          !numeroEmpenho.includes(termo) &&
+          !numeroNota.includes(termo)
         ) {
           return false;
         }
@@ -38,20 +45,29 @@ const DespesasFilters = ({
         return false;
       }
 
-      // Filtro Valor Mínimo
-      if (filtros.valorMin) {
-        const valorDespesa = parseFloat(despesa.valor) || 0;
-        const valorMinimo = parseFloat(filtros.valorMin) || 0;
-        if (valorDespesa < valorMinimo) {
+      // Filtro por Status
+      if (filtros.status && despesa.status !== filtros.status) {
+        return false;
+      }
+
+      // Filtro por Data Início
+      if (filtros.dataInicio) {
+        const dataDespesa = new Date(
+          despesa.dataPagamento || despesa.dataEmpenho,
+        );
+        const dataFiltroInicio = new Date(filtros.dataInicio);
+        if (dataDespesa < dataFiltroInicio) {
           return false;
         }
       }
 
-      // Filtro Valor Máximo
-      if (filtros.valorMax) {
-        const valorDespesa = parseFloat(despesa.valor) || 0;
-        const valorMaximo = parseFloat(filtros.valorMax) || 0;
-        if (valorDespesa > valorMaximo) {
+      // Filtro por Data Fim
+      if (filtros.dataFim) {
+        const dataDespesa = new Date(
+          despesa.dataPagamento || despesa.dataEmpenho,
+        );
+        const dataFiltroFim = new Date(filtros.dataFim);
+        if (dataDespesa > dataFiltroFim) {
           return false;
         }
       }
@@ -60,13 +76,13 @@ const DespesasFilters = ({
     });
   };
 
-  // ✅ APLICAR FILTROS AUTOMATICAMENTE - CORRIGIDO
+  // ✅ APLICAR FILTROS AUTOMATICAMENTE
   useEffect(() => {
     const resultado = filtrarDespesas(despesas, filtros);
     if (onFilterChange) {
       onFilterChange(resultado);
     }
-  }, [despesas, filtros]); // ✅ REMOVIDO onFilterChange das dependências
+  }, [despesas, filtros]);
 
   // ✅ ATUALIZAR FILTRO
   const handleFiltroChange = (campo, valor) => {
@@ -78,13 +94,13 @@ const DespesasFilters = ({
 
   // ✅ LIMPAR FILTROS
   const limparFiltros = () => {
-    const filtrosLimpos = {
+    setFiltros({
       termoBusca: "",
       emendaId: "",
-      valorMin: "",
-      valorMax: "",
-    };
-    setFiltros(filtrosLimpos);
+      status: "",
+      dataInicio: "",
+      dataFim: "",
+    });
   };
 
   // ✅ CONTAR FILTROS ATIVOS
@@ -96,40 +112,43 @@ const DespesasFilters = ({
   const getEmendaDisplayName = (emendaId) => {
     const emenda = emendas.find((e) => e.id === emendaId);
     if (!emenda) return "Emenda não encontrada";
-    return `${emenda.numero || emenda.id} - ${emenda.autor || "Sem autor"}`;
+    return `${emenda.numero || emenda.id} - ${emenda.parlamentar || emenda.autor || "Sem autor"}`;
   };
 
   return (
     <div style={styles.container}>
-      {/* ✅ HEADER IGUAL EMENDAS */}
+      {/* ✅ HEADER */}
       <div style={styles.header}>
         <h3 style={styles.title}>🔍 Filtros de Pesquisa</h3>
         <div style={styles.resultsBadge}>
-          {totalDespesas} despesas encontradas
+          {totalDespesas} {totalDespesas === 1 ? "pagamento" : "pagamentos"}
         </div>
       </div>
 
-      {/* ✅ FILTROS BÁSICOS (4 CAMPOS) */}
+      {/* ✅ FILTROS OTIMIZADOS (5 CAMPOS) */}
       <div style={styles.filtersGrid}>
         {/* Busca Geral */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>🔍 Busca Geral</label>
+          <label style={styles.filterLabel}>🔎 Busca Geral</label>
           <input
             type="text"
-            placeholder="Fornecedor, descrição, CNPJ..."
+            placeholder="Fornecedor, nº empenho, nº nota..."
             value={filtros.termoBusca}
             onChange={(e) => handleFiltroChange("termoBusca", e.target.value)}
             style={styles.filterInput}
           />
         </div>
 
-        {/* Emenda */}
+        {/* Filtro por Emenda - DESTACADO */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>📄 Emenda</label>
+          <label style={styles.filterLabel}>
+            ⭐ Emenda
+            <span style={styles.highlightBadge}>Principal</span>
+          </label>
           <select
             value={filtros.emendaId}
             onChange={(e) => handleFiltroChange("emendaId", e.target.value)}
-            style={styles.filterSelect}
+            style={styles.filterSelectHighlight}
           >
             <option value="">Todas as emendas</option>
             {emendas.map((emenda) => (
@@ -140,31 +159,42 @@ const DespesasFilters = ({
           </select>
         </div>
 
-        {/* Valor Mínimo */}
+        {/* Status do Pagamento */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>💰 Valor Mínimo</label>
+          <label style={styles.filterLabel}>📌 Status</label>
+          <select
+            value={filtros.status}
+            onChange={(e) => handleFiltroChange("status", e.target.value)}
+            style={styles.filterSelect}
+          >
+            <option value="">Todos os status</option>
+            <option value="pendente">Pendente</option>
+            <option value="empenhado">Empenhado</option>
+            <option value="liquidado">Liquidado</option>
+            <option value="pago">Pago</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+
+        {/* Data Início */}
+        <div style={styles.filterGroup}>
+          <label style={styles.filterLabel}>📅 Data Início</label>
           <input
-            type="number"
-            placeholder="Ex: 1000"
-            value={filtros.valorMin}
-            onChange={(e) => handleFiltroChange("valorMin", e.target.value)}
+            type="date"
+            value={filtros.dataInicio}
+            onChange={(e) => handleFiltroChange("dataInicio", e.target.value)}
             style={styles.filterInput}
-            min="0"
-            step="0.01"
           />
         </div>
 
-        {/* Valor Máximo */}
+        {/* Data Fim */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>💰 Valor Máximo</label>
+          <label style={styles.filterLabel}>📅 Data Fim</label>
           <input
-            type="number"
-            placeholder="Ex: 100000"
-            value={filtros.valorMax}
-            onChange={(e) => handleFiltroChange("valorMax", e.target.value)}
+            type="date"
+            value={filtros.dataFim}
+            onChange={(e) => handleFiltroChange("dataFim", e.target.value)}
             style={styles.filterInput}
-            min="0"
-            step="0.01"
           />
         </div>
       </div>
@@ -172,9 +202,6 @@ const DespesasFilters = ({
       {/* ✅ BOTÕES DE AÇÃO */}
       <div style={styles.filterActions}>
         <button
-          onClick={() => {
-            /* Filtros são aplicados automaticamente */
-          }}
           style={styles.buttonFilter}
           disabled={contarFiltrosAtivos() === 0}
         >
@@ -191,6 +218,14 @@ const DespesasFilters = ({
           🗑️ Limpar Filtros
         </button>
       </div>
+
+      {/* ✅ DICA VISUAL */}
+      {filtros.emendaId && (
+        <div style={styles.hint}>
+          💡 <strong>Dica:</strong> Visualizando pagamentos da emenda
+          selecionada
+        </div>
+      )}
     </div>
   );
 };
@@ -233,7 +268,7 @@ const styles = {
 
   filtersGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "16px",
     marginBottom: "20px",
   },
@@ -248,6 +283,18 @@ const styles = {
     fontWeight: "600",
     color: "#495057",
     marginBottom: "6px",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+
+  highlightBadge: {
+    fontSize: "10px",
+    backgroundColor: "#ffc107",
+    color: "#000",
+    padding: "2px 6px",
+    borderRadius: "10px",
+    fontWeight: "bold",
   },
 
   filterInput: {
@@ -266,6 +313,16 @@ const styles = {
     fontSize: "14px",
     backgroundColor: "white",
     cursor: "pointer",
+  },
+
+  filterSelectHighlight: {
+    padding: "10px 12px",
+    border: "2px solid #ffc107",
+    borderRadius: "4px",
+    fontSize: "14px",
+    backgroundColor: "#fffbf0",
+    cursor: "pointer",
+    fontWeight: "500",
   },
 
   filterActions: {
@@ -296,6 +353,16 @@ const styles = {
     fontSize: "14px",
     fontWeight: "bold",
     transition: "all 0.2s",
+  },
+
+  hint: {
+    marginTop: "16px",
+    padding: "12px",
+    backgroundColor: "#e7f3ff",
+    border: "1px solid #b3d9ff",
+    borderRadius: "4px",
+    fontSize: "13px",
+    color: "#004085",
   },
 };
 

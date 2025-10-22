@@ -1,14 +1,13 @@
-// DespesasTable.jsx - VERSÃO COMPLETA COM SALDO PROGRESSIVO
-// ✅ Saldo calculado progressivamente por despesa
-// ✅ Cada linha mostra o saldo APÓS aquela despesa
-// ✅ Respeitando ordem cronológica e isolamento por emenda
+// src/components/DespesasTable.jsx
+// ✅ OTIMIZADA: Foco em pagamentos por emenda
+// ✅ AGRUPAMENTO: Pagamentos organizados por emenda
+// ❌ REMOVIDO: Colunas de Saldo e % (conforme solicitado)
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
 
-// ✅ CORES PADRONIZADAS
 const PRIMARY = "#154360";
 const ACCENT = "#4A90E2";
 const WHITE = "#fff";
@@ -29,8 +28,30 @@ export default function DespesasTable({
   const [excluindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState("resumido");
+  const [modoAgrupamento, setModoAgrupamento] = useState("agrupado"); // 🆕
 
-  // ✅ Função para formatar datas
+  // ✅ AGRUPAR DESPESAS POR EMENDA
+  const despesasAgrupadas = useMemo(() => {
+    const grupos = {};
+
+    despesas.forEach((despesa) => {
+      const emendaId = despesa.emendaId;
+      if (!grupos[emendaId]) {
+        const emenda = emendas.find((e) => e.id === emendaId);
+        grupos[emendaId] = {
+          emenda: emenda || { id: emendaId, numero: "N/A" },
+          despesas: [],
+          totalValor: 0,
+        };
+      }
+      grupos[emendaId].despesas.push(despesa);
+      grupos[emendaId].totalValor += despesa.valor || 0;
+    });
+
+    return Object.values(grupos);
+  }, [despesas, emendas]);
+
+  // ✅ Formatar datas
   function formatarDataFirestore(data) {
     if (!data) return "-";
 
@@ -63,7 +84,7 @@ export default function DespesasTable({
     }
   }
 
-  // ✅ Helper para buscar dados da emenda
+  // ✅ Buscar dados da emenda
   function getEmendaInfo(emendaId) {
     if (!emendas || !emendaId) return "-";
     const emenda = emendas.find((e) => e.id === emendaId);
@@ -74,72 +95,41 @@ export default function DespesasTable({
     return `${numero} - ${parlamentar}`;
   }
 
-  // ✅ FUNÇÃO PRINCIPAL: Calcular saldo PROGRESSIVO
-  function getEmendaSaldoInfo(emendaId, despesaAtualId) {
-    if (!emendas || !emendaId) return null;
+  // ✅ Obter tipo da emenda
+  function getTipoEmenda(emendaId) {
+    if (!emendas || !emendaId) return "-";
     const emenda = emendas.find((e) => e.id === emendaId);
-    if (!emenda) return null;
+    return emenda?.tipo || "-";
+  }
 
-    const valorTotal = emenda.valor || 0;
-
-    // Filtrar e ordenar despesas desta emenda
-    const despesasDestaEmenda = despesas
-      .filter(d => d.emendaId === emendaId)
-      .sort((a, b) => {
-        // Ordenar por data de pagamento
-        if (a.dataPagamento && b.dataPagamento) {
-          const dataA = a.dataPagamento.seconds
-            ? new Date(a.dataPagamento.seconds * 1000)
-            : new Date(a.dataPagamento);
-          const dataB = b.dataPagamento.seconds
-            ? new Date(b.dataPagamento.seconds * 1000)
-            : new Date(b.dataPagamento);
-          return dataA - dataB;
-        }
-        return 0;
-      });
-
-    // Encontrar índice da despesa atual
-    const indexAtual = despesasDestaEmenda.findIndex(d => d.id === despesaAtualId);
-
-    // Calcular total até esta despesa (inclusive)
-    let totalDespesasAteAqui = 0;
-    for (let i = 0; i <= indexAtual; i++) {
-      totalDespesasAteAqui += despesasDestaEmenda[i].valor || 0;
-    }
-
-    // Saldo progressivo
-    const saldoAtual = valorTotal - totalDespesasAteAqui;
-    const valorExecutado = totalDespesasAteAqui;
-    const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
-
-    return {
-      valorTotal,
-      saldoAtual,
-      valorExecutado,
-      percentualExecutado,
-      totalDespesasAteAqui,
-      despesaNumero: indexAtual + 1,
-      totalDespesasEmenda: despesasDestaEmenda.length,
-      emenda
+  // ✅ Cor do badge de tipo
+  function getTipoColor(tipo) {
+    const cores = {
+      Individual: "#007bff",
+      Bancada: "#28a745",
+      "Custeio PAP": "#007bff",
+      "Custeio MAC": "#28a745",
+      "Investimento PAP": "#ffc107",
+      "Investimento MAC": "#6f42c1",
+      "Custeio PAP – Estadual": "#17a2b8",
+      "Custeio MAC – Estadual": "#fd7e14",
     };
+    return cores[tipo] || "#adb5bd";
   }
 
-  // ✅ Função para definir cor do saldo
-  function getSaldoColor(percentualExecutado) {
-    if (percentualExecutado >= 90) return ERROR;
-    if (percentualExecutado >= 70) return WARNING;
-    return SUCCESS;
+  // ✅ Cor do status
+  function getStatusColor(status) {
+    const cores = {
+      pendente: "#6c757d",
+      empenhado: "#007bff",
+      liquidado: "#ffc107",
+      pago: SUCCESS,
+      cancelado: ERROR,
+    };
+    return cores[status] || "#6c757d";
   }
 
-  // ✅ Função para definir indicador visual
-  function getSaldoIndicator(percentualExecutado) {
-    if (percentualExecutado >= 90) return "🔴";
-    if (percentualExecutado >= 70) return "🟡";
-    return "🟢";
-  }
-
-  // ✅ Função para excluir despesa
+  // ✅ Excluir despesa
   async function handleExcluir(despesa) {
     setExcluindo(despesa.id);
     try {
@@ -183,190 +173,265 @@ export default function DespesasTable({
     setConfirmExclusao(despesa);
   }
 
+  // ✅ RENDERIZAR LINHA DE DESPESA
+  const renderDespesaRow = (despesa, index, showEmenda = true) => (
+    <tr
+      key={despesa.id}
+      style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
+    >
+      {showEmenda && (
+        <td style={styles.td}>
+          <div style={styles.emendaCell}>{getEmendaInfo(despesa.emendaId)}</div>
+        </td>
+      )}
+      {showEmenda && (
+        <td style={styles.td}>
+          <span
+            style={{
+              ...styles.tipoBadge,
+              backgroundColor: getTipoColor(getTipoEmenda(despesa.emendaId)),
+            }}
+          >
+            {getTipoEmenda(despesa.emendaId)}
+          </span>
+        </td>
+      )}
+      <td style={styles.td}>
+        <div style={styles.fornecedorCell}>{despesa.fornecedor || "-"}</div>
+      </td>
+      <td style={styles.tdValue}>
+        R${" "}
+        {(despesa.valor || 0).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+        })}
+      </td>
+      <td style={styles.td}>
+        <span
+          style={{
+            ...styles.statusBadge,
+            backgroundColor: getStatusColor(despesa.status),
+          }}
+        >
+          {despesa.status || "pendente"}
+        </span>
+      </td>
+      {modoVisualizacao === "detalhado" && (
+        <>
+          <td style={styles.td}>
+            <span style={styles.numeroCell}>
+              {despesa.numeroContrato || "-"}
+            </span>
+          </td>
+          <td style={styles.td}>
+            <div style={styles.discriminacaoCell}>
+              {despesa.discriminacao || "-"}
+            </div>
+          </td>
+        </>
+      )}
+      <td style={styles.td}>
+        <span style={styles.numeroCell}>{despesa.numeroEmpenho || "-"}</span>
+      </td>
+      <td style={styles.td}>
+        <span style={styles.numeroCell}>
+          {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
+        </span>
+      </td>
+      <td style={styles.td}>
+        <span style={styles.dataCell}>
+          {formatarDataFirestore(despesa.dataPagamento)}
+        </span>
+      </td>
+      <td style={styles.tdActions}>
+        <div style={styles.actionsContainer}>
+          <button
+            onClick={() => handleVisualizar(despesa)}
+            style={styles.viewButton}
+            title="Visualizar despesa"
+          >
+            👁️
+          </button>
+          <button
+            onClick={() => handleEditar(despesa)}
+            style={styles.editButton}
+            title="Editar despesa"
+            disabled={excluindo === despesa.id}
+          >
+            ✏️
+          </button>
+          <button
+            onClick={() => confirmarExclusao(despesa)}
+            style={styles.deleteButton}
+            title="Excluir despesa"
+            disabled={excluindo === despesa.id}
+          >
+            {excluindo === despesa.id ? "⏳" : "🗑️"}
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+
   return (
     <div style={styles.container}>
       <div style={styles.tableContainer}>
         {/* Toggle de visualização */}
         <div style={styles.viewToggleContainer}>
-          <button
-            onClick={() => setModoVisualizacao("resumido")}
-            style={{
-              ...styles.toggleButton,
-              ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
-            }}
-          >
-            📊 Resumido
-          </button>
-          <button
-            onClick={() => setModoVisualizacao("detalhado")}
-            style={{
-              ...styles.toggleButton,
-              ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),
-            }}
-          >
-            📋 Detalhado
-          </button>
+          {/* 🆕 Toggle de Agrupamento */}
+          <div style={styles.toggleGroup}>
+            <button
+              onClick={() => setModoAgrupamento("agrupado")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoAgrupamento === "agrupado"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📁 Agrupado por Emenda
+            </button>
+            <button
+              onClick={() => setModoAgrupamento("lista")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoAgrupamento === "lista"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📄 Lista Completa
+            </button>
+          </div>
+
+          {/* Toggle Resumido/Detalhado */}
+          <div style={styles.toggleGroup}>
+            <button
+              onClick={() => setModoVisualizacao("resumido")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoVisualizacao === "resumido"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📊 Resumido
+            </button>
+            <button
+              onClick={() => setModoVisualizacao("detalhado")}
+              style={{
+                ...styles.toggleButton,
+                ...(modoVisualizacao === "detalhado"
+                  ? styles.toggleButtonActive
+                  : {}),
+              }}
+            >
+              📋 Detalhado
+            </button>
+          </div>
         </div>
 
-        {/* Tabela */}
-        <table style={styles.table}>
-          <thead>
-            <tr style={styles.headerRow}>
-              <th style={styles.th}>Emenda</th>
-              <th style={styles.th}>Tipo</th>
-              <th style={styles.th}>Fornecedor</th>
-              <th style={styles.th}>Valor</th>
-              <th style={styles.th}>Saldo</th>
-              <th style={styles.th}>%</th>
-              {modoVisualizacao === "detalhado" && (
-                <>
-                  <th style={styles.th}>Nº Contrato</th>
-                  <th style={styles.th}>Discriminação</th>
-                </>
+        {/* 🆕 MODO AGRUPADO POR EMENDA */}
+        {modoAgrupamento === "agrupado" ? (
+          <>
+            {despesasAgrupadas.map((grupo, grupoIndex) => (
+              <div key={grupo.emenda.id} style={styles.grupoEmenda}>
+                {/* Header do Grupo */}
+                <div style={styles.grupoHeader}>
+                  <div style={styles.grupoInfo}>
+                    <span style={styles.grupoNumero}>
+                      Emenda {grupo.emenda.numero}
+                    </span>
+                    <span style={styles.grupoSeparator}>•</span>
+                    <span style={styles.grupoParlamentar}>
+                      {grupo.emenda.parlamentar || grupo.emenda.autor || "N/A"}
+                    </span>
+                    <span style={styles.grupoSeparator}>•</span>
+                    <span
+                      style={{
+                        ...styles.grupoTipo,
+                        backgroundColor: getTipoColor(grupo.emenda.tipo),
+                      }}
+                    >
+                      {grupo.emenda.tipo || "N/A"}
+                    </span>
+                  </div>
+                  <div style={styles.grupoStats}>
+                    <span style={styles.grupoQtd}>
+                      {grupo.despesas.length} pagamento(s)
+                    </span>
+                    <span style={styles.grupoSeparator}>•</span>
+                    <span style={styles.grupoTotal}>
+                      R${" "}
+                      {grupo.totalValor.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Tabela do Grupo */}
+                <table style={styles.table}>
+                  <thead>
+                    <tr style={styles.headerRow}>
+                      <th style={styles.th}>Fornecedor</th>
+                      <th style={styles.th}>Valor</th>
+                      <th style={styles.th}>Status</th>
+                      {modoVisualizacao === "detalhado" && (
+                        <>
+                          <th style={styles.th}>Nº Contrato</th>
+                          <th style={styles.th}>Discriminação</th>
+                        </>
+                      )}
+                      <th style={styles.th}>Nº Empenho</th>
+                      <th style={styles.th}>Nº NF</th>
+                      <th style={styles.th}>Data Pgto</th>
+                      <th style={styles.th}>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {grupo.despesas.map((despesa, index) =>
+                      renderDespesaRow(despesa, index, false),
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </>
+        ) : (
+          /* MODO LISTA COMPLETA */
+          <table style={styles.table}>
+            <thead>
+              <tr style={styles.headerRow}>
+                <th style={styles.th}>Emenda</th>
+                <th style={styles.th}>Tipo</th>
+                <th style={styles.th}>Fornecedor</th>
+                <th style={styles.th}>Valor</th>
+                <th style={styles.th}>Status</th>
+                {modoVisualizacao === "detalhado" && (
+                  <>
+                    <th style={styles.th}>Nº Contrato</th>
+                    <th style={styles.th}>Discriminação</th>
+                  </>
+                )}
+                <th style={styles.th}>Nº Empenho</th>
+                <th style={styles.th}>Nº NF</th>
+                <th style={styles.th}>Data Pgto</th>
+                <th style={styles.th}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {despesas.map((despesa, index) =>
+                renderDespesaRow(despesa, index, true),
               )}
-              <th style={styles.th}>Nº Empenho</th>
-              <th style={styles.th}>Nº NF</th>
-              <th style={styles.th}>Data Pgto</th>
-              <th style={styles.th}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {despesas.map((despesa, index) => {
-              const saldoInfo = getEmendaSaldoInfo(despesa.emendaId, despesa.id);
-              return (
-                <tr
-                  key={despesa.id}
-                  style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
-                >
-                  <td style={styles.td}>
-                    <div style={styles.emendaCell}>
-                      {getEmendaInfo(despesa.emendaId)}
-                    </div>
-                  </td>
-                  <td style={styles.td}>
-                    {(() => {
-                      const emenda = emendas.find((e) => e.id === despesa.emendaId);
-                      const tipo = emenda?.tipo || "-";
-                      return (
-                        <span style={{
-                          ...styles.tipoBadge,
-                          backgroundColor: 
-                            tipo === "Individual" ? "#007bff" :
-                            tipo === "Bancada" ? "#28a745" :
-                            tipo === "Custeio PAP" ? "#007bff" :
-                            tipo === "Custeio MAC" ? "#28a745" :
-                            tipo === "Investimento PAP" ? "#ffc107" :
-                            tipo === "Investimento MAC" ? "#6f42c1" :
-                            tipo === "Custeio PAP – Estadual" ? "#17a2b8" :
-                            tipo === "Custeio MAC – Estadual" ? "#fd7e14" :
-                            "#adb5bd"
-                        }}>
-                          {tipo}
-                        </span>
-                      );
-                    })()}
-                  </td>
-                  <td style={styles.td}>
-                    <div style={styles.fornecedorCell}>
-                      {despesa.fornecedor || "-"}
-                    </div>
-                  </td>
-                  <td style={styles.tdValue}>
-                    R$ {(despesa.valor || 0).toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                  <td style={{
-                    ...styles.tdValue,
-                    color: saldoInfo ? getSaldoColor(saldoInfo.percentualExecutado) : "#666"
-                  }}>
-                    {saldoInfo ? (
-                      <>
-                        {getSaldoIndicator(saldoInfo.percentualExecutado)}{" "}
-                        R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </>
-                    ) : "-"}
-                  </td>
-                  <td style={styles.td}>
-                    {saldoInfo ? (
-                      <div style={{
-                        ...styles.percentualCell,
-                        backgroundColor: `${getSaldoColor(saldoInfo.percentualExecutado)}15`,
-                        color: getSaldoColor(saldoInfo.percentualExecutado)
-                      }}>
-                        {saldoInfo.percentualExecutado.toFixed(1)}%
-                      </div>
-                    ) : "-"}
-                  </td>
-                  {modoVisualizacao === "detalhado" && (
-                    <>
-                      <td style={styles.td}>
-                        <span style={styles.numeroCell}>
-                          {despesa.numeroContrato || "-"}
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <div style={styles.discriminacaoCell}>
-                          {despesa.discriminacao || "-"}
-                        </div>
-                      </td>
-                    </>
-                  )}
-                  <td style={styles.td}>
-                    <span style={styles.numeroCell}>
-                      {despesa.numeroEmpenho || "-"}
-                    </span>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.numeroCell}>
-                      {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
-                    </span>
-                  </td>
-                  <td style={styles.td}>
-                    <span style={styles.dataCell}>
-                      {formatarDataFirestore(despesa.dataPagamento)}
-                    </span>
-                  </td>
-                  <td style={styles.tdActions}>
-                    <div style={styles.actionsContainer}>
-                      <button
-                        onClick={() => handleVisualizar(despesa)}
-                        style={styles.viewButton}
-                        title="Visualizar despesa"
-                      >
-                        👁️
-                      </button>
-                      <button
-                        onClick={() => handleEditar(despesa)}
-                        style={styles.editButton}
-                        title="Editar despesa"
-                        disabled={excluindo === despesa.id}
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => confirmarExclusao(despesa)}
-                        style={styles.deleteButton}
-                        title="Excluir despesa"
-                        disabled={excluindo === despesa.id}
-                      >
-                        {excluindo === despesa.id ? "⏳" : "🗑️"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        )}
 
         {/* Estado Vazio */}
         {despesas.length === 0 && (
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>💰</div>
-            <h3 style={styles.emptyTitle}>Nenhuma despesa registrada</h3>
+            <h3 style={styles.emptyTitle}>Nenhum pagamento registrado</h3>
             <p style={styles.emptyText}>
               Clique em "Nova Despesa" para começar
             </p>
@@ -378,7 +443,7 @@ export default function DespesasTable({
       {despesas.length > 0 && (
         <div style={styles.summarySection}>
           <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Total de Despesas:</span>
+            <span style={styles.summaryLabel}>Total de Pagamentos:</span>
             <span style={styles.summaryValue}>{despesas.length}</span>
           </div>
           <div style={styles.summaryCard}>
@@ -387,54 +452,28 @@ export default function DespesasTable({
               {new Set(despesas.map((d) => d.emendaId)).size}
             </span>
           </div>
-
-          {/* Indicador de Saldos Críticos */}
-          {(() => {
-            const emendasCriticas = new Set();
-            const emendasProcessadas = new Set();
-
-            despesas.forEach(d => {
-              if (!emendasProcessadas.has(d.emendaId)) {
-                const todasDespesasEmenda = despesas.filter(desp => desp.emendaId === d.emendaId);
-                const ultimaDespesa = todasDespesasEmenda[todasDespesasEmenda.length - 1];
-                if (ultimaDespesa) {
-                  const saldoFinal = getEmendaSaldoInfo(d.emendaId, ultimaDespesa.id);
-                  if (saldoFinal && saldoFinal.percentualExecutado >= 90) {
-                    emendasCriticas.add(d.emendaId);
-                  }
-                }
-                emendasProcessadas.add(d.emendaId);
-              }
-            });
-
-            if (emendasCriticas.size > 0) {
-              return (
-                <div style={styles.summaryCard}>
-                  <span style={styles.summaryLabel}>⚠️ Emendas Críticas:</span>
-                  <span style={{ ...styles.summaryValue, color: ERROR }}>
-                    {emendasCriticas.size}
-                  </span>
-                </div>
-              );
-            }
-            return null;
-          })()}
+          <div style={styles.summaryCard}>
+            <span style={styles.summaryLabel}>Valor Total:</span>
+            <span style={styles.summaryValue}>
+              R${" "}
+              {despesas
+                .reduce((soma, d) => soma + (d.valor || 0), 0)
+                .toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            </span>
+          </div>
         </div>
       )}
 
-      {/* Modal de Confirmação - MELHORADO */}
+      {/* Modal de Confirmação */}
       {confirmExclusao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
-            {/* Header simplificado */}
             <div style={styles.modalHeader}>
               <span style={styles.modalIcon}>⚠️</span>
-              <h3 style={styles.modalTitle}>Excluir Despesa</h3>
+              <h3 style={styles.modalTitle}>Excluir Pagamento</h3>
             </div>
 
-            {/* Corpo com informações organizadas */}
             <div style={styles.modalBody}>
-              {/* Card com dados da despesa */}
               <div style={styles.despesaCard}>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Fornecedor:</span>
@@ -443,55 +482,34 @@ export default function DespesasTable({
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Valor:</span>
                   <span style={styles.valueHighlight}>
-                    R$ {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
+                    R${" "}
+                    {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Nº Empenho:</span>
-                  <span style={styles.value}>{confirmExclusao.numeroEmpenho || "-"}</span>
+                  <span style={styles.value}>
+                    {confirmExclusao.numeroEmpenho || "-"}
+                  </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Descrição:</span>
-                  <span style={styles.value}>{confirmExclusao.discriminacao || "-"}</span>
+                  <span style={styles.value}>
+                    {confirmExclusao.discriminacao || "-"}
+                  </span>
                 </div>
               </div>
 
-              {/* Resumo financeiro */}
-              {(() => {
-                const saldoInfo = getEmendaSaldoInfo(confirmExclusao.emendaId, confirmExclusao.id);
-                if (saldoInfo) {
-                  const novoSaldo = saldoInfo.saldoAtual + confirmExclusao.valor;
-                  return (
-                    <div style={styles.financialSummary}>
-                      <div style={styles.summaryItem}>
-                        <span>Saldo Atual:</span>
-                        <span>R$ {saldoInfo.saldoAtual.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}</span>
-                      </div>
-                      <div style={styles.summaryItemAfter}>
-                        <span>Saldo Após Exclusão:</span>
-                        <span style={styles.successValue}>
-                          R$ {novoSaldo.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {/* Aviso simplificado */}
               <div style={styles.warningMessage}>
-                <p>Esta ação não pode ser desfeita. O valor será devolvido ao saldo da emenda.</p>
+                <p>
+                  Esta ação não pode ser desfeita. O valor será devolvido ao
+                  saldo da emenda.
+                </p>
               </div>
             </div>
 
-            {/* Footer com botões */}
             <div style={styles.modalFooter}>
               <button
                 onClick={() => setConfirmExclusao(null)}
@@ -505,7 +523,9 @@ export default function DespesasTable({
                 style={styles.confirmDeleteButton}
                 disabled={excluindo === confirmExclusao.id}
               >
-                {excluindo === confirmExclusao.id ? "Excluindo..." : "Confirmar Exclusão"}
+                {excluindo === confirmExclusao.id
+                  ? "Excluindo..."
+                  : "Confirmar Exclusão"}
               </button>
             </div>
           </div>
@@ -515,7 +535,7 @@ export default function DespesasTable({
   );
 }
 
-// ✅ Estilos
+// ✅ Estilos otimizados
 const styles = {
   container: {
     backgroundColor: WHITE,
@@ -531,11 +551,18 @@ const styles = {
 
   viewToggleContainer: {
     display: "flex",
-    justifyContent: "flex-end",
-    gap: "8px",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: "16px",
     padding: "12px",
     backgroundColor: "#f8f9fa",
     borderBottom: "1px solid #dee2e6",
+    flexWrap: "wrap",
+  },
+
+  toggleGroup: {
+    display: "flex",
+    gap: "8px",
   },
 
   toggleButton: {
@@ -550,12 +577,81 @@ const styles = {
     fontWeight: "500",
     cursor: "pointer",
     transition: "all 0.2s",
+    whiteSpace: "nowrap",
   },
 
   toggleButtonActive: {
     background: PRIMARY,
     color: "white",
     borderColor: PRIMARY,
+  },
+
+  // 🆕 Estilos para agrupamento
+  grupoEmenda: {
+    marginBottom: "24px",
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    overflow: "hidden",
+  },
+
+  grupoHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "16px 20px",
+    backgroundColor: "#f8f9fa",
+    borderBottom: "2px solid #dee2e6",
+    flexWrap: "wrap",
+    gap: "12px",
+  },
+
+  grupoInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap",
+  },
+
+  grupoNumero: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: PRIMARY,
+  },
+
+  grupoParlamentar: {
+    fontSize: "14px",
+    color: "#495057",
+  },
+
+  grupoSeparator: {
+    color: "#adb5bd",
+  },
+
+  grupoTipo: {
+    fontSize: "11px",
+    fontWeight: "600",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    color: "white",
+  },
+
+  grupoStats: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+
+  grupoQtd: {
+    fontSize: "13px",
+    color: "#6c757d",
+    fontWeight: "500",
+  },
+
+  grupoTotal: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: SUCCESS,
+    fontFamily: "monospace",
   },
 
   table: {
@@ -656,16 +752,6 @@ const styles = {
     fontWeight: "500",
   },
 
-  percentualCell: {
-    display: "inline-block",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    fontSize: "11px",
-    fontWeight: "600",
-    minWidth: "50px",
-    textAlign: "center",
-  },
-
   discriminacaoCell: {
     maxWidth: 120,
     overflow: "hidden",
@@ -682,6 +768,17 @@ const styles = {
     color: "white",
     display: "inline-block",
     whiteSpace: "nowrap",
+  },
+
+  statusBadge: {
+    fontSize: "11px",
+    fontWeight: "600",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    color: "white",
+    display: "inline-block",
+    whiteSpace: "nowrap",
+    textTransform: "capitalize",
   },
 
   actionsContainer: {
@@ -822,6 +919,10 @@ const styles = {
     color: "#1f2937",
   },
 
+  modalBody: {
+    padding: "24px",
+  },
+
   despesaCard: {
     background: "#f9fafb",
     border: "1px solid #e5e7eb",
@@ -852,39 +953,6 @@ const styles = {
   valueHighlight: {
     fontWeight: "600",
     color: ERROR,
-    fontSize: 16,
-  },
-
-  financialSummary: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-    padding: 16,
-    background: "#f0f9ff",
-    border: "1px solid #bfdbfe",
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-
-  summaryItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: 14,
-  },
-
-  summaryItemAfter: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: 14,
-    fontWeight: "600",
-    paddingTop: 12,
-    borderTop: "1px solid #bfdbfe",
-  },
-
-  successValue: {
-    color: SUCCESS,
     fontSize: 16,
   },
 

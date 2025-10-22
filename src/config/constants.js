@@ -1,31 +1,114 @@
 // src/config/constants.js
-// ✅ Este arquivo centraliza constantes de configuração para o projeto.
-// Ele lê valores de variáveis de ambiente (via Vite) quando disponíveis
-// e define valores padrão quando não houver configuração externa.
+// 🎯 Constantes centralizadas do SICEFSUS
+// ✅ Atualizado em: 21/10/2025
 
-/**
- * Lista de emails de administradores com permissões especiais.
- *
- * Se a variável de ambiente `VITE_ADMIN_EMAILS` estiver definida, ela deve
- * conter uma lista separada por vírgulas de emails que terão acesso ao
- * painel administrativo. Por exemplo:
- *
- * ```env
- * VITE_ADMIN_EMAILS="admin@example.com, user@example.com"
- * ```
- *
- * Caso não seja fornecido, o array será vazio e apenas usuários com
- * `role === 'admin'` terão acesso.
- */
-export const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || "")
-  .split(",")
-  .map((email) => email.trim().toLowerCase())
-  .filter((email) => email.length > 0);
+// ========================================
+// 📋 PROGRAMAS DE SAÚDE (EMENDAS)
+// ========================================
+export const PROGRAMAS_SAUDE = [
+  "INCREMENTO AO CUSTEIO DE SERVIÇOS DA ATENÇÃO PRIMÁRIA À SAÚDE",
+  "CUSTEIO DE SERVIÇOS DA ATENÇÃO PRIMÁRIA À SAÚDE",
+  "CUSTEIO DE SERVIÇOS DA ATENÇÃO ESPECIALIZADA À SAÚDE",
+  "INCREMENTO AO CUSTEIO DE SERVIÇOS DA ATENÇÃO ESPECIALIZADA À SAÚDE",
+];
 
-/**
- * Número padrão de itens por página nas listagens paginadas. Caso deseje
- * alterar o valor global, defina `VITE_DEFAULT_PAGE_SIZE` no arquivo `.env`.
- */
-export const DEFAULT_PAGE_SIZE = Number(
-  import.meta.env.VITE_DEFAULT_PAGE_SIZE || 10,
-);
+// ========================================
+// 💰 NATUREZA DE DESPESAS (EMENDAS E DESPESAS)
+// ========================================
+export const NATUREZAS_DESPESA = [
+  "339004 - CONTRATACAO POR TEMPO DETERMINADO - PES.CIVIL",
+  "339092 - DESPESAS DE EXERCICIOS ANTERIORES",
+  "339037 - LOCACAO DE MAO-DE-OBRA",
+  "339030 - MATERIAL DE CONSUMO",
+  "339039 - OUTROS SERVICOS DE TERCEIROS-PESSOA JURIDICA",
+  "339033 - PASSAGENS E DESPESAS COM LOCOMOCAO",
+  "339040 - SERVICOS DE TECNOLOGIA DA INFORMACAO E COMUNICACAO - PESSOA JURIDICA",
+  "339018 - AUXÍLIO FINANCEIRO A ESTUDANTES",
+  "337200 - EXECUÇÃO ORÇAMENTÁRIA DELEGADA A CONSÓRCIOS PÚBLICOS",
+  "339032 - MATERIAL DE DISTRIBUICAO GRATUITA",
+  "339034 - OUTRAS DESPESAS DE PESSOAL - CONTRATOS DE TERCEIRIZACAO",
+  "339048 - OUTROS AUXILIOS FINANCEIROS A PESSOA FISICA",
+  "339036 - OUTROS SERVICOS DE TERCEIROS - PESSOA FISICA",
+  "339031 - PREMIACOES CULT., ART., CIENT., DESP. E OUTR.",
+  "337170 - RATEIO PELA PARTICIPAÇÃO EM CONSÓRCIO PÚBLICO",
+  "339035 - SERVICOS DE CONSULTORIA",
+  "335085 - TRANSFERENCIAS POR MEIO DE CONTRATO DE GESTAO",
+  "337100 - TRANSFERÊNCIAS A CONSÓRCIOS PÚBLICOS MEDIANTE CONTRATO DE RATEIO",
+];
+
+// ========================================
+// 🏛️ OBJETOS DA EMENDA
+// ========================================
+export const OBJETOS_EMENDA = [
+  "Custeio PAP",
+  "Custeio MAC",
+  "Investimento PAP",
+  "Investimento MAC",
+  "Custeio PAP – Estadual",
+  "Custeio MAC – Estadual",
+];
+
+// ========================================
+// 🎯 AÇÕES ORÇAMENTÁRIAS (DESPESAS)
+// ========================================
+export const ACOES_ORCAMENTARIAS = [
+  {
+    codigo: "8535",
+    descricao: "Estruturação de Unidades de Atenção Especializada em Saúde",
+  },
+  {
+    codigo: "8536",
+    descricao: "Estruturação da Rede de Serviços de Atenção Básica de Saúde",
+  },
+  {
+    codigo: "8585",
+    descricao:
+      "Atenção à Saúde da População para Procedimentos em Média e Alta Complexidade",
+  },
+  {
+    codigo: "8730",
+    descricao:
+      "Atenção à Saúde da População para Procedimentos de Média e Alta Complexidade",
+  },
+  { codigo: "20AD", descricao: "Atenção Primária à Saúde" },
+  {
+    codigo: "21C0",
+    descricao:
+      "Recursos para estruturação da rede de serviços de atenção básica",
+  },
+];
+
+// ========================================
+// 📊 CATEGORIAS DE DESPESAS
+// ========================================
+export const CATEGORIAS_DESPESAS = [
+  "equipamentos",
+  "reformas",
+  "construcao",
+  "servicos",
+  "medicamentos",
+  "materiais",
+  "outros",
+];
+
+// ========================================
+// 📈 STATUS DE DESPESAS
+// ========================================
+export const STATUS_DESPESAS = [
+  { value: "pendente", label: "Pendente" },
+  { value: "empenhado", label: "Empenhado" },
+  { value: "liquidado", label: "Liquidado" },
+  { value: "pago", label: "Pago" },
+  { value: "cancelado", label: "Cancelado" },
+];
+
+// ========================================
+// 🗂️ ELEMENTOS DE DESPESA (para DespesaForm)
+// ========================================
+export const ELEMENTOS_DESPESA = [
+  "3.3.90.30.99 - Outros Materiais de Consumo",
+  "3.3.90.30.01 - Material de Consumo",
+  "3.3.90.39.01 - Serviços de Terceiros - Pessoa Jurídica",
+  "4.4.90.51.00 - Obras e Instalações",
+  "4.4.90.52.00 - Equipamentos e Material Permanente",
+];

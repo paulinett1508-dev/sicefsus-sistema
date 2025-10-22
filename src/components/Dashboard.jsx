@@ -1,14 +1,22 @@
-// src/components/Dashboard.jsx - VERSÃO PROFISSIONAL
-// ✅ FOCO: Visão gerencial e tomada de decisões
-// ✅ UX: Cards informativos com insights acionáveis
-// ✅ MANTIDO: Padrões visuais do sistema
+// src/components/Dashboard.jsx - VERSÃO ESTRATÉGICA REFATORADA
+// ✅ Integra todos os novos componentes
+// ✅ Preserva CronogramaWidget existente
+// ✅ Remove redundâncias do MetricsGrid
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../context/UserContext";
 import usePermissions from "../hooks/usePermissions";
 import useDashboardData from "../hooks/useDashboardData";
+
+// ✅ Componentes existentes (manter)
 import CronogramaWidget from "./DashboardComponents/CronogramaWidget";
+
+// 🆕 Novos componentes estratégicos
+import DashboardExecucao from "./DashboardComponents/DashboardExecucao";
+import DashboardTimeline from "./DashboardComponents/DashboardTimeline";
+import DashboardVelocidade from "./DashboardComponents/DashboardVelocidade";
+import DashboardRankings from "./DashboardComponents/DashboardRankings";
+import DashboardMunicipios from "./DashboardComponents/DashboardMunicipios";
 
 const Dashboard = ({ usuario }) => {
   const navigate = useNavigate();
@@ -18,6 +26,8 @@ const Dashboard = ({ usuario }) => {
 
   const { emendas, despesas, loading, error, stats, recarregar } =
     useDashboardData(user, permissions);
+
+  // ==================== ESTADOS DE CARREGAMENTO ====================
 
   // Loading inicial
   if (userLoading || !user || !user.email || !user.tipo) {
@@ -64,7 +74,8 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
-  // Cálculos para insights
+  // ==================== CÁLCULOS PARA INSIGHTS ====================
+
   const taxaExecucao =
     stats.valorTotalEmendas > 0
       ? ((stats.valorExecutado / stats.valorTotalEmendas) * 100).toFixed(1)
@@ -87,33 +98,47 @@ const Dashboard = ({ usuario }) => {
     return validade && validade < hoje && e.percentualExecutado < 100;
   }).length;
 
-  const topEmendas = [...emendas]
-    .sort((a, b) => (b.valorRecurso || 0) - (a.valorRecurso || 0))
-    .slice(0, 5);
+  // ==================== RENDER PRINCIPAL ====================
 
   return (
     <div style={styles.container}>
-      {/* Header Profissional */}
+      {/* ========== HEADER PERSONALIZADO ========== */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>Dashboard Gerencial</h1>
+          <div style={styles.headerTop}>
+            <h1 style={styles.title}>👋 Bem-vindo, {user.nome || "Usuário"}</h1>
+            <div style={styles.badges}>
+              <span
+                style={{
+                  ...styles.badge,
+                  backgroundColor:
+                    user.tipo === "admin" ? "#E74C3C" : "#27AE60",
+                }}
+              >
+                {user.tipo === "admin" ? "👑 Admin" : "👤 Operador"}
+              </span>
+              {!permissions.acessoTotal && (
+                <span style={{ ...styles.badge, backgroundColor: "#3498DB" }}>
+                  📍 {user.municipio}/{user.uf}
+                </span>
+              )}
+            </div>
+          </div>
           <p style={styles.subtitle}>
-            {permissions.acessoTotal
-              ? "Visão geral do sistema"
-              : `${user.municipio}/${user.uf}`}
+            {new Date().toLocaleDateString("pt-BR", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
         </div>
-        <div style={styles.headerActions}>
-          <span style={styles.lastUpdate}>
-            Atualizado em: {new Date().toLocaleString("pt-BR")}
-          </span>
-          <button onClick={recarregar} style={styles.refreshButton}>
-            🔄 Atualizar
-          </button>
-        </div>
+        <button onClick={recarregar} style={styles.refreshButton}>
+          🔄 Atualizar
+        </button>
       </div>
 
-      {/* Cards de Métricas Principais */}
+      {/* ========== CARDS DE MÉTRICAS PRINCIPAIS (INSIGHTS) ========== */}
       <div style={styles.metricsGrid}>
         <MetricCard
           title="Valor Total"
@@ -149,10 +174,10 @@ const Dashboard = ({ usuario }) => {
         />
       </div>
 
-      {/* Insights Acionáveis */}
+      {/* ========== ALERTAS CRÍTICOS ========== */}
       {(emendasCriticas > 0 || emendasVencidas > 0) && (
         <div style={styles.alertsSection}>
-          <h2 style={styles.sectionTitle}>⚡ Ações Necessárias</h2>
+          <h2 style={styles.sectionTitle}>🚨 Requer Atenção Imediata</h2>
           <div style={styles.alertsGrid}>
             {emendasCriticas > 0 && (
               <AlertCard
@@ -176,79 +201,30 @@ const Dashboard = ({ usuario }) => {
         </div>
       )}
 
-      {/* Visão por Status */}
-      <div style={styles.statusSection}>
-        <h2 style={styles.sectionTitle}>📈 Distribuição por Status</h2>
-        <div style={styles.statusGrid}>
-          <StatusCard
-            status="Executando"
-            count={
-              emendas.filter((e) => {
-                const percentual = e.percentualExecutado || 0;
-                return percentual > 0 && percentual < 100;
-              }).length
-            }
-            total={stats.totalEmendas}
-            color="#F39C12"
-          />
-          <StatusCard
-            status="Concluídas"
-            count={
-              emendas.filter((e) => {
-                const percentual = e.percentualExecutado || 0;
-                return percentual >= 100;
-              }).length
-            }
-            total={stats.totalEmendas}
-            color="#27AE60"
-          />
-          <StatusCard
-            status="Não Iniciadas"
-            count={
-              emendas.filter((e) => {
-                const percentual = e.percentualExecutado || 0;
-                const totalDespesas = e.totalDespesas || 0;
-                return percentual === 0 && totalDespesas === 0;
-              }).length
-            }
-            total={stats.totalEmendas}
-            color="#95A5A6"
-          />
-          <StatusCard
-            status="Vencidas"
-            count={emendasVencidas}
-            total={stats.totalEmendas}
-            color="#E74C3C"
-          />
-        </div>
+      {/* ========== GRID PRINCIPAL: EXECUÇÃO + TIMELINE ========== */}
+      <div style={styles.mainGrid}>
+        <DashboardExecucao emendas={emendas} />
+        <DashboardTimeline emendas={emendas} />
       </div>
 
-      {/* Top Emendas */}
-      {topEmendas.length > 0 && (
-        <div style={styles.topEmendasSection}>
-          <h2 style={styles.sectionTitle}>🏆 Maiores Emendas</h2>
-          <div style={styles.topEmendasGrid}>
-            {topEmendas.map((emenda, index) => (
-              <TopEmendaCard
-                key={emenda.id}
-                rank={index + 1}
-                emenda={emenda}
-                onClick={() => navigate(`/emendas/${emenda.id}`)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ========== GRID SECUNDÁRIO: RANKINGS + VELOCIDADE ========== */}
+      <div style={styles.mainGrid}>
+        <DashboardRankings emendas={emendas} />
+        <DashboardVelocidade despesas={despesas} stats={stats} />
+      </div>
 
-      {/* Cronograma Widget */}
+      {/* ========== RANKING DE MUNICÍPIOS (Admin Only) ========== */}
+      <DashboardMunicipios emendas={emendas} userRole={user.tipo} />
+
+      {/* ========== CRONOGRAMA WIDGET (EXISTENTE - PRESERVADO) ========== */}
       {emendas.length > 0 && (
         <div style={styles.cronogramaSection}>
-          <h2 style={styles.sectionTitle}>📅 Cronograma de Execução</h2>
+          <h2 style={styles.sectionTitle}>📅 Acompanhamento de Prazos</h2>
           <CronogramaWidget emendas={emendas} />
         </div>
       )}
 
-      {/* Estado Vazio */}
+      {/* ========== ESTADO VAZIO ========== */}
       {stats.totalEmendas === 0 && (
         <EmptyState
           isAdmin={permissions.acessoTotal}
@@ -259,7 +235,8 @@ const Dashboard = ({ usuario }) => {
   );
 };
 
-// Componente MetricCard
+// ==================== COMPONENTES AUXILIARES ====================
+
 const MetricCard = ({
   title,
   value,
@@ -299,7 +276,6 @@ const MetricCard = ({
   </div>
 );
 
-// Componente AlertCard
 const AlertCard = ({ type, title, message, action, onAction }) => (
   <div
     style={{
@@ -322,57 +298,6 @@ const AlertCard = ({ type, title, message, action, onAction }) => (
   </div>
 );
 
-// Componente StatusCard
-const StatusCard = ({ status, count, total, color }) => (
-  <div style={styles.statusCard}>
-    <div style={{ ...styles.statusIndicator, backgroundColor: color }} />
-    <div style={styles.statusContent}>
-      <span style={styles.statusLabel}>{status}</span>
-      <span style={styles.statusCount}>{count}</span>
-      <span style={styles.statusPercent}>
-        {total > 0 ? `${((count / total) * 100).toFixed(0)}%` : "0%"}
-      </span>
-    </div>
-  </div>
-);
-
-// Componente TopEmendaCard
-const TopEmendaCard = ({ rank, emenda, onClick }) => (
-  <div style={styles.topEmendaCard} onClick={onClick}>
-    <div style={styles.topEmendaRank}>#{rank}</div>
-    <div style={styles.topEmendaContent}>
-      <div style={styles.topEmendaHeader}>
-        <span style={styles.topEmendaNumero}>{emenda.numero}</span>
-        <span style={styles.topEmendaValor}>
-          {formatCurrency(emenda.valorRecurso || 0)}
-        </span>
-      </div>
-      <div style={styles.topEmendaInfo}>
-        <span>{emenda.parlamentar}</span>
-        <span style={styles.topEmendaDivider}>•</span>
-        <span>
-          {emenda.municipio}/{emenda.uf}
-        </span>
-      </div>
-      <div style={styles.topEmendaProgress}>
-        <div style={styles.progressBar}>
-          <div
-            style={{
-              ...styles.progressFill,
-              width: `${emenda.percentualExecutado || 0}%`,
-              backgroundColor: getProgressColor(emenda.percentualExecutado),
-            }}
-          />
-        </div>
-        <span style={styles.topEmendaPercent}>
-          {(emenda.percentualExecutado || 0).toFixed(0)}% executado
-        </span>
-      </div>
-    </div>
-  </div>
-);
-
-// Componentes auxiliares
 const LoadingState = ({ message }) => (
   <div style={styles.loadingContainer}>
     <div style={styles.spinner}></div>
@@ -404,7 +329,8 @@ const EmptyState = ({ isAdmin, municipio }) => (
   </div>
 );
 
-// Funções auxiliares
+// ==================== FUNÇÕES AUXILIARES ====================
+
 const formatCurrency = (value) => {
   return (value || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -412,14 +338,8 @@ const formatCurrency = (value) => {
   });
 };
 
-const getProgressColor = (percent) => {
-  if (percent >= 80) return "#27AE60";
-  if (percent >= 50) return "#F39C12";
-  if (percent >= 20) return "#E67E22";
-  return "#E74C3C";
-};
+// ==================== ESTILOS ====================
 
-// Estilos
 const styles = {
   container: {
     padding: "24px",
@@ -432,11 +352,19 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "32px",
-    padding: "20px",
+    marginBottom: "24px",
+    padding: "24px",
     backgroundColor: "white",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    flexWrap: "wrap",
+    gap: "16px",
+  },
+  headerTop: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap",
   },
   title: {
     fontSize: "28px",
@@ -444,26 +372,31 @@ const styles = {
     color: "#154360",
     margin: 0,
   },
+  badges: {
+    display: "flex",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  badge: {
+    padding: "4px 12px",
+    borderRadius: "12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "white",
+  },
   subtitle: {
     fontSize: "14px",
     color: "#666",
-    marginTop: "4px",
-  },
-  headerActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-  lastUpdate: {
-    fontSize: "12px",
-    color: "#999",
+    marginTop: "8px",
+    marginBottom: 0,
+    textTransform: "capitalize",
   },
   refreshButton: {
     backgroundColor: "#4A90E2",
     color: "white",
     border: "none",
-    padding: "8px 16px",
-    borderRadius: "6px",
+    padding: "10px 20px",
+    borderRadius: "8px",
     fontSize: "14px",
     fontWeight: "600",
     cursor: "pointer",
@@ -473,7 +406,7 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
-    marginBottom: "32px",
+    marginBottom: "24px",
   },
   metricCard: {
     backgroundColor: "white",
@@ -518,7 +451,7 @@ const styles = {
     transition: "width 0.3s ease",
   },
   alertsSection: {
-    marginBottom: "32px",
+    marginBottom: "24px",
   },
   sectionTitle: {
     fontSize: "20px",
@@ -534,7 +467,7 @@ const styles = {
   alertCard: {
     padding: "20px",
     borderRadius: "8px",
-    border: "1px solid",
+    border: "2px solid",
   },
   alertTitle: {
     fontSize: "16px",
@@ -556,108 +489,14 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
   },
-  statusSection: {
-    marginBottom: "32px",
-  },
-  statusGrid: {
+  mainGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
     gap: "16px",
-  },
-  statusCard: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-  statusIndicator: {
-    width: "8px",
-    height: "40px",
-    borderRadius: "4px",
-  },
-  statusContent: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-  },
-  statusLabel: {
-    fontSize: "14px",
-    color: "#666",
-    marginBottom: "4px",
-  },
-  statusCount: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#154360",
-  },
-  statusPercent: {
-    fontSize: "12px",
-    color: "#999",
-  },
-  topEmendasSection: {
-    marginBottom: "32px",
-  },
-  topEmendasGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-    gap: "16px",
-  },
-  topEmendaCard: {
-    backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-    display: "flex",
-    gap: "16px",
-    cursor: "pointer",
-    transition: "all 0.2s",
-  },
-  topEmendaRank: {
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "#4A90E2",
-  },
-  topEmendaContent: {
-    flex: 1,
-  },
-  topEmendaHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "8px",
-  },
-  topEmendaNumero: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#154360",
-  },
-  topEmendaValor: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: "#27AE60",
-  },
-  topEmendaInfo: {
-    fontSize: "13px",
-    color: "#666",
-    marginBottom: "8px",
-  },
-  topEmendaDivider: {
-    margin: "0 8px",
-  },
-  topEmendaProgress: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-  topEmendaPercent: {
-    fontSize: "12px",
-    color: "#666",
-    whiteSpace: "nowrap",
+    marginBottom: "24px",
   },
   cronogramaSection: {
-    marginBottom: "32px",
+    marginBottom: "24px",
   },
   loadingContainer: {
     textAlign: "center",

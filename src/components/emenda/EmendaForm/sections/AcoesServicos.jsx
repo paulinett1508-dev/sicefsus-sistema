@@ -1,21 +1,25 @@
-import React from "react";
-import { formatarMoedaInput, parseValorMonetario } from "../../../../utils/formatters";
+// src/components/emenda/EmendaForm/sections/AcoesServicos.jsx
+// ✅ ATUALIZADO:
+// - "Meta(s)" → "Despesa" / "Despesas"
+// - Removido "Simples" e "Quantitativa"
+// - Campo Valor agora é obrigatório
 
-const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
-  const estrategias = [
-    "Aquisição de Insumos e Materiais de Uso Contínuo para Acompanhamento de Pessoas com Condições Crônicas",
-    "Oferta de medicamentos da Atenção Básica",
-    "Manutenção da oferta de medicamentos, insumos e materiais de forma regular para os estabelecimentos de saúde",
-    "Estratégia de Rastreamento e Controle de Condições Crônicas",
-    "Custeio de serviços especializados",
-    "Reforma e adequação de unidades de saúde",
-    "Construção de novas unidades",
-    "Aquisição de equipamentos médicos",
-    "Capacitação de profissionais",
-    "Outros",
-  ];
+import React, { useState } from "react";
+import {
+  formatarMoedaInput,
+  parseValorMonetario,
+} from "../../../../utils/formatters";
+import SaldoNaturezaWidget from "../../../SaldoNaturezaWidget";
+import { NATUREZAS_DESPESA } from "../../../../config/constants";
 
-  const tiposMeta = ["Quantitativa", "Simples"];
+const AcoesServicos = ({
+  formData = {},
+  onChange,
+  fieldErrors = {},
+  despesas = [],
+}) => {
+  const [modoCustomizado, setModoCustomizado] = useState(false);
+  const [despesaCustomizada, setDespesaCustomizada] = useState("");
 
   const handleInputChange = (e) => {
     onChange(e);
@@ -27,26 +31,53 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
     onChange({ target: { name, value: valorFormatado } });
   };
 
+  const handleEstrategiaChange = (e) => {
+    const valor = e.target.value;
+
+    if (valor === "__customizado__") {
+      setModoCustomizado(true);
+      onChange({ target: { name: "estrategia", value: "" } });
+    } else {
+      setModoCustomizado(false);
+      setDespesaCustomizada("");
+      onChange(e);
+    }
+  };
+
+  const handleDespesaCustomizadaChange = (e) => {
+    const valor = e.target.value;
+    setDespesaCustomizada(valor);
+    onChange({ target: { name: "estrategia", value: valor } });
+  };
+
   const handleAdicionarMeta = () => {
-    if (!formData.estrategia) {
-      alert("⚠️ Preencha Natureza de Despesas antes de adicionar a meta!");
+    const estrategiaFinal = modoCustomizado
+      ? despesaCustomizada
+      : formData.estrategia;
+
+    if (!estrategiaFinal) {
+      alert("⚠️ Preencha Natureza de Despesas antes de adicionar!");
       return;
     }
 
-    // Determinar tipo de meta baseado se há valor preenchido
-    const temValor = formData.valorAcao && parseValorMonetario(formData.valorAcao) > 0;
-    const tipoMeta = temValor ? "Quantitativa" : "Simples";
+    // ✅ VALIDAÇÃO: Valor é obrigatório
+    if (!formData.valorAcao || parseValorMonetario(formData.valorAcao) <= 0) {
+      alert("⚠️ O campo Valor é obrigatório e deve ser maior que zero!");
+      return;
+    }
 
     const novaMeta = {
       id: Date.now(),
-      estrategia: formData.estrategia,
-      tipoMeta: tipoMeta,
-      valorAcao: temValor ? formData.valorAcao : "0",
+      estrategia: estrategiaFinal,
+      valorAcao: formData.valorAcao,
     };
 
     const metasExistentes = formData.acoesServicos || [];
     const novasMetas = [...metasExistentes, novaMeta];
 
+    // Limpar campos
+    setModoCustomizado(false);
+    setDespesaCustomizada("");
     onChange({ target: { name: "estrategia", value: "" } });
     onChange({ target: { name: "valorAcao", value: "" } });
 
@@ -79,11 +110,8 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
     const metasExistentes = formData.acoesServicos || [];
     const totalMetasExistentes = metasExistentes.reduce((sum, meta) => {
-      if (meta.tipoMeta === "Quantitativa") {
-        const valor = parseValorMonetario(meta.valorAcao);
-        return sum + valor;
-      }
-      return sum;
+      const valor = parseValorMonetario(meta.valorAcao);
+      return sum + valor;
     }, 0);
 
     let valorMetaAtual = 0;
@@ -111,6 +139,21 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
 
   const validacaoTotal = validarTotalMetas();
   const metasExistentes = formData.acoesServicos || [];
+  const estrategiaAtual = modoCustomizado
+    ? despesaCustomizada
+    : formData.estrategia;
+
+  // ✅ Validação adicional: botão só ativa se tem valor preenchido
+  const valorPreenchido =
+    formData.valorAcao && parseValorMonetario(formData.valorAcao) > 0;
+  const podeAdicionar =
+    estrategiaAtual && validacaoTotal.valido && valorPreenchido;
+
+  // ✅ ALTERAÇÃO: Texto dinâmico "Despesa" / "Despesas"
+  const textoDespesas =
+    metasExistentes.length === 1
+      ? "Despesa Cadastrada"
+      : "Despesas Cadastradas";
 
   return (
     <fieldset style={styles.fieldset}>
@@ -119,30 +162,60 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
         Planejamento de Despesas
       </legend>
 
-      {/* Formulário Compacto */}
       <div style={styles.formGrid}>
         <div style={styles.formGroup}>
           <label style={styles.label}>Natureza de Despesas</label>
-          <select
-            name="estrategia"
-            value={formData.estrategia || ""}
-            onChange={handleInputChange}
-            style={{
-              ...styles.input,
-              ...(fieldErrors.estrategia && styles.inputError),
-            }}
-          >
-            <option value="">Selecione a natureza de despesas</option>
-            {estrategias.map((estrategia) => (
-              <option key={estrategia} value={estrategia}>
-                {estrategia}
-              </option>
-            ))}
-          </select>
+
+          {!modoCustomizado ? (
+            <select
+              name="estrategia"
+              value={formData.estrategia || ""}
+              onChange={handleEstrategiaChange}
+              style={{
+                ...styles.input,
+                ...(fieldErrors.estrategia && styles.inputError),
+              }}
+            >
+              <option value="">Selecione a natureza de despesas</option>
+              {NATUREZAS_DESPESA.map((natureza) => (
+                <option key={natureza} value={natureza}>
+                  {natureza}
+                </option>
+              ))}
+              <option value="__customizado__">✏️ Digitar outra...</option>
+            </select>
+          ) : (
+            <div style={styles.inputCustomizadoWrapper}>
+              <input
+                type="text"
+                value={despesaCustomizada}
+                onChange={handleDespesaCustomizadaChange}
+                placeholder="Digite a natureza de despesa..."
+                style={{
+                  ...styles.input,
+                  ...(fieldErrors.estrategia && styles.inputError),
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setModoCustomizado(false);
+                  setDespesaCustomizada("");
+                  onChange({ target: { name: "estrategia", value: "" } });
+                }}
+                style={styles.voltarButton}
+                title="Voltar para seleção"
+              >
+                ↩️
+              </button>
+            </div>
+          )}
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Valor</label>
+          <label style={styles.labelRequired}>
+            Valor <span style={styles.required}>*</span>
+          </label>
           <input
             type="text"
             name="valorAcao"
@@ -155,76 +228,82 @@ const AcoesServicos = ({ formData = {}, onChange, fieldErrors = {} }) => {
               ...(!validacaoTotal.valido && styles.inputError),
             }}
             placeholder="R$ 0,00"
+            required
           />
           {!validacaoTotal.valido && (
             <small style={styles.errorText}>{validacaoTotal.mensagem}</small>
           )}
-          <small style={styles.helpText}>
-            Deixe em branco para meta simples
-          </small>
         </div>
 
-        <div style={styles.formGroup}>
+        <div style={styles.formGroupButton}>
+          <label style={styles.labelInvisible}>Ação</label>
           <button
             type="button"
             style={{
               ...styles.addButton,
-              ...((!formData.estrategia || !validacaoTotal.valido) &&
-                styles.addButtonDisabled),
+              ...(!podeAdicionar && styles.addButtonDisabled),
             }}
             onClick={handleAdicionarMeta}
-            disabled={!formData.estrategia || !validacaoTotal.valido}
+            disabled={!podeAdicionar}
           >
-            ➕ Adicionar Meta
+            ➕ Adicionar
           </button>
         </div>
       </div>
 
-      {/* Lista de Metas - Layout Compacto */}
+      {/* Lista de Despesas */}
       {metasExistentes.length > 0 && (
-        <div style={styles.metasContainer}>
-          <div style={styles.metasHeader}>
-            <span style={styles.metasTitle}>
-              📋 {metasExistentes.length} Meta(s) Cadastrada(s)
-            </span>
-            <span style={styles.metasTotal}>
-              Total:{" "}
-              {metasExistentes
-                .filter((meta) => meta.tipoMeta === "Quantitativa")
-                .reduce((sum, meta) => {
-                  const valor = parseValorMonetario(meta.valorAcao);
-                  return sum + valor;
-                }, 0)
-                .toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-            </span>
+        <>
+          <div style={styles.metasContainer}>
+            <div style={styles.metasHeader}>
+              {/* ✅ ALTERAÇÃO: Texto dinâmico */}
+              <span style={styles.metasTitle}>
+                📋 {metasExistentes.length} {textoDespesas}
+              </span>
+              <span style={styles.metasTotal}>
+                Total:{" "}
+                {metasExistentes
+                  .reduce((sum, meta) => {
+                    const valor = parseValorMonetario(meta.valorAcao);
+                    return sum + valor;
+                  }, 0)
+                  .toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+              </span>
+            </div>
+
+            <div style={styles.metasList}>
+              {metasExistentes.map((meta, index) => (
+                <div key={meta.id} style={styles.metaItem}>
+                  <div style={styles.metaInfo}>
+                    <span style={styles.metaNumber}>#{index + 1}</span>
+                    <span style={styles.metaStrategy}>{meta.estrategia}</span>
+                    {/* ✅ REMOVIDO: badge "Simples" ou "Quantitativa" */}
+                    <span style={styles.metaValue}>{meta.valorAcao}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoverMeta(meta.id)}
+                    style={styles.removeButton}
+                    title="Remover despesa"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div style={styles.metasList}>
-            {metasExistentes.map((meta, index) => (
-              <div key={meta.id} style={styles.metaItem}>
-                <div style={styles.metaInfo}>
-                  <span style={styles.metaNumber}>#{index + 1}</span>
-                  <span style={styles.metaStrategy}>{meta.estrategia}</span>
-                  <span style={styles.metaType}>{meta.tipoMeta}</span>
-                  {meta.tipoMeta === "Quantitativa" && (
-                    <span style={styles.metaValue}>{meta.valorAcao}</span>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoverMeta(meta.id)}
-                  style={styles.removeButton}
-                  title="Remover meta"
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
+          <div style={{ marginTop: "20px" }}>
+            <SaldoNaturezaWidget
+              emenda={formData}
+              despesas={despesas}
+              compacto={true}
+            />
           </div>
-        </div>
+        </>
       )}
     </fieldset>
   );
@@ -258,29 +337,45 @@ const styles = {
   legendIcon: {
     fontSize: "18px",
   },
-
-  // Grid Compacto - Campo Valor mais estreito
   formGrid: {
     display: "grid",
     gridTemplateColumns: "2fr 1fr auto",
     gap: "20px",
     marginBottom: "24px",
-    alignItems: "start",
+    alignItems: "end",
   },
-
   formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
   },
-
+  formGroupButton: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  labelInvisible: {
+    fontWeight: "600",
+    color: "transparent",
+    fontSize: "13px",
+    marginBottom: "2px",
+    visibility: "hidden",
+  },
   label: {
     fontWeight: "600",
     color: "#333",
     fontSize: "13px",
     marginBottom: "2px",
   },
-
+  labelRequired: {
+    fontWeight: "600",
+    color: "#333",
+    fontSize: "13px",
+    marginBottom: "2px",
+  },
+  required: {
+    color: "#dc3545",
+  },
   input: {
     padding: "8px 12px",
     borderWidth: "1px",
@@ -292,7 +387,6 @@ const styles = {
     backgroundColor: "white",
     height: "38px",
   },
-
   inputMoney: {
     fontWeight: "600",
     color: "#059669",
@@ -300,25 +394,31 @@ const styles = {
     backgroundColor: "#f0fdf4",
     borderColor: "#22c55e",
   },
-
   inputError: {
     borderColor: "#dc3545",
     backgroundColor: "#fef2f2",
   },
-
   errorText: {
     color: "#dc3545",
     fontSize: "11px",
     marginTop: "2px",
     fontWeight: "500",
   },
-
-  helpText: {
-    color: "#6c757d",
-    fontSize: "11px",
-    marginTop: "2px",
+  inputCustomizadoWrapper: {
+    display: "flex",
+    gap: "8px",
   },
-
+  voltarButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    cursor: "pointer",
+    height: "38px",
+    whiteSpace: "nowrap",
+  },
   addButton: {
     backgroundColor: "#28a745",
     color: "white",
@@ -332,21 +432,17 @@ const styles = {
     height: "38px",
     whiteSpace: "nowrap",
   },
-
   addButtonDisabled: {
     backgroundColor: "#6c757d",
     cursor: "not-allowed",
     opacity: 0.6,
   },
-
-  // Layout de Metas Compacto
   metasContainer: {
     backgroundColor: "#f8f9fa",
     borderRadius: "6px",
     border: "1px solid #dee2e6",
     overflow: "hidden",
   },
-
   metasHeader: {
     display: "flex",
     justifyContent: "space-between",
@@ -355,24 +451,20 @@ const styles = {
     backgroundColor: "#e9ecef",
     borderBottom: "1px solid #dee2e6",
   },
-
   metasTitle: {
     fontSize: "14px",
     fontWeight: "600",
     color: "#154360",
   },
-
   metasTotal: {
     fontSize: "13px",
     fontWeight: "600",
     color: "#28a745",
   },
-
   metasList: {
     maxHeight: "200px",
     overflowY: "auto",
   },
-
   metaItem: {
     display: "flex",
     justifyContent: "space-between",
@@ -381,21 +473,18 @@ const styles = {
     borderBottom: "1px solid #e9ecef",
     backgroundColor: "white",
   },
-
   metaInfo: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
     flex: 1,
   },
-
   metaNumber: {
     fontSize: "12px",
     fontWeight: "600",
     color: "#6c757d",
     minWidth: "24px",
   },
-
   metaStrategy: {
     fontSize: "12px",
     color: "#495057",
@@ -404,26 +493,13 @@ const styles = {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
-
-  metaType: {
-    fontSize: "11px",
-    fontWeight: "500",
-    color: "#007bff",
-    backgroundColor: "#e7f3ff",
-    padding: "2px 6px",
-    borderRadius: "4px",
-    minWidth: "80px",
-    textAlign: "center",
-  },
-
   metaValue: {
     fontSize: "12px",
     fontWeight: "600",
     color: "#28a745",
-    minWidth: "80px",
+    minWidth: "100px",
     textAlign: "right",
   },
-
   removeButton: {
     backgroundColor: "#dc3545",
     color: "white",
@@ -433,19 +509,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "12px",
     marginLeft: "8px",
-  },
-
-  // Responsividade
-  "@media (max-width: 768px)": {
-    formGrid: {
-      gridTemplateColumns: "1fr",
-      gap: "8px",
-    },
-    metaInfo: {
-      flexDirection: "column",
-      alignItems: "flex-start",
-      gap: "4px",
-    },
   },
 };
 

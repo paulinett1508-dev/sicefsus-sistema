@@ -1,5 +1,6 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ Componente especializado para campos básicos da despesa
+// ✅ ATUALIZADO: Campo "Fornecedor" removido
+// 🎯 Agora apenas: Emenda, Valor, Discriminação
 
 import React from "react";
 
@@ -23,6 +24,7 @@ const DespesaFormBasicFields = ({
       </legend>
 
       <div style={styles.formGrid}>
+        {/* Emenda */}
         <div style={styles.formGroup}>
           <label style={styles.labelRequired}>Emenda *</label>
           {emendaPreSelecionada && emendaInfo ? (
@@ -81,23 +83,7 @@ const DespesaFormBasicFields = ({
           )}
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Fornecedor *</label>
-          <input
-            type="text"
-            name="fornecedor"
-            value={formData.fornecedor}
-            onChange={handleInputChange}
-            style={errors.fornecedor ? styles.inputError : styles.input}
-            readOnly={modoVisualizacao}
-            placeholder="Nome completo do fornecedor"
-            required
-          />
-          {errors.fornecedor && (
-            <span style={styles.errorText}>{errors.fornecedor}</span>
-          )}
-        </div>
-
+        {/* Valor */}
         <div style={styles.formGroup}>
           <label style={styles.labelRequired}>Valor *</label>
           <div style={styles.inputMonetarioContainer}>
@@ -125,6 +111,7 @@ const DespesaFormBasicFields = ({
           </span>
         </div>
 
+        {/* Discriminação */}
         <div style={styles.formGroupDiscriminacao}>
           <label style={styles.labelRequired}>Discriminação *</label>
           <input
@@ -279,4 +266,5 @@ const styles = {
     fontWeight: "500",
   },
 };
+
 export default DespesaFormBasicFields;

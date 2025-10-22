@@ -1,5 +1,7 @@
-// src/components/emenda/EmendaForm/index.jsx - ARQUIVO COMPLETO CORRIGIDO
-import React from "react";
+// src/components/emenda/EmendaForm/index.jsx - COM CARREGAMENTO DE DESPESAS
+import React, { useState, useEffect } from "react";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../../firebase/firebaseConfig";
 
 // ✅ HOOKS ESPECIALIZADOS
 import { useEmendaFormData } from "../../../hooks/useEmendaFormData";
@@ -55,6 +57,49 @@ const EmendaForm = () => {
     handleContinueEditing,
     handleSimpleBack,
   } = useEmendaFormNavigation(hasUnsavedChanges, isEdicao);
+
+  // 💰 NOVO: Estado para despesas da emenda
+  const [despesas, setDespesas] = useState([]);
+  const [loadingDespesas, setLoadingDespesas] = useState(false);
+
+  // 💰 NOVO: Carregar despesas quando estiver editando uma emenda
+  useEffect(() => {
+    const carregarDespesas = async () => {
+      // Só carregar se estiver editando e tiver ID da emenda
+      if (!isEdicao || !formData.id) {
+        setDespesas([]);
+        return;
+      }
+
+      try {
+        setLoadingDespesas(true);
+        console.log("💰 Carregando despesas da emenda:", formData.id);
+
+        const despesasRef = collection(db, "despesas");
+        const q = query(despesasRef, where("emendaId", "==", formData.id));
+        const snapshot = await getDocs(q);
+
+        const despesasData = [];
+        snapshot.forEach((doc) => {
+          despesasData.push({
+            id: doc.id,
+            ...doc.data(),
+          });
+        });
+
+        console.log(`✅ ${despesasData.length} despesas carregadas`);
+        setDespesas(despesasData);
+      } catch (error) {
+        console.error("❌ Erro ao carregar despesas:", error);
+        // Não mostrar erro crítico, apenas log
+        setDespesas([]);
+      } finally {
+        setLoadingDespesas(false);
+      }
+    };
+
+    carregarDespesas();
+  }, [isEdicao, formData.id]);
 
   // 📄 RENDERIZAÇÃO CONDICIONAL: Loading
   if (loading) {
@@ -121,8 +166,6 @@ const EmendaForm = () => {
           onClearError={clearFieldError}
         />
 
-        
-
         {/* ✅ SEÇÃO: Dados Bancários */}
         <DadosBancarios
           formData={formData}
@@ -139,12 +182,14 @@ const EmendaForm = () => {
           onClearError={clearFieldError}
         />
 
-        {/* ✅ SEÇÃO: Ações e Serviços */}
+        {/* ✅ SEÇÃO: Ações e Serviços - AGORA COM DESPESAS */}
         <AcoesServicos
           formData={formData}
           onChange={handleInputChange}
           fieldErrors={fieldErrors}
           onClearError={clearFieldError}
+          despesas={despesas}
+          loadingDespesas={loadingDespesas}
         />
 
         {/* ✅ SEÇÃO: Informações Complementares */}

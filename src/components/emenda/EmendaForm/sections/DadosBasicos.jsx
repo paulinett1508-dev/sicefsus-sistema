@@ -1,27 +1,15 @@
 // src/components/emenda/EmendaForm/sections/DadosBasicos.jsx
-// ✅ ARQUIVO COMPLETO OTIMIZADO - React.memo + Logs limpos + useCallback
+// ✅ ATUALIZADO: Importando constantes centralizadas
 
 import React, { useCallback } from "react";
 import CNPJInput from "../../../CNPJInput";
+import { PROGRAMAS_SAUDE, OBJETOS_EMENDA } from "../../../../config/constants";
 
 const DadosBasicos = React.memo(
   ({ formData = {}, onChange, fieldErrors = {}, onClearError }) => {
-    // ✅ LOGS OTIMIZADOS: Menos verbose
     if (process.env.NODE_ENV === "development") {
       console.log("📋 DadosBasicos renderizado");
     }
-
-    const programas = [
-      "Incremento ao custeio de serviços da atenção primária à saúde",
-      "Aquisição de equipamentos",
-      "Construção e ampliação",
-      "Reforma e adequação",
-      "Custeio de serviços especializados",
-      "Apoio à gestão do SUS",
-      "Vigilância em Saúde",
-      "Assistência Farmacêutica",
-      "Outro",
-    ];
 
     const formatarMoeda = useCallback((valor) => {
       const numero = valor.replace(/\D/g, "");
@@ -34,12 +22,10 @@ const DadosBasicos = React.memo(
       }).format(reais);
     }, []);
 
-    // ✅ HANDLER OTIMIZADO COM useCallback
     const handleInputChange = useCallback(
       (e) => {
         const { name, value } = e.target;
 
-        // ✅ LOGS OTIMIZADOS: Apenas campos importantes
         if (
           process.env.NODE_ENV === "development" &&
           ["objeto", "autor", "numero", "valor"].includes(name)
@@ -47,7 +33,6 @@ const DadosBasicos = React.memo(
           console.log(`📄 Campo ${name} alterado para: "${value}"`);
         }
 
-        // ✅ LIMPEZA DE ERRO OTIMIZADA
         if (onClearError && fieldErrors[name]) {
           onClearError(name);
         }
@@ -70,7 +55,7 @@ const DadosBasicos = React.memo(
         </legend>
 
         <div style={styles.formGrid}>
-          {/* Programa */}
+          {/* Programa - ✅ ATUALIZADO COM CONSTANTES */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Programa <span style={styles.required}>*</span>
@@ -86,7 +71,7 @@ const DadosBasicos = React.memo(
               required
             >
               <option value="">Selecione o programa</option>
-              {programas.map((prog) => (
+              {PROGRAMAS_SAUDE.map((prog) => (
                 <option key={prog} value={prog}>
                   {prog}
                 </option>
@@ -162,7 +147,7 @@ const DadosBasicos = React.memo(
             )}
           </div>
 
-          {/* Objeto da Emenda */}
+          {/* Objeto da Emenda - ✅ ATUALIZADO COM CONSTANTES */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Objeto da Emenda <span style={styles.required}>*</span>
@@ -178,12 +163,11 @@ const DadosBasicos = React.memo(
               required
             >
               <option value="">Selecione o objeto...</option>
-              <option value="Custeio PAP">Custeio PAP</option>
-              <option value="Custeio MAC">Custeio MAC</option>
-              <option value="Investimento PAP">Investimento PAP</option>
-              <option value="Investimento MAC">Investimento MAC</option>
-              <option value="Custeio PAP – Estadual">Custeio PAP – Estadual</option>
-              <option value="Custeio MAC – Estadual">Custeio MAC – Estadual</option>
+              {OBJETOS_EMENDA.map((obj) => (
+                <option key={obj} value={obj}>
+                  {obj}
+                </option>
+              ))}
             </select>
             {fieldErrors.tipo && (
               <small style={styles.errorText}>{fieldErrors.tipo}</small>
@@ -216,13 +200,12 @@ const DadosBasicos = React.memo(
             />
           </div>
 
-          {/* Beneficiário - USANDO CNPJInput COM VALIDAÇÃO EM TEMPO REAL */}
+          {/* Beneficiário - CNPJ */}
           <div style={styles.formGroup}>
             <CNPJInput
               label="Beneficiário (CNPJ)"
               value={formData.beneficiario || ""}
               onChange={(e) => {
-                // ✅ LOGS OTIMIZADOS: Menos verbose
                 if (process.env.NODE_ENV === "development") {
                   console.log(`📄 CNPJInput beneficiario: "${e.target.value}"`);
                 }
@@ -279,10 +262,8 @@ const DadosBasicos = React.memo(
   },
 );
 
-// ✅ ADICIONADO: DisplayName para React DevTools
 DadosBasicos.displayName = "DadosBasicos";
 
-// ✅ ESTILOS PRESERVADOS
 const styles = {
   fieldset: {
     borderWidth: "2px",
