@@ -410,31 +410,22 @@ export const useEmendaFormData = () => {
         let hasValidMeta = false;
 
         formData.acoesServicos.forEach((meta, index) => {
-          // ✅ CORREÇÃO: Usar campos que realmente existem
+          // ✅ CORRIGIDO: Validar apenas campos existentes (estrategia e valorAcao)
           const estrategiaLimpa = cleanField(meta.estrategia);
-          const tipoMetaValido = meta.tipoMeta && meta.tipoMeta.trim();
+          const temValorValido = meta.valorAcao && 
+            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
 
-          // Para metas quantitativas, verificar se tem valor
-          const isQuantitativa = meta.tipoMeta === "Quantitativa";
-          const temValorValido = isQuantitativa ?
-            (meta.valorAcao && parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0) :
-            true; // Metas simples não precisam de valor
-
-          if (estrategiaLimpa && estrategiaLimpa.length >= 5 && tipoMetaValido && temValorValido) {
+          if (estrategiaLimpa && estrategiaLimpa.length >= 5 && temValorValido) {
             hasValidMeta = true;
           } else {
-            // ✅ CORREÇÃO: Erros específicos para campos reais
+            // Erros específicos
             if (!estrategiaLimpa || estrategiaLimpa.length < 5) {
               errors[`meta_${index}_estrategia`] =
-                "🚨 Estratégia da meta deve ter pelo menos 5 caracteres";
+                "🚨 Natureza de despesa deve ter pelo menos 5 caracteres";
             }
-            if (!tipoMetaValido) {
-              errors[`meta_${index}_tipo`] =
-                "🚨 Tipo da meta é obrigatório";
-            }
-            if (isQuantitativa && !temValorValido) {
+            if (!temValorValido) {
               errors[`meta_${index}_valor`] =
-                "🚨 Valor é obrigatório para metas quantitativas";
+                "🚨 Valor é obrigatório";
             }
           }
         });
@@ -789,18 +780,12 @@ export const useEmendaFormData = () => {
       } else {
         const hasValidMeta = formData.acoesServicos.some((meta) => {
           const descricaoLimpa = cleanField(meta.estrategia);
-          const valorLimpo = cleanField(meta.valorAcao);
-          const tipoMetaValido = meta.tipoMeta && meta.tipoMeta.trim();
-          const isQuantitativa = meta.tipoMeta === "Quantitativa";
-          const temValorValido = isQuantitativa ?
-            (meta.valorAcao && parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0) :
-            true;
-
+          const temValorValido = meta.valorAcao && 
+            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
 
           return (
             descricaoLimpa &&
             descricaoLimpa.length >= 5 &&
-            tipoMetaValido &&
             temValorValido
           );
         });
