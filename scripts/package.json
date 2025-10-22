@@ -1,5 +1,6 @@
 
 {
+  "type": "module",
   "name": "sicefsus-scripts",
   "version": "1.0.0",
   "description": "Scripts utilitários para o sistema SICEFSUS",
