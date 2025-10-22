@@ -432,7 +432,7 @@ export const useEmendaFormData = () => {
 
         if (!hasValidMeta) {
           errors.acoesServicos =
-            "🚨 Pelo menos uma meta válida deve ser preenchida";
+            "🚨 O campo \"Valor\" da Natureza de Despesas está em branco.";
         }
       }
     } else {
