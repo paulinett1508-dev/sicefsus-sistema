@@ -2,9 +2,9 @@
 
 // ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 export const APP_VERSION = {
-  number: "2.3.69",
+  number: "2.3.70",
   date: "22/10/2025",
-  timestamp: "22/10/2025 às 18:49",
+  timestamp: "22/10/2025 às 19:03",
   changes: [
     "🚀 Sistema de versionamento centralizado implementado",
     "✅ Fonte única da verdade em versionControl.js",
