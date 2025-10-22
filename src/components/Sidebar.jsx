@@ -142,11 +142,17 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
       >
         {!collapsed && (
           <span
+            onClick={() => onNavigate('/dashboard')}
             style={{
               fontWeight: "bold",
               fontSize: 20,
               color: "var(--white)",
+              cursor: "pointer",
+              transition: "opacity 0.2s ease",
             }}
+            onMouseOver={(e) => (e.target.style.opacity = "0.8")}
+            onMouseOut={(e) => (e.target.style.opacity = "1")}
+            title="Ir para Dashboard"
           >
             SICEFSUS
           </span>
