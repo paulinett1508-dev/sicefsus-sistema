@@ -60,9 +60,9 @@ const AcoesServicos = ({
       return;
     }
 
-    // ✅ VALIDAÇÃO: Valor é obrigatório
+    // ✅ VALIDAÇÃO: Valor é obrigatório - nunca permitir despesa sem valor
     if (!formData.valorAcao || parseValorMonetario(formData.valorAcao) <= 0) {
-      alert("⚠️ O campo Valor é obrigatório e deve ser maior que zero!");
+      alert("⚠️ O campo Valor é obrigatório! Não é permitido cadastrar despesa sem valor.");
       return;
     }
 

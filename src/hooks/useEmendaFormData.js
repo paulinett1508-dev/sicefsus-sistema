@@ -384,11 +384,11 @@ export const useEmendaFormData = () => {
     }
 
     // ============================================
-    // ✅ MELHORIA 1: AÇÕES E SERVIÇOS - ARRAY VAZIO PERMITIDO NA CRIAÇÃO
+    // ✅ PLANEJAMENTO DE DESPESAS - VALIDAÇÃO SIMPLIFICADA
     // ============================================
+    // Regra: Nunca permitir despesa sem valor
+    // Array vazio permitido na criação inicial
 
-    // Se estamos em modo de edição OU formulário tem dados significativos preenchidos,
-    // então validar Ações e Serviços
     const formularioAvancado =
       autorLimpo &&
       municipioLimpo &&
@@ -399,46 +399,31 @@ export const useEmendaFormData = () => {
       agenciaLimpa &&
       contaLimpa;
 
-    // ============================================
-    // ✅ CORREÇÃO: AÇÕES E SERVIÇOS - ESTRUTURA CORRETA
-    // ============================================
     if (isEdicao || formularioAvancado) {
-      if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
-        errors.acoesServicos =
-          "🚨 Pelo menos uma meta deve ser cadastrada em Ações e Serviços";
-      } else {
-        let hasValidMeta = false;
+      // Validar planejamento de despesas se houver itens cadastrados
+      if (formData.acoesServicos && formData.acoesServicos.length > 0) {
+        formData.acoesServicos.forEach((despesa, index) => {
+          const estrategiaLimpa = cleanField(despesa.estrategia);
+          const temValorValido = despesa.valorAcao && 
+            parseFloat(despesa.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
 
-        formData.acoesServicos.forEach((meta, index) => {
-          // ✅ CORRIGIDO: Validar apenas campos existentes (estrategia e valorAcao)
-          const estrategiaLimpa = cleanField(meta.estrategia);
-          const temValorValido = meta.valorAcao && 
-            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
-
-          if (estrategiaLimpa && estrategiaLimpa.length >= 5 && temValorValido) {
-            hasValidMeta = true;
-          } else {
-            // Erros específicos
-            if (!estrategiaLimpa || estrategiaLimpa.length < 5) {
-              errors[`meta_${index}_estrategia`] =
-                "🚨 Natureza de despesa deve ter pelo menos 5 caracteres";
-            }
-            if (!temValorValido) {
-              errors[`meta_${index}_valor`] =
-                "🚨 Valor é obrigatório";
-            }
+          // Validação obrigatória: Natureza de despesa
+          if (!estrategiaLimpa || estrategiaLimpa.length < 5) {
+            errors[`despesa_${index}_estrategia`] =
+              "🚨 Natureza de despesa deve ter pelo menos 5 caracteres";
+          }
+          
+          // Validação obrigatória: Valor nunca pode estar vazio
+          if (!temValorValido) {
+            errors[`despesa_${index}_valor`] =
+              "🚨 Valor é obrigatório para toda despesa cadastrada";
           }
         });
-
-        if (!hasValidMeta) {
-          errors.acoesServicos =
-            "🚨 Pelo menos uma meta válida deve ser preenchida";
-        }
       }
     } else {
       if (process.env.NODE_ENV === "development") {
         console.log(
-          "⚠️ AÇÕES E SERVIÇOS: Validação pulada - criação inicial permitida",
+          "⚠️ PLANEJAMENTO DE DESPESAS: Validação pulada - criação inicial permitida",
         );
       }
     }
@@ -774,24 +759,17 @@ export const useEmendaFormData = () => {
         errors.push("❌ CRÍTICO: Data de Validade obrigatória");
       }
 
-      // ✅ MELHORIA APLICADA: SÓ VALIDA AÇÕES E SERVIÇOS SE NECESSÁRIO
-      if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
-        errors.push("❌ CRÍTICO: Pelo menos uma meta deve ser cadastrada");
-      } else {
-        const hasValidMeta = formData.acoesServicos.some((meta) => {
-          const descricaoLimpa = cleanField(meta.estrategia);
-          const temValorValido = meta.valorAcao && 
-            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
-
-          return (
-            descricaoLimpa &&
-            descricaoLimpa.length >= 5 &&
-            temValorValido
-          );
+      // ✅ VALIDAR PLANEJAMENTO DE DESPESAS: Valor obrigatório
+      if (formData.acoesServicos && formData.acoesServicos.length > 0) {
+        const despesaSemValor = formData.acoesServicos.some((despesa) => {
+          const temValorValido = despesa.valorAcao && 
+            parseFloat(despesa.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
+          return !temValorValido;
         });
-        if (!hasValidMeta) {
+        
+        if (despesaSemValor) {
           errors.push(
-            "❌ CRÍTICO: Pelo menos uma meta válida deve ser preenchida (mín. 5 caracteres)",
+            "❌ CRÍTICO: Toda despesa cadastrada deve ter um valor preenchido",
           );
         }
       }
