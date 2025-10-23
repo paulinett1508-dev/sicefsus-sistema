@@ -1,5 +1,7 @@
 // src/components/despesa/DespesaFormClassificacaoFuncional.jsx
-// ✅ ATUALIZADO: Importando constantes centralizadas
+// ✅ LAYOUT PROFISSIONAL: Campos otimizados e organizados
+// 🎨 VISUAL APRIMORADO: Cores dinâmicas na situação cadastral
+// 🔌 API CNPJ: Busca automática com proxy CORS
 
 import React, { useState } from "react";
 import {
@@ -21,10 +23,11 @@ const DespesaFormClassificacaoFuncional = ({
   const [modoElementoCustomizado, setModoElementoCustomizado] = useState(false);
   const [naturezaCustomizada, setNaturezaCustomizada] = useState("");
   const [elementoCustomizado, setElementoCustomizado] = useState("");
+  const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
+  const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
 
   const validarCNPJ = (cnpj) => {
     const cnpjLimpo = cnpj.replace(/[^\d]/g, "");
-
     if (cnpjLimpo.length !== 14) return false;
     if (/^(\d)\1+$/.test(cnpjLimpo)) return false;
 
@@ -53,9 +56,7 @@ const DespesaFormClassificacaoFuncional = ({
     }
 
     resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-    if (resultado != digitos.charAt(1)) return false;
-
-    return true;
+    return resultado == digitos.charAt(1);
   };
 
   const validarEmail = (email) => {
@@ -75,7 +76,6 @@ const DespesaFormClassificacaoFuncional = ({
 
   const formatarTelefone = (valor) => {
     const apenasNumeros = valor.replace(/\D/g, "");
-
     if (apenasNumeros.length <= 10) {
       return apenasNumeros
         .replace(/^(\d{2})(\d)/, "($1) $2")
@@ -89,36 +89,162 @@ const DespesaFormClassificacaoFuncional = ({
     }
   };
 
+  const formatarCEP = (valor) => {
+    const apenasNumeros = valor.replace(/\D/g, "");
+    return apenasNumeros.replace(/^(\d{5})(\d)/, "$1-$2").substring(0, 9);
+  };
+
+  // 🔌 BUSCAR CNPJ
+  const buscarDadosCNPJ = async (cnpj) => {
+    const cnpjLimpo = cnpj.replace(/[^\d]/g, "");
+
+    if (cnpjLimpo.length !== 14 || !validarCNPJ(cnpj)) {
+      return;
+    }
+
+    setBuscandoCNPJ(true);
+    setCnpjEncontrado(false);
+
+    try {
+      let dados = null;
+
+      // Tentar BrasilAPI
+      try {
+        const response = await fetch(
+          `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+        );
+        if (response.ok) {
+          dados = await response.json();
+        }
+      } catch (error) {
+        console.log("BrasilAPI indisponível");
+      }
+
+      // Fallback: ReceitaWS via proxy
+      if (!dados) {
+        const response = await fetch(
+          `https://api.allorigins.win/get?url=${encodeURIComponent(
+            `https://www.receitaws.com.br/v1/cnpj/${cnpjLimpo}`,
+          )}`,
+        );
+        const result = await response.json();
+        dados = JSON.parse(result.contents);
+      }
+
+      if (!dados || dados.status === "ERROR") {
+        throw new Error("CNPJ não encontrado");
+      }
+
+      // Preencher campos
+      if (dados.nome || dados.razao_social) {
+        handleInputChange({
+          target: {
+            name: "fornecedor",
+            value: dados.nome || dados.razao_social,
+          },
+        });
+      }
+
+      if (dados.fantasia || dados.nome_fantasia) {
+        handleInputChange({
+          target: {
+            name: "nomeFantasia",
+            value: dados.fantasia || dados.nome_fantasia,
+          },
+        });
+      }
+
+      if (dados.telefone || dados.ddd_telefone_1) {
+        const tel = (dados.telefone || dados.ddd_telefone_1).replace(
+          /[^\d]/g,
+          "",
+        );
+        handleInputChange({
+          target: { name: "telefoneFornecedor", value: formatarTelefone(tel) },
+        });
+      }
+
+      if (dados.email) {
+        handleInputChange({
+          target: { name: "emailFornecedor", value: dados.email },
+        });
+      }
+
+      // Separar endereço, cidade/UF e CEP
+      const endereco = [
+        dados.logradouro,
+        dados.numero,
+        dados.complemento,
+        dados.bairro,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      if (endereco) {
+        handleInputChange({
+          target: { name: "enderecoFornecedor", value: endereco },
+        });
+      }
+
+      if (dados.municipio && dados.uf) {
+        handleInputChange({
+          target: { name: "cidadeUf", value: `${dados.municipio}/${dados.uf}` },
+        });
+      }
+
+      if (dados.cep) {
+        handleInputChange({
+          target: { name: "cep", value: formatarCEP(dados.cep) },
+        });
+      }
+
+      // Situação cadastral
+      const situacao = dados.situacao || "ATIVA";
+      handleInputChange({
+        target: { name: "situacaoCadastral", value: situacao.toUpperCase() },
+      });
+
+      setCnpjEncontrado(true);
+      setCnpjError("");
+    } catch (error) {
+      console.error("Erro ao buscar CNPJ:", error);
+      setCnpjError("CNPJ não encontrado");
+      setCnpjEncontrado(false);
+    } finally {
+      setBuscandoCNPJ(false);
+    }
+  };
+
   const handleCNPJChange = (e) => {
     const { value } = e.target;
     const cnpjFormatado = formatarCNPJ(value);
 
-    const event = {
-      target: {
-        name: "cnpjFornecedor",
-        value: cnpjFormatado,
-      },
-    };
-    handleInputChange(event);
+    handleInputChange({
+      target: { name: "cnpjFornecedor", value: cnpjFormatado },
+    });
 
     const cnpjLimpo = cnpjFormatado.replace(/[^\d]/g, "");
+
     if (cnpjLimpo.length === 14) {
       if (!validarCNPJ(cnpjFormatado)) {
         setCnpjError("CNPJ inválido");
+        setCnpjEncontrado(false);
       } else {
         setCnpjError("");
+        buscarDadosCNPJ(cnpjFormatado);
       }
     } else if (cnpjLimpo.length > 0 && cnpjLimpo.length < 14) {
       setCnpjError("CNPJ incompleto");
+      setCnpjEncontrado(false);
     } else {
       setCnpjError("");
+      setCnpjEncontrado(false);
     }
   };
 
   const handleEmailChange = (e) => {
     const { value } = e.target;
     handleInputChange(e);
-
     if (value && !validarEmail(value)) {
       setEmailError("Email inválido");
     } else {
@@ -129,19 +255,21 @@ const DespesaFormClassificacaoFuncional = ({
   const handleTelefoneChange = (e) => {
     const { value } = e.target;
     const telefoneFormatado = formatarTelefone(value);
+    handleInputChange({
+      target: { name: "telefoneFornecedor", value: telefoneFormatado },
+    });
+  };
 
-    const event = {
-      target: {
-        name: "telefoneFornecedor",
-        value: telefoneFormatado,
-      },
-    };
-    handleInputChange(event);
+  const handleCEPChange = (e) => {
+    const { value } = e.target;
+    const cepFormatado = formatarCEP(value);
+    handleInputChange({
+      target: { name: "cep", value: cepFormatado },
+    });
   };
 
   const handleNaturezaChange = (e) => {
     const valor = e.target.value;
-
     if (valor === "__customizado__") {
       setModoNaturezaCustomizada(true);
       setNaturezaCustomizada("");
@@ -160,7 +288,6 @@ const DespesaFormClassificacaoFuncional = ({
 
   const handleElementoChange = (e) => {
     const valor = e.target.value;
-
     if (valor === "__customizado__") {
       setModoElementoCustomizado(true);
       setElementoCustomizado("");
@@ -177,6 +304,21 @@ const DespesaFormClassificacaoFuncional = ({
     handleInputChange({ target: { name: "elementoDespesa", value: valor } });
   };
 
+  // 🎨 Cor da situação cadastral
+  const getCorSituacao = (situacao) => {
+    if (!situacao) return "#6c757d";
+    const situacaoUpper = situacao.toUpperCase();
+    if (situacaoUpper.includes("ATIVA")) return "#27ae60";
+    if (
+      situacaoUpper.includes("INAPTA") ||
+      situacaoUpper.includes("SUSPENS") ||
+      situacaoUpper.includes("BAIXA") ||
+      situacaoUpper.includes("INATIVA")
+    )
+      return "#dc3545";
+    return "#6c757d";
+  };
+
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
@@ -184,9 +326,9 @@ const DespesaFormClassificacaoFuncional = ({
         Classificação Funcional-Programática
       </legend>
 
-      {/* LINHA 1: Ação, Dotação, Status */}
+      {/* LINHA 1: Ação e Status */}
       <div style={styles.formRow}>
-        <div style={styles.formGroup}>
+        <div style={styles.formGroupLarge}>
           <label style={styles.labelRequired}>Ação *</label>
           <select
             name="acao"
@@ -201,7 +343,6 @@ const DespesaFormClassificacaoFuncional = ({
             required
           >
             <option value="">Selecione a ação</option>
-            {/* ✅ ATUALIZADO: Usando constantes centralizadas */}
             {ACOES_ORCAMENTARIAS.map((acao) => (
               <option key={acao.codigo} value={acao.codigo}>
                 {acao.codigo} - {acao.descricao}
@@ -209,25 +350,6 @@ const DespesaFormClassificacaoFuncional = ({
             ))}
           </select>
           {errors.acao && <span style={styles.errorText}>{errors.acao}</span>}
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Dotação Orçamentária *</label>
-          <input
-            type="text"
-            name="dotacaoOrcamentaria"
-            value={formData.dotacaoOrcamentaria}
-            onChange={handleInputChange}
-            style={
-              errors.dotacaoOrcamentaria ? styles.inputError : styles.input
-            }
-            readOnly={modoVisualizacao}
-            placeholder="Código da dotação orçamentária"
-            required
-          />
-          {errors.dotacaoOrcamentaria && (
-            <span style={styles.errorText}>{errors.dotacaoOrcamentaria}</span>
-          )}
         </div>
 
         <div style={styles.formGroup}>
@@ -239,7 +361,6 @@ const DespesaFormClassificacaoFuncional = ({
             style={styles.select}
             disabled={modoVisualizacao}
           >
-            {/* ✅ ATUALIZADO: Usando constantes centralizadas */}
             {STATUS_DESPESAS.map((status) => (
               <option key={status.value} value={status.value}>
                 {status.label}
@@ -249,7 +370,7 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
       </div>
 
-      {/* LINHA 2: Categoria, Centro de Custo, Natureza */}
+      {/* LINHA 2: Categoria e Natureza */}
       <div style={styles.formRow}>
         <div style={styles.formGroup}>
           <label style={styles.label}>Categoria</label>
@@ -271,22 +392,8 @@ const DespesaFormClassificacaoFuncional = ({
           </select>
         </div>
 
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Centro de Custo</label>
-          <input
-            type="text"
-            name="centroCusto"
-            value={formData.centroCusto}
-            onChange={handleInputChange}
-            style={styles.input}
-            readOnly={modoVisualizacao}
-            placeholder="Código do centro de custo"
-          />
-        </div>
-
-        {/* ✅ ATUALIZADO: Natureza da Despesa com constantes */}
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Natureza da Despesa</label>
+        <div style={styles.formGroupLarge}>
+          <label style={styles.label}>Natureza de Despesa</label>
           {!modoNaturezaCustomizada ? (
             <select
               name="naturezaDespesa"
@@ -346,7 +453,6 @@ const DespesaFormClassificacaoFuncional = ({
               disabled={modoVisualizacao}
             >
               <option value="">Selecione o elemento</option>
-              {/* ✅ ATUALIZADO: Usando constantes centralizadas */}
               {ELEMENTOS_DESPESA.map((elemento) => (
                 <option key={elemento} value={elemento}>
                   {elemento}
@@ -384,29 +490,81 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
       </div>
 
-      {/* DIVISOR VISUAL */}
+      {/* DIVISOR */}
       <div style={styles.divider}>
-        <span style={styles.dividerText}>Dados do Fornecedor</span>
+        <span style={styles.dividerText}>
+          🔍 DADOS DO FORNECEDOR
+          {buscandoCNPJ && " 🔄 CONSULTANDO..."}
+          {cnpjEncontrado && !buscandoCNPJ && " ✅ PREENCHIDO"}
+        </span>
       </div>
 
-      {/* LINHA 4: CNPJ, Telefone, Email */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>
-            CNPJ
-            {cnpjError && <span style={styles.validationBadge}>⚠️</span>}
-          </label>
+      {/* LINHA 4: CNPJ + Botão Atualizar + Razão Social */}
+      <div style={styles.formRowCNPJ}>
+        <div style={styles.formGroupCNPJWrapper}>
+          <div style={styles.formGroupCNPJ}>
+            <label style={styles.label}>
+              CNPJ{" "}
+              {cnpjError && (
+                <span style={styles.validationBadge}>⚠️ {cnpjError}</span>
+              )}
+            </label>
+            <input
+              type="text"
+              name="cnpjFornecedor"
+              value={formData.cnpjFornecedor || ""}
+              onChange={handleCNPJChange}
+              style={cnpjError ? styles.inputError : styles.input}
+              readOnly={modoVisualizacao}
+              placeholder="00.000.000/0000-00"
+              maxLength="18"
+            />
+          </div>
+
+          {!modoVisualizacao && formData.cnpjFornecedor && (
+            <button
+              type="button"
+              onClick={() => {
+                if (formData.cnpjFornecedor) {
+                  buscarDadosCNPJ(formData.cnpjFornecedor);
+                }
+              }}
+              style={styles.btnRefresh}
+              title="Atualizar dados do CNPJ"
+              disabled={buscandoCNPJ}
+            >
+              {buscandoCNPJ ? "🔄" : "🔃"}
+            </button>
+          )}
+        </div>
+
+        <div style={styles.formGroupRazaoSocial}>
+          <label style={styles.label}>Razão Social</label>
           <input
             type="text"
-            name="cnpjFornecedor"
-            value={formData.cnpjFornecedor}
-            onChange={handleCNPJChange}
-            style={cnpjError ? styles.inputError : styles.input}
+            name="fornecedor"
+            value={formData.fornecedor || ""}
+            onChange={handleInputChange}
+            style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="00.000.000/0000-00"
-            maxLength="18"
+            placeholder="Preenchido automaticamente"
           />
-          {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}
+        </div>
+      </div>
+
+      {/* LINHA 5: Nome Fantasia, Telefone, Email */}
+      <div style={styles.formRow}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Nome Fantasia</label>
+          <input
+            type="text"
+            name="nomeFantasia"
+            value={formData.nomeFantasia || ""}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="Preenchido automaticamente"
+          />
         </div>
 
         <div style={styles.formGroup}>
@@ -414,7 +572,7 @@ const DespesaFormClassificacaoFuncional = ({
           <input
             type="text"
             name="telefoneFornecedor"
-            value={formatarTelefone(formData.telefoneFornecedor || "")}
+            value={formData.telefoneFornecedor || ""}
             onChange={handleTelefoneChange}
             style={styles.input}
             readOnly={modoVisualizacao}
@@ -425,13 +583,12 @@ const DespesaFormClassificacaoFuncional = ({
 
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Email
-            {emailError && <span style={styles.validationBadge}>⚠️</span>}
+            Email {emailError && <span style={styles.validationBadge}>⚠️</span>}
           </label>
           <input
             type="email"
             name="emailFornecedor"
-            value={formData.emailFornecedor}
+            value={formData.emailFornecedor || ""}
             onChange={handleEmailChange}
             style={emailError ? styles.inputError : styles.input}
             readOnly={modoVisualizacao}
@@ -441,34 +598,80 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
       </div>
 
-      {/* LINHA 5: Endereço */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroupFull}>
+      {/* LINHA 6: Endereço | Cidade/UF | CEP */}
+      <div style={styles.formRowEndereco}>
+        <div style={styles.formGroupEndereco}>
           <label style={styles.label}>Endereço</label>
           <input
             type="text"
             name="enderecoFornecedor"
-            value={formData.enderecoFornecedor}
+            value={formData.enderecoFornecedor || ""}
             onChange={handleInputChange}
             style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="Endereço completo"
+            placeholder="Logradouro, número, complemento, bairro"
+          />
+        </div>
+
+        <div style={styles.formGroupCidade}>
+          <label style={styles.label}>Cidade/UF</label>
+          <input
+            type="text"
+            name="cidadeUf"
+            value={formData.cidadeUf || ""}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="Cidade/UF"
+          />
+        </div>
+
+        <div style={styles.formGroupCEP}>
+          <label style={styles.label}>CEP</label>
+          <input
+            type="text"
+            name="cep"
+            value={formData.cep || ""}
+            onChange={handleCEPChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="00000-000"
+            maxLength="9"
           />
         </div>
       </div>
 
-      {/* LINHA 6: Observações */}
+      {/* LINHA 7: Situação Cadastral e Observações */}
       <div style={styles.formRow}>
-        <div style={styles.formGroupFull}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Situação Cadastral</label>
+          <input
+            type="text"
+            name="situacaoCadastral"
+            value={formData.situacaoCadastral || ""}
+            onChange={handleInputChange}
+            style={{
+              ...styles.input,
+              color: getCorSituacao(formData.situacaoCadastral),
+              fontWeight: "bold",
+              backgroundColor: "#f8f9fa",
+              cursor: "not-allowed",
+            }}
+            readOnly={true}
+            placeholder="Preenchido automaticamente"
+          />
+        </div>
+
+        <div style={styles.formGroupLarge}>
           <label style={styles.label}>Observações</label>
           <input
             type="text"
             name="observacoes"
-            value={formData.observacoes}
+            value={formData.observacoes || ""}
             onChange={handleInputChange}
             style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="Observações adicionais sobre a despesa"
+            placeholder="Observações adicionais"
           />
         </div>
       </div>
@@ -496,19 +699,66 @@ const styles = {
     alignItems: "center",
     gap: "8px",
   },
-  legendIcon: {
-    fontSize: "18px",
-  },
+  legendIcon: { fontSize: "18px" },
   formRow: {
     display: "grid",
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: "20px",
     marginBottom: "20px",
   },
-  formGroup: {
+  formRowCNPJ: {
+    display: "grid",
+    gridTemplateColumns: "270px 1fr",
+    gap: "20px",
+    marginBottom: "20px",
+  },
+  formRowEndereco: {
+    display: "grid",
+    gridTemplateColumns: "1fr 280px 150px",
+    gap: "20px",
+    marginBottom: "20px",
+  },
+  formGroupCNPJWrapper: {
+    display: "flex",
+    gap: "10px",
+    alignItems: "flex-end",
+  },
+  formGroup: { display: "flex", flexDirection: "column", gap: "8px" },
+  formGroupCNPJ: {
     display: "flex",
     flexDirection: "column",
     gap: "8px",
+    flex: 1,
+  },
+  btnRefresh: {
+    backgroundColor: "#154360",
+    color: "white",
+    border: "none",
+    padding: "12px 16px",
+    borderRadius: "6px",
+    fontSize: "18px",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    height: "46px",
+    minWidth: "46px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  formGroupRazaoSocial: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  formGroupEndereco: { display: "flex", flexDirection: "column", gap: "8px" },
+  formGroupCidade: { display: "flex", flexDirection: "column", gap: "8px" },
+  formGroupCEP: { display: "flex", flexDirection: "column", gap: "8px" },
+  formGroupLarge: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    gridColumn: "span 2",
   },
   formGroupFull: {
     display: "flex",
@@ -546,7 +796,6 @@ const styles = {
     border: "2px solid #dc3545",
     borderRadius: "6px",
     fontSize: "14px",
-    transition: "border-color 0.3s ease",
     backgroundColor: "#fff5f5",
     boxSizing: "border-box",
   },
@@ -565,14 +814,8 @@ const styles = {
     marginTop: "5px",
     fontWeight: "500",
   },
-  validationBadge: {
-    marginLeft: "5px",
-    fontSize: "12px",
-  },
-  inputCustomizadoWrapper: {
-    display: "flex",
-    gap: "8px",
-  },
+  validationBadge: { marginLeft: "5px", fontSize: "12px", color: "#dc3545" },
+  inputCustomizadoWrapper: { display: "flex", gap: "8px" },
   voltarButton: {
     backgroundColor: "#6c757d",
     color: "white",
@@ -598,9 +841,9 @@ const styles = {
     padding: "0 15px",
     fontSize: "13px",
     fontWeight: "600",
-    color: "#6c757d",
-    textTransform: "uppercase",
+    color: "#154360",
     letterSpacing: "0.5px",
+    whiteSpace: "nowrap",
   },
 };
 

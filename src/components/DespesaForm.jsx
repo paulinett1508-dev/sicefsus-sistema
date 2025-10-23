@@ -2,6 +2,7 @@
 // ✅ REFATORADO: De 1404 linhas para ~200 linhas
 // Reutiliza componentes modulares existentes + hooks/utils existentes
 // 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
+// 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
 
 import React, {
   useState,
@@ -69,7 +70,8 @@ const DespesaForm = ({
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
-  // ✅ ESTADOS SIMPLIFICADOS
+  // ✅ ESTADOS SIMPLIFICADOS - REMOVIDOS centroCusto e dotacaoOrcamentaria
+  // ✅ ADICIONADOS: nomeFantasia e situacaoCadastral para API CNPJ
   const [formData, setFormData] = useState({
     emendaId: emendaPreSelecionada || emendaId || "",
     discriminacao: "",
@@ -81,14 +83,12 @@ const DespesaForm = ({
     dataLiquidacao: "",
     dataPagamento: "",
     acao: "",
-    dotacaoOrcamentaria: "",
     classificacaoFuncional: "",
     numeroContrato: "",
     categoria: "",
     descricao: "",
     observacoes: "",
     status: "pendente",
-    centroCusto: "",
     naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // ✅ VALOR PRÉ-DEFINIDO
     elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // ✅ VALOR PRÉ-DEFINIDO
     fonteRecurso: "",
@@ -101,9 +101,13 @@ const DespesaForm = ({
     populacaoBeneficiada: "",
     impactoSocial: "",
     cnpjFornecedor: "",
+    nomeFantasia: "",
     enderecoFornecedor: "",
+    cidadeUf: "",
+    cep: "",
     telefoneFornecedor: "",
     emailFornecedor: "",
+    situacaoCadastral: "",
     dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
   });
 
@@ -286,246 +290,117 @@ const DespesaForm = ({
       const { name, value } = e.target;
 
       if (name === "emendaId") {
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        if (errors[name]) {
-          setErrors((prev) => ({ ...prev, [name]: "" }));
-        }
+        setFormData((prev) => ({ ...prev, emendaId: value }));
+        carregarDadosEmenda(value);
         return;
       }
 
       if (name === "valor") {
-        handleValorChange(value, emendaInfoDinamica || emendaInfo, setFormData);
+        handleValorChange(e, (valorFormatado, valorNumerico) => {
+          setFormData((prev) => ({
+            ...prev,
+            valor: valorFormatado,
+          }));
+
+          if (emendaInfoDinamica?.saldoDisponivel !== undefined) {
+            if (valorNumerico > emendaInfoDinamica.saldoDisponivel) {
+              setErrors((prev) => ({
+                ...prev,
+                valor: `Valor excede o saldo disponível (${formatarMoedaDisplay(emendaInfoDinamica.saldoDisponivel)})`,
+              }));
+            } else {
+              setErrors((prev) => {
+                const { valor, ...rest } = prev;
+                return rest;
+              });
+            }
+          }
+        });
         return;
       }
 
       setFormData((prev) => ({ ...prev, [name]: value }));
 
       if (errors[name]) {
-        setErrors((prev) => ({ ...prev, [name]: "" }));
+        setErrors((prev) => {
+          const { [name]: removed, ...rest } = prev;
+          return rest;
+        });
       }
     },
-    [errors, emendaInfoDinamica, emendaInfo, handleValorChange],
+    [
+      handleValorChange,
+      emendaInfoDinamica,
+      errors,
+      carregarDadosEmenda,
+      isMountedRef,
+    ],
   );
 
   // ✅ VALIDAÇÃO SIMPLIFICADA
-  const validarFormulario = useCallback(() => {
-    const novosErrors = {};
-    const emendaAtual = emendaInfoDinamica || emendaInfo;
+  const validateForm = () => {
+    const newErrors = {};
 
-    const camposObrigatorios = {
-      emendaId: "Emenda é obrigatória",
-      discriminacao: "Discriminação é obrigatória",
-      fornecedor: "Fornecedor é obrigatório",
-      valor: "Valor é obrigatório",
-      numeroEmpenho: "Nº do Empenho é obrigatório",
-      numeroNota: "Nº da Nota Fiscal é obrigatório",
-      dataEmpenho: "Data do Empenho é obrigatória",
-      dataLiquidacao: "Data da Liquidação é obrigatória",
-      dataPagamento: "Data do Pagamento é obrigatória",
-      acao: "Ação é obrigatória",
-      dotacaoOrcamentaria: "Dotação Orçamentária é obrigatória",
-      classificacaoFuncional: "Classificação Funcional é obrigatória",
-    };
-
-    Object.keys(camposObrigatorios).forEach((campo) => {
-      if (!formData[campo] || formData[campo].toString().trim() === "") {
-        novosErrors[campo] = camposObrigatorios[campo];
-      }
-    });
-
-    if (formData.valor) {
-      const valor = parseValorMonetario(formData.valor);
-      if (isNaN(valor) || valor <= 0) {
-        novosErrors.valor = "Valor deve ser maior que 0";
-      }
-
-      if (emendaAtual && valor > emendaAtual.saldoDisponivel) {
-        novosErrors.valor = `Valor excede o saldo disponível (R$ ${emendaAtual.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})`;
-      }
+    if (!formData.emendaId) newErrors.emendaId = "Selecione uma emenda válida";
+    if (!formData.fornecedor.trim())
+      newErrors.fornecedor = "Fornecedor é obrigatório";
+    if (!formData.valor || parseValorMonetario(formData.valor) <= 0) {
+      newErrors.valor = "Valor inválido";
     }
+    if (!formData.numeroEmpenho.trim())
+      newErrors.numeroEmpenho = "Número do empenho é obrigatório";
+    if (!formData.numeroNota.trim())
+      newErrors.numeroNota = "Número da nota é obrigatório";
+    if (!formData.dataEmpenho)
+      newErrors.dataEmpenho = "Data do empenho é obrigatória";
+    if (!formData.dataLiquidacao)
+      newErrors.dataLiquidacao = "Data de liquidação é obrigatória";
+    if (!formData.dataPagamento)
+      newErrors.dataPagamento = "Data de pagamento é obrigatória";
+    if (!formData.acao) newErrors.acao = "Ação é obrigatória";
 
-    if (!formData.dataEmpenho) {
-      novosErrors.dataEmpenho = "Data do empenho é obrigatória";
-    }
-
-    if (!formData.dataLiquidacao) {
-      novosErrors.dataLiquidacao = "Data da liquidação é obrigatória";
-    }
-
-    if (!formData.dataPagamento) {
-      novosErrors.dataPagamento = "Data do pagamento é obrigatória";
-    }
-
+    const valorNumerico = parseValorMonetario(formData.valor);
     if (
-      emendaAtual?.dataValidade ||
-      emendaAtual?.dataFim ||
-      emendaAtual?.dataVencimento
+      emendaInfoDinamica?.saldoDisponivel !== undefined &&
+      valorNumerico > emendaInfoDinamica.saldoDisponivel
     ) {
-      const dataValidade = new Date(
-        emendaAtual.dataValidade ||
-          emendaAtual.dataFim ||
-          emendaAtual.dataVencimento,
-      );
-      const dataInicio =
-        emendaAtual.dataInicio ||
-        emendaAtual.dataCriacao ||
-        emendaAtual.dataAprovacao;
-      const inicioEmenda = dataInicio ? new Date(dataInicio) : null;
-
-      if (formData.dataEmpenho) {
-        const dataEmpenho = new Date(formData.dataEmpenho);
-
-        if (inicioEmenda && dataEmpenho < inicioEmenda) {
-          novosErrors.dataEmpenho = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
-        }
-
-        if (dataEmpenho > dataValidade) {
-          novosErrors.dataEmpenho = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
-        }
-      }
-
-      if (formData.dataLiquidacao) {
-        const dataLiquidacao = new Date(formData.dataLiquidacao);
-
-        if (inicioEmenda && dataLiquidacao < inicioEmenda) {
-          novosErrors.dataLiquidacao = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
-        }
-
-        if (dataLiquidacao > dataValidade) {
-          novosErrors.dataLiquidacao = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
-        }
-      }
-
-      if (formData.dataPagamento) {
-        const dataPagamento = new Date(formData.dataPagamento);
-
-        if (inicioEmenda && dataPagamento < inicioEmenda) {
-          novosErrors.dataPagamento = `Data deve ser posterior à criação da emenda (${inicioEmenda.toLocaleDateString("pt-BR")})`;
-        }
-
-        if (dataPagamento > dataValidade) {
-          novosErrors.dataPagamento = `Data não pode ser posterior à validade da emenda (${dataValidade.toLocaleDateString("pt-BR")})`;
-        }
-      }
+      newErrors.valor = `Valor excede o saldo disponível (${formatarMoedaDisplay(emendaInfoDinamica.saldoDisponivel)})`;
     }
 
-    if (
-      formData.dataEmpenho &&
-      formData.dataLiquidacao &&
-      formData.dataPagamento
-    ) {
-      const empenho = new Date(formData.dataEmpenho);
-      const liquidacao = new Date(formData.dataLiquidacao);
-      const pagamento = new Date(formData.dataPagamento);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-      if (liquidacao < empenho) {
-        novosErrors.dataLiquidacao =
-          "Data de liquidação deve ser posterior à data do empenho";
-      }
-
-      if (pagamento < liquidacao) {
-        novosErrors.dataPagamento =
-          "Data de pagamento deve ser posterior à data da liquidação";
-      }
-    }
-
-    if (valorError) {
-      novosErrors.valor = valorError;
-    }
-
-    setErrors(novosErrors);
-    return Object.keys(novosErrors).length === 0;
-  }, [formData, emendaInfoDinamica, emendaInfo, valorError]);
-
-  // ✅ SUBMISSÃO SIMPLIFICADA
+  // ✅ SUBMIT SIMPLIFICADO
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (salvando) return;
-
-    if (!validarFormulario()) {
+    if (!validateForm()) {
       setToast({
         show: true,
-        message: "Por favor, preencha todos os campos obrigatórios.",
+        message: "⚠️ Por favor, corrija os erros no formulário",
         type: "error",
       });
       return;
     }
-
-    const valorDespesa = parseValorMonetario(formData.valor);
-    const emendaAtual = emendaInfoDinamica || emendaInfo;
-
-    if (!emendaAtual) {
-      setToast({
-        show: true,
-        message:
-          "❌ ERRO: Informações da emenda não encontradas!\n\nSelecione uma emenda válida e tente novamente.",
-        type: "error",
-        duration: 8000,
-      });
-      return;
-    }
-
-    const saldoDisponivel = emendaAtual.saldoDisponivel || 0;
-
-    if (!despesaParaEditar && valorDespesa > saldoDisponivel) {
-      setToast({
-        show: true,
-        message: `❌ SALDO INSUFICIENTE!\n\nSaldo disponível: ${formatarMoedaDisplay(saldoDisponivel)}\nValor da despesa: ${formatarMoedaDisplay(valorDespesa)}\n\nReduza o valor ou escolha outra emenda.`,
-        type: "error",
-        duration: 10000,
-      });
-      setSalvando(false);
-      return;
-    }
-
-    if (despesaParaEditar) {
-      const valorAnterior = parseValorMonetario(despesaParaEditar.valor) || 0;
-      const novoSaldoDisponivel = saldoDisponivel + valorAnterior;
-
-      if (valorDespesa > novoSaldoDisponivel) {
-        setToast({
-          show: true,
-          message: `❌ SALDO INSUFICIENTE PARA ALTERAÇÃO!\n\nSaldo atual: ${formatarMoedaDisplay(saldoDisponivel)}\nValor anterior: ${formatarMoedaDisplay(valorAnterior)}\nSaldo disponível: ${formatarMoedaDisplay(novoSaldoDisponivel)}\nValor tentado: ${formatarMoedaDisplay(valorDespesa)}`,
-          type: "error",
-          duration: 12000,
-        });
-        setSalvando(false);
-        return;
-      }
-    }
-
-    if (valorDespesa <= 0) {
-      setToast({
-        show: true,
-        message:
-          "❌ VALOR INVÁLIDO!\n\nO valor da despesa deve ser maior que zero.",
-        type: "error",
-        duration: 6000,
-      });
-      setSalvando(false);
-      return;
-    }
-
-    console.log("🔒 VALIDAÇÃO DE SALDO APROVADA:", {
-      valorDespesa,
-      saldoDisponivel,
-      emendaId: emendaAtual.id,
-      modo: despesaParaEditar ? "edição" : "criação",
-    });
 
     setSalvando(true);
+    setLoading(true);
 
     try {
+      const valorNumerico = parseValorMonetario(formData.valor);
+
       const dadosParaSalvar = {
         ...formData,
-        valor: parseValorMonetario(formData.valor) || 0,
-        contrapartida: parseFloat(formData.contrapartida) || 0,
-        percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
-        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
-        criadoPor: usuario?.email || "sistema",
-        atualizadoEm: new Date(),
-        criadoEm: despesaParaEditar?.criadoEm || new Date(),
+        valor: valorNumerico,
+        usuarioCriacao: usuario.uid || usuario.id,
+        dataUltimaAtualizacao: serverTimestamp(),
+        ...(despesaParaEditar
+          ? {}
+          : {
+              dataCriacao: serverTimestamp(),
+              criadoPor: usuario.uid || usuario.id,
+            }),
       };
 
       if (despesaParaEditar) {
@@ -605,14 +480,12 @@ const DespesaForm = ({
       dataLiquidacao: "",
       dataPagamento: "",
       acao: "",
-      dotacaoOrcamentaria: "",
       classificacaoFuncional: "",
       numeroContrato: "",
       categoria: "",
       descricao: "",
       observacoes: "",
       status: "pendente",
-      centroCusto: "",
       naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // ✅ VALOR PRÉ-DEFINIDO
       elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // ✅ VALOR PRÉ-DEFINIDO
       fonteRecurso: "",
@@ -625,9 +498,13 @@ const DespesaForm = ({
       populacaoBeneficiada: "",
       impactoSocial: "",
       cnpjFornecedor: "",
+      nomeFantasia: "",
       enderecoFornecedor: "",
+      cidadeUf: "",
+      cep: "",
       telefoneFornecedor: "",
       emailFornecedor: "",
+      situacaoCadastral: "",
       dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
     });
     setErrors({});

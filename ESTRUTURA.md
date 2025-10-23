@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 22/10/2025, 13:28
+**📅 Gerado em:** 23/10/2025, 13:44
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,8 +8,8 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 45
-- **📄 Total de Arquivos:** 209
+- **📁 Total de Diretórios:** 50
+- **📄 Total de Arquivos:** 218
 - **⚛️ Componentes React:** 91
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
@@ -18,15 +18,15 @@
 ### 📈 Distribuição por Extensão
 
 - **.jsx**: 100 arquivos
-- **.js**: 46 arquivos
-- **.json**: 21 arquivos
+- **.js**: 45 arquivos
+- **.json**: 23 arquivos
 - **sem extensão**: 10 arquivos
+- **.bin**: 7 arquivos
 - **.cjs**: 6 arquivos
 - **.css**: 6 arquivos
 - **.res**: 4 arquivos
 - **.png**: 3 arquivos
-- **.backup**: 2 arquivos
-- **.11**: 1 arquivos
+- **.md**: 2 arquivos
 
 ---
 
@@ -73,6 +73,20 @@
 │           ├── 📁 bin/
 │           │   └── 📄 firebase (20 linhas)
 │           └── 📁 lib/
+├── 📁 .local/
+│   └── 📁 state/
+│       └── 📁 replit/
+│           └── 📁 agent/
+│               ├── 📁 filesystem/
+│               │   └── 📄 filesystem_state.json (1 linhas)
+│               ├── 📄 .agent_state_29097d0abfe80ac0d2c78ef71d12dd40cfe09932.bin (121 linhas)
+│               ├── 📄 .agent_state_4fcb05e7ec96b62fa73d63f3c1080a415c7e186a.bin (133 linhas)
+│               ├── 📄 .agent_state_6e574c77b377a0ae49ad2569b9d3e346febd772f.bin (127 linhas)
+│               ├── 📄 .agent_state_bd5cfefc43fb48e1deb214e9c28e672b94b15a71.bin (125 linhas)
+│               ├── 📄 .agent_state_f8c575371db8049dae6307a0b091cfeb1e71293a.bin (124 linhas)
+│               ├── 📄 .agent_state_main.bin (112 linhas)
+│               ├── 📄 .latest.json (1 linhas)
+│               └── 📄 repl_state.bin (2 linhas)
 ├── 📁 .upm/
 │   └── 📄 store.json (2 linhas)
 ├── 📁 api/
@@ -89,13 +103,12 @@
 │   ├── 📄 _redirects (1 linhas)
 │   ├── 📄 favicon.png (1263 linhas)
 │   ├── 📄 favicon.svg (7 linhas)
-│   └── 📄 version.json (15 linhas)
+│   └── 📄 version.json (14 linhas)
 ├── 📁 scripts/
 │   ├── 📄 analise-runner.cjs (381 linhas)
-│   ├── 📄 auto-increment.js (34 linhas)
+│   ├── 📄 bump-version.js (66 linhas)
 │   ├── 📄 generateHandover.cjs (560 linhas)
-│   ├── 📄 increment-version.js (72 linhas)
-│   └── 📄 package.json (15 linhas)
+│   └── 📄 package.json (16 linhas)
 ├── 📁 src/
 │   ├── 📁 components/
 │   │   ├── 📁 admin/
@@ -197,8 +210,8 @@
 │   │   ├── 📄 PrivateRoute.jsx (77 linhas)
 │   │   ├── 📄 Relatorios.jsx (273 linhas)
 │   │   ├── 📄 SaldoEmendaWidget.jsx (328 linhas)
-│   │   ├── 📄 SaldoNaturezaWidget.jsx (469 linhas)
-│   │   ├── 📄 Sidebar.jsx (476 linhas)
+│   │   ├── 📄 SaldoNaturezaWidget.jsx (434 linhas)
+│   │   ├── 📄 Sidebar.jsx (482 linhas)
 │   │   ├── 📄 Sobre.jsx (617 linhas)
 │   │   ├── 📄 TemporaryBanner.jsx (148 linhas)
 │   │   ├── 📄 TesteUsuarios.jsx (144 linhas)
@@ -220,7 +233,7 @@
 │   │   ├── 📄 useDespesasCalculos.js (92 linhas)
 │   │   ├── 📄 useDespesasData.js (150 linhas)
 │   │   ├── 📄 useEmendaDespesa.js (662 linhas)
-│   │   ├── 📄 useEmendaFormData.js (993 linhas)
+│   │   ├── 📄 useEmendaFormData.js (978 linhas)
 │   │   ├── 📄 useEmendaFormNavigation.js (164 linhas)
 │   │   ├── 📄 useNavigationProtection.js (351 linhas)
 │   │   ├── 📄 usePageTitle.js (15 linhas)
@@ -275,6 +288,7 @@
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
+├── 📄 ESTRUTURA.md (2492 linhas)
 ├── 📄 firebase-debug.log (18 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
@@ -285,7 +299,7 @@
 ├── 📄 switch-env.sh (136 linhas)
 ├── 📄 tsconfig.json (21 linhas)
 ├── 📄 vercel.json (19 linhas)
-└── 📄 vite.config.js (81 linhas)
+└── 📄 vite.config.js (75 linhas)
 ```
 
 ---
@@ -1546,7 +1560,7 @@ emendaId,
 ```
 
 
-#### ⚛️ Componente React `SaldoNaturezaWidget.jsx` (469 linhas)
+#### ⚛️ Componente React `SaldoNaturezaWidget.jsx` (434 linhas)
 
 **Exports:**
 ```javascript
@@ -1557,13 +1571,13 @@ export default SaldoNaturezaWidget;
 ```javascript
 // src/components/SaldoNaturezaWidget.jsx
 // 💰 Widget que mostra saldo disponível por natureza de despesa
+// ✅ CORRIGIDO: Removido verificações de tipoMeta e campo "Meta qualitativa"
 import React, { useMemo } from "react";
 import { parseValorMonetario } from "../utils/formatters";
-const SaldoNaturezaWidget = ({
 ```
 
 
-#### ⚛️ Componente React `Sidebar.jsx` (476 linhas)
+#### ⚛️ Componente React `Sidebar.jsx` (482 linhas)
 
 **Exports:**
 ```javascript
@@ -1882,7 +1896,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 ```
 
 
-#### 🎣 Hook React `useEmendaFormData.js` (993 linhas)
+#### 🎣 Hook React `useEmendaFormData.js` (978 linhas)
 
 **Exports:**
 ```javascript
@@ -2439,8 +2453,8 @@ export function getVersionInfo() {
 // src/utils/versionControl.js
 // ✅ FONTE ÚNICA DA VERDADE - CONTROLE DE VERSÃO CENTRALIZADO
 export const APP_VERSION = {
-number: "2.3.77",
-date: "20/08/2025",
+number: "2.3.70",
+date: "22/10/2025",
 ```
 
 
