@@ -8,9 +8,9 @@ import { useState } from "react";
  */
 export function formatarMoeda(valor) {
   const numero = parseFloat(valor) || 0;
-  return numero.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
   });
 }
 
@@ -83,33 +83,20 @@ export const calcularSaldoEmenda = (valorTotal, valorExecutado) => {
   return Math.max(0, total - executado);
 };
 
-// ✅ HOOK PARA FORMATAÇÃO MONETÁRIA NO DESPESAFORM
+// ✅ HOOK PARA FORMATAÇÃO MONETÁRIA NO DESPESAFORM - CORRIGIDO
 export const useMoedaFormatting = () => {
   const [valorError, setValorError] = useState("");
 
-  const handleValorChange = (valor, emendaInfo, setFormData) => {
+  const handleValorChange = (e, callback) => {
+    const valor = e.target.value;
+
     // Formatar o valor conforme o usuário digita
     const valorFormatado = formatarMoedaInput(valor);
+    const valorNumerico = parseValorMonetario(valorFormatado);
 
-    // Atualizar o form
-    setFormData((prev) => ({ ...prev, valor: valorFormatado }));
-
-    // Validação de saldo se a emenda estiver selecionada
-    if (emendaInfo && valorFormatado) {
-      const valorNumerico = parseValorMonetario(valorFormatado);
-      const saldoDisponivel = emendaInfo.saldoDisponivel || 0;
-
-      if (valorNumerico > saldoDisponivel) {
-        setValorError(
-          `Valor excede saldo disponível: ${formatarMoedaDisplay(saldoDisponivel)}`,
-        );
-      } else if (valorNumerico <= 0) {
-        setValorError("Valor deve ser maior que zero");
-      } else {
-        setValorError("");
-      }
-    } else {
-      setValorError("");
+    // Chamar callback com os valores formatados
+    if (callback) {
+      callback(valorFormatado, valorNumerico);
     }
   };
 
@@ -163,13 +150,13 @@ export const formatarTelefone = (telefone) => {
 
 // ✅ FORMATADOR PARA DATA
 export const formatarData = (data) => {
-  if (!data) return '';
+  if (!data) return "";
 
   // Se já está no formato brasileiro
-  if (data.includes('/')) return data;
+  if (data.includes("/")) return data;
 
   // Se está no formato ISO (YYYY-MM-DD)
-  const [ano, mes, dia] = data.split('-');
+  const [ano, mes, dia] = data.split("-");
   return `${dia}/${mes}/${ano}`;
 };
 
