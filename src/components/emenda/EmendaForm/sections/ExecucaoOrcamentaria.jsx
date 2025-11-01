@@ -333,10 +333,32 @@ const ExecucaoOrcamentaria = ({
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>🎯 Planejamento de Despesas</h3>
-          <span style={styles.badge}>
-            {despesasPlanejadas.length}{" "}
-            {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
-          </span>
+          <div style={styles.headerActions}>
+            <span style={styles.badge}>
+              {despesasPlanejadas.length}{" "}
+              {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                // Redirecionar para a aba Planejamento
+                const tabPlanejamento = document.querySelector('[data-tab="planejamento"]');
+                if (tabPlanejamento) {
+                  tabPlanejamento.click();
+                  setTimeout(() => {
+                    const btnAdicionar = document.querySelector('[data-action="adicionar-despesa"]');
+                    if (btnAdicionar) {
+                      btnAdicionar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                  }, 100);
+                }
+              }}
+              style={styles.btnNovaDespesaPlanejada}
+              title="Ir para aba Planejamento para adicionar despesa"
+            >
+              ➕ Nova Despesa Planejada
+            </button>
+          </div>
         </div>
 
         {/* 📋 LISTA DE DESPESAS PLANEJADAS */}
@@ -557,6 +579,12 @@ const styles = {
     color: "#154360",
   },
 
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+  },
+
   badge: {
     backgroundColor: "#154360",
     color: "white",
@@ -564,6 +592,19 @@ const styles = {
     borderRadius: "12px",
     fontSize: "12px",
     fontWeight: "600",
+  },
+
+  btnNovaDespesaPlanejada: {
+    backgroundColor: "#f39c12",
+    color: "white",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    whiteSpace: "nowrap",
   },
 
   btnNovaDespesa: {
