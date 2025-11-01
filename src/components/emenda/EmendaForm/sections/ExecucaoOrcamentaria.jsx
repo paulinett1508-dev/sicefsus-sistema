@@ -17,7 +17,6 @@ import {
 import { db } from "../../../../firebase/firebaseConfig";
 
 // ✅ COMPONENTES EXISTENTES REUTILIZADOS
-import AcoesServicos from "./AcoesServicos";
 import ExecutarDespesaModal from "./ExecutarDespesaModal";
 import DespesasList from "../../../DespesasList";
 import DespesasStats from "../../../despesa/DespesasStats";
@@ -339,14 +338,6 @@ const ExecucaoOrcamentaria = ({
             {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
           </span>
         </div>
-
-        {/* ✅ REUTILIZAR COMPONENTE EXISTENTE AcoesServicos */}
-        <AcoesServicos
-          formData={formData}
-          onChange={onChange}
-          fieldErrors={fieldErrors}
-          despesas={despesasExecutadas}
-        />
 
         {/* 📋 LISTA DE DESPESAS PLANEJADAS */}
         {despesasPlanejadas.length > 0 && (
