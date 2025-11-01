@@ -344,18 +344,20 @@ const ExecucaoOrcamentaria = ({
           <div style={styles.listaPlanejadas}>
             <h4 style={styles.listaTitle}>📋 Despesas Planejadas</h4>
             {despesasPlanejadas.map((despesa, index) => (
-              <div key={despesa.id} style={styles.despesaCard}>
-                <div style={styles.despesaStatus}>🟡 PLANEJADA</div>
-                <div style={styles.despesaInfo}>
-                  <div style={styles.despesaNumero}>#{index + 1}</div>
-                  <div style={styles.despesaDescricao}>
-                    {despesa.estrategia || despesa.naturezaDespesa}
-                  </div>
-                  <div style={styles.despesaValor}>
-                    {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
+              <div key={despesa.id} style={styles.despesaCardPlanejada}>
+                <div style={styles.despesaStatusPlanejada}>🟡 PLANEJADA</div>
+                <div style={styles.despesaContent}>
+                  <div style={styles.despesaTopLine}>
+                    <span style={styles.despesaNumero}>#{index + 1}</span>
+                    <span style={styles.despesaDescricao}>
+                      {despesa.estrategia || despesa.naturezaDespesa}
+                    </span>
+                    <span style={styles.despesaValorPlanejada}>
+                      {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
                   </div>
                 </div>
                 <div style={styles.despesaAcoes}>
@@ -587,18 +589,22 @@ const styles = {
     marginBottom: "12px",
   },
 
-  despesaCard: {
+  // ✅ ESTILO PADRONIZADO PARA DESPESAS PLANEJADAS (amarelo)
+  despesaCardPlanejada: {
     display: "flex",
     alignItems: "center",
     gap: "16px",
     padding: "16px",
     backgroundColor: "#fff9e6",
     border: "2px solid #ffc107",
+    borderLeft: "6px solid #ffc107",
     borderRadius: "8px",
     marginBottom: "12px",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 4px rgba(255, 193, 7, 0.1)",
   },
 
-  despesaStatus: {
+  despesaStatusPlanejada: {
     fontSize: "12px",
     fontWeight: "700",
     color: "#856404",
@@ -608,29 +614,39 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
-  despesaInfo: {
+  despesaContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    flex: 1,
+  },
+
+  despesaTopLine: {
     display: "flex",
     alignItems: "center",
     gap: "16px",
-    flex: 1,
   },
 
   despesaNumero: {
     fontSize: "14px",
     fontWeight: "600",
     color: "#6c757d",
+    minWidth: "32px",
   },
 
   despesaDescricao: {
     fontSize: "14px",
     color: "#495057",
     flex: 1,
+    fontWeight: "500",
   },
 
-  despesaValor: {
+  despesaValorPlanejada: {
     fontSize: "16px",
     fontWeight: "700",
     color: "#f39c12",
+    minWidth: "120px",
+    textAlign: "right",
   },
 
   despesaAcoes: {
@@ -648,6 +664,7 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
     whiteSpace: "nowrap",
+    transition: "all 0.2s ease",
   },
 
   btnRemover: {
@@ -658,6 +675,7 @@ const styles = {
     borderRadius: "6px",
     fontSize: "13px",
     cursor: "pointer",
+    transition: "all 0.2s ease",
   },
 };
 
