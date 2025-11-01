@@ -31,6 +31,7 @@ export default function DespesasList({
   usuario,
   filtroInicial = null,
   onRecarregar, // ✅ NOVO: Callback para recarregar dados
+  usarLayoutCards = false, // ✅ NOVO: Permitir layout em cards ao invés de tabela
 }) {
   // ✅ Estados locais simplificados
   const [despesasFiltradas, setDespesasFiltradas] = useState([]);
@@ -206,17 +207,79 @@ export default function DespesasList({
     <div style={styles.container}>
       
 
-      {/* ✅ Componente da Tabela */}
-      <DespesasTable
-        despesas={despesasFiltradas}
-        emendas={emendas}
-        totalDespesas={despesas.length}
-        loading={false}
-        usuario={usuario}
-        onEdit={handleEdit}
-        onView={handleView}
-        onDelete={handleDelete}
-      />
+      {/* ✅ Layout em Cards (padrão visual das planejadas) */}
+      {usarLayoutCards ? (
+        <div style={styles.cardsContainer}>
+          {despesasFiltradas.map((despesa, index) => (
+            <div key={despesa.id} style={styles.despesaCard}>
+              <div style={styles.despesaStatusExecutada}>✅ EXECUTADA</div>
+              <div style={styles.despesaContent}>
+                <div style={styles.despesaTopLine}>
+                  <span style={styles.despesaNumero}>#{index + 1}</span>
+                  <span style={styles.despesaDescricao}>
+                    {despesa.discriminacao || despesa.estrategia || despesa.naturezaDespesa}
+                  </span>
+                  <span style={styles.despesaValor}>
+                    {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </span>
+                </div>
+                <div style={styles.despesaInfoLine}>
+                  <span style={styles.despesaInfo}>
+                    📄 Empenho: {despesa.numeroEmpenho || "N/A"}
+                  </span>
+                  <span style={styles.despesaInfo}>
+                    📅 {despesa.dataPagamento ? new Date(despesa.dataPagamento).toLocaleDateString("pt-BR") : "Sem data"}
+                  </span>
+                  <span style={styles.despesaInfo}>
+                    🏢 {despesa.fornecedor || "Sem fornecedor"}
+                  </span>
+                </div>
+              </div>
+              <div style={styles.despesaAcoes}>
+                <button
+                  type="button"
+                  onClick={() => handleView(despesa)}
+                  style={styles.btnVisualizar}
+                  title="Visualizar despesa"
+                >
+                  👁️
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleEdit(despesa)}
+                  style={styles.btnEditar}
+                  title="Editar despesa"
+                >
+                  ✏️
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(despesa.id)}
+                  style={styles.btnRemover}
+                  title="Remover despesa"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* ✅ Componente da Tabela (modo original) */
+        <DespesasTable
+          despesas={despesasFiltradas}
+          emendas={emendas}
+          totalDespesas={despesas.length}
+          loading={false}
+          usuario={usuario}
+          onEdit={handleEdit}
+          onView={handleView}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 }
@@ -377,5 +440,123 @@ const styles = {
     fontSize: 12,
     opacity: 0.8,
     fontWeight: "400",
+  },
+
+  // ✅ ESTILOS PARA CARDS DE DESPESAS EXECUTADAS
+  cardsContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    padding: "0 32px 32px 32px",
+  },
+
+  despesaCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    padding: "16px",
+    backgroundColor: "#f0fdf4",
+    border: "2px solid #22c55e",
+    borderLeft: "6px solid #22c55e",
+    borderRadius: "8px",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 4px rgba(34, 197, 94, 0.1)",
+  },
+
+  despesaStatusExecutada: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#166534",
+    backgroundColor: "#dcfce7",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    whiteSpace: "nowrap",
+  },
+
+  despesaContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    flex: 1,
+  },
+
+  despesaTopLine: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+  },
+
+  despesaNumero: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#6c757d",
+    minWidth: "32px",
+  },
+
+  despesaDescricao: {
+    fontSize: "14px",
+    color: "#495057",
+    flex: 1,
+    fontWeight: "500",
+  },
+
+  despesaValor: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#16a34a",
+    minWidth: "120px",
+    textAlign: "right",
+  },
+
+  despesaInfoLine: {
+    display: "flex",
+    gap: "16px",
+    paddingLeft: "48px",
+    fontSize: "12px",
+    color: "#6b7280",
+  },
+
+  despesaInfo: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+  },
+
+  despesaAcoes: {
+    display: "flex",
+    gap: "8px",
+  },
+
+  btnVisualizar: {
+    backgroundColor: "#3b82f6",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+
+  btnEditar: {
+    backgroundColor: "#f59e0b",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+
+  btnRemover: {
+    backgroundColor: "#dc3545",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
 };

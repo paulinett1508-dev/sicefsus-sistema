@@ -417,6 +417,7 @@ const ExecucaoOrcamentaria = ({
           filtroInicial={{
             emendaId: emendaId,
           }}
+          usarLayoutCards={true}
         />
       </div>
 
