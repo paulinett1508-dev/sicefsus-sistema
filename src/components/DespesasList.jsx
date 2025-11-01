@@ -276,7 +276,8 @@ const DespesasList = ({
                 </button>
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       ) : (
         /* ✅ Componente da Tabela (modo original) */
