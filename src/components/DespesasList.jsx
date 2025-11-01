@@ -16,7 +16,7 @@ const ERROR = "#E74C3C";
 const WHITE = "#fff";
 const GRAY = "#f4f6f8";
 
-export default function DespesasList({
+const DespesasList = ({
   // ✅ CORREÇÃO: Receber dados via props ao invés do hook
   despesas = [],
   emendas = [],
@@ -32,7 +32,8 @@ export default function DespesasList({
   filtroInicial = null,
   onRecarregar, // ✅ NOVO: Callback para recarregar dados
   usarLayoutCards = false, // ✅ NOVO: Permitir layout em cards ao invés de tabela
-}) {
+  estilosCustomizados = null,
+}) => {
   // ✅ Estados locais simplificados
   const [despesasFiltradas, setDespesasFiltradas] = useState([]);
   const [estatisticasFiltro, setEstatisticasFiltro] = useState(null);
@@ -114,7 +115,7 @@ export default function DespesasList({
 
   // ✅ Handler para excluir simplificado
   const handleDelete = async (despesaId) => {
-    
+
 
     try {
       // Excluir do Firebase
@@ -205,44 +206,54 @@ export default function DespesasList({
 
   return (
     <div style={styles.container}>
-      
+
 
       {/* ✅ Layout em Cards (padrão visual das planejadas) */}
       {usarLayoutCards ? (
         <div style={styles.cardsContainer}>
-          {despesasFiltradas.map((despesa, index) => (
-            <div key={despesa.id} style={styles.despesaCard}>
-              <div style={styles.despesaStatusExecutada}>✅ EXECUTADA</div>
-              <div style={styles.despesaContent}>
-                <div style={styles.despesaTopLine}>
-                  <span style={styles.despesaNumero}>#{index + 1}</span>
-                  <span style={styles.despesaDescricao}>
+          {despesasFiltradas.map((despesa, index) => {
+          const emendaRelacionada = emendas.find(
+            (e) => e.id === despesa.emendaId,
+          );
+
+          // Usar estilos customizados se fornecidos
+          const cardStyle = estilosCustomizados?.despesaCardExecutada || styles.despesaCard;
+
+          return (
+            <div key={despesa.id} style={cardStyle}>
+              <div style={estilosCustomizados?.despesaStatusExecutada || styles.despesaStatusExecutada}>
+                {despesa.status || "✅ EXECUTADA"}
+              </div>
+              <div style={estilosCustomizados?.despesaContent || styles.despesaContent}>
+                <div style={estilosCustomizados?.despesaTopLine || styles.despesaTopLine}>
+                  <span style={estilosCustomizados?.despesaNumero || styles.despesaNumero}>#{index + 1}</span>
+                  <span style={estilosCustomizados?.despesaDescricao || styles.despesaDescricao}>
                     {despesa.discriminacao || despesa.estrategia || despesa.naturezaDespesa}
                   </span>
-                  <span style={styles.despesaValor}>
+                  <span style={estilosCustomizados?.despesaValor || styles.despesaValor}>
                     {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     })}
                   </span>
                 </div>
-                <div style={styles.despesaInfoLine}>
-                  <span style={styles.despesaInfo}>
+                <div style={estilosCustomizados?.despesaInfoLine || styles.despesaInfoLine}>
+                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
                     📄 Empenho: {despesa.numeroEmpenho || "N/A"}
                   </span>
-                  <span style={styles.despesaInfo}>
+                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
                     📅 {despesa.dataPagamento ? new Date(despesa.dataPagamento).toLocaleDateString("pt-BR") : "Sem data"}
                   </span>
-                  <span style={styles.despesaInfo}>
+                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
                     🏢 {despesa.fornecedor || "Sem fornecedor"}
                   </span>
                 </div>
               </div>
-              <div style={styles.despesaAcoes}>
+              <div style={estilosCustomizados?.despesaAcoes || styles.despesaAcoes}>
                 <button
                   type="button"
                   onClick={() => handleView(despesa)}
-                  style={styles.btnVisualizar}
+                  style={estilosCustomizados?.btnVisualizar || styles.btnVisualizar}
                   title="Visualizar despesa"
                 >
                   👁️
@@ -250,7 +261,7 @@ export default function DespesasList({
                 <button
                   type="button"
                   onClick={() => handleEdit(despesa)}
-                  style={styles.btnEditar}
+                  style={estilosCustomizados?.btnEditar || styles.btnEditar}
                   title="Editar despesa"
                 >
                   ✏️
@@ -258,7 +269,7 @@ export default function DespesasList({
                 <button
                   type="button"
                   onClick={() => handleDelete(despesa.id)}
-                  style={styles.btnRemover}
+                  style={estilosCustomizados?.btnRemover || styles.btnRemover}
                   title="Remover despesa"
                 >
                   🗑️
@@ -282,7 +293,9 @@ export default function DespesasList({
       )}
     </div>
   );
-}
+};
+
+export default DespesasList;
 
 // ✅ Estilos mantidos (sem mudanças)
 const styles = {

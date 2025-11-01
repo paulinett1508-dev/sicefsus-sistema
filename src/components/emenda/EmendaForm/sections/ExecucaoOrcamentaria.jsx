@@ -728,6 +728,7 @@ const ExecucaoOrcamentaria = ({
             emendaId: emendaId,
           }}
           usarLayoutCards={true}
+          estilosCustomizados={styles}
         />
       </div>
 
@@ -922,6 +923,31 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
+  // ✅ ESTILO PADRONIZADO PARA DESPESAS EXECUTADAS (verde) - IDÊNTICO AO PLANEJADO
+  despesaCardExecutada: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    padding: "16px",
+    backgroundColor: "#f0fdf4",
+    border: "2px solid #22c55e",
+    borderLeft: "6px solid #22c55e",
+    borderRadius: "8px",
+    marginBottom: "12px",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 4px rgba(34, 197, 94, 0.1)",
+  },
+
+  despesaStatusExecutada: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#166534",
+    backgroundColor: "#dcfce7",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    whiteSpace: "nowrap",
+  },
+
   despesaContent: {
     display: "flex",
     flexDirection: "column",
@@ -953,6 +979,14 @@ const styles = {
     fontSize: "16px",
     fontWeight: "700",
     color: "#f39c12",
+    minWidth: "120px",
+    textAlign: "right",
+  },
+
+  despesaValorExecutada: {
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "#16a34a",
     minWidth: "120px",
     textAlign: "right",
   },
