@@ -15,12 +15,311 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../../../firebase/firebaseConfig";
+import {
+  formatarMoedaInput,
+  parseValorMonetario,
+} from "../../../../utils/formatters";
+import { NATUREZAS_DESPESA } from "../../../../config/constants";
 
 // ✅ COMPONENTES EXISTENTES REUTILIZADOS
 import ExecutarDespesaModal from "./ExecutarDespesaModal";
 import DespesasList from "../../../DespesasList";
 import DespesasStats from "../../../despesa/DespesasStats";
 import Toast from "../../../Toast";
+
+// 📝 COMPONENTE: FORMULÁRIO INLINE PARA DESPESA PLANEJADA
+const DespesaPlanejadaForm = ({
+  emendaId,
+  valorEmenda,
+  totalExecutado,
+  onSuccess,
+  usuario,
+}) => {
+  const [modoCustomizado, setModoCustomizado] = useState(false);
+  const [despesaCustomizada, setDespesaCustomizada] = useState("");
+  const [estrategia, setEstrategia] = useState("");
+  const [valor, setValor] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  const saldoDisponivel = valorEmenda - totalExecutado;
+
+  const handleEstrategiaChange = (e) => {
+    const val = e.target.value;
+    if (val === "__customizado__") {
+      setModoCustomizado(true);
+      setEstrategia("");
+    } else {
+      setModoCustomizado(false);
+      setDespesaCustomizada("");
+      setEstrategia(val);
+    }
+  };
+
+  const handleValorChange = (e) => {
+    const valorFormatado = formatarMoedaInput(e.target.value);
+    setValor(valorFormatado);
+  };
+
+  const validarFormulario = () => {
+    const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
+    if (!estrategiaFinal) {
+      return { valido: false, mensagem: "⚠️ Preencha a Natureza de Despesa" };
+    }
+    if (!valor || parseValorMonetario(valor) <= 0) {
+      return { valido: false, mensagem: "⚠️ O valor deve ser maior que zero" };
+    }
+    const valorNumerico = parseValorMonetario(valor);
+    if (valorNumerico > saldoDisponivel) {
+      return {
+        valido: false,
+        mensagem: `⚠️ Valor excede saldo disponível: R$ ${saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+      };
+    }
+    return { valido: true };
+  };
+
+  const handleAdicionar = async () => {
+    const validacao = validarFormulario();
+    if (!validacao.valido) {
+      alert(validacao.mensagem);
+      return;
+    }
+
+    try {
+      setSalvando(true);
+      const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
+
+      await addDoc(collection(db, "despesas"), {
+        emendaId: emendaId,
+        estrategia: estrategiaFinal,
+        naturezaDespesa: estrategiaFinal,
+        valor: parseValorMonetario(valor),
+        status: "PLANEJADA",
+        criadaEm: new Date().toISOString(),
+        criadaPor: usuario?.email,
+        discriminacao: "",
+        numeroEmpenho: "",
+        numeroNota: "",
+        numeroContrato: "",
+        dataEmpenho: "",
+        dataLiquidacao: "",
+        dataPagamento: "",
+      });
+
+      // Limpar formulário
+      setEstrategia("");
+      setValor("");
+      setModoCustomizado(false);
+      setDespesaCustomizada("");
+
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("❌ Erro ao criar despesa planejada:", error);
+      alert("Erro ao criar despesa planejada");
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const validacao = validarFormulario();
+  const podeAdicionar = validacao.valido && !salvando;
+
+  return (
+    <div style={formStyles.container}>
+      <div style={formStyles.grid}>
+        <div style={formStyles.formGroup}>
+          <label style={formStyles.label}>Natureza de Despesa</label>
+          {!modoCustomizado ? (
+            <select
+              value={estrategia}
+              onChange={handleEstrategiaChange}
+              style={formStyles.select}
+            >
+              <option value="">Selecione a natureza de despesas</option>
+              {NATUREZAS_DESPESA.map((natureza) => (
+                <option key={natureza} value={natureza}>
+                  {natureza}
+                </option>
+              ))}
+              <option value="__customizado__">✏️ Digitar outra...</option>
+            </select>
+          ) : (
+            <div style={formStyles.inputCustomizadoWrapper}>
+              <input
+                type="text"
+                value={despesaCustomizada}
+                onChange={(e) => setDespesaCustomizada(e.target.value)}
+                placeholder="Digite a natureza de despesa..."
+                style={formStyles.input}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setModoCustomizado(false);
+                  setDespesaCustomizada("");
+                  setEstrategia("");
+                }}
+                style={formStyles.voltarButton}
+                title="Voltar para seleção"
+              >
+                ↩️
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div style={formStyles.formGroup}>
+          <label style={formStyles.labelRequired}>
+            Valor <span style={formStyles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            value={valor}
+            onChange={handleValorChange}
+            style={{
+              ...formStyles.input,
+              ...formStyles.inputMoney,
+              ...(!validacao.valido && valor && formStyles.inputError),
+            }}
+            placeholder="R$ 0,00"
+          />
+          {!validacao.valido && valor && (
+            <small style={formStyles.errorText}>{validacao.mensagem}</small>
+          )}
+        </div>
+
+        <div style={formStyles.formGroupButton}>
+          <label style={formStyles.labelInvisible}>Ação</label>
+          <button
+            type="button"
+            onClick={handleAdicionar}
+            disabled={!podeAdicionar}
+            style={{
+              ...formStyles.addButton,
+              ...(!podeAdicionar && formStyles.addButtonDisabled),
+            }}
+          >
+            {salvando ? "⏳ Salvando..." : "➕ Adicionar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const formStyles = {
+  container: {
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #dee2e6",
+    borderRadius: "8px",
+    padding: "16px",
+    marginBottom: "20px",
+  },
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr auto",
+    gap: "20px",
+    alignItems: "end",
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  formGroupButton: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  label: {
+    fontWeight: "600",
+    color: "#333",
+    fontSize: "13px",
+    marginBottom: "2px",
+  },
+  labelRequired: {
+    fontWeight: "600",
+    color: "#333",
+    fontSize: "13px",
+    marginBottom: "2px",
+  },
+  labelInvisible: {
+    fontWeight: "600",
+    color: "transparent",
+    fontSize: "13px",
+    marginBottom: "2px",
+    visibility: "hidden",
+  },
+  required: {
+    color: "#dc3545",
+  },
+  select: {
+    padding: "8px 12px",
+    border: "1px solid #dee2e6",
+    borderRadius: "4px",
+    fontSize: "14px",
+    backgroundColor: "white",
+    height: "38px",
+  },
+  input: {
+    padding: "8px 12px",
+    border: "1px solid #dee2e6",
+    borderRadius: "4px",
+    fontSize: "14px",
+    backgroundColor: "white",
+    height: "38px",
+  },
+  inputMoney: {
+    fontWeight: "600",
+    color: "#059669",
+    textAlign: "right",
+    backgroundColor: "#f0fdf4",
+    borderColor: "#22c55e",
+  },
+  inputError: {
+    borderColor: "#dc3545",
+    backgroundColor: "#fef2f2",
+  },
+  errorText: {
+    color: "#dc3545",
+    fontSize: "11px",
+    marginTop: "2px",
+    fontWeight: "500",
+  },
+  inputCustomizadoWrapper: {
+    display: "flex",
+    gap: "8px",
+  },
+  voltarButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    cursor: "pointer",
+    height: "38px",
+    whiteSpace: "nowrap",
+  },
+  addButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    height: "38px",
+    whiteSpace: "nowrap",
+  },
+  addButtonDisabled: {
+    backgroundColor: "#6c757d",
+    cursor: "not-allowed",
+    opacity: 0.6,
+  },
+};
 
 const ExecucaoOrcamentaria = ({
   formData, // Dados da emenda atual
@@ -333,33 +632,20 @@ const ExecucaoOrcamentaria = ({
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>🎯 Planejamento de Despesas</h3>
-          <div style={styles.headerActions}>
-            <span style={styles.badge}>
-              {despesasPlanejadas.length}{" "}
-              {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                // Redirecionar para a aba Planejamento
-                const tabPlanejamento = document.querySelector('[data-tab="planejamento"]');
-                if (tabPlanejamento) {
-                  tabPlanejamento.click();
-                  setTimeout(() => {
-                    const btnAdicionar = document.querySelector('[data-action="adicionar-despesa"]');
-                    if (btnAdicionar) {
-                      btnAdicionar.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  }, 100);
-                }
-              }}
-              style={styles.btnNovaDespesaPlanejada}
-              title="Ir para aba Planejamento para adicionar despesa"
-            >
-              ➕ Nova Despesa Planejada
-            </button>
-          </div>
+          <span style={styles.badge}>
+            {despesasPlanejadas.length}{" "}
+            {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
+          </span>
         </div>
+
+        {/* 📝 FORMULÁRIO INLINE PARA ADICIONAR DESPESA PLANEJADA */}
+        <DespesaPlanejadaForm
+          emendaId={emendaId}
+          valorEmenda={stats.valorEmenda}
+          totalExecutado={stats.totalExecutado}
+          onSuccess={carregarDespesas}
+          usuario={usuario}
+        />
 
         {/* 📋 LISTA DE DESPESAS PLANEJADAS */}
         {despesasPlanejadas.length > 0 && (
@@ -579,12 +865,6 @@ const styles = {
     color: "#154360",
   },
 
-  headerActions: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-
   badge: {
     backgroundColor: "#154360",
     color: "white",
@@ -592,19 +872,6 @@ const styles = {
     borderRadius: "12px",
     fontSize: "12px",
     fontWeight: "600",
-  },
-
-  btnNovaDespesaPlanejada: {
-    backgroundColor: "#f39c12",
-    color: "white",
-    border: "none",
-    padding: "10px 20px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.2s",
-    whiteSpace: "nowrap",
   },
 
   btnNovaDespesa: {
