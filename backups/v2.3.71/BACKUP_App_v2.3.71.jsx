@@ -18,15 +18,14 @@ import PrivateRoute from "./components/PrivateRoute";
 import Dashboard from "./components/Dashboard";
 import Emendas from "./components/Emendas";
 import EmendaForm from "./components/emenda/EmendaForm";
-// import Despesas from "./components/Despesas"; // ❌ REMOVIDO - Agora é aba dentro de Emendas
+import Despesas from "./components/Despesas";
 import Relatorios from "./components/Relatorios";
 import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
-import MigracaoCompleta from "./components/admin/MigracaoCompleta";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
-// import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
+import DespesaForm from "./components/DespesaForm";
 import { useUser } from "./context/UserContext";
 import { checkVersion } from "./utils/versionControl";
 import { useVersion } from "./hooks/useVersion";
@@ -255,7 +254,7 @@ function AppContent() {
   const getCurrentPageName = () => {
     const path = location.pathname;
     if (path.includes("/emendas")) return "Emendas";
-    // if (path.includes("/despesas")) return "Despesas"; // ❌ REMOVIDO - Agora é aba
+    if (path.includes("/despesas")) return "Despesas";
     if (path.includes("/relatorios")) return "Relatórios";
     if (path.includes("/admin") || path.includes("/administracao"))
       return "Administração";
@@ -433,8 +432,6 @@ function AppContent() {
               />
 
               {/* Rota para despesas de uma emenda específica */}
-              {/* ❌ Rota antiga de despesas dentro de emenda - Agora é aba */}
-              {/*
               <Route
                 path="/emendas/:id/despesas"
                 element={
@@ -445,10 +442,7 @@ function AppContent() {
                   </PrivateRoute>
                 }
               />
-              */}
 
-              {/* ❌ ROTAS DE DESPESAS REMOVIDAS - Agora é aba dentro de Emendas */}
-              {/* 
               <Route
                 path="/despesas"
                 element={
@@ -493,7 +487,6 @@ function AppContent() {
                   </PrivateRoute>
                 }
               />
-              */}
               <Route
                 path="/relatorios"
                 element={
@@ -520,18 +513,6 @@ function AppContent() {
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
                       <Sobre />
-                    </ProtectedRouteWrapper>
-                  </PrivateRoute>
-                }
-              />
-
-              {/* 🔄 ROTA TEMPORÁRIA: Migração Completa */}
-              <Route
-                path="/admin/migracao"
-                element={
-                  <PrivateRoute usuario={usuario} requiredRole="admin">
-                    <ProtectedRouteWrapper usuario={usuario}>
-                      <MigracaoCompleta />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }

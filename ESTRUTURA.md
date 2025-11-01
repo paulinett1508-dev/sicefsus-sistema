@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 23/10/2025, 13:44
+**📅 Gerado em:** 01/11/2025, 19:28
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,25 +8,25 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 50
-- **📄 Total de Arquivos:** 218
-- **⚛️ Componentes React:** 91
+- **📁 Total de Diretórios:** 52
+- **📄 Total de Arquivos:** 233
+- **⚛️ Componentes React:** 98
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 100 arquivos
+- **.jsx**: 111 arquivos
 - **.js**: 45 arquivos
 - **.json**: 23 arquivos
 - **sem extensão**: 10 arquivos
-- **.bin**: 7 arquivos
+- **.bin**: 9 arquivos
 - **.cjs**: 6 arquivos
 - **.css**: 6 arquivos
 - **.res**: 4 arquivos
+- **.md**: 3 arquivos
 - **.png**: 3 arquivos
-- **.md**: 2 arquivos
 
 ---
 
@@ -82,11 +82,13 @@
 │               ├── 📄 .agent_state_29097d0abfe80ac0d2c78ef71d12dd40cfe09932.bin (121 linhas)
 │               ├── 📄 .agent_state_4fcb05e7ec96b62fa73d63f3c1080a415c7e186a.bin (133 linhas)
 │               ├── 📄 .agent_state_6e574c77b377a0ae49ad2569b9d3e346febd772f.bin (127 linhas)
+│               ├── 📄 .agent_state_b1dc7e61a73988d2bc40a887dbb22b82597c4e4e.bin (119 linhas)
 │               ├── 📄 .agent_state_bd5cfefc43fb48e1deb214e9c28e672b94b15a71.bin (125 linhas)
+│               ├── 📄 .agent_state_e93134fdb34ced64d37a3fd0dcacd730f612b249.bin (120 linhas)
 │               ├── 📄 .agent_state_f8c575371db8049dae6307a0b091cfeb1e71293a.bin (124 linhas)
-│               ├── 📄 .agent_state_main.bin (112 linhas)
+│               ├── 📄 .agent_state_main.bin (115 linhas)
 │               ├── 📄 .latest.json (1 linhas)
-│               └── 📄 repl_state.bin (2 linhas)
+│               └── 📄 repl_state.bin (5 linhas)
 ├── 📁 .upm/
 │   └── 📄 store.json (2 linhas)
 ├── 📁 api/
@@ -94,6 +96,16 @@
 │   │   └── 📄 users.js (1 linhas)
 │   ├── 📄 package.json (19 linhas)
 │   └── 📄 server.js (332 linhas)
+├── 📁 backups/
+│   └── 📁 v2.3.71/
+│       ├── 📄 BACKUP_AcoesServicos_v2.3.71.jsx (516 linhas)
+│       ├── 📄 BACKUP_App_v2.3.71.jsx (775 linhas)
+│       ├── 📄 BACKUP_DespesaForm_v2.3.71.jsx (697 linhas)
+│       ├── 📄 BACKUP_EmendaForm_index_v2.3.71.jsx (342 linhas)
+│       ├── 📄 BACKUP_PLAN.md (186 linhas)
+│       ├── 📄 BACKUP_README.md (151 linhas)
+│       ├── 📄 BACKUP_Sidebar_v2.3.71.jsx (482 linhas)
+│       └── 📄 VALIDACAO_BACKUP.txt (54 linhas)
 ├── 📁 docs/
 │   └── 📄 estrutura-atual.md (9 linhas)
 ├── 📁 functions/
@@ -131,7 +143,7 @@
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
 │   │   │   ├── 📄 DespesaFormBasicFields.jsx (271 linhas)
-│   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (608 linhas)
+│   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (851 linhas)
 │   │   │   ├── 📄 DespesaFormDateFields.jsx (439 linhas)
 │   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (73 linhas)
 │   │   │   ├── 📄 DespesaFormEmpenhoFields.jsx (160 linhas)
@@ -145,17 +157,22 @@
 │   │   │   │   ├── 📁 components/
 │   │   │   │   │   ├── 📄 EmendaFormActions.jsx (207 linhas)
 │   │   │   │   │   ├── 📄 EmendaFormCancelModal.jsx (144 linhas)
-│   │   │   │   │   └── 📄 EmendaFormHeader.jsx (104 linhas)
+│   │   │   │   │   ├── 📄 EmendaFormHeader.jsx (104 linhas)
+│   │   │   │   │   ├── 📄 EmendaFormHeaderRich.jsx (252 linhas)
+│   │   │   │   │   └── 📄 TabNavigation.jsx (71 linhas)
 │   │   │   │   ├── 📁 sections/
-│   │   │   │   │   ├── 📄 AcoesServicos.jsx (516 linhas)
+│   │   │   │   │   ├── 📄 AcoesServicos.jsx (605 linhas)
 │   │   │   │   │   ├── 📄 ClassificacaoTecnica.jsx (216 linhas)
 │   │   │   │   │   ├── 📄 Cronograma.jsx (411 linhas)
 │   │   │   │   │   ├── 📄 DadosBancarios.jsx (300 linhas)
 │   │   │   │   │   ├── 📄 DadosBasicos.jsx (355 linhas)
+│   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
-│   │   │   │   │   ├── 📄 Identificacao.jsx (304 linhas)
+│   │   │   │   │   ├── 📄 DespesasTab.jsx (379 linhas)
+│   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
-│   │   │   │   └── 📄 index.jsx (342 linhas)
+│   │   │   │   └── 📄 index.jsx (369 linhas)
+│   │   │   ├── 📄 DespesaModal.jsx (616 linhas)
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
 │   │   │   ├── 📄 EmendasStats.jsx (108 linhas)
@@ -185,7 +202,7 @@
 │   │   ├── 📄 DataManager.jsx (977 linhas)
 │   │   ├── 📄 DebugPanel.jsx (92 linhas)
 │   │   ├── 📄 DebugUsuarios.jsx (236 linhas)
-│   │   ├── 📄 DespesaForm.jsx (820 linhas)
+│   │   ├── 📄 DespesaForm.jsx (697 linhas)
 │   │   ├── 📄 Despesas.jsx (305 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
 │   │   ├── 📄 DespesasList.jsx (382 linhas)
@@ -210,8 +227,9 @@
 │   │   ├── 📄 PrivateRoute.jsx (77 linhas)
 │   │   ├── 📄 Relatorios.jsx (273 linhas)
 │   │   ├── 📄 SaldoEmendaWidget.jsx (328 linhas)
-│   │   ├── 📄 SaldoNaturezaWidget.jsx (434 linhas)
-│   │   ├── 📄 Sidebar.jsx (482 linhas)
+│   │   ├── 📄 SaldoNaturezaWidget (copy).jsx (434 linhas)
+│   │   ├── 📄 SaldoNaturezaWidget.jsx (500 linhas)
+│   │   ├── 📄 Sidebar.jsx (481 linhas)
 │   │   ├── 📄 Sobre.jsx (617 linhas)
 │   │   ├── 📄 TemporaryBanner.jsx (148 linhas)
 │   │   ├── 📄 TesteUsuarios.jsx (144 linhas)
@@ -264,7 +282,7 @@
 │   │   ├── 📄 errorHandlers.js (164 linhas)
 │   │   ├── 📄 exportImport.js (1 linhas)
 │   │   ├── 📄 firebaseCollections.js (334 linhas)
-│   │   ├── 📄 formatters.js (193 linhas)
+│   │   ├── 📄 formatters.js (181 linhas)
 │   │   ├── 📄 formStyles.js (677 linhas)
 │   │   ├── 📄 municipiosCache.js (265 linhas)
 │   │   ├── 📄 pdfHelpers.js (184 linhas)
@@ -274,7 +292,7 @@
 │   │   ├── 📄 validators.js (856 linhas)
 │   │   └── 📄 versionControl.js (333 linhas)
 │   ├── 📄 App.css (454 linhas)
-│   ├── 📄 App.jsx (775 linhas)
+│   ├── 📄 App.jsx (781 linhas)
 │   └── 📄 index.jsx (18 linhas)
 ├── 📄 .env (25 linhas)
 ├── 📄 .env.backup (25 linhas)
@@ -288,7 +306,6 @@
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
-├── 📄 ESTRUTURA.md (2492 linhas)
 ├── 📄 firebase-debug.log (18 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
@@ -308,6 +325,9 @@
 
 ### ⚛️ Componentes React
 
+- `backups/v2.3.71/BACKUP_App_v2.3.71.jsx`
+- `backups/v2.3.71/BACKUP_EmendaForm_index_v2.3.71.jsx`
+- `backups/v2.3.71/BACKUP_Sidebar_v2.3.71.jsx`
 - `src/components/admin/AdminHeader.jsx`
 - `src/components/admin/AdminTabs.jsx`
 - `src/components/admin/LogsSection.jsx`
@@ -325,10 +345,7 @@
 - `src/components/despesa/DespesaFormAdvancedFields.jsx`
 - `src/components/despesa/DespesaFormBanners.jsx`
 - `src/components/despesa/DespesaFormBasicFields.jsx`
-- `src/components/despesa/DespesaFormClassificacaoFuncional.jsx`
-- `src/components/despesa/DespesaFormDateFields.jsx`
-- `src/components/despesa/DespesaFormEmendaInfo.jsx`
-- *...e mais 71 componentes*
+- *...e mais 78 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -664,7 +681,7 @@ const DespesaFormBasicFields = ({
 ```
 
 
-#### ⚛️ Componente React `DespesaFormClassificacaoFuncional.jsx` (608 linhas)
+#### ⚛️ Componente React `DespesaFormClassificacaoFuncional.jsx` (851 linhas)
 
 **Exports:**
 ```javascript
@@ -674,10 +691,10 @@ export default DespesaFormClassificacaoFuncional;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormClassificacaoFuncional.jsx
-// ✅ ATUALIZADO: Importando constantes centralizadas
+// ✅ LAYOUT PROFISSIONAL: Campos otimizados e organizados
+// 🎨 VISUAL APRIMORADO: Cores dinâmicas na situação cadastral
+// 🔌 API CNPJ: Busca automática com proxy CORS
 import React, { useState } from "react";
-import {
-NATUREZAS_DESPESA,
 ```
 
 
@@ -818,6 +835,23 @@ loading,
 
 
 ##### 📁 emenda/
+
+
+#### ⚛️ Componente React `DespesaModal.jsx` (616 linhas)
+
+**Exports:**
+```javascript
+export default DespesaModal;
+```
+
+**Preview:**
+```javascript
+// src/components/emenda/DespesaModal.jsx
+import React, { useState, useEffect } from "react";
+import { db } from "../../firebase/firebaseConfig";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
+```
 
 
 #### ⚛️ Componente React `EmendasFilters.jsx` (214 linhas)
@@ -1147,7 +1181,7 @@ const [debugInfo, setDebugInfo] = useState({
 ```
 
 
-#### ⚛️ Componente React `DespesaForm.jsx` (820 linhas)
+#### 💻 JavaScript `DespesaForm.jsx` (697 linhas)
 
 **Exports:**
 ```javascript
@@ -1160,7 +1194,7 @@ export default DespesaForm;
 // ✅ REFATORADO: De 1404 linhas para ~200 linhas
 // Reutiliza componentes modulares existentes + hooks/utils existentes
 // 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
-import React, {
+// 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
 ```
 
 
@@ -1560,7 +1594,7 @@ emendaId,
 ```
 
 
-#### ⚛️ Componente React `SaldoNaturezaWidget.jsx` (434 linhas)
+#### ⚛️ Componente React `SaldoNaturezaWidget (copy).jsx` (434 linhas)
 
 **Exports:**
 ```javascript
@@ -1577,7 +1611,24 @@ import { parseValorMonetario } from "../utils/formatters";
 ```
 
 
-#### ⚛️ Componente React `Sidebar.jsx` (482 linhas)
+#### 💻 JavaScript `SaldoNaturezaWidget.jsx` (500 linhas)
+
+**Exports:**
+```javascript
+export default SaldoNaturezaWidget;
+```
+
+**Preview:**
+```javascript
+// src/components/SaldoNaturezaWidget.jsx
+// 📅 Versão: 2.3.71
+// 📅 Data: 28/10/2025
+// 💰 Widget que mostra saldo disponível por natureza de despesa
+// ✅ CORRIGIDO: Normalização e match correto entre despesas e planejamento
+```
+
+
+#### ⚛️ Componente React `Sidebar.jsx` (481 linhas)
 
 **Exports:**
 ```javascript
@@ -2295,7 +2346,7 @@ EMENDAS: "emendas",
 ```
 
 
-#### 💻 JavaScript `formatters.js` (193 linhas)
+#### 💻 JavaScript `formatters.js` (181 linhas)
 
 **Exports:**
 ```javascript
@@ -2470,7 +2521,7 @@ padding: 0;
 ```
 
 
-#### ⚛️ Componente React `App.jsx` (775 linhas)
+#### ⚛️ Componente React `App.jsx` (781 linhas)
 
 **Exports:**
 ```javascript

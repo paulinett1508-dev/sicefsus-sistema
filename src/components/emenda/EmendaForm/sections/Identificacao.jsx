@@ -66,7 +66,9 @@ const Identificacao = ({
         const municipiosCarregados = await carregarMunicipiosCache(uf);
         setMunicipios(municipiosCarregados);
 
-        console.log(`✅ ${municipiosCarregados.length} municípios carregados para ${uf}`);
+        console.log(
+          `✅ ${municipiosCarregados.length} municípios carregados para ${uf}`,
+        );
       } catch (error) {
         console.error("❌ Erro ao carregar municípios:", error);
         setMunicipios([]);
@@ -209,13 +211,6 @@ const Identificacao = ({
               </option>
             ))}
           </select>
-
-          {/* Contador de municípios */}
-          {municipios.length > 0 && !loadingMunicipios && (
-            <div style={styles.municipioCount}>
-              📊 {municipios.length} municípios disponíveis em {formData?.uf}
-            </div>
-          )}
 
           {fieldErrors.municipio && (
             <small style={styles.errorText}>{fieldErrors.municipio}</small>

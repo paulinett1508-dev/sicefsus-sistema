@@ -9,7 +9,7 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
-// import SaldoNaturezaWidget from "../../../SaldoNaturezaWidget"; // ❌ REMOVIDO - Redundante
+import SaldoNaturezaWidget from "../../../SaldoNaturezaWidget";
 import { NATUREZAS_DESPESA } from "../../../../config/constants";
 
 const AcoesServicos = ({
@@ -256,6 +256,7 @@ const AcoesServicos = ({
         <>
           <div style={styles.metasContainer}>
             <div style={styles.metasHeader}>
+              {/* ✅ ALTERAÇÃO: Texto dinâmico */}
               <span style={styles.metasTitle}>
                 📋 {metasExistentes.length} {textoDespesas}
               </span>
@@ -274,79 +275,33 @@ const AcoesServicos = ({
             </div>
 
             <div style={styles.metasList}>
-              {metasExistentes.map((meta, index) => {
-                // Calcular saldo disponível para esta natureza
-                const valorPlanejado = parseValorMonetario(meta.valorAcao);
-                const valorExecutado = (despesas || [])
-                  .filter((d) => d.estrategia === meta.estrategia)
-                  .reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0);
-                const saldoDisponivel = valorPlanejado - valorExecutado;
-                const percentualDisponivel =
-                  valorPlanejado > 0
-                    ? ((saldoDisponivel / valorPlanejado) * 100).toFixed(1)
-                    : 100;
-
-                return (
-                  <div key={meta.id} style={styles.metaItem}>
-                    <div style={styles.metaContent}>
-                      <div style={styles.metaTopLine}>
-                        <span style={styles.metaNumber}>#{index + 1}</span>
-                        <span style={styles.metaStrategy}>
-                          {meta.estrategia}
-                        </span>
-                        <span style={styles.metaValue}>{meta.valorAcao}</span>
-                      </div>
-                      <div style={styles.metaSaldoLine}>
-                        <span style={styles.metaSaldoLabel}>
-                          Saldo disponível:
-                        </span>
-                        <span
-                          style={{
-                            ...styles.metaSaldoValue,
-                            color: saldoDisponivel >= 0 ? "#16a34a" : "#dc2626",
-                          }}
-                        >
-                          {saldoDisponivel.toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </span>
-                        <span style={styles.metaSaldoPercent}>
-                          ({percentualDisponivel}% disponível)
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoverMeta(meta.id)}
-                      style={styles.removeButton}
-                      title="Remover natureza"
-                    >
-                      🗑️
-                    </button>
+              {metasExistentes.map((meta, index) => (
+                <div key={meta.id} style={styles.metaItem}>
+                  <div style={styles.metaInfo}>
+                    <span style={styles.metaNumber}>#{index + 1}</span>
+                    <span style={styles.metaStrategy}>{meta.estrategia}</span>
+                    {/* ✅ REMOVIDO: badge "Simples" ou "Quantitativa" */}
+                    <span style={styles.metaValue}>{meta.valorAcao}</span>
                   </div>
-                );
-              })}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoverMeta(meta.id)}
+                    style={styles.removeButton}
+                    title="Remover despesa"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Totalizador final */}
-            <div style={styles.metasFooter}>
-              <span style={styles.footerLabel}>Saldo total para executar:</span>
-              <span style={styles.footerValue}>
-                {metasExistentes
-                  .reduce((sum, meta) => {
-                    const valorPlanejado = parseValorMonetario(meta.valorAcao);
-                    const valorExecutado = (despesas || [])
-                      .filter((d) => d.estrategia === meta.estrategia)
-                      .reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0);
-                    return sum + (valorPlanejado - valorExecutado);
-                  }, 0)
-                  .toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-              </span>
-            </div>
+          <div style={{ marginTop: "20px" }}>
+            <SaldoNaturezaWidget
+              emenda={formData}
+              despesas={despesas}
+              compacto={true}
+            />
           </div>
         </>
       )}
@@ -513,21 +468,10 @@ const styles = {
   metaItem: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "flex-start",
-    padding: "12px",
+    alignItems: "center",
+    padding: "8px 12px",
     borderBottom: "1px solid #e9ecef",
     backgroundColor: "white",
-  },
-  metaContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    flex: 1,
-  },
-  metaTopLine: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
   },
   metaInfo: {
     display: "flex",
@@ -542,52 +486,19 @@ const styles = {
     minWidth: "24px",
   },
   metaStrategy: {
-    fontSize: "13px",
+    fontSize: "12px",
     color: "#495057",
     flex: 1,
-    fontWeight: "500",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   metaValue: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#154360",
-    minWidth: "120px",
-    textAlign: "right",
-  },
-  metaSaldoLine: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    paddingLeft: "36px",
     fontSize: "12px",
-  },
-  metaSaldoLabel: {
-    color: "#6b7280",
-  },
-  metaSaldoValue: {
     fontWeight: "600",
-    fontSize: "13px",
-  },
-  metaSaldoPercent: {
-    color: "#9ca3af",
-    fontSize: "11px",
-  },
-  metasFooter: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "12px 16px",
-    backgroundColor: "#f8f9fa",
-    borderTop: "2px solid #dee2e6",
-    fontWeight: "600",
-  },
-  footerLabel: {
-    fontSize: "14px",
-    color: "#495057",
-  },
-  footerValue: {
-    fontSize: "16px",
-    color: "#16a34a",
+    color: "#28a745",
+    minWidth: "100px",
+    textAlign: "right",
   },
   removeButton: {
     backgroundColor: "#dc3545",

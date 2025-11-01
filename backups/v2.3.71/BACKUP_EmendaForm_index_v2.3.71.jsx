@@ -1,36 +1,28 @@
-// src/components/emenda/EmendaForm/index.jsx - VERSÃO UNIFICADA
-// ✅ ATUALIZADO: Planejamento + Despesas → Execução Orçamentária (aba única)
-
-import React, { useState, useEffect, useContext } from "react";
+// src/components/emenda/EmendaForm/index.jsx - COM CARREGAMENTO DE DESPESAS
+import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../firebase/firebaseConfig";
-import { UserContext } from "../../../context/UserContext";
 
 // ✅ HOOKS ESPECIALIZADOS
 import { useEmendaFormData } from "../../../hooks/useEmendaFormData";
 import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation";
 
-// ✅ COMPONENTE DE ABAS
-import TabNavigation from "./components/TabNavigation";
-
-// ✅ ABAS (2 principais - UNIFICADAS!)
-import DadosBasicosTab from "./sections/DadosBasicosTab";
-import ExecucaoOrcamentaria from "./sections/ExecucaoOrcamentaria"; // 🆕 ABA UNIFICADA
+// ✅ SEÇÕES MODULARES
+import Identificacao from "./sections/Identificacao";
+import DadosBasicos from "./sections/DadosBasicos";
+import DadosBancarios from "./sections/DadosBancarios";
+import Cronograma from "./sections/Cronograma";
+import AcoesServicos from "./sections/AcoesServicos";
+import InformacoesComplementares from "./sections/InformacoesComplementares";
 
 // ✅ COMPONENTES AUXILIARES
-import EmendaFormHeaderRich from "./components/EmendaFormHeaderRich";
+import EmendaFormHeader from "./components/EmendaFormHeader";
 import EmendaFormActions from "./components/EmendaFormActions";
 import EmendaFormCancelModal from "./components/EmendaFormCancelModal";
 import LoadingOverlay from "../../LoadingOverlay";
 import Toast from "../../Toast";
 
 const EmendaForm = () => {
-  // 🎯 Estado da aba ativa (agora só 2 abas!)
-  const [activeTab, setActiveTab] = useState("dadosBasicos");
-
-  // 👤 Dados do usuário do contexto
-  const { user } = useContext(UserContext);
-
   // 🎣 HOOK PRINCIPAL: Estado e lógica do formulário
   const {
     // Estados
@@ -66,13 +58,14 @@ const EmendaForm = () => {
     handleSimpleBack,
   } = useEmendaFormNavigation(hasUnsavedChanges, isEdicao);
 
-  // 💰 Estado para despesas da emenda
+  // 💰 NOVO: Estado para despesas da emenda
   const [despesas, setDespesas] = useState([]);
   const [loadingDespesas, setLoadingDespesas] = useState(false);
 
-  // 💰 Carregar despesas quando estiver editando uma emenda
+  // 💰 NOVO: Carregar despesas quando estiver editando uma emenda
   useEffect(() => {
     const carregarDespesas = async () => {
+      // Só carregar se estiver editando e tiver ID da emenda
       if (!isEdicao || !formData.id) {
         setDespesas([]);
         return;
@@ -98,6 +91,7 @@ const EmendaForm = () => {
         setDespesas(despesasData);
       } catch (error) {
         console.error("❌ Erro ao carregar despesas:", error);
+        // Não mostrar erro crítico, apenas log
         setDespesas([]);
       } finally {
         setLoadingDespesas(false);
@@ -106,20 +100,6 @@ const EmendaForm = () => {
 
     carregarDespesas();
   }, [isEdicao, formData.id]);
-
-  // 🎯 Definição das 2 abas UNIFICADAS
-  const tabs = [
-    {
-      id: "dadosBasicos",
-      label: "Dados Básicos",
-      icon: "📋",
-    },
-    {
-      id: "execucao",
-      label: "Execução Orçamentária",
-      icon: "💰",
-    },
-  ];
 
   // 📄 RENDERIZAÇÃO CONDICIONAL: Loading
   if (loading) {
@@ -158,57 +138,67 @@ const EmendaForm = () => {
     );
   }
 
-  // 🎯 Renderizar conteúdo da aba ativa
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "dadosBasicos":
-        return (
-          <DadosBasicosTab
-            formData={formData}
-            onChange={handleInputChange}
-            fieldErrors={fieldErrors}
-            onClearError={clearFieldError}
-          />
-        );
-
-      case "execucao":
-        return (
-          <ExecucaoOrcamentaria
-            formData={formData}
-            onChange={handleInputChange}
-            fieldErrors={fieldErrors}
-            onClearError={clearFieldError}
-            usuario={user}
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  // 🎯 RENDERIZAÇÃO PRINCIPAL: Formulário com abas
+  // 🎯 RENDERIZAÇÃO PRINCIPAL: Formulário funcional
   return (
     <div style={styles.container}>
-      {/* 📋 HEADER RICO DO FORMULÁRIO */}
-      <EmendaFormHeaderRich
+      {/* 📋 HEADER DO FORMULÁRIO */}
+      <EmendaFormHeader
         modo={isEdicao ? "editar" : "criar"}
-        formData={formData}
-        activeTab={activeTab}
-        despesas={despesas}
+        emendaId={isEdicao ? formData.numero : null}
+        parlamentar={formData.autor}
       />
 
       {/* 📝 FORMULÁRIO PRINCIPAL */}
       <form onSubmit={handleSubmit} style={styles.form}>
-        {/* 🎯 NAVEGAÇÃO POR ABAS */}
-        <TabNavigation
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
+        {/* ✅ SEÇÃO: Identificação */}
+        <Identificacao
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
         />
 
-        {/* 📄 CONTEÚDO DA ABA ATIVA */}
-        <div style={styles.tabContent}>{renderTabContent()}</div>
+        {/* ✅ SEÇÃO: Dados Básicos */}
+        <DadosBasicos
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
+        />
+
+        {/* ✅ SEÇÃO: Dados Bancários */}
+        <DadosBancarios
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
+        />
+
+        {/* ✅ SEÇÃO: Cronograma */}
+        <Cronograma
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
+        />
+
+        {/* ✅ SEÇÃO: Ações e Serviços - AGORA COM DESPESAS */}
+        <AcoesServicos
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
+          despesas={despesas}
+          loadingDespesas={loadingDespesas}
+        />
+
+        {/* ✅ SEÇÃO: Informações Complementares */}
+        <InformacoesComplementares
+          formData={formData}
+          onChange={handleInputChange}
+          fieldErrors={fieldErrors}
+          onClearError={clearFieldError}
+        />
 
         {/* 🎛️ AÇÕES DO FORMULÁRIO */}
         <EmendaFormActions
@@ -256,7 +246,7 @@ const EmendaForm = () => {
   );
 };
 
-// 🎨 ESTILOS
+// 🎨 ESTILOS PRESERVADOS
 const styles = {
   container: {
     padding: "16px",
@@ -271,10 +261,9 @@ const styles = {
     padding: "24px",
     boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
     border: "1px solid #e9ecef",
-  },
-  tabContent: {
-    minHeight: "400px",
-    paddingTop: "24px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "30px",
   },
   loadingContainer: {
     textAlign: "center",
@@ -332,7 +321,7 @@ const styles = {
   },
 };
 
-// 🎭 ANIMAÇÃO CSS
+// 🎭 ANIMAÇÃO CSS PRESERVADA
 if (
   !document.querySelector(
     'style[data-component="emenda-form-refactored-dates"]',

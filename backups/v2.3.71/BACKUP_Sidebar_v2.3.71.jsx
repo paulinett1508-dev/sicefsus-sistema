@@ -5,6 +5,7 @@ import GlobalSearch from "./GlobalSearch";
 const menuItems = [
   { label: "Dashboard", icon: "📊", path: "/dashboard" },
   { label: "Emendas", icon: "📄", path: "/emendas" },
+  { label: "Despesas", icon: "💸", path: "/despesas" },
   { label: "Relatórios", icon: "📈", path: "/relatorios" },
 ];
 

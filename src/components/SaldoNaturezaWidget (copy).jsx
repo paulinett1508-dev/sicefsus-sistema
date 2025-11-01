@@ -1,9 +1,6 @@
 // src/components/SaldoNaturezaWidget.jsx
-// 📅 Versão: 2.3.71
-// 📅 Data: 28/10/2025
 // 💰 Widget que mostra saldo disponível por natureza de despesa
-// ✅ CORRIGIDO: Normalização e match correto entre despesas e planejamento
-// ✅ CORRIGIDO: Logs detalhados para debug de campos
+// ✅ CORRIGIDO: Removido verificações de tipoMeta e campo "Meta qualitativa"
 
 import React, { useMemo } from "react";
 import { parseValorMonetario } from "../utils/formatters";
@@ -13,99 +10,36 @@ const SaldoNaturezaWidget = ({
   despesas = [],
   compacto = false,
 }) => {
-  // 🔧 FUNÇÃO AUXILIAR: Normalizar natureza de despesa para comparação
-  const normalizarNatureza = (texto) => {
-    if (!texto) return "SEM NATUREZA";
-
-    // Remove espaços extras e converte para maiúsculas
-    let normalizado = texto.trim().toUpperCase();
-
-    // Remove código de elemento de despesa (ex: "339030 - MATERIAL DE CONSUMO" → "MATERIAL DE CONSUMO")
-    normalizado = normalizado.replace(/^\d+\s*-\s*/, "");
-
-    // Remove caracteres especiais extras
-    normalizado = normalizado.replace(/[^\w\sÀ-ÿ]/g, " ");
-
-    // Remove espaços múltiplos
-    normalizado = normalizado.replace(/\s+/g, " ").trim();
-
-    return normalizado;
-  };
-
   // Calcular saldo por natureza de despesa
   const saldoPorNatureza = useMemo(() => {
     if (!emenda || !emenda.acoesServicos) return [];
 
     const metas = emenda.acoesServicos || [];
 
-    console.log("📊 SaldoNaturezaWidget - Processando:", {
-      totalMetas: metas.length,
-      totalDespesas: despesas.length,
-    });
-
-    // 🔧 Agrupar despesas por natureza NORMALIZADA
+    // Agrupar despesas por natureza (estrategia)
     const despesasPorNatureza = {};
-    despesas.forEach((despesa, index) => {
-      // 🔍 LOG DETALHADO: Ver TODOS os campos da despesa
-      console.log(`  🔍 Despesa #${index + 1} - Campos disponíveis:`, {
-        naturezaDespesa: despesa.naturezaDespesa,
-        estrategia: despesa.estrategia,
-        elementoDespesa: despesa.elementoDespesa,
-        natureza: despesa.natureza,
-        descricao: despesa.descricao,
-        valor: despesa.valor,
-        todosOsCampos: Object.keys(despesa),
-      });
-
-      // ✅ Buscar em múltiplos campos possíveis
-      const naturezaRaw =
-        despesa.naturezaDespesa ||
-        despesa.estrategia ||
-        despesa.elementoDespesa ||
-        despesa.natureza ||
-        "SEM NATUREZA";
-
-      const naturezaNormalizada = normalizarNatureza(naturezaRaw);
-
-      if (!despesasPorNatureza[naturezaNormalizada]) {
-        despesasPorNatureza[naturezaNormalizada] = 0;
+    despesas.forEach((despesa) => {
+      const natureza =
+        despesa.naturezaDespesa || despesa.estrategia || "Sem Natureza";
+      if (!despesasPorNatureza[natureza]) {
+        despesasPorNatureza[natureza] = 0;
       }
-
-      const valorDespesa = parseValorMonetario(despesa.valor || 0);
-      despesasPorNatureza[naturezaNormalizada] += valorDespesa;
-
-      console.log(
-        `  💸 Despesa: "${naturezaRaw}" → "${naturezaNormalizada}" = R$ ${valorDespesa.toFixed(2)}`,
-      );
+      despesasPorNatureza[natureza] += parseValorMonetario(despesa.valor || 0);
     });
 
-    console.log("📦 Despesas agrupadas:", despesasPorNatureza);
-
-    // ✅ Calcular valores para cada meta
+    // ✅ CORREÇÃO: Sempre calcular valores, sem verificar tipoMeta
     const resultado = metas.map((meta) => {
-      const naturezaMetaRaw = meta.estrategia || "SEM NATUREZA";
-      const naturezaMetaNormalizada = normalizarNatureza(naturezaMetaRaw);
-
+      const natureza = meta.estrategia;
       const planejado = parseValorMonetario(meta.valorAcao || 0);
-      const executado = despesasPorNatureza[naturezaMetaNormalizada] || 0;
+      const executado = despesasPorNatureza[natureza] || 0;
       const saldo = planejado - executado;
       const percentualExecutado =
         planejado > 0 ? (executado / planejado) * 100 : 0;
       const percentualDisponivel =
         planejado > 0 ? (saldo / planejado) * 100 : 0;
 
-      console.log(
-        `  🎯 Meta: "${naturezaMetaRaw}" → "${naturezaMetaNormalizada}"`,
-        {
-          planejado: `R$ ${planejado.toFixed(2)}`,
-          executado: `R$ ${executado.toFixed(2)}`,
-          saldo: `R$ ${saldo.toFixed(2)}`,
-        },
-      );
-
       return {
-        natureza: naturezaMetaRaw, // Usar texto original para exibição
-        naturezaNormalizada: naturezaMetaNormalizada,
+        natureza,
         planejado,
         executado,
         saldo,
@@ -192,7 +126,7 @@ const SaldoNaturezaWidget = ({
               <span style={styles.naturezaNome}>{item.natureza}</span>
             </div>
 
-            {/* Grid de valores */}
+            {/* ✅ CORREÇÃO: Sempre mostrar grid de valores */}
             <div style={styles.valoresGrid}>
               <div style={styles.valorItem}>
                 <span style={styles.valorLabel}>Planejado</span>
