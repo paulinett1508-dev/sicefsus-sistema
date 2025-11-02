@@ -232,19 +232,22 @@ const formStyles = {
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "2fr 1fr auto",
+    gridTemplateColumns: "minmax(300px, 2fr) minmax(200px, 1fr) auto",
     gap: "20px",
     alignItems: "end",
+    width: "100%",
   },
   formGroup: {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
+    minWidth: 0,
   },
   formGroupButton: {
     display: "flex",
     flexDirection: "column",
     gap: "4px",
+    minWidth: "auto",
   },
   label: {
     fontWeight: "600",
@@ -275,6 +278,8 @@ const formStyles = {
     fontSize: "14px",
     backgroundColor: "white",
     height: "38px",
+    width: "100%",
+    boxSizing: "border-box",
   },
   input: {
     padding: "8px 12px",
@@ -283,6 +288,8 @@ const formStyles = {
     fontSize: "14px",
     backgroundColor: "white",
     height: "38px",
+    width: "100%",
+    boxSizing: "border-box",
   },
   inputMoney: {
     fontWeight: "600",
