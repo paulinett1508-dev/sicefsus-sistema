@@ -231,10 +231,7 @@ const Emendas = () => {
     navigate(`/emendas/${emenda.id}`);
   };
 
-  const handleDespesas = (emenda) => {
-    console.log("💰 Ver despesas da emenda:", emenda.id);
-    navigate(`/emendas/${emenda.id}/despesas`);
-  };
+  
 
   // ✅ NOVO: Handler para abrir modal de exclusão
   const handleDeletar = (emendaParam) => {
@@ -561,7 +558,6 @@ const Emendas = () => {
           onEdit={handleEditar}
           onView={handleVisualizar}
           onDelete={handleDeletar}
-          onDespesas={handleDespesas}
           userRole={userRole}
         />
       )}
