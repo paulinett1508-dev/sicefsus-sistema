@@ -145,12 +145,12 @@ const MigracaoCompleta = () => {
             const novaDespesa = {
               emendaId: emendaId,
               estrategia: acao.estrategia || "",
-              naturezaDespesa: acao.estrategia || "",
+              naturezaDespesa: acao.estrategia || "3.3.9.0.30 – Material de Despesa",
               valor: parseValorMonetario(acao.valorAcao),
               status: "PLANEJADA",
 
               // Campos vazios (preenchidos na execução)
-              discriminacao: "",
+              discriminacao: acao.estrategia || "",
               numeroEmpenho: "",
               numeroNota: "",
               numeroContrato: "",

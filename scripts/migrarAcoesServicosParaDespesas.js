@@ -85,7 +85,8 @@ async function migrarAcoesServicos() {
             // Dados básicos
             emendaId: emendaId,
             estrategia: acao.estrategia || "",
-            naturezaDespesa: acao.estrategia || "",
+            naturezaDespesa: acao.estrategia || "3.3.9.0.30 – Material de Despesa",
+            discriminacao: acao.estrategia || "",
             valor: parseValorMonetario(acao.valorAcao),
 
             // Status
