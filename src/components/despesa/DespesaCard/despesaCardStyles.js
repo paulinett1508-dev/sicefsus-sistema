@@ -20,7 +20,7 @@ export const despesaCardStyles = {
 
   despesasCardsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(450px, 1fr))", // AUMENTADO: largura mínima maior
     gap: "16px",
   },
 
@@ -35,7 +35,7 @@ export const despesaCardStyles = {
     gap: "6px",
     transition: "all 0.2s ease",
     cursor: "pointer",
-    minHeight: "110px", // AJUSTADO: mesmo valor para planejada e executada
+    minHeight: "130px", // AUMENTADO para garantir alinhamento visual dos cards
   },
 
   despesaCardHover: {
