@@ -1,4 +1,7 @@
 // src/components/emenda/EmendasTable.jsx
+// ✅ CORRIGIDO: Removidos botões "Visualizar" (👁️) e "Gerenciar Despesas" (💸)
+// Mantidos apenas: Editar (✏️) e Excluir (🗑️)
+
 import React from "react";
 
 const EmendasTable = ({
@@ -66,24 +69,6 @@ const EmendasTable = ({
       return { text: "Saldo Baixo", color: "#fd7e14", icon: "⚡" };
     } else {
       return { text: "Ativa", color: "#28a745", icon: "✅" };
-    }
-  };
-
-  // Handler para abrir emenda
-  const handleAbrirEmenda = (emenda) => {
-    if (onAbrirEmenda && typeof onAbrirEmenda === "function") {
-      onAbrirEmenda(emenda);
-    } else {
-      console.warn("Nenhum handler válido encontrado para abrir emenda");
-    }
-  };
-
-  // Handler para ver despesas
-  const handleVerDespesas = (emenda) => {
-    if (onVerDespesas && typeof onVerDespesas === "function") {
-      onVerDespesas(emenda);
-    } else {
-      console.log(`Ver despesas da emenda: ${emenda.numero}`);
     }
   };
 
@@ -165,23 +150,7 @@ const EmendasTable = ({
         </td>
         <td style={styles.td}>
           <div style={styles.actionsContainer}>
-            <button
-              onClick={() => handleAbrirEmenda(emenda)}
-              style={styles.actionButton}
-              title="Abrir emenda"
-            >
-              👁️
-            </button>
-            <button
-              onClick={() => handleVerDespesas(emenda)}
-              style={{
-                ...styles.actionButton,
-                ...styles.actionButtonDespesas,
-              }}
-              title="Ver despesas vinculadas"
-            >
-              💸
-            </button>
+            {/* ✅ MANTIDO: Botão Editar */}
             <button
               onClick={() => onEditarEmenda(emenda)}
               style={styles.actionButton}
@@ -189,6 +158,7 @@ const EmendasTable = ({
             >
               ✏️
             </button>
+            {/* ✅ MANTIDO: Botão Excluir (apenas para admin) */}
             {usuario?.role === "admin" && (
               <button
                 onClick={() => onExcluirEmenda(emenda.id)}
@@ -410,12 +380,6 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  actionButtonDespesas: {
-    backgroundColor: "#28a745",
-    borderColor: "#28a745",
-    color: "white",
   },
 
   actionButtonDanger: {
