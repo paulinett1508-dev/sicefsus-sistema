@@ -1,6 +1,7 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
 // ✅ ATUALIZADO: Campo "Fornecedor" removido
 // 🎯 Agora apenas: Emenda, Valor, Discriminação
+// 🐞 CORRIGIDO: Bug do 'undefined' ao buscar nome do parlamentar
 
 import React from "react";
 
@@ -29,12 +30,18 @@ const DespesaFormBasicFields = ({
           <label style={styles.labelRequired}>Emenda *</label>
           {emendaPreSelecionada && emendaInfo ? (
             <>
+              {/* ========================================================= */}
+              {/* === 🎯 INÍCIO DA MODIFICAÇÃO: Correção do 'undefined' === */}
+              {/* ========================================================= */}
               <input
                 type="text"
-                value={`${emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
+                value={`${emendaInfo.autor || emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
                 style={styles.inputReadonly}
                 readOnly
               />
+              {/* ========================================================= */}
+              {/* === 🎯 FIM DA MODIFICAÇÃO: Correção do 'undefined' === */}
+              {/* ========================================================= */}
               <input type="hidden" name="emendaId" value={formData.emendaId} />
               <span style={styles.helpText}>
                 Emenda pré-selecionada do fluxo anterior
@@ -63,7 +70,7 @@ const DespesaFormBasicFields = ({
                 </option>
                 {emendas.map((emenda) => (
                   <option key={emenda.id} value={emenda.id}>
-                    {emenda.parlamentar} -{" "}
+                    {emenda.autor || emenda.parlamentar} -{" "}
                     {emenda.numero || emenda.numeroEmenda} - {emenda.municipio}/
                     {emenda.uf}
                   </option>

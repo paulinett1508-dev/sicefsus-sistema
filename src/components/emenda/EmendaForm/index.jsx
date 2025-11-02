@@ -16,6 +16,7 @@ import TabNavigation from "./components/TabNavigation";
 // ✅ ABAS (2 principais - UNIFICADAS!)
 import DadosBasicosTab from "./sections/DadosBasicosTab";
 import ExecucaoOrcamentaria from "./sections/ExecucaoOrcamentaria"; // 🆕 ABA UNIFICADA
+import DespesasTab from "./sections/DespesasTab"; // ✅ ABA DE DESPESAS
 
 // ✅ COMPONENTES AUXILIARES
 import EmendaFormHeaderRich from "./components/EmendaFormHeaderRich";
@@ -172,8 +173,11 @@ const EmendaForm = () => {
         );
 
       case "execucao":
+        console.log(
+          "📊 EmendaForm: Renderizando aba de execução (DespesasTab)",
+        );
         return (
-          <ExecucaoOrcamentaria
+          <DespesasTab
             formData={formData}
             onChange={handleInputChange}
             fieldErrors={fieldErrors}

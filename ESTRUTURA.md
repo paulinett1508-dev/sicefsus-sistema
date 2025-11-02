@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 02/11/2025, 12:05
+**📅 Gerado em:** 02/11/2025, 15:30
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -9,8 +9,8 @@
 ## 📊 ESTATÍSTICAS GERAIS
 
 - **📁 Total de Diretórios:** 59
-- **📄 Total de Arquivos:** 254
-- **⚛️ Componentes React:** 111
+- **📄 Total de Arquivos:** 255
+- **⚛️ Componentes React:** 110
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
@@ -26,7 +26,7 @@
 - **.cjs**: 6 arquivos
 - **.css**: 6 arquivos
 - **.res**: 4 arquivos
-- **.txt**: 3 arquivos
+- **.md**: 4 arquivos
 
 ---
 
@@ -151,11 +151,11 @@
 │   │   │   ├── 📁 DespesaCard/
 │   │   │   │   ├── 📄 DespesaCardExecutada.jsx (47 linhas)
 │   │   │   │   ├── 📄 DespesaCardPlanejada.jsx (36 linhas)
-│   │   │   │   └── 📄 despesaCardStyles.js (106 linhas)
+│   │   │   │   └── 📄 despesaCardStyles.js (113 linhas)
 │   │   │   ├── 📄 DespesaFormActions.jsx (79 linhas)
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
-│   │   │   ├── 📄 DespesaFormBasicFields.jsx (271 linhas)
+│   │   │   ├── 📄 DespesaFormBasicFields.jsx (278 linhas)
 │   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (851 linhas)
 │   │   │   ├── 📄 DespesaFormDateFields.jsx (439 linhas)
 │   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (73 linhas)
@@ -186,7 +186,7 @@
 │   │   │   │   │   ├── 📄 EmendaFormHeaderRich.jsx (252 linhas)
 │   │   │   │   │   └── 📄 TabNavigation.jsx (72 linhas)
 │   │   │   │   ├── 📁 sections/
-│   │   │   │   │   ├── 📄 AcoesServicos.jsx (605 linhas)
+│   │   │   │   │   ├── 📄 AcoesServicos.jsx (627 linhas)
 │   │   │   │   │   ├── 📄 ClassificacaoTecnica.jsx (216 linhas)
 │   │   │   │   │   ├── 📄 Cronograma.jsx (411 linhas)
 │   │   │   │   │   ├── 📄 DadosBancarios.jsx (300 linhas)
@@ -194,7 +194,7 @@
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
 │   │   │   │   │   ├── 📄 DespesasTab.jsx (379 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1076 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (978 linhas)
 │   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (440 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
@@ -233,7 +233,7 @@
 │   │   ├── 📄 Despesas.jsx (305 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
 │   │   ├── 📄 DespesasList.jsx (576 linhas)
-│   │   ├── 📄 DespesasTable.jsx (997 linhas)
+│   │   ├── 📄 DespesasTable.jsx (1005 linhas)
 │   │   ├── 📄 Emendas.jsx (812 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
@@ -265,7 +265,7 @@
 │   │   ├── 📄 UpdateNotification.jsx (185 linhas)
 │   │   ├── 📄 UserForm.jsx (1251 linhas)
 │   │   ├── 📄 UsersTable.jsx (417 linhas)
-│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1333 linhas)
+│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1303 linhas)
 │   │   └── 📄 WorkflowManager.jsx (685 linhas)
 │   ├── 📁 config/
 │   │   └── 📄 constants.js (115 linhas)
@@ -334,6 +334,7 @@
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
+├── 📄 ESTRUTURA.md (2620 linhas)
 ├── 📄 firebase-debug.log (18 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
@@ -373,7 +374,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 91 componentes*
+- *...e mais 90 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -709,7 +710,7 @@ return (
 ```
 
 
-#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (271 linhas)
+#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (278 linhas)
 
 **Exports:**
 ```javascript
@@ -721,8 +722,8 @@ export default DespesaFormBasicFields;
 // src/components/despesa/DespesaFormBasicFields.jsx
 // ✅ ATUALIZADO: Campo "Fornecedor" removido
 // 🎯 Agora apenas: Emenda, Valor, Discriminação
+// 🐞 CORRIGIDO: Bug do 'undefined' ao buscar nome do parlamentar
 import React from "react";
-const DespesaFormBasicFields = ({
 ```
 
 
@@ -1294,7 +1295,7 @@ import { db } from "../firebase/firebaseConfig";
 ```
 
 
-#### ⚛️ Componente React `DespesasTable.jsx` (997 linhas)
+#### ⚛️ Componente React `DespesasTable.jsx` (1005 linhas)
 
 **Exports:**
 ```javascript
@@ -1306,7 +1307,7 @@ export default function DespesasTable({
 // src/components/DespesasTable.jsx
 // ✅ OTIMIZADA: Foco em pagamentos por emenda
 // ✅ AGRUPAMENTO: Pagamentos organizados por emenda
-// ❌ REMOVIDO: Colunas de Saldo e % (conforme solicitado)
+// ✅ CORRIGIDO: Badge "EXECUTADA" agora é verde
 import React, { useState, useMemo } from "react";
 ```
 
@@ -1820,7 +1821,7 @@ onEdit,
 ```
 
 
-#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1333 linhas)
+#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1303 linhas)
 
 **Exports:**
 ```javascript

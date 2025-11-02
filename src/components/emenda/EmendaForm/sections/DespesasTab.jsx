@@ -106,6 +106,17 @@ const DespesasTab = ({
     carregarDespesas();
   }, [emendaId]);
 
+  // 🔍 DEBUG: Monitorar mudanças de view
+  useEffect(() => {
+    console.log("📊 DespesasTab: currentView mudou para:", currentView);
+    if (despesaSelecionada) {
+      console.log("📝 Despesa selecionada:", {
+        id: despesaSelecionada.id,
+        discriminacao: despesaSelecionada.discriminacao,
+      });
+    }
+  }, [currentView, despesaSelecionada]);
+
   const carregarDespesas = async () => {
     if (!emendaId) {
       setDespesas([]);
@@ -147,8 +158,14 @@ const DespesasTab = ({
   };
 
   const handleEditar = (despesa) => {
+    console.log("🔧 DespesasTab.handleEditar CHAMADO:", {
+      despesaId: despesa?.id,
+      despesaDiscriminacao: despesa?.discriminacao,
+      currentView: currentView,
+    });
     setDespesaSelecionada(despesa);
     setCurrentView("editar");
+    console.log("✅ DespesasTab: State atualizado para 'editar'");
   };
 
   const handleVisualizar = (despesa) => {

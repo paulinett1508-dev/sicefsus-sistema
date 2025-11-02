@@ -1,4 +1,4 @@
-// DespesasList.jsx - CORRIGIDO SEM useEmendaDespesa
+// DespesasList.jsx - CORRIGIDO COM LOGS DE DEBUG
 // ✅ CORREÇÃO: Receber dados via props ao invés do hook conflitante
 
 import React, { useEffect, useState } from "react";
@@ -43,6 +43,8 @@ const DespesasList = ({
     emendasCount: emendas.length,
     loading,
     error,
+    temOnEdit: !!onEdit,
+    temOnEditarDespesa: !!onEditarDespesa,
   });
 
   // ✅ Sincronizar dados recebidos via props
@@ -93,19 +95,37 @@ const DespesasList = ({
     calcularEstatisticasFiltro(despesas);
   };
 
-  // ✅ Handler para editar com fallbacks
+  // ✅ Handler para editar com fallbacks + LOGS DE DEBUG
   const handleEdit = (despesa) => {
+    console.log("🔧 DespesasList.handleEdit CHAMADO:", {
+      despesaId: despesa?.id,
+      despesaDiscriminacao: despesa?.discriminacao,
+      temOnEditarDespesa: !!onEditarDespesa,
+      temOnEdit: !!onEdit,
+      tipoOnEditarDespesa: typeof onEditarDespesa,
+      tipoOnEdit: typeof onEdit,
+    });
+
     if (onEditarDespesa && typeof onEditarDespesa === "function") {
+      console.log("✅ Chamando onEditarDespesa");
       onEditarDespesa(despesa);
     } else if (onEdit && typeof onEdit === "function") {
+      console.log("✅ Chamando onEdit");
       onEdit(despesa);
     } else {
-      console.warn("Nenhum handler de edição encontrado");
+      console.error("❌ NENHUM HANDLER DE EDIÇÃO ENCONTRADO!", {
+        onEditarDespesa,
+        onEdit,
+      });
+      alert(
+        "⚠️ Erro: Função de edição não está configurada. Verifique o console.",
+      );
     }
   };
 
   // ✅ Handler para visualizar
   const handleView = (despesa) => {
+    console.log("👁️ DespesasList.handleView CHAMADO:", despesa?.id);
     if (onView && typeof onView === "function") {
       onView(despesa);
     } else {
@@ -115,7 +135,9 @@ const DespesasList = ({
 
   // ✅ Handler para excluir simplificado
   const handleDelete = async (despesaId) => {
-
+    if (!confirm("❌ Tem certeza que deseja excluir esta despesa?")) {
+      return;
+    }
 
     try {
       // Excluir do Firebase
@@ -206,78 +228,146 @@ const DespesasList = ({
 
   return (
     <div style={styles.container}>
-
-
       {/* ✅ Layout em Cards (padrão visual das planejadas) */}
       {usarLayoutCards ? (
         <div style={styles.cardsContainer}>
           {despesasFiltradas.map((despesa, index) => {
-          const emendaRelacionada = emendas.find(
-            (e) => e.id === despesa.emendaId,
-          );
+            const emendaRelacionada = emendas.find(
+              (e) => e.id === despesa.emendaId,
+            );
 
-          // Usar estilos customizados se fornecidos
-          const cardStyle = estilosCustomizados?.despesaCardExecutada || styles.despesaCard;
+            // Usar estilos customizados se fornecidos
+            const cardStyle =
+              estilosCustomizados?.despesaCardExecutada || styles.despesaCard;
 
-          return (
-            <div key={despesa.id} style={cardStyle}>
-              <div style={estilosCustomizados?.despesaStatusExecutada || styles.despesaStatusExecutada}>
-                {despesa.status || "✅ EXECUTADA"}
-              </div>
-              <div style={estilosCustomizados?.despesaContent || styles.despesaContent}>
-                <div style={estilosCustomizados?.despesaTopLine || styles.despesaTopLine}>
-                  <span style={estilosCustomizados?.despesaNumero || styles.despesaNumero}>#{index + 1}</span>
-                  <span style={estilosCustomizados?.despesaDescricao || styles.despesaDescricao}>
-                    {despesa.discriminacao || despesa.estrategia || despesa.naturezaDespesa}
-                  </span>
-                  <span style={estilosCustomizados?.despesaValor || styles.despesaValor}>
-                    {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </span>
+            return (
+              <div key={despesa.id} style={cardStyle}>
+                <div
+                  style={
+                    estilosCustomizados?.despesaStatusExecutada ||
+                    styles.despesaStatusExecutada
+                  }
+                >
+                  {despesa.status || "✅ EXECUTADA"}
                 </div>
-                <div style={estilosCustomizados?.despesaInfoLine || styles.despesaInfoLine}>
-                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
-                    📄 Empenho: {despesa.numeroEmpenho || "N/A"}
-                  </span>
-                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
-                    📅 {despesa.dataPagamento ? new Date(despesa.dataPagamento).toLocaleDateString("pt-BR") : "Sem data"}
-                  </span>
-                  <span style={estilosCustomizados?.despesaInfo || styles.despesaInfo}>
-                    🏢 {despesa.fornecedor || "Sem fornecedor"}
-                  </span>
+                <div
+                  style={
+                    estilosCustomizados?.despesaContent || styles.despesaContent
+                  }
+                >
+                  <div
+                    style={
+                      estilosCustomizados?.despesaTopLine ||
+                      styles.despesaTopLine
+                    }
+                  >
+                    <span
+                      style={
+                        estilosCustomizados?.despesaNumero ||
+                        styles.despesaNumero
+                      }
+                    >
+                      #{index + 1}
+                    </span>
+                    <span
+                      style={
+                        estilosCustomizados?.despesaDescricao ||
+                        styles.despesaDescricao
+                      }
+                    >
+                      {despesa.discriminacao ||
+                        despesa.estrategia ||
+                        despesa.naturezaDespesa}
+                    </span>
+                    <span
+                      style={
+                        estilosCustomizados?.despesaValor || styles.despesaValor
+                      }
+                    >
+                      {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </span>
+                  </div>
+                  <div
+                    style={
+                      estilosCustomizados?.despesaInfoLine ||
+                      styles.despesaInfoLine
+                    }
+                  >
+                    <span
+                      style={
+                        estilosCustomizados?.despesaInfo || styles.despesaInfo
+                      }
+                    >
+                      📄 Empenho: {despesa.numeroEmpenho || "N/A"}
+                    </span>
+                    <span
+                      style={
+                        estilosCustomizados?.despesaInfo || styles.despesaInfo
+                      }
+                    >
+                      📅{" "}
+                      {despesa.dataPagamento
+                        ? new Date(despesa.dataPagamento).toLocaleDateString(
+                            "pt-BR",
+                          )
+                        : "Sem data"}
+                    </span>
+                    <span
+                      style={
+                        estilosCustomizados?.despesaInfo || styles.despesaInfo
+                      }
+                    >
+                      🏢 {despesa.fornecedor || "Sem fornecedor"}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  style={
+                    estilosCustomizados?.despesaAcoes || styles.despesaAcoes
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log("🖱️ BOTÃO VISUALIZAR CLICADO (Cards)");
+                      handleView(despesa);
+                    }}
+                    style={
+                      estilosCustomizados?.btnVisualizar || styles.btnVisualizar
+                    }
+                    title="Visualizar despesa"
+                  >
+                    👁️
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      console.log(
+                        "🖱️ BOTÃO EDITAR CLICADO (Cards):",
+                        despesa.id,
+                      );
+                      handleEdit(despesa);
+                    }}
+                    style={estilosCustomizados?.btnEditar || styles.btnEditar}
+                    title="Editar despesa"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(despesa.id)}
+                    style={estilosCustomizados?.btnRemover || styles.btnRemover}
+                    title="Remover despesa"
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
-              <div style={estilosCustomizados?.despesaAcoes || styles.despesaAcoes}>
-                <button
-                  type="button"
-                  onClick={() => handleView(despesa)}
-                  style={estilosCustomizados?.btnVisualizar || styles.btnVisualizar}
-                  title="Visualizar despesa"
-                >
-                  👁️
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleEdit(despesa)}
-                  style={estilosCustomizados?.btnEditar || styles.btnEditar}
-                  title="Editar despesa"
-                >
-                  ✏️
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(despesa.id)}
-                  style={estilosCustomizados?.btnRemover || styles.btnRemover}
-                  title="Remover despesa"
-                >
-                  🗑️
-                </button>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       ) : (
         /* ✅ Componente da Tabela (modo original) */

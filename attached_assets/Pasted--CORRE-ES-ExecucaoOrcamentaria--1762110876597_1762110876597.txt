@@ -1,0 +1,211 @@
+═══════════════════════════════════════════════════════════════
+🔧 CORREÇÕES: ExecucaoOrcamentaria.jsx
+═══════════════════════════════════════════════════════════════
+
+📁 ARQUIVO: src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
+📊 TOTAL DE LINHAS: 965
+🎯 ALTERAÇÕES: 3 correções pontuais
+
+═══════════════════════════════════════════════════════════════
+🔧 CORREÇÃO #1: Handler de Executar com Log (linha ~467)
+═══════════════════════════════════════════════════════════════
+
+❌ CÓDIGO ATUAL:
+──────────────────────────────────────────────────────────────
+  // 🎯 HANDLERS
+  const handleExecutarDespesa = (despesa) => {
+    setExecutandoDespesa(despesa);
+  };
+──────────────────────────────────────────────────────────────
+
+✅ SUBSTITUIR POR:
+──────────────────────────────────────────────────────────────
+  // 🎯 HANDLERS
+  const handleExecutarDespesa = (despesa) => {
+    console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada:", {
+      id: despesa.id,
+      estrategia: despesa.estrategia,
+      valor: despesa.valor,
+    });
+    setExecutandoDespesa(despesa);
+    console.log("✅ Modal de execução deve abrir agora");
+  };
+──────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════
+🔧 CORREÇÃO #2: Handler de Editar Despesa Executada (linha ~749)
+═══════════════════════════════════════════════════════════════
+
+❌ CÓDIGO ATUAL:
+──────────────────────────────────────────────────────────────
+          onEdit={(despesa) => console.log("Editar:", despesa)}
+          onView={(despesa) => console.log("Visualizar:", despesa)}
+──────────────────────────────────────────────────────────────
+
+✅ SUBSTITUIR POR:
+──────────────────────────────────────────────────────────────
+          onEdit={(despesa) => {
+            console.log("✏️ ExecucaoOrcamentaria: Editando despesa executada:", despesa.id);
+            // TODO: Implementar edição de despesa executada
+            alert("Funcionalidade de edição em desenvolvimento");
+          }}
+          onView={(despesa) => {
+            console.log("👁️ ExecucaoOrcamentaria: Visualizando despesa:", despesa.id);
+            // TODO: Implementar visualização de despesa
+            alert("Funcionalidade de visualização em desenvolvimento");
+          }}
+──────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════
+🔧 CORREÇÃO #3: Verificar se Modal está sendo renderizado (linha ~775)
+═══════════════════════════════════════════════════════════════
+
+📍 LOCALIZAÇÃO: Final do componente, antes do </div> final
+
+✅ VERIFICAR SE EXISTE ESTE CÓDIGO:
+──────────────────────────────────────────────────────────────
+      {/* 🎯 MODAL: EXECUTAR DESPESA PLANEJADA */}
+      {executandoDespesa && (
+        <ExecutarDespesaModal
+          despesa={executandoDespesa}
+          emenda={{
+            id: emendaId,
+            numero: formData?.numero,
+            valorRecurso: stats.valorEmenda,
+            municipio: formData?.municipio,
+            uf: formData?.uf,
+            autor: formData?.autor,
+          }}
+          saldoDisponivel={stats.saldoDisponivel}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmarExecucao}
+          usuario={usuario}
+        />
+      )}
+
+      {/* 🎯 MODAL: CRIAR DESPESA EXECUTADA DO ZERO */}
+      {criandoDespesaExecutada && (
+        <ExecutarDespesaModal
+          despesa={null}
+          emenda={{
+            id: emendaId,
+            numero: formData?.numero,
+            valorRecurso: stats.valorEmenda,
+            municipio: formData?.municipio,
+            uf: formData?.uf,
+            autor: formData?.autor,
+          }}
+          saldoDisponivel={stats.saldoDisponivel}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirmarExecucao}
+          usuario={usuario}
+        />
+      )}
+──────────────────────────────────────────────────────────────
+
+⚠️ SE NÃO EXISTIR: Adicione este código antes da tag </div> final
+⚠️ SE JÁ EXISTIR: Apenas verifique que está lá!
+
+═══════════════════════════════════════════════════════════════
+🎯 FLUXO ESPERADO APÓS CORREÇÕES
+═══════════════════════════════════════════════════════════════
+
+Ao clicar no botão "▶️ Executar" de uma despesa planejada:
+
+1️⃣ "▶️ ExecucaoOrcamentaria: Executando despesa planejada"
+   └─ Mostra: id, estrategia, valor
+
+2️⃣ "✅ Modal de execução deve abrir agora"
+   └─ Confirma que state foi atualizado
+
+3️⃣ Modal ExecutarDespesaModal aparece com:
+   ✅ Dados da despesa planejada pré-preenchidos
+   ✅ Campos adicionais para preencher (empenho, CNPJ, datas, etc)
+
+4️⃣ Ao salvar no modal:
+   ✅ Despesa muda de PLANEJADA → EXECUTADA
+   ✅ Aparece na lista de "Despesas Executadas" (verde)
+
+═══════════════════════════════════════════════════════════════
+📝 CHECKLIST DE APLICAÇÃO
+═══════════════════════════════════════════════════════════════
+
+□ 1. Abrir src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
+□ 2. Aplicar CORREÇÃO #1 (linha ~467)
+□ 3. Aplicar CORREÇÃO #2 (linha ~749)
+□ 4. Verificar CORREÇÃO #3 (linha ~775) - modal deve estar renderizado
+□ 5. Salvar arquivo
+□ 6. Recarregar página no navegador
+□ 7. Abrir console (F12)
+□ 8. Clicar no botão "▶️ Executar" de uma despesa planejada
+□ 9. Verificar se modal abre
+□ 10. Preencher campos e salvar
+□ 11. Verificar se despesa aparece como EXECUTADA (verde)
+
+═══════════════════════════════════════════════════════════════
+🐛 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+❌ PROBLEMA: Modal não abre ao clicar em "▶️ Executar"
+
+SOLUÇÃO:
+1. Verifique o console:
+   - Se aparecer o log "▶️ ExecucaoOrcamentaria: Executando..."
+     → Handler está funcionando, problema é no render do modal
+   - Se NÃO aparecer o log
+     → Problema no botão, verifique linha ~690
+
+2. Se handler funciona mas modal não abre:
+   - Verifique se ExecutarDespesaModal está importado (linha ~33)
+   - Verifique se modal está sendo renderizado (CORREÇÃO #3)
+   - Verifique state `executandoDespesa` no console
+
+═══════════════════════════════════════════════════════════════
+✅ RESULTADO FINAL ESPERADO
+═══════════════════════════════════════════════════════════════
+
+ANTES:
+[Tabela com despesas planejadas]
+#1 | Material de Consumo | R$ 2.000 | 🟡 PLANEJADA | [▶️ Executar] [🗑️]
+                                                           ↑
+                                                     Clica aqui
+                                                     Nada acontece ❌
+
+DEPOIS:
+[Tabela com despesas planejadas]
+#1 | Material de Consumo | R$ 2.000 | 🟡 PLANEJADA | [▶️ Executar] [🗑️]
+                                                           ↑
+                                                     Clica aqui
+                                                     Modal abre! ✅
+                                                     
+[Modal ExecutarDespesaModal]
+┌─────────────────────────────────────────────────────────────┐
+│ ▶️ Executar Despesa Planejada                          [X]  │
+├─────────────────────────────────────────────────────────────┤
+│ Parlamentar: João Silva    Número: 12345                    │
+│ Município: Fortaleza/CE    Saldo: R$ 5.000,00              │
+├─────────────────────────────────────────────────────────────┤
+│ ⚠️ Atenção: Ao executar, o valor será descontado do saldo  │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ 📋 DADOS BÁSICOS                                            │
+│ Natureza: Material de Consumo (pré-preenchido) ✅          │
+│ Valor: R$ 2.000,00 (pré-preenchido) ✅                     │
+│ Discriminação: [Campo vazio para preencher]                │
+│                                                             │
+│ 🧾 EMPENHO E NOTA FISCAL                                    │
+│ Nº Empenho: [Campo vazio para preencher]                   │
+│ Nº Nota Fiscal: [Campo vazio para preencher]               │
+│                                                             │
+│ 📅 DATAS                                                    │
+│ Data Empenho: [Campo vazio para preencher]                 │
+│ Data Liquidação: [Campo vazio para preencher]              │
+│ Data Pagamento: [Campo vazio para preencher]               │
+│                                                             │
+│ ... (mais 20 campos) ...                                   │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│                         [Cancelar]  [✅ Confirmar Execução] │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════

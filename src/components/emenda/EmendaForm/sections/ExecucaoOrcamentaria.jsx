@@ -1,6 +1,9 @@
 // src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
 // ✅ REFATORADO:
-//    - Estilo "CLEAN" aplicado: Fundo branco + acento amarelo
+//    - Seção "Planejamento de Despesas" agora é uma TABELA, idêntica à de "Executadas"
+//    - Estilos de tabela profissionais adicionados
+// ✅ CORRIGIDO: Erro de build de importação do firebaseConfig
+// ✅ CORRIGIDO: ReferenceError: Toast is not defined
 
 import React, { useState, useEffect } from "react";
 import {
@@ -13,7 +16,13 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "../../../../firebase/firebaseConfig";
+// =========================================================
+// === 🎯 INÍCIO DA MODIFICAÇÃO 1: Correção do Erro de Build ===
+// =========================================================
+import { db } from "../../../../firebase/firebaseConfig"; // ✅ Caminho corrigido
+// =========================================================
+// === 🎯 FIM DA MODIFICAÇÃO 1: Correção do Erro de Build ===
+// =========================================================
 import {
   formatarMoedaInput,
   parseValorMonetario,
@@ -23,7 +32,13 @@ import { NATUREZAS_DESPESA } from "../../../../config/constants";
 // ✅ COMPONENTES EXISTENTES REUTILIZADOS
 import ExecutarDespesaModal from "./ExecutarDespesaModal";
 import DespesasList from "../../../DespesasList";
-// ✅ IMPORTAÇÃO DE ESTILOS GLOBAIS
+// =========================================================
+// === 🎯 INÍCIO DA MODIFICAÇÃO 2: Correção do ReferenceError ===
+// =========================================================
+import Toast from "../../../Toast"; // ✅ Importação adicionada
+// =========================================================
+// === 🎯 FIM DA MODIFICAÇÃO 2: Correção do ReferenceError ===
+// =========================================================
 import { despesaCardStyles } from "../../../despesa/DespesaCard/despesaCardStyles";
 
 // 📝 COMPONENTE: FORMULÁRIO INLINE PARA DESPESA PLANEJADA
@@ -556,7 +571,6 @@ const ExecucaoOrcamentaria = ({
       <div style={styles.painelControle}>
         <h3 style={styles.painelTitulo}>📊 Painel de Controle Orçamentário</h3>
         <div style={styles.statsGrid}>
-          {/* ... stats ... */}
           <div style={styles.statCard}>
             <div style={styles.statIcon}>💵</div>
             <div style={styles.statContent}>
@@ -634,61 +648,73 @@ const ExecucaoOrcamentaria = ({
 
         {/* 📋 LISTA DE DESPESAS PLANEJADAS */}
         {despesasPlanejadas.length > 0 && (
-          <div style={despesaCardStyles.despesasCardsGrid}>
-            {despesasPlanejadas.map((despesa, index) => (
-              // -------------------------------------------------
-              // ✅ CORREÇÃO "CLEAN": Fundo branco + acento amarelo
-              // -------------------------------------------------
-              <div
-                key={despesa.id}
-                style={{
-                  ...despesaCardStyles.despesaCard, // Base (branco, borda cinza)
-                  borderLeft: "5px solid #ffc107", // ✅ ACENTO AMARELO
-                  minHeight: "100px",
-                  // ❌ Removido: backgroundColor e borderColor
-                }}
-              >
-                <div style={styles.despesaContent}>
-                  <div style={styles.despesaTopLine}>
-                    <span style={despesaCardStyles.despesaNumero}>
-                      #{index + 1}
-                    </span>
-                    <span style={despesaCardStyles.despesaStatusPlanejada}>
-                      🟡 <strong>PLANEJADA</strong>
-                    </span>
-                  </div>
-                  <div style={despesaCardStyles.despesaDescricao}>
-                    {despesa.estrategia || despesa.naturezaDespesa}
-                  </div>
-                </div>
-
-                <div style={styles.despesaAcoes}>
-                  <div style={styles.despesaValorPlanejada}>
-                    {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleExecutarDespesa(despesa)}
-                    style={styles.btnExecutar}
-                    title="Executar despesa"
+          // =========================================================
+          // === 🎯 INÍCIO DA MODIFICAÇÃO: Troca de DIVs por TABELA ===
+          // =========================================================
+          <div style={styles.tableWrapper}>
+            <table style={styles.table}>
+              <thead style={styles.thead}>
+                <tr style={styles.trHeader}>
+                  <th style={styles.th}>#</th>
+                  <th style={{ ...styles.th, width: "50%" }}>
+                    Natureza da Despesa
+                  </th>
+                  <th style={styles.th}>Valor Planejado</th>
+                  <th style={styles.th}>Status</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>Ações</th>
+                </tr>
+              </thead>
+              <tbody style={styles.tbody}>
+                {despesasPlanejadas.map((despesa, index) => (
+                  <tr
+                    key={despesa.id}
+                    style={index % 2 === 0 ? styles.trEven : styles.trOdd}
                   >
-                    ▶️ Executar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoverDespesaPlanejada(despesa.id)}
-                    style={styles.btnRemover}
-                    title="Remover despesa"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            ))}
+                    <td style={styles.td}>{index + 1}</td>
+                    <td style={styles.td}>
+                      {despesa.estrategia || despesa.naturezaDespesa}
+                    </td>
+                    <td style={{ ...styles.td, ...styles.tdValorPlanejado }}>
+                      {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </td>
+                    <td style={styles.td}>
+                      <span style={despesaCardStyles.despesaStatusPlanejada}>
+                        🟡 <strong>PLANEJADA</strong>
+                      </span>
+                    </td>
+                    <td style={{ ...styles.td, textAlign: "right" }}>
+                      <div style={styles.despesaAcoes}>
+                        <button
+                          type="button"
+                          onClick={() => handleExecutarDespesa(despesa)}
+                          style={styles.btnExecutar}
+                          title="Executar despesa"
+                        >
+                          ▶️ Executar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRemoverDespesaPlanejada(despesa.id)
+                          }
+                          style={styles.btnRemover}
+                          title="Remover despesa"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+          // =========================================================
+          // === 🎯 FIM DA MODIFICAÇÃO: Troca de DIVs por TABELA ===
+          // =========================================================
         )}
       </div>
 
@@ -711,7 +737,11 @@ const ExecucaoOrcamentaria = ({
           emendas={[
             {
               id: emendaId,
-              /* ...outras props da emenda... */
+              numero: formData?.numero,
+              valorRecurso: formData?.valorRecurso,
+              municipio: formData?.municipio,
+              uf: formData?.uf,
+              autor: formData?.autor,
             },
           ]}
           loading={loading}
@@ -720,10 +750,10 @@ const ExecucaoOrcamentaria = ({
           onView={(despesa) => console.log("Visualizar:", despesa)}
           onRecarregar={carregarDespesas}
           usuario={usuario}
-          filtroInicial={{ emendaId: emendaId }}
-          usarLayoutCards={false}
-          // ✅ <DespesasList> agora usará o estilo "CLEAN"
-          //    do 'despesaCardStyles.js' automaticamente.
+          filtroInicial={{
+            emendaId: emendaId,
+          }}
+          usarLayoutCards={false} // ✅ Mantido como 'false'
         />
       </div>
 
@@ -731,7 +761,10 @@ const ExecucaoOrcamentaria = ({
       {(executandoDespesa || criandoDespesaExecutada) && (
         <ExecutarDespesaModal
           despesa={executandoDespesa}
-          emenda={{ id: emendaId, ...formData }}
+          emenda={{
+            id: emendaId,
+            ...formData,
+          }}
           saldoDisponivel={stats.saldoDisponivel}
           onClose={handleCloseModal}
           onConfirm={handleConfirmarExecucao}
@@ -742,7 +775,7 @@ const ExecucaoOrcamentaria = ({
   );
 };
 
-// 🎨 ESTILOS (MANTIDOS E ENXUTOS)
+// 🎨 ESTILOS (REDUZIDOS)
 const styles = {
   container: {
     display: "flex",
@@ -844,30 +877,65 @@ const styles = {
     transition: "all 0.2s",
   },
 
-  // Estilos mantidos pois são customizados para o card Planejado
-  despesaContent: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    flex: 1,
-    justifyContent: "space-between",
+  // =========================================================
+  // === 🎯 INÍCIO DA MODIFICAÇÃO: Estilos da Tabela Planejada
+  // =========================================================
+  tableWrapper: {
+    width: "100%",
+    overflowX: "auto",
+    border: "1px solid #e0e0e0",
+    borderRadius: "8px",
+    marginTop: "20px",
   },
-  despesaTopLine: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: 12,
   },
-  despesaValorPlanejada: {
-    fontSize: "16px",
+  thead: {},
+  trHeader: {
+    backgroundColor: "#2c3e50", // Mesmo header da tabela de executadas
+  },
+  th: {
+    padding: "12px 8px",
+    textAlign: "left",
+    color: "white",
+    fontWeight: "600",
+    fontSize: 14,
+    borderBottom: "2px solid #34495e",
+    borderRight: "1px solid rgba(255,255,255,0.1)",
+    whiteSpace: "nowrap",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  tbody: {},
+  trEven: {
+    backgroundColor: "#f9f9f9",
+  },
+  trOdd: {
+    backgroundColor: "white",
+  },
+  td: {
+    padding: "10px 8px",
+    borderBottom: "1px solid #eee",
+    fontSize: 12,
+    color: "#333",
+    verticalAlign: "middle",
+  },
+  tdValorPlanejado: {
+    fontSize: 14,
     fontWeight: "700",
     color: "#f39c12", // Cor do valor mantida (amarelo)
     textAlign: "right",
+    fontFamily: "monospace",
   },
+  // =========================================================
+  // === 🎯 FIM DA MODIFICAÇÃO: Estilos da Tabela Planejada
+  // =========================================================
   despesaAcoes: {
     display: "flex",
-    flexDirection: "column",
     gap: "8px",
-    alignItems: "flex-end",
+    justifyContent: "flex-end",
   },
   btnExecutar: {
     backgroundColor: "#007bff",

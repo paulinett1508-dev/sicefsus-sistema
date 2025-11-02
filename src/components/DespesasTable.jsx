@@ -1,7 +1,7 @@
 // src/components/DespesasTable.jsx
 // ✅ OTIMIZADA: Foco em pagamentos por emenda
 // ✅ AGRUPAMENTO: Pagamentos organizados por emenda
-// ❌ REMOVIDO: Colunas de Saldo e % (conforme solicitado)
+// ✅ CORRIGIDO: Badge "EXECUTADA" agora é verde
 
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -117,17 +117,25 @@ export default function DespesasTable({
     return cores[tipo] || "#adb5bd";
   }
 
+  // =========================================================
+  // === 🎯 INÍCIO DA MODIFICAÇÃO: Corrigindo o Badge Cinza ===
+  // =========================================================
   // ✅ Cor do status
   function getStatusColor(status) {
+    const statusLimpo = status ? status.toUpperCase() : "PENDENTE";
     const cores = {
-      pendente: "#6c757d",
-      empenhado: "#007bff",
-      liquidado: "#ffc107",
-      pago: SUCCESS,
-      cancelado: ERROR,
+      PENDENTE: "#6c757d",
+      EMPENHADO: "#007bff",
+      LIQUIDADO: "#ffc107",
+      PAGO: SUCCESS,
+      CANCELADO: ERROR,
+      EXECUTADA: SUCCESS, // ✅ CORREÇÃO APLICADA
     };
-    return cores[status] || "#6c757d";
+    return cores[statusLimpo] || "#6c757d";
   }
+  // =========================================================
+  // === 🎯 FIM DA MODIFICAÇÃO: Corrigindo o Badge Cinza ===
+  // =========================================================
 
   // ✅ Excluir despesa
   async function handleExcluir(despesa) {
@@ -162,7 +170,23 @@ export default function DespesasTable({
 
   // ✅ Handlers
   function handleEditar(despesa) {
-    if (onEdit) onEdit(despesa);
+    console.log("🔧 DespesasTable.handleEditar CHAMADO:", {
+      despesaId: despesa?.id,
+      despesaDiscriminacao: despesa?.discriminacao,
+      temOnEdit: !!onEdit,
+      tipoOnEdit: typeof onEdit,
+    });
+
+    if (onEdit && typeof onEdit === "function") {
+      console.log("✅ DespesasTable: Chamando onEdit");
+      onEdit(despesa);
+    } else {
+      console.error("❌ DespesasTable: onEdit não é uma função!", {
+        onEdit,
+        tipoOnEdit: typeof onEdit,
+      });
+      alert("⚠️ Erro: Função de edição não configurada em DespesasTable");
+    }
   }
 
   function handleVisualizar(despesa) {
@@ -252,7 +276,13 @@ export default function DespesasTable({
             👁️
           </button>
           <button
-            onClick={() => handleEditar(despesa)}
+            onClick={() => {
+              console.log("🖱️ BOTÃO EDITAR CLICADO (DespesasTable):", {
+                id: despesa.id,
+                discriminacao: despesa.discriminacao,
+              });
+              handleEditar(despesa);
+            }}
             style={styles.editButton}
             title="Editar despesa"
             disabled={excluindo === despesa.id}
