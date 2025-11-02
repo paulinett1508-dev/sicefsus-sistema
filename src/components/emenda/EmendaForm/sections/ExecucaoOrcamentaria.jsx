@@ -435,8 +435,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   <th style={{ ...styles.th, textAlign: "center", width: 140 }}>
                     Status
                   </th>
-                  <th style={{ ...styles.th, textAlign: "center", width: 220 }}>
-                    Ações
+                  <th style={{ ...styles.th, textAlign: "center", width: 100 }}>
+                    AÇÕES
                   </th>
                 </tr>
               </thead>
@@ -470,9 +470,10 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                         <button
                           type="button"
                           onClick={() => handleExecutarDespesa(despesa)}
-                          style={{ ...styles.btn, ...styles.btnPrimary }}
+                          style={styles.btnIconExecutar}
+                          title="Executar despesa"
                         >
-                          ▶️ Executar
+                          ▶️
                         </button>
                         <button
                           type="button"
@@ -483,9 +484,10 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                               despesa.valor,
                             )
                           }
-                          style={{ ...styles.btn, ...styles.btnDanger }}
+                          style={styles.btnIconRemover}
+                          title="Remover despesa"
                         >
-                          🗑️ Remover
+                          🗑️
                         </button>
                       </div>
                     </td>
@@ -749,8 +751,28 @@ const styles = {
   },
   btnDanger: {
     backgroundColor: "#dc3545",
+    color: "white",
+    transition: "background-color 0.2s",
+  },
+  btnIconExecutar: {
+    backgroundColor: "#0d6efd",
     color: "#fff",
-    borderColor: "#dc3545",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+  },
+  btnIconRemover: {
+    backgroundColor: "#dc3545",
+    color: "#fff",
+    border: "none",
+    padding: "6px 10px",
+    borderRadius: "4px",
+    fontSize: "14px",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   // Empty state
   emptyState: {
