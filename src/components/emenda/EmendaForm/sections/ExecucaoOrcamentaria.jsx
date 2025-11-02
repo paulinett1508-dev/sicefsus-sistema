@@ -678,13 +678,13 @@ const ExecucaoOrcamentaria = ({
             <table style={styles.table}>
               <thead style={styles.thead}>
                 <tr style={styles.trHeader}>
-                  <th style={styles.th}>#</th>
-                  <th style={{ ...styles.th, width: "50%" }}>
+                  <th style={{ ...styles.th, width: "50px" }}>#</th>
+                  <th style={{ ...styles.th, width: "40%" }}>
                     Natureza da Despesa
                   </th>
-                  <th style={styles.th}>Valor Planejado</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={{ ...styles.th, textAlign: "right" }}>Ações</th>
+                  <th style={{ ...styles.th, width: "15%" }}>Valor Planejado</th>
+                  <th style={{ ...styles.th, width: "15%" }}>Status</th>
+                  <th style={{ ...styles.th, width: "20%", textAlign: "center" }}>Ações</th>
                 </tr>
               </thead>
               <tbody style={styles.tbody}>
@@ -708,7 +708,7 @@ const ExecucaoOrcamentaria = ({
                         🟡 <strong>PLANEJADA</strong>
                       </span>
                     </td>
-                    <td style={{ ...styles.td, textAlign: "right" }}>
+                    <td style={{ ...styles.td, textAlign: "center" }}>
                       <div style={styles.despesaAcoes}>
                         <button
                           type="button"
@@ -979,7 +979,9 @@ const styles = {
   despesaAcoes: {
     display: "flex",
     gap: "8px",
-    justifyContent: "flex-end",
+    justifyContent: "center",
+    alignItems: "center",
+    flexWrap: "nowrap",
   },
   btnExecutar: {
     backgroundColor: "#007bff",
