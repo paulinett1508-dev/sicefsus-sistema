@@ -1,4 +1,5 @@
 // components/despesa/DespesaCard/despesaCardStyles.js
+
 // ✅ ESTILOS PADRONIZADOS PARA CARDS DE DESPESAS
 
 export const despesaCardStyles = {
@@ -34,7 +35,7 @@ export const despesaCardStyles = {
     gap: "6px",
     transition: "all 0.2s ease",
     cursor: "pointer",
-    minHeight: "100px",
+    minHeight: "110px", // AJUSTADO: mesmo valor para planejada e executada
   },
 
   despesaCardHover: {
