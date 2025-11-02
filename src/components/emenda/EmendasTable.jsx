@@ -154,7 +154,6 @@ const EmendasTable = ({
         </td>
         <td style={styles.td}>
           <div style={styles.actionsContainer}>
-            {/* ✅ MANTIDO: Botão Editar */}
             <button
               onClick={() => onEdit(emenda)}
               style={styles.actionButton}
@@ -162,7 +161,6 @@ const EmendasTable = ({
             >
               ✏️
             </button>
-            {/* ✅ MANTIDO: Botão Excluir (apenas para admin) */}
             {usuario?.role === "admin" && (
               <button
                 onClick={() => onDelete(emenda.id)}
