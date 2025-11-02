@@ -269,13 +269,6 @@ export default function DespesasTable({
       <td style={styles.tdActions}>
         <div style={styles.actionsContainer}>
           <button
-            onClick={() => handleVisualizar(despesa)}
-            style={styles.viewButton}
-            title="Visualizar despesa"
-          >
-            👁️
-          </button>
-          <button
             onClick={() => {
               console.log("🖱️ BOTÃO EDITAR CLICADO (DespesasTable):", {
                 id: despesa.id,
