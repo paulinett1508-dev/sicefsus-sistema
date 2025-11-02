@@ -34,7 +34,7 @@ export const despesaCardStyles = {
     gap: "6px",
     transition: "all 0.2s ease",
     cursor: "pointer",
-    minHeight: "60px",
+    minHeight: "100px",
   },
 
   despesaCardHover: {
