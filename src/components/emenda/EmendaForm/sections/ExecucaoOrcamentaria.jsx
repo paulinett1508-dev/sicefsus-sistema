@@ -435,7 +435,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   <th style={{ ...styles.th, textAlign: "center", width: 140 }}>
                     Status
                   </th>
-                  <th style={{ ...styles.th, textAlign: "center", width: 100 }}>
+                  <th style={{ ...styles.th, textAlign: "center", width: 80 }}>
                     AÇÕES
                   </th>
                 </tr>
