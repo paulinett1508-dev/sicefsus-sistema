@@ -746,6 +746,24 @@ const ExecucaoOrcamentaria = ({
           usuario={usuario}
         />
       )}
+
+      {/* 🎯 BOTÃO ATUALIZAR EMENDA FIXO */}
+      <div style={styles.buttonFixo}>
+        <button
+          type="submit"
+          style={styles.btnAtualizarFixo}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-2px)";
+            e.target.style.boxShadow = "0 6px 16px rgba(40, 167, 69, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "0 4px 12px rgba(40, 167, 69, 0.3)";
+          }}
+        >
+          💾 Atualizar Emenda
+        </button>
+      </div>
     </div>
   );
 };
@@ -1018,6 +1036,39 @@ const styles = {
     fontSize: "13px",
     cursor: "pointer",
     transition: "all 0.2s ease",
+  },
+
+  // 🎯 BOTÃO FIXO NO RODAPÉ
+  buttonFixo: {
+    position: "sticky",
+    bottom: "0",
+    left: 0,
+    right: 0,
+    padding: "20px",
+    backgroundColor: "white",
+    borderTop: "3px solid #e9ecef",
+    boxShadow: "0 -6px 20px rgba(0,0,0,0.08)",
+    zIndex: 100,
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "32px",
+    borderRadius: "8px 8px 0 0",
+  },
+
+  btnAtualizarFixo: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "16px 40px",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "700",
+    cursor: "pointer",
+    boxShadow: "0 4px 12px rgba(40, 167, 69, 0.3)",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
 };
 
