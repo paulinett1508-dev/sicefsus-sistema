@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 01/11/2025, 19:28
+**📅 Gerado em:** 02/11/2025, 12:05
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,25 +8,25 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 52
-- **📄 Total de Arquivos:** 233
-- **⚛️ Componentes React:** 98
+- **📁 Total de Diretórios:** 59
+- **📄 Total de Arquivos:** 254
+- **⚛️ Componentes React:** 111
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 111 arquivos
-- **.js**: 45 arquivos
+- **.jsx**: 124 arquivos
+- **.js**: 49 arquivos
 - **.json**: 23 arquivos
 - **sem extensão**: 10 arquivos
 - **.bin**: 9 arquivos
+- **.png**: 6 arquivos
 - **.cjs**: 6 arquivos
 - **.css**: 6 arquivos
 - **.res**: 4 arquivos
-- **.md**: 3 arquivos
-- **.png**: 3 arquivos
+- **.txt**: 3 arquivos
 
 ---
 
@@ -50,6 +50,7 @@
 │   │   ├── 📁 nix/
 │   │   │   ├── 📄 dotreplitenv.json (1 linhas)
 │   │   │   └── 📄 env.json (1 linhas)
+│   │   ├── 📁 transfers/
 │   │   ├── 📄 __replit_disk_meta.json (2 linhas)
 │   │   ├── 📄 modules.stamp (1 linhas)
 │   │   └── 📄 toolchain.json (1 linhas)
@@ -96,6 +97,11 @@
 │   │   └── 📄 users.js (1 linhas)
 │   ├── 📄 package.json (19 linhas)
 │   └── 📄 server.js (332 linhas)
+├── 📁 attached_assets/
+│   ├── 📄 image_1762032358714.png (325 linhas)
+│   ├── 📄 image_1762032564858.png (152 linhas)
+│   ├── 📄 image_1762033273030.png (238 linhas)
+│   └── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
 │       ├── 📄 BACKUP_AcoesServicos_v2.3.71.jsx (516 linhas)
@@ -120,6 +126,8 @@
 │   ├── 📄 analise-runner.cjs (381 linhas)
 │   ├── 📄 bump-version.js (66 linhas)
 │   ├── 📄 generateHandover.cjs (560 linhas)
+│   ├── 📄 migrarAcoesServicosParaDespesas.js (243 linhas)
+│   ├── 📄 migrarDespesasStatus.js (365 linhas)
 │   └── 📄 package.json (16 linhas)
 ├── 📁 src/
 │   ├── 📁 components/
@@ -127,6 +135,7 @@
 │   │   │   ├── 📄 AdminHeader.jsx (93 linhas)
 │   │   │   ├── 📄 AdminTabs.jsx (59 linhas)
 │   │   │   ├── 📄 LogsSection.jsx (369 linhas)
+│   │   │   ├── 📄 MigracaoCompleta.jsx (558 linhas)
 │   │   │   ├── 📄 UserModal.jsx (53 linhas)
 │   │   │   ├── 📄 UsersSection.jsx (137 linhas)
 │   │   │   └── 📄 UsersTable.jsx (224 linhas)
@@ -139,6 +148,10 @@
 │   │   │   ├── 📄 DashboardTimeline.jsx (327 linhas)
 │   │   │   └── 📄 DashboardVelocidade.jsx (380 linhas)
 │   │   ├── 📁 despesa/
+│   │   │   ├── 📁 DespesaCard/
+│   │   │   │   ├── 📄 DespesaCardExecutada.jsx (47 linhas)
+│   │   │   │   ├── 📄 DespesaCardPlanejada.jsx (36 linhas)
+│   │   │   │   └── 📄 despesaCardStyles.js (106 linhas)
 │   │   │   ├── 📄 DespesaFormActions.jsx (79 linhas)
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
@@ -153,13 +166,25 @@
 │   │   │   ├── 📄 DespesasListHeader.jsx (273 linhas)
 │   │   │   └── 📄 DespesasStats.jsx (92 linhas)
 │   │   ├── 📁 emenda/
+│   │   │   ├── 📁 EmendaDetail/
+│   │   │   │   ├── 📁 components/
+│   │   │   │   │   ├── 📄 EmendaHeader.jsx (56 linhas)
+│   │   │   │   │   ├── 📄 EmendaKPIs.jsx (71 linhas)
+│   │   │   │   │   └── 📄 EmendaTabs.jsx (31 linhas)
+│   │   │   │   ├── 📁 sections/
+│   │   │   │   │   ├── 📄 DespesasTab.jsx (95 linhas)
+│   │   │   │   │   ├── 📄 NovaDespesaTab.jsx (120 linhas)
+│   │   │   │   │   └── 📄 VisaoGeralTab.jsx (183 linhas)
+│   │   │   │   ├── 📁 styles/
+│   │   │   │   │   └── 📄 emendaDetailStyles.js (532 linhas)
+│   │   │   │   └── 📄 index.jsx (285 linhas)
 │   │   │   ├── 📁 EmendaForm/
 │   │   │   │   ├── 📁 components/
 │   │   │   │   │   ├── 📄 EmendaFormActions.jsx (207 linhas)
 │   │   │   │   │   ├── 📄 EmendaFormCancelModal.jsx (144 linhas)
 │   │   │   │   │   ├── 📄 EmendaFormHeader.jsx (104 linhas)
 │   │   │   │   │   ├── 📄 EmendaFormHeaderRich.jsx (252 linhas)
-│   │   │   │   │   └── 📄 TabNavigation.jsx (71 linhas)
+│   │   │   │   │   └── 📄 TabNavigation.jsx (72 linhas)
 │   │   │   │   ├── 📁 sections/
 │   │   │   │   │   ├── 📄 AcoesServicos.jsx (605 linhas)
 │   │   │   │   │   ├── 📄 ClassificacaoTecnica.jsx (216 linhas)
@@ -169,9 +194,11 @@
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
 │   │   │   │   │   ├── 📄 DespesasTab.jsx (379 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1076 linhas)
+│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (440 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
-│   │   │   │   └── 📄 index.jsx (369 linhas)
+│   │   │   │   └── 📄 index.jsx (353 linhas)
 │   │   │   ├── 📄 DespesaModal.jsx (616 linhas)
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
@@ -205,7 +232,7 @@
 │   │   ├── 📄 DespesaForm.jsx (697 linhas)
 │   │   ├── 📄 Despesas.jsx (305 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
-│   │   ├── 📄 DespesasList.jsx (382 linhas)
+│   │   ├── 📄 DespesasList.jsx (576 linhas)
 │   │   ├── 📄 DespesasTable.jsx (997 linhas)
 │   │   ├── 📄 Emendas.jsx (812 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
@@ -238,7 +265,7 @@
 │   │   ├── 📄 UpdateNotification.jsx (185 linhas)
 │   │   ├── 📄 UserForm.jsx (1251 linhas)
 │   │   ├── 📄 UsersTable.jsx (417 linhas)
-│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1292 linhas)
+│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1333 linhas)
 │   │   └── 📄 WorkflowManager.jsx (685 linhas)
 │   ├── 📁 config/
 │   │   └── 📄 constants.js (115 linhas)
@@ -291,8 +318,9 @@
 │   │   ├── 📄 simpleErrorModal.js (51 linhas)
 │   │   ├── 📄 validators.js (856 linhas)
 │   │   └── 📄 versionControl.js (333 linhas)
+│   ├── 📄 App (copy).jsx (794 linhas)
 │   ├── 📄 App.css (454 linhas)
-│   ├── 📄 App.jsx (781 linhas)
+│   ├── 📄 App.jsx (794 linhas)
 │   └── 📄 index.jsx (18 linhas)
 ├── 📄 .env (25 linhas)
 ├── 📄 .env.backup (25 linhas)
@@ -331,6 +359,7 @@
 - `src/components/admin/AdminHeader.jsx`
 - `src/components/admin/AdminTabs.jsx`
 - `src/components/admin/LogsSection.jsx`
+- `src/components/admin/MigracaoCompleta.jsx`
 - `src/components/admin/UserModal.jsx`
 - `src/components/admin/UsersSection.jsx`
 - `src/components/admin/UsersTable.jsx`
@@ -341,11 +370,10 @@
 - `src/components/DashboardComponents/DashboardRankings.jsx`
 - `src/components/DashboardComponents/DashboardTimeline.jsx`
 - `src/components/DashboardComponents/DashboardVelocidade.jsx`
+- `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
+- `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- `src/components/despesa/DespesaFormAdvancedFields.jsx`
-- `src/components/despesa/DespesaFormBanners.jsx`
-- `src/components/despesa/DespesaFormBasicFields.jsx`
-- *...e mais 78 componentes*
+- *...e mais 91 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -434,6 +462,23 @@ import React from "react";
 const LogsSection = ({
 logs,
 logFilters,
+```
+
+
+#### ⚛️ Componente React `MigracaoCompleta.jsx` (558 linhas)
+
+**Exports:**
+```javascript
+export default MigracaoCompleta;
+```
+
+**Preview:**
+```javascript
+// src/components/admin/MigracaoCompleta.jsx
+// 🔄 MIGRAÇÃO COMPLETA VIA WEB
+// ✅ Usa autenticação do usuário logado
+import React, { useState } from "react";
+import {
 ```
 
 
@@ -1232,11 +1277,11 @@ import React, { useState, useEffect } from "react";
 ```
 
 
-#### ⚛️ Componente React `DespesasList.jsx` (382 linhas)
+#### ⚛️ Componente React `DespesasList.jsx` (576 linhas)
 
 **Exports:**
 ```javascript
-export default function DespesasList({
+export default DespesasList;
 ```
 
 **Preview:**
@@ -1775,7 +1820,7 @@ onEdit,
 ```
 
 
-#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1292 linhas)
+#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1333 linhas)
 
 **Exports:**
 ```javascript
@@ -2509,6 +2554,24 @@ date: "22/10/2025",
 ```
 
 
+#### ⚛️ Componente React `App (copy).jsx` (794 linhas)
+
+**Exports:**
+```javascript
+export const useNavigationProtection = () => {
+export default App;
+```
+
+**Preview:**
+```javascript
+// App.jsx - VERSÃO CORRIGIDA PARA SICEFSUS
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import {
+BrowserRouter as Router,
+Routes,
+```
+
+
 #### 🎨 Estilos `App.css` (454 linhas)
 
 **Preview:**
@@ -2521,7 +2584,7 @@ padding: 0;
 ```
 
 
-#### ⚛️ Componente React `App.jsx` (781 linhas)
+#### ⚛️ Componente React `App.jsx` (794 linhas)
 
 **Exports:**
 ```javascript

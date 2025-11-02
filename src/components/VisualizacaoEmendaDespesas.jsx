@@ -339,29 +339,29 @@ const VisualizacaoEmendaDespesas = ({
       <div style={styles.tabsContainer}>
         <div style={styles.tabsHeader}>
           <button
-            onClick={() => setAbaAtiva("visao-geral")}
             style={{
               ...styles.tab,
               ...(abaAtiva === "visao-geral" ? styles.tabActive : {}),
             }}
+            onClick={() => setAbaAtiva("visao-geral")}
           >
             📊 Visão Geral
           </button>
           <button
-            onClick={() => setAbaAtiva("despesas")}
             style={{
               ...styles.tab,
               ...(abaAtiva === "despesas" ? styles.tabActive : {}),
             }}
+            onClick={() => setAbaAtiva("despesas")}
           >
             💸 Despesas ({metricas.totalDespesas})
           </button>
           <button
-            onClick={() => setAbaAtiva("nova-despesa")}
             style={{
               ...styles.tab,
               ...(abaAtiva === "nova-despesa" ? styles.tabActive : {}),
             }}
+            onClick={handleNovaDespesa}
           >
             ➕ Nova Despesa
           </button>
@@ -371,68 +371,70 @@ const VisualizacaoEmendaDespesas = ({
           {/* ✅ ABA: Visão Geral */}
           {abaAtiva === "visao-geral" && (
             <div style={styles.visaoGeralContainer}>
+              {/* Gráficos */}
               <div style={styles.chartsGrid}>
-                {/* Gráfico de Execução */}
                 <div style={styles.chartCard}>
-                  <h3 style={styles.chartTitle}>💰 Execução Orçamentária</h3>
+                  <h3 style={styles.chartTitle}>📊 Distribuição de Execução</h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                       <Pie
                         data={dadosExecucao}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={5}
+                        labelLine={false}
+                        label={({ name, percent }) =>
+                          `${name} (${(percent * 100).toFixed(0)}%)`
+                        }
+                        outerRadius={80}
+                        fill="#8884d8"
                         dataKey="value"
                       >
                         {dadosExecucao.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        formatter={(value) => [formatCurrency(value), ""]}
-                        labelFormatter={(label) => label}
-                      />
+                      <Tooltip formatter={(value) => formatCurrency(value)} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
 
-                {/* Gráfico de Despesas por Mês */}
                 <div style={styles.chartCard}>
-                  <h3 style={styles.chartTitle}>📈 Despesas por Período</h3>
+                  <h3 style={styles.chartTitle}>
+                    📈 Despesas ao Longo do Tempo
+                  </h3>
                   <ResponsiveContainer width="100%" height={250}>
                     <LineChart data={dadosLinha}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="mes" />
                       <YAxis />
-                      <Tooltip
-                        formatter={(value) => [formatCurrency(value), "Valor"]}
-                      />
+                      <Tooltip formatter={(value) => formatCurrency(value)} />
                       <Line
                         type="monotone"
                         dataKey="valor"
                         stroke={ACCENT}
-                        strokeWidth={3}
-                        dot={{ fill: ACCENT, strokeWidth: 2, r: 4 }}
+                        strokeWidth={2}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              {/* Informações Detalhadas */}
+              {/* Detalhes da Emenda */}
               <div style={styles.detalhesGrid}>
                 <div style={styles.detalheCard}>
-                  <h4 style={styles.detalheTitle}>📋 Dados da Emenda</h4>
+                  <h4 style={styles.detalheTitle}>📋 Informações Gerais</h4>
                   <div style={styles.detalheContent}>
                     <div style={styles.detalheRow}>
-                      <span style={styles.detalheLabel}>Tipo:</span>
-                      <span style={styles.detalheValue}>{emenda.tipo}</span>
+                      <span style={styles.detalheLabel}>Número:</span>
+                      <span style={styles.detalheValue}>{emenda.numero}</span>
                     </div>
                     <div style={styles.detalheRow}>
                       <span style={styles.detalheLabel}>Emenda:</span>
                       <span style={styles.detalheValue}>{emenda.emenda}</span>
+                    </div>
+                    <div style={styles.detalheRow}>
+                      <span style={styles.detalheLabel}>Tipo:</span>
+                      <span style={styles.detalheValue}>{emenda.tipo}</span>
                     </div>
                     <div style={styles.detalheRow}>
                       <span style={styles.detalheLabel}>Funcional:</span>
@@ -596,7 +598,8 @@ const VisualizacaoEmendaDespesas = ({
                           </div>
                           <div style={styles.despesaInfoExtra}>
                             Empenho: {despesa.numeroEmpenho} •{" "}
-                            {formatDate(despesa.data)} • {despesa.naturezaDespesa}
+                            {formatDate(despesa.data)} •{" "}
+                            {despesa.naturezaDespesa}
                           </div>
                         </div>
                       ))}
@@ -607,7 +610,7 @@ const VisualizacaoEmendaDespesas = ({
             </div>
           )}
 
-          {/* ✅ ABA: Nova/Editar Despesa */}
+          {/* ✅ ABA: Nova Despesa */}
           {abaAtiva === "nova-despesa" && (
             <div style={styles.formContainer}>
               <div style={styles.formHeader}>
@@ -619,26 +622,34 @@ const VisualizacaoEmendaDespesas = ({
                     onClick={handleCancelarDespesa}
                     style={styles.btnSecondary}
                   >
-                    Cancelar
+                    ✖️ Cancelar
                   </button>
                   <button
                     onClick={handleSalvarDespesa}
                     style={styles.btnSuccess}
                   >
-                    Salvar
+                    💾 Salvar Despesa
                   </button>
                 </div>
               </div>
 
-              {/* Formulário simplificado de despesa */}
               <div style={styles.formContent}>
+                {/* Saldo Disponível */}
+                <div style={styles.saldoInfo}>
+                  <span style={styles.saldoLabel}>Saldo Disponível:</span>
+                  <span style={styles.saldoValue}>
+                    {formatCurrency(metricas.saldoDisponivel)}
+                  </span>
+                </div>
+
+                {/* Campos do formulário */}
                 <div style={styles.formGrid}>
                   <div style={styles.formGroup}>
                     <label style={styles.formLabel}>Descrição *</label>
                     <input
                       type="text"
                       style={styles.formInput}
-                      placeholder="Descrição da despesa..."
+                      placeholder="Ex: Aquisição de equipamentos"
                       defaultValue={despesaParaEditar?.descricao || ""}
                     />
                   </div>
@@ -648,7 +659,7 @@ const VisualizacaoEmendaDespesas = ({
                     <input
                       type="text"
                       style={styles.formInput}
-                      placeholder="0,00"
+                      placeholder="R$ 0,00"
                       defaultValue={
                         despesaParaEditar
                           ? formatCurrency(despesaParaEditar.valor)
@@ -658,14 +669,11 @@ const VisualizacaoEmendaDespesas = ({
                   </div>
 
                   <div style={styles.formGroup}>
-                    <label style={styles.formLabel}>Data *</label>
+                    <label style={styles.formLabel}>Data da Despesa *</label>
                     <input
                       type="date"
                       style={styles.formInput}
-                      defaultValue={
-                        despesaParaEditar?.data ||
-                        new Date().toISOString().split("T")[0]
-                      }
+                      defaultValue={despesaParaEditar?.data || ""}
                     />
                   </div>
 
@@ -679,22 +687,19 @@ const VisualizacaoEmendaDespesas = ({
                     >
                       <option value="">Selecione...</option>
                       <option value="MATERIAL DE CONSUMO">
-                        MATERIAL DE CONSUMO
+                        Material de Consumo
                       </option>
                       <option value="MATERIAL PERMANENTE">
-                        MATERIAL PERMANENTE
+                        Material Permanente
                       </option>
                       <option value="SERVIÇOS TERCEIRIZADOS">
-                        SERVIÇOS TERCEIRIZADOS
-                      </option>
-                      <option value="OBRAS E INSTALAÇÕES">
-                        OBRAS E INSTALAÇÕES
+                        Serviços Terceirizados
                       </option>
                     </select>
                   </div>
 
                   <div style={styles.formGroup}>
-                    <label style={styles.formLabel}>Número do Empenho *</label>
+                    <label style={styles.formLabel}>Número do Empenho</label>
                     <input
                       type="text"
                       style={styles.formInput}
@@ -702,34 +707,13 @@ const VisualizacaoEmendaDespesas = ({
                       defaultValue={despesaParaEditar?.numeroEmpenho || ""}
                     />
                   </div>
-
-                  <div style={styles.formGroup}>
-                    <label style={styles.formLabel}>Data do Empenho *</label>
-                    <input
-                      type="date"
-                      style={styles.formInput}
-                      defaultValue={
-                        despesaParaEditar?.dataEmpenho ||
-                        new Date().toISOString().split("T")[0]
-                      }
-                    />
-                  </div>
                 </div>
 
-                <div style={styles.saldoInfo}>
-                  <div style={styles.saldoLabel}>
-                    Saldo Disponível na Emenda:
-                  </div>
-                  <div style={styles.saldoValue}>
-                    {formatCurrency(metricas.saldoDisponivel)}
-                  </div>
-                </div>
-
+                {/* Nota informativa */}
                 <div style={styles.formNote}>
-                  <strong>Nota:</strong> Esta é uma versão simplificada do
-                  formulário. Na implementação completa, todos os campos do
-                  sistema original estarão disponíveis com validações
-                  automáticas de saldo e integração total com o banco de dados.
+                  <strong>📌 Observação:</strong> Todos os campos marcados com *
+                  são obrigatórios. O valor da despesa não pode exceder o saldo
+                  disponível da emenda.
                 </div>
               </div>
             </div>
@@ -740,37 +724,31 @@ const VisualizacaoEmendaDespesas = ({
   );
 };
 
-// ✅ Estilos completos
+// ✅ ESTILOS COMPLETOS
 const styles = {
-  container: {
-    minHeight: "100vh",
-    backgroundColor: "#f4f6f8",
-    padding: "20px",
-  },
-
+  // Loading & Error States
   loadingContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "50vh",
-    color: "#154360",
+    minHeight: "400px",
+    padding: "40px",
   },
 
   loadingSpinner: {
-    width: 40,
-    height: 40,
-    border: "4px solid #e3e3e3",
-    borderTop: "4px solid #154360",
+    width: "50px",
+    height: "50px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #4A90E2",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    marginBottom: 16,
   },
 
   loadingText: {
-    fontSize: 16,
-    fontWeight: "500",
-    margin: 0,
+    marginTop: "16px",
+    fontSize: "16px",
+    color: "#6c757d",
   },
 
   errorContainer: {
@@ -778,7 +756,8 @@ const styles = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "50vh",
+    minHeight: "400px",
+    padding: "40px",
     textAlign: "center",
   },
 
@@ -788,46 +767,59 @@ const styles = {
   },
 
   errorTitle: {
-    fontSize: "20px",
+    fontSize: "24px",
     fontWeight: "600",
-    color: "#dc3545",
+    color: "#E74C3C",
     margin: "0 0 8px 0",
   },
 
   errorMessage: {
-    fontSize: "14px",
+    fontSize: "16px",
     color: "#6c757d",
     margin: "0 0 24px 0",
   },
 
   retryButton: {
-    backgroundColor: "#007bff",
+    padding: "10px 20px",
+    backgroundColor: "#4A90E2",
     color: "white",
     border: "none",
-    padding: "10px 20px",
     borderRadius: "6px",
     fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
+    transition: "background-color 0.2s",
   },
 
+  // Container Principal
+  container: {
+    width: "100%",
+    maxWidth: "1400px",
+    margin: "0 auto",
+    padding: "20px",
+    backgroundColor: "#f8f9fa",
+    minHeight: "100vh",
+  },
+
+  // Header
   header: {
     backgroundColor: "white",
-    borderRadius: "12px",
+    borderRadius: "8px",
     padding: "24px",
     marginBottom: "20px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
   headerContent: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: "20px",
     flexWrap: "wrap",
+    gap: "16px",
   },
 
   headerInfo: {
-    flex: 1,
+    flex: "1",
     minWidth: "300px",
   },
 
@@ -839,77 +831,81 @@ const styles = {
   },
 
   headerSubtitle: {
-    fontSize: "16px",
+    fontSize: "14px",
     color: "#6c757d",
-    margin: "0 0 16px 0",
-    lineHeight: 1.4,
+    margin: "0 0 12px 0",
   },
 
   headerMeta: {
     display: "flex",
-    gap: "16px",
     flexWrap: "wrap",
+    gap: "12px",
     alignItems: "center",
   },
 
   metaItem: {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "#495057",
-    backgroundColor: "#f8f9fa",
-    padding: "4px 8px",
-    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
   },
 
   statusBadge: {
-    color: "white",
+    padding: "6px 12px",
+    borderRadius: "20px",
     fontSize: "12px",
     fontWeight: "600",
-    padding: "6px 12px",
-    borderRadius: "6px",
+    color: "white",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
   },
 
   headerActions: {
     display: "flex",
     gap: "12px",
-    flexShrink: 0,
+    alignItems: "flex-start",
   },
 
+  // Buttons
   btnPrimary: {
+    padding: "10px 20px",
     backgroundColor: "#4A90E2",
     color: "white",
     border: "none",
-    padding: "10px 16px",
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
-    transition: "background-color 0.2s",
+    transition: "all 0.2s",
   },
 
   btnSecondary: {
-    backgroundColor: "#6c757d",
-    color: "white",
-    border: "none",
-    padding: "10px 16px",
+    padding: "10px 20px",
+    backgroundColor: "white",
+    color: "#495057",
+    border: "1px solid #dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
-    transition: "background-color 0.2s",
+    transition: "all 0.2s",
   },
 
   btnSuccess: {
-    backgroundColor: "#28a745",
+    padding: "10px 20px",
+    backgroundColor: "#27AE60",
     color: "white",
     border: "none",
-    padding: "10px 16px",
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
-    transition: "background-color 0.2s",
+    transition: "all 0.2s",
   },
 
+  // KPI Section
   kpiSection: {
     marginBottom: "20px",
   },
@@ -923,41 +919,41 @@ const styles = {
   kpiCard: {
     backgroundColor: "white",
     borderRadius: "8px",
-    padding: "16px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    padding: "20px",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "16px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
 
   kpiIcon: {
-    fontSize: "24px",
+    fontSize: "32px",
     flexShrink: 0,
   },
 
   kpiContent: {
-    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
 
   kpiValue: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "700",
     color: "#154360",
-    margin: "0 0 4px 0",
   },
 
   kpiLabel: {
     fontSize: "12px",
     color: "#6c757d",
-    margin: 0,
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
+    fontWeight: "500",
   },
 
+  // Tabs
   tabsContainer: {
     backgroundColor: "white",
-    borderRadius: "12px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "8px",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     overflow: "hidden",
   },
 
@@ -965,11 +961,11 @@ const styles = {
     display: "flex",
     borderBottom: "1px solid #e9ecef",
     backgroundColor: "#f8f9fa",
+    overflowX: "auto",
   },
 
   tab: {
-    flex: 1,
-    padding: "16px 20px",
+    padding: "16px 24px",
     backgroundColor: "transparent",
     border: "none",
     fontSize: "14px",
@@ -1206,71 +1202,6 @@ const styles = {
     lineHeight: 1.4,
   },
 
-  // Estilos para lista de despesas
-  despesasListContainer: {
-    backgroundColor: "white",
-    borderRadius: "8px",
-    border: "1px solid #e9ecef",
-    overflow: "hidden",
-  },
-
-  despesasTable: {
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  tableHeader: {
-    display: "grid",
-    gridTemplateColumns: "100px 1fr 120px 100px 150px 80px",
-    gap: "12px",
-    padding: "16px",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #e9ecef",
-    fontWeight: "600",
-    fontSize: "13px",
-    color: "#495057",
-  },
-
-  headerCell: {
-    textAlign: "left",
-  },
-
-  tableRow: {
-    display: "grid",
-    gridTemplateColumns: "100px 1fr 120px 100px 150px 80px",
-    gap: "12px",
-    padding: "16px",
-    borderBottom: "1px solid #e9ecef",
-    fontSize: "14px",
-    alignItems: "center",
-    transition: "background-color 0.15s ease",
-  },
-
-  tableCell: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  naturezaBadge: {
-    fontSize: "11px",
-    fontWeight: "500",
-    color: "#495057",
-    backgroundColor: "#e9ecef",
-    padding: "3px 8px",
-    borderRadius: "12px",
-  },
-
-  miniButton: {
-    background: "none",
-    border: "1px solid #dee2e6",
-    borderRadius: "4px",
-    padding: "4px 6px",
-    cursor: "pointer",
-    fontSize: "12px",
-    transition: "all 0.15s ease",
-  },
-
   emptyDespesas: {
     display: "flex",
     flexDirection: "column",
@@ -1316,13 +1247,14 @@ const styles = {
   despesaCard: {
     backgroundColor: "#f8f9fa",
     borderRadius: "8px",
-    padding: "16px",
+    padding: "12px 16px",
     border: "1px solid #e9ecef",
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
     transition: "all 0.2s ease",
     cursor: "pointer",
+    minHeight: "60px",
   },
 
   despesaCardHeader: {
@@ -1374,11 +1306,12 @@ const styles = {
   },
 
   despesaInfoExtra: {
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6c757d",
-    marginTop: "4px",
-    paddingTop: "8px",
+    marginTop: "2px",
+    paddingTop: "6px",
     borderTop: "1px solid #e9ecef",
+    lineHeight: "1.2",
   },
 };
 
