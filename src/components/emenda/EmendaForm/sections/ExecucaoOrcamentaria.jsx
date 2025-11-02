@@ -721,7 +721,7 @@ const ExecucaoOrcamentaria = ({
           onRecarregar={carregarDespesas}
           usuario={usuario}
           filtroInicial={{ emendaId: emendaId }}
-          usarLayoutCards={true}
+          usarLayoutCards={false}
           // ✅ <DespesasList> agora usará o estilo "CLEAN"
           //    do 'despesaCardStyles.js' automaticamente.
         />
