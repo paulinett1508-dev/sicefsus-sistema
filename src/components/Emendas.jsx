@@ -231,7 +231,7 @@ const Emendas = () => {
     navigate(`/emendas/${emenda.id}`);
   };
 
-  
+
 
   // ✅ NOVO: Handler para abrir modal de exclusão
   const handleDeletar = (emendaParam) => {
@@ -556,7 +556,6 @@ const Emendas = () => {
           totalEmendas={emendas.length}
           loading={false}
           onEdit={handleEditar}
-          onView={handleVisualizar}
           onDelete={handleDeletar}
           userRole={userRole}
         />
