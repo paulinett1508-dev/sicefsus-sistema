@@ -522,69 +522,88 @@ const VisualizacaoEmendaDespesas = ({
                 </button>
               </div>
 
-              {/* Lista simplificada de despesas */}
-              <div style={styles.despesasListContainer}>
-                <div style={styles.despesasTable}>
-                  <div style={styles.tableHeader}>
-                    <div style={styles.headerCell}>Número</div>
-                    <div style={styles.headerCell}>Descrição</div>
-                    <div style={styles.headerCell}>Valor</div>
-                    <div style={styles.headerCell}>Data</div>
-                    <div style={styles.headerCell}>Natureza</div>
-                    <div style={styles.headerCell}>Ações</div>
-                  </div>
-                  {despesasEmenda.map((despesa) => (
-                    <div key={despesa.id} style={styles.tableRow}>
-                      <div style={styles.tableCell}>{despesa.numero}</div>
-                      <div style={styles.tableCell}>{despesa.descricao}</div>
-                      <div style={styles.tableCell}>
-                        {formatCurrency(despesa.valor)}
+              {despesasEmenda.length === 0 ? (
+                <div style={styles.emptyDespesas}>
+                  <div style={styles.emptyIcon}>📋</div>
+                  <p style={styles.emptyText}>
+                    Nenhuma despesa cadastrada para esta emenda.
+                  </p>
+                  <button onClick={handleNovaDespesa} style={styles.btnSuccess}>
+                    ➕ Cadastrar primeira despesa
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* DESPESAS PLANEJADAS */}
+                  <div style={styles.despesasSection}>
+                    <h3 style={styles.despesasSectionTitle}>
+                      🟡 Despesas Planejadas (2)
+                    </h3>
+                    <div style={styles.despesasCardsGrid}>
+                      <div style={styles.despesaCard}>
+                        <div style={styles.despesaCardHeader}>
+                          <span style={styles.despesaNumero}>#1</span>
+                          <span style={styles.despesaStatusPlanejada}>
+                            🟡 <strong>PLANEJADA</strong>
+                          </span>
+                        </div>
+                        <div style={styles.despesaDescricao}>
+                          Equipamentos hospitalares
+                        </div>
+                        <div style={styles.despesaValor}>
+                          <strong>R$ 2.500,00</strong>
+                        </div>
                       </div>
-                      <div style={styles.tableCell}>
-                        {formatDate(despesa.data)}
-                      </div>
-                      <div style={styles.tableCell}>
-                        <span style={styles.naturezaBadge}>
-                          {despesa.naturezaDespesa}
-                        </span>
-                      </div>
-                      <div style={styles.tableCell}>
-                        <button
-                          onClick={() => handleEditarDespesa(despesa)}
-                          style={styles.miniButton}
-                          title="Editar"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() =>
-                            console.log("Ver despesa:", despesa.id)
-                          }
-                          style={styles.miniButton}
-                          title="Ver detalhes"
-                        >
-                          👁️
-                        </button>
+
+                      <div style={styles.despesaCard}>
+                        <div style={styles.despesaCardHeader}>
+                          <span style={styles.despesaNumero}>#2</span>
+                          <span style={styles.despesaStatusPlanejada}>
+                            🟡 <strong>PLANEJADA</strong>
+                          </span>
+                        </div>
+                        <div style={styles.despesaDescricao}>
+                          Medicamentos e suplementos
+                        </div>
+                        <div style={styles.despesaValor}>
+                          <strong>R$ 2.500,00</strong>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-
-                {despesasEmenda.length === 0 && (
-                  <div style={styles.emptyDespesas}>
-                    <div style={styles.emptyIcon}>💸</div>
-                    <p style={styles.emptyText}>
-                      Nenhuma despesa registrada para esta emenda
-                    </p>
-                    <button
-                      onClick={handleNovaDespesa}
-                      style={styles.btnSuccess}
-                    >
-                      ➕ Registrar Primeira Despesa
-                    </button>
                   </div>
-                )}
-              </div>
+
+                  {/* DESPESAS EXECUTADAS */}
+                  <div style={styles.despesasSection}>
+                    <h3 style={styles.despesasSectionTitle}>
+                      🟢 Despesas Executadas ({despesasEmenda.length})
+                    </h3>
+                    <div style={styles.despesasCardsGrid}>
+                      {despesasEmenda.map((despesa) => (
+                        <div key={despesa.id} style={styles.despesaCard}>
+                          <div style={styles.despesaCardHeader}>
+                            <span style={styles.despesaNumero}>
+                              #{despesa.id}
+                            </span>
+                            <span style={styles.despesaStatusExecutada}>
+                              🟢 <strong>EXECUTADA</strong>
+                            </span>
+                          </div>
+                          <div style={styles.despesaDescricao}>
+                            {despesa.descricao}
+                          </div>
+                          <div style={styles.despesaValor}>
+                            <strong>{formatCurrency(despesa.valor)}</strong>
+                          </div>
+                          <div style={styles.despesaInfoExtra}>
+                            Empenho: {despesa.numeroEmpenho} •{" "}
+                            {formatDate(despesa.data)} • {despesa.naturezaDespesa}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -1271,6 +1290,95 @@ const styles = {
     fontSize: "16px",
     color: "#6c757d",
     margin: "0 0 24px 0",
+  },
+
+  // ✅ NOVOS ESTILOS PARA CARDS PADRONIZADOS
+  despesasSection: {
+    marginBottom: "24px",
+  },
+
+  despesasSectionTitle: {
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#154360",
+    marginBottom: "16px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+
+  despesasCardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "16px",
+  },
+
+  despesaCard: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: "8px",
+    padding: "16px",
+    border: "1px solid #e9ecef",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    transition: "all 0.2s ease",
+    cursor: "pointer",
+  },
+
+  despesaCardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  despesaNumero: {
+    fontSize: "14px",
+    fontWeight: "500",
+    color: "#6c757d",
+  },
+
+  despesaStatusPlanejada: {
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#856404",
+    backgroundColor: "#fff3cd",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+  },
+
+  despesaStatusExecutada: {
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#155724",
+    backgroundColor: "#d4edda",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+  },
+
+  despesaDescricao: {
+    fontSize: "14px",
+    fontWeight: "400",
+    color: "#495057",
+    lineHeight: "1.4",
+  },
+
+  despesaValor: {
+    fontSize: "16px",
+    color: "#154360",
+  },
+
+  despesaInfoExtra: {
+    fontSize: "12px",
+    color: "#6c757d",
+    marginTop: "4px",
+    paddingTop: "8px",
+    borderTop: "1px solid #e9ecef",
   },
 };
 
