@@ -1,6 +1,5 @@
 // components/despesa/DespesaCard/despesaCardStyles.js
-
-// ✅ ESTILOS PADRONIZADOS PARA CARDS DE DESPESAS
+// ✅ ESTILO "CLEAN" E PROFISSIONAL (Layout de "Faixa" / Strip)
 
 export const despesaCardStyles = {
   // ==================== SEÇÕES ====================
@@ -18,29 +17,36 @@ export const despesaCardStyles = {
     gap: "8px",
   },
 
+  // -------------------------------------------------
+  // ✅ CORREÇÃO "FAIXA": Trocado Grid por Flex Column
+  // -------------------------------------------------
   despesasCardsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(450px, 1fr))", // AUMENTADO: largura mínima maior
-    gap: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px", // Espaçamento entre as faixas
   },
 
-  // ==================== CARD BASE ====================
+  // ==================== CARD BASE (agora é uma "Faixa") ====================
   despesaCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff", // Fundo BRANCO
     borderRadius: "8px",
     padding: "12px 16px",
-    border: "1px solid #e9ecef",
+    border: "1px solid #e9ecef", // Borda CINZA SUTIL
+    borderLeft: "5px solid #22c55e", // ✅ ACENTO VERDE (Executada)
     display: "flex",
     flexDirection: "column",
     gap: "6px",
     transition: "all 0.2s ease",
     cursor: "pointer",
-    minHeight: "130px", // AUMENTADO para garantir alinhamento visual dos cards
+    minHeight: "100px", // Altura mínima (antes era 130px)
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    width: "100%", // Garantir largura total
   },
 
   despesaCardHover: {
     transform: "translateY(-2px)",
     boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+    borderColor: "#ced4da", // Um leve destaque na borda
   },
 
   // ==================== HEADER DO CARD ====================

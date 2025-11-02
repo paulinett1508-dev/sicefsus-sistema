@@ -3,6 +3,9 @@
 // - "Meta(s)" → "Despesa" / "Despesas"
 // - Removido "Simples" e "Quantitativa"
 // - Campo Valor agora é obrigatório
+// ✅ CORREÇÃO VISUAL:
+// - Lista de despesas planejadas agora usa layout de CARD (grid)
+// - Aplicado fundo amarelo para consistência com o print
 
 import React, { useState } from "react";
 import {
@@ -506,18 +509,37 @@ const styles = {
     fontWeight: "600",
     color: "#28a745",
   },
+  // ==================================
+  // === 🎯 INÍCIO DA MODIFICAÇÃO 1 ===
+  // ==================================
   metasList: {
-    maxHeight: "200px",
-    overflowY: "auto",
+    // ✅ CORRIGIDO: Transformado em grid para parecer "card"
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(450px, 1fr))",
+    gap: "16px",
+    padding: "16px", // Adicionado padding para o grid
+    // ❌ REMOVIDO:
+    // maxHeight: "200px",
+    // overflowY: "auto",
   },
   metaItem: {
+    // ✅ CORRIGIDO: Estilo de CARD aplicado (amarelo)
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    padding: "12px",
-    borderBottom: "1px solid #e9ecef",
-    backgroundColor: "white",
+    padding: "12px 16px", // Padding padrão de card
+    backgroundColor: "#fffbeb", // Fundo amarelo (do print)
+    borderRadius: "8px", // Borda arredondada
+    border: "1px solid #fde68a", // Borda amarela
+    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+    minHeight: "100px", // Altura mínima para alinhamento
+    // ❌ REMOVIDO:
+    // borderBottom: "1px solid #e9ecef",
+    // backgroundColor: "white",
   },
+  // ==================================
+  // === 🎯 FIM DA MODIFICAÇÃO 1 ===
+  // ==================================
   metaContent: {
     display: "flex",
     flexDirection: "column",

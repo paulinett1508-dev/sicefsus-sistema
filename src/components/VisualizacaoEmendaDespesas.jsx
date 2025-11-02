@@ -13,6 +13,14 @@ import {
   LineChart,
   Line,
 } from "recharts";
+// ==================================
+// === 🎯 INÍCIO DA MODIFICAÇÃO 1 ===
+// ==================================
+// Importar os estilos centralizados
+import { despesaCardStyles } from "../despesa/DespesaCard/despesaCardStyles";
+// ==================================
+// === 🎯 FIM DA MODIFICAÇÃO 1 ===
+// ==================================
 
 const VisualizacaoEmendaDespesas = ({
   emendaId,
@@ -536,38 +544,65 @@ const VisualizacaoEmendaDespesas = ({
                 </div>
               ) : (
                 <>
+                  {/* ================================== */}
+                  {/* === 🎯 INÍCIO DA MODIFICAÇÃO 2 === */}
+                  {/* ================================== */}
+
                   {/* DESPESAS PLANEJADAS */}
-                  <div style={styles.despesasSection}>
-                    <h3 style={styles.despesasSectionTitle}>
+                  <div style={despesaCardStyles.despesasSection}>
+                    <h3 style={despesaCardStyles.despesasSectionTitle}>
                       🟡 Despesas Planejadas (2)
                     </h3>
-                    <div style={styles.despesasCardsGrid}>
-                      <div style={styles.despesaCard}>
-                        <div style={styles.despesaCardHeader}>
-                          <span style={styles.despesaNumero}>#1</span>
-                          <span style={styles.despesaStatusPlanejada}>
+                    {/* Usando o grid centralizado */}
+                    <div style={despesaCardStyles.despesasCardsGrid}>
+                      {/* Card 1 - Amarelo (Override) */}
+                      <div
+                        style={{
+                          ...despesaCardStyles.despesaCard,
+                          backgroundColor: "#fffbeb",
+                          borderColor: "#fde68a",
+                        }}
+                      >
+                        <div style={despesaCardStyles.despesaCardHeader}>
+                          <span style={despesaCardStyles.despesaNumero}>
+                            #1
+                          </span>
+                          <span
+                            style={despesaCardStyles.despesaStatusPlanejada}
+                          >
                             🟡 <strong>PLANEJADA</strong>
                           </span>
                         </div>
-                        <div style={styles.despesaDescricao}>
+                        <div style={despesaCardStyles.despesaDescricao}>
                           Equipamentos hospitalares
                         </div>
-                        <div style={styles.despesaValor}>
+                        <div style={despesaCardStyles.despesaValor}>
                           <strong>R$ 2.500,00</strong>
                         </div>
                       </div>
 
-                      <div style={styles.despesaCard}>
-                        <div style={styles.despesaCardHeader}>
-                          <span style={styles.despesaNumero}>#2</span>
-                          <span style={styles.despesaStatusPlanejada}>
+                      {/* Card 2 - Amarelo (Override) */}
+                      <div
+                        style={{
+                          ...despesaCardStyles.despesaCard,
+                          backgroundColor: "#fffbeb",
+                          borderColor: "#fde68a",
+                        }}
+                      >
+                        <div style={despesaCardStyles.despesaCardHeader}>
+                          <span style={despesaCardStyles.despesaNumero}>
+                            #2
+                          </span>
+                          <span
+                            style={despesaCardStyles.despesaStatusPlanejada}
+                          >
                             🟡 <strong>PLANEJADA</strong>
                           </span>
                         </div>
-                        <div style={styles.despesaDescricao}>
+                        <div style={despesaCardStyles.despesaDescricao}>
                           Medicamentos e suplementos
                         </div>
-                        <div style={styles.despesaValor}>
+                        <div style={despesaCardStyles.despesaValor}>
                           <strong>R$ 2.500,00</strong>
                         </div>
                       </div>
@@ -575,28 +610,39 @@ const VisualizacaoEmendaDespesas = ({
                   </div>
 
                   {/* DESPESAS EXECUTADAS */}
-                  <div style={styles.despesasSection}>
-                    <h3 style={styles.despesasSectionTitle}>
+                  <div style={despesaCardStyles.despesasSection}>
+                    <h3 style={despesaCardStyles.despesasSectionTitle}>
                       🟢 Despesas Executadas ({despesasEmenda.length})
                     </h3>
-                    <div style={styles.despesasCardsGrid}>
+                    {/* Usando o grid centralizado */}
+                    <div style={despesaCardStyles.despesasCardsGrid}>
                       {despesasEmenda.map((despesa) => (
-                        <div key={despesa.id} style={styles.despesaCard}>
-                          <div style={styles.despesaCardHeader}>
-                            <span style={styles.despesaNumero}>
+                        // Card Verde (Override)
+                        <div
+                          key={despesa.id}
+                          style={{
+                            ...despesaCardStyles.despesaCard,
+                            backgroundColor: "#f0fdf4",
+                            borderColor: "#bbf7d0",
+                          }}
+                        >
+                          <div style={despesaCardStyles.despesaCardHeader}>
+                            <span style={despesaCardStyles.despesaNumero}>
                               #{despesa.id}
                             </span>
-                            <span style={styles.despesaStatusExecutada}>
+                            <span
+                              style={despesaCardStyles.despesaStatusExecutada}
+                            >
                               🟢 <strong>EXECUTADA</strong>
                             </span>
                           </div>
-                          <div style={styles.despesaDescricao}>
+                          <div style={despesaCardStyles.despesaDescricao}>
                             {despesa.descricao}
                           </div>
-                          <div style={styles.despesaValor}>
+                          <div style={despesaCardStyles.despesaValor}>
                             <strong>{formatCurrency(despesa.valor)}</strong>
                           </div>
-                          <div style={styles.despesaInfoExtra}>
+                          <div style={despesaCardStyles.despesaInfoExtra}>
                             Empenho: {despesa.numeroEmpenho} •{" "}
                             {formatDate(despesa.data)} •{" "}
                             {despesa.naturezaDespesa}
@@ -605,6 +651,9 @@ const VisualizacaoEmendaDespesas = ({
                       ))}
                     </div>
                   </div>
+                  {/* ================================== */}
+                  {/* === 🎯 FIM DA MODIFICAÇÃO 2 === */}
+                  {/* ================================== */}
                 </>
               )}
             </div>
@@ -1223,96 +1272,17 @@ const styles = {
     margin: "0 0 24px 0",
   },
 
-  // ✅ NOVOS ESTILOS PARA CARDS PADRONIZADOS
-  despesasSection: {
-    marginBottom: "24px",
-  },
-
-  despesasSectionTitle: {
-    fontSize: "16px",
-    fontWeight: "600",
-    color: "#154360",
-    marginBottom: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-
-  despesasCardsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))",
-    gap: "16px",
-  },
-
-  despesaCard: {
-    backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
-    padding: "12px 16px",
-    border: "1px solid #e9ecef",
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    transition: "all 0.2s ease",
-    cursor: "pointer",
-    minHeight: "100px",
-  },
-
-  despesaCardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  despesaNumero: {
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#6c757d",
-  },
-
-  despesaStatusPlanejada: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#856404",
-    backgroundColor: "#fff3cd",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  despesaStatusExecutada: {
-    fontSize: "12px",
-    fontWeight: "600",
-    color: "#155724",
-    backgroundColor: "#d4edda",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    display: "flex",
-    alignItems: "center",
-    gap: "4px",
-  },
-
-  despesaDescricao: {
-    fontSize: "14px",
-    fontWeight: "400",
-    color: "#495057",
-    lineHeight: "1.4",
-  },
-
-  despesaValor: {
-    fontSize: "16px",
-    color: "#154360",
-  },
-
-  despesaInfoExtra: {
-    fontSize: "11px",
-    color: "#6c757d",
-    marginTop: "2px",
-    paddingTop: "6px",
-    borderTop: "1px solid #e9ecef",
-    lineHeight: "1.2",
-  },
+  // ==================================
+  // === 🎯 INÍCIO DA MODIFICAÇÃO 3 ===
+  // ==================================
+  // ❌ REMOVIDOS estilos duplicados (linhas 1245-1318 do original):
+  // despesasSection, despesasSectionTitle, despesasCardsGrid,
+  // despesaCard, despesaCardHeader, despesaNumero,
+  // despesaStatusPlanejada, despesaStatusExecutada,
+  // despesaDescricao, despesaValor, despesaInfoExtra
+  // ==================================
+  // === 🎯 FIM DA MODIFICAÇÃO 3 ===
+  // ==================================
 };
 
 // CSS Animation para spinner
