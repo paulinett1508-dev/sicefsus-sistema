@@ -355,6 +355,15 @@ const ExecucaoOrcamentaria = ({
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
+  // 🐛 DEBUG: Monitorar state do modal
+  useEffect(() => {
+    console.log("🔍 ExecucaoOrcamentaria: State do modal mudou:", {
+      executandoDespesa: executandoDespesa?.id || null,
+      criandoDespesaExecutada,
+      modalDeveEstarAberto: !!(executandoDespesa || criandoDespesaExecutada),
+    });
+  }, [executandoDespesa, criandoDespesaExecutada]);
+
   // ✅ BUSCAR ID REAL DA EMENDA
   useEffect(() => {
     const buscarIdEmenda = async () => {
@@ -465,7 +474,21 @@ const ExecucaoOrcamentaria = ({
 
   // 🎯 HANDLERS
   const handleExecutarDespesa = (despesa) => {
+    console.log("▶️ ExecucaoOrcamentaria.handleExecutarDespesa CHAMADO:", {
+      despesaId: despesa.id,
+      estrategia: despesa.estrategia,
+      valor: despesa.valor,
+      despesaCompleta: despesa,
+    });
+
     setExecutandoDespesa(despesa);
+
+    console.log("✅ setExecutandoDespesa foi chamado, state vai atualizar");
+
+    // Verificar se realmente atualizou (assíncrono)
+    setTimeout(() => {
+      console.log("⏰ Verificando após 100ms se modal abriu");
+    }, 100);
   };
 
   const handleCriarDespesaExecutada = () => {
@@ -689,7 +712,13 @@ const ExecucaoOrcamentaria = ({
                       <div style={styles.despesaAcoes}>
                         <button
                           type="button"
-                          onClick={() => handleExecutarDespesa(despesa)}
+                          onClick={() => {
+                            console.log("🖱️ BOTÃO ▶️ EXECUTAR CLICADO:", {
+                              despesaId: despesa.id,
+                              estrategia: despesa.estrategia,
+                            });
+                            handleExecutarDespesa(despesa);
+                          }}
                           style={styles.btnExecutar}
                           title="Executar despesa"
                         >
@@ -758,19 +787,34 @@ const ExecucaoOrcamentaria = ({
       </div>
 
       {/* 🔄 MODAL: EXECUTAR DESPESA */}
-      {(executandoDespesa || criandoDespesaExecutada) && (
-        <ExecutarDespesaModal
-          despesa={executandoDespesa}
-          emenda={{
-            id: emendaId,
-            ...formData,
-          }}
-          saldoDisponivel={stats.saldoDisponivel}
-          onClose={handleCloseModal}
-          onConfirm={handleConfirmarExecucao}
-          usuario={usuario}
-        />
-      )}
+      {(() => {
+        const deveRenderizar = !!(executandoDespesa || criandoDespesaExecutada);
+        console.log("🎬 ExecucaoOrcamentaria: Renderizando modal?", {
+          deveRenderizar,
+          executandoDespesa: executandoDespesa?.id || null,
+          criandoDespesaExecutada,
+        });
+
+        if (!deveRenderizar) {
+          return null;
+        }
+
+        console.log("✅ MODAL VAI SER RENDERIZADO AGORA!");
+
+        return (
+          <ExecutarDespesaModal
+            despesa={executandoDespesa}
+            emenda={{
+              id: emendaId,
+              ...formData,
+            }}
+            saldoDisponivel={stats.saldoDisponivel}
+            onClose={handleCloseModal}
+            onConfirm={handleConfirmarExecucao}
+            usuario={usuario}
+          />
+        );
+      })()}
     </div>
   );
 };
