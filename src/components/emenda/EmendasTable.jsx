@@ -5,14 +5,18 @@
 import React from "react";
 
 const EmendasTable = ({
-  emendasFiltradas,
-  usuario,
-  onAbrirEmenda,
-  onEditarEmenda,
-  onExcluirEmenda,
-  onVerDespesas,
+  emendas,              // ✅ Corrigido
+  totalEmendas,         // ✅ Novo
+  loading,              // ✅ Novo
+  onEdit,               // ✅ Corrigido
+  onDelete,             // ✅ Corrigido
+  userRole,             // ✅ Corrigido
   onNovaEmenda,
 }) => {
+  // Compatibilidade interna
+  const emendasFiltradas = emendas;
+  const usuario = { role: userRole };
+
   // Função para formatar moeda
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -152,7 +156,7 @@ const EmendasTable = ({
           <div style={styles.actionsContainer}>
             {/* ✅ MANTIDO: Botão Editar */}
             <button
-              onClick={() => onEditarEmenda(emenda)}
+              onClick={() => onEdit(emenda)}
               style={styles.actionButton}
               title="Editar emenda"
             >
@@ -161,7 +165,7 @@ const EmendasTable = ({
             {/* ✅ MANTIDO: Botão Excluir (apenas para admin) */}
             {usuario?.role === "admin" && (
               <button
-                onClick={() => onExcluirEmenda(emenda.id)}
+                onClick={() => onDelete(emenda.id)}
                 style={styles.actionButtonDanger}
                 title="Excluir emenda"
               >
@@ -176,7 +180,11 @@ const EmendasTable = ({
 
   return (
     <div style={styles.tableContainer}>
-      {emendasFiltradas.length === 0 ? (
+      {loading ? (
+        <div style={styles.loadingState}>
+          <p>Carregando emendas...</p>
+        </div>
+      ) : emendasFiltradas.length === 0 ? (
         <div style={styles.emptyState}>
           <span style={styles.emptyIcon}>📋</span>
           <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
@@ -210,6 +218,9 @@ const EmendasTable = ({
             </thead>
             <tbody>{emendasFiltradas.map(renderTableRow)}</tbody>
           </table>
+          <div style={styles.footer}>
+            <p>Total de Emendas: {totalEmendas}</p>
+          </div>
         </div>
       )}
     </div>
@@ -219,6 +230,15 @@ const EmendasTable = ({
 const styles = {
   tableContainer: {
     minHeight: "400px",
+  },
+
+  loadingState: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "400px",
+    fontSize: "18px",
+    color: "#6c757d",
   },
 
   tableWrapper: {
@@ -437,6 +457,15 @@ const styles = {
     fontWeight: "500",
     cursor: "pointer",
     transition: "background-color 0.2s ease",
+  },
+
+  footer: {
+    padding: "16px 12px",
+    textAlign: "right",
+    borderTop: "1px solid #e9ecef",
+    backgroundColor: "#f8f9fa",
+    fontSize: "14px",
+    color: "#495057",
   },
 };
 
