@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 02/11/2025, 15:30
+**📅 Gerado em:** 02/11/2025, 21:52
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,9 +8,9 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 59
-- **📄 Total de Arquivos:** 255
-- **⚛️ Componentes React:** 110
+- **📁 Total de Diretórios:** 58
+- **📄 Total de Arquivos:** 256
+- **⚛️ Componentes React:** 111
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
@@ -26,7 +26,7 @@
 - **.cjs**: 6 arquivos
 - **.css**: 6 arquivos
 - **.res**: 4 arquivos
-- **.md**: 4 arquivos
+- **.txt**: 4 arquivos
 
 ---
 
@@ -50,7 +50,6 @@
 │   │   ├── 📁 nix/
 │   │   │   ├── 📄 dotreplitenv.json (1 linhas)
 │   │   │   └── 📄 env.json (1 linhas)
-│   │   ├── 📁 transfers/
 │   │   ├── 📄 __replit_disk_meta.json (2 linhas)
 │   │   ├── 📄 modules.stamp (1 linhas)
 │   │   └── 📄 toolchain.json (1 linhas)
@@ -101,6 +100,7 @@
 │   ├── 📄 image_1762032358714.png (325 linhas)
 │   ├── 📄 image_1762032564858.png (152 linhas)
 │   ├── 📄 image_1762033273030.png (238 linhas)
+│   ├── 📄 Pasted--CORRE-ES-ExecucaoOrcamentaria--1762110876597_1762110876597.txt (211 linhas)
 │   └── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
@@ -126,7 +126,7 @@
 │   ├── 📄 analise-runner.cjs (381 linhas)
 │   ├── 📄 bump-version.js (66 linhas)
 │   ├── 📄 generateHandover.cjs (560 linhas)
-│   ├── 📄 migrarAcoesServicosParaDespesas.js (243 linhas)
+│   ├── 📄 migrarAcoesServicosParaDespesas.js (244 linhas)
 │   ├── 📄 migrarDespesasStatus.js (365 linhas)
 │   └── 📄 package.json (16 linhas)
 ├── 📁 src/
@@ -193,12 +193,12 @@
 │   │   │   │   │   ├── 📄 DadosBasicos.jsx (355 linhas)
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
-│   │   │   │   │   ├── 📄 DespesasTab.jsx (379 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (978 linhas)
-│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (440 linhas)
+│   │   │   │   │   ├── 📄 DespesasTab.jsx (396 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (826 linhas)
+│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (439 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
-│   │   │   │   └── 📄 index.jsx (353 linhas)
+│   │   │   │   └── 📄 index.jsx (280 linhas)
 │   │   │   ├── 📄 DespesaModal.jsx (616 linhas)
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
@@ -232,8 +232,8 @@
 │   │   ├── 📄 DespesaForm.jsx (697 linhas)
 │   │   ├── 📄 Despesas.jsx (305 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
-│   │   ├── 📄 DespesasList.jsx (576 linhas)
-│   │   ├── 📄 DespesasTable.jsx (1005 linhas)
+│   │   ├── 📄 DespesasList.jsx (667 linhas)
+│   │   ├── 📄 DespesasTable.jsx (1027 linhas)
 │   │   ├── 📄 Emendas.jsx (812 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
@@ -334,7 +334,7 @@
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
-├── 📄 ESTRUTURA.md (2620 linhas)
+├── 📄 ESTRUTURA.md (2621 linhas)
 ├── 📄 firebase-debug.log (18 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
@@ -374,7 +374,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 90 componentes*
+- *...e mais 91 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -1278,7 +1278,7 @@ import React, { useState, useEffect } from "react";
 ```
 
 
-#### ⚛️ Componente React `DespesasList.jsx` (576 linhas)
+#### ⚛️ Componente React `DespesasList.jsx` (667 linhas)
 
 **Exports:**
 ```javascript
@@ -1287,7 +1287,7 @@ export default DespesasList;
 
 **Preview:**
 ```javascript
-// DespesasList.jsx - CORRIGIDO SEM useEmendaDespesa
+// DespesasList.jsx - CORRIGIDO COM LOGS DE DEBUG
 // ✅ CORREÇÃO: Receber dados via props ao invés do hook conflitante
 import React, { useEffect, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
@@ -1295,7 +1295,7 @@ import { db } from "../firebase/firebaseConfig";
 ```
 
 
-#### ⚛️ Componente React `DespesasTable.jsx` (1005 linhas)
+#### ⚛️ Componente React `DespesasTable.jsx` (1027 linhas)
 
 **Exports:**
 ```javascript

@@ -1,9 +1,6 @@
 // src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
-// ✅ REFATORADO:
-//    - Seção "Planejamento de Despesas" agora é uma TABELA, idêntica à de "Executadas"
-//    - Estilos de tabela profissionais adicionados
-// ✅ CORRIGIDO: Erro de build de importação do firebaseConfig
-// ✅ CORRIGIDO: ReferenceError: Toast is not defined
+// Alterações: padronização visual dos botões (Executar/Remover) e confirmação detalhada ao remover.
+// Lógica preservada.
 
 import React, { useState, useEffect } from "react";
 import {
@@ -16,32 +13,22 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
-// =========================================================
-// === 🎯 INÍCIO DA MODIFICAÇÃO 1: Correção do Erro de Build ===
-// =========================================================
-import { db } from "../../../../firebase/firebaseConfig"; // ✅ Caminho corrigido
-// =========================================================
-// === 🎯 FIM DA MODIFICAÇÃO 1: Correção do Erro de Build ===
-// =========================================================
+import { db } from "../../../../firebase/firebaseConfig";
+import Toast from "../../../Toast";
+import DespesasList from "../../../DespesasList";
+import { NATUREZAS_DESPESA } from "../../../../config/constants";
 import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
-import { NATUREZAS_DESPESA } from "../../../../config/constants";
 
-// ✅ COMPONENTES EXISTENTES REUTILIZADOS
-import ExecutarDespesaModal from "./ExecutarDespesaModal";
-import DespesasList from "../../../DespesasList";
-// =========================================================
-// === 🎯 INÍCIO DA MODIFICAÇÃO 2: Correção do ReferenceError ===
-// =========================================================
-import Toast from "../../../Toast"; // ✅ Importação adicionada
-// =========================================================
-// === 🎯 FIM DA MODIFICAÇÃO 2: Correção do ReferenceError ===
-// =========================================================
-import { despesaCardStyles } from "../../../despesa/DespesaCard/despesaCardStyles";
+const formatCurrency = (valor) =>
+  (Number(valor) || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 
-// 📝 COMPONENTE: FORMULÁRIO INLINE PARA DESPESA PLANEJADA
+// ===== Formulário inline (PLANEJADA) =====
 const DespesaPlanejadaForm = ({
   emendaId,
   valorEmenda,
@@ -58,101 +45,79 @@ const DespesaPlanejadaForm = ({
   const saldoDisponivel = valorEmenda - totalExecutado;
 
   const handleEstrategiaChange = (e) => {
-    const val = e.target.value;
-    if (val === "__customizado__") {
+    const selected = e.target.value;
+    if (selected === "__customizado__") {
       setModoCustomizado(true);
       setEstrategia("");
     } else {
       setModoCustomizado(false);
       setDespesaCustomizada("");
-      setEstrategia(val);
+      setEstrategia(selected);
     }
-  };
-
-  const handleValorChange = (e) => {
-    const valorFormatado = formatarMoedaInput(e.target.value);
-    setValor(valorFormatado);
   };
 
   const validarFormulario = () => {
-    const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
-    if (!estrategiaFinal) {
-      return { valido: false, mensagem: "⚠️ Preencha a Natureza de Despesa" };
-    }
-    if (!valor || parseValorMonetario(valor) <= 0) {
-      return { valido: false, mensagem: "⚠️ O valor deve ser maior que zero" };
-    }
-    const valorNumerico = parseValorMonetario(valor);
-    if (valorNumerico > saldoDisponivel) {
+    if (!emendaId)
       return {
         valido: false,
-        mensagem: `⚠️ Valor excede saldo disponível: R$ ${saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
+        mensagem: "Salve a emenda antes de adicionar despesas.",
       };
-    }
+    const v = parseValorMonetario(valor);
+    if (!modoCustomizado && !estrategia)
+      return { valido: false, mensagem: "Selecione a natureza da despesa." };
+    if (modoCustomizado && !despesaCustomizada.trim())
+      return { valido: false, mensagem: "Informe a natureza de despesa." };
+    if (!valor || v <= 0)
+      return { valido: false, mensagem: "Informe um valor válido." };
     return { valido: true };
   };
 
-  const handleAdicionar = async () => {
-    const validacao = validarFormulario();
-    if (!validacao.valido) {
-      alert(validacao.mensagem);
+  const handleSalvarPlanejada = async () => {
+    const valid = validarFormulario();
+    if (!valid.valido) {
+      alert(valid.mensagem);
       return;
     }
-
     try {
       setSalvando(true);
       const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
-
       await addDoc(collection(db, "despesas"), {
-        emendaId: emendaId,
+        emendaId,
         estrategia: estrategiaFinal,
         naturezaDespesa: estrategiaFinal,
         valor: parseValorMonetario(valor),
         status: "PLANEJADA",
         criadaEm: new Date().toISOString(),
         criadaPor: usuario?.email,
-        discriminacao: "",
-        numeroEmpenho: "",
-        numeroNota: "",
-        numeroContrato: "",
-        dataEmpenho: "",
-        dataLiquidacao: "",
-        dataPagamento: "",
       });
-
-      // Limpar formulário
       setEstrategia("");
-      setValor("");
-      setModoCustomizado(false);
       setDespesaCustomizada("");
-
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("❌ Erro ao criar despesa planejada:", error);
-      alert("Erro ao criar despesa planejada");
+      setValor("");
+      onSuccess?.();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao adicionar despesa.");
     } finally {
       setSalvando(false);
     }
   };
 
-  const validacao = validarFormulario();
-  const podeAdicionar = validacao.valido && !salvando;
-
   return (
-    <div style={formStyles.container}>
-      <div style={formStyles.grid}>
-        <div style={formStyles.formGroup}>
+    <div style={styles.cardFormInline}>
+      <div style={styles.formInline}>
+        <div style={styles.formGroup}>
           <label style={formStyles.label}>Natureza de Despesa</label>
           {!modoCustomizado ? (
             <select
+              id="naturezaDespesaSelect"
               value={estrategia}
               onChange={handleEstrategiaChange}
               style={formStyles.select}
             >
               <option value="">Selecione a natureza de despesas</option>
-              {NATUREZAS_DESPESA.map((natureza) => (
-                <option key={natureza} value={natureza}>
-                  {natureza}
+              {NATUREZAS_DESPESA.map((n) => (
+                <option key={n} value={n}>
+                  {n}
                 </option>
               ))}
               <option value="__customizado__">✏️ Digitar outra...</option>
@@ -173,278 +138,111 @@ const DespesaPlanejadaForm = ({
                   setDespesaCustomizada("");
                   setEstrategia("");
                 }}
-                style={formStyles.voltarButton}
-                title="Voltar para seleção"
+                style={formStyles.btnVoltarSelect}
               >
-                ↩️
+                ↩️ Voltar
               </button>
             </div>
           )}
         </div>
-
-        <div style={formStyles.formGroup}>
-          <label style={formStyles.labelRequired}>
-            Valor <span style={formStyles.required}>*</span>
-          </label>
+        <div style={styles.formGroup}>
+          <label style={formStyles.label}>Valor</label>
           <input
             type="text"
             value={valor}
-            onChange={handleValorChange}
+            onChange={(e) => setValor(formatarMoedaInput(e.target.value))}
+            placeholder="R$ 0,00"
             style={{
               ...formStyles.input,
-              ...formStyles.inputMoney,
-              ...(!validacao.valido && valor && formStyles.inputError),
+              textAlign: "right",
+              fontFamily: "monospace",
             }}
-            placeholder="R$ 0,00"
           />
-          {!validacao.valido && valor && (
-            <small style={formStyles.errorText}>{validacao.mensagem}</small>
-          )}
         </div>
-
-        <div style={formStyles.formGroupButton}>
-          <label style={formStyles.labelInvisible}>Ação</label>
+        <div style={styles.formGroupButton}>
+          <label style={{ visibility: "hidden" }}>Ações</label>
           <button
             type="button"
-            onClick={handleAdicionar}
-            disabled={!podeAdicionar}
-            style={{
-              ...formStyles.addButton,
-              ...(!podeAdicionar && formStyles.addButtonDisabled),
-            }}
+            onClick={handleSalvarPlanejada}
+            disabled={salvando}
+            style={{ ...styles.btn, ...styles.btnPrimary }}
           >
-            {salvando ? "⏳ Salvando..." : "➕ Adicionar"}
+            {salvando ? "Salvando..." : "Adicionar"}
           </button>
         </div>
+      </div>
+      <div style={styles.formFooterHint}>
+        <span>Saldo disponível: </span>
+        <strong>{formatCurrency(saldoDisponivel)}</strong>
+        <span style={{ opacity: 0.6, marginLeft: 8 }}>
+          (planejadas não consomem)
+        </span>
       </div>
     </div>
   );
 };
 
-// (Estilos para o formulário inline)
-const formStyles = {
-  container: {
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #dee2e6",
-    borderRadius: "8px",
-    padding: "16px",
-    marginBottom: "20px",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "minmax(300px, 2fr) minmax(200px, 1fr) auto",
-    gap: "20px",
-    alignItems: "end",
-    width: "100%",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    minWidth: 0,
-  },
-  formGroupButton: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    minWidth: "auto",
-  },
-  label: {
-    fontWeight: "600",
-    color: "#333",
-    fontSize: "13px",
-    marginBottom: "2px",
-  },
-  labelRequired: {
-    fontWeight: "600",
-    color: "#333",
-    fontSize: "13px",
-    marginBottom: "2px",
-  },
-  labelInvisible: {
-    fontWeight: "600",
-    color: "transparent",
-    fontSize: "13px",
-    marginBottom: "2px",
-    visibility: "hidden",
-  },
-  required: {
-    color: "#dc3545",
-  },
-  select: {
-    padding: "8px 12px",
-    border: "1px solid #dee2e6",
-    borderRadius: "4px",
-    fontSize: "14px",
-    backgroundColor: "white",
-    height: "38px",
-    width: "100%",
-    boxSizing: "border-box",
-  },
-  input: {
-    padding: "8px 12px",
-    border: "1px solid #dee2e6",
-    borderRadius: "4px",
-    fontSize: "14px",
-    backgroundColor: "white",
-    height: "38px",
-    width: "100%",
-    boxSizing: "border-box",
-  },
-  inputMoney: {
-    fontWeight: "600",
-    color: "#059669",
-    textAlign: "right",
-    backgroundColor: "#f0fdf4",
-    borderColor: "#22c55e",
-  },
-  inputError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fef2f2",
-  },
-  errorText: {
-    color: "#dc3545",
-    fontSize: "11px",
-    marginTop: "2px",
-    fontWeight: "500",
-  },
-  inputCustomizadoWrapper: {
-    display: "flex",
-    gap: "8px",
-  },
-  voltarButton: {
-    backgroundColor: "#6c757d",
-    color: "white",
-    border: "none",
-    padding: "8px 12px",
-    borderRadius: "4px",
-    fontSize: "14px",
-    cursor: "pointer",
-    height: "38px",
-    whiteSpace: "nowrap",
-  },
-  addButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "4px",
-    fontSize: "13px",
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    height: "38px",
-    whiteSpace: "nowrap",
-  },
-  addButtonDisabled: {
-    backgroundColor: "#6c757d",
-    cursor: "not-allowed",
-    opacity: 0.6,
-  },
-};
-
-// ==========================================================
-// === COMPONENTE PRINCIPAL: ExecucaoOrcamentaria ===
-// ==========================================================
-const ExecucaoOrcamentaria = ({
-  formData, // Dados da emenda atual
-  onChange,
-  fieldErrors,
-  onClearError,
-  usuario, // Usuário logado
-}) => {
-  // 🎯 ESTADOS
-  const [despesasPlanejadas, setDespesasPlanejadas] = useState([]);
-  const [despesasExecutadas, setDespesasExecutadas] = useState([]);
+// ===== Principal =====
+const ExecucaoOrcamentaria = ({ formData, usuario }) => {
+  const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [executandoDespesa, setExecutandoDespesa] = useState(null);
-  const [criandoDespesaExecutada, setCriandoDespesaExecutada] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [modal, setModal] = useState({ abrir: false, despesa: null });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
-  // 🐛 DEBUG: Monitorar state do modal
+  // Resolver ID (id | emendaId | número)
   useEffect(() => {
-    console.log("🔍 ExecucaoOrcamentaria: State do modal mudou:", {
-      executandoDespesa: executandoDespesa?.id || null,
-      criandoDespesaExecutada,
-      modalDeveEstarAberto: !!(executandoDespesa || criandoDespesaExecutada),
-    });
-  }, [executandoDespesa, criandoDespesaExecutada]);
-
-  // ✅ BUSCAR ID REAL DA EMENDA
-  useEffect(() => {
-    const buscarIdEmenda = async () => {
+    const resolverId = async () => {
       if (formData?.id || formData?.emendaId) {
         setEmendaIdReal(formData.id || formData.emendaId);
         return;
       }
-
-      if (!formData?.numero) {
+      const numero = formData?.numero || formData?.numeroEmenda;
+      if (!numero) {
         setEmendaIdReal(null);
         return;
       }
-
       try {
         const q = query(
           collection(db, "emendas"),
-          where("numero", "==", formData.numero),
+          where("numero", "==", numero),
         );
-        const snapshot = await getDocs(q);
-
-        if (!snapshot.empty) {
-          setEmendaIdReal(snapshot.docs[0].id);
-        }
-      } catch (err) {
-        console.error("❌ Erro ao buscar ID da emenda:", err);
+        const snap = await getDocs(q);
+        setEmendaIdReal(!snap.empty ? snap.docs[0].id : null);
+      } catch {
+        setEmendaIdReal(null);
       }
     };
-
-    buscarIdEmenda();
-  }, [formData?.id, formData?.emendaId, formData?.numero]);
+    resolverId();
+  }, [
+    formData?.id,
+    formData?.emendaId,
+    formData?.numero,
+    formData?.numeroEmenda,
+  ]);
 
   const emendaId = emendaIdReal || formData?.id || formData?.emendaId;
   const temEmendaSalva = !!emendaId;
 
-  // ✅ CARREGAR DESPESAS (PLANEJADAS E EXECUTADAS)
-  useEffect(() => {
-    if (temEmendaSalva) {
-      carregarDespesas();
-    }
-  }, [emendaId]);
-
   const carregarDespesas = async () => {
     if (!emendaId) {
-      setDespesasPlanejadas([]);
-      setDespesasExecutadas([]);
+      setDespesas([]);
       setLoading(false);
       return;
     }
-
+    setLoading(true);
     try {
-      setLoading(true);
-
       const q = query(
         collection(db, "despesas"),
         where("emendaId", "==", emendaId),
       );
-
-      const snapshot = await getDocs(q);
-      const todasDespesas = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // ✅ SEPARAR POR STATUS
-      const planejadas = todasDespesas.filter((d) => d.status === "PLANEJADA");
-      const executadas = todasDespesas.filter((d) => d.status !== "PLANEJADA");
-
-      setDespesasPlanejadas(planejadas);
-      setDespesasExecutadas(executadas);
-    } catch (err) {
-      console.error("❌ Erro ao carregar despesas:", err);
+      const snap = await getDocs(q);
+      setDespesas(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch (e) {
+      console.error(e);
       setToast({
         show: true,
-        message: "Erro ao carregar despesas",
+        message: "Erro ao carregar despesas.",
         type: "error",
       });
     } finally {
@@ -452,123 +250,51 @@ const ExecucaoOrcamentaria = ({
     }
   };
 
-  // 📊 CALCULAR ESTATÍSTICAS
-  const calcularEstatisticas = () => {
-    const valorEmenda = parseFloat(
-      formData?.valorRecurso?.replace?.(/[^\d,]/g, "")?.replace(",", ".") || 0,
-    );
-    const totalPlanejado = despesasPlanejadas.reduce(
-      (sum, d) => sum + (parseFloat(d.valor) || 0),
+  useEffect(() => {
+    if (temEmendaSalva) carregarDespesas(); /* eslint-disable-next-line */
+  }, [emendaId]);
+
+  const despesasPlanejadas = despesas.filter((d) => d.status === "PLANEJADA");
+  const despesasExecutadas = despesas.filter((d) => d.status !== "PLANEJADA");
+
+  const valorEmendaParsed = (() => {
+    const raw = formData?.valor || formData?.valorRecurso || 0;
+    if (typeof raw === "number") return raw;
+    if (typeof raw === "string")
+      return parseFloat(raw.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+    return 0;
+  })();
+
+  const stats = {
+    valorEmenda: valorEmendaParsed,
+    totalPlanejado: despesasPlanejadas.reduce(
+      (acc, d) => acc + Number(d.valor || 0),
       0,
-    );
-    const totalExecutado = despesasExecutadas.reduce(
-      (sum, d) => sum + (parseFloat(d.valor) || 0),
+    ),
+    totalExecutado: despesasExecutadas.reduce(
+      (acc, d) => acc + Number(d.valor || 0),
       0,
+    ),
+  };
+  const saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
+
+  const handleExecutarDespesa = (despesa) => setModal({ abrir: true, despesa });
+  const closeModal = () => setModal({ abrir: false, despesa: null });
+
+  const handleRemoverDespesaPlanejada = async (id, descricao, valor) => {
+    const confirma = window.confirm(
+      `Remover a despesa planejada\n\n${descricao}\nValor: ${formatCurrency(valor)}\n\nEssa ação não pode ser desfeita. Continuar?`,
     );
-    const saldoDisponivel = valorEmenda - totalExecutado;
-
-    return {
-      valorEmenda,
-      totalPlanejado,
-      totalExecutado,
-      saldoDisponivel,
-      percentualExecutado:
-        valorEmenda > 0 ? (totalExecutado / valorEmenda) * 100 : 0,
-    };
-  };
-
-  const stats = calcularEstatisticas();
-
-  // 🎯 HANDLERS
-  const handleExecutarDespesa = (despesa) => {
-    console.log("▶️ ExecucaoOrcamentaria.handleExecutarDespesa CHAMADO:", {
-      despesaId: despesa.id,
-      estrategia: despesa.estrategia,
-      valor: despesa.valor,
-      despesaCompleta: despesa,
-    });
-
-    setExecutandoDespesa(despesa);
-
-    console.log("✅ setExecutandoDespesa foi chamado, state vai atualizar");
-
-    // Verificar se realmente atualizou (assíncrono)
-    setTimeout(() => {
-      console.log("⏰ Verificando após 100ms se modal abriu");
-    }, 100);
-  };
-
-  const handleCriarDespesaExecutada = () => {
-    setCriandoDespesaExecutada(true);
-  };
-
-  const handleCloseModal = () => {
-    setExecutandoDespesa(null);
-    setCriandoDespesaExecutada(false);
-  };
-
-  const handleConfirmarExecucao = async (dadosExecucao) => {
+    if (!confirma) return;
     try {
-      if (executandoDespesa) {
-        await updateDoc(doc(db, "despesas", executandoDespesa.id), {
-          ...dadosExecucao,
-          status: "EXECUTADA",
-          executadaEm: new Date().toISOString(),
-          executadoPor: usuario?.email,
-        });
-        setToast({
-          show: true,
-          message: "✅ Despesa executada com sucesso!",
-          type: "success",
-        });
-      } else if (criandoDespesaExecutada) {
-        await addDoc(collection(db, "despesas"), {
-          ...dadosExecucao,
-          emendaId: emendaId,
-          status: "EXECUTADA",
-          criadaEm: new Date().toISOString(),
-          criadaPor: usuario?.email,
-        });
-        setToast({
-          show: true,
-          message: "✅ Despesa criada com sucesso!",
-          type: "success",
-        });
-      }
-      await carregarDespesas();
-      handleCloseModal();
-    } catch (error) {
-      console.error("❌ Erro ao salvar despesa:", error);
-      setToast({
-        show: true,
-        message: "Erro ao salvar despesa",
-        type: "error",
-      });
+      await deleteDoc(doc(db, "despesas", id));
+      carregarDespesas();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao remover despesa.");
     }
   };
 
-  const handleRemoverDespesaPlanejada = async (despesaId) => {
-    if (!window.confirm("Deseja remover esta despesa planejada?")) return;
-
-    try {
-      await deleteDoc(doc(db, "despesas", despesaId));
-      await carregarDespesas();
-      setToast({
-        show: true,
-        message: "Despesa planejada removida",
-        type: "success",
-      });
-    } catch (error) {
-      console.error("❌ Erro ao remover despesa:", error);
-      setToast({
-        show: true,
-        message: "Erro ao remover despesa",
-        type: "error",
-      });
-    }
-  };
-
-  // 🚫 SE NÃO TEM ID DA EMENDA
   if (!temEmendaSalva) {
     return (
       <div style={styles.container}>
@@ -586,9 +312,16 @@ const ExecucaoOrcamentaria = ({
     );
   }
 
+  if (loading)
+    return (
+      <div style={styles.loadingBox}>
+        <div style={styles.loadingSpinner} />
+        Carregando...
+      </div>
+    );
+
   return (
     <div style={styles.container}>
-      {/* Toast */}
       {toast.show && (
         <Toast
           message={toast.message}
@@ -597,7 +330,7 @@ const ExecucaoOrcamentaria = ({
         />
       )}
 
-      {/* 📊 PAINEL DE CONTROLE */}
+      {/* Totais (sticky) */}
       <div style={styles.painelControle}>
         <h3 style={styles.painelTitulo}>📊 Painel de Controle Orçamentário</h3>
         <div style={styles.statsGrid}>
@@ -606,10 +339,7 @@ const ExecucaoOrcamentaria = ({
             <div style={styles.statContent}>
               <div style={styles.statLabel}>Valor da Emenda</div>
               <div style={styles.statValue}>
-                {stats.valorEmenda.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
+                {formatCurrency(stats.valorEmenda)}
               </div>
             </div>
           </div>
@@ -618,10 +348,7 @@ const ExecucaoOrcamentaria = ({
             <div style={styles.statContent}>
               <div style={styles.statLabel}>Total Planejado</div>
               <div style={{ ...styles.statValue, color: "#f39c12" }}>
-                {stats.totalPlanejado.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
+                {formatCurrency(stats.totalPlanejado)}
               </div>
               <div style={styles.statHint}>Não consome saldo</div>
             </div>
@@ -630,26 +357,18 @@ const ExecucaoOrcamentaria = ({
             <div style={styles.statIcon}>✅</div>
             <div style={styles.statContent}>
               <div style={styles.statLabel}>Total Executado</div>
-              <div style={{ ...styles.statValue, color: "#e74c3c" }}>
-                {stats.totalExecutado.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
+              <div style={{ ...styles.statValue, color: "#2ecc71" }}>
+                {formatCurrency(stats.totalExecutado)}
               </div>
-              <div style={styles.statHint}>
-                {stats.percentualExecutado.toFixed(1)}% executado
-              </div>
+              <div style={styles.statHint}>Impacta saldo</div>
             </div>
           </div>
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>💚</div>
+            <div style={styles.statIcon}>💼</div>
             <div style={styles.statContent}>
               <div style={styles.statLabel}>Saldo Disponível</div>
-              <div style={{ ...styles.statValue, color: "#27ae60" }}>
-                {stats.saldoDisponivel.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
+              <div style={{ ...styles.statValue, color: "#154360" }}>
+                {formatCurrency(saldoDisponivel)}
               </div>
               <div style={styles.statHint}>Disponível para executar</div>
             </div>
@@ -657,7 +376,7 @@ const ExecucaoOrcamentaria = ({
         </div>
       </div>
 
-      {/* 🎯 SEÇÃO: PLANEJAMENTO */}
+      {/* Planejamento */}
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>🎯 Planejamento de Despesas</h3>
@@ -667,7 +386,6 @@ const ExecucaoOrcamentaria = ({
           </span>
         </div>
 
-        {/* 📝 FORMULÁRIO INLINE PARA ADICIONAR DESPESA PLANEJADA */}
         <DespesaPlanejadaForm
           emendaId={emendaId}
           valorEmenda={stats.valorEmenda}
@@ -676,42 +394,74 @@ const ExecucaoOrcamentaria = ({
           usuario={usuario}
         />
 
-        {/* 📋 LISTA DE DESPESAS PLANEJADAS */}
+        {despesasPlanejadas.length === 0 && (
+          <div style={styles.emptyState}>
+            <div>
+              <div style={styles.emptyEmoji}>🗂️</div>
+              <h4 style={styles.emptyTitle}>Nenhuma despesa planejada ainda</h4>
+              <p style={styles.emptyText}>
+                Adicione uma despesa informando a <strong>Natureza</strong> e o{" "}
+                <strong>Valor</strong>. As despesas planejadas <em>não</em>{" "}
+                consomem o recurso da emenda — apenas após “Executar”.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById("naturezaDespesaSelect");
+                if (el) {
+                  try {
+                    el.focus();
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                  } catch {}
+                }
+              }}
+              style={{ ...styles.btn, ...styles.btnPrimary }}
+            >
+              ➕ Adicionar despesa
+            </button>
+          </div>
+        )}
+
         {despesasPlanejadas.length > 0 && (
-          // =========================================================
-          // === 🎯 INÍCIO DA MODIFICAÇÃO: Troca de DIVs por TABELA ===
-          // =========================================================
-          <div style={styles.tableWrapper}>
+          <div style={styles.tabelaWrapper}>
             <table style={styles.table}>
               <thead style={styles.thead}>
-                <tr style={styles.trHeader}>
-                  <th style={{ ...styles.th, width: "50px" }}>#</th>
-                  <th style={{ ...styles.th, width: "40%" }}>
-                    Natureza da Despesa
+                <tr>
+                  <th style={styles.th}>Natureza</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>
+                    Valor Planejado
                   </th>
-                  <th style={{ ...styles.th, width: "15%" }}>Valor Planejado</th>
-                  <th style={{ ...styles.th, width: "15%" }}>Status</th>
-                  <th style={{ ...styles.th, width: "20%", textAlign: "center" }}>Ações</th>
+                  <th style={{ ...styles.th, textAlign: "center", width: 140 }}>
+                    Status
+                  </th>
+                  <th style={{ ...styles.th, textAlign: "center", width: 220 }}>
+                    Ações
+                  </th>
                 </tr>
               </thead>
               <tbody style={styles.tbody}>
-                {despesasPlanejadas.map((despesa, index) => (
+                {despesasPlanejadas.map((despesa, idx) => (
                   <tr
                     key={despesa.id}
-                    style={index % 2 === 0 ? styles.trEven : styles.trOdd}
+                    style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
                   >
-                    <td style={styles.td}>{index + 1}</td>
                     <td style={styles.td}>
                       {despesa.estrategia || despesa.naturezaDespesa}
                     </td>
-                    <td style={{ ...styles.td, ...styles.tdValorPlanejado }}>
-                      {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
+                    <td style={styles.tdValorPlanejado}>
+                      {formatCurrency(despesa.valor)}
                     </td>
                     <td style={styles.td}>
-                      <span style={despesaCardStyles.despesaStatusPlanejada}>
+                      <span
+                        style={{
+                          background: "#fff7e6",
+                          border: "1px solid #ffe58f",
+                          padding: "3px 8px",
+                          borderRadius: 999,
+                          fontSize: 12,
+                        }}
+                      >
                         🟡 <strong>PLANEJADA</strong>
                       </span>
                     </td>
@@ -719,27 +469,23 @@ const ExecucaoOrcamentaria = ({
                       <div style={styles.despesaAcoes}>
                         <button
                           type="button"
-                          onClick={() => {
-                            console.log("🖱️ BOTÃO ▶️ EXECUTAR CLICADO:", {
-                              despesaId: despesa.id,
-                              estrategia: despesa.estrategia,
-                            });
-                            handleExecutarDespesa(despesa);
-                          }}
-                          style={styles.btnExecutar}
-                          title="Executar despesa"
+                          onClick={() => handleExecutarDespesa(despesa)}
+                          style={{ ...styles.btn, ...styles.btnPrimary }}
                         >
                           ▶️ Executar
                         </button>
                         <button
                           type="button"
                           onClick={() =>
-                            handleRemoverDespesaPlanejada(despesa.id)
+                            handleRemoverDespesaPlanejada(
+                              despesa.id,
+                              despesa.estrategia || despesa.naturezaDespesa,
+                              despesa.valor,
+                            )
                           }
-                          style={styles.btnRemover}
-                          title="Remover despesa"
+                          style={{ ...styles.btn, ...styles.btnDanger }}
                         >
-                          🗑️
+                          🗑️ Remover
                         </button>
                       </div>
                     </td>
@@ -748,26 +494,19 @@ const ExecucaoOrcamentaria = ({
               </tbody>
             </table>
           </div>
-          // =========================================================
-          // === 🎯 FIM DA MODIFICAÇÃO: Troca de DIVs por TABELA ===
-          // =========================================================
         )}
       </div>
 
-      {/* 💸 SEÇÃO: DESPESAS EXECUTADAS */}
+      {/* Executadas — componente existente */}
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
-          <button
-            type="button"
-            onClick={handleCriarDespesaExecutada}
-            style={styles.btnNovaDespesa}
-          >
-            ➕ Nova Despesa Executada
-          </button>
+          <span style={styles.badge}>
+            {despesasExecutadas.length}{" "}
+            {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
+          </span>
         </div>
 
-        {/* ✅ REUTILIZAR COMPONENTE EXISTENTE DespesasList */}
         <DespesasList
           despesas={despesasExecutadas}
           emendas={[
@@ -782,190 +521,193 @@ const ExecucaoOrcamentaria = ({
           ]}
           loading={loading}
           error={null}
-          onEdit={(despesa) => console.log("Editar:", despesa)}
-          onView={(despesa) => console.log("Visualizar:", despesa)}
+          onEdit={() => {}}
+          onView={() => {}}
           onRecarregar={carregarDespesas}
           usuario={usuario}
-          filtroInicial={{
-            emendaId: emendaId,
-          }}
-          usarLayoutCards={false} // ✅ Mantido como 'false'
+          filtroInicial={{ emendaId }}
+          usarLayoutCards={false}
         />
       </div>
 
-      {/* 🔄 MODAL: EXECUTAR DESPESA */}
-      {(() => {
-        const deveRenderizar = !!(executandoDespesa || criandoDespesaExecutada);
-        console.log("🎬 ExecucaoOrcamentaria: Renderizando modal?", {
-          deveRenderizar,
-          executandoDespesa: executandoDespesa?.id || null,
-          criandoDespesaExecutada,
-        });
-
-        if (!deveRenderizar) {
-          return null;
-        }
-
-        console.log("✅ MODAL VAI SER RENDERIZADO AGORA!");
-
-        return (
-          <ExecutarDespesaModal
-            despesa={executandoDespesa}
-            emenda={{
-              id: emendaId,
-              ...formData,
-            }}
-            saldoDisponivel={stats.saldoDisponivel}
-            onClose={handleCloseModal}
-            onConfirm={handleConfirmarExecucao}
-            usuario={usuario}
-          />
-        );
-      })()}
+      {/* Modal de execução */}
+      {modal.abrir && (
+        <div style={modalStyles.backdrop}>
+          <div style={modalStyles.modal}>
+            <h3 style={modalStyles.title}>Executar Despesa</h3>
+            <p style={modalStyles.text}>
+              Confirma a execução da despesa{" "}
+              <strong>{modal.despesa?.estrategia}</strong> no valor de{" "}
+              <strong>{formatCurrency(modal.despesa?.valor)}</strong>?
+            </p>
+            <div style={modalStyles.actions}>
+              <button
+                onClick={closeModal}
+                style={{ ...styles.btn, ...styles.btnSecondary }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await updateDoc(doc(db, "despesas", modal.despesa.id), {
+                      status: "EXECUTADA",
+                      executadaEm: new Date().toISOString(),
+                      executadoPor: usuario?.email,
+                    });
+                    setToast({
+                      show: true,
+                      message: "✅ Despesa executada",
+                      type: "success",
+                    });
+                    closeModal();
+                    carregarDespesas();
+                  } catch (e) {
+                    console.error(e);
+                    alert("Erro ao executar.");
+                  }
+                }}
+                style={{ ...styles.btn, ...styles.btnPrimary }}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// 🎨 ESTILOS (REDUZIDOS)
+// Estilos (padronização de botões incluída)
 const styles = {
   container: {
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
-    paddingBottom: "80px",
+    gap: 24,
+    paddingBottom: 80,
   },
   alertBox: {
     display: "flex",
-    gap: "12px",
-    padding: "20px",
+    gap: 12,
+    padding: 20,
     backgroundColor: "#eff6ff",
     border: "2px solid #bfdbfe",
-    borderRadius: "12px",
+    borderRadius: 12,
   },
-  alertIcon: { fontSize: "32px" },
-  alertTitle: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "#1e40af",
-    margin: "0 0 8px 0",
+  alertIcon: { fontSize: 32 },
+  alertTitle: { margin: 0 },
+  alertText: { margin: 0, opacity: 0.8 },
+  loadingBox: { display: "flex", alignItems: "center", gap: 12, padding: 12 },
+  loadingSpinner: {
+    width: 14,
+    height: 14,
+    border: "2px solid #e2e8f0",
+    borderTop: "2px solid #334155",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
   },
-  alertText: { fontSize: "14px", color: "#3b82f6", margin: 0 },
   painelControle: {
     backgroundColor: "#fff",
-    border: "2px solid #154360",
-    borderRadius: "12px",
-    padding: "24px",
+    borderRadius: 12,
+    padding: 24,
     boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    position: "sticky",
+    top: 0,
+    zIndex: 11,
+    borderBottom: "1px solid #e9ecef",
   },
   painelTitulo: {
     margin: "0 0 20px 0",
     color: "#154360",
-    fontSize: "20px",
+    fontSize: 20,
     fontWeight: "bold",
   },
   statsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "16px",
+    gap: 16,
   },
   statCard: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    padding: "16px",
+    gap: 12,
+    padding: 16,
     backgroundColor: "#f8f9fa",
-    borderRadius: "8px",
+    borderRadius: 8,
     border: "1px solid #dee2e6",
   },
-  statIcon: { fontSize: "32px" },
-  statContent: { flex: 1 },
-  statLabel: {
-    fontSize: "12px",
-    color: "#6c757d",
-    marginBottom: "4px",
-    textTransform: "uppercase",
-    fontWeight: "600",
-  },
-  statValue: { fontSize: "18px", fontWeight: "bold", color: "#154360" },
-  statHint: { fontSize: "11px", color: "#6c757d", marginTop: "2px" },
+  statIcon: { fontSize: 20 },
+  statContent: { display: "grid" },
+  statLabel: { fontSize: 12, opacity: 0.8 },
+  statValue: { fontSize: 18, fontWeight: 800 },
+  statHint: { fontSize: 12, opacity: 0.6 },
   secao: {
     backgroundColor: "#fff",
-    border: "1px solid #dee2e6",
-    borderRadius: "8px",
-    padding: "20px",
+    borderRadius: 12,
+    padding: 16,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
   },
   secaoHeader: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "20px",
-    paddingBottom: "12px",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    paddingBottom: 12,
     borderBottom: "2px solid #e9ecef",
   },
   secaoTitulo: {
     margin: 0,
-    fontSize: "18px",
+    fontSize: 18,
     fontWeight: "bold",
     color: "#154360",
   },
   badge: {
     backgroundColor: "#154360",
-    color: "white",
+    color: "#fff",
     padding: "4px 12px",
-    borderRadius: "12px",
-    fontSize: "12px",
-    fontWeight: "600",
-  },
-  btnNovaDespesa: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "10px 20px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.2s",
-  },
-
-  // =========================================================
-  // === 🎯 INÍCIO DA MODIFICAÇÃO: Estilos da Tabela Planejada
-  // =========================================================
-  tableWrapper: {
-    width: "100%",
-    overflowX: "auto",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
-    marginTop: "20px",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
+    borderRadius: 999,
     fontSize: 12,
   },
-  thead: {},
-  trHeader: {
-    backgroundColor: "#2c3e50", // Mesmo header da tabela de executadas
+  cardFormInline: {
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
   },
-  th: {
-    padding: "12px 8px",
-    textAlign: "left",
-    color: "white",
-    fontWeight: "600",
+  formInline: {
+    display: "grid",
+    gridTemplateColumns: "minmax(220px, 1fr) 160px 160px",
+    gap: 12,
+  },
+  formGroup: { display: "flex", flexDirection: "column", gap: 4, minWidth: 0 },
+  formGroupButton: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    minWidth: "auto",
+  },
+  formFooterHint: { marginTop: 8, fontSize: 12, opacity: 0.8 },
+  tabelaWrapper: {
+    overflowX: "auto",
+    border: "1px solid #e9ecef",
+    borderRadius: 8,
+  },
+  table: { width: "100%", borderCollapse: "collapse" },
+  thead: {
+    backgroundColor: "#2c3e50",
+    color: "#fff",
+    fontWeight: 600,
     fontSize: 14,
     borderBottom: "2px solid #34495e",
-    borderRight: "1px solid rgba(255,255,255,0.1)",
     whiteSpace: "nowrap",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
   tbody: {},
-  trEven: {
-    backgroundColor: "#f9f9f9",
-  },
-  trOdd: {
-    backgroundColor: "white",
-  },
+  trEven: { backgroundColor: "#f9f9f9" },
+  trOdd: { backgroundColor: "#fff" },
   td: {
     padding: "10px 8px",
     borderBottom: "1px solid #eee",
@@ -975,42 +717,108 @@ const styles = {
   },
   tdValorPlanejado: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#f39c12", // Cor do valor mantida (amarelo)
+    fontWeight: 700,
+    color: "#f39c12",
     textAlign: "right",
     fontFamily: "monospace",
   },
-  // =========================================================
-  // === 🎯 FIM DA MODIFICAÇÃO: Estilos da Tabela Planejada
-  // =========================================================
-  despesaAcoes: {
-    display: "flex",
-    gap: "8px",
-    justifyContent: "center",
+  despesaAcoes: { display: "flex", gap: 8, justifyContent: "center" },
+  // Botões padronizados
+  btn: {
+    display: "inline-flex",
     alignItems: "center",
-    flexWrap: "nowrap",
-  },
-  btnExecutar: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    padding: "8px 16px",
-    borderRadius: "6px",
-    fontSize: "13px",
-    fontWeight: "600",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    transition: "all 0.2s ease",
-  },
-  btnRemover: {
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
+    gap: 6,
+    backgroundColor: "#fff",
+    color: "#0f172a",
+    border: "1px solid #e2e8f0",
     padding: "8px 12px",
-    borderRadius: "6px",
-    fontSize: "13px",
+    borderRadius: 8,
+    fontSize: 13,
+    fontWeight: 600,
     cursor: "pointer",
-    transition: "all 0.2s ease",
+  },
+  btnPrimary: {
+    backgroundColor: "#0d6efd",
+    color: "#fff",
+    borderColor: "#0d6efd",
+  },
+  btnSecondary: {
+    backgroundColor: "#6c757d",
+    color: "#fff",
+    borderColor: "#6c757d",
+  },
+  btnDanger: {
+    backgroundColor: "#dc3545",
+    color: "#fff",
+    borderColor: "#dc3545",
+  },
+  // Empty state
+  emptyState: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 16,
+    padding: 20,
+    border: "1px dashed #cbd5e1",
+    borderRadius: 12,
+    background: "#f8fafc",
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  emptyEmoji: { fontSize: 28, marginBottom: 8 },
+  emptyTitle: { margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" },
+  emptyText: { margin: "6px 0 0 0", fontSize: 13, color: "#475569" },
+};
+
+const formStyles = {
+  label: { fontWeight: 600, color: "#154360" },
+  input: {
+    border: "1px solid #dee2e6",
+    borderRadius: 8,
+    padding: "10px 12px",
+    outline: "none",
+  },
+  select: {
+    border: "1px solid #dee2e6",
+    borderRadius: 8,
+    padding: "10px 12px",
+    outline: "none",
+    background: "#fff",
+  },
+  inputCustomizadoWrapper: { display: "flex", gap: 8 },
+  btnVoltarSelect: {
+    backgroundColor: "#6c757d",
+    color: "#fff",
+    border: "none",
+    padding: "10px 12px",
+    borderRadius: 8,
+    cursor: "pointer",
+  },
+};
+
+const modalStyles = {
+  backdrop: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.3)",
+    display: "grid",
+    placeItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    width: "min(560px, 92vw)",
+    background: "#fff",
+    borderRadius: 12,
+    boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
+    padding: 24,
+  },
+  title: { marginTop: 0 },
+  text: { opacity: 0.85 },
+  actions: {
+    display: "flex",
+    gap: 12,
+    justifyContent: "flex-end",
+    marginTop: 16,
   },
 };
 

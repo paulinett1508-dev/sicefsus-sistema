@@ -1,0 +1,104 @@
+# CORREÇÕES NO ExecucaoOrcamentaria.jsx
+
+## 🎯 ALTERAÇÕES NECESSÁRIAS:
+
+### 1. Botões da tabela (linhas 469-490):
+
+**ANTES:**
+```jsx
+<td style={{ ...styles.td, textAlign: "center" }}>
+  <div style={styles.despesaAcoes}>
+    <button
+      type="button"
+      onClick={() => handleExecutarDespesa(despesa)}
+      style={{ ...styles.btn, ...styles.btnPrimary }}
+    >
+      ▶️ Executar
+    </button>
+    <button
+      type="button"
+      onClick={() =>
+        handleRemoverDespesaPlanejada(
+          despesa.id,
+          despesa.estrategia || despesa.naturezaDespesa,
+          despesa.valor,
+        )
+      }
+      style={{ ...styles.btn, ...styles.btnDanger }}
+    >
+      🗑️ Remover
+    </button>
+  </div>
+</td>
+```
+
+**DEPOIS:**
+```jsx
+<td style={{ ...styles.td, textAlign: "center" }}>
+  <div style={styles.despesaAcoes}>
+    <button
+      type="button"
+      onClick={() => handleExecutarDespesa(despesa)}
+      style={styles.btnIconExecutar}
+      title="Executar despesa"
+    >
+      ▶️
+    </button>
+    <button
+      type="button"
+      onClick={() =>
+        handleRemoverDespesaPlanejada(
+          despesa.id,
+          despesa.estrategia || despesa.naturezaDespesa,
+          despesa.valor,
+        )
+      }
+      style={styles.btnIconRemover}
+      title="Remover despesa"
+    >
+      🗑️
+    </button>
+  </div>
+</td>
+```
+
+### 2. Novos estilos para os botões (adicionar após linha 754):
+
+```javascript
+btnIconExecutar: {
+  backgroundColor: "#0d6efd",
+  color: "#fff",
+  border: "none",
+  padding: "6px 10px",
+  borderRadius: "4px",
+  fontSize: "14px",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+},
+btnIconRemover: {
+  backgroundColor: "#dc3545",
+  color: "#fff",
+  border: "none",
+  padding: "6px 10px",
+  borderRadius: "4px",
+  fontSize: "14px",
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+},
+```
+
+### 3. Ajustar largura da coluna de ações (linha 438):
+
+**ANTES:**
+```jsx
+<th style={{ ...styles.th, textAlign: "center", width: 220 }}>
+  Ações
+</th>
+```
+
+**DEPOIS:**
+```jsx
+<th style={{ ...styles.th, textAlign: "center", width: 100 }}>
+  AÇÕES
+</th>
+```

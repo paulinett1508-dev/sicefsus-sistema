@@ -1,5 +1,5 @@
-// DespesasList.jsx - CORRIGIDO COM LOGS DE DEBUG
-// ✅ CORREÇÃO: Receber dados via props ao invés do hook conflitante
+// DespesasList.jsx - CORRIGIDO: Removido espaço vazio
+// ✅ CORREÇÃO: Ajustado container para não forçar altura mínima
 
 import React, { useEffect, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
@@ -313,26 +313,27 @@ const DespesasList = ({
                         ? new Date(despesa.dataPagamento).toLocaleDateString(
                             "pt-BR",
                           )
-                        : "Sem data"}
+                        : "N/A"}
                     </span>
-                    <span
-                      style={
-                        estilosCustomizados?.despesaInfo || styles.despesaInfo
-                      }
-                    >
-                      🏢 {despesa.fornecedor || "Sem fornecedor"}
-                    </span>
+                    {emendaRelacionada && (
+                      <span
+                        style={
+                          estilosCustomizados?.despesaInfo || styles.despesaInfo
+                        }
+                      >
+                        🏛️ {emendaRelacionada.numero || "N/A"}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <div
-                  style={
-                    estilosCustomizados?.despesaAcoes || styles.despesaAcoes
-                  }
-                >
+                <div style={styles.despesaAcoes}>
                   <button
                     type="button"
                     onClick={() => {
-                      console.log("🖱️ BOTÃO VISUALIZAR CLICADO (Cards)");
+                      console.log(
+                        "👁️ Visualizar clicado (DespesasList Cards):",
+                        despesa.id,
+                      );
                       handleView(despesa);
                     }}
                     style={
@@ -346,7 +347,7 @@ const DespesasList = ({
                     type="button"
                     onClick={() => {
                       console.log(
-                        "🖱️ BOTÃO EDITAR CLICADO (Cards):",
+                        "✏️ Editar clicado (DespesasList Cards):",
                         despesa.id,
                       );
                       handleEdit(despesa);
@@ -388,12 +389,12 @@ const DespesasList = ({
 
 export default DespesasList;
 
-// ✅ Estilos mantidos (sem mudanças)
+// ✅ ESTILOS CORRIGIDOS - Removido minHeight e backgrounds desnecessários
 const styles = {
   container: {
-    backgroundColor: GRAY,
-    minHeight: "100vh",
-    paddingBottom: "32px",
+    backgroundColor: "transparent", // ✅ CORRIGIDO: Transparente para não criar fundo extra
+    minHeight: "auto", // ✅ CORRIGIDO: Altura automática sem forçar mínimo
+    paddingBottom: "0", // ✅ CORRIGIDO: Sem padding extra
   },
 
   loadingContainer: {
@@ -432,7 +433,7 @@ const styles = {
     backgroundColor: WHITE,
     borderRadius: 12,
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    margin: "32px",
+    margin: "32px 0", // ✅ CORRIGIDO: Margem vertical apenas
   },
 
   errorIcon: {
@@ -471,7 +472,7 @@ const styles = {
     backgroundColor: WHITE,
     borderRadius: 12,
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    margin: "32px",
+    margin: "0", // ✅ CORRIGIDO: Sem margem extra
   },
 
   emptyIcon: {
@@ -515,7 +516,7 @@ const styles = {
     backgroundColor: "#e3f2fd",
     border: "2px solid #90caf9",
     borderRadius: 12,
-    margin: "0 32px 24px 32px",
+    margin: "0 0 24px 0", // ✅ CORRIGIDO: Margem inferior apenas
     fontSize: 14,
     color: "#1565c0",
     boxShadow: "0 4px 12px rgba(33, 150, 243, 0.15)",
@@ -551,7 +552,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-    padding: "0 32px 32px 32px",
+    padding: "0", // ✅ CORRIGIDO: Sem padding extra
   },
 
   despesaCard: {
