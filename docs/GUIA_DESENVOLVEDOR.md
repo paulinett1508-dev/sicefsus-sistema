@@ -242,30 +242,3 @@ Dashboard/Relatórios exibem resultados
 1. Identifique qual arquivo da lista acima está envolvido
 2. Leia TODO o arquivo (não só a função que vai alterar)
 3. Busque no projeto onde mais esse arquivo é usado (Ctrl+Shift+F)
-4. Teste em modo Admin E Operador
-
-**Essa orientação economizará HORAS de debug!** 🎯
-
----
-
-## 📚 DOCUMENTAÇÃO ADICIONAL
-
-- **ESTRUTURA.md**: Visão completa da estrutura de arquivos do projeto
-- **README.md**: Instruções de instalação e configuração
-- **docs/estrutura-atual.md**: Detalhamento técnico da arquitetura
-
----
-
-## 🆘 SUPORTE
-
-Em caso de dúvidas:
-1. Consulte este guia primeiro
-2. Revise os arquivos mencionados
-3. Teste em ambiente de desenvolvimento
-4. Documente qualquer mudança importante
-
----
-
-**Última atualização:** Janeiro 2025  
-**Versão do Sistema:** 2.3.x  
-**Mantido por:** Equipe SICEFSUS
