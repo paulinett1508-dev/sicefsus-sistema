@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - Guia do Desenvolvedor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .download-btn:hover {
+            background: #2980b9;
+        }
+        .info {
+            margin-top: 30px;
+            padding: 15px;
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📘 Guia de Orientação para Desenvolvedores</h1>
+        <p class="subtitle">SICEFSUS - Sistema de Controle de Emendas Federais do SUS</p>
+        
+        <a href="#" class="download-btn" id="downloadBtn">
+            ⬇️ Baixar Guia (Markdown)
+        </a>
+
+        <div class="info">
+            <strong>ℹ️ Informações:</strong>
+            <ul>
+                <li>Formato: Markdown (.md)</li>
+                <li>Compatível com GitHub, VSCode, Obsidian, etc.</li>
+                <li>Leitura obrigatória para novos desenvolvedores</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            try {
+                // Buscar o conteúdo do arquivo
+                const response = await fetch('/docs/GUIA_DESENVOLVEDOR.md');
+                const content = await response.text();
+                
+                // Criar blob e fazer download
+                const blob = new Blob([content], { type: 'text/markdown' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'GUIA_DESENVOLVEDOR_SICEFSUS.md';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                alert('✅ Download iniciado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao baixar:', error);
+                alert('❌ Erro ao baixar o arquivo. Verifique o console.');
+            }
+        });
+    </script>
+</body>
+</html>
