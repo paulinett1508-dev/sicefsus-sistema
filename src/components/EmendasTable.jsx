@@ -458,31 +458,12 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.actionsContainer}>
                     <button
-                      onClick={() => onView(emenda)}
-                      style={styles.actionButton}
-                      title="Visualizar"
-                    >
-                      👁️
-                    </button>
-                    <button
                       onClick={() => onEdit(emenda)}
                       style={styles.actionButton}
                       title="Editar"
                     >
                       ✏️
                     </button>
-                    {onDespesas && (
-                      <button
-                        onClick={() => onDespesas(emenda)}
-                        style={{
-                          ...styles.actionButton,
-                          ...styles.despesasButton,
-                        }}
-                        title="Gerenciar Despesas"
-                      >
-                        💰
-                      </button>
-                    )}
                     <button
                       onClick={() => onDelete(emenda.id)}
                       style={{ ...styles.actionButton, ...styles.deleteButton }}
