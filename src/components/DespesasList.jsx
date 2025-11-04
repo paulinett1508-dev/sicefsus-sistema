@@ -95,31 +95,18 @@ const DespesasList = ({
     calcularEstatisticasFiltro(despesas);
   };
 
-  // ✅ Handler para editar com fallbacks + LOGS DE DEBUG
+  // ✅ Handler para editar - usa onEdit como padrão
   const handleEdit = (despesa) => {
     console.log("🔧 DespesasList.handleEdit CHAMADO:", {
       despesaId: despesa?.id,
       despesaDiscriminacao: despesa?.discriminacao,
-      temOnEditarDespesa: !!onEditarDespesa,
-      temOnEdit: !!onEdit,
-      tipoOnEditarDespesa: typeof onEditarDespesa,
-      tipoOnEdit: typeof onEdit,
     });
 
-    if (onEditarDespesa && typeof onEditarDespesa === "function") {
-      console.log("✅ Chamando onEditarDespesa");
-      onEditarDespesa(despesa);
-    } else if (onEdit && typeof onEdit === "function") {
+    if (onEdit && typeof onEdit === "function") {
       console.log("✅ Chamando onEdit");
       onEdit(despesa);
     } else {
-      console.error("❌ NENHUM HANDLER DE EDIÇÃO ENCONTRADO!", {
-        onEditarDespesa,
-        onEdit,
-      });
-      alert(
-        "⚠️ Erro: Função de edição não está configurada. Verifique o console.",
-      );
+      console.error("❌ onEdit não é uma função!", { onEdit });
     }
   };
 

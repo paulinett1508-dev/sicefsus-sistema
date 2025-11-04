@@ -70,10 +70,20 @@ const Despesas = ({ usuario }) => {
     setCurrentView("criar");
   };
 
+  // ✅ Handler para editar - corrigido para garantir navegação
   const handleEditar = (despesa) => {
+    console.log("🔧 Despesas.handleEditar CHAMADO:", {
+      despesaId: despesa?.id,
+      despesaDiscriminacao: despesa?.discriminacao,
+      currentView,
+    });
+
+    // Definir despesa selecionada e mudar view
     setDespesaSelecionada(despesa);
     setCurrentView("editar");
+    console.log("✅ View alterada para 'editar'");
   };
+
 
   const handleVisualizar = (despesa) => {
     setDespesaSelecionada(despesa);
