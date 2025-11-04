@@ -792,10 +792,10 @@ const styles = {
   },
 
   fornecedorCell: {
-    maxWidth: 150,
     fontWeight: "500",
     fontSize: 12,
     color: "#495057",
+    whiteSpace: "nowrap",
   },
 
   numeroCell: {
