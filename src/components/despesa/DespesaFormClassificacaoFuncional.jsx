@@ -8,7 +8,7 @@ import {
   NATUREZAS_DESPESA,
   ELEMENTOS_DESPESA,
   ACOES_ORCAMENTARIAS,
-  STATUS_DESPESAS,
+  STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
 
 const DespesaFormClassificacaoFuncional = ({
@@ -361,7 +361,7 @@ const DespesaFormClassificacaoFuncional = ({
             style={styles.select}
             disabled={modoVisualizacao}
           >
-            {STATUS_DESPESAS.map((status) => (
+            {STATUS_PAGAMENTO_DESPESA.map((status) => (
               <option key={status.value} value={status.value}>
                 {status.label}
               </option>
