@@ -1,10 +1,15 @@
 // src/components/relatorios/geradores/RelatorioDespesas.js
+// ✅ CORRIGIDO 04/11/2025: Usando campos corretos do Firebase
 import { BaseRelatorio } from "./BaseRelatorio";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
+
+    console.log("📊 Gerando Relatório de Despesas...");
+    console.log("Emendas recebidas:", this.emendas.length);
+    console.log("Despesas recebidas:", this.despesas.length);
 
     this.addHeader("Relatório de Despesas Detalhado");
 
@@ -18,7 +23,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     const totalDespesas = this.despesas.length;
     const valorTotal = this.despesas.reduce(
-      (sum, d) => sum + (d.valor || 0),
+      (sum, d) => sum + (parseFloat(d.valor) || 0),
       0,
     );
     const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
@@ -58,6 +63,14 @@ export class RelatorioDespesas extends BaseRelatorio {
       filtrosAtivos.push(`Município: ${filtros.municipio}`);
     if (filtros.fornecedor)
       filtrosAtivos.push(`Fornecedor: ${filtros.fornecedor}`);
+    if (filtros.parlamentar)
+      filtrosAtivos.push(`Parlamentar: ${filtros.parlamentar}`);
+    if (filtros.emenda) {
+      const emenda = this.emendas.find((e) => e.id === filtros.emenda);
+      if (emenda) {
+        filtrosAtivos.push(`Emenda: ${emenda.numero || emenda.numeroEmenda}`);
+      }
+    }
 
     if (filtrosAtivos.length > 0) {
       this.doc.setFontSize(12);
@@ -93,9 +106,12 @@ export class RelatorioDespesas extends BaseRelatorio {
       }
 
       porFornecedor[fornecedor].quantidade++;
-      porFornecedor[fornecedor].valorTotal += despesa.valor || 0;
+      porFornecedor[fornecedor].valorTotal += parseFloat(despesa.valor) || 0;
 
-      const dataCompra = new Date(despesa.data);
+      // ✅ CORRIGIDO: Buscar data correta
+      const dataCompra = new Date(
+        despesa.dataEmpenho || despesa.criadaEm || Date.now(),
+      );
       if (
         !porFornecedor[fornecedor].ultimaCompra ||
         dataCompra > porFornecedor[fornecedor].ultimaCompra
@@ -201,26 +217,38 @@ export class RelatorioDespesas extends BaseRelatorio {
     this.doc.text("LISTAGEM DETALHADA DE DESPESAS", 20, yPosition);
     yPosition += 10;
 
-    // Preparar dados ordenados por data
-    const despesasOrdenadas = [...this.despesas].sort(
-      (a, b) => new Date(b.data) - new Date(a.data),
-    );
+    // ✅ CORRIGIDO: Ordenar por data correta
+    const despesasOrdenadas = [...this.despesas].sort((a, b) => {
+      const dataA = new Date(a.dataEmpenho || a.criadaEm || 0);
+      const dataB = new Date(b.dataEmpenho || b.criadaEm || 0);
+      return dataB - dataA;
+    });
 
-    // Mapear com informações da emenda
+    // ✅ CORRIGIDO: Mapear com campos corretos
     const tabelaDespesas = despesasOrdenadas.map((despesa) => {
       const emenda = this.emendas.find((e) => e.id === despesa.emendaId);
+      const data = despesa.dataEmpenho || despesa.criadaEm;
+
       return [
-        this.formatDate(despesa.data),
-        emenda?.numero || "-",
-        (despesa.descricao || "-").substring(0, 40) +
-          (despesa.descricao?.length > 40 ? "..." : ""),
+        data ? this.formatDate(data) : "-",
+        emenda?.numero || emenda?.numeroEmenda || "-",
+        (despesa.discriminacao || despesa.descricao || "-").substring(0, 40) +
+          ((despesa.discriminacao || despesa.descricao || "").length > 40
+            ? "..."
+            : ""),
         (despesa.fornecedor || "-").substring(0, 30) +
-          (despesa.fornecedor?.length > 30 ? "..." : ""),
-        despesa.cnpj || "-",
-        despesa.numeroDocumento || "-",
-        this.formatCurrency(despesa.valor || 0),
+          ((despesa.fornecedor || "").length > 30 ? "..." : ""),
+        despesa.cnpjFornecedor || "-",
+        despesa.numeroNota || despesa.numeroEmpenho || "-",
+        this.formatCurrency(parseFloat(despesa.valor) || 0),
       ];
     });
+
+    console.log(
+      "📋 Tabela de despesas preparada:",
+      tabelaDespesas.length,
+      "linhas",
+    );
 
     // Adicionar tabela com paginação automática
     try {
@@ -231,7 +259,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             [
               "Data",
               "Emenda",
-              "Descrição",
+              "Discriminação",
               "Fornecedor",
               "CNPJ",
               "Documento",
@@ -267,6 +295,8 @@ export class RelatorioDespesas extends BaseRelatorio {
             }
           },
         });
+
+        console.log("✅ Tabela criada com sucesso!");
       } else {
         // Tabela manual simplificada - sem paginação automática
         createManualTable(
@@ -274,7 +304,7 @@ export class RelatorioDespesas extends BaseRelatorio {
           [
             "Data",
             "Emenda",
-            "Descrição",
+            "Discriminação",
             "Fornecedor",
             "CNPJ",
             "Documento",
@@ -293,8 +323,11 @@ export class RelatorioDespesas extends BaseRelatorio {
             this.pageHeight - 40,
           );
         }
+
+        console.log("✅ Tabela manual criada!");
       }
     } catch (error) {
+      console.error("❌ Erro ao criar tabela:", error);
       console.warn(
         "Erro ao criar tabela automática, usando tabela manual:",
         error,
@@ -304,7 +337,7 @@ export class RelatorioDespesas extends BaseRelatorio {
         [
           "Data",
           "Emenda",
-          "Descrição",
+          "Discriminação",
           "Fornecedor",
           "CNPJ",
           "Documento",
@@ -317,5 +350,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     // Adicionar rodapé na última página
     this.addFooter();
+
+    console.log("✅ Relatório de Despesas gerado com sucesso!");
   }
 }

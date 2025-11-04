@@ -1,4 +1,5 @@
 // src/utils/relatoriosConstants.js
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 
 export const COLORS = {
   PRIMARY: "#154360",
@@ -18,7 +19,7 @@ export const TIPOS_RELATORIOS = [
       "Demonstrativo completo da execução financeira das emendas parlamentares",
     icone: "📊",
     cor: COLORS.PRIMARY,
-    campos: ["periodo", "parlamentar", "status"],
+    campos: ["periodo", "parlamentar", "emenda", "status"], // ✅ Adicionado emenda
   },
   {
     id: "prestacao-contas",
@@ -27,7 +28,7 @@ export const TIPOS_RELATORIOS = [
       "Documento oficial para prestação de contas aos órgãos fiscalizadores",
     icone: "📋",
     cor: COLORS.ACCENT,
-    campos: ["periodo", "municipio"],
+    campos: ["periodo", "municipio", "emenda"], // ✅ Adicionado emenda
   },
   {
     id: "analitico-parlamentar",
@@ -35,7 +36,7 @@ export const TIPOS_RELATORIOS = [
     descricao: "Análise detalhada das emendas por autor, com execução e saldos",
     icone: "👥",
     cor: COLORS.SUCCESS,
-    campos: ["parlamentar", "periodo"],
+    campos: ["parlamentar", "periodo", "emenda"], // ✅ Adicionado emenda
   },
   {
     id: "despesas-detalhado",
@@ -44,7 +45,7 @@ export const TIPOS_RELATORIOS = [
       "Listagem completa de todas as despesas realizadas com filtros avançados",
     icone: "💰",
     cor: COLORS.WARNING,
-    campos: ["periodo", "municipio", "fornecedor"],
+    campos: ["periodo", "municipio", "parlamentar", "emenda", "fornecedor"], // ✅ Adicionados parlamentar e emenda
   },
   {
     id: "consolidado-mensal",
@@ -52,7 +53,7 @@ export const TIPOS_RELATORIOS = [
     descricao: "Resumo executivo mensal com principais indicadores e gráficos",
     icone: "📈",
     cor: COLORS.ERROR,
-    campos: ["mes", "ano"],
+    campos: ["mes", "ano", "parlamentar"], // ✅ Adicionado parlamentar
   },
 ];
 
@@ -60,7 +61,9 @@ export const FILTROS_INICIAIS = {
   dataInicio: "",
   dataFim: "",
   parlamentar: "",
+  emenda: "", // ✅ NOVO: Filtro por emenda
   municipio: "",
   uf: "",
+  fornecedor: "", // ✅ Adicionado fornecedor
   status: "todos",
 };

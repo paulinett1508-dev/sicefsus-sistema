@@ -1,4 +1,5 @@
 // src/components/relatorios/RelatoriosFiltros.jsx
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 import React from "react";
 import { formatCurrency } from "../../utils/pdfHelpers";
 import "../../styles/relatorios.css";
@@ -10,6 +11,7 @@ export default function RelatoriosFiltros({
   onLimparFiltros,
   parlamentares,
   ufs,
+  emendas = [], // ✅ NOVO: Lista de emendas para filtro
   previewData,
 }) {
   return (
@@ -44,7 +46,7 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* Filtro de Parlamentar */}
+        {/* ✅ NOVO: Filtro de Parlamentar */}
         {selectedReport.campos.includes("parlamentar") && (
           <div className="relatorios-filter-group">
             <label className="relatorios-filter-label">Parlamentar</label>
@@ -58,6 +60,27 @@ export default function RelatoriosFiltros({
               {parlamentares.map((p) => (
                 <option key={p} value={p}>
                   {p}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* ✅ NOVO: Filtro de Emenda */}
+        {selectedReport.campos.includes("emenda") && (
+          <div className="relatorios-filter-group">
+            <label className="relatorios-filter-label">Emenda Específica</label>
+            <select
+              name="emenda"
+              value={filtros.emenda}
+              onChange={onFiltroChange}
+              className="relatorios-select"
+            >
+              <option value="">Todas as emendas</option>
+              {emendas.map((emenda) => (
+                <option key={emenda.id} value={emenda.id}>
+                  {emenda.numero || emenda.numeroEmenda} -{" "}
+                  {emenda.parlamentar || emenda.autor} - {emenda.municipio}
                 </option>
               ))}
             </select>
@@ -96,6 +119,21 @@ export default function RelatoriosFiltros({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* ✅ NOVO: Filtro de Fornecedor (para relatório de despesas) */}
+        {selectedReport.campos.includes("fornecedor") && (
+          <div className="relatorios-filter-group">
+            <label className="relatorios-filter-label">Fornecedor</label>
+            <input
+              type="text"
+              name="fornecedor"
+              value={filtros.fornecedor || ""}
+              onChange={onFiltroChange}
+              placeholder="Nome ou CNPJ do fornecedor"
+              className="relatorios-input"
+            />
           </div>
         )}
       </div>

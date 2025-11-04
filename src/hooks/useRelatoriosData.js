@@ -1,4 +1,5 @@
 // src/hooks/useRelatoriosData.js
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e fornecedor
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
@@ -9,7 +10,7 @@ export function useRelatoriosData(usuario) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const userRole = usuario?.role;
+  const userRole = usuario?.role || usuario?.tipo;
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
@@ -63,7 +64,7 @@ export function useRelatoriosData(usuario) {
     loadData();
   }, [userRole, userMunicipio, userUf]);
 
-  // Função para aplicar filtros aos dados
+  // ✅ ATUALIZADO: Função para aplicar filtros aos dados
   const aplicarFiltros = (filtros) => {
     let emendasFiltradas = [...emendas];
     let despesasFiltradas = [...despesas];
@@ -71,29 +72,42 @@ export function useRelatoriosData(usuario) {
     // Filtro por período
     if (filtros.dataInicio) {
       const dataInicio = new Date(filtros.dataInicio);
-      emendasFiltradas = emendasFiltradas.filter(
-        (e) => new Date(e.dataAprovacao) >= dataInicio,
-      );
-      despesasFiltradas = despesasFiltradas.filter(
-        (d) => new Date(d.data) >= dataInicio,
-      );
+      emendasFiltradas = emendasFiltradas.filter((e) => {
+        const dataEmenda = e.dataAprovacao || e.dataOb || e.criadaEm;
+        return dataEmenda && new Date(dataEmenda) >= dataInicio;
+      });
+      despesasFiltradas = despesasFiltradas.filter((d) => {
+        const dataDespesa = d.data || d.dataEmpenho || d.criadaEm;
+        return dataDespesa && new Date(dataDespesa) >= dataInicio;
+      });
     }
 
     if (filtros.dataFim) {
       const dataFim = new Date(filtros.dataFim);
       dataFim.setHours(23, 59, 59);
-      emendasFiltradas = emendasFiltradas.filter(
-        (e) => new Date(e.dataAprovacao) <= dataFim,
-      );
-      despesasFiltradas = despesasFiltradas.filter(
-        (d) => new Date(d.data) <= dataFim,
-      );
+      emendasFiltradas = emendasFiltradas.filter((e) => {
+        const dataEmenda = e.dataAprovacao || e.dataOb || e.criadaEm;
+        return dataEmenda && new Date(dataEmenda) <= dataFim;
+      });
+      despesasFiltradas = despesasFiltradas.filter((d) => {
+        const dataDespesa = d.data || d.dataEmpenho || d.criadaEm;
+        return dataDespesa && new Date(dataDespesa) <= dataFim;
+      });
     }
 
     // Filtro por parlamentar
     if (filtros.parlamentar) {
       emendasFiltradas = emendasFiltradas.filter((e) =>
-        e.autor?.toLowerCase().includes(filtros.parlamentar.toLowerCase()),
+        (e.autor || e.parlamentar)
+          ?.toLowerCase()
+          .includes(filtros.parlamentar.toLowerCase()),
+      );
+    }
+
+    // ✅ NOVO: Filtro por emenda específica
+    if (filtros.emenda) {
+      emendasFiltradas = emendasFiltradas.filter(
+        (e) => e.id === filtros.emenda,
       );
     }
 
@@ -115,12 +129,22 @@ export function useRelatoriosData(usuario) {
       emendasIds.has(d.emendaId),
     );
 
+    // ✅ NOVO: Filtro por fornecedor
+    if (filtros.fornecedor) {
+      despesasFiltradas = despesasFiltradas.filter((d) => {
+        const fornecedor = (d.fornecedor || "").toLowerCase();
+        const cnpj = (d.cnpjFornecedor || "").toLowerCase();
+        const filtroLower = filtros.fornecedor.toLowerCase();
+        return fornecedor.includes(filtroLower) || cnpj.includes(filtroLower);
+      });
+    }
+
     return { emendasFiltradas, despesasFiltradas };
   };
 
   // Obter listas únicas para os selects
   const parlamentares = [
-    ...new Set(emendas.map((e) => e.autor).filter(Boolean)),
+    ...new Set(emendas.map((e) => e.autor || e.parlamentar).filter(Boolean)),
   ].sort();
   const ufs = [...new Set(emendas.map((e) => e.uf).filter(Boolean))].sort();
 

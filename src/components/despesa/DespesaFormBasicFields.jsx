@@ -2,6 +2,7 @@
 // ✅ ATUALIZADO: Campo "Fornecedor" removido
 // 🎯 Agora apenas: Emenda, Valor, Discriminação
 // 🐞 CORRIGIDO: Bug do 'undefined' ao buscar nome do parlamentar
+// ✅ ATUALIZADO 04/11/2025: Campo valor mostra R$ 500,00 (com centavos)
 
 import React from "react";
 
@@ -17,6 +18,25 @@ const DespesaFormBasicFields = ({
   valorError,
   handleInputChange,
 }) => {
+  // ✅ Função para formatar valor para exibição
+  const formatarValorExibicao = (valor) => {
+    if (!valor) return "0,00";
+
+    // Se já está formatado (tem vírgula), retorna como está
+    if (typeof valor === "string" && valor.includes(",")) {
+      return valor;
+    }
+
+    // Se é número, formata
+    const numero = typeof valor === "number" ? valor : parseFloat(valor);
+    if (isNaN(numero)) return "0,00";
+
+    return numero.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
@@ -30,18 +50,12 @@ const DespesaFormBasicFields = ({
           <label style={styles.labelRequired}>Emenda *</label>
           {emendaPreSelecionada && emendaInfo ? (
             <>
-              {/* ========================================================= */}
-              {/* === 🎯 INÍCIO DA MODIFICAÇÃO: Correção do 'undefined' === */}
-              {/* ========================================================= */}
               <input
                 type="text"
                 value={`${emendaInfo.autor || emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
                 style={styles.inputReadonly}
                 readOnly
               />
-              {/* ========================================================= */}
-              {/* === 🎯 FIM DA MODIFICAÇÃO: Correção do 'undefined' === */}
-              {/* ========================================================= */}
               <input type="hidden" name="emendaId" value={formData.emendaId} />
               <span style={styles.helpText}>
                 Emenda pré-selecionada do fluxo anterior
@@ -98,7 +112,7 @@ const DespesaFormBasicFields = ({
             <input
               type="text"
               name="valor"
-              value={formData.valor}
+              value={formatarValorExibicao(formData.valor)}
               onChange={handleInputChange}
               style={
                 errors.valor || valorError
