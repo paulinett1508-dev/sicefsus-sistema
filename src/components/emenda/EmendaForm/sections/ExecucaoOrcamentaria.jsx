@@ -3,6 +3,7 @@
 // Lógica preservada.
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom"; // 🆕 Para renderizar fora do form
 import {
   collection,
   query,
@@ -16,6 +17,7 @@ import {
 import { db } from "../../../../firebase/firebaseConfig";
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
+import DespesaForm from "../../../DespesaForm"; // 🆕 Import do formulário de despesas
 import { NATUREZAS_DESPESA } from "../../../../config/constants";
 import {
   formatarMoedaInput,
@@ -190,6 +192,10 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [modal, setModal] = useState({ abrir: false, despesa: null });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
+  // 🆕 Estados para edição/visualização de despesa
+  const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
+  const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | null
+
   // Resolver ID (id | emendaId | número)
   useEffect(() => {
     const resolverId = async () => {
@@ -277,6 +283,43 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     ),
   };
   const saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
+
+  // 🆕 HANDLERS PARA EDIÇÃO/VISUALIZAÇÃO DE DESPESAS
+  const handleEditarDespesa = (despesa) => {
+    console.log("🔧 ExecucaoOrcamentaria.handleEditarDespesa CHAMADO:", {
+      despesaId: despesa?.id,
+      discriminacao: despesa?.discriminacao || despesa?.estrategia,
+    });
+
+    setDespesaEmEdicao(despesa);
+    setModoVisualizacao("editar");
+
+    // Scroll suave para o topo do formulário
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
+  };
+
+  const handleVisualizarDespesa = (despesa) => {
+    console.log("👁️ ExecucaoOrcamentaria.handleVisualizarDespesa CHAMADO:", {
+      despesaId: despesa?.id,
+    });
+
+    setDespesaEmEdicao(despesa);
+    setModoVisualizacao("visualizar");
+
+    // Scroll suave para o topo
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
+  };
+
+  const handleVoltarDaEdicao = () => {
+    console.log("⬅️ ExecucaoOrcamentaria.handleVoltarDaEdicao");
+    setDespesaEmEdicao(null);
+    setModoVisualizacao(null);
+    carregarDespesas(); // Recarregar dados
+  };
 
   const handleExecutarDespesa = (despesa) => setModal({ abrir: true, despesa });
   const closeModal = () => setModal({ abrir: false, despesa: null });
@@ -375,6 +418,81 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
         </div>
       </div>
+
+      {/* 🆕 FORMULÁRIO DE EDIÇÃO/VISUALIZAÇÃO DE DESPESA - USANDO PORTAL (FORA DO DOM) */}
+      {despesaEmEdicao &&
+        modoVisualizacao &&
+        createPortal(
+          <div style={styles.formularioEdicaoOverlay}>
+            <div style={styles.formularioEdicaoModal}>
+              <div style={styles.formularioEdicaoHeader}>
+                <h3 style={styles.formularioTitulo}>
+                  {modoVisualizacao === "editar"
+                    ? "✏️ Editar Despesa"
+                    : "👁️ Visualizar Despesa"}
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleVoltarDaEdicao}
+                  style={styles.btnVoltar}
+                >
+                  ✕ Fechar
+                </button>
+              </div>
+
+              <div style={styles.formularioEdicaoContent}>
+                <DespesaForm
+                  usuario={usuario}
+                  despesaParaEditar={despesaEmEdicao}
+                  onCancelar={handleVoltarDaEdicao}
+                  onSalvar={handleVoltarDaEdicao}
+                  onSuccess={handleVoltarDaEdicao}
+                  emendasDisponiveis={[
+                    {
+                      id: emendaId,
+                      numero: formData?.numero,
+                      valorRecurso: formData?.valorRecurso,
+                      municipio: formData?.municipio,
+                      uf: formData?.uf,
+                      autor: formData?.autor,
+                      tipo: formData?.tipo,
+                    },
+                  ]}
+                  emendaPreSelecionada={emendaId}
+                  emendaInfo={{
+                    id: emendaId,
+                    numero: formData?.numero,
+                    numeroEmenda: formData?.numeroEmenda,
+                    parlamentar:
+                      formData?.autor ||
+                      formData?.parlamentar ||
+                      "Não informado",
+                    autor: formData?.autor || formData?.parlamentar,
+                    tipo:
+                      formData?.tipo || formData?.tipoEmenda || "Não informado",
+                    municipio: formData?.municipio,
+                    uf: formData?.uf,
+                    valorRecurso: stats.valorEmenda,
+                    saldoDisponivel: saldoDisponivel,
+                    programa:
+                      formData?.programa ||
+                      formData?.programaSaude ||
+                      formData?.objeto ||
+                      "Não informado",
+                  }}
+                  modoVisualizacao={modoVisualizacao === "visualizar"}
+                  titulo={
+                    modoVisualizacao === "editar"
+                      ? "Editar Despesa"
+                      : "Visualizar Despesa"
+                  }
+                  hideHeader={true} // 🆕 Esconder header redundante - modal já tem header azul
+                />
+              </div>
+            </div>
+          </div>,
+          document.body, // Renderiza direto no body, fora da hierarquia do form
+        )}
 
       {/* Planejamento */}
       <div style={styles.secao}>
@@ -525,8 +643,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           ]}
           loading={loading}
           error={null}
-          onEdit={() => {}}
-          onView={() => {}}
+          onEdit={handleEditarDespesa}
+          onView={handleVisualizarDespesa}
           onRecarregar={carregarDespesas}
           usuario={usuario}
           filtroInicial={{ emendaId }}
@@ -792,6 +910,64 @@ const styles = {
   emptyEmoji: { fontSize: 28, marginBottom: 8 },
   emptyTitle: { margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" },
   emptyText: { margin: "6px 0 0 0", fontSize: 13, color: "#475569" },
+
+  // 🆕 Estilos para formulário de edição em MODAL (position fixed - fora do form)
+  formularioEdicaoOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 9999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  formularioEdicaoModal: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    width: "100%",
+    maxWidth: 1200,
+    maxHeight: "90vh",
+    overflow: "auto",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+    border: "3px solid #4A90E2",
+  },
+  formularioEdicaoHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "20px 24px",
+    backgroundColor: "#4A90E2",
+    borderTopLeftRadius: 9,
+    borderTopRightRadius: 9,
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
+  },
+  formularioTitulo: {
+    margin: 0,
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  btnVoltar: {
+    backgroundColor: "#fff",
+    color: "#4A90E2",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: 6,
+    fontSize: 14,
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  formularioEdicaoContent: {
+    padding: 24,
+  },
 };
 
 const formStyles = {

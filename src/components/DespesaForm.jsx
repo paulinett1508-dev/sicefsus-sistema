@@ -59,6 +59,7 @@ const DespesaForm = ({
   subtitle = null,
   emendaId = null,
   onSuccess,
+  hideHeader = false, // 🆕 Nova prop para esconder header redundante no modal
 }) => {
   // ✅ HOOKS REUTILIZADOS
   const navigate = useNavigate();
@@ -519,15 +520,18 @@ const DespesaForm = ({
         </div>
       )}
 
-      <DespesaFormHeader
-        configModo={configModo}
-        titulo={titulo}
-        subtitle={subtitle}
-        despesaParaEditar={despesaParaEditar}
-        formData={formData}
-        modoVisualizacao={modoVisualizacao}
-        showSuccessMessage={showSuccessMessage}
-      />
+      {/* 🆕 Só renderizar header se não estiver escondido (modal já tem header) */}
+      {!hideHeader && (
+        <DespesaFormHeader
+          configModo={configModo}
+          titulo={titulo}
+          subtitle={subtitle}
+          despesaParaEditar={despesaParaEditar}
+          formData={formData}
+          modoVisualizacao={modoVisualizacao}
+          showSuccessMessage={showSuccessMessage}
+        />
+      )}
 
       <DespesaFormBanners
         userRole={userRole}

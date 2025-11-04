@@ -1,6 +1,7 @@
 // src/components/emenda/EmendaForm/sections/DespesasTab.jsx
 // ✅ Aba de Despesas COMPLETA - Reutiliza TODO o módulo Despesas existente
 // 🎯 Adaptado para funcionar dentro do contexto de uma emenda específica
+// 🔧 DEBUG: Adicionados logs extremos e prevenção de navegação
 
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -101,20 +102,28 @@ const DespesasTab = ({
     });
   }, [formData, emendaIdReal]);
 
-  // 🔄 CARREGAR DESPESAS DA EMENDA
+  // 📄 CARREGAR DESPESAS DA EMENDA
   useEffect(() => {
     carregarDespesas();
   }, [emendaId]);
 
-  // 🔍 DEBUG: Monitorar mudanças de view
+  // 🔍 DEBUG EXTREMO: Monitorar mudanças de view
   useEffect(() => {
-    console.log("📊 DespesasTab: currentView mudou para:", currentView);
-    if (despesaSelecionada) {
-      console.log("📝 Despesa selecionada:", {
-        id: despesaSelecionada.id,
-        discriminacao: despesaSelecionada.discriminacao,
-      });
-    }
+    console.log("=".repeat(70));
+    console.log("🎬 RENDER DespesasTab");
+    console.log("📍 currentView:", currentView);
+    console.log("📍 despesaSelecionada ID:", despesaSelecionada?.id);
+    console.log(
+      "📍 despesaSelecionada discriminacao:",
+      despesaSelecionada?.discriminacao,
+    );
+    console.log(
+      "📍 Vai renderizar:",
+      ["criar", "editar", "visualizar"].includes(currentView)
+        ? "🖊️ FORMULÁRIO"
+        : "📋 LISTAGEM",
+    );
+    console.log("=".repeat(70));
   }, [currentView, despesaSelecionada]);
 
   const carregarDespesas = async () => {
@@ -151,34 +160,75 @@ const DespesasTab = ({
     }
   };
 
-  // 🎯 HANDLERS DE NAVEGAÇÃO
-  const handleCriar = () => {
+  // 🎯 HANDLERS DE NAVEGAÇÃO COM DEBUG E PREVENÇÃO
+  const handleCriar = (e) => {
+    // PREVENIR PROPAGAÇÃO
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    console.log("➕ handleCriar CHAMADO");
     setDespesaSelecionada(null);
     setCurrentView("criar");
+    console.log("✅ currentView atualizado para: criar");
   };
 
-  const handleEditar = (despesa) => {
-    console.log("🔧 DespesasTab.handleEditar CHAMADO:", {
-      despesaId: despesa?.id,
-      despesaDiscriminacao: despesa?.discriminacao,
-      currentView: currentView,
+  const handleEditar = (despesa, e) => {
+    console.log("🔧🔧🔧 DespesasTab.handleEditar INICIADO 🔧🔧🔧");
+    console.log("📦 Despesa recebida:", {
+      id: despesa?.id,
+      discriminacao: despesa?.discriminacao,
+      fornecedor: despesa?.fornecedor,
     });
+    console.log("📍 currentView ANTES:", currentView);
+
+    // PREVENIR PROPAGAÇÃO E DEFAULT
+    if (e) {
+      console.log("🛑 Prevenindo propagação do evento");
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // PREVENIR NAVEGAÇÃO GLOBAL
+    if (window.event) {
+      console.log("🛑 Prevenindo window.event");
+      window.event.stopPropagation();
+      window.event.preventDefault();
+    }
+
+    // ATUALIZAR ESTADOS
+    console.log("📝 Atualizando despesaSelecionada...");
     setDespesaSelecionada(despesa);
+
+    console.log("📝 Atualizando currentView para 'editar'...");
     setCurrentView("editar");
-    console.log("✅ DespesasTab: State atualizado para 'editar'");
+
+    console.log("✅ DespesasTab.handleEditar CONCLUÍDO");
+    console.log("📍 currentView DEPOIS:", "editar");
   };
 
-  const handleVisualizar = (despesa) => {
+  const handleVisualizar = (despesa, e) => {
+    // PREVENIR PROPAGAÇÃO
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    console.log("👁️ handleVisualizar CHAMADO:", despesa?.id);
     setDespesaSelecionada(despesa);
     setCurrentView("visualizar");
   };
 
   const handleVoltar = () => {
+    console.log("⬅️ handleVoltar CHAMADO");
     setCurrentView("listagem");
     setDespesaSelecionada(null);
+    console.log("✅ Voltou para listagem");
   };
 
   const handleSalvarDespesa = async () => {
+    console.log("💾 handleSalvarDespesa CHAMADO");
     await carregarDespesas();
     handleVoltar();
     setToast({
@@ -234,8 +284,12 @@ const DespesasTab = ({
     );
   }
 
-  // 📝 RENDERIZAÇÃO: FORMULÁRIO DE DESPESA
+  // 🔍 RENDERIZAÇÃO: FORMULÁRIO DE DESPESA
   if (["criar", "editar", "visualizar"].includes(currentView)) {
+    console.log("🖊️ RENDERIZANDO FORMULÁRIO DE DESPESA");
+    console.log("📍 Modo:", currentView);
+    console.log("📦 Despesa selecionada:", despesaSelecionada?.id);
+
     return (
       <div style={styles.container}>
         <DespesaForm
@@ -270,6 +324,7 @@ const DespesasTab = ({
   }
 
   // 📊 RENDERIZAÇÃO: LISTAGEM DE DESPESAS
+  console.log("📋 RENDERIZANDO LISTAGEM DE DESPESAS");
   return (
     <div style={styles.container}>
       {/* Toast de feedback */}

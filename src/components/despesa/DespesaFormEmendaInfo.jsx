@@ -4,37 +4,59 @@
 import React from "react";
 
 const DespesaFormEmendaInfo = ({ emendaInfo }) => {
+  // 🆕 Garantir que todos os dados sejam encontrados com fallbacks
+  const parlamentar =
+    emendaInfo?.parlamentar || emendaInfo?.autor || "Não informado";
+  const numero =
+    emendaInfo?.numero || emendaInfo?.numeroEmenda || "Não informado";
+  const tipo = emendaInfo?.tipo || emendaInfo?.tipoEmenda || "Não informado";
+  const municipio = emendaInfo?.municipio || "Não informado";
+  const uf = emendaInfo?.uf || "";
+  const valorRecurso = emendaInfo?.valorRecurso || emendaInfo?.valor || 0;
+  const saldoDisponivel = emendaInfo?.saldoDisponivel ?? 0;
+  const programa =
+    emendaInfo?.programa ||
+    emendaInfo?.programaSaude ||
+    emendaInfo?.objeto ||
+    "Não informado";
+
   return (
     <div style={styles.emendaInfo}>
-      <h3 style={styles.emendaInfoTitle}>📄 Dados da Emenda Selecionada</h3>
+      <h3 style={styles.emendaInfoTitle}>📋 Dados da Emenda Selecionada</h3>
       <div style={styles.emendaInfoGrid}>
         <div style={styles.emendaInfoRow}>
-          <strong>Parlamentar:</strong> {emendaInfo.parlamentar}
+          <strong>Parlamentar:</strong> {parlamentar}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Número:</strong>{" "}
-          {emendaInfo.numero || emendaInfo.numeroEmenda}
+          <strong>Número:</strong> {numero}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Tipo:</strong> {emendaInfo.tipo || "Não informado"}
+          <strong>Tipo:</strong> {tipo}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Município:</strong> {emendaInfo.municipio}/{emendaInfo.uf}
+          <strong>Município:</strong> {municipio}
+          {uf ? `/${uf}` : ""}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Valor Total:</strong> R${" "}
-          {emendaInfo.valorRecurso?.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-          })}
+          <strong>Valor Total:</strong>{" "}
+          {typeof valorRecurso === "number"
+            ? valorRecurso.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })
+            : `R$ ${valorRecurso}`}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Saldo Disponível:</strong> R${" "}
-          {emendaInfo.saldoDisponivel?.toLocaleString("pt-BR", {
-            minimumFractionDigits: 2,
-          })}
+          <strong>Saldo Disponível:</strong>{" "}
+          {typeof saldoDisponivel === "number"
+            ? saldoDisponivel.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })
+            : `R$ ${saldoDisponivel}`}
         </div>
         <div style={styles.emendaInfoRow}>
-          <strong>Programa:</strong> {emendaInfo.programa}
+          <strong>Programa:</strong> {programa}
         </div>
       </div>
     </div>

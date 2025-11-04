@@ -295,7 +295,10 @@ export default function DespesasTable({
       <td style={styles.tdActions}>
         <div style={styles.actionsContainer}>
           <button
-            onClick={() => {
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               console.log("🖱️ BOTÃO EDITAR CLICADO (DespesasTable):", {
                 id: despesa.id,
                 discriminacao: despesa.discriminacao,
@@ -309,7 +312,12 @@ export default function DespesasTable({
             ✏️
           </button>
           <button
-            onClick={() => confirmarExclusao(despesa)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              confirmarExclusao(despesa);
+            }}
             style={styles.deleteButton}
             title="Excluir despesa"
             disabled={excluindo === despesa.id}
@@ -792,10 +800,10 @@ const styles = {
   },
 
   fornecedorCell: {
+    maxWidth: 150,
     fontWeight: "500",
     fontSize: 12,
     color: "#495057",
-    whiteSpace: "nowrap",
   },
 
   numeroCell: {

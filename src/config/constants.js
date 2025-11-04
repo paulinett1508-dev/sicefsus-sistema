@@ -1,6 +1,6 @@
 // src/config/constants.js
 // 🎯 Constantes centralizadas do SICEFSUS
-// ✅ Atualizado em: 21/10/2025
+// ✅ Atualizado em: 04/11/2025 - Separação de status
 
 // ========================================
 // 📋 PROGRAMAS DE SAÚDE (EMENDAS)
@@ -92,9 +92,19 @@ export const CATEGORIAS_DESPESAS = [
 ];
 
 // ========================================
-// 📈 STATUS DE DESPESAS
+// 📈 STATUS DE EXECUÇÃO ORÇAMENTÁRIA
 // ========================================
-export const STATUS_DESPESAS = [
+// ✅ NOVO: Status que indica a fase da execução orçamentária
+export const STATUS_EXECUCAO_DESPESA = [
+  { value: "PLANEJADA", label: "Planejada" },
+  { value: "EXECUTADA", label: "Executada" },
+];
+
+// ========================================
+// 💰 STATUS DE PAGAMENTO
+// ========================================
+// ✅ NOVO: Status que indica o andamento do pagamento
+export const STATUS_PAGAMENTO_DESPESA = [
   { value: "pendente", label: "Pendente" },
   { value: "empenhado", label: "Empenhado" },
   { value: "liquidado", label: "Liquidado" },

@@ -1,5 +1,6 @@
 // src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
 // ✅ Sincronizado com os campos mostrados nas imagens
+// ✅ ATUALIZADO 04/11/2025: Separação de status em despesas
 
 export const COLLECTIONS = {
   USERS: "usuarios", // Corrigido para usar a coleção correta
@@ -101,6 +102,7 @@ export const USER_SCHEMA = {
   lastLogin: null,
 };
 
+// ✅ ATUALIZADO 04/11/2025: Separação de status
 export const DESPESA_SCHEMA = {
   emendaId: "",
   descricao: "",
@@ -110,7 +112,11 @@ export const DESPESA_SCHEMA = {
   numeroNota: "",
   dataVencimento: null,
   dataPagamento: null,
-  status: "pendente",
+
+  // ✅ DOIS CAMPOS SEPARADOS:
+  status: "PLANEJADA", // Fase da execução orçamentária (PLANEJADA | EXECUTADA)
+  statusPagamento: "pendente", // Status de pagamento (pendente | empenhado | liquidado | pago | cancelado)
+
   observacoes: "",
   dataCriacao: null,
   dataModificacao: null,
