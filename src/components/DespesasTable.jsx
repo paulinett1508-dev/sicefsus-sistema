@@ -1,7 +1,8 @@
 // src/components/DespesasTable.jsx
 // ✅ OTIMIZADA: Foco em pagamentos por emenda
 // ✅ AGRUPAMENTO: Pagamentos organizados por emenda
-// ✅ CORRIGIDO: Badge "EXECUTADA" agora é verde
+// ✅ CORRIGIDO: Badge agora mostra "Objeto da Emenda" em vez de "N/A"
+// ✅ CORRIGIDO: Status diferenciado (Pago, Empenhado, etc.)
 
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -95,47 +96,70 @@ export default function DespesasTable({
     return `${numero} - ${parlamentar}`;
   }
 
-  // ✅ Obter tipo da emenda
-  function getTipoEmenda(emendaId) {
-    if (!emendas || !emendaId) return "-";
+  // ✅ CORREÇÃO: Obter objeto/custeio da emenda
+  function getObjetoEmenda(emendaId) {
+    if (!emendas || !emendaId) return "N/A";
     const emenda = emendas.find((e) => e.id === emendaId);
-    return emenda?.tipo || "-";
+
+    if (!emenda) return "N/A";
+
+    // Campo correto: tipoEmenda (ex: "Custeio PAP", "Custeio MAC", etc.)
+    return emenda.tipoEmenda || emenda.tipo || "N/A";
   }
 
-  // ✅ Cor do badge de tipo
-  function getTipoColor(tipo) {
+  // ✅ Cor do badge de tipo/objeto
+  function getObjetoColor(objeto) {
     const cores = {
-      Individual: "#007bff",
-      Bancada: "#28a745",
       "Custeio PAP": "#007bff",
       "Custeio MAC": "#28a745",
       "Investimento PAP": "#ffc107",
       "Investimento MAC": "#6f42c1",
       "Custeio PAP – Estadual": "#17a2b8",
       "Custeio MAC – Estadual": "#fd7e14",
+      Individual: "#007bff",
+      Bancada: "#28a745",
     };
-    return cores[tipo] || "#adb5bd";
+
+    // Se não encontrar cor específica, usa cinza
+    return cores[objeto] || "#6c757d";
   }
 
-  // =========================================================
-  // === 🎯 INÍCIO DA MODIFICAÇÃO: Corrigindo o Badge Cinza ===
-  // =========================================================
-  // ✅ Cor do status
+  // ✅ CORREÇÃO: Status com cores diferenciadas
   function getStatusColor(status) {
-    const statusLimpo = status ? status.toUpperCase() : "PENDENTE";
+    if (!status) return "#6c757d";
+
+    const statusLimpo = status.toUpperCase().trim();
+
     const cores = {
       PENDENTE: "#6c757d",
       EMPENHADO: "#007bff",
       LIQUIDADO: "#ffc107",
       PAGO: SUCCESS,
+      EXECUTADA: SUCCESS,
       CANCELADO: ERROR,
-      EXECUTADA: SUCCESS, // ✅ CORREÇÃO APLICADA
     };
+
     return cores[statusLimpo] || "#6c757d";
   }
-  // =========================================================
-  // === 🎯 FIM DA MODIFICAÇÃO: Corrigindo o Badge Cinza ===
-  // =========================================================
+
+  // ✅ CORREÇÃO: Formatar status para exibição
+  function formatarStatus(status) {
+    if (!status) return "Pendente";
+
+    // Se status for "EXECUTADA", mostrar "Pago"
+    const statusLimpo = status.toUpperCase().trim();
+
+    const statusMap = {
+      EXECUTADA: "Pago",
+      PAGO: "Pago",
+      EMPENHADO: "Empenhado",
+      LIQUIDADO: "Liquidado",
+      PENDENTE: "Pendente",
+      CANCELADO: "Cancelado",
+    };
+
+    return statusMap[statusLimpo] || status;
+  }
 
   // ✅ Excluir despesa
   async function handleExcluir(despesa) {
@@ -213,10 +237,12 @@ export default function DespesasTable({
           <span
             style={{
               ...styles.tipoBadge,
-              backgroundColor: getTipoColor(getTipoEmenda(despesa.emendaId)),
+              backgroundColor: getObjetoColor(
+                getObjetoEmenda(despesa.emendaId),
+              ),
             }}
           >
-            {getTipoEmenda(despesa.emendaId)}
+            {getObjetoEmenda(despesa.emendaId)}
           </span>
         </td>
       )}
@@ -236,7 +262,7 @@ export default function DespesasTable({
             backgroundColor: getStatusColor(despesa.status),
           }}
         >
-          {despesa.status || "pendente"}
+          {formatarStatus(despesa.status)}
         </span>
       </td>
       {modoVisualizacao === "detalhado" && (
@@ -353,154 +379,154 @@ export default function DespesasTable({
           </div>
         </div>
 
-        {/* 🆕 MODO AGRUPADO POR EMENDA */}
-        {modoAgrupamento === "agrupado" ? (
+        {loading ? (
+          <div style={styles.loadingContainer}>
+            <div style={styles.loadingSpinner}></div>
+            <p>Carregando despesas...</p>
+          </div>
+        ) : despesas.length === 0 ? (
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>💰</div>
+            <h3 style={styles.emptyTitle}>Nenhuma despesa cadastrada</h3>
+            <p style={styles.emptyText}>
+              Clique em "Nova Despesa" para adicionar registros
+            </p>
+          </div>
+        ) : (
           <>
-            {despesasAgrupadas.map((grupo, grupoIndex) => (
-              <div key={grupo.emenda.id} style={styles.grupoEmenda}>
-                {/* Header do Grupo */}
-                <div style={styles.grupoHeader}>
-                  <div style={styles.grupoInfo}>
-                    <span style={styles.grupoNumero}>
-                      Emenda {grupo.emenda.numero}
-                    </span>
-                    <span style={styles.grupoSeparator}>•</span>
-                    <span style={styles.grupoParlamentar}>
-                      {grupo.emenda.parlamentar || grupo.emenda.autor || "N/A"}
-                    </span>
-                    <span style={styles.grupoSeparator}>•</span>
-                    <span
-                      style={{
-                        ...styles.grupoTipo,
-                        backgroundColor: getTipoColor(grupo.emenda.tipo),
-                      }}
-                    >
-                      {grupo.emenda.tipo || "N/A"}
-                    </span>
-                  </div>
-                  <div style={styles.grupoStats}>
-                    <span style={styles.grupoQtd}>
-                      {grupo.despesas.length} pagamento(s)
-                    </span>
-                    <span style={styles.grupoSeparator}>•</span>
-                    <span style={styles.grupoTotal}>
-                      R${" "}
-                      {grupo.totalValor.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                </div>
+            {/* ============================= */}
+            {/* MODO: AGRUPADO POR EMENDA */}
+            {/* ============================= */}
+            {modoAgrupamento === "agrupado" ? (
+              <div style={styles.groupedContainer}>
+                {despesasAgrupadas.map((grupo, grupoIndex) => {
+                  const emenda = grupo.emenda;
+                  const despesasDoGrupo = grupo.despesas;
 
-                {/* Tabela do Grupo */}
+                  return (
+                    <div key={emenda.id} style={styles.emendaGroup}>
+                      {/* Header da Emenda */}
+                      <div style={styles.emendaHeader}>
+                        <div style={styles.emendaInfoHeader}>
+                          <h3 style={styles.emendaNumero}>
+                            Emenda {emenda.numero || "N/A"}
+                          </h3>
+                          <span style={styles.parlamentarText}>
+                            {emenda.parlamentar ||
+                              emenda.autor ||
+                              "DR. BENJAMIM"}
+                          </span>
+                          <span
+                            style={{
+                              ...styles.tipoBadgeHeader,
+                              backgroundColor: getObjetoColor(
+                                getObjetoEmenda(emenda.id),
+                              ),
+                            }}
+                          >
+                            {getObjetoEmenda(emenda.id)}
+                          </span>
+                        </div>
+                        <div style={styles.emendaStatsHeader}>
+                          <span style={styles.statLabel}>
+                            {despesasDoGrupo.length} pagamento(s)
+                          </span>
+                          <span style={styles.statValue}>
+                            R${" "}
+                            {grupo.totalValor.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Tabela de Despesas da Emenda */}
+                      <div style={styles.tableWrapper}>
+                        <table style={styles.table}>
+                          <thead>
+                            <tr style={styles.headerRow}>
+                              <th style={styles.th}>FORNECEDOR</th>
+                              <th style={styles.th}>VALOR</th>
+                              <th style={styles.th}>STATUS</th>
+                              {modoVisualizacao === "detalhado" && (
+                                <>
+                                  <th style={styles.th}>Nº CONTRATO</th>
+                                  <th style={styles.th}>DISCRIMINAÇÃO</th>
+                                </>
+                              )}
+                              <th style={styles.th}>Nº EMPENHO</th>
+                              <th style={styles.th}>Nº NF</th>
+                              <th style={styles.th}>DATA PGTO</th>
+                              <th style={{ ...styles.th, textAlign: "center" }}>
+                                AÇÕES
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {despesasDoGrupo.map((despesa, index) =>
+                              renderDespesaRow(despesa, index, false),
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* ============================= */
+              /* MODO: LISTA COMPLETA */
+              /* ============================= */
+              <div style={styles.tableWrapper}>
                 <table style={styles.table}>
                   <thead>
                     <tr style={styles.headerRow}>
-                      <th style={styles.th}>Fornecedor</th>
-                      <th style={styles.th}>Valor</th>
-                      <th style={styles.th}>Status</th>
+                      <th style={styles.th}>EMENDA</th>
+                      <th style={styles.th}>TIPO</th>
+                      <th style={styles.th}>FORNECEDOR</th>
+                      <th style={styles.th}>VALOR</th>
+                      <th style={styles.th}>STATUS</th>
                       {modoVisualizacao === "detalhado" && (
                         <>
-                          <th style={styles.th}>Nº Contrato</th>
-                          <th style={styles.th}>Discriminação</th>
+                          <th style={styles.th}>Nº CONTRATO</th>
+                          <th style={styles.th}>DISCRIMINAÇÃO</th>
                         </>
                       )}
-                      <th style={styles.th}>Nº Empenho</th>
+                      <th style={styles.th}>Nº EMPENHO</th>
                       <th style={styles.th}>Nº NF</th>
-                      <th style={styles.th}>Data Pgto</th>
-                      <th style={styles.th}>Ações</th>
+                      <th style={styles.th}>DATA PGTO</th>
+                      <th style={{ ...styles.th, textAlign: "center" }}>
+                        AÇÕES
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {grupo.despesas.map((despesa, index) =>
-                      renderDespesaRow(despesa, index, false),
+                    {despesas.map((despesa, index) =>
+                      renderDespesaRow(despesa, index, true),
                     )}
                   </tbody>
                 </table>
               </div>
-            ))}
+            )}
           </>
-        ) : (
-          /* MODO LISTA COMPLETA */
-          <table style={styles.table}>
-            <thead>
-              <tr style={styles.headerRow}>
-                <th style={styles.th}>Emenda</th>
-                <th style={styles.th}>Tipo</th>
-                <th style={styles.th}>Fornecedor</th>
-                <th style={styles.th}>Valor</th>
-                <th style={styles.th}>Status</th>
-                {modoVisualizacao === "detalhado" && (
-                  <>
-                    <th style={styles.th}>Nº Contrato</th>
-                    <th style={styles.th}>Discriminação</th>
-                  </>
-                )}
-                <th style={styles.th}>Nº Empenho</th>
-                <th style={styles.th}>Nº NF</th>
-                <th style={styles.th}>Data Pgto</th>
-                <th style={styles.th}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {despesas.map((despesa, index) =>
-                renderDespesaRow(despesa, index, true),
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {/* Estado Vazio */}
-        {despesas.length === 0 && (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>💰</div>
-            <h3 style={styles.emptyTitle}>Nenhum pagamento registrado</h3>
-            <p style={styles.emptyText}>
-              Clique em "Nova Despesa" para começar
-            </p>
-          </div>
         )}
       </div>
 
-      {/* Resumo Final */}
-      {despesas.length > 0 && (
-        <div style={styles.summarySection}>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Total de Pagamentos:</span>
-            <span style={styles.summaryValue}>{despesas.length}</span>
-          </div>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Emendas Vinculadas:</span>
-            <span style={styles.summaryValue}>
-              {new Set(despesas.map((d) => d.emendaId)).size}
-            </span>
-          </div>
-          <div style={styles.summaryCard}>
-            <span style={styles.summaryLabel}>Valor Total:</span>
-            <span style={styles.summaryValue}>
-              R${" "}
-              {despesas
-                .reduce((soma, d) => soma + (d.valor || 0), 0)
-                .toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Confirmação */}
+      {/* Modal de confirmação de exclusão */}
       {confirmExclusao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
               <span style={styles.modalIcon}>⚠️</span>
-              <h3 style={styles.modalTitle}>Excluir Pagamento</h3>
+              <h2 style={styles.modalTitle}>Confirmar Exclusão</h2>
             </div>
-
             <div style={styles.modalBody}>
               <div style={styles.despesaCard}>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Fornecedor:</span>
-                  <span style={styles.value}>{confirmExclusao.fornecedor}</span>
+                  <span style={styles.value}>
+                    {confirmExclusao.fornecedor || "-"}
+                  </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Valor:</span>
@@ -517,27 +543,18 @@ export default function DespesasTable({
                     {confirmExclusao.numeroEmpenho || "-"}
                   </span>
                 </div>
-                <div style={styles.infoRow}>
-                  <span style={styles.label}>Descrição:</span>
-                  <span style={styles.value}>
-                    {confirmExclusao.discriminacao || "-"}
-                  </span>
-                </div>
               </div>
-
               <div style={styles.warningMessage}>
-                <p>
-                  Esta ação não pode ser desfeita. O valor será devolvido ao
-                  saldo da emenda.
+                <p style={{ margin: 0, fontSize: 14 }}>
+                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será
+                  restaurado.
                 </p>
               </div>
             </div>
-
             <div style={styles.modalFooter}>
               <button
                 onClick={() => setConfirmExclusao(null)}
                 style={styles.cancelButton}
-                disabled={excluindo === confirmExclusao.id}
               >
                 Cancelar
               </button>
@@ -558,123 +575,147 @@ export default function DespesasTable({
   );
 }
 
-// ✅ Estilos otimizados
+// ========================================
+// ESTILOS
+// ========================================
 const styles = {
   container: {
     backgroundColor: WHITE,
     borderRadius: 12,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     overflow: "hidden",
-    margin: "0",
   },
 
   tableContainer: {
-    overflowX: "auto",
+    width: "100%",
   },
 
   viewToggleContainer: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: "16px",
-    padding: "12px",
+    padding: "16px 24px",
     backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #dee2e6",
+    borderBottom: "1px solid #e9ecef",
+    gap: 16,
     flexWrap: "wrap",
   },
 
   toggleGroup: {
     display: "flex",
-    gap: "8px",
+    gap: 8,
+    backgroundColor: WHITE,
+    borderRadius: 8,
+    padding: 4,
+    border: "1px solid #e9ecef",
   },
 
   toggleButton: {
     padding: "8px 16px",
-    borderWidth: "1px",
-    borderStyle: "solid",
-    borderColor: "#dee2e6",
-    borderRadius: "4px",
-    background: "white",
+    border: "none",
+    backgroundColor: "transparent",
     color: "#6c757d",
-    fontSize: "12px",
+    fontSize: 13,
     fontWeight: "500",
+    borderRadius: 6,
     cursor: "pointer",
     transition: "all 0.2s",
     whiteSpace: "nowrap",
   },
 
   toggleButtonActive: {
-    background: PRIMARY,
-    color: "white",
-    borderColor: PRIMARY,
+    backgroundColor: PRIMARY,
+    color: WHITE,
+    fontWeight: "600",
   },
 
-  // 🆕 Estilos para agrupamento
-  grupoEmenda: {
-    marginBottom: "24px",
-    border: "1px solid #e0e0e0",
-    borderRadius: "8px",
+  loadingContainer: {
+    padding: "60px 20px",
+    textAlign: "center",
+    color: "#666",
+  },
+
+  loadingSpinner: {
+    width: 40,
+    height: 40,
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #154360",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 20px",
+  },
+
+  groupedContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 24,
+    padding: 24,
+  },
+
+  emendaGroup: {
+    border: "1px solid #e9ecef",
+    borderRadius: 12,
     overflow: "hidden",
+    backgroundColor: WHITE,
   },
 
-  grupoHeader: {
+  emendaHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "16px 20px",
+    padding: "16px 24px",
     backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #dee2e6",
-    flexWrap: "wrap",
-    gap: "12px",
+    borderBottom: "2px solid #e9ecef",
   },
 
-  grupoInfo: {
+  emendaInfoHeader: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
-    flexWrap: "wrap",
+    gap: 12,
   },
 
-  grupoNumero: {
-    fontSize: "16px",
+  emendaNumero: {
+    fontSize: 16,
     fontWeight: "700",
     color: PRIMARY,
+    margin: 0,
   },
 
-  grupoParlamentar: {
-    fontSize: "14px",
-    color: "#495057",
-  },
-
-  grupoSeparator: {
-    color: "#adb5bd",
-  },
-
-  grupoTipo: {
-    fontSize: "11px",
-    fontWeight: "600",
-    padding: "4px 8px",
-    borderRadius: "4px",
-    color: "white",
-  },
-
-  grupoStats: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-  },
-
-  grupoQtd: {
-    fontSize: "13px",
+  parlamentarText: {
+    fontSize: 14,
     color: "#6c757d",
     fontWeight: "500",
   },
 
-  grupoTotal: {
-    fontSize: "16px",
+  tipoBadgeHeader: {
+    fontSize: "11px",
+    fontWeight: "600",
+    padding: "4px 10px",
+    borderRadius: "4px",
+    color: "white",
+  },
+
+  emendaStatsHeader: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: 4,
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: "#6c757d",
+    fontWeight: "500",
+  },
+
+  statValue: {
+    fontSize: 18,
     fontWeight: "700",
     color: SUCCESS,
-    fontFamily: "monospace",
+  },
+
+  tableWrapper: {
+    overflowX: "auto",
   },
 
   table: {
