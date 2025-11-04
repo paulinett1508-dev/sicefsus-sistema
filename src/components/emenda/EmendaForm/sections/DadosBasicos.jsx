@@ -154,8 +154,12 @@ const DadosBasicos = React.memo(
             </label>
             <select
               name="tipo"
-              value={formData.tipo || ""}
-              onChange={handleInputChange}
+              value={formData.tipo || formData.objetoEmenda || ""}
+              onChange={(e) => {
+                // Salvar em ambos os campos para compatibilidade
+                handleInputChange(e);
+                onChange({ target: { name: "objetoEmenda", value: e.target.value } });
+              }}
               style={{
                 ...styles.input,
                 ...(fieldErrors.tipo && styles.inputError),

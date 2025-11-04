@@ -519,6 +519,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               municipio: formData?.municipio,
               uf: formData?.uf,
               autor: formData?.autor,
+              // O objeto da emenda é buscado aqui
+              tipo: formData?.tipo,
             },
           ]}
           loading={loading}
