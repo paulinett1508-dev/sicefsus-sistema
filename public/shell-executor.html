@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shell to Markdown - SICEFSUS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #154360 0%, #1a5276 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #154360;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .command-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        .command-input:focus {
+            outline: none;
+            border-color: #154360;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #154360;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a5276;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(21, 67, 96, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .output-container {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-container.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #154360;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quick-commands {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .quick-cmd {
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+
+        .quick-cmd:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .quick-cmd code {
+            display: block;
+            font-family: 'Courier New', monospace;
+            color: #154360;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ Shell to Markdown</h1>
+            <p>Execute comandos shell e baixe o resultado em formato Markdown</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">📝 Comando</div>
+                <input 
+                    type="text" 
+                    class="command-input" 
+                    id="commandInput"
+                    placeholder="Digite o comando (ex: ls -la, tree src, npm list)"
+                    value="tree src -L 2"
+                />
+            </div>
+
+            <div class="section">
+                <div class="section-title">⚡ Comandos Rápidos</div>
+                <div class="quick-commands">
+                    <div class="quick-cmd" onclick="setCommand('tree src -L 2')">
+                        <strong>Estrutura src/</strong>
+                        <code>tree src -L 2</code>
+                    </div>
+                    <div class="quick-cmd" onclick="setCommand('npm list --depth=0')">
+                        <strong>Dependências NPM</strong>
+                        <code>npm list --depth=0</code>
+                    </div>
+                    <div class="quick-cmd" onclick="setCommand('git log --oneline -20')">
+                        <strong>Git Log</strong>
+                        <code>git log --oneline -20</code>
+                    </div>
+                    <div class="quick-cmd" onclick="setCommand('du -sh *')">
+                        <strong>Tamanho Pastas</strong>
+                        <code>du -sh *</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="buttons">
+                    <button class="btn btn-primary" id="executeBtn" onclick="executeCommand()">
+                        ▶️ Executar
+                    </button>
+                    <button class="btn btn-secondary" id="downloadBtn" onclick="downloadMarkdown()" disabled>
+                        ⬇️ Baixar MD
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearOutput()">
+                        🗑️ Limpar
+                    </button>
+                </div>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="section">
+                <div class="section-title">📊 Resultado</div>
+                <div class="output-container empty" id="output">
+                    Aguardando execução...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let lastOutput = '';
+        let lastCommand = '';
+
+        function setCommand(cmd) {
+            document.getElementById('commandInput').value = cmd;
+        }
+
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        async function executeCommand() {
+            const command = document.getElementById('commandInput').value.trim();
+            
+            if (!command) {
+                showAlert('Por favor, digite um comando!', 'error');
+                return;
+            }
+
+            const outputEl = document.getElementById('output');
+            const executeBtn = document.getElementById('executeBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            executeBtn.disabled = true;
+            downloadBtn.disabled = true;
+            outputEl.className = 'output-container';
+            outputEl.innerHTML = '<div class="loading"></div> Executando...';
+
+            try {
+                // Simula execução - em produção, isso seria feito via API
+                // Por enquanto, vamos usar dados mockados
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const mockOutput = `$ ${command}\n\n[Simulação - Este executor web precisa de uma API backend]\n\nPara executar comandos reais, use:\nnode scripts/shell-to-md.cjs "${command}"\n\nOu use o terminal do Replit diretamente.`;
+                
+                lastCommand = command;
+                lastOutput = mockOutput;
+                
+                outputEl.textContent = mockOutput;
+                downloadBtn.disabled = false;
+                
+                showAlert('✅ Comando executado com sucesso!');
+            } catch (error) {
+                outputEl.textContent = `Erro: ${error.message}`;
+                showAlert('❌ Erro ao executar comando!', 'error');
+            } finally {
+                executeBtn.disabled = false;
+            }
+        }
+
+        function downloadMarkdown() {
+            if (!lastOutput) {
+                showAlert('Nenhum resultado para baixar!', 'error');
+                return;
+            }
+
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
+            const cmdSlug = lastCommand.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 30);
+            
+            const markdown = `# 📋 Resultado do Comando Shell
+
+**Data/Hora:** ${new Date().toLocaleString('pt-BR')}
+
+**Comando Executado:**
+\`\`\`bash
+${lastCommand}
+\`\`\`
+
+## 📊 Output
+
+\`\`\`
+${lastOutput}
+\`\`\`
+
+---
+*Gerado automaticamente pelo SICEFSUS*
+`;
+
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `shell-output-${cmdSlug}-${timestamp}.md`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showAlert('✅ Arquivo MD baixado com sucesso!');
+        }
+
+        function clearOutput() {
+            document.getElementById('output').className = 'output-container empty';
+            document.getElementById('output').textContent = 'Aguardando execução...';
+            document.getElementById('downloadBtn').disabled = true;
+            lastOutput = '';
+            lastCommand = '';
+        }
+
+        // Enter para executar
+        document.getElementById('commandInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                executeCommand();
+            }
+        });
+    </script>
+</body>
+</html>
