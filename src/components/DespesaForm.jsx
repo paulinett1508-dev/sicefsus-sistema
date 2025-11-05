@@ -560,7 +560,6 @@ const DespesaForm = ({
             modoVisualizacao={modoVisualizacao}
             showSuccessMessage={showSuccessMessage}
           />
-
           <DespesaFormBanners
             userRole={userRole}
             userMunicipio={userMunicipio}
