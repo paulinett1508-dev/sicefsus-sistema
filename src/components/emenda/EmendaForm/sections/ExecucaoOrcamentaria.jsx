@@ -378,7 +378,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   despesaParaEditar={despesaEmEdicao}
                   emendaPreSelecionada={emendaId}
                   usuario={usuario}
-                  onVoltar={handleFecharFormulario}
+                  onCancelar={handleFecharFormulario}
                   onSuccess={handleSucessoFormulario}
                   modoVisualizacao={modoVisualizacao === "visualizar"}
                   hideHeader={true}

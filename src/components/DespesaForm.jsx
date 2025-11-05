@@ -3,6 +3,7 @@
 // Reutiliza componentes modulares existentes + hooks/utils existentes
 // 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
 // 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
+// ✅ ATUALIZADO 05/11/2025: Props corretas para DespesaFormEmendaInfo
 
 import React, {
   useState,
@@ -281,137 +282,52 @@ const DespesaForm = ({
 
   // ✅ MODO EDIÇÃO: Popular formulário com a despesa para editar
   useEffect(() => {
-    if (despesaParaEditar) {
+    if (despesaParaEditar && Object.keys(despesaParaEditar).length > 0) {
       setFormData((prev) => ({
         ...prev,
         ...despesaParaEditar,
-        dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
+        dataEmpenho: despesaParaEditar.dataEmpenho || "",
+        dataLiquidacao: despesaParaEditar.dataLiquidacao || "",
+        dataPagamento: despesaParaEditar.dataPagamento || "",
       }));
-    }
-  }, [despesaParaEditar]);
 
-  // ✅ Modo criar + emenda pré selecionada
-  useEffect(() => {
-    if (emendaPreSelecionada && emendaInfo && !despesaParaEditar) {
-      setFormData((prev) => ({
-        ...prev,
-        emendaId: emendaPreSelecionada,
-      }));
-    }
-  }, [emendaPreSelecionada, emendaInfo, despesaParaEditar]);
-
-  // ✅ HANDLER DE MUDANÇA SIMPLIFICADO
-  const handleInputChange = useCallback(
-    (e) => {
-      if (!isMountedRef.current) return;
-
-      const { name, value } = e.target;
-
-      if (name === "emendaId") {
-        setFormData((prev) => ({ ...prev, emendaId: value }));
-        carregarDadosEmenda(value);
-        return;
+      if (despesaParaEditar.emendaId) {
+        carregarDadosEmenda(despesaParaEditar.emendaId);
       }
-
-      if (name === "valor") {
-        handleValorChange(e, (valorFormatado, valorNumerico) => {
-          setFormData((prev) => ({
-            ...prev,
-            valor: valorFormatado,
-          }));
-
-          if (emendaInfoDinamica?.saldoDisponivel !== undefined) {
-            if (valorNumerico > emendaInfoDinamica.saldoDisponivel) {
-              setErrors((prev) => ({
-                ...prev,
-                valor: `Valor excede o saldo disponível (${formatarMoedaDisplay(
-                  emendaInfoDinamica.saldoDisponivel,
-                )})`,
-              }));
-            } else {
-              setErrors((prev) => {
-                const { valor, ...rest } = prev;
-                return rest;
-              });
-            }
-          }
-        });
-        return;
-      }
-
-      if (name === "dataPagamento") {
-        setFormData((prev) => ({
-          ...prev,
-          dataPagamento: value,
-          statusPagamento: value ? "pago" : "pendente",
-        }));
-        return;
-      }
-
-      setFormData((prev) => ({ ...prev, [name]: value }));
-
-      if (errors[name]) {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[name];
-          return newErrors;
-        });
-      }
-    },
-    [emendaInfoDinamica, errors, carregarDadosEmenda, handleValorChange],
-  );
-
-  // ✅ VALIDAÇÃO PRINCIPAL (submit)
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.emendaId) newErrors.emendaId = "Selecione uma emenda válida";
-    if (!formData.fornecedor.trim())
-      newErrors.fornecedor = "Fornecedor é obrigatório";
-    if (!formData.valor || parseValorMonetario(formData.valor) <= 0) {
-      newErrors.valor = "Valor inválido";
     }
-    if (!formData.numeroEmpenho.trim())
-      newErrors.numeroEmpenho = "Número do empenho é obrigatório";
-    if (!formData.numeroNota.trim())
-      newErrors.numeroNota = "Número da nota é obrigatório";
-    if (!formData.dataEmpenho)
-      newErrors.dataEmpenho = "Data do empenho é obrigatória";
-    if (!formData.dataLiquidacao)
-      newErrors.dataLiquidacao = "Data de liquidação é obrigatória";
-    if (!formData.dataPagamento)
-      newErrors.dataPagamento = "Data de pagamento é obrigatória";
-    if (!formData.acao) newErrors.acao = "Ação é obrigatória";
+  }, [despesaParaEditar, carregarDadosEmenda]);
 
-    const valorNumerico = parseValorMonetario(formData.valor);
-    if (
-      emendaInfoDinamica?.saldoDisponivel !== undefined &&
-      valorNumerico > emendaInfoDinamica.saldoDisponivel
-    ) {
-      newErrors.valor = `Valor excede o saldo disponível (${formatarMoedaDisplay(emendaInfoDinamica.saldoDisponivel)})`;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // ✅ HANDLER GENÉRICO PARA INPUTS
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
-  // Função auxiliar para determinar o status de execução
-  const determinarStatusExecucao = (data) => {
-    if (data.dataPagamento) {
-      return "EXECUTADA"; // Se possui data de pagamento, está executada
-    } else {
-      return "PLANEJADA"; // Caso contrário, permanece como planejada
-    }
+  // ✅ VALIDAÇÃO SIMPLES
+  const validarFormulario = () => {
+    const erros = {};
+
+    if (!formData.emendaId) erros.emendaId = "Selecione uma emenda";
+    if (!formData.fornecedor?.trim())
+      erros.fornecedor = "Fornecedor é obrigatório";
+    if (!formData.valor || parseFloat(formData.valor) <= 0)
+      erros.valor = "Valor deve ser maior que zero";
+
+    setErrors(erros);
+    return Object.keys(erros).length === 0;
   };
 
-  // ✅ SUBMIT (criar/editar)
+  // ✅ SUBMIT DO FORMULÁRIO
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!validarFormulario()) {
       setToast({
         show: true,
-        message: "⚠️ Corrija os erros do formulário",
+        message: "Corrija os erros antes de salvar",
         type: "error",
       });
       return;
@@ -421,24 +337,18 @@ const DespesaForm = ({
     setLoading(true);
 
     try {
-      const valorNumerico = parseValorMonetario(formData.valor);
-
       const dadosParaSalvar = {
         ...formData,
-        valor: valorNumerico, // Armazenar valor numérico para cálculos
-        usuarioCriacao: usuario.uid || usuario.id,
-        dataUltimaAtualizacao: serverTimestamp(),
-        status: determinarStatusExecucao(formData),
-        statusPagamento: formData.statusPagamento || "pendente",
+        municipio: userMunicipio,
+        uf: userUf,
+        usuarioId: usuario.uid,
+        atualizadoEm: serverTimestamp(),
         ...(despesaParaEditar
           ? {}
-          : {
-              dataCriacao: serverTimestamp(),
-              criadoPor: usuario.uid || usuario.id,
-            }),
+          : { criadoEm: serverTimestamp(), criadoPor: usuario.uid }),
       };
 
-      if (despesaParaEditar) {
+      if (despesaParaEditar?.id) {
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
         await updateDoc(despesaRef, dadosParaSalvar);
 
@@ -560,6 +470,7 @@ const DespesaForm = ({
             modoVisualizacao={modoVisualizacao}
             showSuccessMessage={showSuccessMessage}
           />
+
           <DespesaFormBanners
             userRole={userRole}
             userMunicipio={userMunicipio}
@@ -571,8 +482,14 @@ const DespesaForm = ({
         </>
       )}
 
+      {/* ✅ ATUALIZADO: Props corretas incluindo formData e handleInputChange */}
       {(emendaInfoDinamica || emendaInfo) && (
-        <DespesaFormEmendaInfo emendaInfo={emendaInfoDinamica || emendaInfo} />
+        <DespesaFormEmendaInfo
+          emendaInfo={emendaInfoDinamica || emendaInfo}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          modoVisualizacao={modoVisualizacao}
+        />
       )}
 
       <form onSubmit={handleSubmit} style={styles.form}>
