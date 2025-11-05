@@ -104,6 +104,16 @@ const DespesaPlanejadaForm = ({
     }
   };
 
+  // Verificar se o formulário está válido para habilitar o botão
+  const formularioValido = () => {
+    if (!emendaId) return false;
+    const v = parseValorMonetario(valor);
+    if (!modoCustomizado && !estrategia) return false;
+    if (modoCustomizado && !despesaCustomizada.trim()) return false;
+    if (!valor || v <= 0) return false;
+    return true;
+  };
+
   return (
     <div style={styles.cardFormInline}>
       <div style={styles.formInline}>
@@ -166,8 +176,18 @@ const DespesaPlanejadaForm = ({
           <button
             type="button"
             onClick={handleSalvarPlanejada}
-            disabled={salvando}
-            style={{ ...styles.btn, ...styles.btnPrimary }}
+            disabled={salvando || !formularioValido()}
+            style={{
+              ...styles.btn,
+              ...styles.btnPrimary,
+              opacity: salvando || !formularioValido() ? 0.5 : 1,
+              cursor: salvando || !formularioValido() ? "not-allowed" : "pointer",
+            }}
+            title={
+              !formularioValido()
+                ? "Preencha Natureza de Despesa e Valor para adicionar"
+                : "Adicionar despesa planejada"
+            }
           >
             {salvando ? "Salvando..." : "Adicionar"}
           </button>
@@ -499,7 +519,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       );
                       el?.focus();
                     }}
-                    style={{ ...styles.btn, ...styles.btnPrimary }}
+                    style={{
+                      ...styles.btn,
+                      ...styles.btnPrimary,
+                      opacity: 0.9,
+                    }}
                   >
                     ➕ Adicionar despesa
                   </button>
