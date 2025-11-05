@@ -548,27 +548,29 @@ const DespesaForm = ({
         </div>
       )}
 
-      {/* 🆕 Só renderizar header se não estiver escondido (modal já tem header) */}
+      {/* 🆕 Só renderizar header e banners se não estiver escondido (modal já tem header) */}
       {!hideHeader && (
-        <DespesaFormHeader
-          configModo={configModo}
-          titulo={titulo}
-          subtitle={subtitle}
-          despesaParaEditar={despesaParaEditar}
-          formData={formData}
-          modoVisualizacao={modoVisualizacao}
-          showSuccessMessage={showSuccessMessage}
-        />
-      )}
+        <>
+          <DespesaFormHeader
+            configModo={configModo}
+            titulo={titulo}
+            subtitle={subtitle}
+            despesaParaEditar={despesaParaEditar}
+            formData={formData}
+            modoVisualizacao={modoVisualizacao}
+            showSuccessMessage={showSuccessMessage}
+          />
 
-      <DespesaFormBanners
-        userRole={userRole}
-        userMunicipio={userMunicipio}
-        userUf={userUf}
-        emendas={emendas}
-        showSuccessMessage={showSuccessMessage}
-        configModo={configModo}
-      />
+          <DespesaFormBanners
+            userRole={userRole}
+            userMunicipio={userMunicipio}
+            userUf={userUf}
+            emendas={emendas}
+            showSuccessMessage={showSuccessMessage}
+            configModo={configModo}
+          />
+        </>
+      )}
 
       {(emendaInfoDinamica || emendaInfo) && (
         <DespesaFormEmendaInfo emendaInfo={emendaInfoDinamica || emendaInfo} />

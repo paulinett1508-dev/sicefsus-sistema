@@ -1,6 +1,6 @@
 // src/components/emenda/EmendaForm/sections/ExecutarDespesaModal.jsx
-// 🎯 MODAL PARA EXECUTAR DESPESA
-// ✅ CORRIGIDO: Validação de emenda antes de passar para componentes
+// 🎯 MODAL PARA EXECUTAR DESPESA PLANEJADA - VERSÃO CORRIGIDA
+// ✅ Seção "Dados Básicos da Despesa" com campos corretos
 
 import React, { useState, useEffect } from "react";
 import { addDoc, collection, deleteDoc, doc, getDoc } from "firebase/firestore";
@@ -10,106 +10,38 @@ import {
   parseValorMonetario,
 } from "../../../../utils/formatters";
 
-// ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
-// pega o primeiro valor existente entre várias chaves comuns
-const pick = (obj, keys) => {
-  if (!obj) return undefined;
-  for (const k of keys) {
-    const v = obj[k];
-    if (v !== undefined && v !== null && v !== "") return v;
-  }
-  return undefined;
-};
-
-// parse seguro de BRL -> número (usa fallback se vier string)
-const parseBRL = (v) => {
-  if (typeof v === "number") return v;
-  if (!v) return 0;
-  const s = String(v)
-    .replace(/\s/g, "")
-    .replace(/\./g, "") // remove separador de milhar
-    .replace(",", ".") // vírgula -> ponto
-    .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
-  const n = Number(s);
-  return Number.isFinite(n) ? n : 0;
-};
-
-// ✅ REUTILIZA COMPONENTES MODULARES EXISTENTES
-import DespesaFormBasicFields from "../../../despesa/DespesaFormBasicFields";
-import DespesaFormEmpenhoFields from "../../../despesa/DespesaFormEmpenhoFields";
-import DespesaFormDateFields from "../../../despesa/DespesaFormDateFields";
-import DespesaFormClassificacaoFuncional from "../../../despesa/DespesaFormClassificacaoFuncional";
-
 const ExecutarDespesaModal = ({
   isOpen,
   onClose,
-  despesa, // Despesa planejada (se vier de planejamento)
-  emendaId, // ID da emenda
+  despesa,
+  emendaId,
   saldoDisponivel,
   onSuccess,
 }) => {
-  // 🎯 ESTADO DO FORMULÁRIO (TODOS OS 33 CAMPOS)
   const [formData, setFormData] = useState({
+    // ✅ DADOS BÁSICOS DA DESPESA
     emendaId: emendaId || "",
-    estrategia: despesa?.estrategia || "",
-
-    // ✅ NATUREZA + VALOR
-    naturezaDespesa: despesa?.estrategia || "3.3.9.0.30 – Material de Despesa",
     valor: despesa?.valor || "",
-    discriminacao: despesa?.estrategia || "",
+    discriminacao: "", // ✅ VAZIO para usuário preencher
+    naturezaDespesa: despesa?.estrategia || despesa?.naturezaDespesa || "",
 
-    // ✅ EMPENHO
+    // Campos de execução
     numeroEmpenho: "",
     numeroNota: "",
     numeroContrato: "",
-
-    // ✅ DATAS
     dataEmpenho: "",
     dataLiquidacao: "",
     dataPagamento: "",
-
-    // ✅ CLASSIFICAÇÃO FUNCIONAL
-    acao: "",
-    classificacaoFuncional: "",
-    elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
-    fonteRecurso: "",
-    programaTrabalho: "",
-    planoInterno: "",
-    status: "EXECUTADA", // ✅ Status já EXECUTADA
-    categoria: "",
-
-    // ✅ FORNECEDOR (API CNPJ)
     cnpjFornecedor: "",
     fornecedor: "",
-    nomeFantasia: "",
-    enderecoFornecedor: "",
-    cidadeUf: "",
-    cep: "",
-    telefoneFornecedor: "",
-    emailFornecedor: "",
-    situacaoCadastral: "",
-
-    // ✅ METADADOS
-    contrapartida: 0,
-    percentualExecucao: 0,
-    etapaExecucao: "",
-    coordenadasGeograficas: "",
-    populacaoBeneficiada: "",
-    impactoSocial: "",
-    descricao: "",
-    observacoes: "",
-
-    // ✅ LOG
-    dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
+    acao: "",
   });
 
   const [errors, setErrors] = useState({});
   const [salvando, setSalvando] = useState(false);
-  const [naturezaAlterada, setNaturezaAlterada] = useState(false);
-  const naturezaOriginal = despesa?.estrategia || despesa?.naturezaDespesa;
   const [emendaInfo, setEmendaInfo] = useState(null);
+  const [valorAlterado, setValorAlterado] = useState(false);
 
-  // Carregar informações da emenda (para cabeçalho)
   useEffect(() => {
     const carregarEmenda = async () => {
       if (emendaId) {
@@ -126,41 +58,48 @@ const ExecutarDespesaModal = ({
     carregarEmenda();
   }, [emendaId]);
 
-  // Handlers
-  const handleInputChange = (e) => {
+  // ✅ Inicializar valor formatado quando despesa mudar
+  useEffect(() => {
+    if (despesa?.valor) {
+      const valorNum =
+        typeof despesa.valor === "number"
+          ? despesa.valor
+          : parseValorMonetario(despesa.valor);
+      setFormData((prev) => ({
+        ...prev,
+        valor: formatarMoedaInput(valorNum.toString()),
+      }));
+    }
+  }, [despesa]);
+
+  const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Confirma alteração de natureza se vier de planejada
-    if (
-      name === "naturezaDespesa" &&
-      naturezaOriginal &&
-      value !== naturezaOriginal
-    ) {
-      const confirmar = window.confirm(
-        `⚠️ ATENÇÃO: Você está alterando a Natureza de Despesa!\n\nNatureza Original:\n${naturezaOriginal}\n\nNova Natureza:\n${value}\n\nDeseja realmente alterar?`,
-      );
-      if (!confirmar) {
-        // Se cancelar, manter valor original
-        return;
+    // Alerta ao alterar valor
+    if (name === "valor") {
+      const valorOriginal =
+        typeof despesa?.valor === "number"
+          ? despesa.valor
+          : parseValorMonetario(despesa?.valor || "0");
+      const valorNovo = parseValorMonetario(value);
+
+      if (valorNovo !== valorOriginal && !valorAlterado) {
+        const confirmar = window.confirm(
+          `⚠️ ATENÇÃO: Você está alterando o valor da despesa!\n\n` +
+            `Valor Original: R$ ${valorOriginal.toFixed(2)}\n` +
+            `Novo Valor: R$ ${valorNovo.toFixed(2)}\n\n` +
+            `Deseja realmente alterar?`,
+        );
+
+        if (!confirmar) return;
+        setValorAlterado(true);
       }
 
-      setNaturezaAlterada(true);
-    }
-
-    // Formatação especial para valor monetário
-    if (name === "valor") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: formatarMoedaInput(value),
-      }));
+      setFormData((prev) => ({ ...prev, [name]: formatarMoedaInput(value) }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
-    // Limpar erro do campo
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -170,61 +109,57 @@ const ExecutarDespesaModal = ({
     }
   };
 
-  const validarFormulario = () => {
-    const novosErros = {};
+  const validar = () => {
+    const erros = {};
 
-    // Campos essenciais
-    if (!formData.discriminacao) novosErros.discriminacao = "Campo obrigatório";
+    // Validações obrigatórias
+    if (!formData.discriminacao?.trim())
+      erros.discriminacao = "Campo obrigatório";
     if (!formData.valor || parseValorMonetario(formData.valor) <= 0)
-      novosErros.valor = "Valor deve ser maior que zero";
+      erros.valor = "Valor deve ser maior que zero";
+    if (!formData.numeroEmpenho?.trim())
+      erros.numeroEmpenho = "Campo obrigatório";
+    if (!formData.numeroNota?.trim()) erros.numeroNota = "Campo obrigatório";
+    if (!formData.cnpjFornecedor?.trim())
+      erros.cnpjFornecedor = "Campo obrigatório";
 
-    // Limite por saldo
-    const valorDespesa = parseValorMonetario(formData.valor);
-    if (saldoDisponivel && valorDespesa > saldoDisponivel) {
-      novosErros.valor = `Saldo insuficiente. Disponível: R$ ${saldoDisponivel.toFixed(2)}`;
+    // Validação de saldo
+    const valorNum = parseValorMonetario(formData.valor);
+    if (valorNum > saldoDisponivel) {
+      erros.valor = `Saldo insuficiente. Disponível: R$ ${saldoDisponivel.toFixed(2)}`;
     }
 
-    // Execução requer dados fiscais/datas mínimos
-    if (!formData.numeroEmpenho) novosErros.numeroEmpenho = "Campo obrigatório";
-    if (!formData.numeroNota) novosErros.numeroNota = "Campo obrigatório";
-    if (!formData.dataEmpenho) novosErros.dataEmpenho = "Campo obrigatório";
-    if (!formData.dataLiquidacao)
-      novosErros.dataLiquidacao = "Campo obrigatório";
-    if (!formData.dataPagamento) novosErros.dataPagamento = "Campo obrigatório";
-    if (!formData.acao) novosErros.acao = "Campo obrigatório";
-    if (!formData.cnpjFornecedor)
-      novosErros.cnpjFornecedor = "Campo obrigatório";
-
-    setErrors(novosErros);
-    return Object.keys(novosErros).length === 0;
+    setErrors(erros);
+    return Object.keys(erros).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validarFormulario()) {
-      alert("❌ Preencha todos os campos obrigatórios");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validar()) {
+      alert("⚠️ Preencha todos os campos obrigatórios");
       return;
     }
 
     setSalvando(true);
     try {
-      const despesaData = {
+      // Criar despesa executada
+      await addDoc(collection(db, "despesas"), {
         ...formData,
         valor: parseValorMonetario(formData.valor),
         status: "EXECUTADA",
         criadaEm: new Date().toISOString(),
-      };
+      });
 
-      await addDoc(collection(db, "despesas"), despesaData);
-
-      // Se veio de uma despesa planejada, deletar a planejada
+      // Deletar despesa planejada
       if (despesa?.id) {
         await deleteDoc(doc(db, "despesas", despesa.id));
       }
 
       onSuccess?.();
     } catch (error) {
-      console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar despesa");
+      console.error("Erro:", error);
+      alert("Erro ao executar despesa");
     } finally {
       setSalvando(false);
     }
@@ -232,160 +167,319 @@ const ExecutarDespesaModal = ({
 
   if (!isOpen) return null;
 
-  // 🔒 Habilitar Confirmar Execução somente com info válida mínima
-  const canConfirm =
-    Boolean(formData.naturezaDespesa) &&
-    parseValorMonetario(formData.valor) > 0;
+  const valorOriginal =
+    typeof despesa?.valor === "number"
+      ? despesa.valor
+      : parseValorMonetario(despesa?.valor || "0");
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {/* 📋 HEADER */}
+        {/* HEADER AZUL */}
         <div style={styles.header}>
-          <h2 style={styles.title}>
-            {despesa
-              ? "▶️ Executar Despesa Planejada"
-              : "➕ Nova Despesa Executada"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            style={styles.closeButton}
-            disabled={salvando}
-          >
+          <h2 style={styles.title}>▶️ Executar Despesa Planejada</h2>
+          <button onClick={onClose} style={styles.closeBtn} disabled={salvando}>
             ✕
           </button>
         </div>
 
-        {/* 🧾 CABEÇALHO DA EMENDA */}
+        {/* INFO DA EMENDA (azul claro) */}
         {emendaInfo && (
           <div style={styles.emendaInfo}>
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Parlamentar:</span>
-              <span style={styles.infoValue}>
-                {emendaInfo.autor || emendaInfo.parlamentar}
-              </span>
-            </div>
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Número:</span>
-              <span style={styles.infoValue}>{emendaInfo.numero}</span>
-            </div>
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Município:</span>
-              <span style={styles.infoValue}>
-                {emendaInfo.municipio}/{emendaInfo.uf}
-              </span>
-            </div>
-            <div style={styles.infoItem}>
-              <span style={styles.infoLabel}>Saldo Disponível:</span>
-              <span
-                style={{
-                  ...styles.infoValue,
-                  color: "#27ae60",
-                  fontWeight: "bold",
-                }}
-              >
-                {saldoDisponivel.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* ⚠️ ALERTA DE SALDO */}
-        <div style={styles.alertaSaldo}>
-          <div style={styles.alertaIcon}>⚠️</div>
-          <div>
-            <strong>Atenção:</strong> Ao executar, o valor será descontado do
-            saldo disponível da emenda.
-          </div>
-        </div>
-
-        {/* ⚠️ ALERTA DE NATUREZA ALTERADA */}
-        {naturezaAlterada && (
-          <div style={styles.alertaNatureza}>
-            <div style={styles.alertaIcon}>🔄</div>
-            <div>
-              <strong>Natureza Alterada:</strong> A natureza de despesa foi
-              modificada em relação ao planejamento original.
+            <h3 style={styles.emendaTitle}>📊 Dados da Emenda Selecionada</h3>
+            <div style={styles.emendaGrid}>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Parlamentar:</span>
+                <span style={styles.emendaValue}>
+                  {emendaInfo.autor || emendaInfo.parlamentar}
+                </span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Número:</span>
+                <span style={styles.emendaValue}>{emendaInfo.numero}</span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Tipo:</span>
+                <span style={styles.emendaValue}>
+                  {emendaInfo.tipo || "Não informado"}
+                </span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Município:</span>
+                <span style={styles.emendaValue}>
+                  {emendaInfo.municipio}/{emendaInfo.uf}
+                </span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Valor Total:</span>
+                <span style={styles.emendaValue}>
+                  {(emendaInfo.valor || 0).toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Saldo Disponível:</span>
+                <span style={styles.saldoValue}>
+                  {saldoDisponivel.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                </span>
+              </div>
+              <div style={styles.emendaItem}>
+                <span style={styles.emendaLabel}>Programa:</span>
+                <span style={styles.emendaValue}>
+                  {emendaInfo.programa || "Não informado"}
+                </span>
+              </div>
             </div>
           </div>
         )}
 
-        {/* 📋 FORMULÁRIO COMPLETO */}
-        <div style={styles.formContent}>
-          {/* ✅ SEÇÃO 1: DADOS BÁSICOS */}
-          <DespesaFormBasicFields
-            formData={formData}
-            errors={errors}
-            emendas={emendaInfo ? [emendaInfo] : []}
-            emendaPreSelecionada={emendaId}
-            emendaInfo={emendaInfo}
-            userRole="admin"
-            userMunicipio=""
-            modoVisualizacao={false}
-            valorError={errors.valor}
-            handleInputChange={handleInputChange}
-          />
+        {/* FORMULÁRIO */}
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.formContent}>
+            {/* ✅ SEÇÃO: DADOS BÁSICOS DA DESPESA */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>📋 Dados Básicos da Despesa</h3>
 
-          {/* ✅ SEÇÃO 2: EMPENHO */}
-          <DespesaFormEmpenhoFields
-            formData={formData}
-            errors={errors}
-            modoVisualizacao={false}
-            handleInputChange={handleInputChange}
-          />
+              {/* Linha 1: Emenda (readonly) + Valor (editável) */}
+              <div style={styles.row}>
+                <div style={{ ...styles.field, flex: 2 }}>
+                  <label style={styles.label}>
+                    EMENDA *{" "}
+                    <span style={styles.readonlyTag}>(não editável)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={`${emendaInfo?.numero || emendaId} - ${emendaInfo?.municipio || ""}/${emendaInfo?.uf || ""}`}
+                    disabled
+                    style={{
+                      ...styles.input,
+                      backgroundColor: "#f8f9fa",
+                      cursor: "not-allowed",
+                      fontWeight: 600,
+                      color: "#495057",
+                    }}
+                  />
+                </div>
 
-          {/* ✅ SEÇÃO 3: DATAS */}
-          <DespesaFormDateFields
-            formData={formData}
-            errors={errors}
-            modoVisualizacao={false}
-            handleInputChange={handleInputChange}
-            emendaInfo={emendaInfo}
-          />
+                <div style={styles.field}>
+                  <label style={styles.label}>
+                    VALOR * <span style={styles.editableTag}>(editável)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="valor"
+                    value={formData.valor}
+                    onChange={handleChange}
+                    placeholder="R$ 0,00"
+                    style={{
+                      ...styles.input,
+                      backgroundColor: valorAlterado ? "#fff3cd" : "#fff",
+                      fontWeight: 700,
+                      fontSize: 16,
+                    }}
+                  />
+                  {errors.valor && (
+                    <span style={styles.error}>{errors.valor}</span>
+                  )}
+                  {valorAlterado && (
+                    <span style={styles.warning}>
+                      ⚠️ Valor alterado (Original: R$ {valorOriginal.toFixed(2)}
+                      )
+                    </span>
+                  )}
+                </div>
+              </div>
 
-          {/* ✅ SEÇÃO 4: CLASSIFICAÇÃO FUNCIONAL */}
-          <DespesaFormClassificacaoFuncional
-            formData={formData}
-            errors={errors}
-            modoVisualizacao={false}
-            handleInputChange={handleInputChange}
-          />
-        </div>
+              {/* Linha 2: Discriminação (editável em branco) */}
+              <div style={styles.row}>
+                <div style={{ ...styles.field, flex: 1 }}>
+                  <label style={styles.label}>
+                    DISCRIMINAÇÃO *{" "}
+                    <span style={styles.editableTag}>(preencher)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="discriminacao"
+                    value={formData.discriminacao}
+                    onChange={handleChange}
+                    placeholder="Digite a discriminação da despesa"
+                    style={{ ...styles.input, fontWeight: 500 }}
+                  />
+                  {errors.discriminacao && (
+                    <span style={styles.error}>{errors.discriminacao}</span>
+                  )}
+                </div>
+              </div>
+            </div>
 
-        {/* 📎 FOOTER */}
-        <div style={styles.footer}>
-          <button
-            type="button"
-            onClick={onClose}
-            style={styles.btnCancelar}
-            disabled={salvando}
-          >
-            Cancelar
-          </button>
+            {/* SEÇÃO: DADOS DO EMPENHO E NOTA FISCAL */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>
+                📋 Dados do Empenho e Nota Fiscal
+              </h3>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            style={{
-              ...styles.btnConfirmar,
-              opacity: salvando || !canConfirm ? 0.6 : 1,
-              cursor: salvando || !canConfirm ? "not-allowed" : "pointer",
-            }}
-            disabled={salvando || !canConfirm}
-          >
-            {salvando ? "⏳ Salvando..." : "✅ Confirmar Execução"}
-          </button>
-        </div>
+              <div style={styles.row}>
+                <div style={styles.field}>
+                  <label style={styles.label}>Nº DO EMPENHO *</label>
+                  <input
+                    type="text"
+                    name="numeroEmpenho"
+                    value={formData.numeroEmpenho}
+                    onChange={handleChange}
+                    placeholder="Ex: 2025NE000123"
+                    style={styles.input}
+                  />
+                  {errors.numeroEmpenho && (
+                    <span style={styles.error}>{errors.numeroEmpenho}</span>
+                  )}
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>
+                    Nº DA NOTA FISCAL *
+                    <span style={styles.infoIcon} title="Número da nota fiscal">
+                      ℹ️
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    name="numeroNota"
+                    value={formData.numeroNota}
+                    onChange={handleChange}
+                    placeholder="Ex: 12345"
+                    style={styles.input}
+                  />
+                  {errors.numeroNota && (
+                    <span style={styles.error}>{errors.numeroNota}</span>
+                  )}
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>Nº DO CONTRATO</label>
+                  <input
+                    type="text"
+                    name="numeroContrato"
+                    value={formData.numeroContrato}
+                    onChange={handleChange}
+                    placeholder="Ex: 2025CT000456"
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: DATAS DE EXECUÇÃO */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>📅 Datas de Execução</h3>
+
+              <div style={styles.row}>
+                <div style={styles.field}>
+                  <label style={styles.label}>DATA DO EMPENHO</label>
+                  <input
+                    type="date"
+                    name="dataEmpenho"
+                    value={formData.dataEmpenho}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>DATA DA LIQUIDAÇÃO</label>
+                  <input
+                    type="date"
+                    name="dataLiquidacao"
+                    value={formData.dataLiquidacao}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>DATA DO PAGAMENTO</label>
+                  <input
+                    type="date"
+                    name="dataPagamento"
+                    value={formData.dataPagamento}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: DADOS DO FORNECEDOR */}
+            <div style={styles.section}>
+              <h3 style={styles.sectionTitle}>🏢 Dados do Fornecedor</h3>
+
+              <div style={styles.row}>
+                <div style={styles.field}>
+                  <label style={styles.label}>CNPJ *</label>
+                  <input
+                    type="text"
+                    name="cnpjFornecedor"
+                    value={formData.cnpjFornecedor}
+                    onChange={handleChange}
+                    placeholder="00.000.000/0000-00"
+                    style={styles.input}
+                  />
+                  {errors.cnpjFornecedor && (
+                    <span style={styles.error}>{errors.cnpjFornecedor}</span>
+                  )}
+                </div>
+
+                <div style={{ ...styles.field, flex: 2 }}>
+                  <label style={styles.label}>FORNECEDOR</label>
+                  <input
+                    type="text"
+                    name="fornecedor"
+                    value={formData.fornecedor}
+                    onChange={handleChange}
+                    placeholder="Nome do fornecedor"
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.field}>
+                  <label style={styles.label}>AÇÃO</label>
+                  <input
+                    type="text"
+                    name="acao"
+                    value={formData.acao}
+                    onChange={handleChange}
+                    placeholder="Código da ação"
+                    style={styles.input}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div style={styles.footer}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={salvando}
+              style={styles.btnCancel}
+            >
+              Cancelar
+            </button>
+            <button type="submit" disabled={salvando} style={styles.btnConfirm}>
+              {salvando ? "⏳ Executando..." : "✅ Confirmar Execução"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-// 🎨 ESTILOS
 const styles = {
   overlay: {
     position: "fixed",
@@ -393,132 +487,215 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0,0,0,0.75)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 9999,
-    padding: "20px",
+    zIndex: 10000,
+    padding: 20,
   },
-
   modal: {
-    backgroundColor: "white",
-    borderRadius: "12px",
+    backgroundColor: "#fff",
+    borderRadius: 16,
     width: "100%",
-    maxWidth: "1200px",
+    maxWidth: 1000,
     maxHeight: "90vh",
     display: "flex",
     flexDirection: "column",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+    boxShadow: "0 25px 50px rgba(0,0,0,0.35)",
+    overflow: "hidden",
   },
-
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "24px",
-    borderBottom: "2px solid #e9ecef",
+    padding: "24px 28px",
+    backgroundColor: "#4A90E2",
+    borderBottom: "3px solid #357ABD",
   },
-
-  title: { margin: 0, fontSize: "22px", fontWeight: "bold", color: "#154360" },
-
-  closeButton: {
-    backgroundColor: "transparent",
-    border: "none",
-    fontSize: "24px",
-    color: "#6c757d",
+  title: {
+    margin: 0,
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  closeBtn: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    border: "2px solid rgba(255,255,255,0.3)",
+    fontSize: 24,
+    color: "#fff",
     cursor: "pointer",
-    padding: 0,
-    width: "32px",
-    height: "32px",
+    width: 36,
+    height: 36,
     borderRadius: "50%",
-    transition: "all 0.2s",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "bold",
   },
-
   emendaInfo: {
+    padding: "24px 28px",
+    backgroundColor: "#e3f2fd",
+    borderBottom: "2px solid #90caf9",
+  },
+  emendaTitle: {
+    margin: "0 0 16px 0",
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#1565c0",
+  },
+  emendaGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "12px",
-    padding: "16px 24px",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #dee2e6",
+    gap: 16,
   },
-  infoItem: { display: "flex", flexDirection: "column", gap: "4px" },
-  infoLabel: {
-    fontSize: "11px",
-    color: "#6c757d",
+  emendaItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  },
+  emendaLabel: {
+    fontSize: 11,
+    color: "#1565c0",
     textTransform: "uppercase",
-    fontWeight: "600",
+    fontWeight: 700,
+    letterSpacing: 0.5,
   },
-  infoValue: { fontSize: "14px", color: "#495057", fontWeight: "500" },
-
-  alertaSaldo: {
+  emendaValue: {
+    fontSize: 14,
+    color: "#0d47a1",
+    fontWeight: 600,
+  },
+  saldoValue: {
+    fontSize: 15,
+    color: "#27ae60",
+    fontWeight: 800,
+  },
+  form: {
     display: "flex",
-    gap: "12px",
-    alignItems: "flex-start",
-    padding: "16px 24px",
-    backgroundColor: "#fff3cd",
-    border: "1px solid #ffc107",
-    borderLeft: "4px solid #ffc107",
-    fontSize: "14px",
-    color: "#856404",
+    flexDirection: "column",
+    flex: 1,
+    overflow: "hidden",
   },
-
-  alertaNatureza: {
-    display: "flex",
-    gap: "12px",
-    alignItems: "flex-start",
-    padding: "16px 24px",
-    backgroundColor: "#d1ecf1",
-    border: "1px solid #17a2b8",
-    borderLeft: "4px solid #17a2b8",
-    fontSize: "14px",
-    color: "#0c5460",
-  },
-
-  alertaIcon: { fontSize: "20px", flexShrink: 0 },
-
   formContent: {
     flex: 1,
     overflowY: "auto",
-    padding: "24px",
+    padding: 28,
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
+    gap: 28,
+    backgroundColor: "#fafbfc",
   },
-
+  section: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    border: "1px solid #e9ecef",
+  },
+  sectionTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2c3e50",
+    paddingBottom: 12,
+    borderBottom: "2px solid #e9ecef",
+  },
+  row: {
+    display: "flex",
+    gap: 16,
+    flexWrap: "wrap",
+  },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    minWidth: 200,
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#495057",
+    marginBottom: 8,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  readonlyTag: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "#6c757d",
+    backgroundColor: "#f8f9fa",
+    padding: "2px 8px",
+    borderRadius: 4,
+    marginLeft: 6,
+    textTransform: "lowercase",
+  },
+  editableTag: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "#0d6efd",
+    backgroundColor: "#e7f1ff",
+    padding: "2px 8px",
+    borderRadius: 4,
+    marginLeft: 6,
+    textTransform: "lowercase",
+  },
+  infoIcon: {
+    marginLeft: 6,
+    cursor: "help",
+    fontSize: 14,
+    opacity: 0.6,
+  },
+  input: {
+    height: 44,
+    border: "1px solid #ced4da",
+    borderRadius: 8,
+    padding: "0 14px",
+    fontSize: 15,
+  },
+  error: {
+    color: "#dc3545",
+    fontSize: 12,
+    marginTop: 6,
+    fontWeight: 600,
+  },
+  warning: {
+    color: "#856404",
+    fontSize: 12,
+    marginTop: 6,
+    fontWeight: 600,
+  },
   footer: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "12px",
-    padding: "20px 24px",
-    borderTop: "2px solid #e9ecef",
+    gap: 14,
+    padding: "20px 28px",
+    borderTop: "3px solid #e9ecef",
     backgroundColor: "#f8f9fa",
   },
-
-  btnCancelar: {
+  btnCancel: {
     backgroundColor: "#6c757d",
-    color: "white",
+    color: "#fff",
     border: "none",
-    padding: "12px 24px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "600",
+    padding: "13px 28px",
+    borderRadius: 8,
+    fontSize: 15,
+    fontWeight: 600,
     cursor: "pointer",
-    transition: "all 0.2s",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
-
-  btnConfirmar: {
+  btnConfirm: {
     backgroundColor: "#28a745",
-    color: "white",
+    color: "#fff",
     border: "none",
-    padding: "12px 32px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    fontWeight: "600",
+    padding: "13px 36px",
+    borderRadius: 8,
+    fontSize: 15,
+    fontWeight: 700,
     cursor: "pointer",
-    transition: "all 0.2s",
-    boxShadow: "0 2px 4px rgba(40, 167, 69, 0.2)",
+    boxShadow: "0 4px 8px rgba(40,167,69,0.25)",
   },
 };
 

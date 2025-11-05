@@ -104,16 +104,6 @@ const DespesaPlanejadaForm = ({
     }
   };
 
-  // Verificar se o formulário está válido para habilitar o botão
-  const formularioValido = () => {
-    if (!emendaId) return false;
-    const v = parseValorMonetario(valor);
-    if (!modoCustomizado && !estrategia) return false;
-    if (modoCustomizado && !despesaCustomizada.trim()) return false;
-    if (!valor || v <= 0) return false;
-    return true;
-  };
-
   return (
     <div style={styles.cardFormInline}>
       <div style={styles.formInline}>
@@ -176,18 +166,14 @@ const DespesaPlanejadaForm = ({
           <button
             type="button"
             onClick={handleSalvarPlanejada}
-            disabled={salvando || !formularioValido()}
+            disabled={salvando}
             style={{
               ...styles.btn,
               ...styles.btnPrimary,
-              opacity: salvando || !formularioValido() ? 0.5 : 1,
-              cursor: salvando || !formularioValido() ? "not-allowed" : "pointer",
+              opacity: salvando ? 0.5 : 1,
+              cursor: salvando ? "not-allowed" : "pointer",
             }}
-            title={
-              !formularioValido()
-                ? "Preencha Natureza de Despesa e Valor para adicionar"
-                : "Adicionar despesa planejada"
-            }
+            title="Adicionar despesa planejada"
           >
             {salvando ? "Salvando..." : "Adicionar"}
           </button>
@@ -395,7 +381,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   onVoltar={handleFecharFormulario}
                   onSuccess={handleSucessoFormulario}
                   modoVisualizacao={modoVisualizacao === "visualizar"}
-                  ocultarHeader={true}
+                  hideHeader={true}
                   tituloCustomizado={
                     modoVisualizacao === "editar"
                       ? "Editar Despesa"
@@ -502,38 +488,33 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
               {despesasPlanejadas.length === 0 && (
                 <div style={styles.emptyState}>
-                  <div>
-                    <h4 style={styles.emptyTitle}>
-                      Nenhuma despesa planejada ainda
-                    </h4>
-                    <p style={styles.emptyText}>
-                      Adicione uma despesa informando a{" "}
-                      <strong>Natureza</strong> e o <strong>Valor</strong>. As
-                      despesas planejadas <em>não</em> consomem saldo.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const el = document.getElementById(
-                        "naturezaDespesaSelect",
-                      );
-                      el?.focus();
-                    }}
-                    disabled={!formularioValido()}
-                    style={{
-                      ...styles.btn,
-                      ...styles.btnPrimary,
-                      opacity: !formularioValido() ? 0.5 : 0.9,
-                      cursor: !formularioValido() ? "not-allowed" : "pointer",
-                    }}
-                    title={
-                      !formularioValido()
-                        ? "Preencha Natureza de Despesa e Valor para adicionar"
-                        : "Focar no campo de natureza de despesa"
-                    }
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 12 }}
                   >
-                    ➕ Adicionar despesa
-                  </button>
+                    <div style={styles.emptyEmoji}>📋</div>
+                    <div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
+                        <h4 style={styles.emptyTitle}>
+                          Nenhuma despesa planejada ainda
+                        </h4>
+                        <span
+                          style={styles.infoIcon}
+                          title="💡 As despesas planejadas NÃO consomem saldo. Use-as para organizar como pretende gastar a emenda antes de executar."
+                        >
+                          ℹ️
+                        </span>
+                      </div>
+                      <p style={styles.emptyText}>
+                        Comece adicionando uma despesa no formulário acima
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -743,6 +724,13 @@ const styles = {
     padding: "4px 12px",
     borderRadius: 999,
     fontSize: 12,
+  },
+  infoIcon: {
+    fontSize: 16,
+    cursor: "help",
+    opacity: 0.6,
+    transition: "opacity 0.2s",
+    userSelect: "none",
   },
   cardFormInline: {
     backgroundColor: "#f8fafc",
