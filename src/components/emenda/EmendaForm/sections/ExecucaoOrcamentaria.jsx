@@ -519,11 +519,18 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       );
                       el?.focus();
                     }}
+                    disabled={!formularioValido()}
                     style={{
                       ...styles.btn,
                       ...styles.btnPrimary,
-                      opacity: 0.9,
+                      opacity: !formularioValido() ? 0.5 : 0.9,
+                      cursor: !formularioValido() ? "not-allowed" : "pointer",
                     }}
+                    title={
+                      !formularioValido()
+                        ? "Preencha Natureza de Despesa e Valor para adicionar"
+                        : "Focar no campo de natureza de despesa"
+                    }
                   >
                     ➕ Adicionar despesa
                   </button>
