@@ -283,9 +283,13 @@ const DespesaForm = ({
   // ✅ MODO EDIÇÃO: Popular formulário com a despesa para editar
   useEffect(() => {
     if (despesaParaEditar && Object.keys(despesaParaEditar).length > 0) {
+      // 🔥 CRÍTICO: discriminacao sempre em branco ao editar
+      const { discriminacao, ...restoDosDados } = despesaParaEditar;
+
       setFormData((prev) => ({
         ...prev,
-        ...despesaParaEditar,
+        ...restoDosDados,
+        discriminacao: "", // 🔥 SEMPRE EM BRANCO
         dataEmpenho: despesaParaEditar.dataEmpenho || "",
         dataLiquidacao: despesaParaEditar.dataLiquidacao || "",
         dataPagamento: despesaParaEditar.dataPagamento || "",
@@ -359,14 +363,18 @@ const DespesaForm = ({
         });
 
         if (onSuccess && typeof onSuccess === "function") {
+          console.log("✅ DespesaForm: Chamando onSuccess (não vai navegar)");
           setTimeout(() => {
             onSuccess();
           }, 800);
-        } else {
-          setTimeout(() => {
-            navigate("/despesas", { replace: true });
-          }, 800);
+          return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
         }
+
+        // Só navega se NÃO tiver onSuccess
+        console.log("⚠️ DespesaForm: Sem onSuccess, navegando para /despesas");
+        setTimeout(() => {
+          navigate("/despesas", { replace: true });
+        }, 800);
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
 
@@ -377,14 +385,18 @@ const DespesaForm = ({
         });
 
         if (onSuccess && typeof onSuccess === "function") {
+          console.log("✅ DespesaForm: Chamando onSuccess (não vai navegar)");
           setTimeout(() => {
             onSuccess();
           }, 800);
-        } else {
-          setTimeout(() => {
-            navigate("/despesas", { replace: true });
-          }, 800);
+          return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
         }
+
+        // Só navega se NÃO tiver onSuccess
+        console.log("⚠️ DespesaForm: Sem onSuccess, navegando para /despesas");
+        setTimeout(() => {
+          navigate("/despesas", { replace: true });
+        }, 800);
       }
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);

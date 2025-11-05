@@ -176,14 +176,14 @@ const DespesaFormBasicFields = ({
           </small>
         </div>
 
-        {/* DISCRIMINAÇÃO (1 linha normal - SEMPRE EM BRANCO) */}
+        {/* DISCRIMINAÇÃO (1 linha normal - EDITÁVEL) */}
         <div style={{ ...styles.fieldGroup, gridColumn: "1 / -1" }}>
           <label style={styles.label}>Discriminação</label>
           <input
             type="text"
             name="discriminacao"
             placeholder="Descreva brevemente a despesa"
-            value=""
+            value={formData.discriminacao || ""}
             onChange={handleInputChange}
             disabled={modoVisualizacao}
             style={styles.input}

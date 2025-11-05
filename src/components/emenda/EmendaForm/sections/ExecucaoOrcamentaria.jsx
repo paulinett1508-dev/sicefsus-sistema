@@ -315,22 +315,25 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   };
 
   const handleFecharFormulario = () => {
-    console.log("🔙 Fechando formulário de despesa");
+    console.log("🔒 handleFecharFormulario CHAMADO");
     setDespesaEmEdicao(null);
     setModoVisualizacao(null);
+    console.log(
+      "✅ Modal fechado - despesaEmEdicao=null, modoVisualizacao=null",
+    );
   };
 
   const handleSucessoFormulario = () => {
-    console.log("✅ Despesa atualizada - Fechando formulário");
-    
-    // 1. Primeiro fecha o formulário/modal
-    setDespesaEmEdicao(null);
-    setModoVisualizacao(null);
-    
-    // 2. Depois recarrega as despesas com um delay maior para garantir que o modal fecha
+    console.log("✅ handleSucessoFormulario CHAMADO - Iniciando fechamento");
+
+    // Fechar formulário IMEDIATAMENTE
+    handleFecharFormulario();
+
+    // Recarregar despesas após pequeno delay
     setTimeout(() => {
+      console.log("🔄 Recarregando despesas...");
       carregarDespesas();
-    }, 300);
+    }, 100);
   };
 
   const handleExecutarDespesa = (despesa) => setModal({ abrir: true, despesa });
