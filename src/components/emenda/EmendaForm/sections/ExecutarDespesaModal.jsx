@@ -25,15 +25,16 @@ const pick = (obj, keys) => {
 const parseBRL = (v) => {
   if (typeof v === "number") return v;
   if (!v) return 0;
-  const s = String(v).replace(/\s/g, "")
-    .replace(/\./g, "")       // remove separador de milhar
-    .replace(",", ".")        // vírgula -> ponto
+  const s = String(v)
+    .replace(/\s/g, "")
+    .replace(/\./g, "") // remove separador de milhar
+    .replace(",", ".") // vírgula -> ponto
     .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
   const n = Number(s);
   return Number.isFinite(n) ? n : 0;
 };
 
-// ✅ REUTILIZAR COMPONENTES MODULARES EXISTENTES
+// ✅ REUTILIZA COMPONENTES MODULARES EXISTENTES
 import DespesaFormBasicFields from "../../../despesa/DespesaFormBasicFields";
 import DespesaFormEmpenhoFields from "../../../despesa/DespesaFormEmpenhoFields";
 import DespesaFormDateFields from "../../../despesa/DespesaFormDateFields";
@@ -49,13 +50,12 @@ const ExecutarDespesaModal = ({
 }) => {
   // 🎯 ESTADO DO FORMULÁRIO (TODOS OS 33 CAMPOS)
   const [formData, setFormData] = useState({
-    // ✅ DADOS PRÉ-PREENCHIDOS (se vier de despesa planejada)
     emendaId: emendaId || "",
     estrategia: despesa?.estrategia || "",
+
+    // ✅ NATUREZA + VALOR
     naturezaDespesa: despesa?.estrategia || "3.3.9.0.30 – Material de Despesa",
     valor: despesa?.valor || "",
-
-    // ✅ DADOS BÁSICOS
     discriminacao: despesa?.estrategia || "",
 
     // ✅ EMPENHO
@@ -89,7 +89,7 @@ const ExecutarDespesaModal = ({
     emailFornecedor: "",
     situacaoCadastral: "",
 
-    // ✅ AVANÇADOS
+    // ✅ METADADOS
     contrapartida: 0,
     percentualExecucao: 0,
     etapaExecucao: "",
@@ -99,19 +99,17 @@ const ExecutarDespesaModal = ({
     descricao: "",
     observacoes: "",
 
+    // ✅ LOG
     dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
   });
 
   const [errors, setErrors] = useState({});
   const [salvando, setSalvando] = useState(false);
   const [naturezaAlterada, setNaturezaAlterada] = useState(false);
-
-  // ✅ Detectar alteração de natureza original
   const naturezaOriginal = despesa?.estrategia || despesa?.naturezaDespesa;
-
-  // ✅ Carregar dados da emenda (se necessário)
   const [emendaInfo, setEmendaInfo] = useState(null);
 
+  // Carregar informações da emenda (para cabeçalho)
   useEffect(() => {
     const carregarEmenda = async () => {
       if (emendaId) {
@@ -128,23 +126,19 @@ const ExecutarDespesaModal = ({
     carregarEmenda();
   }, [emendaId]);
 
-  // ✅ HANDLERS
+  // Handlers
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // ✅ ALERTA: Detectar alteração de natureza de despesa
+    // Confirma alteração de natureza se vier de planejada
     if (
       name === "naturezaDespesa" &&
       naturezaOriginal &&
       value !== naturezaOriginal
     ) {
       const confirmar = window.confirm(
-        `⚠️ ATENÇÃO: Você está alterando a Natureza de Despesa!\n\n` +
-          `Natureza Original:\n${naturezaOriginal}\n\n` +
-          `Nova Natureza:\n${value}\n\n` +
-          `Deseja realmente alterar?`,
+        `⚠️ ATENÇÃO: Você está alterando a Natureza de Despesa!\n\nNatureza Original:\n${naturezaOriginal}\n\nNova Natureza:\n${value}\n\nDeseja realmente alterar?`,
       );
-
       if (!confirmar) {
         // Se cancelar, manter valor original
         return;
@@ -176,33 +170,27 @@ const ExecutarDespesaModal = ({
     }
   };
 
-  // ✅ VALIDAÇÃO
   const validarFormulario = () => {
     const novosErros = {};
 
-    // Campos obrigatórios básicos
+    // Campos essenciais
     if (!formData.discriminacao) novosErros.discriminacao = "Campo obrigatório";
-    if (!formData.valor || parseValorMonetario(formData.valor) <= 0) {
+    if (!formData.valor || parseValorMonetario(formData.valor) <= 0)
       novosErros.valor = "Valor deve ser maior que zero";
-    }
 
-    // Validar saldo
+    // Limite por saldo
     const valorDespesa = parseValorMonetario(formData.valor);
-    if (valorDespesa > saldoDisponivel) {
+    if (saldoDisponivel && valorDespesa > saldoDisponivel) {
       novosErros.valor = `Saldo insuficiente. Disponível: R$ ${saldoDisponivel.toFixed(2)}`;
     }
 
-    // Empenho e NF
+    // Execução requer dados fiscais/datas mínimos
     if (!formData.numeroEmpenho) novosErros.numeroEmpenho = "Campo obrigatório";
     if (!formData.numeroNota) novosErros.numeroNota = "Campo obrigatório";
-
-    // Datas
     if (!formData.dataEmpenho) novosErros.dataEmpenho = "Campo obrigatório";
     if (!formData.dataLiquidacao)
       novosErros.dataLiquidacao = "Campo obrigatório";
     if (!formData.dataPagamento) novosErros.dataPagamento = "Campo obrigatório";
-
-    // Classificação
     if (!formData.acao) novosErros.acao = "Campo obrigatório";
     if (!formData.cnpjFornecedor)
       novosErros.cnpjFornecedor = "Campo obrigatório";
@@ -211,7 +199,6 @@ const ExecutarDespesaModal = ({
     return Object.keys(novosErros).length === 0;
   };
 
-  // ✅ SUBMIT
   const handleSubmit = async () => {
     if (!validarFormulario()) {
       alert("❌ Preencha todos os campos obrigatórios");
@@ -219,7 +206,6 @@ const ExecutarDespesaModal = ({
     }
 
     setSalvando(true);
-
     try {
       const despesaData = {
         ...formData,
@@ -228,7 +214,6 @@ const ExecutarDespesaModal = ({
         criadaEm: new Date().toISOString(),
       };
 
-      // Salvar nova despesa executada
       await addDoc(collection(db, "despesas"), despesaData);
 
       // Se veio de uma despesa planejada, deletar a planejada
@@ -246,6 +231,11 @@ const ExecutarDespesaModal = ({
   };
 
   if (!isOpen) return null;
+
+  // 🔒 Habilitar Confirmar Execução somente com info válida mínima
+  const canConfirm =
+    Boolean(formData.naturezaDespesa) &&
+    parseValorMonetario(formData.valor) > 0;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -267,7 +257,7 @@ const ExecutarDespesaModal = ({
           </button>
         </div>
 
-        {/* 📊 INFO DA EMENDA */}
+        {/* 🧾 CABEÇALHO DA EMENDA */}
         {emendaInfo && (
           <div style={styles.emendaInfo}>
             <div style={styles.infoItem}>
@@ -340,7 +330,7 @@ const ExecutarDespesaModal = ({
             handleInputChange={handleInputChange}
           />
 
-          {/* ✅ SEÇÃO 2: EMPENHO E NF */}
+          {/* ✅ SEÇÃO 2: EMPENHO */}
           <DespesaFormEmpenhoFields
             formData={formData}
             errors={errors}
@@ -357,7 +347,7 @@ const ExecutarDespesaModal = ({
             emendaInfo={emendaInfo}
           />
 
-          {/* ✅ SEÇÃO 4: CLASSIFICAÇÃO FUNCIONAL (851 linhas!) */}
+          {/* ✅ SEÇÃO 4: CLASSIFICAÇÃO FUNCIONAL */}
           <DespesaFormClassificacaoFuncional
             formData={formData}
             errors={errors}
@@ -366,7 +356,7 @@ const ExecutarDespesaModal = ({
           />
         </div>
 
-        {/* 🎬 FOOTER - AÇÕES */}
+        {/* 📎 FOOTER */}
         <div style={styles.footer}>
           <button
             type="button"
@@ -376,11 +366,16 @@ const ExecutarDespesaModal = ({
           >
             Cancelar
           </button>
+
           <button
             type="button"
             onClick={handleSubmit}
-            style={styles.btnConfirmar}
-            disabled={salvando}
+            style={{
+              ...styles.btnConfirmar,
+              opacity: salvando || !canConfirm ? 0.6 : 1,
+              cursor: salvando || !canConfirm ? "not-allowed" : "pointer",
+            }}
+            disabled={salvando || !canConfirm}
           >
             {salvando ? "⏳ Salvando..." : "✅ Confirmar Execução"}
           </button>
@@ -425,12 +420,7 @@ const styles = {
     borderBottom: "2px solid #e9ecef",
   },
 
-  title: {
-    margin: 0,
-    fontSize: "22px",
-    fontWeight: "bold",
-    color: "#154360",
-  },
+  title: { margin: 0, fontSize: "22px", fontWeight: "bold", color: "#154360" },
 
   closeButton: {
     backgroundColor: "transparent",
@@ -438,7 +428,7 @@ const styles = {
     fontSize: "24px",
     color: "#6c757d",
     cursor: "pointer",
-    padding: "0",
+    padding: 0,
     width: "32px",
     height: "32px",
     borderRadius: "50%",
@@ -453,25 +443,14 @@ const styles = {
     backgroundColor: "#f8f9fa",
     borderBottom: "1px solid #dee2e6",
   },
-
-  infoItem: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-  },
-
+  infoItem: { display: "flex", flexDirection: "column", gap: "4px" },
   infoLabel: {
     fontSize: "11px",
     color: "#6c757d",
     textTransform: "uppercase",
     fontWeight: "600",
   },
-
-  infoValue: {
-    fontSize: "14px",
-    color: "#495057",
-    fontWeight: "500",
-  },
+  infoValue: { fontSize: "14px", color: "#495057", fontWeight: "500" },
 
   alertaSaldo: {
     display: "flex",
@@ -497,10 +476,7 @@ const styles = {
     color: "#0c5460",
   },
 
-  alertaIcon: {
-    fontSize: "20px",
-    flexShrink: 0,
-  },
+  alertaIcon: { fontSize: "20px", flexShrink: 0 },
 
   formContent: {
     flex: 1,

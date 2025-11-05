@@ -1,289 +1,300 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ CORRIGIDO: Validação de array de emendas para evitar erro de undefined
+// 🎯 Campos básicos da despesa (Natureza, Valor, Fornecedor, Discriminação, Emenda)
+// 🔒 "Adicionar" e "+ Adicionar despesa" desativados até Natureza selecionada e Valor > 0
+// 🧩 Integra com DespesaForm via props: formData, errors, emendas, handleInputChange, etc.
 
-import React from "react";
+import React, { useMemo } from "react";
+import {
+  parseValorMonetario,
+  formatarMoedaInput,
+} from "../../utils/formatters";
+import { NATUREZAS_DESPESA } from "../../config/constants";
+
+const toNaturezaOptions = (lista) => {
+  try {
+    if (Array.isArray(lista)) {
+      return lista.map((n) => ({
+        value: n.value ?? n.codigo ?? String(n),
+        label: n.label ?? n.nome ?? String(n),
+      }));
+    }
+  } catch (_) {}
+  return [
+    { value: "3.3.9.0.30", label: "3.3.9.0.30 – Material de Despesa" },
+    {
+      value: "3.3.90.30.99",
+      label: "3.3.90.30.99 – Outros Materiais de Consumo",
+    },
+  ];
+};
 
 const DespesaFormBasicFields = ({
   formData,
-  errors,
-  emendas = [], // ✅ DEFAULT: Array vazio para evitar undefined
-  emendaPreSelecionada,
-  emendaInfo,
+  errors = {},
+  emendas = [],
+  emendaPreSelecionada = null,
+  emendaInfo = null,
   userRole,
   userMunicipio,
-  modoVisualizacao,
+  modoVisualizacao = false,
   valorError,
   handleInputChange,
+  onAdicionar, // opcional; se não vier, o botão apenas respeita disabled
+  showEmptyCTA = false, // se true, exibe o card de estado vazio com "+ Adicionar despesa"
 }) => {
-  // ✅ Função para formatar valor para exibição
-  const formatarValorExibicao = (valor) => {
-    if (!valor) return "0,00";
+  // Opções normalizadas de Natureza
+  const naturezaOptions = useMemo(
+    () => toNaturezaOptions(NATUREZAS_DESPESA),
+    [],
+  );
 
-    // Se já está formatado (tem vírgula), retorna como está
-    if (typeof valor === "string" && valor.includes(",")) {
-      return valor;
+  // Gate para habilitar botões
+  const naturezaSelecionada =
+    formData?.naturezaDespesa || formData?.natureza || "";
+  const valorNum = parseValorMonetario(formData?.valor);
+  const canAdd = Boolean(naturezaSelecionada) && valorNum > 0;
+
+  // Handlers locais (encaminham para o pai)
+  const onValorChange = (e) => {
+    // Delega a formatação ao handler pai (que já usa useMoedaFormatting/formatters)
+    // Caso queira forçar máscara aqui, descomente a linha abaixo e passe "valorFormatado"
+    // e.target.value = formatarMoedaInput(e.target.value);
+    handleInputChange?.(e);
+  };
+
+  const onAdicionarClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canAdd) return;
+    if (typeof onAdicionar === "function") {
+      onAdicionar({
+        naturezaDespesa: naturezaSelecionada,
+        valor: valorNum,
+        fornecedor: formData?.fornecedor || "",
+        discriminacao: formData?.discriminacao || formData?.descricao || "",
+      });
     }
-
-    // Se é número, formata
-    const numero = typeof valor === "number" ? valor : parseFloat(valor);
-    if (isNaN(numero)) return "0,00";
-
-    return numero.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
   };
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📋</span>
-        Dados Básicos da Despesa
-      </legend>
-
-      <div style={styles.formGrid}>
-        {/* Emenda */}
-        <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Emenda *</label>
-          {emendaPreSelecionada && emendaInfo ? (
-            <>
-              <input
-                type="text"
-                value={`${emendaInfo.autor || emendaInfo.parlamentar} - ${emendaInfo.numero || emendaInfo.numeroEmenda}`}
-                style={styles.inputReadonly}
-                readOnly
-              />
-              <input type="hidden" name="emendaId" value={formData.emendaId} />
-              <span style={styles.helpText}>
-                Emenda pré-selecionada do fluxo anterior
-              </span>
-            </>
-          ) : (
-            <>
-              <select
-                name="emendaId"
-                value={formData.emendaId}
-                onChange={handleInputChange}
-                style={
-                  errors.emendaId
-                    ? { ...styles.select, borderColor: "#dc3545" }
-                    : styles.select
-                }
-                disabled={modoVisualizacao}
-                required
-              >
-                <option value="">
-                  {emendas.length === 0
-                    ? userRole === "operador"
-                      ? `Nenhuma emenda encontrada para ${userMunicipio}`
-                      : "Carregando emendas..."
-                    : "Selecione uma emenda..."}
-                </option>
-                {/* ✅ VALIDAÇÃO: Verifica se emendas existe e é array antes de fazer map */}
-                {Array.isArray(emendas) &&
-                  emendas.map((emenda) => (
-                    <option key={emenda.id} value={emenda.id}>
-                      {emenda.autor || emenda.parlamentar} -{" "}
-                      {emenda.numero || emenda.numeroEmenda} -{" "}
-                      {emenda.municipio}/{emenda.uf}
-                    </option>
-                  ))}
-              </select>
-              {userRole === "operador" && emendas.length === 0 && (
-                <span style={styles.helpText}>
-                  ⚠️ Nenhuma emenda disponível para o município{" "}
-                  {userMunicipio || "não cadastrado"}. Entre em contato com o
-                  administrador.
-                </span>
-              )}
-            </>
-          )}
-          {errors.emendaId && (
-            <span style={styles.errorText}>{errors.emendaId}</span>
-          )}
-        </div>
-
-        {/* Valor */}
-        <div style={styles.formGroup}>
-          <label style={styles.labelRequired}>Valor *</label>
-          <div style={styles.inputMonetarioContainer}>
-            <span style={styles.moedaPrefix}>R$</span>
-            <input
-              type="text"
-              name="valor"
-              value={formatarValorExibicao(formData.valor)}
+    <section style={styles.section}>
+      {/* EMENDA (quando não pré-selecionada) */}
+      {!emendaPreSelecionada && (
+        <div style={styles.row}>
+          <div style={styles.field}>
+            <label style={styles.label}>Emenda</label>
+            <select
+              name="emendaId"
+              value={formData?.emendaId || ""}
               onChange={handleInputChange}
-              style={
-                errors.valor || valorError
-                  ? { ...styles.inputMonetario, borderColor: "#dc3545" }
-                  : styles.inputMonetario
-              }
-              readOnly={modoVisualizacao}
-              placeholder="0,00"
-              required
-            />
+              disabled={modoVisualizacao}
+              style={styles.select}
+            >
+              <option value="">Selecione…</option>
+              {emendas.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.numero || e.numeroEmenda || e.id} —{" "}
+                  {e.parlamentar || e.autor || ""}
+                </option>
+              ))}
+            </select>
+            {errors?.emendaId && (
+              <span style={styles.error}>{errors.emendaId}</span>
+            )}
           </div>
-          {(errors.valor || valorError) && (
-            <span style={styles.errorText}>{errors.valor || valorError}</span>
-          )}
-          <span style={styles.helpText}>
-            Digite o valor normalmente. Formatação automática.
-          </span>
         </div>
+      )}
 
-        {/* Discriminação */}
-        <div style={styles.formGroupDiscriminacao}>
-          <label style={styles.labelRequired}>Discriminação *</label>
+      {/* FORNECEDOR */}
+      <div style={styles.row}>
+        <div style={{ ...styles.field, flex: 2 }}>
+          <label style={styles.label}>Fornecedor</label>
           <input
             type="text"
-            name="discriminacao"
-            value={formData.discriminacao}
+            name="fornecedor"
+            placeholder="Razão Social / Nome Fantasia"
+            value={formData?.fornecedor || ""}
             onChange={handleInputChange}
-            style={errors.discriminacao ? styles.inputError : styles.input}
-            readOnly={modoVisualizacao}
-            placeholder="Descreva a discriminação da despesa..."
-            required
+            disabled={modoVisualizacao}
+            style={styles.input}
           />
-          {errors.discriminacao && (
-            <span style={styles.errorText}>{errors.discriminacao}</span>
+          {errors?.fornecedor && (
+            <span style={styles.error}>{errors.fornecedor}</span>
           )}
         </div>
       </div>
-    </fieldset>
+
+      {/* DISCRIMINAÇÃO */}
+      <div style={styles.row}>
+        <div style={{ ...styles.field, flex: 2 }}>
+          <label style={styles.label}>Discriminação</label>
+          <input
+            type="text"
+            name="discriminacao"
+            placeholder="Descreva brevemente a despesa"
+            value={formData?.discriminacao || formData?.descricao || ""}
+            onChange={handleInputChange}
+            disabled={modoVisualizacao}
+            style={styles.input}
+          />
+          {errors?.discriminacao && (
+            <span style={styles.error}>{errors.discriminacao}</span>
+          )}
+        </div>
+      </div>
+
+      {/* NATUREZA + VALOR + (BOTÃO ADICIONAR) */}
+      <div style={styles.row}>
+        <div style={{ ...styles.field, flex: 2 }}>
+          <label style={styles.label}>Natureza da Despesa</label>
+          <select
+            name="naturezaDespesa"
+            value={naturezaSelecionada}
+            onChange={handleInputChange}
+            disabled={modoVisualizacao}
+            style={styles.select}
+          >
+            <option value="">Selecione…</option>
+            {naturezaOptions.map((opt) => (
+              <option key={opt.value} value={opt.label || opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ ...styles.field, flex: 1 }}>
+          <label style={styles.label}>Valor</label>
+          <input
+            type="text"
+            name="valor"
+            placeholder="R$ 0,00"
+            value={formData?.valor || ""}
+            onChange={onValorChange}
+            disabled={modoVisualizacao}
+            style={styles.input}
+          />
+          {(errors?.valor || valorError) && (
+            <span style={styles.error}>{errors?.valor || valorError}</span>
+          )}
+        </div>
+
+        {/* BOTÃO ADICIONAR (LINHA) */}
+        <div style={{ ...styles.field, flex: 0 }}>
+          <label style={styles.label}>&nbsp;</label>
+          <button
+            type="button"
+            onClick={onAdicionarClick}
+            disabled={!canAdd || modoVisualizacao}
+            style={{
+              ...styles.addButton,
+              opacity: !canAdd || modoVisualizacao ? 0.6 : 1,
+              cursor: !canAdd || modoVisualizacao ? "not-allowed" : "pointer",
+            }}
+            title={
+              canAdd ? "Adicionar" : "Selecione Natureza e informe Valor > 0"
+            }
+          >
+            Adicionar
+          </button>
+        </div>
+      </div>
+
+      {/* CTA de estado vazio (opcional) */}
+      {showEmptyCTA && (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>🧾</div>
+          <div style={styles.emptyTextBox}>
+            <h4 style={styles.emptyTitle}>Nenhuma despesa adicionada</h4>
+            <p style={styles.emptyText}>
+              Preencha <strong>Natureza</strong> e <strong>Valor</strong> para
+              habilitar o botão.
+            </p>
+            <button
+              type="button"
+              onClick={onAdicionarClick}
+              disabled={!canAdd || modoVisualizacao}
+              style={{
+                ...styles.addBigButton,
+                opacity: !canAdd || modoVisualizacao ? 0.6 : 1,
+                cursor: !canAdd || modoVisualizacao ? "not-allowed" : "pointer",
+              }}
+              title={
+                canAdd
+                  ? "+ Adicionar despesa"
+                  : "Selecione Natureza e informe Valor > 0"
+              }
+            >
+              + Adicionar despesa
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 
 const styles = {
-  fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
-    padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-  legend: {
-    background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  legendIcon: {
-    fontSize: "18px",
-  },
-  formGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "20px",
-    marginBottom: "20px",
-  },
-  formGroupFull: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    gridColumn: "1 / -1",
-  },
-  formGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  formGroupDiscriminacao: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-    gridColumn: "span 2",
-  },
-  labelRequired: {
-    fontWeight: "bold",
-    color: "#333",
-    fontSize: "14px",
+  section: { display: "flex", flexDirection: "column", gap: 16 },
+  row: { display: "flex", gap: 16, flexWrap: "wrap" },
+  field: { display: "flex", flexDirection: "column", minWidth: 220 },
+  label: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#495057",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   input: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    boxSizing: "border-box",
-  },
-  inputError: {
-    padding: "12px",
-    border: "2px solid #dc3545",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    boxSizing: "border-box",
-  },
-  inputReadonly: {
-    padding: "12px",
-    border: "2px solid #2196f3",
-    borderRadius: "6px",
-    fontSize: "14px",
-    backgroundColor: "#e3f2fd",
-    color: "#1565c0",
-    fontWeight: "bold",
-    boxSizing: "border-box",
+    height: 40,
+    border: "1px solid #ced4da",
+    borderRadius: 8,
+    padding: "0 12px",
+    fontSize: 14,
   },
   select: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    backgroundColor: "white",
-    cursor: "pointer",
-    boxSizing: "border-box",
+    height: 40,
+    border: "1px solid #ced4da",
+    borderRadius: 8,
+    padding: "0 8px",
+    fontSize: 14,
+    minWidth: 260,
   },
-  textarea: {
-    padding: "12px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    resize: "vertical",
-    minHeight: "100px",
-    fontFamily: "Arial, sans-serif",
-    boxSizing: "border-box",
+  error: { color: "#E74C3C", fontSize: 12, marginTop: 6 },
+
+  addButton: {
+    height: 40,
+    border: "none",
+    backgroundColor: "#1c7ed6",
+    color: "#fff",
+    borderRadius: 8,
+    padding: "0 16px",
+    fontWeight: 700,
   },
-  errorText: {
-    color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "5px",
-  },
-  helpText: {
-    color: "#6c757d",
-    fontSize: "12px",
-    marginTop: "5px",
-  },
-  inputMonetarioContainer: {
+
+  emptyState: {
     display: "flex",
     alignItems: "center",
-    position: "relative",
+    gap: 16,
+    padding: 16,
+    background: "#f8f9fa",
+    border: "1px dashed #ced4da",
+    borderRadius: 12,
   },
-  moedaPrefix: {
-    position: "absolute",
-    left: "12px",
-    color: "#495057",
-    fontWeight: "bold",
-    fontSize: "14px",
-    zIndex: 1,
-  },
-  inputMonetario: {
-    padding: "12px 12px 12px 35px",
-    border: "2px solid #dee2e6",
-    borderRadius: "6px",
-    fontSize: "14px",
-    transition: "border-color 0.3s ease",
-    backgroundColor: "white",
-    boxSizing: "border-box",
-    width: "100%",
-    fontWeight: "500",
+  emptyIcon: { fontSize: 28 },
+  emptyTextBox: { display: "flex", alignItems: "center", gap: 12 },
+  emptyTitle: { margin: 0, fontSize: 14, color: "#495057", fontWeight: 700 },
+  emptyText: { margin: 0, fontSize: 13, color: "#6c757d" },
+
+  addBigButton: {
+    height: 40,
+    border: "none",
+    backgroundColor: "#2f9e44",
+    color: "#fff",
+    borderRadius: 8,
+    padding: "0 16px",
+    fontWeight: 700,
   },
 };
 

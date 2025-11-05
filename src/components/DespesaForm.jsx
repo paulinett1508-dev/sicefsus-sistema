@@ -27,7 +27,6 @@ import {
 import { db } from "../firebase/firebaseConfig";
 
 // ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
-// pega o primeiro valor existente entre várias chaves comuns
 const pick = (obj, keys) => {
   if (!obj) return undefined;
   for (const k of keys) {
@@ -41,9 +40,10 @@ const pick = (obj, keys) => {
 const parseBRL = (v) => {
   if (typeof v === "number") return v;
   if (!v) return 0;
-  const s = String(v).replace(/\s/g, "")
-    .replace(/\./g, "")       // remove separador de milhar
-    .replace(",", ".")        // vírgula -> ponto
+  const s = String(v)
+    .replace(/\s/g, "")
+    .replace(/\./g, "") // remove separador de milhar
+    .replace(",", ".") // vírgula -> ponto
     .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
   const n = Number(s);
   return Number.isFinite(n) ? n : 0;
@@ -59,14 +59,13 @@ import DespesaFormDateFields from "./despesa/DespesaFormDateFields";
 import DespesaFormClassificacaoFuncional from "./despesa/DespesaFormClassificacaoFuncional"; // ✅ NOVO COMPONENTE UNIFICADO
 
 // ✅ HOOKS E UTILS EXISTENTES REUTILIZADOS
-import DespesaFormActions from "./despesa/DespesaFormActions";
 import Toast from "./Toast";
+import LoadingOverlay from "./LoadingOverlay";
 import {
   useMoedaFormatting,
   parseValorMonetario,
   formatarMoedaDisplay,
 } from "../utils/formatters";
-import LoadingOverlay from "./LoadingOverlay";
 
 const DespesaForm = ({
   usuario,
@@ -94,8 +93,7 @@ const DespesaForm = ({
   const userMunicipio = usuario?.municipio;
   const userUf = usuario?.uf;
 
-  // ✅ ESTADOS SIMPLIFICADOS - REMOVIDOS centroCusto e dotacaoOrcamentaria
-  // ✅ ADICIONADOS: nomeFantasia e situacaoCadastral para API CNPJ
+  // ✅ ESTADO DO FORMULÁRIO (ESSENCIAL)
   const [formData, setFormData] = useState({
     emendaId: emendaPreSelecionada || emendaId || "",
     discriminacao: "",
@@ -112,10 +110,10 @@ const DespesaForm = ({
     categoria: "",
     descricao: "",
     observacoes: "",
-    status: "PLANEJADA", // Inicia como planejada
-    statusPagamento: "pendente", // Pagamento pendente
-    naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // ✅ VALOR PRÉ-DEFINIDO
-    elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // ✅ VALOR PRÉ-DEFINIDO
+    status: "PLANEJADA",
+    statusPagamento: "pendente",
+    naturezaDespesa: "3.3.9.0.30 – Material de Despesa",
+    elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
     fonteRecurso: "",
     programaTrabalho: "",
     planoInterno: "",
@@ -172,8 +170,7 @@ const DespesaForm = ({
         setEmendas([]);
         setToast({
           show: true,
-          message:
-            "Configuração de usuário incompleta. Entre em contato com o administrador.",
+          message: "Configuração de usuário incompleta.",
           type: "error",
         });
         return;
@@ -184,11 +181,9 @@ const DespesaForm = ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      console.log(`✅ Emendas carregadas: ${emendasData.length}`);
       setEmendas(emendasData);
     } catch (error) {
-      console.error("❌ Erro ao carregar emendas:", error);
+      console.error("Erro ao carregar emendas:", error);
       setToast({
         show: true,
         message: "Erro ao carregar emendas disponíveis",
@@ -197,16 +192,10 @@ const DespesaForm = ({
     }
   }, [userRole, userMunicipio]);
 
-  // ✅ FUNÇÃO para buscar dados da emenda selecionada:
+  // ✅ CARREGAR INFORMAÇÕES DA EMENDA + SALDO/EXECUÇÃO
   const carregarDadosEmenda = useCallback(async (emendaId) => {
-    if (!emendaId) {
-      setEmendaInfoDinamica(null);
-      return;
-    }
-
+    setLoading(true);
     try {
-      console.log("🔍 Buscando dados da emenda:", emendaId);
-
       const emendaRef = doc(db, "emendas", emendaId);
       const emendaDoc = await getDoc(emendaRef);
 
@@ -238,24 +227,25 @@ const DespesaForm = ({
               : 0,
         };
 
+        setEmendaData(emendaCompleta);
         setEmendaInfoDinamica(emendaCompleta);
-        console.log("✅ Dados da emenda carregados:", emendaCompleta);
       } else {
-        console.warn("⚠️ Emenda não encontrada:", emendaId);
+        setEmendaData(null);
         setEmendaInfoDinamica(null);
       }
     } catch (error) {
-      console.error("❌ Erro ao carregar dados da emenda:", error);
+      console.error("Erro ao carregar dados da emenda:", error);
       setToast({
         show: true,
         message: "Erro ao carregar informações da emenda",
         type: "error",
       });
-      setEmendaInfoDinamica(null);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  // ✅ EFFECTS SIMPLIFICADOS
+  // ✅ SETUP/UNMOUNT
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
@@ -263,7 +253,7 @@ const DespesaForm = ({
     };
   }, []);
 
-  // ✅ useEffect para monitorar mudanças na emenda selecionada:
+  // ✅ SINCRONIZAR EMENDA PRE-SELECIONADA
   useEffect(() => {
     if (emendaPreSelecionada && emendaInfo) {
       setEmendaInfoDinamica(emendaInfo);
@@ -282,12 +272,14 @@ const DespesaForm = ({
     carregarDadosEmenda,
   ]);
 
+  // ✅ CARREGAR EMENDAS NA PRIMEIRA VEZ (se necessário)
   useEffect(() => {
     if (emendas.length === 0 && !emendaPreSelecionada) {
       carregarEmendas();
     }
   }, [emendas.length, emendaPreSelecionada, carregarEmendas]);
 
+  // ✅ MODO EDIÇÃO: Popular formulário com a despesa para editar
   useEffect(() => {
     if (despesaParaEditar) {
       setFormData((prev) => ({
@@ -298,6 +290,7 @@ const DespesaForm = ({
     }
   }, [despesaParaEditar]);
 
+  // ✅ Modo criar + emenda pré selecionada
   useEffect(() => {
     if (emendaPreSelecionada && emendaInfo && !despesaParaEditar) {
       setFormData((prev) => ({
@@ -331,7 +324,9 @@ const DespesaForm = ({
             if (valorNumerico > emendaInfoDinamica.saldoDisponivel) {
               setErrors((prev) => ({
                 ...prev,
-                valor: `Valor excede o saldo disponível (${formatarMoedaDisplay(emendaInfoDinamica.saldoDisponivel)})`,
+                valor: `Valor excede o saldo disponível (${formatarMoedaDisplay(
+                  emendaInfoDinamica.saldoDisponivel,
+                )})`,
               }));
             } else {
               setErrors((prev) => {
@@ -344,12 +339,11 @@ const DespesaForm = ({
         return;
       }
 
-      // Lógica para atualizar statusPagamento ao mudar dataPagamento
       if (name === "dataPagamento") {
         setFormData((prev) => ({
           ...prev,
           dataPagamento: value,
-          statusPagamento: value ? "pago" : "pendente", // Define como pago se houver data, senão pendente
+          statusPagamento: value ? "pago" : "pendente",
         }));
         return;
       }
@@ -358,21 +352,16 @@ const DespesaForm = ({
 
       if (errors[name]) {
         setErrors((prev) => {
-          const { [name]: removed, ...rest } = prev;
-          return rest;
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
         });
       }
     },
-    [
-      handleValorChange,
-      emendaInfoDinamica,
-      errors,
-      carregarDadosEmenda,
-      isMountedRef,
-    ],
+    [emendaInfoDinamica, errors, carregarDadosEmenda, handleValorChange],
   );
 
-  // ✅ VALIDAÇÃO SIMPLIFICADA
+  // ✅ VALIDAÇÃO PRINCIPAL (submit)
   const validateForm = () => {
     const newErrors = {};
 
@@ -408,19 +397,21 @@ const DespesaForm = ({
 
   // Função auxiliar para determinar o status de execução
   const determinarStatusExecucao = (data) => {
-    // Se a data de pagamento foi preenchida, considera executada.
-    // Caso contrário, permanece planejada.
-    return data.dataPagamento ? "EXECUTADA" : "PLANEJADA";
+    if (data.dataPagamento) {
+      return "EXECUTADA"; // Se possui data de pagamento, está executada
+    } else {
+      return "PLANEJADA"; // Caso contrário, permanece como planejada
+    }
   };
 
-  // ✅ SUBMIT SIMPLIFICADO
+  // ✅ SUBMIT (criar/editar)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
       setToast({
         show: true,
-        message: "⚠️ Por favor, corrija os erros no formulário",
+        message: "⚠️ Corrija os erros do formulário",
         type: "error",
       });
       return;
@@ -434,11 +425,11 @@ const DespesaForm = ({
 
       const dadosParaSalvar = {
         ...formData,
-        valor: valorNumerico,
+        valor: valorNumerico, // Armazenar valor numérico para cálculos
         usuarioCriacao: usuario.uid || usuario.id,
         dataUltimaAtualizacao: serverTimestamp(),
-        status: determinarStatusExecucao(formData), // ✅ Determina automaticamente (PLANEJADA ou EXECUTADA)
-        statusPagamento: formData.statusPagamento || "pendente", // Mantém statusPagamento
+        status: determinarStatusExecucao(formData),
+        statusPagamento: formData.statusPagamento || "pendente",
         ...(despesaParaEditar
           ? {}
           : {
@@ -484,26 +475,12 @@ const DespesaForm = ({
             navigate("/despesas", { replace: true });
           }, 800);
         }
-
-        if (!onSuccess) {
-          limparFormulario();
-        }
       }
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);
-      let mensagemErro = "❌ Erro ao salvar despesa. ";
-
-      if (error.code === "permission-denied") {
-        mensagemErro += "Você não tem permissão para esta operação.";
-      } else if (error.code === "unavailable") {
-        mensagemErro += "Serviço temporariamente indisponível.";
-      } else {
-        mensagemErro += "Tente novamente.";
-      }
-
       setToast({
         show: true,
-        message: mensagemErro,
+        message: "❌ Erro ao salvar despesa. Tente novamente.",
         type: "error",
       });
     } finally {
@@ -512,6 +489,7 @@ const DespesaForm = ({
     }
   };
 
+  // ✅ LIMPAR FORMULÁRIO
   const limparFormulario = () => {
     setFormData({
       emendaId: emendaPreSelecionada || emendaId || "",
@@ -531,8 +509,8 @@ const DespesaForm = ({
       observacoes: "",
       status: "PLANEJADA",
       statusPagamento: "pendente",
-      naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // ✅ VALOR PRÉ-DEFINIDO
-      elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // ✅ VALOR PRÉ-DEFINIDO
+      naturezaDespesa: "3.3.9.0.30 – Material de Despesa",
+      elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
       fonteRecurso: "",
       programaTrabalho: "",
       planoInterno: "",
@@ -558,7 +536,8 @@ const DespesaForm = ({
   // ✅ VALIDAÇÃO PARA HABILITAR/DESABILITAR BOTÕES
   const naturezaSelecionada = pick(formData, ["naturezaDespesa", "natureza"]);
   const valorNum = parseBRL(formData?.valor);
-  const canSubmit = Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
+  const canSubmit =
+    Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
 
   return (
     <div style={styles.container}>
@@ -632,6 +611,7 @@ const DespesaForm = ({
           handleInputChange={handleInputChange}
         />
 
+        {/* Ações do formulário */}
         {!modoVisualizacao && (
           <div style={styles.formActions}>
             <button
@@ -700,11 +680,7 @@ const styles = {
     backgroundColor: "#ffffff",
     fontFamily: "Arial, sans-serif",
   },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "30px",
-  },
+  form: { display: "flex", flexDirection: "column", gap: "30px" },
   formActions: {
     display: "flex",
     gap: "15px",
