@@ -1,6 +1,7 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
 // ✅ ATUALIZADO 05/11/2025: Nova estrutura com seção "Dados Básicos da Despesa"
 // 🎯 Campos: Emenda (não editável), Valor (editável com alerta), Discriminação (1 linha), Fornecedor, Natureza
+// 🔧 CORREÇÃO 05/11/2025: Validação de saldo considera valor anterior da despesa ao editar
 
 import React from "react";
 import { NATUREZAS_DESPESA } from "../../config/constants";
@@ -34,6 +35,7 @@ const DespesaFormBasicFields = ({
   modoVisualizacao = false,
   valorError,
   handleInputChange,
+  despesaParaEditar = null, // 🆕 Nova prop para saber se está editando
 }) => {
   // Normalizar opções de Natureza
   const naturezaOptions = React.useMemo(
@@ -46,8 +48,36 @@ const DespesaFormBasicFields = ({
     ? `${emendaInfo.numero || emendaInfo.numeroEmenda || ""} - ${emendaInfo.parlamentar || emendaInfo.autor || ""}`
     : "Nenhuma emenda selecionada";
 
-  // Validação de valor vs saldo disponível
-  const saldoDisponivel = emendaInfo?.saldoDisponivel ?? 0;
+  // 🔧 CORREÇÃO: Calcular saldo disponível considerando edição
+  const calcularSaldoParaValidacao = () => {
+    let saldoBase = emendaInfo?.saldoDisponivel ?? 0;
+
+    // Se está editando uma despesa, "devolve" o valor anterior ao saldo
+    if (despesaParaEditar?.id && despesaParaEditar?.valor) {
+      const valorAnterior =
+        typeof despesaParaEditar.valor === "number"
+          ? despesaParaEditar.valor
+          : parseFloat(
+              String(despesaParaEditar.valor || "").replace(/\D/g, ""),
+            ) / 100;
+
+      saldoBase += valorAnterior;
+
+      console.log("🔍 Validação de Saldo (EDIÇÃO):", {
+        saldoAtualEmenda: emendaInfo?.saldoDisponivel ?? 0,
+        valorAnteriorDespesa: valorAnterior,
+        saldoDisponivel: saldoBase,
+      });
+    } else {
+      console.log("🔍 Validação de Saldo (NOVA):", {
+        saldoDisponivel: saldoBase,
+      });
+    }
+
+    return saldoBase;
+  };
+
+  const saldoDisponivel = calcularSaldoParaValidacao();
 
   // Converter valor para número
   const valorNum =

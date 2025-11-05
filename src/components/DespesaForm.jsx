@@ -312,6 +312,37 @@ const DespesaForm = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // 🔧 HELPER: Navegação inteligente após salvar
+  const navegarAposSalvar = () => {
+    // 1️⃣ Prioridade: onSuccess (quando vem de modal/emenda)
+    if (onSuccess && typeof onSuccess === "function") {
+      console.log(
+        "✅ DespesaForm: Chamando onSuccess (retorna ao contexto de origem)",
+      );
+      setTimeout(() => {
+        onSuccess();
+      }, 800);
+      return;
+    }
+
+    // 2️⃣ Segunda opção: onCancelar (mantém contexto)
+    if (onCancelar && typeof onCancelar === "function") {
+      console.log(
+        "✅ DespesaForm: Chamando onCancelar (volta ao contexto anterior)",
+      );
+      setTimeout(() => {
+        onCancelar();
+      }, 800);
+      return;
+    }
+
+    // 3️⃣ Fallback: navigate(-1)
+    console.log("⚠️ DespesaForm: Fallback - navigate(-1)");
+    setTimeout(() => {
+      navigate(-1);
+    }, 800);
+  };
+
   // ✅ SALVAR/ATUALIZAR DESPESA
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -350,21 +381,7 @@ const DespesaForm = ({
           type: "success",
         });
 
-        if (onSuccess && typeof onSuccess === "function") {
-          console.log("✅ DespesaForm: Chamando onSuccess (não vai navegar)");
-          setTimeout(() => {
-            onSuccess();
-          }, 800);
-          return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
-        }
-
-        // 🔧 CORREÇÃO: Volta para a tela anterior (listagem de despesas)
-        console.log(
-          "⚠️ DespesaForm: Sem onSuccess, voltando para tela anterior",
-        );
-        setTimeout(() => {
-          navigate(-1); // Volta para a tela anterior
-        }, 800);
+        navegarAposSalvar();
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
 
@@ -374,21 +391,7 @@ const DespesaForm = ({
           type: "success",
         });
 
-        if (onSuccess && typeof onSuccess === "function") {
-          console.log("✅ DespesaForm: Chamando onSuccess (não vai navegar)");
-          setTimeout(() => {
-            onSuccess();
-          }, 800);
-          return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
-        }
-
-        // 🔧 CORREÇÃO: Volta para a tela anterior (listagem de despesas)
-        console.log(
-          "⚠️ DespesaForm: Sem onSuccess, voltando para tela anterior",
-        );
-        setTimeout(() => {
-          navigate(-1); // Volta para a tela anterior
-        }, 800);
+        navegarAposSalvar();
       }
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);
@@ -508,6 +511,7 @@ const DespesaForm = ({
           modoVisualizacao={modoVisualizacao}
           valorError={valorError}
           handleInputChange={handleInputChange}
+          despesaParaEditar={despesaParaEditar}
         />
 
         <DespesaFormEmpenhoFields

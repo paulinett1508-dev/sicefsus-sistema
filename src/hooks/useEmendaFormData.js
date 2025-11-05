@@ -412,10 +412,20 @@ export const useEmendaFormData = () => {
         formData.acoesServicos.forEach((meta, index) => {
           // ✅ CORRIGIDO: Validar apenas campos existentes (estrategia e valorAcao)
           const estrategiaLimpa = cleanField(meta.estrategia);
-          const temValorValido = meta.valorAcao && 
-            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
+          const temValorValido =
+            meta.valorAcao &&
+            parseFloat(
+              meta.valorAcao
+                .replace(/[R$\s]/g, "")
+                .replace(/\./g, "")
+                .replace(",", "."),
+            ) > 0;
 
-          if (estrategiaLimpa && estrategiaLimpa.length >= 5 && temValorValido) {
+          if (
+            estrategiaLimpa &&
+            estrategiaLimpa.length >= 5 &&
+            temValorValido
+          ) {
             hasValidMeta = true;
           } else {
             // Erros específicos
@@ -424,15 +434,14 @@ export const useEmendaFormData = () => {
                 "🚨 Natureza de despesa deve ter pelo menos 5 caracteres";
             }
             if (!temValorValido) {
-              errors[`meta_${index}_valor`] =
-                "🚨 Valor é obrigatório";
+              errors[`meta_${index}_valor`] = "🚨 Valor é obrigatório";
             }
           }
         });
 
         if (!hasValidMeta) {
           errors.acoesServicos =
-            "🚨 O campo \"Valor\" da Natureza de Despesas está em branco.";
+            '🚨 O campo "Valor" da Natureza de Despesas está em branco.';
         }
       }
     } else {
@@ -780,14 +789,16 @@ export const useEmendaFormData = () => {
       } else {
         const hasValidMeta = formData.acoesServicos.some((meta) => {
           const descricaoLimpa = cleanField(meta.estrategia);
-          const temValorValido = meta.valorAcao && 
-            parseFloat(meta.valorAcao.replace(/[R$\s]/g, "").replace(/\./g, "").replace(",", ".")) > 0;
+          const temValorValido =
+            meta.valorAcao &&
+            parseFloat(
+              meta.valorAcao
+                .replace(/[R$\s]/g, "")
+                .replace(/\./g, "")
+                .replace(",", "."),
+            ) > 0;
 
-          return (
-            descricaoLimpa &&
-            descricaoLimpa.length >= 5 &&
-            temValorValido
-          );
+          return descricaoLimpa && descricaoLimpa.length >= 5 && temValorValido;
         });
         if (!hasValidMeta) {
           errors.push(
@@ -905,7 +916,9 @@ export const useEmendaFormData = () => {
         }
 
         setTimeout(() => {
-          navigate("/emendas", { replace: true });
+          // 🔧 CRÍTICO: Não navegar automaticamente
+          // Deixar o componente decidir quando navegar
+          console.log("✅ Emenda salva com sucesso");
         }, 800);
       } catch (error) {
         let mensagemErro = "❌ Erro ao salvar emenda. ";
