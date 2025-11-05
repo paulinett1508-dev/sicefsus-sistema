@@ -1,0 +1,202 @@
+# 🔧 Correção: Remover Botões de Agrupamento
+
+## Arquivo: `src/components/DespesasTable.jsx`
+
+---
+
+## ✅ Solução 1: Adicionar Prop Condicional
+
+### 1️⃣ **Adicionar prop no componente (Linha 20)**
+
+**ANTES:**
+```javascript
+export default function DespesasTable({
+  despesas,
+  emendas,
+  loading,
+  onEdit,
+  onView,
+  onDelete,
+  totalDespesas = 0,
+}) {
+```
+
+**DEPOIS:**
+```javascript
+export default function DespesasTable({
+  despesas,
+  emendas,
+  loading,
+  onEdit,
+  onView,
+  onDelete,
+  totalDespesas = 0,
+  ocultarBotoesAgrupamento = false, // 🆕 Nova prop
+}) {
+```
+
+---
+
+### 2️⃣ **Ocultar botões condicionalmente (Linhas 395-417)**
+
+**ANTES:**
+```javascript
+<div style={styles.viewToggleContainer}>
+  {/* 🆕 Toggle de Agrupamento */}
+  <div style={styles.toggleGroup}>
+    <button type="button" ...>
+      📁 Agrupado por Emenda
+    </button>
+    <button type="button" ...>
+      📄 Lista Completa
+    </button>
+  </div>
+  
+  {/* Toggle Resumido/Detalhado */}
+  <div style={styles.toggleGroup}>
+    ...
+  </div>
+</div>
+```
+
+**DEPOIS:**
+```javascript
+<div style={styles.viewToggleContainer}>
+  {/* 🆕 Toggle de Agrupamento - OCULTAR quando dentro da emenda */}
+  {!ocultarBotoesAgrupamento && (
+    <div style={styles.toggleGroup}>
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("agrupado"); }}
+        style={{
+          ...styles.toggleButton,
+          ...(modoAgrupamento === "agrupado" ? styles.toggleButtonActive : {}),
+        }}
+      >
+        📁 Agrupado por Emenda
+      </button>
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("lista"); }}
+        style={{
+          ...styles.toggleButton,
+          ...(modoAgrupamento === "lista" ? styles.toggleButtonActive : {}),
+        }}
+      >
+        📄 Lista Completa
+      </button>
+    </div>
+  )}
+  
+  {/* Toggle Resumido/Detalhado - MANTER sempre visível */}
+  <div style={styles.toggleGroup}>
+    <button
+      type="button"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("resumido"); }}
+      style={{
+        ...styles.toggleButton,
+        ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
+      }}
+    >
+      📊 Resumido
+    </button>
+    <button
+      type="button"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("detalhado"); }}
+      style={{
+        ...styles.toggleButton,
+        ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),
+      }}
+    >
+      📋 Detalhado
+    </button>
+  </div>
+</div>
+```
+
+---
+
+### 3️⃣ **Passar prop no ExecucaoOrcamentaria.jsx**
+
+No arquivo `src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx`, onde chama `DespesasList` (linha 618):
+
+**ADICIONAR:**
+```javascript
+<DespesasList
+  despesas={despesasExecutadas}
+  emendas={[{ 
+    id: emendaId,
+    numero: formData?.numero || formData?.numeroEmenda,
+    objeto: formData?.objeto,
+  }]}
+  loading={loading}
+  onEdit={handleEditarDespesa}
+  onView={handleVisualizarDespesa}
+  onRecarregar={carregarDespesas}
+  ocultarBotaoNovo={true}
+  exibirModoCards={true}
+  ocultarBotoesAgrupamento={true}  // 🆕 ADICIONAR ESTA LINHA
+/>
+```
+
+---
+
+### 4️⃣ **Propagar prop no DespesasList.jsx**
+
+No arquivo `src/components/DespesasList.jsx`, linha ~19 e ~362:
+
+**Receber prop (linha 19):**
+```javascript
+const DespesasList = ({
+  despesas = [],
+  emendas = [],
+  loading = false,
+  error = null,
+  onEdit,
+  onView,
+  onDelete,
+  onNovaDespesa,
+  onEditarDespesa,
+  onExcluirDespesa,
+  usuario,
+  filtroInicial = null,
+  onRecarregar,
+  usarLayoutCards = false,
+  estilosCustomizados = null,
+  ocultarBotoesAgrupamento = false, // 🆕 ADICIONAR
+}) => {
+```
+
+**Passar para DespesasTable (linha ~362):**
+```javascript
+<DespesasTable
+  despesas={despesasFiltradas}
+  emendas={emendas}
+  totalDespesas={despesas.length}
+  loading={false}
+  usuario={usuario}
+  onEdit={handleEdit}
+  onView={handleView}
+  onDelete={handleDelete}
+  ocultarBotoesAgrupamento={ocultarBotoesAgrupamento} // 🆕 ADICIONAR
+/>
+```
+
+---
+
+## 🎯 Resultado Final
+
+✅ **Dentro da Emenda (Execução Orçamentária):**
+- Botões "📁 Agrupado" e "📄 Lista Completa" → **OCULTOS**
+- Botões "📊 Resumido" e "📋 Detalhado" → **VISÍVEIS**
+
+✅ **Tela de Despesas Geral:**
+- Todos os botões → **VISÍVEIS**
+
+---
+
+## 📦 Arquivos para Editar
+
+1. `src/components/DespesasTable.jsx` (linhas 20, 395-417)
+2. `src/components/DespesasList.jsx` (linhas 19, 362)
+3. `src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx` (linha 618)
