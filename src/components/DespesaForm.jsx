@@ -26,6 +26,29 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
+// ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
+// pega o primeiro valor existente entre várias chaves comuns
+const pick = (obj, keys) => {
+  if (!obj) return undefined;
+  for (const k of keys) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return undefined;
+};
+
+// parse seguro de BRL -> número (usa fallback se vier string)
+const parseBRL = (v) => {
+  if (typeof v === "number") return v;
+  if (!v) return 0;
+  const s = String(v).replace(/\s/g, "")
+    .replace(/\./g, "")       // remove separador de milhar
+    .replace(",", ".")        // vírgula -> ponto
+    .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+};
+
 // ✅ COMPONENTES MODULARES EXISTENTES REUTILIZADOS
 import DespesaFormHeader from "./despesa/DespesaFormHeader";
 import DespesaFormBanners from "./despesa/DespesaFormBanners";
@@ -532,6 +555,11 @@ const DespesaForm = ({
     setErrors({});
   };
 
+  // ✅ VALIDAÇÃO PARA HABILITAR/DESABILITAR BOTÕES
+  const naturezaSelecionada = pick(formData, ["naturezaDespesa", "natureza"]);
+  const valorNum = parseBRL(formData?.valor);
+  const canSubmit = Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
+
   return (
     <div style={styles.container}>
       {toast.show && (
@@ -619,10 +647,16 @@ const DespesaForm = ({
               type="submit"
               style={{
                 ...styles.submitButton,
-                opacity: salvando ? 0.6 : 1,
-                cursor: salvando ? "not-allowed" : "pointer",
+                opacity: salvando || !canSubmit ? 0.6 : 1,
+                cursor: salvando || !canSubmit ? "not-allowed" : "pointer",
               }}
-              disabled={salvando}
+              disabled={salvando || !canSubmit}
+              onClick={(e) => {
+                if (!canSubmit && !salvando) {
+                  e.preventDefault();
+                  return;
+                }
+              }}
             >
               {salvando
                 ? "Processando..."

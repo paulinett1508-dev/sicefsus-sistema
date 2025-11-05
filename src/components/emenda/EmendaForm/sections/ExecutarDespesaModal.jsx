@@ -10,6 +10,29 @@ import {
   parseValorMonetario,
 } from "../../../../utils/formatters";
 
+// ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
+// pega o primeiro valor existente entre várias chaves comuns
+const pick = (obj, keys) => {
+  if (!obj) return undefined;
+  for (const k of keys) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return undefined;
+};
+
+// parse seguro de BRL -> número (usa fallback se vier string)
+const parseBRL = (v) => {
+  if (typeof v === "number") return v;
+  if (!v) return 0;
+  const s = String(v).replace(/\s/g, "")
+    .replace(/\./g, "")       // remove separador de milhar
+    .replace(",", ".")        // vírgula -> ponto
+    .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+};
+
 // ✅ REUTILIZAR COMPONENTES MODULARES EXISTENTES
 import DespesaFormBasicFields from "../../../despesa/DespesaFormBasicFields";
 import DespesaFormEmpenhoFields from "../../../despesa/DespesaFormEmpenhoFields";
