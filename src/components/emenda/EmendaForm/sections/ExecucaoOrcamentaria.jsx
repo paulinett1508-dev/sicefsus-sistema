@@ -320,8 +320,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   };
 
   const handleSucessoFormulario = () => {
+    console.log("✅ Despesa atualizada - Fechando formulário");
     handleFecharFormulario();
-    carregarDespesas(); // Recarregar dados
+    setTimeout(() => {
+      carregarDespesas();
+    }, 100);
   };
 
   const handleExecutarDespesa = (despesa) => setModal({ abrir: true, despesa });
