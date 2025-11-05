@@ -310,10 +310,6 @@ export default function DespesasTable({
         <div style={styles.fornecedorCell}>{despesa.fornecedor || "-"}</div>
       </td>
 
-      </span>
-        </td>
-      )}
-
       {/* VALOR */}
       <td style={styles.tdValue}>
         R{"$"} {Number(despesa.valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
