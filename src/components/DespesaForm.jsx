@@ -4,6 +4,7 @@
 // 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
 // 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
 // ✅ ATUALIZADO 05/11/2025: Props corretas para DespesaFormEmendaInfo
+// 🔧 CORREÇÃO 05/11/2025: Navegação volta para tela anterior (navigate(-1))
 
 import React, {
   useState,
@@ -280,51 +281,38 @@ const DespesaForm = ({
     }
   }, [emendas.length, emendaPreSelecionada, carregarEmendas]);
 
-  // ✅ MODO EDIÇÃO: Popular formulário com a despesa para editar
+  // ✅ PREENCHER FORMULÁRIO COM DADOS DA DESPESA (EDIÇÃO)
   useEffect(() => {
-    if (despesaParaEditar && Object.keys(despesaParaEditar).length > 0) {
-      // 🔥 CRÍTICO: discriminacao sempre em branco ao editar
-      const { discriminacao, ...restoDosDados } = despesaParaEditar;
-
+    if (despesaParaEditar) {
       setFormData((prev) => ({
         ...prev,
-        ...restoDosDados,
-        discriminacao: "", // 🔥 SEMPRE EM BRANCO
-        dataEmpenho: despesaParaEditar.dataEmpenho || "",
-        dataLiquidacao: despesaParaEditar.dataLiquidacao || "",
-        dataPagamento: despesaParaEditar.dataPagamento || "",
+        ...despesaParaEditar,
       }));
-
-      if (despesaParaEditar.emendaId) {
-        carregarDadosEmenda(despesaParaEditar.emendaId);
-      }
     }
-  }, [despesaParaEditar, carregarDadosEmenda]);
+  }, [despesaParaEditar]);
 
-  // ✅ HANDLER GENÉRICO PARA INPUTS
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+  // ✅ MANIPULAR MUDANÇAS NO FORMULÁRIO
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  // ✅ VALIDAÇÃO SIMPLES
+  // ✅ VALIDAÇÃO SIMPLIFICADA (APENAS CAMPOS CRÍTICOS)
   const validarFormulario = () => {
-    const erros = {};
+    const newErrors = {};
 
-    if (!formData.emendaId) erros.emendaId = "Selecione uma emenda";
-    if (!formData.fornecedor?.trim())
-      erros.fornecedor = "Fornecedor é obrigatório";
+    if (!formData.emendaId) newErrors.emendaId = "Selecione uma emenda";
+    if (!formData.fornecedor) newErrors.fornecedor = "Fornecedor é obrigatório";
     if (!formData.valor || parseFloat(formData.valor) <= 0)
-      erros.valor = "Valor deve ser maior que zero";
+      newErrors.valor = "Valor deve ser maior que zero";
+    if (!formData.naturezaDespesa)
+      newErrors.naturezaDespesa = "Natureza da despesa é obrigatória";
 
-    setErrors(erros);
-    return Object.keys(erros).length === 0;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ SUBMIT DO FORMULÁRIO
+  // ✅ SALVAR/ATUALIZAR DESPESA
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -370,10 +358,12 @@ const DespesaForm = ({
           return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
         }
 
-        // Só navega se NÃO tiver onSuccess
-        console.log("⚠️ DespesaForm: Sem onSuccess, navegando para /despesas");
+        // 🔧 CORREÇÃO: Volta para a tela anterior (listagem de despesas)
+        console.log(
+          "⚠️ DespesaForm: Sem onSuccess, voltando para tela anterior",
+        );
         setTimeout(() => {
-          navigate("/despesas", { replace: true });
+          navigate(-1); // Volta para a tela anterior
         }, 800);
       } else {
         await addDoc(collection(db, "despesas"), dadosParaSalvar);
@@ -392,10 +382,12 @@ const DespesaForm = ({
           return; // ⚠️ CRÍTICO: Prevenir navegação quando há onSuccess
         }
 
-        // Só navega se NÃO tiver onSuccess
-        console.log("⚠️ DespesaForm: Sem onSuccess, navegando para /despesas");
+        // 🔧 CORREÇÃO: Volta para a tela anterior (listagem de despesas)
+        console.log(
+          "⚠️ DespesaForm: Sem onSuccess, voltando para tela anterior",
+        );
         setTimeout(() => {
-          navigate("/despesas", { replace: true });
+          navigate(-1); // Volta para a tela anterior
         }, 800);
       }
     } catch (error) {
