@@ -33,6 +33,7 @@ const DespesasList = ({
   onRecarregar, // ✅ NOVO: Callback para recarregar dados
   usarLayoutCards = false, // ✅ NOVO: Permitir layout em cards ao invés de tabela
   estilosCustomizados = null,
+  ocultarBotoesAgrupamento = false,
 }) => {
   // ✅ Estados locais simplificados
   const [despesasFiltradas, setDespesasFiltradas] = useState([]);
@@ -368,6 +369,7 @@ const DespesasList = ({
           onEdit={handleEdit}
           onView={handleView}
           onDelete={handleDelete}
+          ocultarBotoesAgrupamento={ocultarBotoesAgrupamento}
         />
       )}
     </div>

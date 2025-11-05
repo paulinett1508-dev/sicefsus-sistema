@@ -25,6 +25,7 @@ export default function DespesasTable({
   onView,
   onDelete,
   totalDespesas = 0,
+  ocultarBotoesAgrupamento = false, // Nova prop para ocultar botões de agrupamento
 }) {
   const navigate = useNavigate();
   const [excluindo, setExcluindo] = useState(null);
@@ -41,10 +42,10 @@ export default function DespesasTable({
       if (!grupos[emendaId]) {
         const emenda = emendas.find((e) => e.id === emendaId);
         grupos[emendaId] = {
-          emenda: emenda || { 
-            id: emendaId, 
+          emenda: emenda || {
+            id: emendaId,
             numero: emendaId, // Mostrar ID ao invés de N/A
-            objeto: "Emenda sem dados" 
+            objeto: "Emenda sem dados"
           },
           despesas: [],
           totalValor: 0,
@@ -331,7 +332,7 @@ export default function DespesasTable({
       {modoVisualizacao === "detalhado" && (
         <>
           <td style={styles.td}>{getNaturezaLabel(despesa)}</td>
-                    <td style={styles.td}>
+          <td style={styles.td}>
             <span style={styles.numeroCell}>{despesa.numeroContrato || "-"}</span>
           </td>
           <td style={styles.td}>
@@ -392,35 +393,51 @@ export default function DespesasTable({
       <div style={styles.tableContainer}>
         {/* Toggle de visualização */}
         <div style={styles.viewToggleContainer}>
-          {/* 🆕 Toggle de Agrupamento */}
-          <div style={styles.toggleGroup}>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("agrupado"); }}
-              style={{
-                ...styles.toggleButton,
-                ...(modoAgrupamento === "agrupado" ? styles.toggleButtonActive : {}),
-              }}
-            >
-              📁 Agrupado por Emenda
-            </button>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("lista"); }}
-              style={{
-                ...styles.toggleButton,
-                ...(modoAgrupamento === "lista" ? styles.toggleButtonActive : {}),
-              }}
-            >
-              📄 Lista Completa
-            </button>
-          </div>
+          {/* 🆕 Toggle de Agrupamento - OCULTAR quando dentro da emenda */}
+          {!ocultarBotoesAgrupamento && (
+            <div style={styles.toggleGroup}>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setModoAgrupamento("agrupado");
+                }}
+                style={{
+                  ...styles.toggleButton,
+                  ...(modoAgrupamento === "agrupado"
+                    ? styles.toggleButtonActive
+                    : {}),
+                }}
+              >
+                📁 Agrupado por Emenda
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setModoAgrupamento("lista");
+                }}
+                style={{
+                  ...styles.toggleButton,
+                  ...(modoAgrupamento === "lista" ? styles.toggleButtonActive : {}),
+                }}
+              >
+                📄 Lista Completa
+              </button>
+            </div>
+          )}
 
-          {/* Toggle Resumido/Detalhado */}
+          {/* Toggle Resumido/Detalhado - MANTER sempre visível */}
           <div style={styles.toggleGroup}>
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("resumido"); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setModoVisualizacao("resumido");
+              }}
               style={{
                 ...styles.toggleButton,
                 ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
@@ -430,7 +447,11 @@ export default function DespesasTable({
             </button>
             <button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("detalhado"); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setModoVisualizacao("detalhado");
+              }}
               style={{
                 ...styles.toggleButton,
                 ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),

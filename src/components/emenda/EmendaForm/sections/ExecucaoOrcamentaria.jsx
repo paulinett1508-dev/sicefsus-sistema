@@ -617,13 +617,20 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
           <DespesasList
             despesas={despesasExecutadas}
-            emendas={[]}
+            emendas={[
+              {
+                id: emendaId,
+                numero: formData?.numero || formData?.numeroEmenda,
+                objeto: formData?.objeto,
+              },
+            ]}
             loading={loading}
             onEdit={handleEditarDespesa}
             onView={handleVisualizarDespesa}
             onRecarregar={carregarDespesas}
             ocultarBotaoNovo={true}
             exibirModoCards={true}
+            ocultarBotoesAgrupamento={true}
           />
         </div>
 
