@@ -1,0 +1,81 @@
+Abaixo vai um patch genérico e drop-in que funciona mesmo que seus nomes de estado mudem (pega os mais comuns). Aplique no componente onde ficam esses campos (geralmente src/components/DespesaForm.jsx ou a aba de despesas planejadas do EmendaForm).
+
+1) Helpers (uma vez no topo do componente)
+// pega o primeiro valor existente entre várias chaves comuns
+const pick = (obj, keys) => {
+  if (!obj) return undefined;
+  for (const k of keys) {
+    const v = obj[k];
+    if (v !== undefined && v !== null && v !== "") return v;
+  }
+  return undefined;
+};
+
+// parse seguro de BRL -> número (usa fallback se vier string)
+const parseBRL = (v) => {
+  if (typeof v === "number") return v;
+  if (!v) return 0;
+  const s = String(v).replace(/\s/g, "")
+    .replace(/\./g, "")       // remove separador de milhar
+    .replace(",", ".")        // vírgula -> ponto
+    .replace(/[^\d.-]/g, ""); // remove qualquer coisa não numérica
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+};
+
+2) Derive a habilitação dos botões
+
+Coloque logo antes do return do JSX:
+
+// tente cobrir diferentes nomes que você possa estar usando no form
+const naturezaSelecionada =
+  pick(props, ["naturezaDespesa", "natureza"]) ??
+  pick(state, ["naturezaDespesa", "natureza"]) ??
+  pick(form, ["naturezaDespesa", "natureza"]) ??
+  null;
+
+const valorInput =
+  pick(props, ["valor"]) ?? pick(state, ["valor"]) ?? pick(form, ["valor"]) ?? 0;
+
+const valorNum = parseBRL(valorInput);
+const canAdd = Boolean(naturezaSelecionada) && valorNum > 0;
+
+
+Se você já tem um objeto novaDespesa, troque por:
+
+const naturezaSelecionada = pick(novaDespesa, ["naturezaDespesa","natureza"]);
+const valorNum = parseBRL(novaDespesa?.valor);
+const canAdd = Boolean(naturezaSelecionada) && valorNum > 0;
+
+3) Desabilite os dois botões (e evite clique quando desabilitado)
+
+No botão “Adicionar” ao lado dos inputs:
+
+<button
+  type="button"
+  disabled={!canAdd}
+  onClick={(e) => {
+    e.preventDefault();
+    if (!canAdd) return; // guarda
+    handleAdicionar();   // sua função atual
+  }}
+  style={ !canAdd ? { opacity: .6, cursor: "not-allowed" } : undefined }
+>
+  Adicionar
+</button>
+
+
+No botão “+ Adicionar despesa” do card vazio:
+
+<button
+  type="button"
+  disabled={!canAdd}
+  onClick={(e) => {
+    e.preventDefault();
+    if (!canAdd) return;
+    handleAdicionar();
+  }}
+  style={ !canAdd ? { opacity: .6, cursor: "not-allowed" } : undefined }
+>
+  + Adicionar despesa
+</button>
