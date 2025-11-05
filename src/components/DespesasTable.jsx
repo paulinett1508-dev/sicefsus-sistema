@@ -41,7 +41,11 @@ export default function DespesasTable({
       if (!grupos[emendaId]) {
         const emenda = emendas.find((e) => e.id === emendaId);
         grupos[emendaId] = {
-          emenda: emenda || { id: emendaId, numero: "N/A" },
+          emenda: emenda || { 
+            id: emendaId, 
+            numero: emendaId, // Mostrar ID ao invés de N/A
+            objeto: "Emenda sem dados" 
+          },
           despesas: [],
           totalValor: 0,
         };
@@ -134,19 +138,20 @@ export default function DespesasTable({
 
 
 
-  const getMunicipioUF = (despesa) => {
-    let mun = pick(despesa, ["municipio", "municipioNome", "cidade"]);
-    let uf = pick(despesa, ["uf", "estado"]);
-
-    if (!mun || !uf) {
-      const emenda = emendas?.find((e) => e.id === despesa.emendaId);
-      if (emenda) {
-        mun = mun || pick(emenda, ["municipio", "municipioNome", "cidade"]);
-        uf = uf || pick(emenda, ["uf", "estado"]);
-      }
-    }
-    return mun || uf ? `${mun || ""}${uf ? `/${uf}` : ""}` : "-";
-  };
+  // 🔧 FUNÇÃO REMOVIDA - Coluna MUNICÍPIO/UF foi excluída
+  // const getMunicipioUF = (despesa) => {
+  //   let mun = pick(despesa, ["municipio", "municipioNome", "cidade"]);
+  //   let uf = pick(despesa, ["uf", "estado"]);
+  //
+  //   if (!mun || !uf) {
+  //     const emenda = emendas?.find((e) => e.id === despesa.emendaId);
+  //     if (emenda) {
+  //       mun = mun || pick(emenda, ["municipio", "municipioNome", "cidade"]);
+  //       uf = uf || pick(emenda, ["uf", "estado"]);
+  //     }
+  //   }
+  //   return mun || uf ? `${mun || ""}${uf ? `/${uf}` : ""}` : "-";
+  // };
 
   // =====================================================
   // 🔎 Info da Emenda e Status
@@ -346,12 +351,7 @@ export default function DespesasTable({
         <span style={styles.dataCell}>{formatarDataFirestore(despesa.dataPagamento)}</span>
       </td>
 
-      {/* Bloco Detalhado: Município/UF, Observação */}
-      {modoVisualizacao === "detalhado" && (
-        <>
-          <td style={styles.td}>{getMunicipioUF(despesa)}</td>
-                  </>
-      )}
+      {/* Bloco Detalhado removido: Município/UF */}
 
       {/* AÇÕES */}
       <td style={styles.tdActions}>
@@ -511,12 +511,6 @@ export default function DespesasTable({
                               <th style={styles.th}>Nº EMPENHO</th>
                               <th style={styles.th}>Nº NF</th>
                               <th style={styles.th}>DATA PGTO</th>
-                              {modoVisualizacao === "detalhado" && (
-                                <>
-                                  <th style={styles.th}>MUNICÍPIO/UF</th>
-
-                                </>
-                              )}
                               <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
                             </tr>
                           </thead>
@@ -556,12 +550,6 @@ export default function DespesasTable({
                       <th style={styles.th}>Nº EMPENHO</th>
                       <th style={styles.th}>Nº NF</th>
                       <th style={styles.th}>DATA PGTO</th>
-                      {modoVisualizacao === "detalhado" && (
-                        <>
-                          <th style={styles.th}>MUNICÍPIO/UF</th>
-
-                        </>
-                      )}
                       <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
                     </tr>
                   </thead>
