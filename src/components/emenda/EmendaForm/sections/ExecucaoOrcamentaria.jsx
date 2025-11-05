@@ -1,9 +1,8 @@
 // src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
-// Alterações: padronização visual dos botões (Executar/Remover) e confirmação detalhada ao remover.
-// Lógica preservada.
+// ✅ CORRIGIDO: Substituído modal de confirmação por ExecutarDespesaModal (formulário completo)
 
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom"; // 🆕 Para renderizar fora do form
+import { createPortal } from "react-dom";
 import {
   collection,
   query,
@@ -17,7 +16,8 @@ import {
 import { db } from "../../../../firebase/firebaseConfig";
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
-import DespesaForm from "../../../DespesaForm"; // 🆕 Import do formulário de despesas
+import DespesaForm from "../../../DespesaForm";
+import ExecutarDespesaModal from "./ExecutarDespesaModal"; // ✅ IMPORT DO MODAL CORRETO
 import { NATUREZAS_DESPESA } from "../../../../config/constants";
 import {
   formatarMoedaInput,
@@ -304,20 +304,17 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     console.log("👁️ ExecucaoOrcamentaria.handleVisualizarDespesa CHAMADO:", {
       despesaId: despesa?.id,
     });
-
     setDespesaEmEdicao(despesa);
     setModoVisualizacao("visualizar");
-
-    // Scroll suave para o topo
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 100);
   };
 
-  const handleVoltarDaEdicao = () => {
-    console.log("⬅️ ExecucaoOrcamentaria.handleVoltarDaEdicao");
+  const handleFecharFormulario = () => {
     setDespesaEmEdicao(null);
     setModoVisualizacao(null);
+  };
+
+  const handleSucessoFormulario = () => {
+    handleFecharFormulario();
     carregarDespesas(); // Recarregar dados
   };
 
@@ -325,406 +322,331 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const closeModal = () => setModal({ abrir: false, despesa: null });
 
   const handleRemoverDespesaPlanejada = async (id, descricao, valor) => {
-    const confirma = window.confirm(
-      `Remover a despesa planejada\n\n${descricao}\nValor: ${formatCurrency(valor)}\n\nEssa ação não pode ser desfeita. Continuar?`,
-    );
-    if (!confirma) return;
+    if (
+      !confirm(
+        `Remover a despesa planejada\n\n${descricao}\nValor: ${formatCurrency(valor)}\n\nEssa ação não pode ser desfeita. Continuar?`,
+      )
+    )
+      return;
     try {
       await deleteDoc(doc(db, "despesas", id));
       carregarDespesas();
+      setToast({
+        show: true,
+        message: "Despesa planejada removida",
+        type: "success",
+      });
     } catch (e) {
       console.error(e);
       alert("Erro ao remover despesa.");
     }
   };
 
-  if (!temEmendaSalva) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.alertBox}>
-          <div style={styles.alertIcon}>ℹ️</div>
-          <div>
-            <h3 style={styles.alertTitle}>Salve a emenda primeiro</h3>
-            <p style={styles.alertText}>
-              Para gerenciar a execução orçamentária, você precisa salvar a
-              emenda.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading)
-    return (
-      <div style={styles.loadingBox}>
-        <div style={styles.loadingSpinner} />
-        Carregando...
-      </div>
-    );
+  const showToast = (config) => {
+    setToast({ show: true, ...config });
+    setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
+  };
 
   return (
-    <div style={styles.container}>
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ show: false, message: "", type: "" })}
-        />
-      )}
-
-      {/* Totais (sticky) */}
-      <div style={styles.painelControle}>
-        <h3 style={styles.painelTitulo}>📊 Painel de Controle Orçamentário</h3>
-        <div style={styles.statsGrid}>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>💵</div>
-            <div style={styles.statContent}>
-              <div style={styles.statLabel}>Valor da Emenda</div>
-              <div style={styles.statValue}>
-                {formatCurrency(stats.valorEmenda)}
-              </div>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>🎯</div>
-            <div style={styles.statContent}>
-              <div style={styles.statLabel}>Total Planejado</div>
-              <div style={{ ...styles.statValue, color: "#f39c12" }}>
-                {formatCurrency(stats.totalPlanejado)}
-              </div>
-              <div style={styles.statHint}>Não consome saldo</div>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>✅</div>
-            <div style={styles.statContent}>
-              <div style={styles.statLabel}>Total Executado</div>
-              <div style={{ ...styles.statValue, color: "#2ecc71" }}>
-                {formatCurrency(stats.totalExecutado)}
-              </div>
-              <div style={styles.statHint}>Impacta saldo</div>
-            </div>
-          </div>
-          <div style={styles.statCard}>
-            <div style={styles.statIcon}>💼</div>
-            <div style={styles.statContent}>
-              <div style={styles.statLabel}>Saldo Disponível</div>
-              <div style={{ ...styles.statValue, color: "#154360" }}>
-                {formatCurrency(saldoDisponivel)}
-              </div>
-              <div style={styles.statHint}>Disponível para executar</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <>
       {/* 🆕 FORMULÁRIO DE EDIÇÃO/VISUALIZAÇÃO DE DESPESA - USANDO PORTAL (FORA DO DOM) */}
       {despesaEmEdicao &&
-        modoVisualizacao &&
         createPortal(
           <div style={styles.formularioEdicaoOverlay}>
             <div style={styles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
-                <h3 style={styles.formularioTitulo}>
+                <h2 style={styles.formularioTitulo}>
                   {modoVisualizacao === "editar"
                     ? "✏️ Editar Despesa"
                     : "👁️ Visualizar Despesa"}
-                </h3>
+                </h2>
                 <button
-                  type="button"
-                  onClick={handleVoltarDaEdicao}
+                  onClick={handleFecharFormulario}
                   style={styles.btnVoltar}
                 >
                   ✕ Fechar
                 </button>
               </div>
-
               <div style={styles.formularioEdicaoContent}>
                 <DespesaForm
-                  usuario={usuario}
                   despesaParaEditar={despesaEmEdicao}
-                  onCancelar={handleVoltarDaEdicao}
-                  onSalvar={handleVoltarDaEdicao}
-                  onSuccess={handleVoltarDaEdicao}
-                  emendasDisponiveis={[
-                    {
-                      id: emendaId,
-                      numero: formData?.numero,
-                      valorRecurso: formData?.valorRecurso,
-                      municipio: formData?.municipio,
-                      uf: formData?.uf,
-                      autor: formData?.autor,
-                      tipo: formData?.tipo,
-                    },
-                  ]}
                   emendaPreSelecionada={emendaId}
-                  emendaInfo={{
-                    id: emendaId,
-                    numero: formData?.numero,
-                    numeroEmenda: formData?.numeroEmenda,
-                    parlamentar:
-                      formData?.autor ||
-                      formData?.parlamentar ||
-                      "Não informado",
-                    autor: formData?.autor || formData?.parlamentar,
-                    tipo:
-                      formData?.tipo || formData?.tipoEmenda || "Não informado",
-                    municipio: formData?.municipio,
-                    uf: formData?.uf,
-                    valorRecurso: stats.valorEmenda,
-                    saldoDisponivel: saldoDisponivel,
-                    programa:
-                      formData?.programa ||
-                      formData?.programaSaude ||
-                      formData?.objeto ||
-                      "Não informado",
-                  }}
+                  usuario={usuario}
+                  onVoltar={handleFecharFormulario}
+                  onSuccess={handleSucessoFormulario}
                   modoVisualizacao={modoVisualizacao === "visualizar"}
-                  titulo={
+                  ocultarHeader={true}
+                  tituloCustomizado={
                     modoVisualizacao === "editar"
                       ? "Editar Despesa"
                       : "Visualizar Despesa"
                   }
-                  hideHeader={true} // 🆕 Esconder header redundante - modal já tem header azul
                 />
               </div>
             </div>
           </div>,
-          document.body, // Renderiza direto no body, fora da hierarquia do form
+          document.body,
         )}
 
-      {/* Planejamento */}
-      <div style={styles.secao}>
-        <div style={styles.secaoHeader}>
-          <h3 style={styles.secaoTitulo}>🎯 Planejamento de Despesas</h3>
-          <span style={styles.badge}>
-            {despesasPlanejadas.length}{" "}
-            {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
-          </span>
+      <div style={styles.container}>
+        {/* Painel de Controle */}
+        <div style={styles.painelControle}>
+          <h2 style={styles.painelTitulo}>💰 Painel de Controle Financeiro</h2>
+          <div style={styles.statsGrid}>
+            <div style={styles.statCard}>
+              <div style={styles.statIcon}>💼</div>
+              <div style={styles.statContent}>
+                <div style={styles.statLabel}>Valor da Emenda</div>
+                <div style={styles.statValue}>
+                  {formatCurrency(stats.valorEmenda)}
+                </div>
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statIcon}>📊</div>
+              <div style={styles.statContent}>
+                <div style={styles.statLabel}>Total Planejado</div>
+                <div style={styles.statValue}>
+                  {formatCurrency(stats.totalPlanejado)}
+                </div>
+                <div style={styles.statHint}>
+                  ({despesasPlanejadas.length}{" "}
+                  {despesasPlanejadas.length === 1 ? "despesa" : "despesas"})
+                </div>
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statIcon}>💸</div>
+              <div style={styles.statContent}>
+                <div style={styles.statLabel}>Total Executado</div>
+                <div style={styles.statValue}>
+                  {formatCurrency(stats.totalExecutado)}
+                </div>
+                <div style={styles.statHint}>
+                  ({despesasExecutadas.length}{" "}
+                  {despesasExecutadas.length === 1 ? "despesa" : "despesas"})
+                </div>
+              </div>
+            </div>
+            <div style={styles.statCard}>
+              <div style={styles.statIcon}>🎯</div>
+              <div style={styles.statContent}>
+                <div style={styles.statLabel}>Saldo Disponível</div>
+                <div
+                  style={{
+                    ...styles.statValue,
+                    color: saldoDisponivel < 0 ? "#dc3545" : "#28a745",
+                  }}
+                >
+                  {formatCurrency(saldoDisponivel)}
+                </div>
+                <div style={styles.statHint}>
+                  {saldoDisponivel < 0
+                    ? "⚠️ Saldo negativo!"
+                    : "✓ Saldo positivo"}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <DespesaPlanejadaForm
-          emendaId={emendaId}
-          valorEmenda={stats.valorEmenda}
-          totalExecutado={stats.totalExecutado}
-          onSuccess={carregarDespesas}
-          usuario={usuario}
-        />
-
-        {despesasPlanejadas.length === 0 && (
-          <div style={styles.emptyState}>
-            <div>
-              <div style={styles.emptyEmoji}>🗂️</div>
-              <h4 style={styles.emptyTitle}>Nenhuma despesa planejada ainda</h4>
-              <p style={styles.emptyText}>
-                Adicione uma despesa informando a <strong>Natureza</strong> e o{" "}
-                <strong>Valor</strong>. As despesas planejadas <em>não</em>{" "}
-                consomem o recurso da emenda — apenas após “Executar”.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById("naturezaDespesaSelect");
-                if (el) {
-                  try {
-                    el.focus();
-                    el.scrollIntoView({ behavior: "smooth", block: "center" });
-                  } catch {}
-                }
-              }}
-              style={{ ...styles.btn, ...styles.btnPrimary }}
-            >
-              ➕ Adicionar despesa
-            </button>
+        {/* Seção: Planejamento */}
+        <div style={styles.secao}>
+          <div style={styles.secaoHeader}>
+            <h3 style={styles.secaoTitulo}>🎯 Planejamento de Despesas</h3>
+            <span style={styles.badge}>
+              {despesasPlanejadas.length}{" "}
+              {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
+            </span>
           </div>
-        )}
 
-        {despesasPlanejadas.length > 0 && (
-          <div style={styles.tabelaWrapper}>
-            <table style={styles.table}>
-              <thead style={styles.thead}>
-                <tr>
-                  <th style={styles.th}>Natureza</th>
-                  <th style={{ ...styles.th, textAlign: "right" }}>
-                    Valor Planejado
-                  </th>
-                  <th style={{ ...styles.th, textAlign: "center", width: 140 }}>
-                    Status
-                  </th>
-                  <th style={{ ...styles.th, textAlign: "center", width: 80 }}>
-                    AÇÕES
-                  </th>
-                </tr>
-              </thead>
-              <tbody style={styles.tbody}>
-                {despesasPlanejadas.map((despesa, idx) => (
-                  <tr
-                    key={despesa.id}
-                    style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
+          {!temEmendaSalva ? (
+            <div style={styles.emptyState}>
+              <div style={{ textAlign: "center" }}>
+                <div style={styles.emptyEmoji}>💡</div>
+                <h4 style={styles.emptyTitle}>Salve a emenda primeiro</h4>
+                <p style={styles.emptyText}>
+                  Você precisa salvar a emenda antes de planejar despesas
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <DespesaPlanejadaForm
+                emendaId={emendaId}
+                valorEmenda={stats.valorEmenda}
+                totalExecutado={stats.totalExecutado}
+                onSuccess={carregarDespesas}
+                usuario={usuario}
+              />
+
+              {despesasPlanejadas.length === 0 && (
+                <div style={styles.emptyState}>
+                  <div>
+                    <h4 style={styles.emptyTitle}>
+                      Nenhuma despesa planejada ainda
+                    </h4>
+                    <p style={styles.emptyText}>
+                      Adicione uma despesa informando a{" "}
+                      <strong>Natureza</strong> e o <strong>Valor</strong>. As
+                      despesas planejadas <em>não</em> consomem saldo.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById(
+                        "naturezaDespesaSelect",
+                      );
+                      el?.focus();
+                    }}
+                    style={{ ...styles.btn, ...styles.btnPrimary }}
                   >
-                    <td style={styles.td}>
-                      {despesa.estrategia || despesa.naturezaDespesa}
-                    </td>
-                    <td style={styles.tdValorPlanejado}>
-                      {formatCurrency(despesa.valor)}
-                    </td>
-                    <td style={styles.td}>
-                      <span
-                        style={{
-                          background: "#fff7e6",
-                          border: "1px solid #ffe58f",
-                          padding: "3px 8px",
-                          borderRadius: 999,
-                          fontSize: 12,
-                        }}
-                      >
-                        🟡 <strong>PLANEJADA</strong>
-                      </span>
-                    </td>
-                    <td style={{ ...styles.td, textAlign: "center" }}>
-                      <div style={styles.despesaAcoes}>
-                        <button
-                          type="button"
-                          onClick={() => handleExecutarDespesa(despesa)}
-                          style={styles.btnIconExecutar}
-                          title="Executar despesa"
+                    ➕ Adicionar despesa
+                  </button>
+                </div>
+              )}
+
+              {despesasPlanejadas.length > 0 && (
+                <div style={styles.tabelaWrapper}>
+                  <table style={styles.table}>
+                    <thead style={styles.thead}>
+                      <tr>
+                        <th style={{ padding: "10px 8px", textAlign: "left" }}>
+                          Natureza de Despesa
+                        </th>
+                        <th
+                          style={{
+                            padding: "10px 8px",
+                            textAlign: "right",
+                            width: 140,
+                          }}
                         >
-                          ▶️
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleRemoverDespesaPlanejada(
-                              despesa.id,
-                              despesa.estrategia || despesa.naturezaDespesa,
-                              despesa.valor,
-                            )
-                          }
-                          style={styles.btnIconRemover}
-                          title="Remover despesa"
+                          Valor Planejado
+                        </th>
+                        <th
+                          style={{
+                            padding: "10px 8px",
+                            textAlign: "center",
+                            width: 100,
+                          }}
                         >
-                          🗑️
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          Ações
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody style={styles.tbody}>
+                      {despesasPlanejadas.map((despesa, idx) => (
+                        <tr
+                          key={despesa.id}
+                          style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
+                        >
+                          <td style={styles.td}>
+                            {despesa.estrategia || despesa.naturezaDespesa}
+                          </td>
+                          <td style={styles.tdValorPlanejado}>
+                            {formatCurrency(despesa.valor)}
+                          </td>
+                          <td style={styles.td}>
+                            <div style={styles.despesaAcoes}>
+                              <button
+                                onClick={() => handleExecutarDespesa(despesa)}
+                                style={styles.btnIconExecutar}
+                                title="Executar despesa"
+                              >
+                                ▶️
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleRemoverDespesaPlanejada(
+                                    despesa.id,
+                                    despesa.estrategia ||
+                                      despesa.naturezaDespesa,
+                                    despesa.valor,
+                                  )
+                                }
+                                style={styles.btnIconRemover}
+                                title="Remover despesa"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Seção: Despesas Executadas */}
+        <div style={styles.secao}>
+          <div style={styles.secaoHeader}>
+            <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
+            <span style={styles.badge}>
+              {despesasExecutadas.length}{" "}
+              {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
+            </span>
           </div>
+
+          <DespesasList
+            despesas={despesasExecutadas}
+            emendas={[]}
+            loading={loading}
+            onEdit={handleEditarDespesa}
+            onView={handleVisualizarDespesa}
+            onRecarregar={carregarDespesas}
+            ocultarBotaoNovo={true}
+            exibirModoCards={true}
+          />
+        </div>
+
+        {/* ✅ MODAL CORRETO: ExecutarDespesaModal (formulário completo) */}
+        {modal.abrir && modal.despesa && (
+          <ExecutarDespesaModal
+            isOpen={modal.abrir}
+            onClose={closeModal}
+            despesa={modal.despesa}
+            emendaId={emendaId}
+            saldoDisponivel={saldoDisponivel}
+            onSuccess={() => {
+              closeModal();
+              carregarDespesas();
+              showToast({
+                message: "✅ Despesa executada com sucesso!",
+                type: "success",
+              });
+            }}
+          />
         )}
+
+        {toast.show && <Toast message={toast.message} type={toast.type} />}
       </div>
-
-      {/* Executadas — componente existente */}
-      <div style={styles.secao}>
-        <div style={styles.secaoHeader}>
-          <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
-          <span style={styles.badge}>
-            {despesasExecutadas.length}{" "}
-            {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
-          </span>
-        </div>
-
-        <DespesasList
-          despesas={despesasExecutadas}
-          emendas={[
-            {
-              id: emendaId,
-              numero: formData?.numero,
-              valorRecurso: formData?.valorRecurso,
-              municipio: formData?.municipio,
-              uf: formData?.uf,
-              autor: formData?.autor,
-              // O objeto da emenda é buscado aqui
-              tipo: formData?.tipo,
-            },
-          ]}
-          loading={loading}
-          error={null}
-          onEdit={handleEditarDespesa}
-          onView={handleVisualizarDespesa}
-          onRecarregar={carregarDespesas}
-          usuario={usuario}
-          filtroInicial={{ emendaId }}
-          usarLayoutCards={false}
-        />
-      </div>
-
-      {/* Modal de execução */}
-      {modal.abrir && (
-        <div style={modalStyles.backdrop}>
-          <div style={modalStyles.modal}>
-            <h3 style={modalStyles.title}>Executar Despesa</h3>
-            <p style={modalStyles.text}>
-              Confirma a execução da despesa{" "}
-              <strong>{modal.despesa?.estrategia}</strong> no valor de{" "}
-              <strong>{formatCurrency(modal.despesa?.valor)}</strong>?
-            </p>
-            <div style={modalStyles.actions}>
-              <button
-                onClick={closeModal}
-                style={{ ...styles.btn, ...styles.btnSecondary }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    await updateDoc(doc(db, "despesas", modal.despesa.id), {
-                      status: "EXECUTADA",
-                      executadaEm: new Date().toISOString(),
-                      executadoPor: usuario?.email,
-                    });
-                    setToast({
-                      show: true,
-                      message: "✅ Despesa executada",
-                      type: "success",
-                    });
-                    closeModal();
-                    carregarDespesas();
-                  } catch (e) {
-                    console.error(e);
-                    alert("Erro ao executar.");
-                  }
-                }}
-                style={{ ...styles.btn, ...styles.btnPrimary }}
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
-// Estilos (padronização de botões incluída)
 const styles = {
   container: {
     display: "flex",
     flexDirection: "column",
     gap: 24,
-    paddingBottom: 80,
+    paddingBottom: 40,
   },
-  alertBox: {
+  loader: {
     display: "flex",
-    gap: 12,
-    padding: 20,
-    backgroundColor: "#eff6ff",
-    border: "2px solid #bfdbfe",
-    borderRadius: 12,
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+    gap: 16,
   },
-  alertIcon: { fontSize: 32 },
-  alertTitle: { margin: 0 },
-  alertText: { margin: 0, opacity: 0.8 },
-  loadingBox: { display: "flex", alignItems: "center", gap: 12, padding: 12 },
-  loadingSpinner: {
-    width: 14,
-    height: 14,
-    border: "2px solid #e2e8f0",
+  spinner: {
+    width: 48,
+    height: 48,
+    border: "4px solid #e9ecef",
     borderTop: "2px solid #334155",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
@@ -845,7 +767,6 @@ const styles = {
     fontFamily: "monospace",
   },
   despesaAcoes: { display: "flex", gap: 8, justifyContent: "center" },
-  // Botões padronizados
   btn: {
     display: "inline-flex",
     alignItems: "center",
@@ -894,7 +815,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
-  // Empty state
   emptyState: {
     display: "flex",
     alignItems: "center",
@@ -910,8 +830,6 @@ const styles = {
   emptyEmoji: { fontSize: 28, marginBottom: 8 },
   emptyTitle: { margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" },
   emptyText: { margin: "6px 0 0 0", fontSize: 13, color: "#475569" },
-
-  // 🆕 Estilos para formulário de edição em MODAL (position fixed - fora do form)
   formularioEdicaoOverlay: {
     position: "fixed",
     top: 0,
@@ -993,32 +911,6 @@ const formStyles = {
     padding: "10px 12px",
     borderRadius: 8,
     cursor: "pointer",
-  },
-};
-
-const modalStyles = {
-  backdrop: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.3)",
-    display: "grid",
-    placeItems: "center",
-    zIndex: 1000,
-  },
-  modal: {
-    width: "min(560px, 92vw)",
-    background: "#fff",
-    borderRadius: 12,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.25)",
-    padding: 24,
-  },
-  title: { marginTop: 0 },
-  text: { opacity: 0.85 },
-  actions: {
-    display: "flex",
-    gap: 12,
-    justifyContent: "flex-end",
-    marginTop: 16,
   },
 };
 

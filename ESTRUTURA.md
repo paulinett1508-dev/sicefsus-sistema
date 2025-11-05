@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 02/11/2025, 21:52
+**📅 Gerado em:** 05/11/2025, 01:04
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -9,24 +9,24 @@
 ## 📊 ESTATÍSTICAS GERAIS
 
 - **📁 Total de Diretórios:** 58
-- **📄 Total de Arquivos:** 256
-- **⚛️ Componentes React:** 111
+- **📄 Total de Arquivos:** 267
+- **⚛️ Componentes React:** 112
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 124 arquivos
+- **.jsx**: 125 arquivos
 - **.js**: 49 arquivos
 - **.json**: 23 arquivos
 - **sem extensão**: 10 arquivos
 - **.bin**: 9 arquivos
-- **.png**: 6 arquivos
-- **.cjs**: 6 arquivos
+- **.png**: 9 arquivos
+- **.txt**: 7 arquivos
+- **.cjs**: 7 arquivos
 - **.css**: 6 arquivos
-- **.res**: 4 arquivos
-- **.txt**: 4 arquivos
+- **.md**: 5 arquivos
 
 ---
 
@@ -100,8 +100,14 @@
 │   ├── 📄 image_1762032358714.png (325 linhas)
 │   ├── 📄 image_1762032564858.png (152 linhas)
 │   ├── 📄 image_1762033273030.png (238 linhas)
+│   ├── 📄 image_1762123376260.png (160 linhas)
+│   ├── 📄 image_1762215376492.png (187 linhas)
+│   ├── 📄 image_1762215929692.png (42 linhas)
+│   ├── 📄 Pasted--ALTERA-ES-PONTUAIS-DespesaForm-jsx-ARQUIVO-src-components-DespesaForm-jsx-AL-1762268688285_1762268688286.txt (106 linhas)
 │   ├── 📄 Pasted--CORRE-ES-ExecucaoOrcamentaria--1762110876597_1762110876597.txt (211 linhas)
-│   └── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
+│   ├── 📄 Pasted--CORRE-ES-NO-ExecucaoOrcamentaria-jsx-ALTERA-ES-NECESS-RIAS-1-Bot-es-da-tabela--1762121604958_1762121604959.txt (104 linhas)
+│   ├── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
+│   └── 📄 Pasted--CORRE-O-CR-TICA-EmendasTable-jsx-Props-Incompat-veis-PROBLEMA-IDENTIFICADO-O-Eme-1762123288681_1762123288682.txt (89 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
 │       ├── 📄 BACKUP_AcoesServicos_v2.3.71.jsx (516 linhas)
@@ -113,14 +119,17 @@
 │       ├── 📄 BACKUP_Sidebar_v2.3.71.jsx (482 linhas)
 │       └── 📄 VALIDACAO_BACKUP.txt (54 linhas)
 ├── 📁 docs/
-│   └── 📄 estrutura-atual.md (9 linhas)
+│   ├── 📄 estrutura-atual.md (9 linhas)
+│   └── 📄 GUIA_DESENVOLVEDOR.md (245 linhas)
 ├── 📁 functions/
 │   ├── 📄 index.js (1 linhas)
 │   └── 📄 package.json (1 linhas)
 ├── 📁 public/
 │   ├── 📄 _redirects (1 linhas)
+│   ├── 📄 download-guia.html (100 linhas)
 │   ├── 📄 favicon.png (1263 linhas)
 │   ├── 📄 favicon.svg (7 linhas)
+│   ├── 📄 shell-executor.html (394 linhas)
 │   └── 📄 version.json (14 linhas)
 ├── 📁 scripts/
 │   ├── 📄 analise-runner.cjs (381 linhas)
@@ -128,7 +137,8 @@
 │   ├── 📄 generateHandover.cjs (560 linhas)
 │   ├── 📄 migrarAcoesServicosParaDespesas.js (244 linhas)
 │   ├── 📄 migrarDespesasStatus.js (365 linhas)
-│   └── 📄 package.json (16 linhas)
+│   ├── 📄 package.json (16 linhas)
+│   └── 📄 shell-to-md.cjs (138 linhas)
 ├── 📁 src/
 │   ├── 📁 components/
 │   │   ├── 📁 admin/
@@ -155,10 +165,10 @@
 │   │   │   ├── 📄 DespesaFormActions.jsx (79 linhas)
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
-│   │   │   ├── 📄 DespesaFormBasicFields.jsx (278 linhas)
+│   │   │   ├── 📄 DespesaFormBasicFields.jsx (291 linhas)
 │   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (851 linhas)
 │   │   │   ├── 📄 DespesaFormDateFields.jsx (439 linhas)
-│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (73 linhas)
+│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (113 linhas)
 │   │   │   ├── 📄 DespesaFormEmpenhoFields.jsx (160 linhas)
 │   │   │   ├── 📄 DespesaFormHeader.jsx (95 linhas)
 │   │   │   ├── 📄 DespesaFormOrcamentoFields.jsx (311 linhas)
@@ -186,16 +196,17 @@
 │   │   │   │   │   ├── 📄 EmendaFormHeaderRich.jsx (252 linhas)
 │   │   │   │   │   └── 📄 TabNavigation.jsx (72 linhas)
 │   │   │   │   ├── 📁 sections/
-│   │   │   │   │   ├── 📄 AcoesServicos.jsx (627 linhas)
+│   │   │   │   │   ├── 📄 AcoesServicos.jsx (672 linhas)
 │   │   │   │   │   ├── 📄 ClassificacaoTecnica.jsx (216 linhas)
+│   │   │   │   │   ├── 📄 ConfirmarExecucaoDespesaModal.jsx (314 linhas)
 │   │   │   │   │   ├── 📄 Cronograma.jsx (411 linhas)
 │   │   │   │   │   ├── 📄 DadosBancarios.jsx (300 linhas)
-│   │   │   │   │   ├── 📄 DadosBasicos.jsx (355 linhas)
+│   │   │   │   │   ├── 📄 DadosBasicos.jsx (359 linhas)
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
-│   │   │   │   │   ├── 📄 DespesasTab.jsx (396 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (826 linhas)
-│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (439 linhas)
+│   │   │   │   │   ├── 📄 DespesasTab.jsx (451 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (918 linhas)
+│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (527 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
 │   │   │   │   └── 📄 index.jsx (280 linhas)
@@ -203,19 +214,19 @@
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
 │   │   │   ├── 📄 EmendasStats.jsx (108 linhas)
-│   │   │   ├── 📄 EmendasTable.jsx (480 linhas)
+│   │   │   ├── 📄 EmendasTable.jsx (470 linhas)
 │   │   │   └── 📄 ModalExclusaoEmenda.jsx (224 linhas)
 │   │   ├── 📁 relatorios/
 │   │   │   ├── 📁 geradores/
 │   │   │   │   ├── 📄 BaseRelatorio.js (70 linhas)
 │   │   │   │   ├── 📄 RelatorioAnalitico.js (290 linhas)
 │   │   │   │   ├── 📄 RelatorioConsolidado.js (406 linhas)
-│   │   │   │   ├── 📄 RelatorioDespesas.js (322 linhas)
+│   │   │   │   ├── 📄 RelatorioDespesas.js (357 linhas)
 │   │   │   │   ├── 📄 RelatorioExecucao.js (152 linhas)
 │   │   │   │   └── 📄 RelatorioPrestacao.js (211 linhas)
 │   │   │   ├── 📄 RelatoriosCards.jsx (30 linhas)
 │   │   │   ├── 📄 RelatoriosConfig.jsx (1 linhas)
-│   │   │   └── 📄 RelatoriosFiltros.jsx (137 linhas)
+│   │   │   └── 📄 RelatoriosFiltros.jsx (175 linhas)
 │   │   ├── 📁 shared/
 │   │   │   └── 📄 SystemHeader.jsx (99 linhas)
 │   │   ├── 📄 Administracao.jsx (660 linhas)
@@ -229,15 +240,15 @@
 │   │   ├── 📄 DataManager.jsx (977 linhas)
 │   │   ├── 📄 DebugPanel.jsx (92 linhas)
 │   │   ├── 📄 DebugUsuarios.jsx (236 linhas)
-│   │   ├── 📄 DespesaForm.jsx (697 linhas)
-│   │   ├── 📄 Despesas.jsx (305 linhas)
+│   │   ├── 📄 DespesaForm.jsx (722 linhas)
+│   │   ├── 📄 Despesas.jsx (314 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
-│   │   ├── 📄 DespesasList.jsx (667 linhas)
-│   │   ├── 📄 DespesasTable.jsx (1027 linhas)
-│   │   ├── 📄 Emendas.jsx (812 linhas)
+│   │   ├── 📄 DespesasList.jsx (655 linhas)
+│   │   ├── 📄 DespesasTable.jsx (1069 linhas)
+│   │   ├── 📄 Emendas.jsx (806 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
-│   │   ├── 📄 EmendasTable.jsx (824 linhas)
+│   │   ├── 📄 EmendasTable.jsx (806 linhas)
 │   │   ├── 📄 EnvironmentIndicator.jsx (119 linhas)
 │   │   ├── 📄 ErrorBoundary.jsx (186 linhas)
 │   │   ├── 📄 FirebaseError.jsx (118 linhas)
@@ -268,7 +279,7 @@
 │   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1303 linhas)
 │   │   └── 📄 WorkflowManager.jsx (685 linhas)
 │   ├── 📁 config/
-│   │   └── 📄 constants.js (115 linhas)
+│   │   └── 📄 constants.js (125 linhas)
 │   ├── 📁 context/
 │   │   └── 📄 UserContext.jsx (196 linhas)
 │   ├── 📁 firebase/
@@ -284,7 +295,7 @@
 │   │   ├── 📄 usePageTitle.js (15 linhas)
 │   │   ├── 📄 usePagination.js (404 linhas)
 │   │   ├── 📄 usePermissions.js (223 linhas)
-│   │   ├── 📄 useRelatoriosData.js (137 linhas)
+│   │   ├── 📄 useRelatoriosData.js (161 linhas)
 │   │   ├── 📄 useValidation.js (591 linhas)
 │   │   └── 📄 useVersion.js (39 linhas)
 │   ├── 📁 images/
@@ -308,13 +319,13 @@
 │   │   ├── 📄 DisableConsole.jsx (299 linhas)
 │   │   ├── 📄 errorHandlers.js (164 linhas)
 │   │   ├── 📄 exportImport.js (1 linhas)
-│   │   ├── 📄 firebaseCollections.js (334 linhas)
+│   │   ├── 📄 firebaseCollections.js (340 linhas)
 │   │   ├── 📄 formatters.js (181 linhas)
 │   │   ├── 📄 formStyles.js (677 linhas)
 │   │   ├── 📄 municipiosCache.js (265 linhas)
 │   │   ├── 📄 pdfHelpers.js (184 linhas)
 │   │   ├── 📄 printUtils.js (286 linhas)
-│   │   ├── 📄 relatoriosConstants.js (67 linhas)
+│   │   ├── 📄 relatoriosConstants.js (70 linhas)
 │   │   ├── 📄 simpleErrorModal.js (51 linhas)
 │   │   ├── 📄 validators.js (856 linhas)
 │   │   └── 📄 versionControl.js (333 linhas)
@@ -374,7 +385,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 91 componentes*
+- *...e mais 92 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -710,7 +721,7 @@ return (
 ```
 
 
-#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (278 linhas)
+#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (291 linhas)
 
 **Exports:**
 ```javascript
@@ -720,10 +731,10 @@ export default DespesaFormBasicFields;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ ATUALIZADO: Campo "Fornecedor" removido
-// 🎯 Agora apenas: Emenda, Valor, Discriminação
-// 🐞 CORRIGIDO: Bug do 'undefined' ao buscar nome do parlamentar
+// ✅ CORRIGIDO: Validação de array de emendas para evitar erro de undefined
 import React from "react";
+const DespesaFormBasicFields = ({
+formData,
 ```
 
 
@@ -761,7 +772,7 @@ validarDatasDespesaEmenda,
 ```
 
 
-#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (73 linhas)
+#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (113 linhas)
 
 **Exports:**
 ```javascript
@@ -772,9 +783,9 @@ export default DespesaFormEmendaInfo;
 ```javascript
 // src/components/despesa/DespesaFormEmendaInfo.jsx
 // ✅ Componente especializado para exibir informações da emenda selecionada
+// ✅ ATUALIZADO 04/11/2025: Labels normais, valores em negrito
 import React from "react";
 const DespesaFormEmendaInfo = ({ emendaInfo }) => {
-return (
 ```
 
 
@@ -951,7 +962,7 @@ return null;
 ```
 
 
-#### ⚛️ Componente React `EmendasTable.jsx` (480 linhas)
+#### ⚛️ Componente React `EmendasTable.jsx` (470 linhas)
 
 **Exports:**
 ```javascript
@@ -961,10 +972,10 @@ export default EmendasTable;
 **Preview:**
 ```javascript
 // src/components/emenda/EmendasTable.jsx
+// ✅ CORRIGIDO: Removidos botões "Visualizar" (👁️) e "Gerenciar Despesas" (💸)
+// Mantidos apenas: Editar (✏️) e Excluir (🗑️)
 import React from "react";
 const EmendasTable = ({
-emendasFiltradas,
-usuario,
 ```
 
 
@@ -1008,7 +1019,7 @@ export default function RelatoriosCards({ onSelectReport }) {
 #### ⚙️ Configuração `RelatoriosConfig.jsx` (1 linhas)
 
 
-#### ⚛️ Componente React `RelatoriosFiltros.jsx` (137 linhas)
+#### ⚛️ Componente React `RelatoriosFiltros.jsx` (175 linhas)
 
 **Exports:**
 ```javascript
@@ -1018,10 +1029,10 @@ export default function RelatoriosFiltros({
 **Preview:**
 ```javascript
 // src/components/relatorios/RelatoriosFiltros.jsx
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 import React from "react";
 import { formatCurrency } from "../../utils/pdfHelpers";
 import "../../styles/relatorios.css";
-export default function RelatoriosFiltros({
 ```
 
 
@@ -1227,7 +1238,7 @@ const [debugInfo, setDebugInfo] = useState({
 ```
 
 
-#### 💻 JavaScript `DespesaForm.jsx` (697 linhas)
+#### 💻 JavaScript `DespesaForm.jsx` (722 linhas)
 
 **Exports:**
 ```javascript
@@ -1244,7 +1255,7 @@ export default DespesaForm;
 ```
 
 
-#### ⚛️ Componente React `Despesas.jsx` (305 linhas)
+#### ⚛️ Componente React `Despesas.jsx` (314 linhas)
 
 **Exports:**
 ```javascript
@@ -1278,7 +1289,7 @@ import React, { useState, useEffect } from "react";
 ```
 
 
-#### ⚛️ Componente React `DespesasList.jsx` (667 linhas)
+#### ⚛️ Componente React `DespesasList.jsx` (655 linhas)
 
 **Exports:**
 ```javascript
@@ -1287,15 +1298,15 @@ export default DespesasList;
 
 **Preview:**
 ```javascript
-// DespesasList.jsx - CORRIGIDO COM LOGS DE DEBUG
-// ✅ CORREÇÃO: Receber dados via props ao invés do hook conflitante
+// DespesasList.jsx - CORRIGIDO: Removido espaço vazio
+// ✅ CORREÇÃO: Ajustado container para não forçar altura mínima
 import React, { useEffect, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 ```
 
 
-#### ⚛️ Componente React `DespesasTable.jsx` (1027 linhas)
+#### 💻 JavaScript `DespesasTable.jsx` (1069 linhas)
 
 **Exports:**
 ```javascript
@@ -1307,12 +1318,12 @@ export default function DespesasTable({
 // src/components/DespesasTable.jsx
 // ✅ OTIMIZADA: Foco em pagamentos por emenda
 // ✅ AGRUPAMENTO: Pagamentos organizados por emenda
-// ✅ CORRIGIDO: Badge "EXECUTADA" agora é verde
-import React, { useState, useMemo } from "react";
+// ✅ CORRIGIDO: Badge agora mostra "Objeto da Emenda" em vez de "N/A"
+// ✅ CORRIGIDO: Status diferenciado (Pago, Empenhado, etc.)
 ```
 
 
-#### 💻 JavaScript `Emendas.jsx` (812 linhas)
+#### 💻 JavaScript `Emendas.jsx` (806 linhas)
 
 **Exports:**
 ```javascript
@@ -1363,7 +1374,7 @@ import EmendasListHeader from "./emenda/EmendasListHeader";
 ```
 
 
-#### ⚛️ Componente React `EmendasTable.jsx` (824 linhas)
+#### ⚛️ Componente React `EmendasTable.jsx` (806 linhas)
 
 **Exports:**
 ```javascript
@@ -1858,7 +1869,7 @@ doc,
 #### 📁 config/
 
 
-#### 💻 JavaScript `constants.js` (115 linhas)
+#### 💻 JavaScript `constants.js` (125 linhas)
 
 **Exports:**
 ```javascript
@@ -1871,7 +1882,7 @@ export const OBJETOS_EMENDA = [
 ```javascript
 // src/config/constants.js
 // 🎯 Constantes centralizadas do SICEFSUS
-// ✅ Atualizado em: 21/10/2025
+// ✅ Atualizado em: 04/11/2025 - Separação de status
 // ========================================
 // 📋 PROGRAMAS DE SAÚDE (EMENDAS)
 ```
@@ -2099,7 +2110,7 @@ validateLocation,
 ```
 
 
-#### 🎣 Hook React `useRelatoriosData.js` (137 linhas)
+#### 🎣 Hook React `useRelatoriosData.js` (161 linhas)
 
 **Exports:**
 ```javascript
@@ -2109,10 +2120,10 @@ export function useRelatoriosData(usuario) {
 **Preview:**
 ```javascript
 // src/hooks/useRelatoriosData.js
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e fornecedor
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-export function useRelatoriosData(usuario) {
 ```
 
 
@@ -2373,7 +2384,7 @@ export const handleNetworkError = (error, context = 'Network Operation') => {
 #### 💻 JavaScript `exportImport.js` (1 linhas)
 
 
-#### 💻 JavaScript `firebaseCollections.js` (334 linhas)
+#### 💻 JavaScript `firebaseCollections.js` (340 linhas)
 
 **Exports:**
 ```javascript
@@ -2386,9 +2397,9 @@ export const USER_SCHEMA = {
 ```javascript
 // src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
 // ✅ Sincronizado com os campos mostrados nas imagens
+// ✅ ATUALIZADO 04/11/2025: Separação de status em despesas
 export const COLLECTIONS = {
 USERS: "usuarios", // Corrigido para usar a coleção correta
-EMENDAS: "emendas",
 ```
 
 
@@ -2480,7 +2491,7 @@ currency: "BRL",
 ```
 
 
-#### 💻 JavaScript `relatoriosConstants.js` (67 linhas)
+#### 💻 JavaScript `relatoriosConstants.js` (70 linhas)
 
 **Exports:**
 ```javascript
@@ -2492,10 +2503,10 @@ export const FILTROS_INICIAIS = {
 **Preview:**
 ```javascript
 // src/utils/relatoriosConstants.js
+// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 export const COLORS = {
 PRIMARY: "#154360",
 ACCENT: "#4A90E2",
-SUCCESS: "#27AE60",
 ```
 
 

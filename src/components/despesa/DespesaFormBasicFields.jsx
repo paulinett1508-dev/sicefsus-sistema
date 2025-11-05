@@ -1,15 +1,12 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ ATUALIZADO: Campo "Fornecedor" removido
-// 🎯 Agora apenas: Emenda, Valor, Discriminação
-// 🐞 CORRIGIDO: Bug do 'undefined' ao buscar nome do parlamentar
-// ✅ ATUALIZADO 04/11/2025: Campo valor mostra R$ 500,00 (com centavos)
+// ✅ CORRIGIDO: Validação de array de emendas para evitar erro de undefined
 
 import React from "react";
 
 const DespesaFormBasicFields = ({
   formData,
   errors,
-  emendas,
+  emendas = [], // ✅ DEFAULT: Array vazio para evitar undefined
   emendaPreSelecionada,
   emendaInfo,
   userRole,
@@ -82,13 +79,15 @@ const DespesaFormBasicFields = ({
                       : "Carregando emendas..."
                     : "Selecione uma emenda..."}
                 </option>
-                {emendas.map((emenda) => (
-                  <option key={emenda.id} value={emenda.id}>
-                    {emenda.autor || emenda.parlamentar} -{" "}
-                    {emenda.numero || emenda.numeroEmenda} - {emenda.municipio}/
-                    {emenda.uf}
-                  </option>
-                ))}
+                {/* ✅ VALIDAÇÃO: Verifica se emendas existe e é array antes de fazer map */}
+                {Array.isArray(emendas) &&
+                  emendas.map((emenda) => (
+                    <option key={emenda.id} value={emenda.id}>
+                      {emenda.autor || emenda.parlamentar} -{" "}
+                      {emenda.numero || emenda.numeroEmenda} -{" "}
+                      {emenda.municipio}/{emenda.uf}
+                    </option>
+                  ))}
               </select>
               {userRole === "operador" && emendas.length === 0 && (
                 <span style={styles.helpText}>

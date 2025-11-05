@@ -1,9 +1,10 @@
 // src/components/emenda/EmendaForm/sections/ExecutarDespesaModal.jsx
 // 🎯 MODAL PARA EXECUTAR DESPESA
-// ✅ PRESERVA 100% DOS CAMPOS EXISTENTES (33 campos)
-// 🔄 Reutiliza componentes modulares existentes
+// ✅ CORRIGIDO: Validação de emenda antes de passar para componentes
 
 import React, { useState, useEffect } from "react";
+import { addDoc, collection, deleteDoc, doc, getDoc } from "firebase/firestore";
+import { db } from "../../../../firebase/firebaseConfig";
 import {
   formatarMoedaInput,
   parseValorMonetario,
@@ -16,23 +17,23 @@ import DespesaFormDateFields from "../../../despesa/DespesaFormDateFields";
 import DespesaFormClassificacaoFuncional from "../../../despesa/DespesaFormClassificacaoFuncional";
 
 const ExecutarDespesaModal = ({
-  despesa, // Despesa planejada (se vier de planejamento)
-  emenda, // Dados da emenda
-  saldoDisponivel,
+  isOpen,
   onClose,
-  onConfirm,
-  usuario,
+  despesa, // Despesa planejada (se vier de planejamento)
+  emendaId, // ID da emenda
+  saldoDisponivel,
+  onSuccess,
 }) => {
   // 🎯 ESTADO DO FORMULÁRIO (TODOS OS 33 CAMPOS)
   const [formData, setFormData] = useState({
     // ✅ DADOS PRÉ-PREENCHIDOS (se vier de despesa planejada)
-    emendaId: emenda?.id || "",
+    emendaId: emendaId || "",
     estrategia: despesa?.estrategia || "",
     naturezaDespesa: despesa?.estrategia || "3.3.9.0.30 – Material de Despesa",
     valor: despesa?.valor || "",
 
     // ✅ DADOS BÁSICOS
-    discriminacao: "",
+    discriminacao: despesa?.estrategia || "",
 
     // ✅ EMPENHO
     numeroEmpenho: "",
@@ -51,7 +52,7 @@ const ExecutarDespesaModal = ({
     fonteRecurso: "",
     programaTrabalho: "",
     planoInterno: "",
-    status: "pendente",
+    status: "EXECUTADA", // ✅ Status já EXECUTADA
     categoria: "",
 
     // ✅ FORNECEDOR (API CNPJ)
@@ -80,10 +81,54 @@ const ExecutarDespesaModal = ({
 
   const [errors, setErrors] = useState({});
   const [salvando, setSalvando] = useState(false);
+  const [naturezaAlterada, setNaturezaAlterada] = useState(false);
+
+  // ✅ Detectar alteração de natureza original
+  const naturezaOriginal = despesa?.estrategia || despesa?.naturezaDespesa;
+
+  // ✅ Carregar dados da emenda (se necessário)
+  const [emendaInfo, setEmendaInfo] = useState(null);
+
+  useEffect(() => {
+    const carregarEmenda = async () => {
+      if (emendaId) {
+        try {
+          const emendaDoc = await getDoc(doc(db, "emendas", emendaId));
+          if (emendaDoc.exists()) {
+            setEmendaInfo({ id: emendaDoc.id, ...emendaDoc.data() });
+          }
+        } catch (error) {
+          console.error("Erro ao carregar emenda:", error);
+        }
+      }
+    };
+    carregarEmenda();
+  }, [emendaId]);
 
   // ✅ HANDLERS
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // ✅ ALERTA: Detectar alteração de natureza de despesa
+    if (
+      name === "naturezaDespesa" &&
+      naturezaOriginal &&
+      value !== naturezaOriginal
+    ) {
+      const confirmar = window.confirm(
+        `⚠️ ATENÇÃO: Você está alterando a Natureza de Despesa!\n\n` +
+          `Natureza Original:\n${naturezaOriginal}\n\n` +
+          `Nova Natureza:\n${value}\n\n` +
+          `Deseja realmente alterar?`,
+      );
+
+      if (!confirmar) {
+        // Se cancelar, manter valor original
+        return;
+      }
+
+      setNaturezaAlterada(true);
+    }
 
     // Formatação especial para valor monetário
     if (name === "valor") {
@@ -153,7 +198,22 @@ const ExecutarDespesaModal = ({
     setSalvando(true);
 
     try {
-      await onConfirm(formData);
+      const despesaData = {
+        ...formData,
+        valor: parseValorMonetario(formData.valor),
+        status: "EXECUTADA",
+        criadaEm: new Date().toISOString(),
+      };
+
+      // Salvar nova despesa executada
+      await addDoc(collection(db, "despesas"), despesaData);
+
+      // Se veio de uma despesa planejada, deletar a planejada
+      if (despesa?.id) {
+        await deleteDoc(doc(db, "despesas", despesa.id));
+      }
+
+      onSuccess?.();
     } catch (error) {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar despesa");
@@ -161,6 +221,8 @@ const ExecutarDespesaModal = ({
       setSalvando(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -183,39 +245,41 @@ const ExecutarDespesaModal = ({
         </div>
 
         {/* 📊 INFO DA EMENDA */}
-        <div style={styles.emendaInfo}>
-          <div style={styles.infoItem}>
-            <span style={styles.infoLabel}>Parlamentar:</span>
-            <span style={styles.infoValue}>
-              {emenda?.autor || emenda?.parlamentar}
-            </span>
+        {emendaInfo && (
+          <div style={styles.emendaInfo}>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Parlamentar:</span>
+              <span style={styles.infoValue}>
+                {emendaInfo.autor || emendaInfo.parlamentar}
+              </span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Número:</span>
+              <span style={styles.infoValue}>{emendaInfo.numero}</span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Município:</span>
+              <span style={styles.infoValue}>
+                {emendaInfo.municipio}/{emendaInfo.uf}
+              </span>
+            </div>
+            <div style={styles.infoItem}>
+              <span style={styles.infoLabel}>Saldo Disponível:</span>
+              <span
+                style={{
+                  ...styles.infoValue,
+                  color: "#27ae60",
+                  fontWeight: "bold",
+                }}
+              >
+                {saldoDisponivel.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </span>
+            </div>
           </div>
-          <div style={styles.infoItem}>
-            <span style={styles.infoLabel}>Número:</span>
-            <span style={styles.infoValue}>{emenda?.numero}</span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.infoLabel}>Município:</span>
-            <span style={styles.infoValue}>
-              {emenda?.municipio}/{emenda?.uf}
-            </span>
-          </div>
-          <div style={styles.infoItem}>
-            <span style={styles.infoLabel}>Saldo Disponível:</span>
-            <span
-              style={{
-                ...styles.infoValue,
-                color: "#27ae60",
-                fontWeight: "bold",
-              }}
-            >
-              {saldoDisponivel.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* ⚠️ ALERTA DE SALDO */}
         <div style={styles.alertaSaldo}>
@@ -226,17 +290,28 @@ const ExecutarDespesaModal = ({
           </div>
         </div>
 
+        {/* ⚠️ ALERTA DE NATUREZA ALTERADA */}
+        {naturezaAlterada && (
+          <div style={styles.alertaNatureza}>
+            <div style={styles.alertaIcon}>🔄</div>
+            <div>
+              <strong>Natureza Alterada:</strong> A natureza de despesa foi
+              modificada em relação ao planejamento original.
+            </div>
+          </div>
+        )}
+
         {/* 📋 FORMULÁRIO COMPLETO */}
         <div style={styles.formContent}>
           {/* ✅ SEÇÃO 1: DADOS BÁSICOS */}
           <DespesaFormBasicFields
             formData={formData}
             errors={errors}
-            emendas={[emenda]}
-            emendaPreSelecionada={emenda?.id}
-            emendaInfo={emenda}
-            userRole={usuario?.tipo}
-            userMunicipio={usuario?.municipio}
+            emendas={emendaInfo ? [emendaInfo] : []}
+            emendaPreSelecionada={emendaId}
+            emendaInfo={emendaInfo}
+            userRole="admin"
+            userMunicipio=""
             modoVisualizacao={false}
             valorError={errors.valor}
             handleInputChange={handleInputChange}
@@ -256,7 +331,7 @@ const ExecutarDespesaModal = ({
             errors={errors}
             modoVisualizacao={false}
             handleInputChange={handleInputChange}
-            emendaInfo={emenda}
+            emendaInfo={emendaInfo}
           />
 
           {/* ✅ SEÇÃO 4: CLASSIFICAÇÃO FUNCIONAL (851 linhas!) */}
@@ -385,6 +460,18 @@ const styles = {
     borderLeft: "4px solid #ffc107",
     fontSize: "14px",
     color: "#856404",
+  },
+
+  alertaNatureza: {
+    display: "flex",
+    gap: "12px",
+    alignItems: "flex-start",
+    padding: "16px 24px",
+    backgroundColor: "#d1ecf1",
+    border: "1px solid #17a2b8",
+    borderLeft: "4px solid #17a2b8",
+    fontSize: "14px",
+    color: "#0c5460",
   },
 
   alertaIcon: {

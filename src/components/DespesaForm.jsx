@@ -89,8 +89,8 @@ const DespesaForm = ({
     categoria: "",
     descricao: "",
     observacoes: "",
-    status: "PLANEJADA",              // Inicia como planejada
-    statusPagamento: "pendente",      // Pagamento pendente
+    status: "PLANEJADA", // Inicia como planejada
+    statusPagamento: "pendente", // Pagamento pendente
     naturezaDespesa: "3.3.9.0.30 – Material de Despesa", // ✅ VALOR PRÉ-DEFINIDO
     elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo", // ✅ VALOR PRÉ-DEFINIDO
     fonteRecurso: "",
@@ -331,7 +331,6 @@ const DespesaForm = ({
         return;
       }
 
-
       setFormData((prev) => ({ ...prev, [name]: value }));
 
       if (errors[name]) {
@@ -391,7 +390,6 @@ const DespesaForm = ({
     return data.dataPagamento ? "EXECUTADA" : "PLANEJADA";
   };
 
-
   // ✅ SUBMIT SIMPLIFICADO
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -416,8 +414,8 @@ const DespesaForm = ({
         valor: valorNumerico,
         usuarioCriacao: usuario.uid || usuario.id,
         dataUltimaAtualizacao: serverTimestamp(),
-        status: determinarStatusExecucao(formData),  // ✅ Determina automaticamente (PLANEJADA ou EXECUTADA)
-        statusPagamento: formData.statusPagamento || "pendente",  // Mantém statusPagamento
+        status: determinarStatusExecucao(formData), // ✅ Determina automaticamente (PLANEJADA ou EXECUTADA)
+        statusPagamento: formData.statusPagamento || "pendente", // Mantém statusPagamento
         ...(despesaParaEditar
           ? {}
           : {

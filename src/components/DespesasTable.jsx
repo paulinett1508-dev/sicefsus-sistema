@@ -8,6 +8,7 @@ import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
+import { NATUREZAS_DESPESA } from "../config/constants"; // mapeia código → rótulo (fallback seguro abaixo)
 
 const PRIMARY = "#154360";
 const ACCENT = "#4A90E2";
@@ -28,7 +29,7 @@ export default function DespesasTable({
   const navigate = useNavigate();
   const [excluindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
-  const [modoVisualizacao, setModoVisualizacao] = useState("resumido");
+  const [modoVisualizacao, setModoVisualizacao] = useState("detalhado");
   const [modoAgrupamento, setModoAgrupamento] = useState("agrupado"); // 🆕
 
   // ✅ AGRUPAR DESPESAS POR EMENDA
@@ -52,7 +53,11 @@ export default function DespesasTable({
     return Object.values(grupos);
   }, [despesas, emendas]);
 
-  // ✅ Formatar datas
+  // =====================================================
+  // 📦 HELPERS (datas, pick, natureza, ação, CNPJ, município/UF)
+  // =====================================================
+
+  // ✅ Formatar datas (Firestore Timestamp, ISO string, Date, number)
   function formatarDataFirestore(data) {
     if (!data) return "-";
 
@@ -85,6 +90,68 @@ export default function DespesasTable({
     }
   }
 
+  // ✅ utilitário pick (pega o primeiro campo válido)
+  const pick = (obj, keys) => {
+    if (!obj) return undefined;
+    for (const k of keys) {
+      const v = obj[k];
+      if (v !== undefined && v !== null && v !== "") return v;
+    }
+    return undefined;
+  };
+
+  // ✅ tabela de natureza (código → rótulo) com fallback
+  const naturezaMap = useMemo(() => {
+    try {
+      if (Array.isArray(NATUREZAS_DESPESA)) {
+        return Object.fromEntries(
+          NATUREZAS_DESPESA.map((n) => [
+            n.value ?? n.codigo ?? n,
+            n.label ?? n.nome ?? n,
+          ]),
+        );
+      }
+    } catch (e) {
+      // ignora
+    }
+    return {};
+  }, []);
+
+  const getNaturezaLabel = (despesa) => {
+    const codigo = pick(despesa, [
+      "natureza",
+      "naturezaDespesa",
+      "codNatureza",
+      "natureza_despesa",
+    ]);
+    const rotuloDireto = pick(despesa, [
+      "naturezaLabel",
+      "naturezaDescricao",
+      "natureza_descricao",
+    ]);
+    return rotuloDireto || naturezaMap[codigo] || codigo || "-";
+  };
+
+
+
+  const getMunicipioUF = (despesa) => {
+    let mun = pick(despesa, ["municipio", "municipioNome", "cidade"]);
+    let uf = pick(despesa, ["uf", "estado"]);
+
+    if (!mun || !uf) {
+      const emenda = emendas?.find((e) => e.id === despesa.emendaId);
+      if (emenda) {
+        mun = mun || pick(emenda, ["municipio", "municipioNome", "cidade"]);
+        uf = uf || pick(emenda, ["uf", "estado"]);
+      }
+    }
+    return mun || uf ? `${mun || ""}${uf ? `/${uf}` : ""}` : "-";
+  };
+
+  // =====================================================
+  // 🔎 Info da Emenda e Status
+  // =====================================================
+
   // ✅ Buscar dados da emenda
   function getEmendaInfo(emendaId) {
     if (!emendas || !emendaId) return "-";
@@ -96,13 +163,11 @@ export default function DespesasTable({
     return `${numero} - ${parlamentar}`;
   }
 
-  // ✅ CORREÇÃO: Obter objeto/custeio da emenda
+  // ✅ Objeto/tipo da emenda
   function getObjetoEmenda(emendaId) {
     if (!emendas || !emendaId) return "N/A";
     const emenda = emendas.find((e) => e.id === emendaId);
-
     if (!emenda) return "N/A";
-
     // Campo correto: tipoEmenda (ex: "Custeio PAP", "Custeio MAC", etc.)
     return emenda.tipoEmenda || emenda.tipo || "N/A";
   }
@@ -124,11 +189,11 @@ export default function DespesasTable({
     return cores[objeto] || "#6c757d";
   }
 
-  // ✅ CORREÇÃO: Status com cores diferenciadas
+  // ✅ Status com cores diferenciadas
   function getStatusColor(status) {
     if (!status) return "#6c757d";
 
-    const statusLimpo = status.toUpperCase().trim();
+    const statusLimpo = String(status).toUpperCase().trim();
 
     const cores = {
       PENDENTE: "#6c757d",
@@ -142,12 +207,12 @@ export default function DespesasTable({
     return cores[statusLimpo] || "#6c757d";
   }
 
-  // ✅ CORREÇÃO: Formatar status para exibição
+  // ✅ Formatar status para exibição
   function formatarStatus(status) {
     if (!status) return "Pendente";
 
     // Se status for "EXECUTADA", mostrar "Pago"
-    const statusLimpo = status.toUpperCase().trim();
+    const statusLimpo = String(status).toUpperCase().trim();
 
     const statusMap = {
       EXECUTADA: "Pago",
@@ -160,6 +225,10 @@ export default function DespesasTable({
 
     return statusMap[statusLimpo] || status;
   }
+
+  // =====================================================
+  // 🗑️ Ações
+  // =====================================================
 
   // ✅ Excluir despesa
   async function handleExcluir(despesa) {
@@ -194,15 +263,7 @@ export default function DespesasTable({
 
   // ✅ Handlers
   function handleEditar(despesa) {
-    console.log("🔧 DespesasTable.handleEditar CHAMADO:", {
-      despesaId: despesa?.id,
-      despesaDiscriminacao: despesa?.discriminacao,
-      temOnEdit: !!onEdit,
-      tipoOnEdit: typeof onEdit,
-    });
-
     if (onEdit && typeof onEdit === "function") {
-      console.log("✅ DespesasTable: Chamando onEdit");
       onEdit(despesa);
     } else {
       console.error("❌ DespesasTable: onEdit não é uma função!", {
@@ -221,12 +282,11 @@ export default function DespesasTable({
     setConfirmExclusao(despesa);
   }
 
-  // ✅ RENDERIZAR LINHA DE DESPESA
+  // =====================================================
+  // 🧱 Render da linha (mantém ordem com os <th>)
+  // =====================================================
   const renderDespesaRow = (despesa, index, showEmenda = true) => (
-    <tr
-      key={despesa.id}
-      style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
-    >
+    <tr key={despesa.id} style={index % 2 === 0 ? styles.evenRow : styles.oddRow}>
       {showEmenda && (
         <td style={styles.td}>
           <div style={styles.emendaCell}>{getEmendaInfo(despesa.emendaId)}</div>
@@ -237,61 +297,67 @@ export default function DespesasTable({
           <span
             style={{
               ...styles.tipoBadge,
-              backgroundColor: getObjetoColor(
-                getObjetoEmenda(despesa.emendaId),
-              ),
+              backgroundColor: getObjetoColor(getObjetoEmenda(despesa.emendaId)),
             }}
           >
             {getObjetoEmenda(despesa.emendaId)}
           </span>
         </td>
       )}
+
+      {/* FORNECEDOR */}
       <td style={styles.td}>
         <div style={styles.fornecedorCell}>{despesa.fornecedor || "-"}</div>
       </td>
+
+      </span>
+        </td>
+      )}
+
+      {/* VALOR */}
       <td style={styles.tdValue}>
-        R${" "}
-        {(despesa.valor || 0).toLocaleString("pt-BR", {
-          minimumFractionDigits: 2,
-        })}
+        R{"$"} {Number(despesa.valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
       </td>
+
+      {/* STATUS */}
       <td style={styles.td}>
-        <span
-          style={{
-            ...styles.statusBadge,
-            backgroundColor: getStatusColor(despesa.status),
-          }}
-        >
+        <span style={{ ...styles.statusBadge, backgroundColor: getStatusColor(despesa.status) }}>
           {formatarStatus(despesa.status)}
         </span>
       </td>
+
+      {/* Bloco Detalhado: Natureza, Ação, Contrato, Discriminação */}
       {modoVisualizacao === "detalhado" && (
         <>
-          <td style={styles.td}>
-            <span style={styles.numeroCell}>
-              {despesa.numeroContrato || "-"}
-            </span>
+          <td style={styles.td}>{getNaturezaLabel(despesa)}</td>
+                    <td style={styles.td}>
+            <span style={styles.numeroCell}>{despesa.numeroContrato || "-"}</span>
           </td>
           <td style={styles.td}>
-            <div style={styles.discriminacaoCell}>
-              {despesa.discriminacao || "-"}
-            </div>
+            <div style={styles.discriminacaoCell}>{despesa.discriminacao || "-"}</div>
           </td>
         </>
       )}
+
+      {/* Nº EMPENHO, Nº NF, DATA PGTO */}
       <td style={styles.td}>
         <span style={styles.numeroCell}>{despesa.numeroEmpenho || "-"}</span>
       </td>
       <td style={styles.td}>
-        <span style={styles.numeroCell}>
-          {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
-        </span>
+        <span style={styles.numeroCell}>{despesa.numeroNotaFiscal || despesa.numeroNota || "-"}</span>
       </td>
       <td style={styles.td}>
-        <span style={styles.dataCell}>
-          {formatarDataFirestore(despesa.dataPagamento)}
-        </span>
+        <span style={styles.dataCell}>{formatarDataFirestore(despesa.dataPagamento)}</span>
       </td>
+
+      {/* Bloco Detalhado: Município/UF, Observação */}
+      {modoVisualizacao === "detalhado" && (
+        <>
+          <td style={styles.td}>{getMunicipioUF(despesa)}</td>
+                  </>
+      )}
+
+      {/* AÇÕES */}
       <td style={styles.tdActions}>
         <div style={styles.actionsContainer}>
           <button
@@ -299,10 +365,6 @@ export default function DespesasTable({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log("🖱️ BOTÃO EDITAR CLICADO (DespesasTable):", {
-                id: despesa.id,
-                discriminacao: despesa.discriminacao,
-              });
               handleEditar(despesa);
             }}
             style={styles.editButton}
@@ -337,23 +399,21 @@ export default function DespesasTable({
           {/* 🆕 Toggle de Agrupamento */}
           <div style={styles.toggleGroup}>
             <button
-              onClick={() => setModoAgrupamento("agrupado")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("agrupado"); }}
               style={{
                 ...styles.toggleButton,
-                ...(modoAgrupamento === "agrupado"
-                  ? styles.toggleButtonActive
-                  : {}),
+                ...(modoAgrupamento === "agrupado" ? styles.toggleButtonActive : {}),
               }}
             >
               📁 Agrupado por Emenda
             </button>
             <button
-              onClick={() => setModoAgrupamento("lista")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoAgrupamento("lista"); }}
               style={{
                 ...styles.toggleButton,
-                ...(modoAgrupamento === "lista"
-                  ? styles.toggleButtonActive
-                  : {}),
+                ...(modoAgrupamento === "lista" ? styles.toggleButtonActive : {}),
               }}
             >
               📄 Lista Completa
@@ -363,23 +423,21 @@ export default function DespesasTable({
           {/* Toggle Resumido/Detalhado */}
           <div style={styles.toggleGroup}>
             <button
-              onClick={() => setModoVisualizacao("resumido")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("resumido"); }}
               style={{
                 ...styles.toggleButton,
-                ...(modoVisualizacao === "resumido"
-                  ? styles.toggleButtonActive
-                  : {}),
+                ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
               }}
             >
               📊 Resumido
             </button>
             <button
-              onClick={() => setModoVisualizacao("detalhado")}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setModoVisualizacao("detalhado"); }}
               style={{
                 ...styles.toggleButton,
-                ...(modoVisualizacao === "detalhado"
-                  ? styles.toggleButtonActive
-                  : {}),
+                ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),
               }}
             >
               📋 Detalhado
@@ -396,9 +454,7 @@ export default function DespesasTable({
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>💰</div>
             <h3 style={styles.emptyTitle}>Nenhuma despesa cadastrada</h3>
-            <p style={styles.emptyText}>
-              Clique em "Nova Despesa" para adicionar registros
-            </p>
+            <p style={styles.emptyText}>Clique em "Nova Despesa" para adicionar registros</p>
           </div>
         ) : (
           <>
@@ -407,7 +463,7 @@ export default function DespesasTable({
             {/* ============================= */}
             {modoAgrupamento === "agrupado" ? (
               <div style={styles.groupedContainer}>
-                {despesasAgrupadas.map((grupo, grupoIndex) => {
+                {despesasAgrupadas.map((grupo) => {
                   const emenda = grupo.emenda;
                   const despesasDoGrupo = grupo.despesas;
 
@@ -416,20 +472,14 @@ export default function DespesasTable({
                       {/* Header da Emenda */}
                       <div style={styles.emendaHeader}>
                         <div style={styles.emendaInfoHeader}>
-                          <h3 style={styles.emendaNumero}>
-                            Emenda {emenda.numero || "N/A"}
-                          </h3>
+                          <h3 style={styles.emendaNumero}>Emenda {emenda.numero || "N/A"}</h3>
                           <span style={styles.parlamentarText}>
-                            {emenda.parlamentar ||
-                              emenda.autor ||
-                              "DR. BENJAMIM"}
+                            {emenda.parlamentar || emenda.autor || "-"}
                           </span>
                           <span
                             style={{
                               ...styles.tipoBadgeHeader,
-                              backgroundColor: getObjetoColor(
-                                getObjetoEmenda(emenda.id),
-                              ),
+                              backgroundColor: getObjetoColor(getObjetoEmenda(emenda.id)),
                             }}
                           >
                             {getObjetoEmenda(emenda.id)}
@@ -440,10 +490,7 @@ export default function DespesasTable({
                             {despesasDoGrupo.length} pagamento(s)
                           </span>
                           <span style={styles.statValue}>
-                            R${" "}
-                            {grupo.totalValor.toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                            })}
+                            R{"$"} {grupo.totalValor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                           </span>
                         </div>
                       </div>
@@ -454,10 +501,13 @@ export default function DespesasTable({
                           <thead>
                             <tr style={styles.headerRow}>
                               <th style={styles.th}>FORNECEDOR</th>
+
                               <th style={styles.th}>VALOR</th>
                               <th style={styles.th}>STATUS</th>
                               {modoVisualizacao === "detalhado" && (
                                 <>
+                                  <th style={styles.th}>NATUREZA</th>
+
                                   <th style={styles.th}>Nº CONTRATO</th>
                                   <th style={styles.th}>DISCRIMINAÇÃO</th>
                                 </>
@@ -465,9 +515,13 @@ export default function DespesasTable({
                               <th style={styles.th}>Nº EMPENHO</th>
                               <th style={styles.th}>Nº NF</th>
                               <th style={styles.th}>DATA PGTO</th>
-                              <th style={{ ...styles.th, textAlign: "center" }}>
-                                AÇÕES
-                              </th>
+                              {modoVisualizacao === "detalhado" && (
+                                <>
+                                  <th style={styles.th}>MUNICÍPIO/UF</th>
+
+                                </>
+                              )}
+                              <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -492,10 +546,13 @@ export default function DespesasTable({
                       <th style={styles.th}>EMENDA</th>
                       <th style={styles.th}>TIPO</th>
                       <th style={styles.th}>FORNECEDOR</th>
+
                       <th style={styles.th}>VALOR</th>
                       <th style={styles.th}>STATUS</th>
                       {modoVisualizacao === "detalhado" && (
                         <>
+                          <th style={styles.th}>NATUREZA</th>
+
                           <th style={styles.th}>Nº CONTRATO</th>
                           <th style={styles.th}>DISCRIMINAÇÃO</th>
                         </>
@@ -503,9 +560,13 @@ export default function DespesasTable({
                       <th style={styles.th}>Nº EMPENHO</th>
                       <th style={styles.th}>Nº NF</th>
                       <th style={styles.th}>DATA PGTO</th>
-                      <th style={{ ...styles.th, textAlign: "center" }}>
-                        AÇÕES
-                      </th>
+                      {modoVisualizacao === "detalhado" && (
+                        <>
+                          <th style={styles.th}>MUNICÍPIO/UF</th>
+
+                        </>
+                      )}
+                      <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -532,38 +593,30 @@ export default function DespesasTable({
               <div style={styles.despesaCard}>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Fornecedor:</span>
-                  <span style={styles.value}>
-                    {confirmExclusao.fornecedor || "-"}
-                  </span>
+                  <span style={styles.value}>{confirmExclusao.fornecedor || "-"}</span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Valor:</span>
                   <span style={styles.valueHighlight}>
-                    R${" "}
-                    {(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
+                    R{"$"}{" "}
+                    {Number(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                     })}
                   </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Nº Empenho:</span>
-                  <span style={styles.value}>
-                    {confirmExclusao.numeroEmpenho || "-"}
-                  </span>
+                  <span style={styles.value}>{confirmExclusao.numeroEmpenho || "-"}</span>
                 </div>
               </div>
               <div style={styles.warningMessage}>
                 <p style={{ margin: 0, fontSize: 14 }}>
-                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será
-                  restaurado.
+                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será restaurado.
                 </p>
               </div>
             </div>
             <div style={styles.modalFooter}>
-              <button
-                onClick={() => setConfirmExclusao(null)}
-                style={styles.cancelButton}
-              >
+              <button onClick={() => setConfirmExclusao(null)} style={styles.cancelButton}>
                 Cancelar
               </button>
               <button
@@ -571,9 +624,7 @@ export default function DespesasTable({
                 style={styles.confirmDeleteButton}
                 disabled={excluindo === confirmExclusao.id}
               >
-                {excluindo === confirmExclusao.id
-                  ? "Excluindo..."
-                  : "Confirmar Exclusão"}
+                {excluindo === confirmExclusao.id ? "Excluindo..." : "Confirmar Exclusão"}
               </button>
             </div>
           </div>
@@ -825,7 +876,7 @@ const styles = {
   },
 
   discriminacaoCell: {
-    maxWidth: 120,
+    maxWidth: 180,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",

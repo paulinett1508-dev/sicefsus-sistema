@@ -353,10 +353,10 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>Status</label>
+          <label style={styles.label}>Status Pagamento</label>
           <select
-            name="status"
-            value={formData.status}
+            name="statusPagamento"
+            value={formData.statusPagamento || "pendente"}
             onChange={handleInputChange}
             style={styles.select}
             disabled={modoVisualizacao}
