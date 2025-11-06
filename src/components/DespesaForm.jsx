@@ -151,6 +151,29 @@ const DespesaForm = ({
   const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
+  // ✅ FUNÇÃO PARA CONVERSÃO SEGURA DE DATAS
+  const convertToDateString = (dateValue) => {
+    if (!dateValue) return "";
+    
+    try {
+      // Se é Timestamp do Firebase (tem .seconds)
+      if (dateValue.seconds) {
+        return new Date(dateValue.seconds * 1000).toISOString().split("T")[0];
+      }
+      
+      // Se já é string ISO ou data válida
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split("T")[0];
+      }
+      
+      return "";
+    } catch (error) {
+      console.warn("⚠️ Erro ao converter data:", dateValue, error);
+      return "";
+    }
+  };
+
   // ✅ CONFIGURAÇÃO DE MODO SIMPLIFICADA
   const configModo = useMemo(() => {
     if (modoVisualizacao) return { modo: "visualizar", readOnly: true };
@@ -309,21 +332,9 @@ const DespesaForm = ({
           despesaParaEditar.numeroNota ||
           "",
         numeroNota: despesaParaEditar.numeroNota || "",
-        dataEmpenho: despesaParaEditar.dataEmpenho
-          ? (despesaParaEditar.dataEmpenho.seconds 
-              ? new Date(despesaParaEditar.dataEmpenho.seconds * 1000).toISOString().split("T")[0]
-              : new Date(despesaParaEditar.dataEmpenho).toISOString().split("T")[0])
-          : "",
-        dataLiquidacao: despesaParaEditar.dataLiquidacao
-          ? (despesaParaEditar.dataLiquidacao.seconds 
-              ? new Date(despesaParaEditar.dataLiquidacao.seconds * 1000).toISOString().split("T")[0]
-              : new Date(despesaParaEditar.dataLiquidacao).toISOString().split("T")[0])
-          : "",
-        dataPagamento: despesaParaEditar.dataPagamento
-          ? (despesaParaEditar.dataPagamento.seconds 
-              ? new Date(despesaParaEditar.dataPagamento.seconds * 1000).toISOString().split("T")[0]
-              : new Date(despesaParaEditar.dataPagamento).toISOString().split("T")[0])
-          : "",
+        dataEmpenho: convertToDateString(despesaParaEditar.dataEmpenho),
+        dataLiquidacao: convertToDateString(despesaParaEditar.dataLiquidacao),
+        dataPagamento: convertToDateString(despesaParaEditar.dataPagamento),
         acao:
           despesaParaEditar.acao || despesaParaEditar.acaoOrcamentaria || "",
         classificacaoFuncional: despesaParaEditar.classificacaoFuncional || "",
