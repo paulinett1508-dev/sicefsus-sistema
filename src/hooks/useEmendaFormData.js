@@ -1,5 +1,6 @@
 // src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO OTIMIZADO
 // ✅ CORREÇÕES: Re-renderização + Foco removido + Modal simples + Performance
+// ✅ NOVA CORREÇÃO: Planejamento de Despesas (acoesServicos) OPCIONAL
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -247,17 +248,11 @@ export const useEmendaFormData = () => {
       errors.dataAprovacao = "🚨 Data de Aprovação é obrigatória";
     } else if (dataAprov === "INVALID") {
       errors.dataAprovacao = "🚨 Data de Aprovação inválida";
-    } else {
-      if (dataAprov.getFullYear() < 2020) {
-        errors.dataAprovacao =
-          "🚨 Data de Aprovação não pode ser anterior a 2020";
-      }
-      if (dataAprov > hoje) {
-        errors.dataAprovacao = "🚨 Data de Aprovação não pode ser futura";
-      }
+    } else if (dataAprov > hoje) {
+      errors.dataAprovacao = "🚨 Data de Aprovação não pode ser futura";
     }
 
-    // 🚨 5️⃣ DATA DE VALIDADE - OBRIGATÓRIA
+    // 🚨 2️⃣ DATA DE VALIDADE - OBRIGATÓRIA
     if (
       !formData.dataValidade?.trim() ||
       formData.dataValidade === "dd/mm/aaaa"
@@ -265,219 +260,68 @@ export const useEmendaFormData = () => {
       errors.dataValidade = "🚨 Data de Validade é obrigatória";
     } else if (dataVal === "INVALID") {
       errors.dataValidade = "🚨 Data de Validade inválida";
-    } else {
-      if (dataVal <= hoje) {
-        errors.dataValidade = "🚨 Data de Validade deve ser futura";
-      }
-      if (dataAprov && dataAprov !== "INVALID" && dataVal <= dataAprov) {
-        errors.dataValidade =
-          "🚨 Data de Validade deve ser posterior à Data de Aprovação";
-      }
+    } else if (dataAprov && dataVal && dataVal < dataAprov) {
+      errors.dataValidade =
+        "🚨 Data de Validade deve ser posterior à Data de Aprovação";
     }
 
-    // ✅ MELHORIA 2: VALIDAÇÃO CRONOLÓGICA INTELIGENTE
-    // Só valida sequência se TODAS as datas estiverem preenchidas
-    const todasDatasPreenchidas =
-      formData.dataAprovacao?.trim() &&
-      formData.dataOb?.trim() &&
-      formData.inicioExecucao?.trim() &&
-      formData.finalExecucao?.trim() &&
-      formData.dataValidade?.trim();
-
-    if (todasDatasPreenchidas) {
-      // 🚨 2️⃣ DATA OB - Validar apenas se todas as datas estão preenchidas
+    // ✅ 3️⃣ DATA OB - OPCIONAL, MAS SE PREENCHIDA VALIDA
+    if (formData.dataOb?.trim() && formData.dataOb !== "dd/mm/aaaa") {
       if (dataOB === "INVALID") {
-        errors.dataOb = "🚨 Data do OB inválida";
-      } else if (dataOB) {
-        if (dataAprov && dataAprov !== "INVALID" && dataOB < dataAprov) {
-          errors.dataOb =
-            "🚨 Data do OB não pode ser anterior à Data de Aprovação";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataOB > dataVal) {
-          errors.dataOb =
-            "🚨 Data do OB não pode ser posterior à Data de Validade";
-        }
+        errors.dataOb = "🚨 Data OB inválida";
+      } else if (dataAprov && dataOB && dataOB < dataAprov) {
+        errors.dataOb = "🚨 Data OB deve ser posterior à Data de Aprovação";
       }
+    }
 
-      // 🚨 3️⃣ INÍCIO DA EXECUÇÃO - Validar apenas se todas as datas estão preenchidas
+    // ✅ 4️⃣ INÍCIO DA EXECUÇÃO - OPCIONAL, MAS SE PREENCHIDA VALIDA
+    if (
+      formData.inicioExecucao?.trim() &&
+      formData.inicioExecucao !== "dd/mm/aaaa"
+    ) {
       if (dataInicio === "INVALID") {
-        errors.inicioExecucao = "🚨 Data de Início da Execução inválida";
-      } else if (dataInicio) {
-        if (dataAprov && dataAprov !== "INVALID" && dataInicio < dataAprov) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução não pode ser anterior à Data de Aprovação";
-        }
-        if (dataOB && dataOB !== "INVALID" && dataInicio < dataOB) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução deve ser posterior ou igual à Data do OB";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataInicio > dataVal) {
-          errors.inicioExecucao =
-            "🚨 Início da Execução não pode ser posterior à Data de Validade";
-        }
+        errors.inicioExecucao = "🚨 Data de Início inválida";
+      } else if (dataAprov && dataInicio && dataInicio < dataAprov) {
+        errors.inicioExecucao =
+          "🚨 Início da Execução deve ser posterior à Aprovação";
+      } else if (dataOB && dataInicio && dataInicio < dataOB) {
+        errors.inicioExecucao =
+          "🚨 Início da Execução deve ser posterior à Data OB";
       }
+    }
 
-      // 🚨 4️⃣ FINAL DA EXECUÇÃO - Validar apenas se todas as datas estão preenchidas
+    // ✅ 5️⃣ FINAL DA EXECUÇÃO - OPCIONAL, MAS SE PREENCHIDA VALIDA
+    if (
+      formData.finalExecucao?.trim() &&
+      formData.finalExecucao !== "dd/mm/aaaa"
+    ) {
       if (dataFinal === "INVALID") {
-        errors.finalExecucao = "🚨 Data de Final da Execução inválida";
-      } else if (dataFinal) {
-        if (dataInicio && dataInicio !== "INVALID" && dataFinal <= dataInicio) {
-          errors.finalExecucao =
-            "🚨 Final da Execução deve ser posterior ao Início da Execução";
-        }
-        if (dataVal && dataVal !== "INVALID" && dataFinal > dataVal) {
-          errors.finalExecucao =
-            "🚨 Final da Execução não pode ser posterior à Data de Validade";
-        }
-        if (dataAprov && dataAprov !== "INVALID" && dataFinal < dataAprov) {
-          errors.finalExecucao =
-            "🚨 Final da Execução não pode ser anterior à Data de Aprovação";
-        }
-        if (dataOB && dataOB !== "INVALID" && dataFinal < dataOB) {
-          errors.finalExecucao =
-            "🚨 Final da Execução deve ser posterior à Data do OB";
-        }
-      }
-
-      // ============================================
-      // 🚨 VERIFICAÇÃO DE SEQUÊNCIA CRONOLÓGICA COMPLETA
-      // ============================================
-      if (
-        dataAprov &&
-        dataAprov !== "INVALID" &&
-        dataOB &&
-        dataOB !== "INVALID" &&
-        dataInicio &&
-        dataInicio !== "INVALID" &&
-        dataFinal &&
-        dataFinal !== "INVALID" &&
-        dataVal &&
-        dataVal !== "INVALID"
-      ) {
-        // Sequência obrigatória: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade
-        if (
-          !(
-            dataAprov <= dataOB &&
-            dataOB <= dataInicio &&
-            dataInicio <= dataFinal &&
-            dataFinal <= dataVal
-          )
-        ) {
-          if (
-            !errors.dataAprovacao &&
-            !errors.dataOb &&
-            !errors.inicioExecucao &&
-            !errors.finalExecucao &&
-            !errors.dataValidade
-          ) {
-            errors.cronogramaGeral =
-              "🚨 Sequência cronológica inválida: Aprovação ≤ OB ≤ Início ≤ Final ≤ Validade";
-          }
-        }
-      }
-    } else {
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "⚠️ CRONOGRAMA: Validação de sequência pulada - nem todas as datas preenchidas",
-        );
+        errors.finalExecucao = "🚨 Data Final inválida";
+      } else if (dataInicio && dataFinal && dataFinal < dataInicio) {
+        errors.finalExecucao =
+          "🚨 Final da Execução deve ser posterior ao Início";
+      } else if (dataVal && dataFinal && dataFinal > dataVal) {
+        errors.finalExecucao =
+          "🚨 Final da Execução não pode ultrapassar a Data de Validade";
       }
     }
 
-    // ============================================
-    // ✅ MELHORIA 1: AÇÕES E SERVIÇOS - ARRAY VAZIO PERMITIDO NA CRIAÇÃO
-    // ============================================
-
-    // Se estamos em modo de edição OU formulário tem dados significativos preenchidos,
-    // então validar Ações e Serviços
-    const formularioAvancado =
-      autorLimpo &&
-      municipioLimpo &&
-      programaLimpo &&
-      objetoLimpo &&
-      beneficiarioLimpo &&
-      bancoLimpo &&
-      agenciaLimpa &&
-      contaLimpa;
-
-    // ============================================
-    // ✅ CORREÇÃO: AÇÕES E SERVIÇOS - ESTRUTURA CORRETA
-    // ============================================
-    if (isEdicao || formularioAvancado) {
-      if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
-        errors.acoesServicos =
-          "🚨 Pelo menos uma meta deve ser cadastrada em Ações e Serviços";
-      } else {
-        let hasValidMeta = false;
-
-        formData.acoesServicos.forEach((meta, index) => {
-          // ✅ CORRIGIDO: Validar apenas campos existentes (estrategia e valorAcao)
-          const estrategiaLimpa = cleanField(meta.estrategia);
-          const temValorValido =
-            meta.valorAcao &&
-            parseFloat(
-              meta.valorAcao
-                .replace(/[R$\s]/g, "")
-                .replace(/\./g, "")
-                .replace(",", "."),
-            ) > 0;
-
-          if (
-            estrategiaLimpa &&
-            estrategiaLimpa.length >= 5 &&
-            temValorValido
-          ) {
-            hasValidMeta = true;
-          } else {
-            // Erros específicos
-            if (!estrategiaLimpa || estrategiaLimpa.length < 5) {
-              errors[`meta_${index}_estrategia`] =
-                "🚨 Natureza de despesa deve ter pelo menos 5 caracteres";
-            }
-            if (!temValorValido) {
-              errors[`meta_${index}_valor`] = "🚨 Valor é obrigatório";
-            }
-          }
-        });
-
-        if (!hasValidMeta) {
-          errors.acoesServicos =
-            '🚨 O campo "Valor" da Natureza de Despesas está em branco.';
-        }
-      }
-    } else {
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "⚠️ AÇÕES E SERVIÇOS: Validação pulada - criação inicial permitida",
-        );
-      }
-    }
-
-    // ============================================
-    // VALIDAÇÃO CNPJ MUNICÍPIO (OPCIONAL)
-    // ============================================
-    if (formData.cnpj) {
-      const cnpjLimpo = limparCNPJ(formData.cnpj);
-      if (cnpjLimpo && cnpjLimpo.length === 14) {
-        if (!validarCNPJ(formData.cnpj)) {
-          errors.cnpj = "CNPJ do município é inválido";
-        }
-      } else if (cnpjLimpo && cnpjLimpo.length > 0) {
-        errors.cnpj = "CNPJ do município está incompleto";
-      }
-    }
+    // ✅ MELHORIA APLICADA: Validação completa de acoesServicos agora é OPCIONAL
+    // O componente AcoesServicos.jsx já valida individualmente ao adicionar metas
+    // Não precisa mais forçar ter pelo menos uma meta cadastrada
 
     return errors;
-  }, [formData, isEdicao, cleanField]);
+  }, [formData, cleanField]);
 
-  // ✅ ORDENAR ERROS POR PRIORIDADE
+  // ✅ ORDENAÇÃO DOS ERROS POR SEÇÃO
   const getOrderedFieldErrors = useCallback(() => {
-    const errors = getFieldErrors();
-    const fieldOrder = [
+    const fieldErrorsResult = getFieldErrors();
+
+    const sectionOrder = [
       "numero",
       "autor",
       "municipio",
       "uf",
-      "cnpj",
       "programa",
       "objeto",
       "valor",
@@ -486,185 +330,46 @@ export const useEmendaFormData = () => {
       "agencia",
       "conta",
       "dataAprovacao",
+      "dataValidade",
       "dataOb",
       "inicioExecucao",
       "finalExecucao",
-      "dataValidade",
       "acoesServicos",
     ];
 
-    const orderedErrors = {};
-    fieldOrder.forEach((field) => {
-      if (errors[field]) orderedErrors[field] = errors[field];
-    });
-
-    Object.keys(errors).forEach((field) => {
-      if (!orderedErrors[field]) orderedErrors[field] = errors[field];
-    });
-
-    return orderedErrors;
+    return Object.keys(fieldErrorsResult)
+      .sort((a, b) => {
+        const indexA = sectionOrder.indexOf(a);
+        const indexB = sectionOrder.indexOf(b);
+        return indexA - indexB;
+      })
+      .reduce((acc, key) => {
+        acc[key] = fieldErrorsResult[key];
+        return acc;
+      }, {});
   }, [getFieldErrors]);
 
-  // 🚨 MODAL SIMPLES - SUBSTITUINDO FOCO INTELIGENTE
-  const showSimpleErrorModal = useCallback((fieldErrors) => {
-    const errorCount = Object.keys(fieldErrors).length;
-    const errorList = Object.values(fieldErrors)
-      .slice(0, 5)
-      .map((err) => `• ${err.replace("🚨 ", "")}`)
-      .join("\n");
+  // 🚨 MODAL SIMPLES DE ERRO - SEM FOCO NEM SCROLL
+  const showSimpleErrorModal = useCallback((errors) => {
+    const firstError = Object.entries(errors)[0];
+    if (!firstError) return;
 
-    alert(
-      `⚠️ FORMULÁRIO INCOMPLETO\n\n` +
-        `${errorCount} campo(s) obrigatório(s):\n\n${errorList}\n\n` +
-        `${errorCount > 5 ? `... e mais ${errorCount - 5} campos\n\n` : ""}` +
-        `✅ Preencha os campos em vermelho e tente novamente.`,
-    );
+    const [field, message] = firstError;
+    const errorCount = Object.keys(errors).length;
+
+    let modalMessage = `🚨 FORMULÁRIO INCOMPLETO\n\n${errorCount} campo(s) obrigatório(s):\n`;
+
+    Object.entries(errors).forEach(([key, msg]) => {
+      modalMessage += `• ${msg.replace("🚨 ", "")}\n`;
+    });
+
+    modalMessage +=
+      "\n⚠️ Preencha os campos em vermelho e tente novamente.\n\n✅ Sistema com melhorias aplicadas.";
+
+    alert(modalMessage);
   }, []);
 
-  // ✅ INICIALIZAÇÃO
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const inicializar = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        if (isEdicao && id) {
-          const emendaDoc = await getDoc(doc(db, "emendas", id));
-
-          if (!emendaDoc.exists()) {
-            throw new Error("Emenda não encontrada");
-          }
-
-          const emendaData = emendaDoc.data();
-          const valorFormatado =
-            typeof emendaData.valorRecurso === "number"
-              ? emendaData.valorRecurso.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })
-              : emendaData.valorRecurso || emendaData.valor || "";
-
-          setFormData({
-            numero: emendaData.numero || "",
-            autor: emendaData.autor || emendaData.parlamentar || "",
-            municipio: emendaData.municipio || "",
-            uf: emendaData.uf || "",
-            cnpj: emendaData.cnpj || "",
-            valor: valorFormatado,
-            valorRecurso: valorFormatado,
-            programa: emendaData.programa || "",
-            beneficiario: emendaData.beneficiario || "",
-            cnpjBeneficiario: emendaData.cnpjBeneficiario || "",
-            tipo: emendaData.tipo || "Individual",
-            modalidade: emendaData.modalidade || "",
-            objeto: emendaData.objeto || "",
-            banco: emendaData.banco || "",
-            agencia: emendaData.agencia || "",
-            conta: emendaData.conta || "",
-            dataAprovacao: emendaData.dataAprovacao || "",
-            dataValidade:
-              emendaData.dataValidade || emendaData.dataValidada || "",
-            inicioExecucao: emendaData.inicioExecucao || "",
-            finalExecucao: emendaData.finalExecucao || "",
-            numeroProposta: emendaData.numeroProposta || "",
-            funcional: emendaData.funcional || "",
-            dataOb: emendaData.dataOb || "",
-            acoesServicos: emendaData.acoesServicos || [],
-            observacoes: emendaData.observacoes || "",
-          });
-        } else {
-          if (user?.tipo === "operador" && user?.municipio && user?.uf) {
-            setFormData((prev) => ({
-              ...prev,
-              municipio: user.municipio,
-              uf: user.uf,
-            }));
-          }
-        }
-
-        setIsReady(true);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) {
-      inicializar();
-    }
-  }, [user, id, isEdicao]);
-
-  // ✅ HANDLER PRINCIPAL OTIMIZADO
-  const handleInputChange = useCallback(
-    (e) => {
-      const { name, value } = e.target;
-
-      // ✅ OTIMIZAÇÃO: Batch updates
-      const updateStates = () => {
-        // 📄 Atualizar formData
-        setFormData((prev) => {
-          // ✅ OTIMIZAÇÃO: Só atualizar se valor realmente mudou
-          if (prev[name] === value) return prev;
-
-          return {
-            ...prev,
-            [name]: value,
-          };
-        });
-
-        // 🧹 Limpeza de erros OTIMIZADA
-        setFieldErrors((prev) => {
-          // ✅ OTIMIZAÇÃO: Só limpar se erro existir
-          if (!prev[name]) return prev;
-
-          const newErrors = { ...prev };
-          delete newErrors[name];
-
-          // Limpeza condicional de erros relacionados
-          const cleanValue = cleanField(value);
-          if (cleanValue && cleanValue.length > 0) {
-            // Remove erros relacionados
-            const relatedFields = {
-              autor: ["autor"],
-              objeto: ["objeto"],
-              valor: ["valor"],
-              programa: ["programa"],
-              numero: ["numero"],
-              municipio: ["municipio"],
-              uf: ["uf"],
-            };
-
-            if (relatedFields[name]) {
-              relatedFields[name].forEach((field) => {
-                delete newErrors[field];
-              });
-            }
-          }
-
-          return newErrors;
-        });
-      };
-
-      updateStates();
-
-      // ✅ LOGS OTIMIZADOS: Menos verbose
-      if (
-        process.env.NODE_ENV === "development" &&
-        ["objeto", "autor", "numero", "valor"].includes(name)
-      ) {
-        console.log(`📄 Campo ${name} alterado para: "${value}"`);
-      }
-    },
-    [cleanField],
-  );
-
+  // ✅ LIMPEZA DE ERRO DE CAMPO ESPECÍFICO
   const clearFieldError = useCallback((fieldName) => {
     setFieldErrors((prev) => {
       const newErrors = { ...prev };
@@ -673,72 +378,160 @@ export const useEmendaFormData = () => {
     });
   }, []);
 
-  const toggleSection = useCallback((sectionName) => {
-    setExpandedSections((prev) => ({
+  // 🔄 HANDLERS
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [sectionName]: !prev[sectionName],
+      [name]: value,
     }));
   }, []);
 
-  const buscarDadosFornecedor = useCallback(async (cnpj) => {
-    try {
-      const cnpjLimpo = cnpj.replace(/\D/g, "");
-      const response = await fetch(
-        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
-      );
-
-      if (response.ok) {
-        const dados = await response.json();
-        setFormData((prev) => ({
-          ...prev,
-          beneficiario: dados.nome_fantasia || dados.razao_social,
-          razaoSocial: dados.razao_social,
-        }));
-
-        setToast({
-          show: true,
-          message: `✅ Dados do CNPJ carregados: ${dados.nome_fantasia || dados.razao_social}`,
-          type: "success",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao buscar CNPJ:", error);
-    }
+  const toggleSection = useCallback((section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   }, []);
 
-  // 🚨 VALIDAÇÃO CRÍTICA - CORRIGIDA COM LIMPEZA UNIVERSAL
+  // 🔍 BUSCAR DADOS DO FORNECEDOR (CNPJ)
+  const buscarDadosFornecedor = useCallback(
+    async (cnpj) => {
+      const cnpjLimpo = limparCNPJ(cnpj);
+
+      if (cnpjLimpo.length !== 14) {
+        return { error: "CNPJ deve ter 14 dígitos" };
+      }
+
+      if (!validarCNPJ(cnpj)) {
+        return { error: "CNPJ inválido" };
+      }
+
+      try {
+        const response = await fetch(
+          `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+        );
+
+        if (!response.ok) {
+          return { error: "CNPJ não encontrado na Receita Federal" };
+        }
+
+        const data = await response.json();
+        return {
+          success: true,
+          razaoSocial: data.razao_social || data.nome_fantasia,
+          nomeFantasia: data.nome_fantasia,
+        };
+      } catch (error) {
+        return { error: "Erro ao consultar CNPJ. Verifique sua conexão." };
+      }
+    },
+    [validarCNPJ, limparCNPJ],
+  );
+
+  // 🔄 CARREGAR DADOS DA EMENDA (SE EDIÇÃO)
+  useEffect(() => {
+    if (!id) {
+      setIsReady(true);
+      return;
+    }
+
+    const carregarEmenda = async () => {
+      try {
+        setLoading(true);
+        const docRef = doc(db, "emendas", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+
+          setFormData({
+            numero: data.numero || "",
+            autor: data.autor || data.parlamentar || "",
+            municipio: data.municipio || "",
+            uf: data.uf || "",
+            cnpj: data.cnpj || "",
+            valor:
+              data.valor?.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }) || "",
+            valorRecurso:
+              data.valorRecurso?.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }) || "",
+            programa: data.programa || "",
+            beneficiario: data.beneficiario || "",
+            cnpjBeneficiario: data.cnpjBeneficiario || "",
+            tipo: data.tipo || "Custeio PAP",
+            modalidade: data.modalidade || "",
+            objeto: data.objeto || "",
+            banco: data.banco || "",
+            agencia: data.agencia || "",
+            conta: data.conta || "",
+            dataAprovacao: data.dataAprovacao || "",
+            dataValidade: data.dataValidade || "",
+            inicioExecucao: data.inicioExecucao || "",
+            finalExecucao: data.finalExecucao || "",
+            numeroProposta: data.numeroProposta || "",
+            funcional: data.funcional || "",
+            dataOb: data.dataOb || "",
+            dataUltimaAtualizacao:
+              data.dataUltimaAtualizacao ||
+              new Date().toISOString().split("T")[0],
+            acoesServicos: data.acoesServicos || [],
+            observacoes: data.observacoes || "",
+          });
+
+          setIsReady(true);
+        } else {
+          setError("Emenda não encontrada");
+          navigate("/emendas");
+        }
+      } catch (error) {
+        setError("Erro ao carregar emenda: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarEmenda();
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [id, navigate]);
+
+  // 🚨 VALIDAÇÃO CRÍTICA ANTES DE SALVAR
   const criticalValidation = useCallback(() => {
     const errors = [];
 
     // SEÇÃO IDENTIFICAÇÃO - LIMPEZA APLICADA
     const numeroLimpo = cleanField(formData.numero);
     if (!numeroLimpo || numeroLimpo.length < 3)
-      errors.push(
-        "❌ CRÍTICO: Número da emenda obrigatório (mín. 3 caracteres)",
-      );
+      errors.push("❌ CRÍTICO: Número da emenda obrigatório (mín. 3 chars)");
 
     const autorLimpo = cleanField(formData.autor);
     if (!autorLimpo || autorLimpo.length < 3)
-      errors.push("❌ CRÍTICO: Parlamentar obrigatório (mín. 3 caracteres)");
+      errors.push("❌ CRÍTICO: Parlamentar obrigatório (mín. 3 chars)");
 
     const municipioLimpo = cleanField(formData.municipio);
     if (!municipioLimpo || municipioLimpo.length < 2)
-      errors.push("❌ CRÍTICO: Município obrigatório (mín. 2 caracteres)");
+      errors.push("❌ CRÍTICO: Município obrigatório (mín. 2 chars)");
 
     const ufLimpo = cleanField(formData.uf);
     if (!ufLimpo || ufLimpo.length !== 2)
-      errors.push("❌ CRÍTICO: UF obrigatória (exatos 2 caracteres)");
+      errors.push("❌ CRÍTICO: UF obrigatória (exatos 2 chars)");
 
     // SEÇÃO DADOS BÁSICOS - LIMPEZA APLICADA
     const programaLimpo = cleanField(formData.programa);
     if (!programaLimpo || programaLimpo.length < 5)
-      errors.push("❌ CRÍTICO: Programa obrigatório (mín. 5 caracteres)");
+      errors.push("❌ CRÍTICO: Programa obrigatório (mín. 5 chars)");
 
     const objetoLimpo = cleanField(formData.objeto);
     if (!objetoLimpo || objetoLimpo.length < 10)
-      errors.push(
-        "❌ CRÍTICO: Objeto da Proposta obrigatório (mín. 10 caracteres)",
-      );
+      errors.push("❌ CRÍTICO: Objeto obrigatório (mín. 10 chars)");
 
     if (!formData.valor?.toString().trim())
       errors.push("❌ CRÍTICO: Valor do Recurso obrigatório");
@@ -783,29 +576,7 @@ export const useEmendaFormData = () => {
         errors.push("❌ CRÍTICO: Data de Validade obrigatória");
       }
 
-      // ✅ MELHORIA APLICADA: SÓ VALIDA AÇÕES E SERVIÇOS SE NECESSÁRIO
-      if (!formData.acoesServicos || formData.acoesServicos.length === 0) {
-        errors.push("❌ CRÍTICO: Pelo menos uma meta deve ser cadastrada");
-      } else {
-        const hasValidMeta = formData.acoesServicos.some((meta) => {
-          const descricaoLimpa = cleanField(meta.estrategia);
-          const temValorValido =
-            meta.valorAcao &&
-            parseFloat(
-              meta.valorAcao
-                .replace(/[R$\s]/g, "")
-                .replace(/\./g, "")
-                .replace(",", "."),
-            ) > 0;
-
-          return descricaoLimpa && descricaoLimpa.length >= 5 && temValorValido;
-        });
-        if (!hasValidMeta) {
-          errors.push(
-            "❌ CRÍTICO: Pelo menos uma meta válida deve ser preenchida (mín. 5 caracteres)",
-          );
-        }
-      }
+      // ✅ VALIDAÇÃO DE AÇÕES E SERVIÇOS REMOVIDA - AGORA É OPCIONAL
     }
 
     return errors;
@@ -895,31 +666,150 @@ export const useEmendaFormData = () => {
         };
 
         // SALVAR NO FIREBASE
+        let emendaId = id; // Para edição
+
         if (isEdicao) {
           await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
           setToast({
             show: true,
-            message:
-              "✅ Emenda atualizada com sucesso! Melhorias aplicadas funcionando.",
+            message: "✅ Emenda atualizada com sucesso!",
             type: "success",
           });
+
+          // 🔄 EDIÇÃO: Voltar para listagem após 1.2s
+          setTimeout(() => {
+            navigate("/emendas");
+          }, 1200);
         } else {
+          // 🆕 CRIAÇÃO: Salvar e perguntar sobre primeira despesa
           dadosParaSalvar.criadoEm = serverTimestamp();
           dadosParaSalvar.criadoPor = user.uid || user.email;
-          await addDoc(collection(db, "emendas"), dadosParaSalvar);
+          const docRef = await addDoc(
+            collection(db, "emendas"),
+            dadosParaSalvar,
+          );
+          emendaId = docRef.id; // Capturar ID da nova emenda
+
           setToast({
             show: true,
-            message:
-              "✅ Emenda cadastrada com sucesso! Sistema com melhorias implementadas.",
+            message: "✅ Emenda cadastrada com sucesso!",
             type: "success",
           });
-        }
 
-        setTimeout(() => {
-          // 🔧 CRÍTICO: Não navegar automaticamente
-          // Deixar o componente decidir quando navegar
-          console.log("✅ Emenda salva com sucesso");
-        }, 800);
+          // 🎯 MODAL BONITO CUSTOMIZADO
+          setTimeout(() => {
+            // Criar modal customizado no DOM
+            const modalOverlay = document.createElement("div");
+            modalOverlay.style.cssText = `
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: rgba(0, 0, 0, 0.6);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              z-index: 10000;
+              animation: fadeIn 0.2s ease;
+            `;
+
+            const modalBox = document.createElement("div");
+            modalBox.style.cssText = `
+              background: white;
+              border-radius: 12px;
+              padding: 30px;
+              max-width: 450px;
+              width: 90%;
+              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+              animation: slideUp 0.3s ease;
+            `;
+
+            modalBox.innerHTML = `
+              <style>
+                @keyframes fadeIn {
+                  from { opacity: 0; }
+                  to { opacity: 1; }
+                }
+                @keyframes slideUp {
+                  from { transform: translateY(30px); opacity: 0; }
+                  to { transform: translateY(0); opacity: 1; }
+                }
+              </style>
+              <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                <h2 style="color: #154360; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
+                  Emenda Cadastrada!
+                </h2>
+                <p style="color: #666; margin: 0 0 24px 0; font-size: 15px; line-height: 1.5;">
+                  Deseja cadastrar a primeira despesa desta emenda agora?
+                </p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                  <button id="modal-nao" style="
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 12px 32px;
+                    border-radius: 6px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                  ">
+                    Não, voltar
+                  </button>
+                  <button id="modal-sim" style="
+                    background: #28a745;
+                    color: white;
+                    border: none;
+                    padding: 12px 32px;
+                    border-radius: 6px;
+                    font-size: 15px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                  ">
+                    Sim, cadastrar
+                  </button>
+                </div>
+              </div>
+            `;
+
+            modalOverlay.appendChild(modalBox);
+            document.body.appendChild(modalOverlay);
+
+            // Efeitos hover
+            const btnSim = document.getElementById("modal-sim");
+            const btnNao = document.getElementById("modal-nao");
+
+            btnSim.onmouseover = () => (btnSim.style.background = "#218838");
+            btnSim.onmouseout = () => (btnSim.style.background = "#28a745");
+
+            btnNao.onmouseover = () => (btnNao.style.background = "#5a6268");
+            btnNao.onmouseout = () => (btnNao.style.background = "#6c757d");
+
+            // Handlers dos botões
+            btnSim.onclick = () => {
+              document.body.removeChild(modalOverlay);
+              // ✅ NAVEGAR PARA EMENDA COM ABA DE DESPESAS ATIVA
+              // Usar window.location para forçar reload e garantir navegação
+              window.location.href = `/emendas/${emendaId}?tab=despesas`;
+            };
+
+            btnNao.onclick = () => {
+              document.body.removeChild(modalOverlay);
+              navigate("/emendas");
+            };
+
+            // Fechar ao clicar fora
+            modalOverlay.onclick = (e) => {
+              if (e.target === modalOverlay) {
+                document.body.removeChild(modalOverlay);
+                navigate("/emendas");
+              }
+            };
+          }, 1000);
+        }
       } catch (error) {
         let mensagemErro = "❌ Erro ao salvar emenda. ";
 

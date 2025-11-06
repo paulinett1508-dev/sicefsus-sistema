@@ -281,6 +281,14 @@ const DespesaFormClassificacaoFuncional = ({
 
   const handleNaturezaChange = (e) => {
     const valor = e.target.value;
+
+    // 🆕 Se for "Digitar Outra", passar para o handleInputChange do pai
+    if (valor === "__DIGITAR_OUTRA__") {
+      handleInputChange(e); // Passa pro DespesaForm que vai abrir o modal
+      return; // Não faz nada mais aqui
+    }
+
+    // Lógica antiga para customizado (modo texto)
     if (valor === "__customizado__") {
       setModoNaturezaCustomizada(true);
       setNaturezaCustomizada("");
@@ -299,7 +307,7 @@ const DespesaFormClassificacaoFuncional = ({
 
   const handleElementoChange = (e) => {
     const valor = e.target.value;
-    if (valor === "__customizado__") {
+    if (valor === "__DIGITAR_OUTRA__") {
       setModoElementoCustomizado(true);
       setElementoCustomizado("");
     } else {
@@ -412,11 +420,12 @@ const DespesaFormClassificacaoFuncional = ({
               onChange={handleNaturezaChange}
               style={{
                 ...styles.select,
-                maxHeight: '300px',
-                overflowY: 'auto',
-                fontSize: '13px'
+                fontSize: "13px",
+                height: "auto",
+                maxHeight: "400px",
               }}
               disabled={modoVisualizacao || loadingNaturezas}
+              size="10"
             >
               <option value="">
                 {loadingNaturezas
@@ -480,7 +489,7 @@ const DespesaFormClassificacaoFuncional = ({
                   {elemento}
                 </option>
               ))}
-              <option value="__customizado__">✏️ Digitar outro...</option>
+              <option value="__DIGITAR_OUTRA__">✏️ Digitar outro...</option>
             </select>
           ) : (
             <div style={styles.inputCustomizadoWrapper}>
