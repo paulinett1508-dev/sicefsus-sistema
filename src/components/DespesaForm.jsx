@@ -614,7 +614,7 @@ const DespesaForm = ({
         />
       )}
 
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <div style={styles.form}>
         <DespesaFormBasicFields
           formData={formData}
           errors={errors}
@@ -667,19 +667,14 @@ const DespesaForm = ({
             </button>
 
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit}
               style={{
                 ...styles.submitButton,
                 opacity: salvando || !canSubmit ? 0.6 : 1,
                 cursor: salvando || !canSubmit ? "not-allowed" : "pointer",
               }}
               disabled={salvando || !canSubmit}
-              onClick={(e) => {
-                if (!canSubmit && !salvando) {
-                  e.preventDefault();
-                  return;
-                }
-              }}
             >
               {salvando
                 ? "Processando..."
@@ -701,7 +696,7 @@ const DespesaForm = ({
             </button>
           </div>
         )}
-      </form>
+      </div>
 
       <LoadingOverlay
         show={salvando}
