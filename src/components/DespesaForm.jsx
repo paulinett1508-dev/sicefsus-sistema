@@ -54,9 +54,7 @@ import DespesaFormEmpenhoFields from "./despesa/DespesaFormEmpenhoFields";
 import DespesaFormDateFields from "./despesa/DespesaFormDateFields";
 import DespesaFormClassificacaoFuncional from "./despesa/DespesaFormClassificacaoFuncional"; // ✅ NOVO COMPONENTE UNIFICADO
 
-// ✅ 🆕 NOVO: Hook e Modal para Naturezas Dinâmicas
-import { useNaturezasDespesa } from "../hooks/useNaturezasDespesa";
-import ModalNovaNatureza from "./ModalNovaNatureza";
+// Importações de modal removidas
 
 // ✅ HOOKS E UTILS EXISTENTES REUTILIZADOS
 import Toast from "./Toast";
@@ -88,13 +86,7 @@ const DespesaForm = ({
   const isMountedRef = useRef(true);
   const { valorError, handleValorChange } = useMoedaFormatting();
 
-  // ✅ 🆕 NOVO: Hook para naturezas dinâmicas
-  const {
-    naturezas,
-    loading: loadingNaturezas,
-    adicionarNatureza,
-  } = useNaturezasDespesa();
-  const [modalNaturezaAberto, setModalNaturezaAberto] = useState(false);
+  
 
   // ✅ DADOS DO USUÁRIO SIMPLIFICADOS
   const userRole = usuario?.role || usuario?.tipo;
@@ -390,12 +382,6 @@ const DespesaForm = ({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    // 🆕 NOVO: Detectar seleção de "Digitar Outra"
-    if (name === "naturezaDespesa" && value === "__DIGITAR_OUTRA__") {
-      setModalNaturezaAberto(true);
-      return; // Não atualizar formData ainda
-    }
-
     if (name === "valor") {
       handleValorChange(e, setFormData);
     } else {
@@ -411,29 +397,7 @@ const DespesaForm = ({
     }));
   };
 
-  // ✅ 🆕 NOVO: Handler para salvar nova natureza
-  const handleSalvarNovaNatureza = async (codigo, descricao) => {
-    try {
-      const novaNatureza = await adicionarNatureza(codigo, descricao);
-
-      // Atualizar formData com a nova natureza
-      setFormData((prev) => ({
-        ...prev,
-        naturezaDespesa: novaNatureza.natureza,
-      }));
-
-      setToast({
-        show: true,
-        message: "✅ Nova natureza de despesa adicionada com sucesso!",
-        type: "success",
-      });
-
-      setModalNaturezaAberto(false);
-    } catch (error) {
-      console.error("Erro ao adicionar natureza:", error);
-      throw error; // Propagar erro para o modal mostrar
-    }
-  };
+  
 
   // ✅ NAVEGAÇÃO APÓS SALVAR
   const navegarAposSalvar = () => {
@@ -587,13 +551,6 @@ const DespesaForm = ({
         </div>
       )}
 
-      {/* 🆕 Modal para adicionar nova natureza */}
-      <ModalNovaNatureza
-        isOpen={modalNaturezaAberto}
-        onClose={() => setModalNaturezaAberto(false)}
-        onSalvar={handleSalvarNovaNatureza}
-      />
-
       {/* 🆕 Só renderizar header e banners se não estiver escondido (modal já tem header) */}
       {!hideHeader && (
         <>
@@ -641,8 +598,6 @@ const DespesaForm = ({
           valorError={valorError}
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
-          naturezas={naturezas} // 🆕 Passar naturezas dinâmicas
-          loadingNaturezas={loadingNaturezas} // 🆕 Status de carregamento
         />
 
         <DespesaFormEmpenhoFields
