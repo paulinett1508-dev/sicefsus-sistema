@@ -168,6 +168,28 @@ const DespesaFormBasicFields = ({
       backgroundColor: "white",
       boxSizing: "border-box",
     },
+    inputCompact: {
+      padding: "8px 12px",
+      border: "2px solid #dee2e6",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      backgroundColor: "white",
+      boxSizing: "border-box",
+      maxWidth: "280px",
+    },
+    textarea: {
+      padding: "12px",
+      border: "2px solid #dee2e6",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      backgroundColor: "white",
+      boxSizing: "border-box",
+      minHeight: "100px",
+      resize: "vertical",
+      fontFamily: "Arial, sans-serif",
+    },
     inputError: {
       padding: "12px",
       border: "2px solid #dc3545",
@@ -176,6 +198,28 @@ const DespesaFormBasicFields = ({
       transition: "border-color 0.3s ease",
       backgroundColor: "#fff5f5",
       boxSizing: "border-box",
+    },
+    inputErrorCompact: {
+      padding: "8px 12px",
+      border: "2px solid #dc3545",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      backgroundColor: "#fff5f5",
+      boxSizing: "border-box",
+      maxWidth: "280px",
+    },
+    textareaError: {
+      padding: "12px",
+      border: "2px solid #dc3545",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      backgroundColor: "#fff5f5",
+      boxSizing: "border-box",
+      minHeight: "100px",
+      resize: "vertical",
+      fontFamily: "Arial, sans-serif",
     },
     inputWrapper: {
       position: "relative",
@@ -354,7 +398,7 @@ const DespesaFormBasicFields = ({
             )}
           </div>
 
-          {/* ✅ VALOR DA DESPESA (EDITÁVEL COM ALERTA) */}
+          {/* ✅ VALOR DA DESPESA (SEMPRE EDITÁVEL, TAMANHO REDUZIDO) */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               💰 Valor da Despesa
@@ -368,11 +412,10 @@ const DespesaFormBasicFields = ({
               onBlur={handleValorBlur}
               style={
                 valorExcedeSaldo || errors.valor
-                  ? styles.inputError
-                  : styles.input
+                  ? styles.inputErrorCompact
+                  : styles.inputCompact
               }
               placeholder="R$ 0,00"
-              readOnly={modoVisualizacao}
             />
             {valorExcedeSaldo && (
               <span style={styles.errorText}>
@@ -385,37 +428,20 @@ const DespesaFormBasicFields = ({
             )}
           </div>
 
-          {/* ✅ DISCRIMINAÇÃO (EM BRANCO, EDITÁVEL) */}
+          {/* ✅ DISCRIMINAÇÃO (TEXTAREA EXPANDIDA) */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               📝 Discriminação da Despesa
               <span style={styles.requiredMark}>*</span>
             </label>
-            <div style={styles.inputWrapper}>
-              <input
-                type="text"
-                name="discriminacao"
-                value={formData.discriminacao || ""}
-                onChange={handleInputChange}
-                style={errors.discriminacao ? styles.inputError : styles.input}
-                placeholder="Ex: Aquisição de equipamentos médicos"
-                readOnly={modoVisualizacao}
-              />
-              {formData.discriminacao && !modoVisualizacao && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleInputChange({
-                      target: { name: "discriminacao", value: "" },
-                    })
-                  }
-                  style={styles.clearButton}
-                  title="Limpar campo"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            <textarea
+              name="discriminacao"
+              value={formData.discriminacao || ""}
+              onChange={handleInputChange}
+              style={errors.discriminacao ? styles.textareaError : styles.textarea}
+              placeholder="Ex: Aquisição de equipamentos médicos para o hospital municipal, incluindo aparelhos de ultrassom, macas e material cirúrgico"
+              readOnly={modoVisualizacao}
+            />
             {errors.discriminacao && (
               <span style={styles.errorText}>{errors.discriminacao}</span>
             )}
