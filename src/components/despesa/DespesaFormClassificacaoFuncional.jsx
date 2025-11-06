@@ -9,7 +9,7 @@ import {
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
-import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 CORRETO com chaves {}
+import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 Hook para naturezas dinâmicas
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -17,15 +17,16 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
-  // 🆕 NOVO: Hook para carregar naturezas dinâmicas
+  // 🆕 Hook para carregar naturezas dinâmicas (fixas + Firebase)
   const { naturezas, loading: loadingNaturezas } = useNaturezasDespesa();
 
-  const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
+  const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
   const [modoElementoCustomizado, setModoElementoCustomizado] = useState(false);
   const [naturezaCustomizada, setNaturezaCustomizada] = useState("");
   const [elementoCustomizado, setElementoCustomizado] = useState("");
+  const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
   const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
 
   const validarCNPJ = (cnpj) => {
@@ -405,7 +406,7 @@ const DespesaFormClassificacaoFuncional = ({
               disabled={modoVisualizacao || loadingNaturezas}
             >
               <option value="">
-                {loadingNaturezas ? "Carregando naturezas..." : "Selecione a natureza"}
+                {loadingNaturezas ? "⏳ Carregando naturezas..." : "Selecione a natureza de despesas"}
               </option>
               {naturezas && naturezas.map((natureza, index) => (
                 <option key={`natureza-${index}`} value={natureza}>
