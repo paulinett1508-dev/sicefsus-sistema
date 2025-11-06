@@ -764,51 +764,61 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         </div>
 
         {/* ✅ MODAL USANDO DespesaForm COMPLETO (para executar despesa planejada) */}
-        {modal.abrir && modal.despesa && createPortal(
-          <div style={styles.formularioEdicaoOverlay}>
-            <div style={styles.formularioEdicaoModal}>
-              <div style={styles.formularioEdicaoHeader}>
-                <h2 style={styles.formularioTitulo}>
-                  ▶️ Executar Despesa Planejada
-                </h2>
-                <button onClick={closeModal} style={styles.btnVoltar}>
-                  ✕ Fechar
-                </button>
-              </div>
-              <div style={styles.formularioEdicaoContent}>
-                <DespesaForm
-                  despesaParaEditar={{
-                    ...modal.despesa,
-                    status: 'EXECUTADA',
-                    discriminacao: modal.despesa.estrategia || modal.despesa.naturezaDespesa || '',
-                  }}
-                  emendaPreSelecionada={emendaId}
-                  usuario={usuario}
-                  onCancelar={closeModal}
-                  onSuccess={async () => {
-                    // Deletar despesa planejada após criar a executada
-                    if (modal.despesa?.id) {
-                      try {
-                        await deleteDoc(doc(db, "despesas", modal.despesa.id));
-                      } catch (error) {
-                        console.error("Erro ao deletar despesa planejada:", error);
+        {modal.abrir &&
+          modal.despesa &&
+          createPortal(
+            <div style={styles.formularioEdicaoOverlay}>
+              <div style={styles.formularioEdicaoModal}>
+                <div style={styles.formularioEdicaoHeader}>
+                  <h2 style={styles.formularioTitulo}>
+                    ▶️ Executar Despesa Planejada
+                  </h2>
+                  <button onClick={closeModal} style={styles.btnVoltar}>
+                    ✕ Fechar
+                  </button>
+                </div>
+                <div style={styles.formularioEdicaoContent}>
+                  <DespesaForm
+                    despesaParaEditar={{
+                      ...modal.despesa,
+                      status: "EXECUTADA",
+                      discriminacao:
+                        modal.despesa.estrategia ||
+                        modal.despesa.naturezaDespesa ||
+                        "",
+                    }}
+                    emendaPreSelecionada={emendaId}
+                    usuario={usuario}
+                    onCancelar={closeModal}
+                    onSuccess={async () => {
+                      // Deletar despesa planejada após criar a executada
+                      if (modal.despesa?.id) {
+                        try {
+                          await deleteDoc(
+                            doc(db, "despesas", modal.despesa.id),
+                          );
+                        } catch (error) {
+                          console.error(
+                            "Erro ao deletar despesa planejada:",
+                            error,
+                          );
+                        }
                       }
-                    }
-                    closeModal();
-                    carregarDespesas();
-                    showToast({
-                      message: "✅ Despesa executada com sucesso!",
-                      type: "success",
-                    });
-                  }}
-                  hideHeader={true}
-                  tituloCustomizado="Executar Despesa Planejada"
-                />
+                      closeModal();
+                      carregarDespesas();
+                      showToast({
+                        message: "✅ Despesa executada com sucesso!",
+                        type: "success",
+                      });
+                    }}
+                    hideHeader={true}
+                    tituloCustomizado="Executar Despesa Planejada"
+                  />
+                </div>
               </div>
-            </div>
-          </div>,
-          document.body
-        )}
+            </div>,
+            document.body,
+          )}
 
         {toast.show && <Toast message={toast.message} type={toast.type} />}
       </div>
@@ -1114,9 +1124,10 @@ const styles = {
     backgroundColor: "#fff",
     borderRadius: 12,
     width: "100%",
-    maxWidth: 1200,
-    maxHeight: "90vh",
-    overflow: "auto",
+    maxWidth: 1400,
+    maxHeight: "95vh",
+    display: "flex",
+    flexDirection: "column",
     boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
     border: "3px solid #4A90E2",
   },
@@ -1152,6 +1163,8 @@ const styles = {
   },
   formularioEdicaoContent: {
     padding: 24,
+    overflowY: "auto",
+    flex: 1,
   },
 };
 

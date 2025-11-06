@@ -743,7 +743,7 @@ const styles = {
   legendIcon: { fontSize: "18px" },
   formRow: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
     gap: "20px",
     marginBottom: "20px",
   },
@@ -755,7 +755,7 @@ const styles = {
   },
   formRowEndereco: {
     display: "grid",
-    gridTemplateColumns: "1fr 280px 150px",
+    gridTemplateColumns: "2fr 1fr 150px",
     gap: "20px",
     marginBottom: "20px",
   },
