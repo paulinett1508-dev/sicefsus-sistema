@@ -410,7 +410,12 @@ const DespesaFormClassificacaoFuncional = ({
               name="naturezaDespesa"
               value={formData.naturezaDespesa || ""}
               onChange={handleNaturezaChange}
-              style={styles.select}
+              style={{
+                ...styles.select,
+                maxHeight: '300px',
+                overflowY: 'auto',
+                fontSize: '13px'
+              }}
               disabled={modoVisualizacao || loadingNaturezas}
             >
               <option value="">
