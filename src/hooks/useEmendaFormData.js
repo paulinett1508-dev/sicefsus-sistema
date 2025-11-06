@@ -676,10 +676,8 @@ export const useEmendaFormData = () => {
             type: "success",
           });
 
-          // 🔄 EDIÇÃO: Voltar para listagem após 1.2s
-          setTimeout(() => {
-            navigate("/emendas");
-          }, 1200);
+          // 🔄 EDIÇÃO: NÃO navegar, deixar usuário na emenda
+          // Apenas mostra toast de sucesso
         } else {
           // 🆕 CRIAÇÃO: Salvar e perguntar sobre primeira despesa
           dadosParaSalvar.criadoEm = serverTimestamp();
