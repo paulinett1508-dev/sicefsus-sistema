@@ -17,7 +17,6 @@ import { db } from "../../../../firebase/firebaseConfig";
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
-import ExecutarDespesaModal from "./ExecutarDespesaModal"; // ✅ IMPORT DO MODAL CORRETO
 import { NATUREZAS_DESPESA } from "../../../../config/constants";
 import {
   formatarMoedaInput,
@@ -764,23 +763,51 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           />
         </div>
 
-        {/* ✅ MODAL CORRETO: ExecutarDespesaModal (formulário completo) */}
-        {modal.abrir && modal.despesa && (
-          <ExecutarDespesaModal
-            isOpen={modal.abrir}
-            onClose={closeModal}
-            despesa={modal.despesa}
-            emendaId={emendaId}
-            saldoDisponivel={saldoDisponivel}
-            onSuccess={() => {
-              closeModal();
-              carregarDespesas();
-              showToast({
-                message: "✅ Despesa executada com sucesso!",
-                type: "success",
-              });
-            }}
-          />
+        {/* ✅ MODAL USANDO DespesaForm COMPLETO (para executar despesa planejada) */}
+        {modal.abrir && modal.despesa && createPortal(
+          <div style={styles.formularioEdicaoOverlay}>
+            <div style={styles.formularioEdicaoModal}>
+              <div style={styles.formularioEdicaoHeader}>
+                <h2 style={styles.formularioTitulo}>
+                  ▶️ Executar Despesa Planejada
+                </h2>
+                <button onClick={closeModal} style={styles.btnVoltar}>
+                  ✕ Fechar
+                </button>
+              </div>
+              <div style={styles.formularioEdicaoContent}>
+                <DespesaForm
+                  despesaParaEditar={{
+                    ...modal.despesa,
+                    status: 'EXECUTADA',
+                    discriminacao: modal.despesa.estrategia || modal.despesa.naturezaDespesa || '',
+                  }}
+                  emendaPreSelecionada={emendaId}
+                  usuario={usuario}
+                  onCancelar={closeModal}
+                  onSuccess={async () => {
+                    // Deletar despesa planejada após criar a executada
+                    if (modal.despesa?.id) {
+                      try {
+                        await deleteDoc(doc(db, "despesas", modal.despesa.id));
+                      } catch (error) {
+                        console.error("Erro ao deletar despesa planejada:", error);
+                      }
+                    }
+                    closeModal();
+                    carregarDespesas();
+                    showToast({
+                      message: "✅ Despesa executada com sucesso!",
+                      type: "success",
+                    });
+                  }}
+                  hideHeader={true}
+                  tituloCustomizado="Executar Despesa Planejada"
+                />
+              </div>
+            </div>
+          </div>,
+          document.body
         )}
 
         {toast.show && <Toast message={toast.message} type={toast.type} />}
