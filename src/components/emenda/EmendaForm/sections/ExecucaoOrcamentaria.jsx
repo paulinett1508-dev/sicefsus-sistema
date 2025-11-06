@@ -790,23 +790,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     emendaPreSelecionada={emendaId}
                     usuario={usuario}
                     onCancelar={closeModal}
-                    onSuccess={async () => {
-                      // Deletar despesa planejada após criar a executada
-                      if (modal.despesa?.id) {
-                        try {
-                          await deleteDoc(
-                            doc(db, "despesas", modal.despesa.id),
-                          );
-                        } catch (error) {
-                          console.error(
-                            "Erro ao deletar despesa planejada:",
-                            error,
-                          );
-                        }
-                      }
+                    onSuccess={() => {
                       closeModal();
                       carregarDespesas();
-                      showToast({
+                      setToast({
+                        show: true,
                         message: "✅ Despesa executada com sucesso!",
                         type: "success",
                       });
