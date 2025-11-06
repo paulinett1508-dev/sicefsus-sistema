@@ -84,9 +84,6 @@ const DespesaForm = ({
   // ✅ HOOKS REUTILIZADOS
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
-  const { valorError, handleValorChange } = useMoedaFormatting();
-
-  
 
   // ✅ DADOS DO USUÁRIO SIMPLIFICADOS
   const userRole = usuario?.role || usuario?.tipo;
@@ -382,22 +379,16 @@ const DespesaForm = ({
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "valor") {
-      handleValorChange(e, setFormData);
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
   };
-
-  
 
   // ✅ NAVEGAÇÃO APÓS SALVAR
   const navegarAposSalvar = () => {
@@ -595,7 +586,6 @@ const DespesaForm = ({
           userRole={userRole}
           userMunicipio={userMunicipio}
           modoVisualizacao={modoVisualizacao}
-          valorError={valorError}
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
         />
