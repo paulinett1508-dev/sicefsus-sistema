@@ -310,19 +310,19 @@ const DespesaForm = ({
           "",
         numeroNota: despesaParaEditar.numeroNota || "",
         dataEmpenho: despesaParaEditar.dataEmpenho
-          ? new Date(despesaParaEditar.dataEmpenho.seconds * 1000)
-              .toISOString()
-              .split("T")[0]
+          ? (despesaParaEditar.dataEmpenho.seconds 
+              ? new Date(despesaParaEditar.dataEmpenho.seconds * 1000).toISOString().split("T")[0]
+              : new Date(despesaParaEditar.dataEmpenho).toISOString().split("T")[0])
           : "",
         dataLiquidacao: despesaParaEditar.dataLiquidacao
-          ? new Date(despesaParaEditar.dataLiquidacao.seconds * 1000)
-              .toISOString()
-              .split("T")[0]
+          ? (despesaParaEditar.dataLiquidacao.seconds 
+              ? new Date(despesaParaEditar.dataLiquidacao.seconds * 1000).toISOString().split("T")[0]
+              : new Date(despesaParaEditar.dataLiquidacao).toISOString().split("T")[0])
           : "",
         dataPagamento: despesaParaEditar.dataPagamento
-          ? new Date(despesaParaEditar.dataPagamento.seconds * 1000)
-              .toISOString()
-              .split("T")[0]
+          ? (despesaParaEditar.dataPagamento.seconds 
+              ? new Date(despesaParaEditar.dataPagamento.seconds * 1000).toISOString().split("T")[0]
+              : new Date(despesaParaEditar.dataPagamento).toISOString().split("T")[0])
           : "",
         acao:
           despesaParaEditar.acao || despesaParaEditar.acaoOrcamentaria || "",
