@@ -1,0 +1,85 @@
+// ========================================
+// 🎯 CÓDIGO FINAL PARA index.jsx
+// Arquivo: src/components/emenda/EmendaForm/index.jsx
+// ========================================
+
+// 1️⃣ IMPORT (Procure pela linha do useParams e SUBSTITUA)
+// ❌ ANTES:
+// import { useParams } from 'react-router-dom';
+
+// ✅ DEPOIS:
+import { useParams, useLocation } from 'react-router-dom';
+
+
+// 2️⃣ DENTRO DO COMPONENTE (Logo após os outros hooks)
+// Procure por:
+//   const { id } = useParams();
+//   const [activeTab, setActiveTab] = useState("dadosBasicos");
+
+// ✅ ADICIONE ESTA LINHA logo abaixo:
+const location = useLocation();
+
+
+// 3️⃣ useEffect (Adicionar ANTES do return)
+// ✅ COLE ESTE BLOCO COMPLETO antes do return:
+useEffect(() => {
+  // Detectar se veio do modal de criação de emenda
+  if (location.state?.activeTab) {
+    setActiveTab(location.state.activeTab); // Já vem 'execucao'
+    
+    // Limpar o state para não reabrir em navegações futuras
+    window.history.replaceState({}, document.title);
+  }
+}, [location.state]);
+
+
+// ========================================
+// ✅ EXEMPLO VISUAL COMPLETO
+// ========================================
+
+// ANTES:
+import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+
+function EmendaForm({ usuario }) {
+  const { id } = useParams();
+  const [activeTab, setActiveTab] = useState("dadosBasicos");
+  
+  const tabs = [
+    { id: "dadosBasicos", label: "Dados Básicos", icon: "📋" },
+    { id: "execucao", label: "Execução Orçamentária", icon: "💰" },
+  ];
+  
+  return (
+    <div>...</div>
+  );
+}
+
+// ========================================
+
+// DEPOIS:
+import { useParams, useLocation } from 'react-router-dom'; // ⬅️ MUDOU
+import { useState, useEffect } from 'react'; // ⬅️ Certifique-se de ter useEffect
+
+function EmendaForm({ usuario }) {
+  const { id } = useParams();
+  const location = useLocation(); // ⬅️ NOVO
+  const [activeTab, setActiveTab] = useState("dadosBasicos");
+  
+  const tabs = [
+    { id: "dadosBasicos", label: "Dados Básicos", icon: "📋" },
+    { id: "execucao", label: "Execução Orçamentária", icon: "💰" },
+  ];
+  
+  // ⬅️ NOVO useEffect
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+  
+  return (
+    <div>...</div>
+  );
+}

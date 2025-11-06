@@ -791,9 +791,12 @@ export const useEmendaFormData = () => {
             // Handlers dos botões
             btnSim.onclick = () => {
               document.body.removeChild(modalOverlay);
-              // ✅ NAVEGAR PARA EMENDA COM ABA DE DESPESAS ATIVA
-              // Usar window.location para forçar reload e garantir navegação
-              window.location.href = `/emendas/${emendaId}?tab=despesas`;
+              // ✅ USAR NAVIGATE DO REACT ROUTER
+              // Replace: true força recarga da rota mesmo se for a mesma
+              navigate(`/emendas/${emendaId}`, {
+                replace: true,
+                state: { activeTab: "execucao" },
+              });
             };
 
             btnNao.onclick = () => {
