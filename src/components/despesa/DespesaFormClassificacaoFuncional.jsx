@@ -1,15 +1,14 @@
 // src/components/despesa/DespesaFormClassificacaoFuncional.jsx
-// ✅ LAYOUT PROFISSIONAL: Campos otimizados e organizados
-// 🎨 VISUAL APRIMORADO: Cores dinâmicas na situação cadastral
-// 🔌 API CNPJ: Busca automática com proxy CORS
+// ✅ ATUALIZADO 06/11/2025: Corrigido select de Natureza - usando apenas constants.js
+// 🔧 CORREÇÃO: Removida dependência do Firebase para naturezas (causava erro de permissão)
 
 import React, { useState } from "react";
 import {
+  NATUREZAS_DESPESA,
   ELEMENTOS_DESPESA,
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
-import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 Hook para naturezas dinâmicas
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -17,17 +16,6 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
-  // 🆕 Hook para carregar naturezas dinâmicas (fixas + Firebase)
-  const { naturezas, loading: loadingNaturezas } = useNaturezasDespesa();
-
-  // 🐛 DEBUG: Verificar o que o hook está retornando
-  console.log("🔍 DespesaFormClassificacaoFuncional - Hook naturezas:", {
-    naturezas,
-    quantidade: naturezas?.length,
-    loading: loadingNaturezas,
-    primeiras3: naturezas?.slice(0, 3),
-  });
-
   const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
@@ -282,198 +270,135 @@ const DespesaFormClassificacaoFuncional = ({
   const handleNaturezaChange = (e) => {
     const valor = e.target.value;
 
-    // 🆕 Se for "Digitar Outra", passar para o handleInputChange do pai
     if (valor === "__DIGITAR_OUTRA__") {
-      handleInputChange(e); // Passa pro DespesaForm que vai abrir o modal
-      return; // Não faz nada mais aqui
+      setModoNaturezaCustomizada(true);
+      return;
     }
 
-    // Lógica antiga para customizado (modo texto)
-    if (valor === "__customizado__") {
-      setModoNaturezaCustomizada(true);
-      setNaturezaCustomizada("");
-    } else {
+    if (modoNaturezaCustomizada) {
       setModoNaturezaCustomizada(false);
       setNaturezaCustomizada("");
-      handleInputChange(e);
     }
+
+    handleInputChange(e);
   };
 
-  const handleNaturezaCustomizadaChange = (e) => {
-    const valor = e.target.value;
-    setNaturezaCustomizada(valor);
-    handleInputChange({ target: { name: "naturezaDespesa", value: valor } });
+  const salvarNaturezaCustomizada = () => {
+    if (naturezaCustomizada.trim()) {
+      handleInputChange({
+        target: { name: "naturezaDespesa", value: naturezaCustomizada },
+      });
+      setModoNaturezaCustomizada(false);
+      setNaturezaCustomizada("");
+    }
   };
 
   const handleElementoChange = (e) => {
     const valor = e.target.value;
-    if (valor === "__DIGITAR_OUTRA__") {
+
+    if (valor === "__DIGITAR_OUTRO__") {
       setModoElementoCustomizado(true);
-      setElementoCustomizado("");
-    } else {
+      return;
+    }
+
+    if (modoElementoCustomizado) {
       setModoElementoCustomizado(false);
       setElementoCustomizado("");
-      handleInputChange(e);
+    }
+
+    handleInputChange(e);
+  };
+
+  const salvarElementoCustomizado = () => {
+    if (elementoCustomizado.trim()) {
+      handleInputChange({
+        target: { name: "elementoDespesa", value: elementoCustomizado },
+      });
+      setModoElementoCustomizado(false);
+      setElementoCustomizado("");
     }
   };
 
-  const handleElementoCustomizadoChange = (e) => {
-    const valor = e.target.value;
-    setElementoCustomizado(valor);
-    handleInputChange({ target: { name: "elementoDespesa", value: valor } });
-  };
-
-  // 🎨 Cor da situação cadastral
   const getCorSituacao = (situacao) => {
     if (!situacao) return "#6c757d";
     const situacaoUpper = situacao.toUpperCase();
-    if (situacaoUpper.includes("ATIVA")) return "#27ae60";
+    if (situacaoUpper.includes("ATIVA") || situacaoUpper.includes("REGULAR"))
+      return "#27AE60";
     if (
-      situacaoUpper.includes("INAPTA") ||
-      situacaoUpper.includes("SUSPENS") ||
-      situacaoUpper.includes("BAIXA") ||
-      situacaoUpper.includes("INATIVA")
+      situacaoUpper.includes("SUSPENSA") ||
+      situacaoUpper.includes("PENDENTE")
     )
-      return "#dc3545";
+      return "#f39c12";
+    if (
+      situacaoUpper.includes("BAIXADA") ||
+      situacaoUpper.includes("CANCELADA") ||
+      situacaoUpper.includes("INAPTA")
+    )
+      return "#e74c3c";
     return "#6c757d";
   };
 
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📊</span>
+        <span style={styles.legendIcon}>💼</span>
         Classificação Funcional-Programática
       </legend>
 
-      {/* LINHA 1: Ação e Status */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroupLarge}>
-          <label style={styles.labelRequired}>Ação *</label>
-          <select
-            name="acao"
-            value={formData.acao}
-            onChange={handleInputChange}
-            style={
-              errors.acao
-                ? { ...styles.select, borderColor: "#dc3545" }
-                : styles.select
-            }
-            disabled={modoVisualizacao}
-            required
-          >
-            <option value="">Selecione a ação</option>
-            {ACOES_ORCAMENTARIAS.map((acao) => (
-              <option key={acao.codigo} value={acao.codigo}>
-                {acao.codigo} - {acao.descricao}
-              </option>
-            ))}
-          </select>
-          {errors.acao && <span style={styles.errorText}>{errors.acao}</span>}
-        </div>
-
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Status Pagamento</label>
-          <select
-            name="statusPagamento"
-            value={formData.statusPagamento || "pendente"}
-            onChange={handleInputChange}
-            style={styles.select}
-            disabled={modoVisualizacao}
-          >
-            {STATUS_PAGAMENTO_DESPESA.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* LINHA 2: Categoria e Natureza */}
+      {/* LINHA 1: Natureza de Despesa | Elemento de Despesa | Status de Pagamento */}
       <div style={styles.formRow}>
         <div style={styles.formGroup}>
-          <label style={styles.label}>Categoria</label>
-          <select
-            name="categoria"
-            value={formData.categoria}
-            onChange={handleInputChange}
-            style={styles.select}
-            disabled={modoVisualizacao}
-          >
-            <option value="">Selecione a categoria</option>
-            <option value="equipamentos">Equipamentos</option>
-            <option value="reformas">Reformas</option>
-            <option value="construcao">Construção</option>
-            <option value="servicos">Serviços</option>
-            <option value="medicamentos">Medicamentos</option>
-            <option value="materiais">Materiais</option>
-            <option value="outros">Outros</option>
-          </select>
-        </div>
-
-        <div style={styles.formGroupLarge}>
-          <label style={styles.label}>Natureza de Despesa</label>
+          <label style={styles.labelRequired}>
+            Natureza de Despesa <span style={{ color: "#dc3545" }}>*</span>
+          </label>
           {!modoNaturezaCustomizada ? (
             <select
               name="naturezaDespesa"
               value={formData.naturezaDespesa || ""}
               onChange={handleNaturezaChange}
-              style={{
-                ...styles.select,
-                fontSize: "13px",
-                height: "auto",
-                maxHeight: "400px",
-              }}
-              disabled={modoVisualizacao || loadingNaturezas}
-              size="10"
+              style={styles.select}
+              disabled={modoVisualizacao}
             >
-              <option value="">
-                {loadingNaturezas
-                  ? "⏳ Carregando naturezas..."
-                  : "Selecione a natureza de despesas"}
-              </option>
-              {naturezas &&
-                naturezas.map((natureza, index) => (
-                  <option key={`natureza-${index}`} value={natureza}>
-                    {natureza}
-                  </option>
-                ))}
-              <option disabled>──────────────────</option>
-              <option value="__customizado__">✏️ Digitar outra...</option>
+              <option value="">Selecione...</option>
+              {NATUREZAS_DESPESA.map((nat) => (
+                <option key={nat.codigo} value={nat.nome}>
+                  {nat.nome}
+                </option>
+              ))}
+              <option value="__DIGITAR_OUTRA__">✏️ Digitar Outra...</option>
             </select>
           ) : (
             <div style={styles.inputCustomizadoWrapper}>
               <input
                 type="text"
                 value={naturezaCustomizada}
-                onChange={handleNaturezaCustomizadaChange}
-                placeholder="Digite a natureza da despesa..."
+                onChange={(e) => setNaturezaCustomizada(e.target.value)}
+                placeholder="Digite a natureza de despesa..."
                 style={styles.input}
-                disabled={modoVisualizacao}
+                autoFocus
               />
+              <button
+                type="button"
+                onClick={salvarNaturezaCustomizada}
+                style={styles.voltarButton}
+              >
+                ✓ Salvar
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   setModoNaturezaCustomizada(false);
                   setNaturezaCustomizada("");
-                  handleInputChange({
-                    target: { name: "naturezaDespesa", value: "" },
-                  });
                 }}
                 style={styles.voltarButton}
-                title="Voltar para seleção"
-                disabled={modoVisualizacao}
               >
-                ↩️
+                ✕
               </button>
             </div>
           )}
         </div>
-      </div>
 
-      {/* LINHA 3: Elemento de Despesa */}
-      <div style={styles.formRow}>
-        <div style={styles.formGroupFull}>
+        <div style={styles.formGroup}>
           <label style={styles.label}>Elemento de Despesa</label>
           {!modoElementoCustomizado ? (
             <select
@@ -483,61 +408,127 @@ const DespesaFormClassificacaoFuncional = ({
               style={styles.select}
               disabled={modoVisualizacao}
             >
-              <option value="">Selecione o elemento</option>
-              {ELEMENTOS_DESPESA.map((elemento) => (
-                <option key={elemento} value={elemento}>
-                  {elemento}
+              <option value="">Selecione...</option>
+              {ELEMENTOS_DESPESA.map((el) => (
+                <option key={el.codigo} value={el.nome}>
+                  {el.nome}
                 </option>
               ))}
-              <option value="__DIGITAR_OUTRA__">✏️ Digitar outro...</option>
+              <option value="__DIGITAR_OUTRO__">✏️ Digitar Outro...</option>
             </select>
           ) : (
             <div style={styles.inputCustomizadoWrapper}>
               <input
                 type="text"
                 value={elementoCustomizado}
-                onChange={handleElementoCustomizadoChange}
+                onChange={(e) => setElementoCustomizado(e.target.value)}
                 placeholder="Digite o elemento de despesa..."
                 style={styles.input}
-                disabled={modoVisualizacao}
+                autoFocus
               />
+              <button
+                type="button"
+                onClick={salvarElementoCustomizado}
+                style={styles.voltarButton}
+              >
+                ✓ Salvar
+              </button>
               <button
                 type="button"
                 onClick={() => {
                   setModoElementoCustomizado(false);
                   setElementoCustomizado("");
-                  handleInputChange({
-                    target: { name: "elementoDespesa", value: "" },
-                  });
                 }}
                 style={styles.voltarButton}
-                title="Voltar para seleção"
-                disabled={modoVisualizacao}
               >
-                ↩️
+                ✕
               </button>
             </div>
           )}
         </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Status de Pagamento</label>
+          <select
+            name="statusPagamento"
+            value={formData.statusPagamento || ""}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="">Selecione...</option>
+            {STATUS_PAGAMENTO_DESPESA.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* DIVISOR */}
+      {/* LINHA 2: Ação Orçamentária | Fonte de Recurso | Programa de Trabalho */}
+      <div style={styles.formRow}>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Ação Orçamentária</label>
+          <select
+            name="acao"
+            value={formData.acao || ""}
+            onChange={handleInputChange}
+            style={styles.select}
+            disabled={modoVisualizacao}
+          >
+            <option value="">Selecione...</option>
+            {ACOES_ORCAMENTARIAS.map((acao) => (
+              <option key={acao.codigo} value={acao.nome}>
+                {acao.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Fonte de Recurso</label>
+          <input
+            type="text"
+            name="fonteRecurso"
+            value={formData.fonteRecurso || ""}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="Ex: 0100 - Recursos Ordinários"
+          />
+        </div>
+
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Programa de Trabalho</label>
+          <input
+            type="text"
+            name="programaTrabalho"
+            value={formData.programaTrabalho || ""}
+            onChange={handleInputChange}
+            style={styles.input}
+            readOnly={modoVisualizacao}
+            placeholder="Ex: 10.301.1234.2000"
+          />
+        </div>
+      </div>
+
+      {/* SEPARADOR VISUAL */}
       <div style={styles.divider}>
-        <span style={styles.dividerText}>
-          🔍 DADOS DO FORNECEDOR
-          {buscandoCNPJ && " 🔄 CONSULTANDO..."}
-          {cnpjEncontrado && !buscandoCNPJ && " ✅ PREENCHIDO"}
-        </span>
+        <span style={styles.dividerText}>DADOS DO FORNECEDOR</span>
       </div>
 
-      {/* LINHA 4: CNPJ + Botão Atualizar + Razão Social */}
+      {/* LINHA 3: CNPJ | Razão Social */}
       <div style={styles.formRowCNPJ}>
         <div style={styles.formGroupCNPJWrapper}>
           <div style={styles.formGroupCNPJ}>
-            <label style={styles.label}>
-              CNPJ{" "}
-              {cnpjError && (
-                <span style={styles.validationBadge}>⚠️ {cnpjError}</span>
+            <label style={styles.labelRequired}>
+              CNPJ <span style={{ color: "#dc3545" }}>*</span>
+              {cnpjError && <span style={styles.validationBadge}>⚠️</span>}
+              {cnpjEncontrado && (
+                <span style={{ ...styles.validationBadge, color: "#27AE60" }}>
+                  ✓
+                </span>
               )}
             </label>
             <input
@@ -550,27 +541,43 @@ const DespesaFormClassificacaoFuncional = ({
               placeholder="00.000.000/0000-00"
               maxLength="18"
             />
+            {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}
           </div>
-
-          {!modoVisualizacao && formData.cnpjFornecedor && (
+          {!modoVisualizacao && (
             <button
               type="button"
-              onClick={() => {
-                if (formData.cnpjFornecedor) {
-                  buscarDadosCNPJ(formData.cnpjFornecedor);
-                }
+              onClick={() => buscarDadosCNPJ(formData.cnpjFornecedor)}
+              disabled={
+                buscandoCNPJ ||
+                !formData.cnpjFornecedor ||
+                formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+              }
+              style={{
+                ...styles.btnRefresh,
+                opacity:
+                  buscandoCNPJ ||
+                  !formData.cnpjFornecedor ||
+                  formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+                    ? 0.5
+                    : 1,
+                cursor:
+                  buscandoCNPJ ||
+                  !formData.cnpjFornecedor ||
+                  formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+                    ? "not-allowed"
+                    : "pointer",
               }}
-              style={styles.btnRefresh}
-              title="Atualizar dados do CNPJ"
-              disabled={buscandoCNPJ}
+              title="Buscar dados do CNPJ"
             >
-              {buscandoCNPJ ? "🔄" : "🔃"}
+              {buscandoCNPJ ? "🔄" : "🔍"}
             </button>
           )}
         </div>
 
         <div style={styles.formGroupRazaoSocial}>
-          <label style={styles.label}>Razão Social</label>
+          <label style={styles.labelRequired}>
+            Razão Social <span style={{ color: "#dc3545" }}>*</span>
+          </label>
           <input
             type="text"
             name="fornecedor"
@@ -583,7 +590,7 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
       </div>
 
-      {/* LINHA 5: Nome Fantasia, Telefone, Email */}
+      {/* LINHA 4: Nome Fantasia | Telefone | Email */}
       <div style={styles.formRow}>
         <div style={styles.formGroup}>
           <label style={styles.label}>Nome Fantasia</label>

@@ -1,0 +1,146 @@
+vejo o problema! 🎯
+Quando a despesa é carregada para edição, o useEffect preenche o formData.emendaId, MAS o segundo useEffect (que sincroniza a emenda) só carrega se não houver emendaPreSelecionada.
+O problema é que ao editar:
+
+✅ formData.emendaId é preenchido com o ID da emenda
+❌ O useEffect de sincronização não chama carregarDadosEmenda porque emendaPreSelecionada pode estar null mas emendaInfo também está null
+❌ Resultado: emendaInfoDinamica fica null
+
+
+✅ SOLUÇÃO
+Preciso corrigir o useEffect de sincronização para sempre carregar a emenda quando houver formData.emendaId:Gerando correção para o DespesaForm.jsxbashcat > /tmp/despesaform_fix.txt << 'EOF'
+CORREÇÃO PARA DespesaForm.jsx
+
+Substituir o useEffect de SINCRONIZAR EMENDA PRE-SELECIONADA:
+
+// ❌ CÓDIGO ANTIGO (BUGADO):
+useEffect(() => {
+  if (emendaPreSelecionada && emendaInfo) {
+    setEmendaInfoDinamica(emendaInfo);
+    return;
+  }
+  if (formData.emendaId && !emendaPreSelecionada) {
+    carregarDadosEmenda(formData.emendaId);
+  } else if (!formData.emendaId) {
+    setEmendaInfoDinamica(null);
+  }
+}, [
+  formData.emendaId,
+  emendaPreSelecionada,
+  emendaInfo,
+  carregarDadosEmenda,
+]);
+
+// ✅ CÓDIGO NOVO (CORRIGIDO):
+useEffect(() => {
+  // 1. Se tem emenda pré-selecionada com info, usa direto
+  if (emendaPreSelecionada && emendaInfo) {
+    setEmendaInfoDinamica(emendaInfo);
+    return;
+  }
+  
+  // 2. Se tem emendaId no formData, SEMPRE carregar (criar OU editar)
+  if (formData.emendaId) {
+    carregarDadosEmenda(formData.emendaId);
+  } else {
+    // 3. Se não tem emendaId, limpar
+    setEmendaInfoDinamica(null);
+  }
+}, [
+  formData.emendaId,
+  emendaPreSelecionada,
+  emendaInfo,
+  carregarDadosEmenda,
+]);
+
+EXPLICAÇÃO DA CORREÇÃO:
+- Removido: && !emendaPreSelecionada
+- Motivo: Ao editar despesa, emendaPreSelecionada é null mas formData.emendaId existe
+- Resultado: Agora SEMPRE carrega a emenda quando formData.emendaId é preenchido
+EOF
+cat /tmp/despesaform_fix.txt
+SaídaCORREÇÃO PARA DespesaForm.jsx
+
+Substituir o useEffect de SINCRONIZAR EMENDA PRE-SELECIONADA:
+
+// ❌ CÓDIGO ANTIGO (BUGADO):
+useEffect(() => {
+  if (emendaPreSelecionada && emendaInfo) {
+    setEmendaInfoDinamica(emendaInfo);
+    return;
+  }
+  if (formData.emendaId && !emendaPreSelecionada) {
+    carregarDadosEmenda(formData.emendaId);
+  } else if (!formData.emendaId) {
+    setEmendaInfoDinamica(null);
+  }
+}, [
+  formData.emendaId,
+  emendaPreSelecionada,
+  emendaInfo,
+  carregarDadosEmenda,
+]);
+
+// ✅ CÓDIGO NOVO (CORRIGIDO):
+useEffect(() => {
+  // 1. Se tem emenda pré-selecionada com info, usa direto
+  if (emendaPreSelecionada && emendaInfo) {
+    setEmendaInfoDinamica(emendaInfo);
+    return;
+  }
+  
+  // 2. Se tem emendaId no formData, SEMPRE carregar (criar OU editar)
+  if (formData.emendaId) {
+    carregarDadosEmenda(formData.emendaId);
+  } else {
+    // 3. Se não tem emendaId, limpar
+    setEmendaInfoDinamica(null);
+  }
+}, [
+  formData.emendaId,
+  emendaPreSelecionada,
+  emendaInfo,
+  carregarDadosEmenda,
+]);
+
+EXPLICAÇÃO DA CORREÇÃO:
+- Removido: && !emendaPreSelecionada
+- Motivo: Ao editar despesa, emendaPreSelecionada é null mas formData.emendaId existe
+- Resultado: Agora SEMPRE carrega a emenda quando formData.emendaId é preenchido
+
+🎯 CORREÇÃO PARA DespesaForm.jsx
+No arquivo src/components/DespesaForm.jsx, localize o useEffect que começa com // ✅ SINCRONIZAR EMENDA PRE-SELECIONADA e substitua por:
+javascript// ✅ SINCRONIZAR EMENDA PRE-SELECIONADA
+useEffect(() => {
+  // 1. Se tem emenda pré-selecionada com info, usa direto
+  if (emendaPreSelecionada && emendaInfo) {
+    setEmendaInfoDinamica(emendaInfo);
+    return;
+  }
+  
+  // 2. Se tem emendaId no formData, SEMPRE carregar (criar OU editar)
+  if (formData.emendaId) {
+    carregarDadosEmenda(formData.emendaId);
+  } else {
+    // 3. Se não tem emendaId, limpar
+    setEmendaInfoDinamica(null);
+  }
+}, [
+  formData.emendaId,
+  emendaPreSelecionada,
+  emendaInfo,
+  carregarDadosEmenda,
+]);
+
+📝 RESUMO DA ALTERAÇÃO
+ANTES (linha com bug):
+javascriptif (formData.emendaId && !emendaPreSelecionada) {
+DEPOIS (corrigido):
+javascriptif (formData.emendaId) {
+Por quê? Ao editar despesa:
+
+✅ formData.emendaId existe (foi carregado da despesa)
+❌ emendaPreSelecionada é null (pois não veio de prop)
+❌ Condição !emendaPreSelecionada impedia carregamento
+
+Agora sempre carrega a emenda quando formData.emendaId existe! 🎉
