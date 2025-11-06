@@ -5,11 +5,12 @@
 
 import React, { useState } from "react";
 import {
-  NATUREZAS_DESPESA,
+  NATUREZAS_DESPESA, // Esta constante será substituída pelo hook
   ELEMENTOS_DESPESA,
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
+import useNaturezasDespesa from "../../hooks/useNaturezasDespesa"; // Importando o hook
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -17,13 +18,15 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
-  const [cnpjError, setCnpjError] = useState("");
+  // 🆕 NOVO: Hook para carregar naturezas dinâmicas
+  const { naturezas, loading: loadingNaturezas } = useNaturezasDespesa();
+
+  const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
   const [modoElementoCustomizado, setModoElementoCustomizado] = useState(false);
   const [naturezaCustomizada, setNaturezaCustomizada] = useState("");
   const [elementoCustomizado, setElementoCustomizado] = useState("");
-  const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
   const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
 
   const validarCNPJ = (cnpj) => {
@@ -400,14 +403,17 @@ const DespesaFormClassificacaoFuncional = ({
               value={formData.naturezaDespesa || ""}
               onChange={handleNaturezaChange}
               style={styles.select}
-              disabled={modoVisualizacao}
+              disabled={modoVisualizacao || loadingNaturezas}
             >
-              <option value="">Selecione a natureza</option>
-              {NATUREZAS_DESPESA.map((natureza) => (
-                <option key={natureza} value={natureza}>
+              <option value="">
+                {loadingNaturezas ? "Carregando naturezas..." : "Selecione a natureza"}
+              </option>
+              {naturezas && naturezas.map((natureza, index) => (
+                <option key={`natureza-${index}`} value={natureza}>
                   {natureza}
                 </option>
               ))}
+              <option disabled>──────────────────</option>
               <option value="__customizado__">✏️ Digitar outra...</option>
             </select>
           ) : (
