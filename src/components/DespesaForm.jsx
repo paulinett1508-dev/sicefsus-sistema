@@ -154,19 +154,19 @@ const DespesaForm = ({
   // ✅ FUNÇÃO PARA CONVERSÃO SEGURA DE DATAS
   const convertToDateString = (dateValue) => {
     if (!dateValue) return "";
-    
+
     try {
       // Se é Timestamp do Firebase (tem .seconds)
       if (dateValue.seconds) {
         return new Date(dateValue.seconds * 1000).toISOString().split("T")[0];
       }
-      
+
       // Se já é string ISO ou data válida
       const date = new Date(dateValue);
       if (!isNaN(date.getTime())) {
         return date.toISOString().split("T")[0];
       }
-      
+
       return "";
     } catch (error) {
       console.warn("⚠️ Erro ao converter data:", dateValue, error);
