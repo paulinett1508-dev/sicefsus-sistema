@@ -62,22 +62,43 @@ const DespesaFormBasicFields = ({
   };
 
   const handleValorChange = (e) => {
-    let valor = e.target.value.replace(/\D/g, "");
-
-    if (valor === "") {
+    const valorDigitado = e.target.value;
+    
+    // Permite campo vazio
+    if (valorDigitado === "" || valorDigitado === "R$ ") {
       handleInputChange({ target: { name: "valor", value: "" } });
       return;
     }
 
-    const numeroValor = parseFloat(valor) / 100;
+    // Remove tudo exceto números
+    let apenasNumeros = valorDigitado.replace(/\D/g, "");
+    
+    if (apenasNumeros === "") {
+      handleInputChange({ target: { name: "valor", value: "" } });
+      return;
+    }
+
+    // Converte para número (centavos para reais)
+    const numeroValor = parseFloat(apenasNumeros) / 100;
+    
+    // Formata para exibição
     const valorFormatado = formatarValorMonetario(numeroValor);
+    
+    // Atualiza o estado através da função pai
     handleInputChange({ target: { name: "valor", value: valorFormatado } });
   };
 
   const handleValorBlur = (e) => {
     const valorAtual = e.target.value;
+    
+    // Se campo vazio, não faz nada
+    if (!valorAtual || valorAtual === "R$ ") {
+      return;
+    }
+    
     const numeroValor = parseValorMonetario(valorAtual);
 
+    // Verifica se houve alteração significativa
     const diferencaSignificativa = Math.abs(numeroValor - valorOriginal) > 0.01;
     const deveAbrirModal =
       valorOriginal > 0 && numeroValor > 0 && diferencaSignificativa;
@@ -438,6 +459,9 @@ const DespesaFormBasicFields = ({
                     : styles.input
                 }
                 placeholder="R$ 0,00"
+                disabled={false}
+                readOnly={false}
+                autoComplete="off"
               />
               {valorExcedeSaldo && (
                 <span style={styles.errorText}>
