@@ -1,0 +1,102 @@
+# 🔧 CORREÇÃO: DespesaForm.jsx - Erro de Data Inválida
+
+## 🎯 Problema
+Ao editar despesa, erro: `RangeError: Invalid time value`
+
+## ✅ Solução (2 mudanças)
+
+---
+
+### **1️⃣ ADICIONAR FUNÇÃO (Linha ~300, dentro do componente DespesaForm)**
+
+Procure por:
+```javascript
+function DespesaForm({ ... }) {
+  // ... hooks existentes ...
+  
+  useEffect(() => {
+```
+
+**ADICIONE ESTA FUNÇÃO** logo antes do `useEffect`:
+```javascript
+function DespesaForm({ ... }) {
+  // ... hooks existentes ...
+  
+  // ✅ ADICIONAR ESTA FUNÇÃO
+  const convertToDateString = (dateValue) => {
+    if (!dateValue) return "";
+    
+    try {
+      // Se é Timestamp do Firebase (tem .seconds)
+      if (dateValue.seconds) {
+        return new Date(dateValue.seconds * 1000).toISOString().split("T")[0];
+      }
+      
+      // Se já é string ISO ou data válida
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split("T")[0];
+      }
+      
+      return "";
+    } catch (error) {
+      console.warn("⚠️ Erro ao converter data:", dateValue, error);
+      return "";
+    }
+  };
+  
+  useEffect(() => {
+    // ... resto do código
+```
+
+---
+
+### **2️⃣ SUBSTITUIR LINHAS 325-339**
+
+**PROCURE POR (linhas 325-339):**
+```javascript
+dataEmpenho: despesaParaEditar.dataEmpenho
+  ? new Date(despesaParaEditar.dataEmpenho.seconds * 1000)
+      .toISOString()
+      .split("T")[0]
+  : "",
+dataLiquidacao: despesaParaEditar.dataLiquidacao
+  ? new Date(despesaParaEditar.dataLiquidacao.seconds * 1000)
+      .toISOString()
+      .split("T")[0]
+  : "",
+dataPagamento: despesaParaEditar.dataPagamento
+  ? new Date(despesaParaEditar.dataPagamento.seconds * 1000)
+      .toISOString()
+      .split("T")[0]
+  : "",
+```
+
+**SUBSTITUIR POR:**
+```javascript
+dataEmpenho: convertToDateString(despesaParaEditar.dataEmpenho),
+dataLiquidacao: convertToDateString(despesaParaEditar.dataLiquidacao),
+dataPagamento: convertToDateString(despesaParaEditar.dataPagamento),
+```
+
+---
+
+## 🚀 TESTE
+
+Após fazer as mudanças:
+1. ✅ Criar emenda
+2. ✅ Cadastrar despesa
+3. ✅ Clicar "Editar" na despesa
+4. ✅ **Deve abrir formulário sem erro**
+
+---
+
+## 📋 CONFIRMAÇÃO DAS SEÇÕES
+
+As 4 seções do formulário **PERMANECEM** intactas:
+1. ✅ Dados Básicos da Despesa
+2. ✅ Dados do Empenho e Nota Fiscal
+3. ✅ Datas de Execução
+4. ✅ Classificação Funcional-Programática
+
+**Nenhuma seção foi alterada!** Apenas corrigimos a conversão de datas.
