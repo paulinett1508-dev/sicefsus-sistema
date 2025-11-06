@@ -18,7 +18,7 @@ import { NATUREZAS_DESPESA } from "../config/constants";
 export const useNaturezasDespesa = () => {
   const [naturezasDinamicas, setNaturezasDinamicas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState(null);
+  const [erro, setErro] = useState(null); // Renamed from 'erro' to 'erro' as per original code for consistency
 
   // ✅ Carregar naturezas dinâmicas do Firebase com LISTENER EM TEMPO REAL
   useEffect(() => {
@@ -48,15 +48,29 @@ export const useNaturezasDespesa = () => {
       },
       (error) => {
         console.error("❌ Erro ao carregar naturezas:", error);
-        setErro(error.message);
-        setLoading(false);
+
+        // Tratar especificamente erro de permissão
+        if (error.code === 'permission-denied') {
+          setErro('Sem permissão para acessar naturezas de despesa');
+          // Usar dados em cache ou array vazio
+          setNaturezasDinamicas([]);
+        } else {
+          setErro(error.message);
+        }
+        setLoading(false); // Ensure loading is set to false even on error
       },
     );
 
     // Cleanup: cancelar listener quando componente desmontar
     return () => {
-      console.log("🛑 Cancelando listener de naturezas");
-      unsubscribe();
+      if (unsubscribe) {
+        console.log("🛑 Cancelando listener de naturezas");
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.warn("⚠️ Erro ao cancelar listener:", error);
+        }
+      }
     };
   }, []);
 
