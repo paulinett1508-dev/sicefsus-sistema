@@ -1,28 +1,14 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ CORRIGIDO 06/11/2025: Validação aprimorada e lógica do modal
+// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda, valor e discriminação
 
-import React, { useState, useEffect } from "react";
-import { NATUREZAS_DESPESA } from "../../config/constants";
-
-const toNaturezaOptions = (lista) => {
-  try {
-    if (Array.isArray(lista)) {
-      return lista.map((n) => ({
-        value: n.value ?? n.codigo ?? String(n),
-        label: n.label ?? n.nome ?? String(n),
-      }));
-    }
-  } catch (_) {}
-  return [
-    { value: "3.3.9.0.30", label: "3.3.9.0.30 – Material de Despesa" },
-    { value: "3.3.90.30.99", label: "3.3.90.30.99 – Outros Materiais de Consumo" },
-  ];
-};
+import React, { useState } from "react";
 
 const parseValorMonetario = (valor) => {
   if (typeof valor === "number") return valor;
   if (!valor) return 0;
-  const valorLimpo = String(valor).replace(/[^\d,]/g, "").replace(",", ".");
+  const valorLimpo = String(valor)
+    .replace(/[^\d,]/g, "")
+    .replace(",", ".");
   const numero = parseFloat(valorLimpo);
   return isNaN(numero) ? 0 : numero;
 };
@@ -30,13 +16,8 @@ const parseValorMonetario = (valor) => {
 const DespesaFormBasicFields = ({
   formData,
   errors = {},
-  emendas = [],
-  emendaPreSelecionada = null,
   emendaInfo = null,
-  userRole,
-  userMunicipio,
   modoVisualizacao = false,
-  valorError,
   handleInputChange,
   despesaParaEditar = null,
 }) => {
@@ -44,13 +25,10 @@ const DespesaFormBasicFields = ({
   const [novoValorPendente, setNovoValorPendente] = useState(null);
   const [valorAnterior, setValorAnterior] = useState(null);
 
-  const naturezaOptions = React.useMemo(() => toNaturezaOptions(NATUREZAS_DESPESA), []);
-
   const emendaDisplay = emendaInfo
     ? `${emendaInfo.numero || emendaInfo.numeroEmenda || ""} - ${emendaInfo.parlamentar || emendaInfo.autor || ""}`
     : "Nenhuma emenda selecionada";
 
-  // Calcular valor original da despesa (para comparação)
   const valorOriginal = React.useMemo(() => {
     if (despesaParaEditar?.valor) {
       return parseValorMonetario(despesaParaEditar.valor);
@@ -79,32 +57,30 @@ const DespesaFormBasicFields = ({
       style: "currency",
       currency: "BRL",
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
   };
 
   const handleValorChange = (e) => {
     let valor = e.target.value.replace(/\D/g, "");
+
     if (valor === "") {
-      e.target.value = "";
-      handleInputChange(e);
+      handleInputChange({ target: { name: "valor", value: "" } });
       return;
     }
+
     const numeroValor = parseFloat(valor) / 100;
-    e.target.value = formatarValorMonetario(numeroValor);
-    handleInputChange(e);
+    const valorFormatado = formatarValorMonetario(numeroValor);
+    handleInputChange({ target: { name: "valor", value: valorFormatado } });
   };
 
   const handleValorBlur = (e) => {
     const valorAtual = e.target.value;
     const numeroValor = parseValorMonetario(valorAtual);
 
-    // Verificar se deve abrir modal de confirmação:
-    // 1. Há um valor original (despesa em edição)
-    // 2. O novo valor é diferente do original (diferença > R$ 0,01)
-    // 3. O novo valor é maior que zero
     const diferencaSignificativa = Math.abs(numeroValor - valorOriginal) > 0.01;
-    const deveAbrirModal = valorOriginal > 0 && numeroValor > 0 && diferencaSignificativa;
+    const deveAbrirModal =
+      valorOriginal > 0 && numeroValor > 0 && diferencaSignificativa;
 
     if (deveAbrirModal) {
       setValorAnterior(valorOriginal);
@@ -117,8 +93,8 @@ const DespesaFormBasicFields = ({
     const eventoSimulado = {
       target: {
         name: "valor",
-        value: formatarValorMonetario(novoValorPendente)
-      }
+        value: formatarValorMonetario(novoValorPendente),
+      },
     };
     handleInputChange(eventoSimulado);
     setShowModalConfirmacao(false);
@@ -130,8 +106,8 @@ const DespesaFormBasicFields = ({
     const eventoSimulado = {
       target: {
         name: "valor",
-        value: formatarValorMonetario(valorOriginal)
-      }
+        value: formatarValorMonetario(valorOriginal),
+      },
     };
     handleInputChange(eventoSimulado);
     setShowModalConfirmacao(false);
@@ -146,7 +122,7 @@ const DespesaFormBasicFields = ({
       padding: "20px",
       marginBottom: "20px",
       background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     },
     legend: {
       background: "white",
@@ -158,24 +134,18 @@ const DespesaFormBasicFields = ({
       fontSize: "16px",
       display: "flex",
       alignItems: "center",
-      gap: "8px"
+      gap: "8px",
     },
     legendIcon: { fontSize: "18px" },
     formGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-      gap: "20px"
+      gridTemplateColumns: "1fr",
+      gap: "20px",
     },
     formGroup: {
       display: "flex",
       flexDirection: "column",
-      gap: "8px"
-    },
-    formGroupFull: {
-      gridColumn: "1 / -1",
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px"
+      gap: "8px",
     },
     label: {
       fontWeight: "bold",
@@ -183,11 +153,11 @@ const DespesaFormBasicFields = ({
       fontSize: "14px",
       display: "flex",
       alignItems: "center",
-      gap: "5px"
+      gap: "5px",
     },
     requiredMark: {
       color: "#dc3545",
-      fontSize: "16px"
+      fontSize: "16px",
     },
     input: {
       padding: "12px",
@@ -196,7 +166,7 @@ const DespesaFormBasicFields = ({
       fontSize: "14px",
       transition: "border-color 0.3s ease",
       backgroundColor: "white",
-      boxSizing: "border-box"
+      boxSizing: "border-box",
     },
     inputError: {
       padding: "12px",
@@ -205,12 +175,12 @@ const DespesaFormBasicFields = ({
       fontSize: "14px",
       transition: "border-color 0.3s ease",
       backgroundColor: "#fff5f5",
-      boxSizing: "border-box"
+      boxSizing: "border-box",
     },
     inputWrapper: {
       position: "relative",
       display: "flex",
-      alignItems: "center"
+      alignItems: "center",
     },
     clearButton: {
       position: "absolute",
@@ -222,7 +192,7 @@ const DespesaFormBasicFields = ({
       cursor: "pointer",
       padding: "5px",
       lineHeight: "1",
-      transition: "color 0.2s"
+      transition: "color 0.2s",
     },
     emendaInfoBox: {
       padding: "12px",
@@ -231,17 +201,17 @@ const DespesaFormBasicFields = ({
       borderRadius: "6px",
       minHeight: "44px",
       display: "flex",
-      alignItems: "center"
+      alignItems: "center",
     },
     emendaText: {
       fontSize: "14px",
       color: "#495057",
-      fontWeight: "500"
+      fontWeight: "500",
     },
     errorText: {
       color: "#dc3545",
       fontSize: "12px",
-      marginTop: "5px"
+      marginTop: "5px",
     },
     modalOverlay: {
       position: "fixed",
@@ -253,7 +223,7 @@ const DespesaFormBasicFields = ({
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      zIndex: 10000
+      zIndex: 10000,
     },
     modalContent: {
       backgroundColor: "white",
@@ -261,12 +231,12 @@ const DespesaFormBasicFields = ({
       width: "90%",
       maxWidth: "500px",
       boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-      overflow: "hidden"
+      overflow: "hidden",
     },
     modalHeader: {
       padding: "20px",
       backgroundColor: "#fff3cd",
-      borderBottom: "2px solid #ffc107"
+      borderBottom: "2px solid #ffc107",
     },
     modalTitle: {
       margin: 0,
@@ -274,16 +244,16 @@ const DespesaFormBasicFields = ({
       color: "#856404",
       display: "flex",
       alignItems: "center",
-      gap: "10px"
+      gap: "10px",
     },
     modalBody: {
-      padding: "30px 20px"
+      padding: "30px 20px",
     },
     modalText: {
       fontSize: "15px",
       color: "#333",
       marginBottom: "20px",
-      textAlign: "center"
+      textAlign: "center",
     },
     valorComparacao: {
       display: "flex",
@@ -293,33 +263,33 @@ const DespesaFormBasicFields = ({
       marginBottom: "20px",
       padding: "20px",
       backgroundColor: "#f8f9fa",
-      borderRadius: "8px"
+      borderRadius: "8px",
     },
     valorBox: {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: "8px"
+      gap: "8px",
     },
     valorLabel: {
       fontSize: "12px",
       color: "#6c757d",
       textTransform: "uppercase",
-      fontWeight: "600"
+      fontWeight: "600",
     },
     valorAntigo: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "#dc3545"
+      color: "#dc3545",
     },
     valorNovo: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "#28a745"
+      color: "#28a745",
     },
     seta: {
       fontSize: "24px",
-      color: "#6c757d"
+      color: "#6c757d",
     },
     modalWarning: {
       fontSize: "13px",
@@ -328,7 +298,7 @@ const DespesaFormBasicFields = ({
       padding: "12px",
       borderRadius: "6px",
       border: "1px solid #ffc107",
-      textAlign: "center"
+      textAlign: "center",
     },
     modalFooter: {
       padding: "15px 20px",
@@ -336,7 +306,7 @@ const DespesaFormBasicFields = ({
       borderTop: "1px solid #dee2e6",
       display: "flex",
       justifyContent: "flex-end",
-      gap: "10px"
+      gap: "10px",
     },
     btnCancelar: {
       padding: "10px 20px",
@@ -347,7 +317,7 @@ const DespesaFormBasicFields = ({
       backgroundColor: "white",
       color: "#6c757d",
       cursor: "pointer",
-      transition: "all 0.2s"
+      transition: "all 0.2s",
     },
     btnConfirmar: {
       padding: "10px 20px",
@@ -358,7 +328,7 @@ const DespesaFormBasicFields = ({
       backgroundColor: "#28a745",
       color: "white",
       cursor: "pointer",
-      transition: "all 0.2s"
+      transition: "all 0.2s",
     },
   };
 
@@ -370,7 +340,8 @@ const DespesaFormBasicFields = ({
           Dados Básicos da Despesa
         </legend>
         <div style={styles.formGrid}>
-          <div style={styles.formGroupFull}>
+          {/* ✅ EMENDA VINCULADA (READ-ONLY) */}
+          <div style={styles.formGroup}>
             <label style={styles.label}>
               📌 Emenda Vinculada
               <span style={styles.requiredMark}>*</span>
@@ -378,9 +349,12 @@ const DespesaFormBasicFields = ({
             <div style={styles.emendaInfoBox}>
               <span style={styles.emendaText}>{emendaDisplay}</span>
             </div>
-            {errors.emendaId && <span style={styles.errorText}>{errors.emendaId}</span>}
+            {errors.emendaId && (
+              <span style={styles.errorText}>{errors.emendaId}</span>
+            )}
           </div>
 
+          {/* ✅ VALOR DA DESPESA (EDITÁVEL COM ALERTA) */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               💰 Valor da Despesa
@@ -392,13 +366,18 @@ const DespesaFormBasicFields = ({
               value={formatarValorMonetario(formData.valor) || ""}
               onChange={handleValorChange}
               onBlur={handleValorBlur}
-              style={valorExcedeSaldo || errors.valor ? styles.inputError : styles.input}
+              style={
+                valorExcedeSaldo || errors.valor
+                  ? styles.inputError
+                  : styles.input
+              }
               placeholder="R$ 0,00"
               readOnly={modoVisualizacao}
             />
             {valorExcedeSaldo && (
               <span style={styles.errorText}>
-                ⚠️ Valor excede o saldo disponível ({formatarValorMonetario(saldoDisponivel)})
+                ⚠️ Valor excede o saldo disponível (
+                {formatarValorMonetario(saldoDisponivel)})
               </span>
             )}
             {errors.valor && !valorExcedeSaldo && (
@@ -406,7 +385,8 @@ const DespesaFormBasicFields = ({
             )}
           </div>
 
-          <div style={styles.formGroupFull}>
+          {/* ✅ DISCRIMINAÇÃO (EM BRANCO, EDITÁVEL) */}
+          <div style={styles.formGroup}>
             <label style={styles.label}>
               📝 Discriminação da Despesa
               <span style={styles.requiredMark}>*</span>
@@ -424,7 +404,11 @@ const DespesaFormBasicFields = ({
               {formData.discriminacao && !modoVisualizacao && (
                 <button
                   type="button"
-                  onClick={() => handleInputChange({ target: { name: "discriminacao", value: "" } })}
+                  onClick={() =>
+                    handleInputChange({
+                      target: { name: "discriminacao", value: "" },
+                    })
+                  }
                   style={styles.clearButton}
                   title="Limpar campo"
                 >
@@ -432,28 +416,14 @@ const DespesaFormBasicFields = ({
                 </button>
               )}
             </div>
-            {errors.discriminacao && <span style={styles.errorText}>{errors.discriminacao}</span>}
-          </div>
-
-          <div style={styles.formGroupFull}>
-            <label style={styles.label}>
-              🏢 Fornecedor
-              <span style={styles.requiredMark}>*</span>
-            </label>
-            <input
-              type="text"
-              name="fornecedor"
-              value={formData.fornecedor || ""}
-              onChange={handleInputChange}
-              style={errors.fornecedor ? styles.inputError : styles.input}
-              placeholder="Nome do fornecedor"
-              readOnly={modoVisualizacao}
-            />
-            {errors.fornecedor && <span style={styles.errorText}>{errors.fornecedor}</span>}
+            {errors.discriminacao && (
+              <span style={styles.errorText}>{errors.discriminacao}</span>
+            )}
           </div>
         </div>
       </fieldset>
 
+      {/* ✅ MODAL DE CONFIRMAÇÃO DE ALTERAÇÃO */}
       {showModalConfirmacao && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
@@ -461,27 +431,40 @@ const DespesaFormBasicFields = ({
               <h3 style={styles.modalTitle}>⚠️ Confirmar Alteração de Valor</h3>
             </div>
             <div style={styles.modalBody}>
-              <p style={styles.modalText}>Você está alterando o valor da despesa:</p>
+              <p style={styles.modalText}>
+                Você está alterando o valor da despesa:
+              </p>
               <div style={styles.valorComparacao}>
                 <div style={styles.valorBox}>
                   <span style={styles.valorLabel}>Valor Anterior:</span>
-                  <span style={styles.valorAntigo}>{formatarValorMonetario(valorAnterior)}</span>
+                  <span style={styles.valorAntigo}>
+                    {formatarValorMonetario(valorAnterior)}
+                  </span>
                 </div>
                 <span style={styles.seta}>→</span>
                 <div style={styles.valorBox}>
                   <span style={styles.valorLabel}>Novo Valor:</span>
-                  <span style={styles.valorNovo}>{formatarValorMonetario(novoValorPendente)}</span>
+                  <span style={styles.valorNovo}>
+                    {formatarValorMonetario(novoValorPendente)}
+                  </span>
                 </div>
               </div>
               <p style={styles.modalWarning}>
-                ⚠️ Esta alteração pode impactar o planejamento orçamentário da emenda.
+                ⚠️ Esta alteração pode impactar o planejamento orçamentário da
+                emenda.
               </p>
             </div>
             <div style={styles.modalFooter}>
-              <button onClick={cancelarAlteracaoValor} style={styles.btnCancelar}>
+              <button
+                onClick={cancelarAlteracaoValor}
+                style={styles.btnCancelar}
+              >
                 ❌ Cancelar
               </button>
-              <button onClick={confirmarAlteracaoValor} style={styles.btnConfirmar}>
+              <button
+                onClick={confirmarAlteracaoValor}
+                style={styles.btnConfirmar}
+              >
                 ✅ Confirmar Alteração
               </button>
             </div>

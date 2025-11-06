@@ -1,0 +1,98 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.jsx:36 🔥 PROD Firebase Check: Object
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: Object
+DisableConsole.jsx:172 👤 Usuário configurado: Object
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: Object
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔍 Iniciando carregamento de dados: Object
+DisableConsole.jsx:172 🔑 ADMIN: Carregando TODOS os dados do sistema
+DisableConsole.jsx:172 ✅ ADMIN carregou: 7 emendas, 18 despesas
+DisableConsole.jsx:172 🔍 Tentativa de navegação para Emendas: Object
+DisableConsole.jsx:172 ✅ Navegação normal para Emendas
+DisableConsole.jsx:172 📋 Emendas.jsx v2.3 - Dados do usuário: Object
+DisableConsole.jsx:172 📊 Estatísticas calculadas: Object
+DisableConsole.jsx:172 📊 Carregando emendas e despesas...
+DisableConsole.jsx:172 👤 Usuário: Object
+DisableConsole.jsx:172 🔓 Admin - carregando TODAS as emendas
+DisableConsole.jsx:172 ✅ Emendas encontradas: 7
+DisableConsole.jsx:172 ✅ Despesas encontradas: 18
+DisableConsole.jsx:172 💰 Emenda 1145102212 (Aveiro/PA): Object
+DisableConsole.jsx:172 💰 Emenda 34520202 (Atalaia/AL): Object
+DisableConsole.jsx:172 💰 Emenda 304612542 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 💰 Emenda 5120222 (Ferreira Gomes/AP): Object
+DisableConsole.jsx:172 💰 Emenda 45120220 (Aguanil/MG): Object
+DisableConsole.jsx:172 💰 Emenda 451202512 (Areia de Baraúnas/PB): Object
+DisableConsole.jsx:172 💰 Emenda 2202120 (Ferreira Gomes/AP): Object
+DisableConsole.jsx:172 ✅ 7 emendas processadas para usuário admin
+DisableConsole.jsx:172 🔍 Aplicando filtros: 7
+DisableConsole.jsx:172 ✏️ Editando emenda: 17rf3Pw8Cpam1jwU073H
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 🏙️ Carregando municípios para PA...
+DisableConsole.jsx:172 🌐 Tentativa 1/2 - API IBGE para PA
+DisableConsole.jsx:172 ✅ API IBGE sucesso para PA: 144 municípios
+DisableConsole.jsx:172 💾 Cache salvo para PA: 144 municípios
+DisableConsole.jsx:172 ✅ 144 municípios carregados para PA
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:172  Warning: Each child in a list should have a unique "key" prop.
+
+Check the render method of `DespesaFormClassificacaoFuncional`. See https://reactjs.org/link/warning-keys for more information.
+    at option
+    at DespesaFormClassificacaoFuncional (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/despesa/DespesaFormClassificacaoFuncional.jsx:26:3)
+    at div
+    at div
+    at DespesaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesaForm.jsx:73:3)
+    at div
+    at div
+    at div
+    at div
+    at ExecucaoOrcamentaria (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx:307:33)
+    at div
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:35:18)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=54076bda:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=54076bda:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/ErrorBoundary.jsx:5:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:195:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:91:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=54076bda:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=54076bda:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at App
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+(anônimo) @ DisableConsole.jsx:172
+DespesaForm.jsx:311 🔍 DEBUG: Carregando Despesa para Edição
+DisableConsole.jsx:172 despesaParaEditar recebida: Object
+DisableConsole.jsx:172 Campos carregados para o formulário: Object
+DespesaForm.jsx:311 🔍 DEBUG: Carregando Despesa para Edição
+DisableConsole.jsx:172 🔍 Validação executada - campos: Object
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Input: 06.597.801/0001-62
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Numero limpo: 06597801000162
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Digits array: Array(14)
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Primeiro dígito calculado: 6 vs esperado: 6
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Segundo dígito calculado: 2 vs esperado: 2
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Resultado final: true
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DespesaForm.jsx:311 🔍 DEBUG: Carregando Despesa para Edição
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: Array(0)
+DespesaForm.jsx:311 🔍 DEBUG: Carregando Despesa para Edição

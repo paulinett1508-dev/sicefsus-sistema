@@ -1,5 +1,5 @@
 // src/components/despesa/DespesaFormEmpenhoFields.jsx
-// ✅ Componente especializado para campos de empenho e nota fiscal
+// ✅ CORRIGIDO: Inputs controlados com || ''
 
 import React from "react";
 
@@ -22,7 +22,7 @@ const DespesaFormEmpenhoFields = ({
           <input
             type="text"
             name="numeroEmpenho"
-            value={formData.numeroEmpenho}
+            value={formData.numeroEmpenho || ""}
             onChange={handleInputChange}
             style={errors.numeroEmpenho ? styles.inputError : styles.input}
             readOnly={modoVisualizacao}
@@ -47,7 +47,7 @@ const DespesaFormEmpenhoFields = ({
           <input
             type="text"
             name="numeroNota"
-            value={formData.numeroNota}
+            value={formData.numeroNota || ""}
             onChange={handleInputChange}
             style={errors.numeroNota ? styles.inputError : styles.input}
             readOnly={modoVisualizacao}
@@ -64,7 +64,7 @@ const DespesaFormEmpenhoFields = ({
           <input
             type="text"
             name="numeroContrato"
-            value={formData.numeroContrato}
+            value={formData.numeroContrato || ""}
             onChange={handleInputChange}
             style={styles.input}
             readOnly={modoVisualizacao}
