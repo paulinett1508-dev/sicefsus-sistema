@@ -151,7 +151,7 @@ const DespesaForm = ({
   const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // ✅ FUNÇÃO PARA CONVERSÃO SEGURA DE DATAS
+  // ✅ Função para converter datas de forma segura
   const convertToDateString = (dateValue) => {
     if (!dateValue) return "";
 
