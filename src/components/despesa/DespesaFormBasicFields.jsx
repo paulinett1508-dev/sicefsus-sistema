@@ -165,7 +165,7 @@ const DespesaFormBasicFields = ({
     },
     formGridRow: {
       display: "grid",
-      gridTemplateColumns: "2fr 1fr",
+      gridTemplateColumns: "1fr 1fr",
       gap: "20px",
     },
     formGridDiscriminacao: {
