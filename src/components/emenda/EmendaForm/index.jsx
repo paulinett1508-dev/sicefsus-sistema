@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { useSearchParams } from "react-router-dom";
 import { db } from "../../../firebase/firebaseConfig";
 import { UserContext } from "../../../context/UserContext";
 
@@ -21,6 +22,7 @@ import Toast from "../../Toast";
 export default function EmendaForm() {
   const [activeTab, setActiveTab] = useState("dadosBasicos");
   const { user } = useContext(UserContext);
+  const [searchParams] = useSearchParams();
 
   const {
     formData,
@@ -46,6 +48,17 @@ export default function EmendaForm() {
     handleContinueEditing,
     handleSimpleBack,
   } = useEmendaFormNavigation(hasUnsavedChanges, isEdicao);
+
+  // Processa navegação via query parameter
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'despesas' || tabParam === 'execucao') {
+      setActiveTab('execucao');
+      // Limpar query string da URL
+      const currentPath = window.location.pathname;
+      window.history.replaceState({}, '', currentPath);
+    }
+  }, [searchParams]);
 
   // Carrega despesas para o header
   const [despesas, setDespesas] = useState([]);
