@@ -5,12 +5,11 @@
 
 import React, { useState } from "react";
 import {
-  NATUREZAS_DESPESA, // Esta constante será substituída pelo hook
   ELEMENTOS_DESPESA,
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
-import useNaturezasDespesa from "../../hooks/useNaturezasDespesa"; // Importando o hook
+import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 CORRETO com chaves {}
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
