@@ -9,7 +9,7 @@ import {
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
-import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa";
+import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 Hook para naturezas dinâmicas
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -17,7 +17,16 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
+  // 🆕 Hook para carregar naturezas dinâmicas (fixas + Firebase)
   const { naturezas, loading: loadingNaturezas } = useNaturezasDespesa();
+
+  // 🐛 DEBUG: Verificar o que o hook está retornando
+  console.log("🔍 DespesaFormClassificacaoFuncional - Hook naturezas:", {
+    naturezas,
+    quantidade: naturezas?.length,
+    loading: loadingNaturezas,
+    primeiras3: naturezas?.slice(0, 3),
+  });
 
   const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -405,13 +414,16 @@ const DespesaFormClassificacaoFuncional = ({
               disabled={modoVisualizacao || loadingNaturezas}
             >
               <option value="">
-                {loadingNaturezas ? "⏳ Carregando naturezas..." : "Selecione a natureza de despesas"}
+                {loadingNaturezas
+                  ? "⏳ Carregando naturezas..."
+                  : "Selecione a natureza de despesas"}
               </option>
-              {naturezas && naturezas.map((natureza, index) => (
-                <option key={`natureza-${index}`} value={natureza}>
-                  {natureza}
-                </option>
-              ))}
+              {naturezas &&
+                naturezas.map((natureza, index) => (
+                  <option key={`natureza-${index}`} value={natureza}>
+                    {natureza}
+                  </option>
+                ))}
               <option disabled>──────────────────</option>
               <option value="__customizado__">✏️ Digitar outra...</option>
             </select>
