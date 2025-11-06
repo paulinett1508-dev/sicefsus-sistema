@@ -17,6 +17,21 @@ const ERROR = "#E74C3C";
 const SUCCESS = "#27AE60";
 const WARNING = "#F39C12";
 
+// 🔧 HELPER: Parse seguro de valor monetário
+const parseValorMonetario = (valor) => {
+  if (typeof valor === "number") return valor;
+  if (!valor) return 0;
+
+  // Remove tudo exceto números, vírgula e ponto
+  const valorLimpo = String(valor)
+    .replace(/[^\d,.-]/g, "") // Remove R$, espaços, etc
+    .replace(/\./g, "") // Remove separador de milhar
+    .replace(",", "."); // Vírgula vira ponto
+
+  const numero = parseFloat(valorLimpo);
+  return isNaN(numero) ? 0 : numero;
+};
+
 export default function DespesasTable({
   despesas,
   emendas,
@@ -45,14 +60,14 @@ export default function DespesasTable({
           emenda: emenda || {
             id: emendaId,
             numero: emendaId, // Mostrar ID ao invés de N/A
-            objeto: "Emenda sem dados"
+            objeto: "Emenda sem dados",
           },
           despesas: [],
           totalValor: 0,
         };
       }
       grupos[emendaId].despesas.push(despesa);
-      grupos[emendaId].totalValor += despesa.valor || 0;
+      grupos[emendaId].totalValor += parseValorMonetario(despesa.valor);
     });
 
     return Object.values(grupos);
@@ -136,8 +151,6 @@ export default function DespesasTable({
     ]);
     return rotuloDireto || naturezaMap[codigo] || codigo || "-";
   };
-
-
 
   // 🔧 FUNÇÃO REMOVIDA - Coluna MUNICÍPIO/UF foi excluída
   // const getMunicipioUF = (despesa) => {
@@ -232,6 +245,40 @@ export default function DespesasTable({
     return statusMap[statusLimpo] || status;
   }
 
+  // ✅ Cor do Status Financeiro (statusPagamento)
+  function getStatusFinanceiroColor(statusPagamento) {
+    if (!statusPagamento) return "#6c757d";
+
+    const statusLimpo = String(statusPagamento).toLowerCase().trim();
+
+    const cores = {
+      pago: SUCCESS, // Verde
+      pendente: "#ffc107", // Amarelo
+      parcial: "#17a2b8", // Azul (info)
+      atrasado: ERROR, // Vermelho
+      cancelado: "#6c757d", // Cinza
+    };
+
+    return cores[statusLimpo] || "#6c757d";
+  }
+
+  // ✅ Formatar Status Financeiro para exibição
+  function formatarStatusFinanceiro(statusPagamento) {
+    if (!statusPagamento) return "Pendente";
+
+    const statusLimpo = String(statusPagamento).toLowerCase().trim();
+
+    const statusMap = {
+      pago: "Pago",
+      pendente: "Pendente",
+      parcial: "Parcial",
+      atrasado: "Atrasado",
+      cancelado: "Cancelado",
+    };
+
+    return statusMap[statusLimpo] || statusPagamento;
+  }
+
   // =====================================================
   // 🗑️ Ações
   // =====================================================
@@ -292,7 +339,10 @@ export default function DespesasTable({
   // 🧱 Render da linha (mantém ordem com os <th>)
   // =====================================================
   const renderDespesaRow = (despesa, index, showEmenda = true) => (
-    <tr key={despesa.id} style={index % 2 === 0 ? styles.evenRow : styles.oddRow}>
+    <tr
+      key={despesa.id}
+      style={index % 2 === 0 ? styles.evenRow : styles.oddRow}
+    >
       {showEmenda && (
         <td style={styles.td}>
           <div style={styles.emendaCell}>{getEmendaInfo(despesa.emendaId)}</div>
@@ -303,7 +353,9 @@ export default function DespesasTable({
           <span
             style={{
               ...styles.tipoBadge,
-              backgroundColor: getObjetoColor(getObjetoEmenda(despesa.emendaId)),
+              backgroundColor: getObjetoColor(
+                getObjetoEmenda(despesa.emendaId),
+              ),
             }}
           >
             {getObjetoEmenda(despesa.emendaId)}
@@ -318,13 +370,21 @@ export default function DespesasTable({
 
       {/* VALOR */}
       <td style={styles.tdValue}>
-        R{"$"} {Number(despesa.valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+        R{"$"}{" "}
+        {parseValorMonetario(despesa.valor).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+        })}
       </td>
 
-      {/* STATUS */}
+      {/* STATUS (Financeiro) */}
       <td style={styles.td}>
-        <span style={{ ...styles.statusBadge, backgroundColor: getStatusColor(despesa.status) }}>
-          {formatarStatus(despesa.status)}
+        <span
+          style={{
+            ...styles.statusBadge,
+            backgroundColor: getStatusFinanceiroColor(despesa.statusPagamento),
+          }}
+        >
+          {formatarStatusFinanceiro(despesa.statusPagamento)}
         </span>
       </td>
 
@@ -333,10 +393,14 @@ export default function DespesasTable({
         <>
           <td style={styles.td}>{getNaturezaLabel(despesa)}</td>
           <td style={styles.td}>
-            <span style={styles.numeroCell}>{despesa.numeroContrato || "-"}</span>
+            <span style={styles.numeroCell}>
+              {despesa.numeroContrato || "-"}
+            </span>
           </td>
           <td style={styles.td}>
-            <div style={styles.discriminacaoCell}>{despesa.discriminacao || "-"}</div>
+            <div style={styles.discriminacaoCell}>
+              {despesa.discriminacao || "-"}
+            </div>
           </td>
         </>
       )}
@@ -346,10 +410,14 @@ export default function DespesasTable({
         <span style={styles.numeroCell}>{despesa.numeroEmpenho || "-"}</span>
       </td>
       <td style={styles.td}>
-        <span style={styles.numeroCell}>{despesa.numeroNotaFiscal || despesa.numeroNota || "-"}</span>
+        <span style={styles.numeroCell}>
+          {despesa.numeroNotaFiscal || despesa.numeroNota || "-"}
+        </span>
       </td>
       <td style={styles.td}>
-        <span style={styles.dataCell}>{formatarDataFirestore(despesa.dataPagamento)}</span>
+        <span style={styles.dataCell}>
+          {formatarDataFirestore(despesa.dataPagamento)}
+        </span>
       </td>
 
       {/* Bloco Detalhado removido: Município/UF */}
@@ -421,7 +489,9 @@ export default function DespesasTable({
                 }}
                 style={{
                   ...styles.toggleButton,
-                  ...(modoAgrupamento === "lista" ? styles.toggleButtonActive : {}),
+                  ...(modoAgrupamento === "lista"
+                    ? styles.toggleButtonActive
+                    : {}),
                 }}
               >
                 📄 Lista Completa
@@ -440,7 +510,9 @@ export default function DespesasTable({
               }}
               style={{
                 ...styles.toggleButton,
-                ...(modoVisualizacao === "resumido" ? styles.toggleButtonActive : {}),
+                ...(modoVisualizacao === "resumido"
+                  ? styles.toggleButtonActive
+                  : {}),
               }}
             >
               📊 Resumido
@@ -454,7 +526,9 @@ export default function DespesasTable({
               }}
               style={{
                 ...styles.toggleButton,
-                ...(modoVisualizacao === "detalhado" ? styles.toggleButtonActive : {}),
+                ...(modoVisualizacao === "detalhado"
+                  ? styles.toggleButtonActive
+                  : {}),
               }}
             >
               📋 Detalhado
@@ -471,7 +545,9 @@ export default function DespesasTable({
           <div style={styles.emptyState}>
             <div style={styles.emptyIcon}>💰</div>
             <h3 style={styles.emptyTitle}>Nenhuma despesa cadastrada</h3>
-            <p style={styles.emptyText}>Clique em "Nova Despesa" para adicionar registros</p>
+            <p style={styles.emptyText}>
+              Clique em "Nova Despesa" para adicionar registros
+            </p>
           </div>
         ) : (
           <>
@@ -484,33 +560,45 @@ export default function DespesasTable({
                   const emenda = grupo.emenda;
                   const despesasDoGrupo = grupo.despesas;
 
+                  // ✅ Só mostrar header se houver MÚLTIPLAS emendas
+                  const mostrarHeaderEmenda = despesasAgrupadas.length > 1;
+
                   return (
                     <div key={emenda.id} style={styles.emendaGroup}>
-                      {/* Header da Emenda */}
-                      <div style={styles.emendaHeader}>
-                        <div style={styles.emendaInfoHeader}>
-                          <h3 style={styles.emendaNumero}>Emenda {emenda.numero || "N/A"}</h3>
-                          <span style={styles.parlamentarText}>
-                            {emenda.parlamentar || emenda.autor || "-"}
-                          </span>
-                          <span
-                            style={{
-                              ...styles.tipoBadgeHeader,
-                              backgroundColor: getObjetoColor(getObjetoEmenda(emenda.id)),
-                            }}
-                          >
-                            {getObjetoEmenda(emenda.id)}
-                          </span>
+                      {/* Header da Emenda - CONDICIONAL */}
+                      {mostrarHeaderEmenda && (
+                        <div style={styles.emendaHeader}>
+                          <div style={styles.emendaInfoHeader}>
+                            <h3 style={styles.emendaNumero}>
+                              Emenda {emenda.numero || "N/A"}
+                            </h3>
+                            <span style={styles.parlamentarText}>
+                              {emenda.parlamentar || emenda.autor || "-"}
+                            </span>
+                            <span
+                              style={{
+                                ...styles.tipoBadgeHeader,
+                                backgroundColor: getObjetoColor(
+                                  getObjetoEmenda(emenda.id),
+                                ),
+                              }}
+                            >
+                              {getObjetoEmenda(emenda.id)}
+                            </span>
+                          </div>
+                          <div style={styles.emendaStatsHeader}>
+                            <span style={styles.statLabel}>
+                              {despesasDoGrupo.length} pagamento(s)
+                            </span>
+                            <span style={styles.statValue}>
+                              R{"$"}{" "}
+                              {grupo.totalValor.toLocaleString("pt-BR", {
+                                minimumFractionDigits: 2,
+                              })}
+                            </span>
+                          </div>
                         </div>
-                        <div style={styles.emendaStatsHeader}>
-                          <span style={styles.statLabel}>
-                            {despesasDoGrupo.length} pagamento(s)
-                          </span>
-                          <span style={styles.statValue}>
-                            R{"$"} {grupo.totalValor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                      </div>
+                      )}
 
                       {/* Tabela de Despesas da Emenda */}
                       <div style={styles.tableWrapper}>
@@ -532,7 +620,9 @@ export default function DespesasTable({
                               <th style={styles.th}>Nº EMPENHO</th>
                               <th style={styles.th}>Nº NF</th>
                               <th style={styles.th}>DATA PGTO</th>
-                              <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
+                              <th style={{ ...styles.th, textAlign: "center" }}>
+                                AÇÕES
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -571,7 +661,9 @@ export default function DespesasTable({
                       <th style={styles.th}>Nº EMPENHO</th>
                       <th style={styles.th}>Nº NF</th>
                       <th style={styles.th}>DATA PGTO</th>
-                      <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
+                      <th style={{ ...styles.th, textAlign: "center" }}>
+                        AÇÕES
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -598,30 +690,41 @@ export default function DespesasTable({
               <div style={styles.despesaCard}>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Fornecedor:</span>
-                  <span style={styles.value}>{confirmExclusao.fornecedor || "-"}</span>
+                  <span style={styles.value}>
+                    {confirmExclusao.fornecedor || "-"}
+                  </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Valor:</span>
                   <span style={styles.valueHighlight}>
                     R{"$"}{" "}
-                    {Number(confirmExclusao.valor || 0).toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                    })}
+                    {Number(confirmExclusao.valor || 0).toLocaleString(
+                      "pt-BR",
+                      {
+                        minimumFractionDigits: 2,
+                      },
+                    )}
                   </span>
                 </div>
                 <div style={styles.infoRow}>
                   <span style={styles.label}>Nº Empenho:</span>
-                  <span style={styles.value}>{confirmExclusao.numeroEmpenho || "-"}</span>
+                  <span style={styles.value}>
+                    {confirmExclusao.numeroEmpenho || "-"}
+                  </span>
                 </div>
               </div>
               <div style={styles.warningMessage}>
                 <p style={{ margin: 0, fontSize: 14 }}>
-                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será restaurado.
+                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será
+                  restaurado.
                 </p>
               </div>
             </div>
             <div style={styles.modalFooter}>
-              <button onClick={() => setConfirmExclusao(null)} style={styles.cancelButton}>
+              <button
+                onClick={() => setConfirmExclusao(null)}
+                style={styles.cancelButton}
+              >
                 Cancelar
               </button>
               <button
@@ -629,7 +732,9 @@ export default function DespesasTable({
                 style={styles.confirmDeleteButton}
                 disabled={excluindo === confirmExclusao.id}
               >
-                {excluindo === confirmExclusao.id ? "Excluindo..." : "Confirmar Exclusão"}
+                {excluindo === confirmExclusao.id
+                  ? "Excluindo..."
+                  : "Confirmar Exclusão"}
               </button>
             </div>
           </div>

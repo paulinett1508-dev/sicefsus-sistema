@@ -1,10 +1,4 @@
 // src/components/DespesaForm.jsx
-// ✅ REFATORADO: De 1404 linhas para ~200 linhas
-// Reutiliza componentes modulares existentes + hooks/utils existentes
-// 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
-// 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
-// ✅ ATUALIZADO 05/11/2025: Props corretas para DespesaFormEmendaInfo
-// 🔧 CORREÇÃO 05/11/2025: Navegação volta para tela anterior (navigate(-1))
 
 import React, {
   useState,
@@ -60,6 +54,10 @@ import DespesaFormEmpenhoFields from "./despesa/DespesaFormEmpenhoFields";
 import DespesaFormDateFields from "./despesa/DespesaFormDateFields";
 import DespesaFormClassificacaoFuncional from "./despesa/DespesaFormClassificacaoFuncional"; // ✅ NOVO COMPONENTE UNIFICADO
 
+// ✅ 🆕 NOVO: Hook e Modal para Naturezas Dinâmicas
+import { useNaturezasDespesa } from "../hooks/useNaturezasDespesa";
+import ModalNovaNatureza from "./ModalNovaNatureza";
+
 // ✅ HOOKS E UTILS EXISTENTES REUTILIZADOS
 import Toast from "./Toast";
 import LoadingOverlay from "./LoadingOverlay";
@@ -89,6 +87,14 @@ const DespesaForm = ({
   const navigate = useNavigate();
   const isMountedRef = useRef(true);
   const { valorError, handleValorChange } = useMoedaFormatting();
+
+  // ✅ 🆕 NOVO: Hook para naturezas dinâmicas
+  const {
+    naturezas,
+    loading: loadingNaturezas,
+    adicionarNatureza,
+  } = useNaturezasDespesa();
+  const [modalNaturezaAberto, setModalNaturezaAberto] = useState(false);
 
   // ✅ DADOS DO USUÁRIO SIMPLIFICADOS
   const userRole = usuario?.role || usuario?.tipo;
@@ -284,75 +290,162 @@ const DespesaForm = ({
   // ✅ PREENCHER FORMULÁRIO COM DADOS DA DESPESA (EDIÇÃO)
   useEffect(() => {
     if (despesaParaEditar) {
+      console.group("🔍 DEBUG: Carregando Despesa para Edição");
+      console.log("despesaParaEditar recebida:", despesaParaEditar);
+
+      const camposParaCarregar = {
+        emendaId:
+          despesaParaEditar.emendaId || emendaPreSelecionada || emendaId || "",
+        discriminacao: despesaParaEditar.discriminacao || "",
+        fornecedor: despesaParaEditar.fornecedor || "",
+        valor:
+          despesaParaEditar.valor ||
+          despesaParaEditar.valorEmpenho ||
+          despesaParaEditar.valorExecutado ||
+          "",
+        numeroEmpenho:
+          despesaParaEditar.numeroEmpenho ||
+          despesaParaEditar.empenho ||
+          despesaParaEditar.numeroNota ||
+          "",
+        numeroNota: despesaParaEditar.numeroNota || "",
+        dataEmpenho: despesaParaEditar.dataEmpenho
+          ? new Date(despesaParaEditar.dataEmpenho.seconds * 1000)
+              .toISOString()
+              .split("T")[0]
+          : "",
+        dataLiquidacao: despesaParaEditar.dataLiquidacao
+          ? new Date(despesaParaEditar.dataLiquidacao.seconds * 1000)
+              .toISOString()
+              .split("T")[0]
+          : "",
+        dataPagamento: despesaParaEditar.dataPagamento
+          ? new Date(despesaParaEditar.dataPagamento.seconds * 1000)
+              .toISOString()
+              .split("T")[0]
+          : "",
+        acao:
+          despesaParaEditar.acao || despesaParaEditar.acaoOrcamentaria || "",
+        classificacaoFuncional: despesaParaEditar.classificacaoFuncional || "",
+        numeroContrato: despesaParaEditar.numeroContrato || "",
+        categoria: despesaParaEditar.categoria || "",
+        descricao: despesaParaEditar.descricao || "",
+        observacoes: despesaParaEditar.observacoes || "",
+        status: despesaParaEditar.status || "PLANEJADA",
+        statusPagamento:
+          despesaParaEditar.statusPagamento ||
+          despesaParaEditar.situacao ||
+          "pendente",
+        naturezaDespesa:
+          despesaParaEditar.naturezaDespesa ||
+          despesaParaEditar.natureza ||
+          "3.3.9.0.30 – Material de Despesa",
+        elementoDespesa:
+          despesaParaEditar.elementoDespesa ||
+          "3.3.90.30.99 - Outros Materiais de Consumo",
+        fonteRecurso: despesaParaEditar.fonteRecurso || "",
+        programaTrabalho: despesaParaEditar.programaTrabalho || "",
+        planoInterno: despesaParaEditar.planoInterno || "",
+        contrapartida: despesaParaEditar.contrapartida || 0,
+        percentualExecucao: despesaParaEditar.percentualExecucao || 0,
+        etapaExecucao: despesaParaEditar.etapaExecucao || "",
+        coordenadasGeograficas: despesaParaEditar.coordenadasGeograficas || "",
+        populacaoBeneficiada: despesaParaEditar.populacaoBeneficiada || "",
+        impactoSocial: despesaParaEditar.impactoSocial || "",
+        cnpjFornecedor: despesaParaEditar.cnpjFornecedor || "",
+        nomeFantasia: despesaParaEditar.nomeFantasia || "",
+        enderecoFornecedor: despesaParaEditar.enderecoFornecedor || "",
+        cidadeUf: despesaParaEditar.cidadeUf || "",
+        cep: despesaParaEditar.cep || "",
+        telefoneFornecedor: despesaParaEditar.telefoneFornecedor || "",
+        emailFornecedor: despesaParaEditar.emailFornecedor || "",
+        situacaoCadastral: despesaParaEditar.situacaoCadastral || "",
+        dataUltimaAtualizacao:
+          despesaParaEditar.dataUltimaAtualizacao ||
+          new Date().toISOString().split("T")[0],
+      };
+
+      console.log("Campos carregados para o formulário:", camposParaCarregar);
+      console.groupEnd();
+
+      setFormData(camposParaCarregar);
+    }
+  }, [despesaParaEditar, emendaPreSelecionada, emendaId]);
+
+  // ✅ MANIPULAR MUDANÇAS DE INPUT
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // 🆕 NOVO: Detectar seleção de "Digitar Outra"
+    if (name === "naturezaDespesa" && value === "__DIGITAR_OUTRA__") {
+      setModalNaturezaAberto(true);
+      return; // Não atualizar formData ainda
+    }
+
+    if (name === "valor") {
+      handleValorChange(e, setFormData);
+    } else {
       setFormData((prev) => ({
         ...prev,
-        ...despesaParaEditar,
+        [name]: value,
       }));
     }
-  }, [despesaParaEditar]);
 
-  // ✅ MANIPULAR MUDANÇAS NO FORMULÁRIO
-  const handleInputChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  // ✅ VALIDAÇÃO SIMPLIFICADA (APENAS CAMPOS CRÍTICOS)
-  const validarFormulario = () => {
-    const newErrors = {};
-
-    if (!formData.emendaId) newErrors.emendaId = "Selecione uma emenda";
-    if (!formData.fornecedor) newErrors.fornecedor = "Fornecedor é obrigatório";
-    if (!formData.valor || parseFloat(formData.valor) <= 0)
-      newErrors.valor = "Valor deve ser maior que zero";
-    if (!formData.naturezaDespesa)
-      newErrors.naturezaDespesa = "Natureza da despesa é obrigatória";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
-  // 🔧 HELPER: Navegação inteligente após salvar
+  // ✅ 🆕 NOVO: Handler para salvar nova natureza
+  const handleSalvarNovaNatureza = async (codigo, descricao) => {
+    try {
+      const novaNatureza = await adicionarNatureza(codigo, descricao);
+
+      // Atualizar formData com a nova natureza
+      setFormData((prev) => ({
+        ...prev,
+        naturezaDespesa: novaNatureza.natureza,
+      }));
+
+      setToast({
+        show: true,
+        message: "✅ Nova natureza de despesa adicionada com sucesso!",
+        type: "success",
+      });
+
+      setModalNaturezaAberto(false);
+    } catch (error) {
+      console.error("Erro ao adicionar natureza:", error);
+      throw error; // Propagar erro para o modal mostrar
+    }
+  };
+
+  // ✅ NAVEGAÇÃO APÓS SALVAR
   const navegarAposSalvar = () => {
-    // 1️⃣ Prioridade: onSuccess (quando vem de modal/emenda)
-    if (onSuccess && typeof onSuccess === "function") {
-      console.log(
-        "✅ DespesaForm: Chamando onSuccess (retorna ao contexto de origem)",
-      );
-      setTimeout(() => {
-        onSuccess();
-      }, 800);
-      return;
+    if (onSuccess) {
+      onSuccess();
+    } else if (onSalvar) {
+      onSalvar();
+    } else if (
+      despesaParaEditar?.emendaId ||
+      emendaPreSelecionada ||
+      emendaId
+    ) {
+      const targetEmendaId =
+        despesaParaEditar?.emendaId || emendaPreSelecionada || emendaId;
+      navigate(`/emendas/${targetEmendaId}`);
+    } else {
+      navigate("/despesas");
     }
-
-    // 2️⃣ Segunda opção: onCancelar (mantém contexto)
-    if (onCancelar && typeof onCancelar === "function") {
-      console.log(
-        "✅ DespesaForm: Chamando onCancelar (volta ao contexto anterior)",
-      );
-      setTimeout(() => {
-        onCancelar();
-      }, 800);
-      return;
-    }
-
-    // 3️⃣ Fallback: navigate(-1)
-    console.log("⚠️ DespesaForm: Fallback - navigate(-1)");
-    setTimeout(() => {
-      navigate(-1);
-    }, 800);
   };
 
-  // ✅ SALVAR/ATUALIZAR DESPESA
+  // ✅ SUBMIT DO FORMULÁRIO
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validarFormulario()) {
-      setToast({
-        show: true,
-        message: "Corrija os erros antes de salvar",
-        type: "error",
-      });
+    if (modoVisualizacao) {
+      console.log("Modo visualização - submit ignorado");
       return;
     }
 
@@ -362,14 +455,29 @@ const DespesaForm = ({
     try {
       const dadosParaSalvar = {
         ...formData,
-        municipio: userMunicipio,
-        uf: userUf,
-        usuarioId: usuario.uid,
+        emendaId:
+          formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
+        valor: parseFloat(formData.valor) || 0,
+        contrapartida: parseFloat(formData.contrapartida) || 0,
+        percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
+        dataEmpenho: formData.dataEmpenho
+          ? new Date(formData.dataEmpenho)
+          : null,
+        dataLiquidacao: formData.dataLiquidacao
+          ? new Date(formData.dataLiquidacao)
+          : null,
+        dataPagamento: formData.dataPagamento
+          ? new Date(formData.dataPagamento)
+          : null,
+        dataUltimaAtualizacao: formData.dataUltimaAtualizacao
+          ? new Date(formData.dataUltimaAtualizacao)
+          : new Date(),
         atualizadoEm: serverTimestamp(),
-        ...(despesaParaEditar
-          ? {}
-          : { criadoEm: serverTimestamp(), criadoPor: usuario.uid }),
       };
+
+      if (!dadosParaSalvar.criadoEm) {
+        dadosParaSalvar.criadoEm = serverTimestamp();
+      }
 
       if (despesaParaEditar?.id) {
         const despesaRef = doc(db, "despesas", despesaParaEditar.id);
@@ -465,6 +573,13 @@ const DespesaForm = ({
         </div>
       )}
 
+      {/* 🆕 Modal para adicionar nova natureza */}
+      <ModalNovaNatureza
+        isOpen={modalNaturezaAberto}
+        onClose={() => setModalNaturezaAberto(false)}
+        onSalvar={handleSalvarNovaNatureza}
+      />
+
       {/* 🆕 Só renderizar header e banners se não estiver escondido (modal já tem header) */}
       {!hideHeader && (
         <>
@@ -512,6 +627,8 @@ const DespesaForm = ({
           valorError={valorError}
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
+          naturezas={naturezas} // 🆕 Passar naturezas dinâmicas
+          loadingNaturezas={loadingNaturezas} // 🆕 Status de carregamento
         />
 
         <DespesaFormEmpenhoFields

@@ -269,6 +269,17 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const despesasPlanejadas = despesas.filter((d) => d.status === "PLANEJADA");
   const despesasExecutadas = despesas.filter((d) => d.status !== "PLANEJADA");
 
+  // 🔍 DEBUG: Ver os dados reais das despesas
+  console.log(
+    "🔍 DEBUG - Despesas Executadas:",
+    despesasExecutadas.map((d) => ({
+      statusPagamento: d.statusPagamento,
+      valor: d.valor,
+      valorTipo: typeof d.valor,
+      valorParsed: parseValorMonetario(d.valor),
+    })),
+  );
+
   const valorEmendaParsed = (() => {
     const raw = formData?.valor || formData?.valorRecurso || 0;
     if (typeof raw === "number") return raw;
@@ -283,10 +294,61 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       (acc, d) => acc + Number(d.valor || 0),
       0,
     ),
+    // ✅ CORRIGIDO: Soma TODAS as despesas executadas (status !== PLANEJADA)
     totalExecutado: despesasExecutadas.reduce(
-      (acc, d) => acc + Number(d.valor || 0),
+      (acc, d) => acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
       0,
     ),
+    // 🆕 Cálculos por status financeiro (com parse robusto)
+    totalPago: despesasExecutadas
+      .filter((d) => String(d.statusPagamento || "").toLowerCase() === "pago")
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalLiquidado: despesasExecutadas
+      .filter(
+        (d) => String(d.statusPagamento || "").toLowerCase() === "liquidado",
+      )
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalEmpenhado: despesasExecutadas
+      .filter(
+        (d) => String(d.statusPagamento || "").toLowerCase() === "empenhado",
+      )
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalPendente: despesasExecutadas
+      .filter((d) => {
+        const status = String(d.statusPagamento || "").toLowerCase();
+        return status === "pendente" || !status || status === "";
+      })
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    // Contadores
+    qtdPago: despesasExecutadas.filter(
+      (d) => String(d.statusPagamento || "").toLowerCase() === "pago",
+    ).length,
+    qtdLiquidado: despesasExecutadas.filter(
+      (d) => String(d.statusPagamento || "").toLowerCase() === "liquidado",
+    ).length,
+    qtdEmpenhado: despesasExecutadas.filter(
+      (d) => String(d.statusPagamento || "").toLowerCase() === "empenhado",
+    ).length,
+    qtdPendente: despesasExecutadas.filter((d) => {
+      const status = String(d.statusPagamento || "").toLowerCase();
+      return status === "pendente" || !status || status === "";
+    }).length,
   };
   const saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
 
@@ -462,6 +524,74 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   {saldoDisponivel < 0
                     ? "⚠️ Saldo negativo!"
                     : "✓ Saldo positivo"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 🆕 Mini-cards: Breakdown por Status Financeiro */}
+          <div style={styles.statusBreakdownContainer}>
+            <div style={styles.statusBreakdownTitle}>
+              Detalhamento por Status:
+            </div>
+            <div style={styles.statusMiniGrid}>
+              {/* Pago */}
+              <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
+                <div style={styles.miniCardIcon}>✅</div>
+                <div style={styles.miniCardContent}>
+                  <div style={styles.miniCardLabel}>Pago</div>
+                  <div style={styles.miniCardValue}>
+                    {formatCurrency(stats.totalPago)}
+                  </div>
+                  <div style={styles.miniCardHint}>
+                    {stats.qtdPago}{" "}
+                    {stats.qtdPago === 1 ? "despesa" : "despesas"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Liquidado */}
+              <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
+                <div style={styles.miniCardIcon}>🟢</div>
+                <div style={styles.miniCardContent}>
+                  <div style={styles.miniCardLabel}>Liquidado</div>
+                  <div style={styles.miniCardValue}>
+                    {formatCurrency(stats.totalLiquidado)}
+                  </div>
+                  <div style={styles.miniCardHint}>
+                    {stats.qtdLiquidado}{" "}
+                    {stats.qtdLiquidado === 1 ? "despesa" : "despesas"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Empenhado */}
+              <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
+                <div style={styles.miniCardIcon}>🔵</div>
+                <div style={styles.miniCardContent}>
+                  <div style={styles.miniCardLabel}>Empenhado</div>
+                  <div style={styles.miniCardValue}>
+                    {formatCurrency(stats.totalEmpenhado)}
+                  </div>
+                  <div style={styles.miniCardHint}>
+                    {stats.qtdEmpenhado}{" "}
+                    {stats.qtdEmpenhado === 1 ? "despesa" : "despesas"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pendente */}
+              <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
+                <div style={styles.miniCardIcon}>⏳</div>
+                <div style={styles.miniCardContent}>
+                  <div style={styles.miniCardLabel}>Pendente</div>
+                  <div style={styles.miniCardValue}>
+                    {formatCurrency(stats.totalPendente)}
+                  </div>
+                  <div style={styles.miniCardHint}>
+                    {stats.qtdPendente}{" "}
+                    {stats.qtdPendente === 1 ? "despesa" : "despesas"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -717,6 +847,78 @@ const styles = {
   statLabel: { fontSize: 12, opacity: 0.8 },
   statValue: { fontSize: 18, fontWeight: 800 },
   statHint: { fontSize: 12, opacity: 0.6 },
+  // 🆕 Estilos dos mini-cards de status
+  statusBreakdownContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTop: "2px solid #e9ecef",
+  },
+  statusBreakdownTitle: {
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#64748b",
+    marginBottom: 10,
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  statusMiniGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: 10,
+  },
+  miniCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 12px",
+    borderRadius: 6,
+    border: "1px solid",
+    transition: "all 0.2s ease",
+    cursor: "default",
+  },
+  miniCardPago: {
+    backgroundColor: "#f0fdf4",
+    borderColor: "#86efac",
+  },
+  miniCardLiquidado: {
+    backgroundColor: "#ecfdf5",
+    borderColor: "#6ee7b7",
+  },
+  miniCardEmpenhado: {
+    backgroundColor: "#eff6ff",
+    borderColor: "#93c5fd",
+  },
+  miniCardPendente: {
+    backgroundColor: "#fef3c7",
+    borderColor: "#fcd34d",
+  },
+  miniCardIcon: {
+    fontSize: 18,
+    lineHeight: 1,
+  },
+  miniCardContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 1,
+    flex: 1,
+  },
+  miniCardLabel: {
+    fontSize: 10,
+    fontWeight: 600,
+    color: "#475569",
+    textTransform: "uppercase",
+    letterSpacing: "0.3px",
+  },
+  miniCardValue: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#0f172a",
+    fontFamily: "monospace",
+  },
+  miniCardHint: {
+    fontSize: 9,
+    color: "#64748b",
+  },
   secao: {
     backgroundColor: "#fff",
     borderRadius: 12,
