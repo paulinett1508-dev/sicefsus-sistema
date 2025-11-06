@@ -239,7 +239,7 @@ const ExecutarDespesaModal = ({
         )}
 
         {/* FORMULÁRIO */}
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.form}>
           <div style={styles.formContent}>
             {/* ✅ SEÇÃO: DADOS BÁSICOS DA DESPESA */}
             <div style={styles.section}>
@@ -470,11 +470,16 @@ const ExecutarDespesaModal = ({
             >
               Cancelar
             </button>
-            <button type="submit" disabled={salvando} style={styles.btnConfirm}>
+            <button 
+              type="button" 
+              onClick={handleSubmit}
+              disabled={salvando} 
+              style={styles.btnConfirm}
+            >
               {salvando ? "⏳ Executando..." : "✅ Confirmar Execução"}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
