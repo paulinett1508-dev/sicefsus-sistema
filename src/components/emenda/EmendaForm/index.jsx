@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams, useLocation } from "react-router-dom";
 import { db } from "../../../firebase/firebaseConfig";
 import { UserContext } from "../../../context/UserContext";
 
@@ -20,6 +20,8 @@ import LoadingOverlay from "../../LoadingOverlay";
 import Toast from "../../Toast";
 
 export default function EmendaForm() {
+  const { id } = useParams();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("dadosBasicos");
   const { user } = useContext(UserContext);
   const [searchParams] = useSearchParams();
@@ -48,6 +50,15 @@ export default function EmendaForm() {
     handleContinueEditing,
     handleSimpleBack,
   } = useEmendaFormNavigation(hasUnsavedChanges, isEdicao);
+
+  // Detectar se veio do modal de criação de emenda com aba específica
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      // Limpar o state para não reabrir em navegações futuras
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Processa navegação via query parameter
   useEffect(() => {
