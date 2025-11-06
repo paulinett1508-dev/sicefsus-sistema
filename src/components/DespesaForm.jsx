@@ -286,14 +286,17 @@ const DespesaForm = ({
 
   // ✅ SINCRONIZAR EMENDA PRE-SELECIONADA
   useEffect(() => {
+    // 1. Se tem emenda pré-selecionada com info, usa direto
     if (emendaPreSelecionada && emendaInfo) {
       setEmendaInfoDinamica(emendaInfo);
       return;
     }
 
-    if (formData.emendaId && !emendaPreSelecionada) {
+    // 2. Se tem emendaId no formData, SEMPRE carregar (criar OU editar)
+    if (formData.emendaId) {
       carregarDadosEmenda(formData.emendaId);
-    } else if (!formData.emendaId) {
+    } else {
+      // 3. Se não tem emendaId, limpar
       setEmendaInfoDinamica(null);
     }
   }, [
