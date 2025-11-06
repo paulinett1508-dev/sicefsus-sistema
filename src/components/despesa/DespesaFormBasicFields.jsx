@@ -142,6 +142,11 @@ const DespesaFormBasicFields = ({
       gridTemplateColumns: "1fr",
       gap: "20px",
     },
+    formGridRow: {
+      display: "grid",
+      gridTemplateColumns: "2fr 1fr",
+      gap: "20px",
+    },
     formGroup: {
       display: "flex",
       flexDirection: "column",
@@ -384,64 +389,86 @@ const DespesaFormBasicFields = ({
           Dados Básicos da Despesa
         </legend>
         <div style={styles.formGrid}>
-          {/* ✅ EMENDA VINCULADA (READ-ONLY) */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>
-              📌 Emenda Vinculada
-              <span style={styles.requiredMark}>*</span>
-            </label>
-            <div style={styles.emendaInfoBox}>
-              <span style={styles.emendaText}>{emendaDisplay}</span>
+          {/* ✅ EMENDA E VALOR NA MESMA LINHA */}
+          <div style={styles.formGridRow}>
+            {/* EMENDA VINCULADA (READ-ONLY) */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                📌 Emenda Vinculada
+                <span style={styles.requiredMark}>*</span>
+              </label>
+              <div style={styles.emendaInfoBox}>
+                <span style={styles.emendaText}>{emendaDisplay}</span>
+              </div>
+              {errors.emendaId && (
+                <span style={styles.errorText}>{errors.emendaId}</span>
+              )}
             </div>
-            {errors.emendaId && (
-              <span style={styles.errorText}>{errors.emendaId}</span>
-            )}
+
+            {/* VALOR DA DESPESA (SEMPRE EDITÁVEL) */}
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                💰 Valor da Despesa
+                <span style={styles.requiredMark}>*</span>
+              </label>
+              <input
+                type="text"
+                name="valor"
+                value={formatarValorMonetario(formData.valor) || ""}
+                onChange={handleValorChange}
+                onBlur={handleValorBlur}
+                style={
+                  valorExcedeSaldo || errors.valor
+                    ? styles.inputError
+                    : styles.input
+                }
+                placeholder="R$ 0,00"
+              />
+              {valorExcedeSaldo && (
+                <span style={styles.errorText}>
+                  ⚠️ Valor excede o saldo disponível (
+                  {formatarValorMonetario(saldoDisponivel)})
+                </span>
+              )}
+              {errors.valor && !valorExcedeSaldo && (
+                <span style={styles.errorText}>{errors.valor}</span>
+              )}
+            </div>
           </div>
 
-          {/* ✅ VALOR DA DESPESA (SEMPRE EDITÁVEL, TAMANHO REDUZIDO) */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>
-              💰 Valor da Despesa
-              <span style={styles.requiredMark}>*</span>
-            </label>
-            <input
-              type="text"
-              name="valor"
-              value={formatarValorMonetario(formData.valor) || ""}
-              onChange={handleValorChange}
-              onBlur={handleValorBlur}
-              style={
-                valorExcedeSaldo || errors.valor
-                  ? styles.inputErrorCompact
-                  : styles.inputCompact
-              }
-              placeholder="R$ 0,00"
-            />
-            {valorExcedeSaldo && (
-              <span style={styles.errorText}>
-                ⚠️ Valor excede o saldo disponível (
-                {formatarValorMonetario(saldoDisponivel)})
-              </span>
-            )}
-            {errors.valor && !valorExcedeSaldo && (
-              <span style={styles.errorText}>{errors.valor}</span>
-            )}
-          </div>
-
-          {/* ✅ DISCRIMINAÇÃO (TEXTAREA EXPANDIDA) */}
+          {/* ✅ DISCRIMINAÇÃO (INPUT SIMPLES COM BOTÃO LIMPAR) */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               📝 Discriminação da Despesa
               <span style={styles.requiredMark}>*</span>
             </label>
-            <textarea
-              name="discriminacao"
-              value={formData.discriminacao || ""}
-              onChange={handleInputChange}
-              style={errors.discriminacao ? styles.textareaError : styles.textarea}
-              placeholder="Ex: Aquisição de equipamentos médicos para o hospital municipal, incluindo aparelhos de ultrassom, macas e material cirúrgico"
-              readOnly={modoVisualizacao}
-            />
+            <div style={styles.inputWrapper}>
+              <input
+                type="text"
+                name="discriminacao"
+                value={formData.discriminacao || ""}
+                onChange={handleInputChange}
+                style={errors.discriminacao ? styles.inputError : styles.input}
+                placeholder="Ex: Aquisição de equipamentos médicos"
+                readOnly={modoVisualizacao}
+              />
+              {formData.discriminacao && !modoVisualizacao && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInputChange({
+                      target: { name: "discriminacao", value: "" },
+                    })
+                  }
+                  style={styles.clearButton}
+                  onMouseOver={(e) => (e.target.style.color = "#dc3545")}
+                  onMouseOut={(e) => (e.target.style.color = "#999")}
+                  title="Limpar campo"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
             {errors.discriminacao && (
               <span style={styles.errorText}>{errors.discriminacao}</span>
             )}
