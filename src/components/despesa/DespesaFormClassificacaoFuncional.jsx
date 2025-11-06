@@ -9,7 +9,7 @@ import {
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
-import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa"; // 🆕 Hook para naturezas dinâmicas
+import { useNaturezasDespesa } from "../../hooks/useNaturezasDespesa";
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -17,7 +17,6 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
-  // 🆕 Hook para carregar naturezas dinâmicas (fixas + Firebase)
   const { naturezas, loading: loadingNaturezas } = useNaturezasDespesa();
 
   const [cnpjError, setCnpjError] = useState("");
