@@ -2,10 +2,12 @@
 // 🎯 Hook centralizado para dados do Dashboard
 // ✅ CORREÇÃO: Filtro operador com município + UF
 // ✅ PRESERVADO: Lógica Admin 100% funcional
+// ✅ CORREÇÃO: parseValorMonetario para cálculos monetários
 
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { parseValorMonetario } from "../utils/formatters"; // ✅ IMPORT ADICIONADO
 
 const useDashboardData = (user, permissions) => {
   const [emendas, setEmendas] = useState([]);
@@ -16,7 +18,7 @@ const useDashboardData = (user, permissions) => {
   // 🔧 ADMIN: Carrega todos os dados (PRESERVADO - funciona 100%)
   const carregarDadosAdmin = async () => {
     try {
-      console.log("🔑 ADMIN: Carregando TODOS os dados do sistema");
+      console.log("🔓 ADMIN: Carregando TODOS os dados do sistema");
 
       const emendasRef = collection(db, "emendas");
       const emendasSnapshot = await getDocs(emendasRef);
@@ -48,7 +50,7 @@ const useDashboardData = (user, permissions) => {
       const userMunicipio = user?.municipio?.trim();
       const userUf = user?.uf?.trim();
 
-      console.log("🔑 OPERADOR: Aplicando filtros geográficos");
+      console.log("🔐 OPERADOR: Aplicando filtros geográficos");
       console.log("👤 Dados do usuário:", {
         email: user?.email,
         municipio: userMunicipio,
@@ -101,7 +103,7 @@ const useDashboardData = (user, permissions) => {
 
         if (!match) {
           console.log(
-            `🔍 Comparando: "${municipioNormalizado}" vs "${emendaMunicipio}" = ${match}`,
+            `🔎 Comparando: "${municipioNormalizado}" vs "${emendaMunicipio}" = ${match}`,
           );
         }
 
@@ -169,7 +171,7 @@ const useDashboardData = (user, permissions) => {
       setLoading(true);
       setError(null);
 
-      console.log("🔍 Iniciando carregamento de dados:", {
+      console.log("🔄 Iniciando carregamento de dados:", {
         userEmail: user?.email,
         userTipo: user?.tipo,
         acessoTotal: permissions?.acessoTotal,
@@ -191,17 +193,21 @@ const useDashboardData = (user, permissions) => {
         throw new Error(mensagem);
       }
 
-      // ✅ CORREÇÃO: Calcular execução individual de cada emenda
+      // ✅ CORREÇÃO: Calcular execução individual de cada emenda COM parseValorMonetario
       const emendasComExecucao = resultado.emendasData.map((emenda) => {
         // Calcular despesas desta emenda
         const despesasEmenda = resultado.despesasData.filter(
           (despesa) => despesa.emendaId === emenda.id,
         );
 
-        // Calcular valores
-        const valorTotal = parseFloat(emenda.valorRecurso || emenda.valor || 0);
+        // ✅ CORREÇÃO: Usar parseValorMonetario para valores
+        const valorTotal = parseValorMonetario(
+          emenda.valorRecurso || emenda.valor || 0,
+        );
+
+        // ✅ CORREÇÃO: Usar parseValorMonetario no reduce
         const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
-          return sum + parseFloat(despesa.valor || 0);
+          return sum + parseValorMonetario(despesa.valor);
         }, 0);
 
         const saldoDisponivel = valorTotal - valorExecutado;
@@ -233,9 +239,12 @@ const useDashboardData = (user, permissions) => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
+    // ✅ CORREÇÃO: Usar parseValorMonetario
     const valorTotalEmendas = emendas.reduce((total, emenda) => {
-      const valor = parseFloat(emenda.valor || emenda.valorRecurso || 0);
-      return total + (isNaN(valor) ? 0 : valor);
+      const valor = parseValorMonetario(
+        emenda.valor || emenda.valorRecurso || 0,
+      );
+      return total + valor;
     }, 0);
 
     // ✅ CORREÇÃO: Usar valorExecutado já calculado em cada emenda
@@ -251,7 +260,7 @@ const useDashboardData = (user, permissions) => {
       totalEmendas,
       totalDespesas,
       valorTotalEmendas,
-      valorExecutado, // ✅ Nome corrigido
+      valorExecutado,
       saldoDisponivel,
       percentualExecutado: Math.round(percentualExecutado * 100) / 100,
     };
