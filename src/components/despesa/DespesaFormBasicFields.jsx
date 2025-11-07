@@ -273,35 +273,36 @@ const DespesaFormBasicFields = ({
       cursor: "pointer",
       padding: "6px 10px",
       lineHeight: "1",
-      transition: "all 0.2s",
       display: "flex",
       alignItems: "center",
       gap: "4px",
-      fontWeight: "500",
+      transition: "all 0.2s",
+      zIndex: 10,
     },
     clearButtonHover: {
       background: "#dc3545",
       color: "white",
       borderColor: "#dc3545",
     },
+    errorText: {
+      color: "#dc3545",
+      fontSize: "13px",
+      marginTop: "4px",
+      fontWeight: "500",
+    },
     emendaInfoBox: {
       padding: "12px",
-      backgroundColor: "#f8f9fa",
-      border: "2px solid #dee2e6",
+      border: "2px solid #17a2b8",
       borderRadius: "6px",
-      minHeight: "44px",
+      backgroundColor: "#e7f5f7",
       display: "flex",
       alignItems: "center",
+      gap: "8px",
     },
     emendaText: {
       fontSize: "14px",
-      color: "#495057",
-      fontWeight: "500",
-    },
-    errorText: {
-      color: "#dc3545",
-      fontSize: "12px",
-      marginTop: "5px",
+      color: "#154360",
+      fontWeight: "600",
     },
     modalOverlay: {
       position: "fixed",
@@ -480,47 +481,43 @@ const DespesaFormBasicFields = ({
             </div>
           </div>
 
-          {/* ✅ DISCRIMINAÇÃO - DENTRO DO GRID ROW PARA MESMA LARGURA */}
-          <div style={styles.formGridRow}>
-            <div style={styles.formGroupFull}>
-              <label style={styles.label}>
-                📝 Discriminação da Despesa
-              </label>
-              <div style={styles.inputWrapper}>
-                <input
-                  type="text"
-                  name="discriminacao"
-                  value={formData.discriminacao || ""}
-                  onChange={handleInputChange}
-                  style={errors.discriminacao ? styles.inputError : styles.input}
-                  placeholder="Ex: Aquisição de equipamentos médicos"
-                  readOnly={modoVisualizacao}
-                />
-                {formData.discriminacao && !modoVisualizacao && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleInputChange({
-                        target: { name: "discriminacao", value: "" },
-                      })
-                    }
-                    style={styles.clearButton}
-                    onMouseEnter={(e) => {
-                      Object.assign(e.target.style, styles.clearButtonHover);
-                    }}
-                    onMouseLeave={(e) => {
-                      Object.assign(e.target.style, styles.clearButton);
-                    }}
-                    title="Limpar campo"
-                  >
-                    🗑️ Limpar
-                  </button>
-                )}
-              </div>
-              {errors.discriminacao && (
-                <span style={styles.errorText}>{errors.discriminacao}</span>
+          {/* ✅ DISCRIMINAÇÃO - LARGURA TOTAL OCUPANDO 2 COLUNAS */}
+          <div style={styles.formGroupFull}>
+            <label style={styles.label}>📝 Discriminação da Despesa</label>
+            <div style={styles.inputWrapper}>
+              <input
+                type="text"
+                name="discriminacao"
+                value={formData.discriminacao || ""}
+                onChange={handleInputChange}
+                style={errors.discriminacao ? styles.inputError : styles.input}
+                placeholder="Ex: Aquisição de equipamentos médicos"
+                readOnly={modoVisualizacao}
+              />
+              {formData.discriminacao && !modoVisualizacao && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInputChange({
+                      target: { name: "discriminacao", value: "" },
+                    })
+                  }
+                  style={styles.clearButton}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.target.style, styles.clearButtonHover);
+                  }}
+                  onMouseLeave={(e) => {
+                    Object.assign(e.target.style, styles.clearButton);
+                  }}
+                  title="Limpar campo"
+                >
+                  🗑️ Limpar
+                </button>
               )}
             </div>
+            {errors.discriminacao && (
+              <span style={styles.errorText}>{errors.discriminacao}</span>
+            )}
           </div>
         </div>
       </fieldset>
