@@ -742,6 +742,19 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               {despesasExecutadas.length}{" "}
               {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
             </span>
+            {/* 🆕 Botão para Adicionar Nova Despesa Executada */}
+            <button
+              onClick={() => setModal({ abrir: true, despesa: null })}
+              style={{
+                ...styles.btn,
+                ...styles.btnPrimary,
+                padding: "8px 16px",
+                fontSize: 13,
+              }}
+              title="Adicionar nova despesa executada"
+            >
+              ➕ Nova Despesa
+            </button>
           </div>
 
           <DespesasList
@@ -763,15 +776,14 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           />
         </div>
 
-        {/* ✅ MODAL USANDO DespesaForm COMPLETO (para executar despesa planejada) */}
+        {/* ✅ MODAL USANDO DespesaForm COMPLETO (executar planejada OU criar nova) */}
         {modal.abrir &&
-          modal.despesa &&
           createPortal(
             <div style={styles.formularioEdicaoOverlay}>
               <div style={styles.formularioEdicaoModal}>
                 <div style={styles.formularioEdicaoHeader}>
                   <h2 style={styles.formularioTitulo}>
-                    ▶️ Executar Despesa Planejada
+                    {modal.despesa ? "▶️ Executar Despesa Planejada" : "➕ Nova Despesa Executada"}
                   </h2>
                   <button onClick={closeModal} style={styles.btnVoltar}>
                     ✕ Fechar
@@ -779,14 +791,18 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 </div>
                 <div style={styles.formularioEdicaoContent}>
                   <DespesaForm
-                    despesaParaEditar={{
-                      ...modal.despesa,
-                      status: "EXECUTADA",
-                      discriminacao:
-                        modal.despesa.estrategia ||
-                        modal.despesa.naturezaDespesa ||
-                        "",
-                    }}
+                    despesaParaEditar={
+                      modal.despesa
+                        ? {
+                            ...modal.despesa,
+                            status: "EXECUTADA",
+                            discriminacao:
+                              modal.despesa.estrategia ||
+                              modal.despesa.naturezaDespesa ||
+                              "",
+                          }
+                        : null
+                    }
                     emendaPreSelecionada={emendaId}
                     usuario={usuario}
                     onCancelar={closeModal}
@@ -795,12 +811,16 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       carregarDespesas();
                       setToast({
                         show: true,
-                        message: "✅ Despesa executada com sucesso!",
+                        message: modal.despesa
+                          ? "✅ Despesa executada com sucesso!"
+                          : "✅ Despesa cadastrada com sucesso!",
                         type: "success",
                       });
                     }}
                     hideHeader={true}
-                    tituloCustomizado="Executar Despesa Planejada"
+                    tituloCustomizado={
+                      modal.despesa ? "Executar Despesa Planejada" : "Nova Despesa Executada"
+                    }
                   />
                 </div>
               </div>
