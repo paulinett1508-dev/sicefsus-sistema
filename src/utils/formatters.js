@@ -173,8 +173,30 @@ export const formatarCPF = (cpf) => {
   return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 };
 
+export const formatMoeda = (valor) => {
+  if (valor === null || valor === undefined || valor === "") return "R$ 0,00";
+  const numero = typeof valor === "string" ? parseFloat(valor) : valor;
+  if (isNaN(numero)) return "R$ 0,00";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(numero);
+};
+
+export const parseMoeda = (valorFormatado) => {
+  if (!valorFormatado) return 0;
+  const valorString = String(valorFormatado);
+  const valorNumerico = valorString
+    .replace(/[R$\s]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+  return parseFloat(valorNumerico) || 0;
+};
+
 // Export default para compatibilidade
 export default {
   formatarMoeda,
   formatarData,
+  formatMoeda,
+  parseMoeda,
 };

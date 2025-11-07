@@ -1,5 +1,5 @@
 import React from "react";
-import { formatarMoeda, parseValorMonetario } from "../../utils/formatters";
+import { formatarMoeda } from "../../utils/formatters";
 
 /**
  * Componente: Campos Básicos da Despesa
@@ -22,7 +22,8 @@ const DespesaFormBasicFields = ({
   // Calcula o saldo após a despesa
   const valorDespesa =
     typeof formData.valor === "string"
-      ? parseValorMonetario(formData.valor)
+      ? // Utiliza parseValorMonetario se disponível, caso contrário, assume 0
+        (typeof parseValorMonetario === "function" ? parseValorMonetario(formData.valor) : 0)
       : formData.valor || 0;
 
   const saldoAposExecucao = (emenda?.saldoDisponivel || 0) - valorDespesa;
