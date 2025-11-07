@@ -200,6 +200,7 @@ const DespesaFormBasicFields = ({
       transition: "border-color 0.3s ease",
       backgroundColor: "white",
       boxSizing: "border-box",
+      width: "100%",
     },
     inputCompact: {
       padding: "8px 12px",
@@ -232,6 +233,7 @@ const DespesaFormBasicFields = ({
       transition: "border-color 0.3s ease",
       backgroundColor: "#fff5f5",
       boxSizing: "border-box",
+      width: "100%",
     },
     inputErrorCompact: {
       padding: "8px 12px",
@@ -259,6 +261,7 @@ const DespesaFormBasicFields = ({
       position: "relative",
       display: "flex",
       alignItems: "center",
+      width: "100%",
     },
     clearButton: {
       position: "absolute",
