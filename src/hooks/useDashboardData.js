@@ -201,9 +201,7 @@ const useDashboardData = (user, permissions) => {
         );
 
         // ✅ CORREÇÃO: Usar parseValorMonetario para valores
-        const valorTotal = parseValorMonetario(
-          emenda.valorRecurso || emenda.valor || 0,
-        );
+        const valorTotal = parseValorMonetario(emenda.valorRecurso || emenda.valor || 0);
 
         // ✅ CORREÇÃO: Usar parseValorMonetario no reduce
         const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
@@ -241,9 +239,7 @@ const useDashboardData = (user, permissions) => {
 
     // ✅ CORREÇÃO: Usar parseValorMonetario
     const valorTotalEmendas = emendas.reduce((total, emenda) => {
-      const valor = parseValorMonetario(
-        emenda.valor || emenda.valorRecurso || 0,
-      );
+      const valor = parseValorMonetario(emenda.valor || emenda.valorRecurso || 0);
       return total + valor;
     }, 0);
 

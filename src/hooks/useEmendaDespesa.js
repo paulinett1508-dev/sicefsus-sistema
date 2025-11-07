@@ -17,6 +17,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { parseValorMonetario } from "../utils/formatters";
 
 /**
  * Hook customizado para gerenciar relacionamento Emenda-Despesa
@@ -105,13 +106,17 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     (emendaData, despesasData) => {
       if (!emendaData) return metricas;
 
-      const valorTotal = emendaData.valorTotal || emendaData.valorRecurso || 0;
+      // ✅ CORREÇÃO: Parse correto do valor total
+      const valorTotal = parseValorMonetario(
+        emendaData.valorTotal || emendaData.valorRecurso || 0,
+      );
       const despesasValidas = despesasData.filter(
         (d) => d.emendaId === emendaData.id,
       );
 
+      // ✅ CORREÇÃO: Parse correto de cada despesa
       const valorExecutado = despesasValidas.reduce(
-        (sum, d) => sum + (d.valor || 0),
+        (sum, d) => sum + parseValorMonetario(d.valor),
         0,
       );
       const saldoDisponivel = valorTotal - valorExecutado;
@@ -136,7 +141,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         despesasRejeitadas: despesasPorStatus.rejeitada || 0,
       };
     },
-    [], // ✅ Sem dependências para ser estável
+    [metricas], // Adicionado metricas como dependência, embora possa ser estável
   );
 
   // ✅ FUNÇÃO: Carregar emenda específica (ESTÁVEL)
@@ -282,7 +287,10 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         const despesasData = await carregarDespesasEmenda(emendaId);
         const metricas = calcularMetricasEmenda(emendaData, despesasData);
 
-        if (valorDespesa > metricas.saldoDisponivel) {
+        // Usar o valor parseado da despesa para validação
+        const valorDespesaParseado = parseValorMonetario(valorDespesa);
+
+        if (valorDespesaParseado > metricas.saldoDisponivel) {
           return {
             valida: false,
             erro: `Valor excede saldo disponível. Saldo: R$ ${metricas.saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`,
@@ -335,11 +343,11 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
     const totalEmendas = emendas.length;
     const valorTotalGeral = emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || 0),
+      (sum, e) => sum + parseValorMonetario(e.valorTotal || e.valor || 0), // Usar parseValorMonetario
       0,
     );
     const valorExecutadoGeral = emendas.reduce(
-      (sum, e) => sum + (e.valorExecutado || 0),
+      (sum, e) => sum + parseValorMonetario(e.valorExecutado || 0), // Usar parseValorMonetario
       0,
     );
     const saldoDisponivelGeral = valorTotalGeral - valorExecutadoGeral;
@@ -351,9 +359,9 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       saldoDisponivelGeral,
       percentualGeralExecutado:
         valorTotalGeral > 0 ? (valorExecutadoGeral / valorTotalGeral) * 100 : 0,
-      emendasComSaldo: emendas.filter((e) => (e.saldoDisponivel || 0) > 0)
+      emendasComSaldo: emendas.filter((e) => parseValorMonetario(e.saldoDisponivel || 0) > 0) // Usar parseValorMonetario
         .length,
-      emendasEsgotadas: emendas.filter((e) => (e.saldoDisponivel || 0) <= 0)
+      emendasEsgotadas: emendas.filter((e) => parseValorMonetario(e.saldoDisponivel || 0) <= 0) // Usar parseValorMonetario
         .length,
       emendasSemDespesas: emendas.filter((e) => (e.totalDespesas || 0) === 0)
         .length,
@@ -391,11 +399,11 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
 
       if (filtros.statusFinanceiro === "com-saldo") {
         emendasFiltradas = emendasFiltradas.filter(
-          (e) => (e.saldoDisponivel || 0) > 0,
+          (e) => parseValorMonetario(e.saldoDisponivel || 0) > 0, // Usar parseValorMonetario
         );
       } else if (filtros.statusFinanceiro === "esgotadas") {
         emendasFiltradas = emendasFiltradas.filter(
-          (e) => (e.saldoDisponivel || 0) <= 0,
+          (e) => parseValorMonetario(e.saldoDisponivel || 0) <= 0, // Usar parseValorMonetario
         );
       } else if (filtros.statusFinanceiro === "sem-despesas") {
         emendasFiltradas = emendasFiltradas.filter(

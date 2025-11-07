@@ -23,6 +23,19 @@ import EmendasTable from "./EmendasTable";
 import Toast from "./Toast";
 import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
+// Função auxiliar para parsear valores monetários (ex: R$ 1.000,50 para 1000.50)
+const parseValorMonetario = (valor) => {
+  if (typeof valor !== 'string') {
+    valor = String(valor);
+  }
+  // Remove todos os caracteres que não são dígitos ou ponto decimal
+  const valorLimpo = valor.replace(/[^\d,]/g, "").replace(",", ".");
+  // Converte para float, tratando casos de múltiplos pontos decimais ou valores inválidos
+  const valorFloat = parseFloat(valorLimpo);
+  return isNaN(valorFloat) ? 0 : valorFloat;
+};
+
+
 const Emendas = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -144,15 +157,8 @@ const Emendas = () => {
       console.log(`✅ Despesas encontradas: ${despesasData.length}`);
 
       // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
-      const emendasComExecucao = emendasData.map((emenda) => {
-        // Buscar despesas desta emenda
-        const despesasEmenda = despesasData.filter(
-          (despesa) => despesa.emendaId === emenda.id,
-        );
-
-        // ✅ CORREÇÃO: Calcular valor executado APENAS das despesas
         const valorExecutadoDespesas = despesasEmenda.reduce((sum, despesa) => {
-          return sum + (parseFloat(despesa.valor) || 0);
+          return sum + parseValorMonetario(despesa.valor);
         }, 0);
 
         // ✅ TOTAL EXECUTADO: Apenas Despesas
