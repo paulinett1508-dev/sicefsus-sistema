@@ -168,15 +168,16 @@ const DespesaFormBasicFields = ({
       gridTemplateColumns: "1fr 1fr",
       gap: "20px",
     },
-    formGridDiscriminacao: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: "20px",
-    },
     formGroup: {
       display: "flex",
       flexDirection: "column",
       gap: "8px",
+    },
+    formGroupFull: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+      gridColumn: "1 / -1",
     },
     label: {
       fontWeight: "bold",
@@ -479,45 +480,47 @@ const DespesaFormBasicFields = ({
             </div>
           </div>
 
-          {/* ✅ DISCRIMINAÇÃO (MESMA LARGURA QUE EMENDA VINCULADA) */}
-          <div style={styles.formGroup}>
-            <label style={styles.label}>
-              📝 Discriminação da Despesa
-            </label>
-            <div style={styles.inputWrapper}>
-              <input
-                type="text"
-                name="discriminacao"
-                value={formData.discriminacao || ""}
-                onChange={handleInputChange}
-                style={errors.discriminacao ? styles.inputError : styles.input}
-                placeholder="Ex: Aquisição de equipamentos médicos"
-                readOnly={modoVisualizacao}
-              />
-              {formData.discriminacao && !modoVisualizacao && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleInputChange({
-                      target: { name: "discriminacao", value: "" },
-                    })
-                  }
-                  style={styles.clearButton}
-                  onMouseEnter={(e) => {
-                    Object.assign(e.target.style, styles.clearButtonHover);
-                  }}
-                  onMouseLeave={(e) => {
-                    Object.assign(e.target.style, styles.clearButton);
-                  }}
-                  title="Limpar campo"
-                >
-                  🗑️ Limpar
-                </button>
+          {/* ✅ DISCRIMINAÇÃO - DENTRO DO GRID ROW PARA MESMA LARGURA */}
+          <div style={styles.formGridRow}>
+            <div style={styles.formGroupFull}>
+              <label style={styles.label}>
+                📝 Discriminação da Despesa
+              </label>
+              <div style={styles.inputWrapper}>
+                <input
+                  type="text"
+                  name="discriminacao"
+                  value={formData.discriminacao || ""}
+                  onChange={handleInputChange}
+                  style={errors.discriminacao ? styles.inputError : styles.input}
+                  placeholder="Ex: Aquisição de equipamentos médicos"
+                  readOnly={modoVisualizacao}
+                />
+                {formData.discriminacao && !modoVisualizacao && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleInputChange({
+                        target: { name: "discriminacao", value: "" },
+                      })
+                    }
+                    style={styles.clearButton}
+                    onMouseEnter={(e) => {
+                      Object.assign(e.target.style, styles.clearButtonHover);
+                    }}
+                    onMouseLeave={(e) => {
+                      Object.assign(e.target.style, styles.clearButton);
+                    }}
+                    title="Limpar campo"
+                  >
+                    🗑️ Limpar
+                  </button>
+                )}
+              </div>
+              {errors.discriminacao && (
+                <span style={styles.errorText}>{errors.discriminacao}</span>
               )}
             </div>
-            {errors.discriminacao && (
-              <span style={styles.errorText}>{errors.discriminacao}</span>
-            )}
           </div>
         </div>
       </fieldset>
