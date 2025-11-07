@@ -400,7 +400,7 @@ Agrupa todas as seções de dados básicos:
 - Total executado
 - Saldo disponível
 
-##### 2. Despesas Planejadas
+##### 2. Despesas Planejadas (OPCIONAL)
 **Formulário Inline:**
 - Natureza de Despesa (select + opção customizada)
 - Valor (formatado como moeda)
@@ -415,6 +415,25 @@ Agrupa todas as seções de dados básicos:
 - Natureza
 - Valor Planejado
 - Status (calculado vs executado)
+- Ações: 
+  - ▶️ Executar (abre modal com DespesaForm)
+  - 🗑️ Remover
+
+##### 3. Despesas Executadas
+**Cabeçalho:**
+- Badge com quantidade de despesas executadas
+- **🆕 Botão "➕ Nova Despesa"** (adiciona despesa executada diretamente, sem planejamento)
+
+**Fluxos Possíveis:**
+1. **Planejar → Executar:** Cria despesa planejada e depois converte para executada
+2. **🆕 Criar Direto:** Clica em "➕ Nova Despesa" e cadastra despesa executada imediatamente
+
+**Modal de Execução/Criação:**
+- Usa o componente `DespesaForm` completo
+- Título dinâmico:
+  - "▶️ Executar Despesa Planejada" (quando vem de planejada)
+  - "➕ Nova Despesa Executada" (quando criada diretamente)
+- Toast de sucesso adaptado ao contexto
 - Ações: Executar / Excluir
 
 ##### 3. Despesas Executadas
