@@ -475,49 +475,45 @@ const DespesaFormBasicFields = ({
             </div>
           </div>
 
-          {/* ✅ DISCRIMINAÇÃO (METADE DA LARGURA COM BOTÃO LIMPAR MELHORADO) */}
-          <div style={styles.formGridDiscriminacao}>
-            <div style={styles.formGroup}>
-              <label style={styles.label}>
-                📝 Discriminação da Despesa
-                <span style={styles.requiredMark}>*</span>
-              </label>
-              <div style={styles.inputWrapper}>
-                <input
-                  type="text"
-                  name="discriminacao"
-                  value={formData.discriminacao || ""}
-                  onChange={handleInputChange}
-                  style={errors.discriminacao ? styles.inputError : styles.input}
-                  placeholder="Ex: Aquisição de equipamentos médicos"
-                  readOnly={modoVisualizacao}
-                />
-                {formData.discriminacao && !modoVisualizacao && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleInputChange({
-                        target: { name: "discriminacao", value: "" },
-                      })
-                    }
-                    style={styles.clearButton}
-                    onMouseEnter={(e) => {
-                      Object.assign(e.target.style, styles.clearButtonHover);
-                    }}
-                    onMouseLeave={(e) => {
-                      Object.assign(e.target.style, styles.clearButton);
-                    }}
-                    title="Limpar campo"
-                  >
-                    🗑️ Limpar
-                  </button>
-                )}
-              </div>
-              {errors.discriminacao && (
-                <span style={styles.errorText}>{errors.discriminacao}</span>
+          {/* ✅ DISCRIMINAÇÃO (LARGURA COMPLETA COM BOTÃO LIMPAR) */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              📝 Discriminação da Despesa
+            </label>
+            <div style={styles.inputWrapper}>
+              <input
+                type="text"
+                name="discriminacao"
+                value={formData.discriminacao || ""}
+                onChange={handleInputChange}
+                style={errors.discriminacao ? styles.inputError : styles.input}
+                placeholder="Ex: Aquisição de equipamentos médicos"
+                readOnly={modoVisualizacao}
+              />
+              {formData.discriminacao && !modoVisualizacao && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleInputChange({
+                      target: { name: "discriminacao", value: "" },
+                    })
+                  }
+                  style={styles.clearButton}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.target.style, styles.clearButtonHover);
+                  }}
+                  onMouseLeave={(e) => {
+                    Object.assign(e.target.style, styles.clearButton);
+                  }}
+                  title="Limpar campo"
+                >
+                  🗑️ Limpar
+                </button>
               )}
             </div>
-            <div></div>
+            {errors.discriminacao && (
+              <span style={styles.errorText}>{errors.discriminacao}</span>
+            )}
           </div>
         </div>
       </fieldset>
