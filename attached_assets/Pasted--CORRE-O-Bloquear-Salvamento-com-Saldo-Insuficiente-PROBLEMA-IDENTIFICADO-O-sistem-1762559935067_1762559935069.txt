@@ -1,0 +1,170 @@
+# 🔒 CORREÇÃO: Bloquear Salvamento com Saldo Insuficiente
+
+## 🚨 PROBLEMA IDENTIFICADO
+
+O sistema mostra o aviso "Valor excede o saldo disponível", mas **ainda permite salvar a despesa**.
+
+**Causa:** A validação `canSubmit` não verifica se há saldo disponível.
+
+---
+
+## 🔧 SOLUÇÃO EM 2 PASSOS
+
+### PASSO 1: Modificar `DespesaFormBasicFields.jsx`
+
+Adicionar callback para informar ao componente pai quando o valor excede o saldo.
+
+**📍 Localização:** `src/components/despesa/DespesaFormBasicFields.jsx`
+
+**🔧 Linha 16-23 (Props do componente) - ADICIONAR nova prop:**
+
+```javascript
+const DespesaFormBasicFields = ({
+  formData,
+  errors = {},
+  emendaInfo = null,
+  modoVisualizacao = false,
+  handleInputChange,
+  despesaParaEditar = null,
+  onValorExcedeSaldo, // ✅ NOVA PROP ADICIONADA
+}) => {
+```
+
+**🔧 Linhas 48-50 (Após calcular valorExcedeSaldo) - ADICIONAR useEffect:**
+
+```javascript
+const saldoDisponivel = calcularSaldoParaValidacao();
+const valorNum = parseValorMonetario(formData.valor);
+const valorExcedeSaldo = valorNum > saldoDisponivel;
+
+// ✅ NOVO: Notificar componente pai quando valor excede saldo
+React.useEffect(() => {
+  if (onValorExcedeSaldo) {
+    onValorExcedeSaldo(valorExcedeSaldo);
+  }
+}, [valorExcedeSaldo, onValorExcedeSaldo]);
+```
+
+---
+
+### PASSO 2: Modificar `DespesaForm.jsx`
+
+Receber a informação de saldo insuficiente e bloquear botão de salvar.
+
+**📍 Localização:** `src/components/DespesaForm.jsx`
+
+**🔧 Linha 141 (Após useState do emendaInfoDinamica) - ADICIONAR novo estado:**
+
+```javascript
+const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo);
+const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+const [valorExcedeSaldo, setValorExcedeSaldo] = useState(false); // ✅ NOVO ESTADO
+```
+
+**🔧 Linha 524-525 (Modificar validação canSubmit):**
+
+**ANTES:**
+```javascript
+const canSubmit =
+  Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
+```
+
+**DEPOIS:**
+```javascript
+const canSubmit =
+  Boolean(naturezaSelecionada) && 
+  valorNum > 0 && 
+  formData.fornecedor?.trim() &&
+  !valorExcedeSaldo; // ✅ BLOQUEIO ADICIONADO
+```
+
+**🔧 Linha 566 (No uso do DespesaFormBasicFields) - ADICIONAR prop:**
+
+Procure onde está:
+```javascript
+<DespesaFormBasicFields
+  formData={formData}
+  errors={errors}
+  emendaInfo={emendaInfoDinamica || emendaInfo}
+  modoVisualizacao={modoVisualizacao}
+  handleInputChange={handleInputChange}
+  despesaParaEditar={despesaParaEditar}
+/>
+```
+
+E adicione a nova prop:
+```javascript
+<DespesaFormBasicFields
+  formData={formData}
+  errors={errors}
+  emendaInfo={emendaInfoDinamica || emendaInfo}
+  modoVisualizacao={modoVisualizacao}
+  handleInputChange={handleInputChange}
+  despesaParaEditar={despesaParaEditar}
+  onValorExcedeSaldo={setValorExcedeSaldo} // ✅ NOVA PROP
+/>
+```
+
+---
+
+## ✅ RESULTADO ESPERADO
+
+Após aplicar as correções:
+
+1. ✅ Sistema detecta quando valor > saldo disponível
+2. ✅ Mostra aviso vermelho: "⚠️ Valor excede o saldo disponível"
+3. ✅ **Botão "Cadastrar/Atualizar Despesa" fica DESABILITADO (opacidade 0.6)**
+4. ✅ Usuário não consegue salvar até ajustar o valor
+
+---
+
+## 📋 CHECKLIST DE APLICAÇÃO
+
+- [ ] Modificar `DespesaFormBasicFields.jsx` (adicionar prop + useEffect)
+- [ ] Modificar `DespesaForm.jsx` (adicionar estado + modificar canSubmit + passar prop)
+- [ ] Testar criando despesa com valor maior que saldo
+- [ ] Verificar que botão fica desabilitado
+- [ ] Verificar que ao corrigir valor, botão volta a funcionar
+
+---
+
+## 🎯 TESTE RÁPIDO
+
+1. Abrir formulário de despesa
+2. Tentar adicionar valor **maior** que o saldo disponível
+3. **Resultado esperado:** Botão "Cadastrar Despesa" fica cinza e desabilitado
+4. Corrigir valor para **menor ou igual** ao saldo
+5. **Resultado esperado:** Botão volta a ficar verde e habilitado
+
+---
+
+## 📝 OBSERVAÇÕES TÉCNICAS
+
+### Por que usar callback ao invés de Context?
+
+- ✅ **Simplicidade:** Apenas 2 componentes envolvidos (pai e filho)
+- ✅ **Performance:** Evita re-renders desnecessários
+- ✅ **Manutenibilidade:** Fluxo de dados claro e direto
+
+### Por que usar useEffect no filho?
+
+- ✅ Garante que pai é notificado sempre que `valorExcedeSaldo` muda
+- ✅ Evita prop drilling complexo
+- ✅ Mantém lógica de validação encapsulada no componente filho
+
+---
+
+## 🐛 TROUBLESHOOTING
+
+**Problema:** Botão continua habilitado mesmo com valor excedendo saldo
+
+**Solução:** Verifique se:
+1. `onValorExcedeSaldo` está sendo passada corretamente como prop
+2. `setValorExcedeSaldo` está sendo chamado no useEffect
+3. `!valorExcedeSaldo` foi adicionado na condição `canSubmit`
+
+**Problema:** Botão fica desabilitado mesmo com valor correto
+
+**Solução:** Verifique se:
+1. `valorExcedeSaldo` está sendo atualizado para `false` quando valor é corrigido
+2. useEffect tem as dependências corretas `[valorExcedeSaldo, onValorExcedeSaldo]`
