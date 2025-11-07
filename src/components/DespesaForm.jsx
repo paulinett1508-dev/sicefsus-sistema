@@ -139,6 +139,7 @@ const DespesaForm = ({
   const [emendaData, setEmendaData] = useState(emendaInfo);
   const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [valorExcedeSaldo, setValorExcedeSaldo] = useState(false); // ✅ NOVO: Controla se valor excede saldo
 
   // ✅ Função para converter datas de forma segura
   const convertToDateString = (dateValue) => {
@@ -522,7 +523,10 @@ const DespesaForm = ({
   const naturezaSelecionada = pick(formData, ["naturezaDespesa", "natureza"]);
   const valorNum = parseBRL(formData?.valor);
   const canSubmit =
-    Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
+    Boolean(naturezaSelecionada) && 
+    valorNum > 0 && 
+    formData.fornecedor?.trim() &&
+    !valorExcedeSaldo; // ✅ BLOQUEIO: Não permite salvar se valor excede saldo
 
   return (
     <div style={styles.container}>
@@ -579,6 +583,7 @@ const DespesaForm = ({
           modoVisualizacao={modoVisualizacao}
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
+          onValorExcedeSaldo={setValorExcedeSaldo} // ✅ NOVO: Callback para receber status do saldo
         />
 
         <DespesaFormEmpenhoFields

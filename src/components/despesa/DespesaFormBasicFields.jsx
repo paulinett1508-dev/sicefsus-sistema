@@ -20,6 +20,7 @@ const DespesaFormBasicFields = ({
   modoVisualizacao = false,
   handleInputChange,
   despesaParaEditar = null,
+  onValorExcedeSaldo, // ✅ NOVA PROP: Callback para notificar quando valor excede saldo
 }) => {
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
   const [novoValorPendente, setNovoValorPendente] = useState(null);
@@ -48,6 +49,13 @@ const DespesaFormBasicFields = ({
   const saldoDisponivel = calcularSaldoParaValidacao();
   const valorNum = parseValorMonetario(formData.valor);
   const valorExcedeSaldo = valorNum > saldoDisponivel;
+
+  // ✅ NOVO: Notificar componente pai quando valor excede saldo
+  React.useEffect(() => {
+    if (onValorExcedeSaldo) {
+      onValorExcedeSaldo(valorExcedeSaldo);
+    }
+  }, [valorExcedeSaldo, onValorExcedeSaldo]);
 
   const formatarValorMonetario = (valor) => {
     if (!valor && valor !== 0) return "";
