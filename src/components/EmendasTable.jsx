@@ -1,6 +1,7 @@
 // EmendasTable.jsx - Com integração para Despesas
 // ✅ Cálculos baseados nos dados reais das emendas + Botão Despesas
 // 🔧 CORREÇÃO: Campo Execução agora calcula corretamente baseado em saldo
+// 🎨 UX FIX: Badge de status com visual elegante (Opção A - texto colorido simples)
 
 import React, { useState, useMemo } from "react";
 
@@ -325,17 +326,15 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.emendaInfo}>
                     <div style={styles.numeroEmenda}>
-                      {emenda.numero || "S/N"}
+                      {emenda.numero || "Sem número"}
                     </div>
                     <div style={styles.dataInfo}>
                       Criada:{" "}
                       {emenda.criadoEm
-                        ? emenda.criadoEm.toDate().toLocaleDateString("pt-BR")
-                        : emenda.criadoEm
-                          ? new Date(emenda.criadoEm).toLocaleDateString(
-                              "pt-BR",
-                            )
-                          : "N/A"}
+                        ? new Date(
+                            emenda.criadoEm.seconds * 1000,
+                          ).toLocaleDateString()
+                        : "N/A"}
                     </div>
                   </div>
                 </td>
@@ -343,10 +342,10 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.parlamentarInfo}>
                     <div style={styles.parlamentarNome}>
-                      {emenda.parlamentar || emenda.autor}
+                      {emenda.parlamentar || "Não informado"}
                     </div>
                     <div style={styles.numeroEmendaSecundario}>
-                      Nº {emenda.numeroProposta || emenda.numero}
+                      Nº {emenda.numeroEmenda || "N/A"}
                     </div>
                   </div>
                 </td>
@@ -356,57 +355,37 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                     style={{
                       ...styles.tipoBadge,
                       backgroundColor:
-                        emenda.tipo === "Individual"
-                          ? "#007bff"
-                          : emenda.tipo === "Bancada"
+                        emenda.tipo === "Custeio PAP"
+                          ? "#ffc107"
+                          : emenda.tipo === "Custeio MAC"
                             ? "#28a745"
-                            : emenda.tipo === "Custeio PAP"
-                              ? "#007bff"
-                              : emenda.tipo === "Custeio MAC"
-                                ? "#28a745"
-                                : emenda.tipo === "Investimento PAP"
-                                  ? "#ffc107"
-                                  : emenda.tipo === "Investimento MAC"
-                                    ? "#6f42c1"
-                                    : emenda.tipo === "Custeio PAP – Estadual"
-                                      ? "#17a2b8"
-                                      : emenda.tipo === "Custeio MAC – Estadual"
-                                        ? "#fd7e14"
-                                        : "#adb5bd", // Cor padrão caso não corresponda
+                            : "#17a2b8",
                     }}
                   >
-                    {emenda.tipo}
+                    {emenda.tipo || "Não definido"}
                   </span>
                 </td>
 
                 <td style={styles.td}>
                   <div style={styles.localInfo}>
-                    <div style={styles.municipio}>{emenda.municipio}</div>
-                    <div style={styles.uf}>{emenda.uf}</div>
+                    <div style={styles.municipio}>
+                      {emenda.municipio || "Não informado"}
+                    </div>
+                    <div style={styles.uf}>{emenda.uf || "N/A"}</div>
                   </div>
                 </td>
 
                 <td style={styles.td}>
                   <div style={styles.valorInfo}>
                     <div style={styles.valorPrincipal}>
-                      {formatCurrency(emenda.valorRecurso || emenda.valor)}
+                      {formatCurrency(emenda.valorRecurso || emenda.valor || 0)}
                     </div>
-                    {(emenda.saldoDisponivel !== undefined ||
-                      emenda.saldo !== undefined) && (
-                      <div style={styles.saldoInfo}>
-                        Saldo:{" "}
-                        {formatCurrency(
-                          emenda.saldoDisponivel ||
-                            emenda.saldo ||
-                            (emenda.valorRecurso || emenda.valor) -
-                              (emenda.valorExecutado || 0),
-                        )}
-                      </div>
-                    )}
+                    <div style={styles.saldoInfo}>
+                      Saldo: {formatCurrency(emenda.saldoDisponivel || 0)}
+                    </div>
                   </div>
                 </td>
 
-                {/* ✅ EXECUÇÃO REAL CALCULADA - CORRIGIDA */}
                 <td style={styles.td}>
                   <div style={styles.execucaoContainer}>
                     <div style={styles.execucaoTexto}>
@@ -423,33 +402,32 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                         }}
                       />
                     </div>
-                    {emenda.totalDespesas > 0 && (
-                      <div style={styles.despesasInfo}>
-                        {emenda.totalDespesas} despesa
-                        {emenda.totalDespesas > 1 ? "s" : ""}
-                      </div>
-                    )}
+                    <div style={styles.despesasInfo}>
+                      {emenda.totalDespesas || 0} despesa(s)
+                    </div>
                   </div>
                 </td>
 
-                {/* ✅ STATUS REAL CALCULADO */}
                 <td style={styles.td}>
                   <div style={styles.statusContainer}>
-                    <span
+                    {/* ✅ OPÇÃO A: Texto colorido elegante sem aparência de botão */}
+                    <div
                       style={{
-                        ...styles.statusBadge,
-                        backgroundColor: emenda.statusCalculado.cor,
+                        ...styles.statusTextElegante,
+                        color: emenda.statusCalculado.cor,
                       }}
                     >
-                      {emenda.statusCalculado.icone}{" "}
-                      {emenda.statusCalculado.status}
-                    </span>
-                    {(emenda.finalExecucao || emenda.dataValidade) && (
+                      <span style={styles.statusIcone}>
+                        {emenda.statusCalculado.icone}
+                      </span>
+                      <span style={styles.statusLabel}>
+                        {emenda.statusCalculado.status}
+                      </span>
+                    </div>
+                    {emenda.finalExecucao && (
                       <div style={styles.prazoInfo}>
                         Prazo:{" "}
-                        {new Date(
-                          emenda.finalExecucao || emenda.dataValidade,
-                        ).toLocaleDateString("pt-BR")}
+                        {new Date(emenda.finalExecucao).toLocaleDateString()}
                       </div>
                     )}
                   </div>
@@ -458,16 +436,24 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={styles.td}>
                   <div style={styles.actionsContainer}>
                     <button
+                      onClick={() => onView(emenda)}
+                      style={styles.actionButton}
+                      title="Visualizar detalhes"
+                    >
+                      👁️
+                    </button>
+                    <button
                       onClick={() => onEdit(emenda)}
                       style={styles.actionButton}
-                      title="Editar"
+                      title="Editar emenda"
                     >
                       ✏️
                     </button>
+                    {renderIconeDespesas(emenda)}
                     <button
-                      onClick={() => onDelete(emenda.id)}
+                      onClick={() => onDelete(emenda)}
                       style={{ ...styles.actionButton, ...styles.deleteButton }}
-                      title="Excluir"
+                      title="Excluir emenda"
                     >
                       🗑️
                     </button>
@@ -614,21 +600,28 @@ const styles = {
     fontStyle: "italic",
   },
 
-  // ✅ Estilos para status
+  // ✅ NOVO: Estilos para status - OPÇÃO A (texto colorido elegante)
   statusContainer: {
     minWidth: "120px",
   },
 
-  statusBadge: {
-    padding: "6px 12px",
-    borderRadius: "20px",
-    color: "white",
-    fontSize: "12px",
+  statusTextElegante: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    fontSize: "13px",
     fontWeight: "600",
-    display: "inline-block",
-    textAlign: "center",
-    minWidth: "100px",
     marginBottom: "4px",
+    cursor: "default",
+    userSelect: "none",
+  },
+
+  statusIcone: {
+    fontSize: "14px",
+  },
+
+  statusLabel: {
+    letterSpacing: "0.3px",
   },
 
   prazoInfo: {

@@ -3,6 +3,7 @@
 // ✅ REMOVIDO: Metas não são contabilizadas como execução
 // ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
 // 🔧 CORREÇÃO: Versão dinâmica integrada com versionControl.js
+// 🔧 FIX: Adicionadas props onView e onDespesas para EmendasTable
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -231,7 +232,11 @@ const Emendas = () => {
     navigate(`/emendas/${emenda.id}`);
   };
 
-
+  // ✅ NOVO: Handler para visualizar despesas da emenda
+  const handleVerDespesas = (emenda) => {
+    console.log("💰 Visualizando despesas da emenda:", emenda.id);
+    navigate(`/emendas/${emenda.id}`, { state: { activeTab: "despesas" } });
+  };
 
   // ✅ NOVO: Handler para abrir modal de exclusão
   const handleDeletar = (emendaParam) => {
@@ -303,135 +308,136 @@ const Emendas = () => {
 
     // Se for operador, não deve chegar aqui (o modal já bloqueia)
     if (userRole === "operador" || userRole === "Operador") {
-      console.warn("⚠️ Operador tentando excluir emenda - ação bloqueada");
+      console.error("❌ Operador tentou excluir emenda!");
       setToast({
         show: true,
-        message: "Você não tem permissão para excluir emendas!",
-        type: "warning",
+        message: "Erro: Operadores não podem excluir emendas!",
+        type: "error",
       });
+      setModalExclusao({ isOpen: false, emenda: null, loading: false });
       return;
     }
 
-    setModalExclusao((prev) => ({ ...prev, loading: true }));
-
-    console.log("🗑️ Iniciando exclusão da emenda:", emendaId);
-
     try {
-      // Deletar todas as despesas vinculadas primeiro
-      if (modalExclusao.emenda.despesasVinculadas?.length > 0) {
-        console.log(
-          `🗑️ Deletando ${modalExclusao.emenda.despesasVinculadas.length} despesas vinculadas...`,
-        );
-        const deletePromises = modalExclusao.emenda.despesasVinculadas.map(
-          (despesa) => deleteDoc(doc(db, "despesas", despesa.id)),
-        );
-        await Promise.all(deletePromises);
-      }
+      console.log("🗑️ Excluindo emenda:", emendaId);
 
-      // Deletar a emenda
+      // Ativar loading no modal
+      setModalExclusao((prev) => ({ ...prev, loading: true }));
+
+      // Excluir emenda do Firebase
       await deleteDoc(doc(db, "emendas", emendaId));
 
-      console.log("✅ Emenda e despesas deletadas com sucesso:", emendaId);
+      console.log("✅ Emenda excluída com sucesso!");
 
+      // Atualizar lista de emendas (remover da lista local)
+      setEmendas((prevEmendas) =>
+        prevEmendas.filter((emenda) => emenda.id !== emendaId),
+      );
+      setEmendasFiltradas((prevEmendasFiltradas) =>
+        prevEmendasFiltradas.filter((emenda) => emenda.id !== emendaId),
+      );
+
+      // Exibir mensagem de sucesso
       setToast({
         show: true,
-        message: "Emenda excluída com sucesso!",
+        message: `✅ Emenda ${modalExclusao.emenda.numero || emendaId} excluída com sucesso!`,
         type: "success",
       });
 
-      // Fechar modal e recarregar dados
+      // Fechar modal
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
-      await recarregar();
     } catch (error) {
-      console.error("❌ Erro ao deletar emenda:", error);
+      console.error("❌ Erro ao excluir emenda:", error);
+
+      // Desativar loading
+      setModalExclusao((prev) => ({ ...prev, loading: false }));
+
+      // Exibir mensagem de erro
       setToast({
         show: true,
-        message: `Erro ao excluir emenda: ${error.message}`,
+        message: `❌ Erro ao excluir emenda: ${error.message}`,
         type: "error",
       });
-      setModalExclusao((prev) => ({ ...prev, loading: false }));
     }
   };
 
-  // ✅ CALCULAR: Estatísticas COM VALORES REAIS
+  // ✅ NOVO: Handler para cancelar exclusão
+  const handleCancelarExclusao = () => {
+    console.log("❌ Exclusão cancelada pelo usuário");
+    setModalExclusao({ isOpen: false, emenda: null, loading: false });
+  };
+
+  // Loading state
+  if (loading && emendas.length === 0) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p style={styles.loadingText}>Carregando emendas...</p>
+      </div>
+    );
+  }
+
+  // ✅ CÁLCULOS: Estatísticas simples
   const totalEmendas = emendasFiltradas.length;
-  const valorTotal = emendasFiltradas.reduce((sum, emenda) => {
-    const valor = parseFloat(emenda.valorRecurso || emenda.valor || 0);
-    return sum + valor;
-  }, 0);
-
-  const emendasAtivas = emendasFiltradas.filter((e) => {
-    const saldo = parseFloat(e.saldoDisponivel || 0);
-    return saldo > 0;
-  }).length;
-
-  const emendasExecutadas = emendasFiltradas.filter((e) => {
-    const executado = parseFloat(e.valorExecutado || 0);
-    return executado > 0;
-  }).length;
-
-  const valorExecutado = emendasFiltradas.reduce((sum, emenda) => {
-    const executado = parseFloat(emenda.valorExecutado || 0);
-    return sum + executado;
-  }, 0);
+  const emendasExecutadas = emendasFiltradas.filter(
+    (e) => e.percentualExecutado >= 100,
+  ).length;
+  const emendasAtivas = emendasFiltradas.filter(
+    (e) => e.percentualExecutado > 0 && e.percentualExecutado < 100,
+  ).length;
+  const valorTotal = emendasFiltradas.reduce(
+    (sum, emenda) => sum + (emenda.valorRecurso || emenda.valor || 0),
+    0,
+  );
 
   console.log("📊 Estatísticas calculadas:", {
     totalEmendas,
-    valorTotal,
-    valorExecutado,
-    emendasAtivas,
     emendasExecutadas,
+    emendasAtivas,
+    valorTotal,
   });
 
-  // ✅ RENDERIZAÇÃO: Estados especiais
-  if (loading) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Carregando emendas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.emptyContainer}>
-          <div style={styles.emptyIcon}>📋</div>
-          <h3>Erro ao carregar dados</h3>
-          <p style={styles.emptyText}>{error}</p>
-          <button onClick={recarregar} style={styles.retryButton}>
-            🔄 Tentar novamente
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (emendas.length === 0) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.emptyContainer}>
-          <div style={styles.emptyIcon}>📋</div>
-          <h2>Nenhuma emenda cadastrada</h2>
-          <p style={styles.emptyText}>
-            Clique em "Nova Emenda" para começar a cadastrar suas emendas
-            parlamentares.
-          </p>
-          <button onClick={handleCriar} style={styles.emptyButton}>
-            ➕ Nova Emenda
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ RENDERIZAÇÃO: Layout principal
   return (
     <div style={styles.container}>
-      {/* Toast de notificações */}
+      {/* Header compacto */}
+      <div style={styles.compactHeader}>
+        <div style={styles.statusInfo}>
+          <span style={styles.statusText}>📋 EMENDAS</span>
+          <span style={styles.divider}>|</span>
+          <span style={styles.statusText}>
+            {userRole === "admin" ? "👑 Administrador" : "👤 Operador"}
+          </span>
+          {userRole === "operador" && (
+            <>
+              <span style={styles.divider}>|</span>
+              <span style={styles.statusValue}>
+                {userMunicipio}/{userUf}
+              </span>
+            </>
+          )}
+          <span style={styles.divider}>|</span>
+          <span style={styles.versionText}>v{formatVersion()}</span>
+        </div>
+      </div>
+
+      {/* Permissões de operador */}
+      {userRole === "operador" && (
+        <div style={styles.permissaoInfo}>
+          <div style={styles.permissaoIcon}>ℹ️</div>
+          <div style={styles.permissaoContent}>
+            <div style={styles.permissaoTexto}>
+              Você visualiza apenas emendas do município de{" "}
+              <strong>{userMunicipio}</strong>
+            </div>
+            <div style={styles.permissaoSubtexto}>
+              Permissões de operador: criar despesas, visualizar e editar
+              emendas do seu município
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast de feedback */}
       {toast.show && (
         <Toast
           message={toast.message}
@@ -440,57 +446,31 @@ const Emendas = () => {
         />
       )}
 
-      {/* Modal de Exclusão */}
+      {/* Modal de exclusão */}
       <ModalExclusaoEmenda
         isOpen={modalExclusao.isOpen}
-        onClose={() =>
-          setModalExclusao({ isOpen: false, emenda: null, loading: false })
-        }
-        onConfirm={handleConfirmarExclusao}
         emenda={modalExclusao.emenda}
-        userRole={userRole}
         loading={modalExclusao.loading}
+        userRole={userRole}
+        onConfirm={handleConfirmarExclusao}
+        onCancel={handleCancelarExclusao}
       />
 
-      {/* Header com informações do sistema */}
-      <div style={styles.compactHeader}>
-        <div style={styles.statusInfo}>
-          <span style={styles.statusText}>Status:</span>
-          <span style={styles.statusValue}>✅ Operacional</span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>{formatVersion()}</span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.statusText}>Usuário:</span>
-          <span style={styles.versionValue}>
-            {userRole === "admin"
-              ? "👑 Admin"
-              : `🏘️ ${userMunicipio || "Município não cadastrado"}`}
-          </span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.statusText}>Dados:</span>
-          <span style={styles.versionValue}>
-            {loading ? "Carregando..." : `${totalEmendas} emendas`}
-          </span>
-        </div>
-      </div>
-
-      {/* Banner de informação de permissões para operadores */}
-      {userRole === "operador" && userMunicipio && (
-        <div style={styles.permissaoInfo}>
-          <span style={styles.permissaoIcon}>🔒</span>
-          <div style={styles.permissaoContent}>
-            <span style={styles.permissaoTexto}>
-              <strong>Acesso Local:</strong> Visualizando emendas relacionadas
-              ao município{" "}
-              <strong>
-                {userMunicipio}/{userUf || "UF não informada"}
-              </strong>
-            </span>
-            <span style={styles.permissaoSubtexto}>
-              {totalEmendas} emenda(s) encontrada(s) para sua região
-            </span>
-          </div>
+      {/* Erro de carregamento */}
+      {error && (
+        <div
+          style={{
+            ...styles.emptyContainer,
+            backgroundColor: "#ffebee",
+            border: "2px solid #f44336",
+          }}
+        >
+          <div style={styles.emptyIcon}>⚠️</div>
+          <h3>Erro ao carregar emendas</h3>
+          <p style={styles.emptyText}>{error}</p>
+          <button style={styles.retryButton} onClick={recarregar}>
+            🔄 Tentar Novamente
+          </button>
         </div>
       )}
 
@@ -556,7 +536,9 @@ const Emendas = () => {
           totalEmendas={emendas.length}
           loading={false}
           onEdit={handleEditar}
+          onView={handleVisualizar}
           onDelete={handleDeletar}
+          onDespesas={handleVerDespesas}
           userRole={userRole}
         />
       )}

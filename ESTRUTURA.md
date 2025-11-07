@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 05/11/2025, 01:04
+**📅 Gerado em:** 07/11/2025, 10:40
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -9,24 +9,24 @@
 ## 📊 ESTATÍSTICAS GERAIS
 
 - **📁 Total de Diretórios:** 58
-- **📄 Total de Arquivos:** 267
-- **⚛️ Componentes React:** 112
+- **📄 Total de Arquivos:** 292
+- **⚛️ Componentes React:** 114
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 125 arquivos
-- **.js**: 49 arquivos
+- **.jsx**: 126 arquivos
+- **.js**: 50 arquivos
 - **.json**: 23 arquivos
+- **.txt**: 19 arquivos
+- **.png**: 17 arquivos
 - **sem extensão**: 10 arquivos
 - **.bin**: 9 arquivos
-- **.png**: 9 arquivos
-- **.txt**: 7 arquivos
+- **.md**: 7 arquivos
 - **.cjs**: 7 arquivos
-- **.css**: 6 arquivos
-- **.md**: 5 arquivos
+- **.css**: 7 arquivos
 
 ---
 
@@ -103,11 +103,31 @@
 │   ├── 📄 image_1762123376260.png (160 linhas)
 │   ├── 📄 image_1762215376492.png (187 linhas)
 │   ├── 📄 image_1762215929692.png (42 linhas)
+│   ├── 📄 image_1762366447504.png (78 linhas)
+│   ├── 📄 image_1762459773013.png (215 linhas)
+│   ├── 📄 image_1762459973489.png (109 linhas)
+│   ├── 📄 image_1762460152393.png (158 linhas)
+│   ├── 📄 image_1762475904275.png (107 linhas)
+│   ├── 📄 image_1762476019645.png (163 linhas)
+│   ├── 📄 image_1762476253560.png (79 linhas)
+│   ├── 📄 image_1762476499466.png (129 linhas)
 │   ├── 📄 Pasted--ALTERA-ES-PONTUAIS-DespesaForm-jsx-ARQUIVO-src-components-DespesaForm-jsx-AL-1762268688285_1762268688286.txt (106 linhas)
+│   ├── 📄 Pasted--C-DIGO-FINAL-PARA-index-jsx-Arquivo-src-comp-1762435448618_1762435448619.txt (85 linhas)
 │   ├── 📄 Pasted--CORRE-ES-ExecucaoOrcamentaria--1762110876597_1762110876597.txt (211 linhas)
 │   ├── 📄 Pasted--CORRE-ES-NO-ExecucaoOrcamentaria-jsx-ALTERA-ES-NECESS-RIAS-1-Bot-es-da-tabela--1762121604958_1762121604959.txt (104 linhas)
 │   ├── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
-│   └── 📄 Pasted--CORRE-O-CR-TICA-EmendasTable-jsx-Props-Incompat-veis-PROBLEMA-IDENTIFICADO-O-Eme-1762123288681_1762123288682.txt (89 linhas)
+│   ├── 📄 Pasted--CORRE-O-CR-TICA-EmendasTable-jsx-Props-Incompat-veis-PROBLEMA-IDENTIFICADO-O-Eme-1762123288681_1762123288682.txt (89 linhas)
+│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762439838809_1762439838810.txt (102 linhas)
+│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762440451620_1762440451621.txt (102 linhas)
+│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762441450693_1762441450694.txt (102 linhas)
+│   ├── 📄 Pasted--Corre-o-Remover-Bot-es-de-Agrupamento-Arquivo-src-components-DespesasTable-jsx--1762386052129_1762386052129.txt (202 linhas)
+│   ├── 📄 Pasted-Abaixo-vai-um-patch-gen-rico-e-drop-in-que-funciona-mesmo-que-seus-nomes-de-estado-mudem-pega-os-ma-1762354320983_1762354320984.txt (81 linhas)
+│   ├── 📄 Pasted-cat-src-components-despesa-DespesaFormBasicFields-jsx-EOF-src-components-despesa-DespesaF-1762456759079_1762456759080.txt (208 linhas)
+│   ├── 📄 Pasted-MODIFICA-ES-NECESS-RIAS-Fa-a-estas-3-altera-es-no-arquivo-DespesaFormClassificacaoFuncional-jsx-1-1762394108181_1762394108181.txt (84 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762455428368_1762455428370.txt (1596 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762459074181_1762459074181.txt (99 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762474870927_1762474870928.txt (102 linhas)
+│   └── 📄 Pasted-vejo-o-problema-Quando-a-despesa-carregada-para-edi-o-o-useEffect-preenche-o-formData-emenda-1762453946864_1762453946865.txt (146 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
 │       ├── 📄 BACKUP_AcoesServicos_v2.3.71.jsx (516 linhas)
@@ -165,10 +185,10 @@
 │   │   │   ├── 📄 DespesaFormActions.jsx (79 linhas)
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
-│   │   │   ├── 📄 DespesaFormBasicFields.jsx (291 linhas)
-│   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (851 linhas)
+│   │   │   ├── 📄 DespesaFormBasicFields.jsx (581 linhas)
+│   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (892 linhas)
 │   │   │   ├── 📄 DespesaFormDateFields.jsx (439 linhas)
-│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (113 linhas)
+│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (349 linhas)
 │   │   │   ├── 📄 DespesaFormEmpenhoFields.jsx (160 linhas)
 │   │   │   ├── 📄 DespesaFormHeader.jsx (95 linhas)
 │   │   │   ├── 📄 DespesaFormOrcamentoFields.jsx (311 linhas)
@@ -205,11 +225,11 @@
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
 │   │   │   │   │   ├── 📄 DespesasTab.jsx (451 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (918 linhas)
-│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (527 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1186 linhas)
+│   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (708 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
-│   │   │   │   └── 📄 index.jsx (280 linhas)
+│   │   │   │   └── 📄 index.jsx (303 linhas)
 │   │   │   ├── 📄 DespesaModal.jsx (616 linhas)
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
@@ -240,11 +260,11 @@
 │   │   ├── 📄 DataManager.jsx (977 linhas)
 │   │   ├── 📄 DebugPanel.jsx (92 linhas)
 │   │   ├── 📄 DebugUsuarios.jsx (236 linhas)
-│   │   ├── 📄 DespesaForm.jsx (722 linhas)
+│   │   ├── 📄 DespesaForm.jsx (720 linhas)
 │   │   ├── 📄 Despesas.jsx (314 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
-│   │   ├── 📄 DespesasList.jsx (655 linhas)
-│   │   ├── 📄 DespesasTable.jsx (1069 linhas)
+│   │   ├── 📄 DespesasList.jsx (656 linhas)
+│   │   ├── 📄 DespesasTable.jsx (1230 linhas)
 │   │   ├── 📄 Emendas.jsx (806 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
@@ -257,6 +277,8 @@
 │   │   ├── 📄 Home.jsx (106 linhas)
 │   │   ├── 📄 LoadingOverlay.jsx (71 linhas)
 │   │   ├── 📄 Login.jsx (617 linhas)
+│   │   ├── 📄 ModalNovaNatureza.css (237 linhas)
+│   │   ├── 📄 ModalNovaNatureza.jsx (142 linhas)
 │   │   ├── 📄 MunicipioSelector.jsx (358 linhas)
 │   │   ├── 📄 PaginatedTable.jsx (1 linhas)
 │   │   ├── 📄 Pagination.jsx (604 linhas)
@@ -289,7 +311,7 @@
 │   │   ├── 📄 useDespesasCalculos.js (92 linhas)
 │   │   ├── 📄 useDespesasData.js (150 linhas)
 │   │   ├── 📄 useEmendaDespesa.js (662 linhas)
-│   │   ├── 📄 useEmendaFormData.js (978 linhas)
+│   │   ├── 📄 useEmendaFormData.js (883 linhas)
 │   │   ├── 📄 useEmendaFormNavigation.js (164 linhas)
 │   │   ├── 📄 useNavigationProtection.js (351 linhas)
 │   │   ├── 📄 usePageTitle.js (15 linhas)
@@ -320,6 +342,7 @@
 │   │   ├── 📄 errorHandlers.js (164 linhas)
 │   │   ├── 📄 exportImport.js (1 linhas)
 │   │   ├── 📄 firebaseCollections.js (340 linhas)
+│   │   ├── 📄 firebaseHelpers.js (50 linhas)
 │   │   ├── 📄 formatters.js (181 linhas)
 │   │   ├── 📄 formStyles.js (677 linhas)
 │   │   ├── 📄 municipiosCache.js (265 linhas)
@@ -340,12 +363,14 @@
 ├── 📄 .env.production.backup (35 linhas)
 ├── 📄 .firebaserc (1 linhas)
 ├── 📄 .gitignore (130 linhas)
-├── 📄 .replit (68 linhas)
+├── 📄 .replit (72 linhas)
 ├── 📄 backup_original.jsx (1682 linhas)
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
-├── 📄 ESTRUTURA.md (2621 linhas)
+├── 📄 ESTRUTURA_DESPESAS.md (487 linhas)
+├── 📄 ESTRUTURA_EMENDAS.md (1053 linhas)
+├── 📄 ESTRUTURA.md (2632 linhas)
 ├── 📄 firebase-debug.log (18 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
@@ -385,7 +410,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 92 componentes*
+- *...e mais 94 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -721,7 +746,7 @@ return (
 ```
 
 
-#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (291 linhas)
+#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (581 linhas)
 
 **Exports:**
 ```javascript
@@ -731,14 +756,14 @@ export default DespesaFormBasicFields;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ CORRIGIDO: Validação de array de emendas para evitar erro de undefined
-import React from "react";
-const DespesaFormBasicFields = ({
-formData,
+// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda, valor e discriminação
+import React, { useState } from "react";
+const parseValorMonetario = (valor) => {
+if (typeof valor === "number") return valor;
 ```
 
 
-#### ⚛️ Componente React `DespesaFormClassificacaoFuncional.jsx` (851 linhas)
+#### ⚛️ Componente React `DespesaFormClassificacaoFuncional.jsx` (892 linhas)
 
 **Exports:**
 ```javascript
@@ -748,10 +773,10 @@ export default DespesaFormClassificacaoFuncional;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormClassificacaoFuncional.jsx
-// ✅ LAYOUT PROFISSIONAL: Campos otimizados e organizados
-// 🎨 VISUAL APRIMORADO: Cores dinâmicas na situação cadastral
-// 🔌 API CNPJ: Busca automática com proxy CORS
+// ✅ ATUALIZADO 06/11/2025: Corrigido select de Natureza - usando apenas constants.js
+// 🔧 CORREÇÃO: Removida dependência do Firebase para naturezas (causava erro de permissão)
 import React, { useState } from "react";
+import {
 ```
 
 
@@ -772,7 +797,7 @@ validarDatasDespesaEmenda,
 ```
 
 
-#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (113 linhas)
+#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (349 linhas)
 
 **Exports:**
 ```javascript
@@ -783,9 +808,9 @@ export default DespesaFormEmendaInfo;
 ```javascript
 // src/components/despesa/DespesaFormEmendaInfo.jsx
 // ✅ Componente especializado para exibir informações da emenda selecionada
-// ✅ ATUALIZADO 04/11/2025: Labels normais, valores em negrito
+// ✅ ATUALIZADO 05/11/2025: UX aprimorada com progresso visual e cores semafóricas
 import React from "react";
-const DespesaFormEmendaInfo = ({ emendaInfo }) => {
+const DespesaFormEmendaInfo = ({
 ```
 
 
@@ -799,7 +824,7 @@ export default DespesaFormEmpenhoFields;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormEmpenhoFields.jsx
-// ✅ Componente especializado para campos de empenho e nota fiscal
+// ✅ CORRIGIDO: Inputs controlados com || ''
 import React from "react";
 const DespesaFormEmpenhoFields = ({
 formData,
@@ -1238,7 +1263,7 @@ const [debugInfo, setDebugInfo] = useState({
 ```
 
 
-#### 💻 JavaScript `DespesaForm.jsx` (722 linhas)
+#### ⚛️ Componente React `DespesaForm.jsx` (720 linhas)
 
 **Exports:**
 ```javascript
@@ -1248,10 +1273,10 @@ export default DespesaForm;
 **Preview:**
 ```javascript
 // src/components/DespesaForm.jsx
-// ✅ REFATORADO: De 1404 linhas para ~200 linhas
-// Reutiliza componentes modulares existentes + hooks/utils existentes
-// 🔄 ATUALIZADO: Nova seção unificada "Classificação Funcional-Programática"
-// 🗑️ ATUALIZADO: Removidos campos "Centro de Custo" e "Dotação Orçamentária"
+import React, {
+useState,
+useEffect,
+useCallback,
 ```
 
 
@@ -1289,7 +1314,7 @@ import React, { useState, useEffect } from "react";
 ```
 
 
-#### ⚛️ Componente React `DespesasList.jsx` (655 linhas)
+#### ⚛️ Componente React `DespesasList.jsx` (656 linhas)
 
 **Exports:**
 ```javascript
@@ -1306,7 +1331,7 @@ import { db } from "../firebase/firebaseConfig";
 ```
 
 
-#### 💻 JavaScript `DespesasTable.jsx` (1069 linhas)
+#### 💻 JavaScript `DespesasTable.jsx` (1230 linhas)
 
 **Exports:**
 ```javascript
@@ -1524,6 +1549,35 @@ import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/aut
 import { auth, db } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
 import {
+```
+
+
+#### 🎨 Estilos `ModalNovaNatureza.css` (237 linhas)
+
+**Preview:**
+```javascript
+/* src/components/ModalNovaNatureza.css */
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+```
+
+
+#### ⚛️ Componente React `ModalNovaNatureza.jsx` (142 linhas)
+
+**Exports:**
+```javascript
+export default ModalNovaNatureza;
+```
+
+**Preview:**
+```javascript
+// src/components/ModalNovaNatureza.jsx
+import React, { useState } from "react";
+import "./ModalNovaNatureza.css";
+const ModalNovaNatureza = ({ isOpen, onClose, onSalvar }) => {
+const [codigo, setCodigo] = useState("");
 ```
 
 
@@ -2004,7 +2058,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 ```
 
 
-#### 🎣 Hook React `useEmendaFormData.js` (978 linhas)
+#### 🎣 Hook React `useEmendaFormData.js` (883 linhas)
 
 **Exports:**
 ```javascript
@@ -2015,9 +2069,9 @@ export const useEmendaFormData = () => {
 ```javascript
 // src/hooks/useEmendaFormData.js - ARQUIVO COMPLETO OTIMIZADO
 // ✅ CORREÇÕES: Re-renderização + Foco removido + Modal simples + Performance
+// ✅ NOVA CORREÇÃO: Planejamento de Despesas (acoesServicos) OPCIONAL
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
 ```
 
 
@@ -2400,6 +2454,24 @@ export const USER_SCHEMA = {
 // ✅ ATUALIZADO 04/11/2025: Separação de status em despesas
 export const COLLECTIONS = {
 USERS: "usuarios", // Corrigido para usar a coleção correta
+```
+
+
+#### 💻 JavaScript `firebaseHelpers.js` (50 linhas)
+
+**Exports:**
+```javascript
+export const clearFirestoreCache = async () => {
+export const diagnosticarFirestore = () => {
+```
+
+**Preview:**
+```javascript
+import { clearIndexedDbPersistence } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
+/**
+* Limpa o cache local do Firestore
+* Use com cuidado - apenas quando houver erros persistentes
 ```
 
 

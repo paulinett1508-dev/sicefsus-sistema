@@ -284,9 +284,6 @@ const DespesaForm = ({
     // 2. Se tem emendaId no formData, SEMPRE carregar (criar OU editar)
     if (formData.emendaId) {
       carregarDadosEmenda(formData.emendaId);
-    } else {
-      // 3. Se não tem emendaId, limpar
-      setEmendaInfoDinamica(null);
     }
   }, [
     formData.emendaId,
@@ -295,57 +292,39 @@ const DespesaForm = ({
     carregarDadosEmenda,
   ]);
 
-  // ✅ CARREGAR EMENDAS NA PRIMEIRA VEZ (se necessário)
+  // ✅ CARREGAR EMENDAS DISPONÍVEIS (criar nova despesa sem emenda pré-selecionada)
   useEffect(() => {
-    if (emendas.length === 0 && !emendaPreSelecionada) {
+    if (!emendaPreSelecionada && !emendaId && emendas.length === 0) {
       carregarEmendas();
     }
-  }, [emendas.length, emendaPreSelecionada, carregarEmendas]);
+  }, [emendaPreSelecionada, emendaId, emendas.length, carregarEmendas]);
 
-  // ✅ PREENCHER FORMULÁRIO COM DADOS DA DESPESA (EDIÇÃO)
+  // ✅ CARREGAR DADOS DA DESPESA PARA EDITAR
   useEffect(() => {
     if (despesaParaEditar) {
-      console.group("🔍 DEBUG: Carregando Despesa para Edição");
+      console.log("🔍 DEBUG: Carregando Despesa para Edição");
       console.log("despesaParaEditar recebida:", despesaParaEditar);
 
-      const camposParaCarregar = {
-        emendaId:
-          despesaParaEditar.emendaId || emendaPreSelecionada || emendaId || "",
+      const dadosCarregados = {
+        emendaId: despesaParaEditar.emendaId || "",
         discriminacao: despesaParaEditar.discriminacao || "",
         fornecedor: despesaParaEditar.fornecedor || "",
-        valor: (
-          despesaParaEditar.valor ||
-          despesaParaEditar.valorEmpenho ||
-          despesaParaEditar.valorExecutado
-        ) ? String(
-          despesaParaEditar.valor ||
-          despesaParaEditar.valorEmpenho ||
-          despesaParaEditar.valorExecutado
-        ) : "",
-        numeroEmpenho:
-          despesaParaEditar.numeroEmpenho ||
-          despesaParaEditar.empenho ||
-          despesaParaEditar.numeroNota ||
-          "",
+        valor: despesaParaEditar.valor?.toString() || "",
+        numeroEmpenho: despesaParaEditar.numeroEmpenho || "",
         numeroNota: despesaParaEditar.numeroNota || "",
         dataEmpenho: convertToDateString(despesaParaEditar.dataEmpenho),
         dataLiquidacao: convertToDateString(despesaParaEditar.dataLiquidacao),
         dataPagamento: convertToDateString(despesaParaEditar.dataPagamento),
-        acao:
-          despesaParaEditar.acao || despesaParaEditar.acaoOrcamentaria || "",
+        acao: despesaParaEditar.acao || "",
         classificacaoFuncional: despesaParaEditar.classificacaoFuncional || "",
         numeroContrato: despesaParaEditar.numeroContrato || "",
         categoria: despesaParaEditar.categoria || "",
         descricao: despesaParaEditar.descricao || "",
         observacoes: despesaParaEditar.observacoes || "",
         status: despesaParaEditar.status || "PLANEJADA",
-        statusPagamento:
-          despesaParaEditar.statusPagamento ||
-          despesaParaEditar.situacao ||
-          "pendente",
+        statusPagamento: despesaParaEditar.statusPagamento || "pendente",
         naturezaDespesa:
           despesaParaEditar.naturezaDespesa ||
-          despesaParaEditar.natureza ||
           "3.3.9.0.30 – Material de Despesa",
         elementoDespesa:
           despesaParaEditar.elementoDespesa ||
@@ -368,33 +347,29 @@ const DespesaForm = ({
         emailFornecedor: despesaParaEditar.emailFornecedor || "",
         situacaoCadastral: despesaParaEditar.situacaoCadastral || "",
         dataUltimaAtualizacao:
-          despesaParaEditar.dataUltimaAtualizacao ||
+          convertToDateString(despesaParaEditar.dataUltimaAtualizacao) ||
           new Date().toISOString().split("T")[0],
       };
 
-      console.log("Campos carregados para o formulário:", camposParaCarregar);
-      console.groupEnd();
+      console.log("Campos carregados para o formulário:", dadosCarregados);
+      setFormData(dadosCarregados);
 
-      setFormData(camposParaCarregar);
+      if (despesaParaEditar.emendaId) {
+        carregarDadosEmenda(despesaParaEditar.emendaId);
+      }
     }
-  }, [despesaParaEditar, emendaPreSelecionada, emendaId]);
+  }, [despesaParaEditar, carregarDadosEmenda]);
 
-  // ✅ MANIPULAR MUDANÇAS DE INPUT
+  // ✅ MANIPULADORES DE EVENTOS
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
-  // ✅ NAVEGAÇÃO APÓS SALVAR
+  // ✅ NAVEGAÇÃO PÓS SALVAR
   const navegarAposSalvar = () => {
     if (onSuccess) {
       onSuccess();
@@ -426,25 +401,37 @@ const DespesaForm = ({
     setLoading(true);
 
     try {
+      // ✅ CORREÇÃO: Remover campos vazios ANTES de criar dadosParaSalvar
+      const formDataLimpo = Object.fromEntries(
+        Object.entries(formData).filter(
+          ([_, v]) => v !== "" && v !== null && v !== undefined,
+        ),
+      );
+
       const dadosParaSalvar = {
-        ...formData,
+        ...formDataLimpo,
         emendaId:
           formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
         valor: parseFloat(formData.valor) || 0,
         contrapartida: parseFloat(formData.contrapartida) || 0,
         percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
-        dataEmpenho: formData.dataEmpenho
-          ? new Date(formData.dataEmpenho)
-          : null,
-        dataLiquidacao: formData.dataLiquidacao
-          ? new Date(formData.dataLiquidacao)
-          : null,
-        dataPagamento: formData.dataPagamento
-          ? new Date(formData.dataPagamento)
-          : null,
-        dataUltimaAtualizacao: formData.dataUltimaAtualizacao
-          ? new Date(formData.dataUltimaAtualizacao)
-          : new Date(),
+        dataEmpenho:
+          formData.dataEmpenho && formData.dataEmpenho !== ""
+            ? new Date(formData.dataEmpenho)
+            : null,
+        dataLiquidacao:
+          formData.dataLiquidacao && formData.dataLiquidacao !== ""
+            ? new Date(formData.dataLiquidacao)
+            : null,
+        dataPagamento:
+          formData.dataPagamento && formData.dataPagamento !== ""
+            ? new Date(formData.dataPagamento)
+            : null,
+        dataUltimaAtualizacao:
+          formData.dataUltimaAtualizacao &&
+          formData.dataUltimaAtualizacao !== ""
+            ? new Date(formData.dataUltimaAtualizacao)
+            : new Date(),
         atualizadoEm: serverTimestamp(),
       };
 
