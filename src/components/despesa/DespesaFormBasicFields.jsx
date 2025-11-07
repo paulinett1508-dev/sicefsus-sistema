@@ -1,5 +1,5 @@
 import React from "react";
-import { formatarMoeda } from "../../utils/formatters";
+import { formatarMoeda, parseValorMonetario } from "../../utils/formatters";
 
 /**
  * Componente: Campos Básicos da Despesa
@@ -22,8 +22,7 @@ const DespesaFormBasicFields = ({
   // Calcula o saldo após a despesa
   const valorDespesa =
     typeof formData.valor === "string"
-      ? // Utiliza parseValorMonetario se disponível, caso contrário, assume 0
-        (typeof parseValorMonetario === "function" ? parseValorMonetario(formData.valor) : 0)
+      ? parseValorMonetario(formData.valor)
       : formData.valor || 0;
 
   const saldoAposExecucao = (emenda?.saldoDisponivel || 0) - valorDespesa;
@@ -52,11 +51,11 @@ const DespesaFormBasicFields = ({
                 : "Carregando..."
             }
             readOnly
-            disabled
             style={{
               backgroundColor: "#f8f9fa",
               cursor: "not-allowed",
               color: "#495057",
+              pointerEvents: "none",
             }}
           />
         </div>
@@ -68,7 +67,11 @@ const DespesaFormBasicFields = ({
             type="text"
             id="valor"
             name="valor"
-            value={formData.valor || ""}
+            value={
+              typeof formData.valor === "number"
+                ? String(formData.valor)
+                : formData.valor || ""
+            }
             onChange={handleChange}
             placeholder="R$ 0,00"
             disabled={modo === "visualizar"}
