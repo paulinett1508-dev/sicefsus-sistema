@@ -63,7 +63,7 @@ const DespesaFormBasicFields = ({
 
   const handleValorChange = (e) => {
     const valorDigitado = e.target.value;
-    
+
     // Permite campo vazio
     if (valorDigitado === "" || valorDigitado === "R$ ") {
       handleInputChange({ target: { name: "valor", value: "" } });
@@ -72,7 +72,7 @@ const DespesaFormBasicFields = ({
 
     // Remove tudo exceto números
     let apenasNumeros = valorDigitado.replace(/\D/g, "");
-    
+
     if (apenasNumeros === "") {
       handleInputChange({ target: { name: "valor", value: "" } });
       return;
@@ -80,22 +80,22 @@ const DespesaFormBasicFields = ({
 
     // Converte para número (centavos para reais)
     const numeroValor = parseFloat(apenasNumeros) / 100;
-    
+
     // Formata para exibição
     const valorFormatado = formatarValorMonetario(numeroValor);
-    
+
     // Atualiza o estado através da função pai
     handleInputChange({ target: { name: "valor", value: valorFormatado } });
   };
 
   const handleValorBlur = (e) => {
     const valorAtual = e.target.value;
-    
+
     // Se campo vazio, não faz nada
     if (!valorAtual || valorAtual === "R$ ") {
       return;
     }
-    
+
     const numeroValor = parseValorMonetario(valorAtual);
 
     // Verifica se houve alteração significativa
@@ -192,6 +192,7 @@ const DespesaFormBasicFields = ({
     },
     input: {
       padding: "12px",
+      paddingRight: "90px",
       border: "2px solid #dee2e6",
       borderRadius: "6px",
       fontSize: "14px",
@@ -223,6 +224,7 @@ const DespesaFormBasicFields = ({
     },
     inputError: {
       padding: "12px",
+      paddingRight: "90px",
       border: "2px solid #dc3545",
       borderRadius: "6px",
       fontSize: "14px",
@@ -259,14 +261,16 @@ const DespesaFormBasicFields = ({
     },
     clearButton: {
       position: "absolute",
-      right: "8px",
+      right: "10px",
+      top: "50%",
+      transform: "translateY(-50%)",
       background: "#f8f9fa",
       border: "1px solid #dee2e6",
       borderRadius: "4px",
       color: "#dc3545",
       fontSize: "12px",
       cursor: "pointer",
-      padding: "4px 8px",
+      padding: "6px 10px",
       lineHeight: "1",
       transition: "all 0.2s",
       display: "flex",
