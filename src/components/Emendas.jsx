@@ -156,7 +156,13 @@ const Emendas = () => {
       console.log(`✅ Emendas encontradas: ${emendasData.length}`);
       console.log(`✅ Despesas encontradas: ${despesasData.length}`);
 
-      // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
+      // ✅ Mapear emendas com execução calculada
+      const emendasComExecucao = emendasData.map((emenda) => {
+        const despesasEmenda = despesasData.filter(
+          (despesa) => despesa.emendaId === emenda.id,
+        );
+
+        // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
         const valorExecutadoDespesas = despesasEmenda.reduce((sum, despesa) => {
           return sum + parseValorMonetario(despesa.valor);
         }, 0);
