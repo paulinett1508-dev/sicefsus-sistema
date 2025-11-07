@@ -313,11 +313,15 @@ const DespesaForm = ({
           despesaParaEditar.emendaId || emendaPreSelecionada || emendaId || "",
         discriminacao: despesaParaEditar.discriminacao || "",
         fornecedor: despesaParaEditar.fornecedor || "",
-        valor:
+        valor: (
           despesaParaEditar.valor ||
           despesaParaEditar.valorEmpenho ||
-          despesaParaEditar.valorExecutado ||
-          "",
+          despesaParaEditar.valorExecutado
+        ) ? String(
+          despesaParaEditar.valor ||
+          despesaParaEditar.valorEmpenho ||
+          despesaParaEditar.valorExecutado
+        ) : "",
         numeroEmpenho:
           despesaParaEditar.numeroEmpenho ||
           despesaParaEditar.empenho ||
