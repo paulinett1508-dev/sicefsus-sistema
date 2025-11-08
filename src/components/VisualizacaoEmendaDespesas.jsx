@@ -18,6 +18,7 @@ import {
 // ==================================
 // Importar os estilos centralizados
 import { despesaCardStyles } from "../despesa/DespesaCard/despesaCardStyles";
+import DespesasList from "../DespesasList";
 // ==================================
 // === 🎯 FIM DA MODIFICAÇÃO 1 ===
 // ==================================
@@ -544,18 +545,12 @@ const VisualizacaoEmendaDespesas = ({
                 </div>
               ) : (
                 <>
-                  {/* ================================== */}
-                  {/* === 🎯 INÍCIO DA MODIFICAÇÃO 2 === */}
-                  {/* ================================== */}
-
                   {/* DESPESAS PLANEJADAS */}
                   <div style={despesaCardStyles.despesasSection}>
                     <h3 style={despesaCardStyles.despesasSectionTitle}>
                       🟡 Despesas Planejadas (2)
                     </h3>
-                    {/* Usando o grid centralizado */}
                     <div style={despesaCardStyles.despesasCardsGrid}>
-                      {/* Card 1 - Amarelo (Override) */}
                       <div
                         style={{
                           ...despesaCardStyles.despesaCard,
@@ -581,7 +576,6 @@ const VisualizacaoEmendaDespesas = ({
                         </div>
                       </div>
 
-                      {/* Card 2 - Amarelo (Override) */}
                       <div
                         style={{
                           ...despesaCardStyles.despesaCard,
@@ -609,57 +603,39 @@ const VisualizacaoEmendaDespesas = ({
                     </div>
                   </div>
 
-                  {/* DESPESAS EXECUTADAS */}
+                  {/* DESPESAS EXECUTADAS - Usando DespesasList */}
                   <div style={despesaCardStyles.despesasSection}>
                     <h3 style={despesaCardStyles.despesasSectionTitle}>
                       🟢 Despesas Executadas ({despesasEmenda.length})
                     </h3>
-                    {/* Usando o grid centralizado */}
-                    <div style={despesaCardStyles.despesasCardsGrid}>
-                      {despesasEmenda.map((despesa) => (
-                        // Card Verde (Override)
-                        <div
-                          key={despesa.id}
-                          style={{
-                            ...despesaCardStyles.despesaCard,
-                            backgroundColor: "#f0fdf4",
-                            borderColor: "#bbf7d0",
-                          }}
-                        >
-                          <div style={despesaCardStyles.despesaCardHeader}>
-                            <span style={despesaCardStyles.despesaNumero}>
-                              #{despesa.id}
-                            </span>
-                            <span
-                              style={despesaCardStyles.despesaStatusExecutada}
-                            >
-                              🟢 <strong>EXECUTADA</strong>
-                            </span>
-                          </div>
-                          <div style={despesaCardStyles.despesaDescricao}>
-                            {despesa.descricao}
-                          </div>
-                          <div style={despesaCardStyles.despesaValor}>
-                            <strong>{formatCurrency(despesa.valor)}</strong>
-                          </div>
-                          <div style={despesaCardStyles.despesaInfoExtra}>
-                            Empenho: {despesa.numeroEmpenho} •{" "}
-                            {formatDate(despesa.data)} •{" "}
-                            {despesa.naturezaDespesa}
-                          </div>
-                          <button
-                            onClick={() => handleEditarDespesa(despesa)}
-                            style={styles.editButton} // Assuming a style for the edit button
-                          >
-                            ✏️ Editar
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                    <DespesasList
+                      despesas={despesasEmenda}
+                      emendas={[]}
+                      loading={false}
+                      error={null}
+                      onEdit={handleEditarDespesa}
+                      onView={handleEditarDespesa}
+                      onDelete={(id) => console.log("Deletar despesa:", id)}
+                      usuario={usuario}
+                      usarLayoutCards={true}
+                      ocultarBotoesAgrupamento={true}
+                      estilosCustomizados={{
+                        despesaCardExecutada: {
+                          ...despesaCardStyles.despesaCard,
+                          backgroundColor: "#f0fdf4",
+                          borderColor: "#bbf7d0",
+                        },
+                        despesaStatusExecutada: despesaCardStyles.despesaStatusExecutada,
+                        despesaContent: despesaCardStyles.despesaContent,
+                        despesaTopLine: despesaCardStyles.despesaTopLine,
+                        despesaNumero: despesaCardStyles.despesaNumero,
+                        despesaDescricao: despesaCardStyles.despesaDescricao,
+                        despesaValor: despesaCardStyles.despesaValor,
+                        despesaInfoLine: despesaCardStyles.despesaInfoLine,
+                        despesaInfo: despesaCardStyles.despesaInfo,
+                      }}
+                    />
                   </div>
-                  {/* ================================== */}
-                  {/* === 🎯 FIM DA MODIFICAÇÃO 2 === */}
-                  {/* ================================== */}
                 </>
               )}
             </div>
