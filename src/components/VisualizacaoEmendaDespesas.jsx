@@ -610,12 +610,14 @@ const VisualizacaoEmendaDespesas = ({
                     </h3>
                     <DespesasList
                       despesas={despesasEmenda}
-                      emendas={[]}
+                      emendas={[emenda]}
                       loading={false}
                       error={null}
                       onEdit={handleEditarDespesa}
                       onView={handleEditarDespesa}
                       onDelete={(id) => console.log("Deletar despesa:", id)}
+                      onEditarDespesa={handleEditarDespesa}
+                      onNovaDespesa={handleNovaDespesa}
                       usuario={usuario}
                       usarLayoutCards={true}
                       ocultarBotoesAgrupamento={true}
