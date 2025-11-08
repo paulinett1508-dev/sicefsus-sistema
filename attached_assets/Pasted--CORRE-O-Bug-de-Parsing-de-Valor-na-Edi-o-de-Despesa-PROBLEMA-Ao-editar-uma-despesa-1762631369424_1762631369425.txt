@@ -1,0 +1,119 @@
+# 🔧 CORREÇÃO: Bug de Parsing de Valor na Edição de Despesa
+
+## 🐛 PROBLEMA
+Ao editar uma despesa, o valor é carregado incorretamente:
+- Valor original: R$ 2.699,10
+- Após edição: 269,91 (ERRADO!)
+
+## 🎯 CAUSA RAIZ
+A função `formatarMoedaInput` trata o número como CENTAVOS quando deveria tratar como REAIS.
+
+---
+
+## ✅ SOLUÇÃO 1: Multiplicar por 100 (RECOMENDADA)
+
+### 📍 Arquivo: `src/components/DespesaForm.jsx`
+### 🔍 Localização: Linha ~239 (dentro do useEffect)
+
+### ANTES (ERRADO):
+```javascript
+valor: despesaParaEditar.valor != null 
+  ? formatarMoedaInput(String(despesaParaEditar.valor))
+  : "",
+```
+
+### DEPOIS (CORRETO):
+```javascript
+valor: despesaParaEditar.valor != null 
+  ? formatarMoedaInput((despesaParaEditar.valor * 100).toFixed(0))
+  : "",
+```
+
+### 📝 EXPLICAÇÃO:
+- `despesaParaEditar.valor` = 2699.10 (número decimal em REAIS)
+- `* 100` = 269910 (converte para CENTAVOS)
+- `.toFixed(0)` = "269910" (garante string sem decimais)
+- `formatarMoedaInput` formata como "2.699,10" ✅
+
+---
+
+## ✅ SOLUÇÃO 2: Formatação Direta (ALTERNATIVA)
+
+Se preferir não depender de `formatarMoedaInput` para centavos:
+
+### ANTES (ERRADO):
+```javascript
+valor: despesaParaEditar.valor != null 
+  ? formatarMoedaInput(String(despesaParaEditar.valor))
+  : "",
+```
+
+### DEPOIS (CORRETO):
+```javascript
+valor: despesaParaEditar.valor != null 
+  ? despesaParaEditar.valor
+      .toLocaleString('pt-BR', { 
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2 
+      })
+      .replace(/\s/g, '') // Remove espaços se houver
+  : "",
+```
+
+### 📝 EXPLICAÇÃO:
+- `toLocaleString('pt-BR')` já formata corretamente como "2.699,10"
+- Não precisa converter para centavos
+- Mais direto e legível
+
+---
+
+## 🧪 TESTES ESPERADOS
+
+### Teste 1: Valor com 2 casas decimais
+```
+Firebase: 2699.10
+Carregado: "2.699,10" ✅
+Salvo: 2699.10 ✅
+```
+
+### Teste 2: Valor com 1 casa decimal
+```
+Firebase: 2699.1
+Carregado: "2.699,10" ✅ (adiciona zero)
+Salvo: 2699.10 ✅
+```
+
+### Teste 3: Valor inteiro
+```
+Firebase: 2699
+Carregado: "2.699,00" ✅
+Salvo: 2699.00 ✅
+```
+
+### Teste 4: Valor grande
+```
+Firebase: 123456.78
+Carregado: "123.456,78" ✅
+Salvo: 123456.78 ✅
+```
+
+---
+
+## 🎯 RESUMO
+
+**ESCOLHA UMA DAS SOLUÇÕES:**
+
+✅ **Solução 1** (multiplicar por 100): Mantém compatibilidade com `formatarMoedaInput` atual
+✅ **Solução 2** (formatação direta): Mais limpa, não depende de conversão para centavos
+
+**MINHA RECOMENDAÇÃO:** Solução 1 (menos impacto no código existente)
+
+---
+
+## 📤 PRÓXIMO PASSO
+
+1. Abra `src/components/DespesaForm.jsx`
+2. Localize a linha ~239 (dentro do useEffect)
+3. Substitua o trecho do campo `valor`
+4. Teste editando uma despesa existente
+5. Confirme que o valor carrega corretamente
