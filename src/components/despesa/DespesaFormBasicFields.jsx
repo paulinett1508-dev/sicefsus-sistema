@@ -72,9 +72,15 @@ const DespesaFormBasicFields = ({
       valorAtual: valorNum,
       excedeSaldo: valorExcedeSaldo,
       despesaId: despesaParaEditar?.id,
-      modoEdicao: !!despesaParaEditar?.id
+      modoEdicao: !!despesaParaEditar?.id,
     });
-  }, [emendaInfo, despesaParaEditar, saldoDisponivel, valorNum, valorExcedeSaldo]);
+  }, [
+    emendaInfo,
+    despesaParaEditar,
+    saldoDisponivel,
+    valorNum,
+    valorExcedeSaldo,
+  ]);
 
   // ✅ SOLUÇÃO CORRETA: Chamar callback diretamente sem causar loop
   React.useEffect(() => {
@@ -99,7 +105,11 @@ const DespesaFormBasicFields = ({
     const valorDigitado = e.target.value;
 
     // Permite campo vazio
-    if (valorDigitado === "" || valorDigitado === "R$ ") {
+    if (
+      valorDigitado === "" ||
+      valorDigitado === "R$ " ||
+      valorDigitado === "R$"
+    ) {
       handleInputChange({ target: { name: "valor", value: "" } });
       return;
     }
@@ -112,8 +122,19 @@ const DespesaFormBasicFields = ({
       return;
     }
 
-    // Converte para número (centavos para reais)
-    const numeroValor = parseFloat(apenasNumeros) / 100;
+    // ✅ CORREÇÃO: Construir número com centavos
+    // Sempre considera os últimos 2 dígitos como centavos
+    let numeroValor;
+    if (apenasNumeros.length === 1) {
+      numeroValor = parseFloat(apenasNumeros) / 100; // "5" = 0.05
+    } else if (apenasNumeros.length === 2) {
+      numeroValor = parseFloat(apenasNumeros) / 100; // "50" = 0.50
+    } else {
+      // 3 ou mais dígitos: últimos 2 são centavos
+      const inteiros = apenasNumeros.slice(0, -2);
+      const centavos = apenasNumeros.slice(-2);
+      numeroValor = parseFloat(inteiros + "." + centavos); // "2699" + "11" = 2699.11
+    }
 
     // Formata para exibição
     const valorFormatado = formatarValorMonetario(numeroValor);
@@ -173,7 +194,9 @@ const DespesaFormBasicFields = ({
   // Atualizar valor quando emendaInfo mudar (para modo criar)
   useEffect(() => {
     if (!despesaParaEditar && emendaInfo?.saldoDisponivel) {
-      const valorFormatado = formatarMoedaInput(String(emendaInfo.saldoDisponivel));
+      const valorFormatado = formatarMoedaInput(
+        String(emendaInfo.saldoDisponivel),
+      );
       handleInputChange({
         target: {
           name: "valor",
@@ -188,7 +211,7 @@ const DespesaFormBasicFields = ({
     if (despesaParaEditar && formData.valor) {
       const valorAtual = formData.valor;
       // Se o valor não está formatado (é apenas número), formatar
-      if (!valorAtual.includes(',') && !valorAtual.includes('.')) {
+      if (!valorAtual.includes(",") && !valorAtual.includes(".")) {
         const valorFormatado = formatarMoedaInput(valorAtual);
         if (valorFormatado !== valorAtual) {
           handleInputChange({
@@ -526,7 +549,7 @@ const DespesaFormBasicFields = ({
               <input
                 type="text"
                 name="valor"
-                value={formatarValorMonetario(formData.valor) || ""}
+                value={formData.valor || ""}
                 onChange={handleValorChange}
                 onBlur={handleValorBlur}
                 style={
