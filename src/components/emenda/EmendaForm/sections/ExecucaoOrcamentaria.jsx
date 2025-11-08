@@ -355,15 +355,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   };
 
   // ✅ Handler para fechar formulário (COM PROTEÇÃO)
-  const handleFecharFormulario = () => {
-    console.log("🚪 ExecucaoOrcamentaria: Tentando fechar DespesaForm");
-    console.log("📝 Modo atual:", modoVisualizacao);
+  const handleFecharFormulario = (foiSalvoComSucesso = false) => {
+    console.log("🚪 Tentando fechar - Modo:", modoVisualizacao, "| Salvou?", foiSalvoComSucesso);
 
-    // ✅ PROTEÇÃO: Confirmar antes de fechar em modo execução
-    if (modoVisualizacao === "executar") {
+    // ✅ PROTEÇÃO: Só confirmar cancelamento se NÃO foi salvo com sucesso
+    if (modoVisualizacao === "executar" && !foiSalvoComSucesso) {
       const confirmacao = window.confirm(
-        "⚠️ Tem certeza que deseja cancelar a execução desta despesa?\n\n" +
-          "Os dados preenchidos serão perdidos.",
+        "⚠️ Cancelar execução?\n\nDados não salvos serão perdidos.",
       );
 
       if (!confirmacao) {
@@ -725,7 +723,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       "📞 DespesaForm.onSuccess chamado - Modo:",
                       modoVisualizacao,
                     );
-                    handleFecharFormulario();
+                    handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
                     showToast({
                       message:
                         modoVisualizacao === "executar"
@@ -739,10 +737,15 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       "📞 DespesaForm.onSave chamado - Modo:",
                       modoVisualizacao,
                     );
-                    handleFecharFormulario();
+                    handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
                     showToast({
                       message:
                         modoVisualizacao === "executar"
+                          ? "✅ Despesa executada com sucesso!"
+                          : "✅ Despesa atualizada com sucesso!",
+                      type: "success",
+                    });
+                  }}o === "executar"
                           ? "✅ Despesa executada com sucesso!"
                           : "✅ Despesa atualizada com sucesso!",
                       type: "success",
