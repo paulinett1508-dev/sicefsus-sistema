@@ -63,12 +63,12 @@ const DespesaFormBasicFields = ({
     });
   }, [emendaInfo, despesaParaEditar, saldoDisponivel, valorNum, valorExcedeSaldo]);
 
-  // ✅ NOVO: Notificar componente pai quando valor excede saldo
+  // ✅ SOLUÇÃO CORRETA: Chamar callback diretamente sem causar loop
   React.useEffect(() => {
     if (onValorExcedeSaldo) {
       onValorExcedeSaldo(valorExcedeSaldo);
     }
-  }, [valorExcedeSaldo, onValorExcedeSaldo]);
+  }, [valorExcedeSaldo]); // ✅ SÓ valorExcedeSaldo na dependência
 
   const formatarValorMonetario = (valor) => {
     if (!valor && valor !== 0) return "";
