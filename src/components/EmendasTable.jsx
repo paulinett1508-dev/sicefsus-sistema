@@ -1,7 +1,6 @@
-// EmendasTable.jsx - Com integração para Despesas
-// ✅ Cálculos baseados nos dados reais das emendas + Botão Despesas
-// 🔧 CORREÇÃO: Campo Execução agora calcula corretamente baseado em saldo
-// 🎨 UX FIX: Badge de status com visual elegante (Opção A - texto colorido simples)
+// EmendasTable.jsx - CORRIGIDO
+// ✅ BUG CORRIGIDO: Removida soma incorreta de acoesServicos como despesas
+// ✅ Cálculo baseado APENAS em dados reais: valorRecurso - saldoDisponivel
 
 import React, { useState, useMemo } from "react";
 
@@ -9,14 +8,22 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // ✅ Função para calcular execução real - APENAS DESPESAS
+  // ✅ CORRIGIDO: Função para calcular execução real SEM usar acoesServicos
   const calcularExecucao = (emenda) => {
-    // Buscar valor total da emenda (estrutura real do Firebase)
+    // Buscar valor total da emenda
     const valorRecurso = emenda.valorRecurso || emenda.valor || 0;
 
-    // ✅ CORREÇÃO: Usar APENAS valorExecutado do Firebase (calculado em Emendas.jsx)
-    // NÃO confundir metas planejadas com despesas executadas!
-    const valorExecutado = emenda.valorExecutado || 0;
+    // ✅ MÉTODO 1: Usar valorExecutado já calculado (se existir)
+    let valorExecutado = emenda.valorExecutado || 0;
+
+    // ✅ MÉTODO 2: Calcular baseado no saldo disponível (mais confiável)
+    if (emenda.saldoDisponivel !== undefined) {
+      const saldoAtual = emenda.saldoDisponivel || 0;
+      valorExecutado = Math.max(0, valorRecurso - saldoAtual);
+    }
+
+    // ❌ REMOVIDO: Bloco que somava acoesServicos incorretamente
+    // O campo acoesServicos contém METAS PLANEJADAS, não despesas executadas!
 
     if (valorRecurso === 0) {
       return { percentual: 0, texto: "0,0% (R$ 0,00)" };
@@ -58,16 +65,15 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     );
   };
 
-  // ✅ Função para calcular status real - BASEADO APENAS EM DESPESAS
+  // ✅ CORRIGIDO: Função para calcular status (agora sem considerar metas legadas)
   const calcularStatus = (emenda) => {
     const execucao = calcularExecucao(emenda);
     const percentual = execucao.percentual;
 
-    // ✅ CORREÇÃO: Verificar APENAS despesas executadas
+    // ✅ Verificar se há despesas REAIS (não metas)
     const temDespesas = emenda.totalDespesas > 0;
-    const temExecucao = temDespesas;
 
-    // Verificar datas para determinar status mais preciso (estrutura Firebase)
+    // Verificar datas para determinar status mais preciso
     const hoje = new Date();
     const dataInicio = emenda.inicioExecucao
       ? new Date(emenda.inicioExecucao)
@@ -87,8 +93,8 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
       };
     }
 
-    // ✅ LÓGICA MELHORADA: Considera metas e despesas
-    if (percentual === 0 && !temExecucao) {
+    // ✅ LÓGICA CORRIGIDA: Considera apenas despesas reais
+    if (percentual === 0 && !temDespesas) {
       return {
         status: "Não Iniciado",
         cor: "#6c757d",
@@ -162,246 +168,296 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     return "#dc3545"; // Excedido
   };
 
-  // ✅ Processamento das emendas com cálculos reais
-  const emendasProcessadas = useMemo(() => {
-    return emendas.map((emenda) => {
-      const execucao = calcularExecucao(emenda);
-      const statusInfo = calcularStatus(emenda);
-
-      return {
-        ...emenda,
-        execucaoCalculada: execucao,
-        statusCalculado: statusInfo,
-      };
-    });
-  }, [emendas]);
-
-  // ✅ Função de ordenação
+  // Função de ordenação
   const handleSort = (field) => {
-    const direction =
-      sortField === field && sortDirection === "asc" ? "desc" : "asc";
-    setSortField(field);
-    setSortDirection(direction);
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
   };
 
-  // ✅ Emendas ordenadas
   const emendasOrdenadas = useMemo(() => {
-    if (!sortField) return emendasProcessadas;
+    if (!sortField) return emendas;
 
-    return [...emendasProcessadas].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
+    return [...emendas].sort((a, b) => {
+      let aValue, bValue;
 
-      // Tratamento especial para campos calculados
-      if (sortField === "execucao") {
-        aValue = a.execucaoCalculada.percentual;
-        bValue = b.execucaoCalculada.percentual;
+      switch (sortField) {
+        case "numero":
+          aValue = a.numero || a.numeroEmenda || "";
+          bValue = b.numero || b.numeroEmenda || "";
+          break;
+        case "parlamentar":
+          aValue = a.parlamentar || a.autor || "";
+          bValue = b.parlamentar || b.autor || "";
+          break;
+        case "objeto":
+          aValue = a.objeto || a.programa || "";
+          bValue = b.objeto || b.programa || "";
+          break;
+        case "municipio":
+          aValue = `${a.municipio || ""}/${a.uf || ""}`;
+          bValue = `${b.municipio || ""}/${b.uf || ""}`;
+          break;
+        case "valor":
+          aValue = a.valorRecurso || a.valor || 0;
+          bValue = b.valorRecurso || b.valor || 0;
+          break;
+        case "execucao":
+          aValue = calcularExecucao(a).percentual;
+          bValue = calcularExecucao(b).percentual;
+          break;
+        case "status":
+          aValue = calcularStatus(a).status;
+          bValue = calcularStatus(b).status;
+          break;
+        default:
+          return 0;
       }
 
-      if (sortField === "status") {
-        aValue = a.statusCalculado.status;
-        bValue = b.statusCalculado.status;
-      }
-
-      // Ordenação numérica
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      // Ordenação alfabética
-      const aStr = String(aValue || "").toLowerCase();
-      const bStr = String(bValue || "").toLowerCase();
-
-      if (sortDirection === "asc") {
-        return aStr.localeCompare(bStr);
-      } else {
-        return bStr.localeCompare(aStr);
-      }
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
     });
-  }, [emendasProcessadas, sortField, sortDirection]);
-
-  // ✅ Função para formatar valor monetário
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value || 0);
-  };
+  }, [emendas, sortField, sortDirection]);
 
   if (!emendas || emendas.length === 0) {
     return (
       <div style={styles.emptyState}>
-        <div style={styles.emptyIcon}>📄</div>
+        <div style={styles.emptyEmoji}>📭</div>
         <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
-        <p style={styles.emptyDescription}>
-          Adicione uma nova emenda para começar.
-        </p>
+        <p style={styles.emptyText}>As emendas cadastradas aparecerão aqui.</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.tableContainer}>
-        <table style={styles.table}>
-          <thead style={styles.thead}>
-            <tr>
-              <th style={styles.th} onClick={() => handleSort("numero")}>
-                Emenda{" "}
-                {sortField === "numero" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("parlamentar")}>
-                Parlamentar{" "}
-                {sortField === "parlamentar" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("tipo")}>
-                Objeto{" "}
-                {sortField === "tipo" && (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("municipio")}>
-                Município/UF{" "}
-                {sortField === "municipio" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("valorRecurso")}>
-                Valor Total{" "}
-                {sortField === "valorRecurso" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("execucao")}>
-                Execução{" "}
-                {sortField === "execucao" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.th} onClick={() => handleSort("status")}>
-                Status{" "}
-                {sortField === "status" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </th>
-              <th style={styles.thActions}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {emendasOrdenadas.map((emenda) => (
-              <tr key={emenda.id} style={styles.tr}>
-                <td style={styles.td}>
-                  <div style={styles.emendaInfo}>
-                    <div style={styles.numeroEmenda}>
-                      {emenda.numero || "Sem número"}
-                    </div>
-                    <div style={styles.dataInfo}>
-                      Criada:{" "}
-                      {emenda.criadoEm
-                        ? new Date(
-                            emenda.criadoEm.seconds * 1000,
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </div>
-                  </div>
-                </td>
-
-                <td style={styles.td}>
-                  <div style={styles.parlamentarInfo}>
-                    <div style={styles.parlamentarNome}>
-                      {emenda.parlamentar || "Não informado"}
-                    </div>
-                    <div style={styles.numeroEmendaSecundario}>
-                      Nº {emenda.numeroEmenda || "N/A"}
-                    </div>
-                  </div>
-                </td>
-
-                <td style={styles.td}>
-                  <span
-                    style={{
-                      ...styles.tipoBadge,
-                      backgroundColor:
-                        emenda.tipo === "Custeio PAP"
-                          ? "#ffc107"
-                          : emenda.tipo === "Custeio MAC"
-                            ? "#28a745"
-                            : "#17a2b8",
-                    }}
-                  >
-                    {emenda.tipo || "Não definido"}
+    <div style={styles.tableWrapper}>
+      <table style={styles.table}>
+        <thead style={styles.thead}>
+          <tr>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("numero")}
+              title="Ordenar por emenda"
+            >
+              <div style={styles.thContent}>
+                EMENDA
+                {sortField === "numero" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
                   </span>
-                </td>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("parlamentar")}
+              title="Ordenar por parlamentar"
+            >
+              <div style={styles.thContent}>
+                PARLAMENTAR
+                {sortField === "parlamentar" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("objeto")}
+              title="Ordenar por objeto"
+            >
+              <div style={styles.thContent}>
+                OBJETO
+                {sortField === "objeto" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("municipio")}
+              title="Ordenar por município"
+            >
+              <div style={styles.thContent}>
+                MUNICÍPIO/UF
+                {sortField === "municipio" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("valor")}
+              title="Ordenar por valor"
+            >
+              <div style={styles.thContent}>
+                VALOR TOTAL
+                {sortField === "valor" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("execucao")}
+              title="Ordenar por execução"
+            >
+              <div style={styles.thContent}>
+                EXECUÇÃO
+                {sortField === "execucao" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th
+              style={styles.th}
+              onClick={() => handleSort("status")}
+              title="Ordenar por status"
+            >
+              <div style={styles.thContent}>
+                STATUS
+                {sortField === "status" && (
+                  <span style={styles.sortIcon}>
+                    {sortDirection === "asc" ? "▲" : "▼"}
+                  </span>
+                )}
+              </div>
+            </th>
+            <th style={{ ...styles.th, textAlign: "center" }}>AÇÕES</th>
+          </tr>
+        </thead>
+        <tbody>
+          {emendasOrdenadas.map((emenda, index) => {
+            const execucao = calcularExecucao(emenda);
+            const status = calcularStatus(emenda);
+            const valorFormatado = (
+              emenda.valorRecurso ||
+              emenda.valor ||
+              0
+            ).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            });
 
+            return (
+              <tr
+                key={emenda.id}
+                style={index % 2 === 0 ? styles.trEven : styles.trOdd}
+              >
+                {/* EMENDA */}
                 <td style={styles.td}>
-                  <div style={styles.localInfo}>
-                    <div style={styles.municipio}>
-                      {emenda.municipio || "Não informado"}
-                    </div>
-                    <div style={styles.uf}>{emenda.uf || "N/A"}</div>
+                  <div style={styles.emendaCell}>
+                    <strong style={styles.emendaNumero}>
+                      {emenda.numero || emenda.numeroEmenda || "N/A"}
+                    </strong>
+                    <small style={styles.emendaData}>
+                      Criada:{" "}
+                      {emenda.criadaEm
+                        ? new Date(
+                            emenda.criadaEm.seconds * 1000,
+                          ).toLocaleDateString("pt-BR")
+                        : "N/A"}
+                    </small>
                   </div>
                 </td>
 
+                {/* PARLAMENTAR */}
                 <td style={styles.td}>
-                  <div style={styles.valorInfo}>
-                    <div style={styles.valorPrincipal}>
-                      {formatCurrency(emenda.valorRecurso || emenda.valor || 0)}
-                    </div>
-                    <div style={styles.saldoInfo}>
-                      Saldo: {formatCurrency(emenda.saldoDisponivel || 0)}
+                  <div style={styles.parlamentarCell}>
+                    <strong style={styles.parlamentarNome}>
+                      {emenda.parlamentar || emenda.autor || "N/A"}
+                    </strong>
+                    <div style={styles.tipoEmendaBadge}>
+                      {emenda.tipo || emenda.tipoEmenda || "N/A"}
                     </div>
                   </div>
                 </td>
 
+                {/* OBJETO */}
                 <td style={styles.td}>
-                  <div style={styles.execucaoContainer}>
-                    <div style={styles.execucaoTexto}>
-                      {emenda.execucaoCalculada.texto}
-                    </div>
+                  <div style={styles.objetoCell}>
+                    {emenda.objeto || emenda.programa || "N/A"}
+                  </div>
+                </td>
+
+                {/* MUNICÍPIO */}
+                <td style={styles.td}>
+                  <div style={styles.municipioCell}>
+                    <span style={styles.municipioNome}>
+                      {emenda.municipio || "N/A"}
+                    </span>
+                    <span style={styles.ufBadge}>{emenda.uf || ""}</span>
+                  </div>
+                </td>
+
+                {/* VALOR TOTAL */}
+                <td style={styles.td}>
+                  <div style={styles.valorCell}>
+                    <strong style={styles.valorTexto}>{valorFormatado}</strong>
+                    <small style={styles.saldoTexto}>
+                      Saldo:{" "}
+                      {(emenda.saldoDisponivel || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </small>
+                  </div>
+                </td>
+
+                {/* EXECUÇÃO */}
+                <td style={styles.td}>
+                  <div style={styles.execucaoCell}>
+                    <div style={styles.execucaoTexto}>{execucao.texto}</div>
                     <div style={styles.progressBarContainer}>
                       <div
                         style={{
                           ...styles.progressBar,
-                          width: `${Math.min(emenda.execucaoCalculada.percentual, 100)}%`,
+                          width: `${Math.min(execucao.percentual, 100)}%`,
                           backgroundColor: getProgressColor(
-                            emenda.execucaoCalculada.percentual,
+                            execucao.percentual,
                           ),
                         }}
                       />
                     </div>
-                    <div style={styles.despesasInfo}>
+                    <small style={styles.despesasCount}>
                       {emenda.totalDespesas || 0} despesa(s)
-                    </div>
+                    </small>
                   </div>
                 </td>
 
+                {/* STATUS */}
                 <td style={styles.td}>
-                  <div style={styles.statusContainer}>
-                    {/* ✅ OPÇÃO A: Texto colorido elegante sem aparência de botão */}
-                    <div
-                      style={{
-                        ...styles.statusTextElegante,
-                        color: emenda.statusCalculado.cor,
-                      }}
-                    >
-                      <span style={styles.statusIcone}>
-                        {emenda.statusCalculado.icone}
-                      </span>
-                      <span style={styles.statusLabel}>
-                        {emenda.statusCalculado.status}
-                      </span>
-                    </div>
-                    {emenda.finalExecucao && (
-                      <div style={styles.prazoInfo}>
-                        Prazo:{" "}
-                        {new Date(emenda.finalExecucao).toLocaleDateString()}
-                      </div>
-                    )}
+                  <div
+                    style={{
+                      ...styles.statusBadge,
+                      color: status.cor,
+                    }}
+                  >
+                    <span style={styles.statusIcone}>{status.icone}</span>
+                    <span style={styles.statusTexto}>{status.status}</span>
                   </div>
                 </td>
 
-                <td style={styles.td}>
-                  <div style={styles.actionsContainer}>
+                {/* AÇÕES */}
+                <td style={{ ...styles.td, textAlign: "center" }}>
+                  <div style={styles.actionsCell}>
                     <button
                       onClick={() => onView(emenda)}
                       style={styles.actionButton}
-                      title="Visualizar detalhes"
+                      title="Visualizar emenda"
                     >
                       👁️
                     </button>
@@ -414,8 +470,11 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                     </button>
                     {renderIconeDespesas(emenda)}
                     <button
-                      onClick={() => onDelete(emenda)}
-                      style={{ ...styles.actionButton, ...styles.deleteButton }}
+                      onClick={() => onDelete(emenda.id)}
+                      style={{
+                        ...styles.actionButton,
+                        backgroundColor: "#dc3545",
+                      }}
                       title="Excluir emenda"
                     >
                       🗑️
@@ -423,338 +482,219 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                   </div>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ✅ Informações de rodapé */}
-      <div style={styles.footer}>
-        <div style={styles.footerInfo}>
-          Total de {emendas.length} emenda{emendas.length !== 1 ? "s" : ""}{" "}
-          encontrada{emendas.length !== 1 ? "s" : ""}
-        </div>
-        <div style={styles.footerLegend}>
-          <span style={styles.legendItem}>
-            <span
-              style={{ ...styles.legendColor, backgroundColor: "#28a745" }}
-            ></span>
-            Concluído
-          </span>
-          <span style={styles.legendItem}>
-            <span
-              style={{ ...styles.legendColor, backgroundColor: "#ffc107" }}
-            ></span>
-            Em Andamento
-          </span>
-          <span style={styles.legendItem}>
-            <span
-              style={{ ...styles.legendColor, backgroundColor: "#6c757d" }}
-            ></span>
-            Não Iniciado
-          </span>
-        </div>
-      </div>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-// ✅ Estilos expandidos para novos elementos
 const styles = {
-  container: {
-    backgroundColor: "#ffffff",
-    borderRadius: "12px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    overflow: "hidden",
-    margin: "20px 0",
-  },
-
-  tableContainer: {
+  tableWrapper: {
     overflowX: "auto",
-    maxHeight: "70vh",
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
   },
-
   table: {
     width: "100%",
     borderCollapse: "collapse",
     fontSize: "14px",
   },
-
   thead: {
     backgroundColor: "#2c3e50",
-    color: "white",
-    position: "sticky",
-    top: 0,
-    zIndex: 10,
+    color: "#ffffff",
   },
-
   th: {
     padding: "16px 12px",
     textAlign: "left",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "12px",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
     cursor: "pointer",
-    transition: "background-color 0.3s ease",
     userSelect: "none",
-    borderBottom: "2px solid #34495e",
-    borderRight: "1px solid rgba(255,255,255,0.1)",
-    whiteSpace: "nowrap",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    backgroundColor: "#2c3e50",
-    color: "#ffffff",
+    transition: "background-color 0.2s",
   },
-
-  thActions: {
-    padding: "16px 12px",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: "14px",
-    borderBottom: "2px solid #34495e",
-    borderRight: "1px solid rgba(255,255,255,0.1)",
-    whiteSpace: "nowrap",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    backgroundColor: "#2c3e50",
-    color: "#ffffff",
+  thContent: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "8px",
   },
-
-  tr: {
-    borderBottom: "1px solid #e9ecef",
-    transition: "background-color 0.3s ease",
+  sortIcon: {
+    fontSize: "10px",
+    opacity: 0.7,
   },
-
   td: {
     padding: "16px 12px",
-    verticalAlign: "top",
-    borderBottom: "1px solid #f1f3f4",
+    borderBottom: "1px solid #e9ecef",
   },
-
-  // ✅ Estilos para execução
-  execucaoContainer: {
+  trEven: {
+    backgroundColor: "#ffffff",
+  },
+  trOdd: {
+    backgroundColor: "#f8f9fa",
+  },
+  emendaCell: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  emendaNumero: {
+    fontSize: "15px",
+    color: "#2c3e50",
+    fontWeight: "600",
+  },
+  emendaData: {
+    fontSize: "11px",
+    color: "#6c757d",
+  },
+  parlamentarCell: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  parlamentarNome: {
+    fontSize: "14px",
+    color: "#2c3e50",
+    fontWeight: "500",
+  },
+  tipoEmendaBadge: {
+    display: "inline-block",
+    padding: "4px 10px",
+    borderRadius: "12px",
+    fontSize: "11px",
+    fontWeight: "600",
+    backgroundColor: "#e3f2fd",
+    color: "#1976d2",
+    textTransform: "uppercase",
+    width: "fit-content",
+  },
+  objetoCell: {
+    fontSize: "13px",
+    color: "#495057",
+    lineHeight: "1.4",
+    maxWidth: "200px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+  },
+  municipioCell: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  municipioNome: {
+    fontSize: "13px",
+    color: "#2c3e50",
+    fontWeight: "500",
+  },
+  ufBadge: {
+    padding: "2px 8px",
+    borderRadius: "4px",
+    fontSize: "11px",
+    fontWeight: "600",
+    backgroundColor: "#ffc107",
+    color: "#ffffff",
+  },
+  valorCell: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  valorTexto: {
+    fontSize: "15px",
+    color: "#28a745",
+    fontWeight: "600",
+  },
+  saldoTexto: {
+    fontSize: "11px",
+    color: "#6c757d",
+  },
+  execucaoCell: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
     minWidth: "150px",
   },
-
   execucaoTexto: {
     fontSize: "13px",
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: "6px",
+    color: "#2c3e50",
+    fontWeight: "500",
   },
-
   progressBarContainer: {
     width: "100%",
     height: "8px",
     backgroundColor: "#e9ecef",
     borderRadius: "4px",
     overflow: "hidden",
-    marginBottom: "4px",
   },
-
   progressBar: {
     height: "100%",
+    transition: "width 0.3s ease, background-color 0.3s ease",
     borderRadius: "4px",
-    transition: "width 0.3s ease",
   },
-
-  despesasInfo: {
+  despesasCount: {
     fontSize: "11px",
     color: "#6c757d",
-    fontStyle: "italic",
   },
-
-  // ✅ NOVO: Estilos para status - OPÇÃO A (texto colorido elegante)
-  statusContainer: {
-    minWidth: "120px",
-  },
-
-  statusTextElegante: {
-    display: "flex",
+  statusBadge: {
+    display: "inline-flex",
     alignItems: "center",
     gap: "6px",
+    fontWeight: "600",
     fontSize: "13px",
-    fontWeight: "600",
-    marginBottom: "4px",
-    cursor: "default",
-    userSelect: "none",
   },
-
   statusIcone: {
-    fontSize: "14px",
+    fontSize: "16px",
   },
-
-  statusLabel: {
-    letterSpacing: "0.3px",
+  statusTexto: {
+    fontSize: "13px",
   },
-
-  prazoInfo: {
-    fontSize: "11px",
-    color: "#6c757d",
-  },
-
-  // Estilos existentes continuam...
-  emendaInfo: {
-    minWidth: "120px",
-  },
-
-  numeroEmenda: {
-    fontWeight: "600",
-    color: "#154360",
-    fontSize: "14px",
-  },
-
-  dataInfo: {
-    fontSize: "11px",
-    color: "#6c757d",
-    marginTop: "2px",
-  },
-
-  parlamentarInfo: {
-    minWidth: "150px",
-  },
-
-  parlamentarNome: {
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: "2px",
-  },
-
-  numeroEmendaSecundario: {
-    fontSize: "11px",
-    color: "#6c757d",
-  },
-
-  tipoBadge: {
-    padding: "4px 8px",
-    borderRadius: "12px",
-    color: "white",
-    fontSize: "11px",
-    fontWeight: "600",
-    textTransform: "uppercase",
-  },
-
-  localInfo: {
-    minWidth: "120px",
-  },
-
-  municipio: {
-    fontWeight: "500",
-    color: "#333",
-  },
-
-  uf: {
-    fontSize: "12px",
-    color: "#6c757d",
-    marginTop: "2px",
-  },
-
-  valorInfo: {
-    textAlign: "right",
-    minWidth: "120px",
-  },
-
-  valorPrincipal: {
-    fontWeight: "600",
-    color: "#154360",
-    fontSize: "14px",
-  },
-
-  saldoInfo: {
-    fontSize: "11px",
-    color: "#6c757d",
-    marginTop: "2px",
-  },
-
-  actionsContainer: {
+  actionsCell: {
     display: "flex",
     gap: "6px",
     justifyContent: "center",
     flexWrap: "wrap",
   },
-
   actionButton: {
-    background: "none",
-    border: "1px solid #dee2e6",
+    padding: "8px 12px",
+    border: "none",
     borderRadius: "6px",
-    padding: "8px 10px",
+    fontSize: "14px",
     cursor: "pointer",
-    fontSize: "14px",
-    transition: "all 0.3s ease",
-    backgroundColor: "#f8f9fa",
-    minWidth: "36px",
-  },
-
-  despesasButton: {
-    borderColor: "#28a745",
-    color: "#28a745",
-    backgroundColor: "#f8fff8",
-  },
-
-  deleteButton: {
-    borderColor: "#dc3545",
-    color: "#dc3545",
-    backgroundColor: "#fff8f8",
-  },
-
-  // ✅ Estilos para rodapé
-  footer: {
-    padding: "16px 20px",
-    backgroundColor: "#f8f9fa",
-    borderTop: "1px solid #e9ecef",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: "12px",
-  },
-
-  footerInfo: {
-    fontSize: "14px",
-    color: "#6c757d",
+    transition: "all 0.2s",
+    backgroundColor: "#6c757d",
+    color: "#ffffff",
     fontWeight: "500",
   },
-
-  footerLegend: {
-    display: "flex",
-    gap: "16px",
-    flexWrap: "wrap",
-  },
-
-  legendItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: "6px",
-    fontSize: "12px",
-    color: "#6c757d",
-  },
-
-  legendColor: {
-    width: "12px",
-    height: "12px",
-    borderRadius: "2px",
-  },
-
   emptyState: {
-    textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
     padding: "60px 20px",
-    color: "#6c757d",
+    backgroundColor: "#ffffff",
+    borderRadius: "8px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
   },
-
-  emptyIcon: {
-    fontSize: "48px",
+  emptyEmoji: {
+    fontSize: "64px",
     marginBottom: "16px",
-    opacity: 0.7,
   },
-
   emptyTitle: {
-    margin: "0 0 8px 0",
-    fontSize: "18px",
+    fontSize: "20px",
+    color: "#2c3e50",
+    marginBottom: "8px",
     fontWeight: "600",
   },
-
-  emptyDescription: {
-    margin: 0,
+  emptyText: {
     fontSize: "14px",
+    color: "#6c757d",
   },
 };
 

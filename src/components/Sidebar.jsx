@@ -17,6 +17,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const location = useLocation(); // ✅ ADICIONADO: Hook para detectar rota
 
   const isAdmin = usuario?.tipo === "admin";
+  const isSuperAdmin = isAdmin && usuario?.superAdmin === true; // 👑 NOVO
 
   // ✅ ADICIONADO: Detectar se está em processo de criação/edição
   const isCreatingEmenda =
@@ -312,6 +313,83 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             </div>
           ))}
 
+        {/* 👑 FERRAMENTAS DEV - APENAS SUPERADMIN */}
+        {isSuperAdmin && (
+          <div
+            onClick={() => onNavigate("/ferramentas-dev")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: collapsed ? "12px 0" : "12px 24px",
+              cursor: "pointer",
+              background:
+                activePath === "/ferramentas-dev"
+                  ? "var(--accent)"
+                  : "transparent",
+              color:
+                activePath === "/ferramentas-dev"
+                  ? "var(--white)"
+                  : "var(--gray-200)",
+              fontWeight: activePath === "/ferramentas-dev" ? "bold" : "normal",
+              fontSize: 16,
+              transition: "all 0.2s ease",
+              justifyContent: collapsed ? "center" : "flex-start",
+              marginTop: 4,
+            }}
+            onMouseOver={(e) => {
+              if (activePath !== "/ferramentas-dev") {
+                e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
+                e.target.style.color = "var(--white)";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (activePath !== "/ferramentas-dev") {
+                e.target.style.backgroundColor = "transparent";
+                e.target.style.color = "var(--gray-200)";
+              }
+            }}
+            title={collapsed ? "Ferramentas Dev" : ""}
+          >
+            <span
+              style={{
+                fontSize: 20,
+                marginRight: collapsed ? 0 : 12,
+                filter:
+                  activePath === "/ferramentas-dev"
+                    ? "brightness(1.2)"
+                    : "none",
+              }}
+            >
+              🔧
+            </span>
+            {!collapsed && (
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  flex: 1,
+                }}
+              >
+                Ferramentas Dev
+                <span
+                  style={{
+                    fontSize: 10,
+                    backgroundColor: "#ffc107",
+                    color: "#1a1a2e",
+                    padding: "2px 6px",
+                    borderRadius: 10,
+                    fontWeight: "bold",
+                    marginLeft: "auto",
+                  }}
+                >
+                  👑
+                </span>
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Espaçador flexível */}
         <div style={{ flex: 1 }}></div>
 
@@ -425,6 +503,25 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
               >
                 {usuario.tipo === "admin" ? "ADMIN" : "OPERADOR"}
               </span>
+              {/* 👑 Badge SuperAdmin */}
+              {isSuperAdmin && (
+                <span
+                  style={{
+                    backgroundColor: "#ffc107",
+                    color: "#1a1a2e",
+                    borderRadius: "6px",
+                    padding: "3px 8px",
+                    fontWeight: "bold",
+                    fontSize: 9,
+                    letterSpacing: 0.5,
+                    textTransform: "uppercase",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
+                  }}
+                  title="Super Administrador"
+                >
+                  👑 SUPER
+                </span>
+              )}
               <span
                 style={{
                   fontSize: 10,

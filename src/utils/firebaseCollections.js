@@ -1,9 +1,10 @@
-// src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
+// src/utils/firebaseCollections.js - CORRIGIDO
+// ✅ BUG CORRIGIDO: parseValorMonetario para strings formatadas "200.000,00"
 // ✅ Sincronizado com os campos mostrados nas imagens
-// ✅ ATUALIZADO 04/11/2025: Separação de status em despesas
+// ✅ ATUALIZADO 08/11/2025: Correção crítica na função calcularValorTotalAcoesServicos
 
 export const COLLECTIONS = {
-  USERS: "usuarios", // Corrigido para usar a coleção correta
+  USERS: "usuarios",
   EMENDAS: "emendas",
   DESPESAS: "despesas",
   LOGS: "logs",
@@ -11,50 +12,51 @@ export const COLLECTIONS = {
 
 // ✅ SCHEMA ATUALIZADO - Baseado nos prints fornecidos
 export const EMENDA_SCHEMA = {
-  // Dados básicos obrigatórios (conforme print)
+  // Dados básicos obrigatórios
   municipio: "",
   uf: "",
-  cnpj: "", // CNPJ do município
+  cnpj: "",
   beneficiario: "",
   objetoProposta: "",
   programa: "",
   parlamentar: "",
-  numeroEmenda: "", // Nº DA EMENDA
-  tipoEmenda: "Custeio PAP", // OBJETO DA EMENDA
-  numeroProposta: "", // Nº DA PROPOSTA
-  funcional: "", // FUNCIONAL
-  valorRecurso: 0, // VALOR DO RECURSO (R$)
+  numeroEmenda: "",
+  tipoEmenda: "Custeio PAP",
+  numeroProposta: "",
+  funcional: "",
+  valorRecurso: 0,
 
   // Execução financeira
-  valorExecutado: 0, // VALOR EXECUTADO DA EMENDA
-  saldoDisponivel: 0, // SALDO DISPONÍVEL DA EMENDA (calculado)
+  valorExecutado: 0,
+  saldoDisponivel: 0,
 
   // Cronograma
-  dataOb: "", // DATA DA OB
-  inicioExecucao: "", // INÍCIO DA EXECUÇÃO
-  finalExecucao: "", // FINAL DA EXECUÇÃO
-  dataUltimaAtualizacao: "", // DATA DA ÚLTIMA ATUALIZAÇÃO
+  dataOb: "",
+  inicioExecucao: "",
+  finalExecucao: "",
+  dataUltimaAtualizacao: "",
 
   // Dados bancários
-  banco: "", // BANCO
-  agencia: "", // AGÊNCIA
-  conta: "", // CONTA
+  banco: "",
+  agencia: "",
+  conta: "",
 
-  // ✅ NOVA SEÇÃO: AÇÕES E SERVIÇOS - METAS QUANTITATIVAS
+  // ✅ SEÇÃO: AÇÕES E SERVIÇOS - METAS QUANTITATIVAS
   acoesServicos: [
     {
-      tipo: "Metas Quantitativas", // ou 'Metas'
-      estrategia: "", // Ex: "ESTRATÉGIA DE RASTREAMENTO E CONTROLE DE CONDIÇÕES CRÔNICAS"
-      descricao: "", // Ex: "Aquisição de Insumos e Materiais de Uso Contínuo..."
-      valor: 0, // VALOR
+      tipo: "Metas Quantitativas",
+      estrategia: "",
+      descricao: "",
+      valor: 0,
+      valorAcao: "", // Campo real no Firebase (string formatada)
     },
   ],
 
-  // ✅ NOVA SEÇÃO: METAS
+  // ✅ SEÇÃO: METAS
   metas: [
     {
-      titulo: "", // Ex: "Oferta de medicamentos da Atenção Básica"
-      detalhamento: "", // Ex: "Manutenção da oferta de medicamentos, insumos e materiais..."
+      titulo: "",
+      detalhamento: "",
     },
   ],
 
@@ -65,12 +67,12 @@ export const EMENDA_SCHEMA = {
   contrato: "",
 
   // Campos de sistema
-  numero: "", // Número gerado automaticamente
-  status: "ativa", // 'ativa', 'concluida', 'cancelada'
+  numero: "",
+  status: "ativa",
   createdAt: null,
   updatedAt: null,
 
-  // Campos legados mantidos para compatibilidade
+  // Campos legados
   area: "",
   tipo: "Individual",
   observacoes: "",
@@ -78,7 +80,7 @@ export const EMENDA_SCHEMA = {
   dataVencimento: null,
   dataModificacao: null,
 
-  // Campos adicionais do formulário atual
+  // Campos adicionais
   cnpjMunicipio: "",
   beneficiarioCnpj: "",
   outrosValores: 0,
@@ -91,8 +93,8 @@ export const USER_SCHEMA = {
   email: "",
   nome: "",
   displayName: "",
-  role: "user", // 'admin', 'user'
-  status: "ativo", // 'ativo', 'inativo'
+  role: "user",
+  status: "ativo",
   isActive: true,
   municipio: null,
   uf: null,
@@ -102,7 +104,7 @@ export const USER_SCHEMA = {
   lastLogin: null,
 };
 
-// ✅ ATUALIZADO 04/11/2025: Separação de status
+// ✅ ATUALIZADO: Separação de status
 export const DESPESA_SCHEMA = {
   emendaId: "",
   descricao: "",
@@ -114,33 +116,47 @@ export const DESPESA_SCHEMA = {
   dataPagamento: null,
 
   // ✅ DOIS CAMPOS SEPARADOS:
-  status: "PLANEJADA", // Fase da execução orçamentária (PLANEJADA | EXECUTADA)
-  statusPagamento: "pendente", // Status de pagamento (pendente | empenhado | liquidado | pago | cancelado)
+  status: "PLANEJADA", // PLANEJADA | EXECUTADA
+  statusPagamento: "pendente", // pendente | empenhado | liquidado | pago | cancelado
 
   observacoes: "",
   dataCriacao: null,
   dataModificacao: null,
 };
 
-// ✅ NOVA: Estrutura para Ações e Serviços
 export const ACAO_SERVICO_SCHEMA = {
-  tipo: "Metas Quantitativas", // 'Metas Quantitativas' ou 'Metas'
-  estrategia: "", // Título/Estratégia principal
-  descricao: "", // Descrição detalhada
-  valor: 0, // Valor monetário (apenas para Metas Quantitativas)
+  tipo: "Metas Quantitativas",
+  estrategia: "",
+  descricao: "",
+  valor: 0,
+  valorAcao: "", // String formatada
 };
 
-// ✅ NOVA: Estrutura para Metas
 export const META_SCHEMA = {
-  titulo: "", // Título da meta
-  detalhamento: "", // Detalhamento completo da meta
+  titulo: "",
+  detalhamento: "",
 };
+
+// ✅ FUNÇÃO AUXILIAR: Parse de valores monetários (strings formatadas)
+function parseValorMonetario(valor) {
+  if (typeof valor === "number") return valor;
+  if (!valor) return 0;
+
+  // Remove R$, espaços, pontos (milhar) e troca vírgula por ponto
+  const valorLimpo = String(valor)
+    .replace(/R\$/g, "")
+    .replace(/\s/g, "")
+    .replace(/\./g, "") // Remove pontos (separador de milhar)
+    .replace(",", "."); // Troca vírgula por ponto (decimal)
+
+  const numero = parseFloat(valorLimpo);
+  return isNaN(numero) ? 0 : numero;
+}
 
 // Função para validar estrutura de documento
 export function validateDocumentStructure(doc, schema) {
   if (!doc || typeof doc !== "object") return false;
 
-  // Verificar campos obrigatórios baseados no schema
   const requiredFields = Object.keys(schema).filter(
     (key) =>
       schema[key] !== null && schema[key] !== "" && !Array.isArray(schema[key]),
@@ -162,11 +178,10 @@ export function normalizeDocument(doc, schema) {
   return normalized;
 }
 
-// ✅ NOVA: Função para validar Ação/Serviço
+// ✅ Função para validar Ação/Serviço
 export function validateAcaoServico(acao) {
   if (!acao || typeof acao !== "object") return false;
 
-  // Validações específicas
   if (!acao.tipo || !["Metas Quantitativas", "Metas"].includes(acao.tipo)) {
     return false;
   }
@@ -181,7 +196,8 @@ export function validateAcaoServico(acao) {
 
   // Para Metas Quantitativas, valor é obrigatório
   if (acao.tipo === "Metas Quantitativas") {
-    if (!acao.valor || acao.valor <= 0) {
+    const valor = parseValorMonetario(acao.valorAcao || acao.valor);
+    if (valor <= 0) {
       return false;
     }
   }
@@ -189,7 +205,7 @@ export function validateAcaoServico(acao) {
   return true;
 }
 
-// ✅ NOVA: Função para validar Meta
+// ✅ Função para validar Meta
 export function validateMeta(meta) {
   if (!meta || typeof meta !== "object") return false;
 
@@ -204,20 +220,33 @@ export function validateMeta(meta) {
   return true;
 }
 
-// ✅ NOVA: Função para calcular valor total das ações/serviços
+// ✅ CORRIGIDO: Função para calcular valor total das ações/serviços
 export function calcularValorTotalAcoesServicos(acoesServicos) {
   if (!Array.isArray(acoesServicos)) return 0;
 
   return acoesServicos
-    .filter((acao) => acao.tipo === "Metas Quantitativas" && acao.valor)
-    .reduce((total, acao) => total + (parseFloat(acao.valor) || 0), 0);
+    .filter((acao) => {
+      // Aceita qualquer ação que tenha valor
+      const temValor = acao.valorAcao || acao.valor;
+      return temValor;
+    })
+    .reduce((total, acao) => {
+      // Usa valorAcao (campo real do Firebase) ou valor (legado)
+      const valorString = acao.valorAcao || acao.valor;
+
+      // ✅ CORREÇÃO CRÍTICA: Usa parseValorMonetario para strings formatadas
+      // Isso corrige o bug de "200.000,00" → 20.000.000
+      const valor = parseValorMonetario(valorString);
+
+      return total + valor;
+    }, 0);
 }
 
-// ✅ NOVA: Função para validar emenda completa conforme prints
+// ✅ Função para validar emenda completa
 export function validateEmendaCompleta(emenda) {
   const erros = [];
 
-  // Campos obrigatórios conforme prints
+  // Campos obrigatórios
   const camposObrigatorios = [
     "municipio",
     "uf",
