@@ -1,0 +1,96 @@
+# 🔧 CORREÇÃO: Alinhamento dos Campos Emenda e Valor
+
+## 🎯 PROBLEMA
+Campo "Valor da Despesa" (verde) está mais alto que "Emenda Vinculada" (azul)
+
+## 📊 CAUSA
+Paddings diferentes:
+- Emenda: `12px 15px` (altura ~42px)
+- Valor: `14px 16px` (altura ~50px)
+
+---
+
+## ✅ SOLUÇÃO RECOMENDADA: Igualar Padding
+
+### 📍 Arquivo: `src/components/DespesaFormBasicFields.jsx`
+### 🔍 Localização: Objeto de estilos `emendaInfoBox`
+
+### ANTES (DESALINHADO):
+```javascript
+emendaInfoBox: {
+  padding: "12px 15px", // ❌ Diferente
+  backgroundColor: "#e8f4f8",
+  border: "2px solid #3498db",
+  borderRadius: "8px",
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+}
+```
+
+### DEPOIS (ALINHADO):
+```javascript
+emendaInfoBox: {
+  padding: "14px 16px", // ✅ IGUAL ao inputValor
+  backgroundColor: "#e8f4f8",
+  border: "2px solid #3498db",
+  borderRadius: "8px",
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+}
+```
+
+---
+
+## 🧪 RESULTADO ESPERADO
+
+Ambos os campos terão:
+- ✅ Mesma altura (~50px)
+- ✅ Mesmo padding vertical (14px)
+- ✅ Alinhamento perfeito no grid
+- ✅ Aparência profissional
+
+---
+
+## 🎨 VISUAL ANTES/DEPOIS
+
+### ANTES:
+```
+┌─────────────────────────┐  ┌──────────────────────────┐
+│ 30460003 - ANDRE FUFUCA │  │                          │
+│                         │  │       2.699,11           │ ← Mais alto
+└─────────────────────────┘  │                          │
+                             └──────────────────────────┘
+```
+
+### DEPOIS:
+```
+┌─────────────────────────┐  ┌──────────────────────────┐
+│                         │  │                          │
+│ 30460003 - ANDRE FUFUCA │  │       2.699,11           │ ← Alinhados!
+│                         │  │                          │
+└─────────────────────────┘  └──────────────────────────┘
+```
+
+---
+
+## 📝 RESUMO DA MUDANÇA
+
+**Trocar UMA linha:**
+
+```javascript
+// De:
+padding: "12px 15px",
+
+// Para:
+padding: "14px 16px",
+```
+
+**Local:** Estilo `emendaInfoBox` no arquivo `DespesaFormBasicFields.jsx`
+
+---
+
+## ✅ PRONTO!
+
+Após aplicar, ambos os campos ficarão perfeitamente alinhados! 🎯
