@@ -9,39 +9,14 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // ✅ Função para calcular execução real - CORRIGIDA COM METAS
+  // ✅ Função para calcular execução real - APENAS DESPESAS
   const calcularExecucao = (emenda) => {
     // Buscar valor total da emenda (estrutura real do Firebase)
     const valorRecurso = emenda.valorRecurso || emenda.valor || 0;
 
-    // ✅ NOVO: Usar valorExecutado já calculado (despesas + metas) OU calcular se necessário
-    let valorExecutado = emenda.valorExecutado || 0;
-
-    // Se ainda não calculado, calcular baseado no saldo
-    if (!valorExecutado && emenda.saldoDisponivel !== undefined) {
-      const saldoAtual = emenda.saldoDisponivel || 0;
-      valorExecutado = Math.max(0, valorRecurso - saldoAtual);
-    }
-
-    // ✅ FALLBACK: Se ainda zerado, tentar calcular das metas diretamente
-    if (
-      valorExecutado === 0 &&
-      emenda.acoesServicos &&
-      emenda.acoesServicos.length > 0
-    ) {
-      valorExecutado = emenda.acoesServicos.reduce((sum, meta) => {
-        if (meta.tipoMeta === "Quantitativa" && meta.valorAcao) {
-          const valorMeta = parseFloat(
-            meta.valorAcao
-              .replace(/[R$\s]/g, "")
-              .replace(/\./g, "")
-              .replace(",", "."),
-          );
-          return sum + valorMeta;
-        }
-        return sum;
-      }, 0);
-    }
+    // ✅ CORREÇÃO: Usar APENAS valorExecutado do Firebase (calculado em Emendas.jsx)
+    // NÃO confundir metas planejadas com despesas executadas!
+    const valorExecutado = emenda.valorExecutado || 0;
 
     if (valorRecurso === 0) {
       return { percentual: 0, texto: "0,0% (R$ 0,00)" };
@@ -83,17 +58,14 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     );
   };
 
-  // ✅ Função para calcular status real - MELHORADA COM METAS
+  // ✅ Função para calcular status real - BASEADO APENAS EM DESPESAS
   const calcularStatus = (emenda) => {
     const execucao = calcularExecucao(emenda);
     const percentual = execucao.percentual;
 
-    // ✅ NOVO: Verificar se há metas quantitativas OU despesas
+    // ✅ CORREÇÃO: Verificar APENAS despesas executadas
     const temDespesas = emenda.totalDespesas > 0;
-    const temMetas =
-      emenda.acoesServicos &&
-      emenda.acoesServicos.some((meta) => meta.tipoMeta === "Quantitativa");
-    const temExecucao = temDespesas || temMetas;
+    const temExecucao = temDespesas;
 
     // Verificar datas para determinar status mais preciso (estrutura Firebase)
     const hoje = new Date();
@@ -170,15 +142,6 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
         status: "Pendente",
         cor: "#ffc107",
         icone: "⏳",
-      };
-    }
-
-    // ✅ NOVO: Se tem metas mas sem percentual, considerar "Em Planejamento"
-    if (temMetas && percentual === 0) {
-      return {
-        status: "Em Planejamento",
-        cor: "#6f42c1",
-        icone: "📋",
       };
     }
 
