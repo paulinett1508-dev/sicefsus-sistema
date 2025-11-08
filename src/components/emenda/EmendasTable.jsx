@@ -85,7 +85,17 @@ const EmendasTable = ({
     return (
       <tr key={emenda.id} style={styles.tableRow}>
         <td style={styles.td}>
-          <strong style={styles.numeroEmenda}>{emenda.numero}</strong>
+          <div style={styles.emendaCell}>
+            <strong style={styles.numeroEmenda}>{emenda.numero}</strong>
+            {emenda.criadaEm && (
+              <small style={styles.emendaData}>
+                Criada:{" "}
+                {new Date(
+                  emenda.criadaEm.seconds * 1000
+                ).toLocaleDateString("pt-BR")}
+              </small>
+            )}
+          </div>
         </td>
         <td style={styles.td}>
           <div style={styles.parlamentarInfo}>
@@ -276,6 +286,18 @@ const styles = {
     color: "#007bff",
     fontSize: "14px",
     fontWeight: "600",
+  },
+
+  emendaCell: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+
+  emendaData: {
+    fontSize: "11px",
+    color: "#6c757d",
+    fontWeight: "400",
   },
 
   parlamentarInfo: {
