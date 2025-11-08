@@ -1,10 +1,11 @@
 // EmendasTable.jsx - CORRIGIDO
 // ✅ BUG CORRIGIDO: Removida soma incorreta de acoesServicos como despesas
 // ✅ Cálculo baseado APENAS em dados reais: valorRecurso - saldoDisponivel
+// ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas) - Redundantes
 
 import React, { useState, useMemo } from "react";
 
-const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
+const EmendasTable = ({ emendas, onEdit, onDelete }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
@@ -41,29 +42,8 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
     };
   };
 
-  const renderIconeDespesas = (emenda) => {
-    const temDespesas = emenda.totalDespesas > 0;
-
-    return (
-      <button
-        onClick={() => onDespesas(emenda)}
-        style={{
-          ...styles.actionButton,
-          backgroundColor: temDespesas ? "#4A90E2" : "#cccccc",
-          cursor: temDespesas ? "pointer" : "not-allowed",
-          opacity: temDespesas ? 1 : 0.5,
-        }}
-        disabled={!temDespesas}
-        title={
-          temDespesas
-            ? `Ver ${emenda.totalDespesas} despesa(s)`
-            : "Nenhuma despesa cadastrada"
-        }
-      >
-        💰 {emenda.totalDespesas || 0}
-      </button>
-    );
-  };
+  // ❌ REMOVIDO: Função renderIconeDespesas (botão 💰)
+  // Motivo: Redundante com botão de Editar que já dá acesso às despesas
 
   // ✅ CORRIGIDO: Função para calcular status (agora sem considerar metas legadas)
   const calcularStatus = (emenda) => {
@@ -455,20 +435,12 @@ const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
                 <td style={{ ...styles.td, textAlign: "center" }}>
                   <div style={styles.actionsCell}>
                     <button
-                      onClick={() => onView(emenda)}
-                      style={styles.actionButton}
-                      title="Visualizar emenda"
-                    >
-                      👁️
-                    </button>
-                    <button
                       onClick={() => onEdit(emenda)}
                       style={styles.actionButton}
                       title="Editar emenda"
                     >
                       ✏️
                     </button>
-                    {renderIconeDespesas(emenda)}
                     <button
                       onClick={() => onDelete(emenda.id)}
                       style={{

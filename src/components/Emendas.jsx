@@ -3,7 +3,7 @@
 // ✅ REMOVIDO: Metas não são contabilizadas como execução
 // ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
 // 🔧 CORREÇÃO: Versão dinâmica integrada com versionControl.js
-// 🔧 FIX: Adicionadas props onView e onDespesas para EmendasTable
+// ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas) - Redundantes
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,7 +25,7 @@ import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
 // Função auxiliar para parsear valores monetários (ex: R$ 1.000,50 para 1000.50)
 const parseValorMonetario = (valor) => {
-  if (typeof valor !== 'string') {
+  if (typeof valor !== "string") {
     valor = String(valor);
   }
   // Remove todos os caracteres que não são dígitos ou ponto decimal
@@ -34,7 +34,6 @@ const parseValorMonetario = (valor) => {
   const valorFloat = parseFloat(valorLimpo);
   return isNaN(valorFloat) ? 0 : valorFloat;
 };
-
 
 const Emendas = () => {
   const navigate = useNavigate();
@@ -239,16 +238,8 @@ const Emendas = () => {
     navigate(`/emendas/${emenda.id}/editar`);
   };
 
-  const handleVisualizar = (emenda) => {
-    console.log("👁️ Visualizando emenda:", emenda.id);
-    navigate(`/emendas/${emenda.id}`);
-  };
-
-  // ✅ NOVO: Handler para visualizar despesas da emenda
-  const handleVerDespesas = (emenda) => {
-    console.log("💰 Visualizando despesas da emenda:", emenda.id);
-    navigate(`/emendas/${emenda.id}`, { state: { activeTab: "despesas" } });
-  };
+  // ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas)
+  // Motivo: Redundante com botão de Editar
 
   // ✅ NOVO: Handler para abrir modal de exclusão
   const handleDeletar = (emendaParam) => {
@@ -548,9 +539,7 @@ const Emendas = () => {
           totalEmendas={emendas.length}
           loading={false}
           onEdit={handleEditar}
-          onView={handleVisualizar}
           onDelete={handleDeletar}
-          onDespesas={handleVerDespesas}
           userRole={userRole}
         />
       )}

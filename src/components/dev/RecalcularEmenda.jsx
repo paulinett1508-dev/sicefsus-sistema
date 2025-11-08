@@ -42,12 +42,15 @@ function RecalcularEmenda() {
         const despesasSnapshot = await getDocs(despesasQuery);
         const despesas = despesasSnapshot.docs.map((doc) => doc.data());
 
+        // ✅ CORREÇÃO: Usar (emenda.valor || emenda.valorTotal)
+        const valorTotal = emenda.valor || emenda.valorTotal || 0;
+
         // Calcular valores reais
         const valorExecutadoReal = despesas.reduce(
           (sum, d) => sum + (d.valor || 0),
           0,
         );
-        const saldoReal = emenda.valorTotal - valorExecutadoReal;
+        const saldoReal = valorTotal - valorExecutadoReal;
 
         // Verificar discrepância
         const diferencaExecutado = Math.abs(
@@ -91,6 +94,9 @@ function RecalcularEmenda() {
   };
 
   const selecionarEmenda = (emenda) => {
+    // ✅ CORREÇÃO: Usar (emenda.valor || emenda.valorTotal)
+    const valorTotal = emenda.valor || emenda.valorTotal || 0;
+
     setPreview({
       emenda,
       despesas: emenda.despesas,
@@ -103,7 +109,7 @@ function RecalcularEmenda() {
         valorExecutado: emenda.valorExecutadoReal,
         saldoDisponivel: emenda.saldoReal,
         percentualExecutado:
-          (emenda.valorExecutadoReal / emenda.valorTotal) * 100,
+          valorTotal > 0 ? (emenda.valorExecutadoReal / valorTotal) * 100 : 0,
       },
     });
     setSucesso(false);
@@ -125,10 +131,14 @@ function RecalcularEmenda() {
     setLoadingRecalculo(true);
 
     try {
+      // ✅ CORREÇÃO: Arredondar para 2 casas decimais
       await updateDoc(doc(db, "emendas", preview.emenda.id), {
-        valorExecutado: preview.valoresCalculados.valorExecutado,
-        saldoDisponivel: preview.valoresCalculados.saldoDisponivel,
-        percentualExecutado: preview.valoresCalculados.percentualExecutado,
+        valorExecutado:
+          Math.round(preview.valoresCalculados.valorExecutado * 100) / 100,
+        saldoDisponivel:
+          Math.round(preview.valoresCalculados.saldoDisponivel * 100) / 100,
+        percentualExecutado:
+          Math.round(preview.valoresCalculados.percentualExecutado * 100) / 100,
         atualizadoEm: new Date(),
       });
 
@@ -260,7 +270,7 @@ function RecalcularEmenda() {
                 <div className="info-item">
                   <span className="label">Valor Total:</span>
                   <span className="valor">
-                    {formatarMoeda(emenda.valorTotal)}
+                    {formatarMoeda(emenda.valor || emenda.valorTotal)}
                   </span>
                 </div>
                 <div className="info-item">
@@ -314,7 +324,9 @@ function RecalcularEmenda() {
               </p>
               <p>
                 <strong>Valor Total:</strong>{" "}
-                {formatarMoeda(preview.emenda.valorTotal)}
+                {formatarMoeda(
+                  preview.emenda.valor || preview.emenda.valorTotal,
+                )}
               </p>
               <p>
                 <strong>Despesas:</strong> {preview.despesas} cadastrada(s)
