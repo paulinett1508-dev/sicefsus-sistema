@@ -2,7 +2,10 @@
 // PROBLEMA: Saldo mostrando R$ 0,00 quando deveria mostrar R$ 73.000,00
 
 import React, { useMemo } from "react";
-import { formatarMoeda } from "../utils/formatters";
+import {
+  formatarMoedaDisplay,
+  parseValorMonetario,
+} from "../utils/formatters";
 
 const ContextPanel = ({ emenda, despesas = [] }) => {
   // 🚨 CORREÇÃO PRINCIPAL: Cálculo do saldo com debug e validações
@@ -61,8 +64,8 @@ const ContextPanel = ({ emenda, despesas = [] }) => {
 
       // Converter string para number se necessário
       if (typeof valorDespesa === "string") {
-        const valorLimpo = valorDespesa.replace(/[R$\s.,]/g, "");
-        valorDespesa = parseFloat(valorLimpo) || 0;
+        // Utiliza a função parseValorMonetario para um parsing correto
+        valorDespesa = parseValorMonetario(valorDespesa) || 0;
       } else {
         valorDespesa = Number(valorDespesa) || 0;
       }
@@ -130,7 +133,7 @@ const ContextPanel = ({ emenda, despesas = [] }) => {
         <div className="metric-card bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="text-sm font-medium text-blue-700">Valor Total</div>
           <div className="text-xl font-bold text-blue-800">
-            {formatarMoeda(valorTotal)}
+            {formatarMoedaDisplay(valorTotal)}
           </div>
         </div>
 
@@ -140,7 +143,7 @@ const ContextPanel = ({ emenda, despesas = [] }) => {
             Valor Executado
           </div>
           <div className="text-xl font-bold text-orange-800">
-            {formatarMoeda(valorExecutado)}
+            {formatarMoedaDisplay(valorExecutado)}
           </div>
           <div className="text-xs text-orange-600 mt-1">
             {despesas.length} despesa(s) cadastrada(s)
@@ -177,7 +180,7 @@ const ContextPanel = ({ emenda, despesas = [] }) => {
                   : "text-red-800"
             }`}
           >
-            {formatarMoeda(saldoRestante)}
+            {formatarMoedaDisplay(saldoRestante)}
           </div>
           {saldoRestante <= 0 && (
             <div className="text-xs text-red-600 mt-1">
