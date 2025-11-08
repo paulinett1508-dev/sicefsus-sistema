@@ -50,6 +50,19 @@ const DespesaFormBasicFields = ({
   const valorNum = parseValorMonetario(formData.valor);
   const valorExcedeSaldo = valorNum > saldoDisponivel;
 
+  // ✅ DEBUG TEMPORÁRIO - REMOVER DEPOIS
+  React.useEffect(() => {
+    console.log("🔍 DEBUG SALDO:", {
+      saldoBase: emendaInfo?.saldoDisponivel,
+      valorAnteriorDespesa: despesaParaEditar?.valor,
+      saldoParaValidacao: saldoDisponivel,
+      valorAtual: valorNum,
+      excedeSaldo: valorExcedeSaldo,
+      despesaId: despesaParaEditar?.id,
+      modoEdicao: !!despesaParaEditar?.id
+    });
+  }, [emendaInfo, despesaParaEditar, saldoDisponivel, valorNum, valorExcedeSaldo]);
+
   // ✅ NOVO: Notificar componente pai quando valor excede saldo
   React.useEffect(() => {
     if (onValorExcedeSaldo) {
