@@ -1,17 +1,8 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
 // ✅ SIMPLIFICADO 06/11/2025: Apenas emenda e valor
 
-import React, { useState, useEffect } from "react"; // Importei useEffect
-
-const parseValorMonetario = (valor) => {
-  if (typeof valor === "number") return valor;
-  if (!valor) return 0;
-  const valorLimpo = String(valor)
-    .replace(/[^\d,]/g, "")
-    .replace(",", ".");
-  const numero = parseFloat(valorLimpo);
-  return isNaN(numero) ? 0 : numero;
-};
+import React, { useState, useEffect } from "react";
+import { parseValorMonetario } from "../../utils/formatters"; // ✅ USA A VERSÃO CORRIGIDA
 
 // Função auxiliar para formatar moeda no input (sem R$)
 const formatarMoedaInput = (valor) => {
