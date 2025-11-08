@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
-import PageNotFound from "./pages/PageNotFound";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import Emendas from "./components/Emendas";
+import Despesas from "./components/Despesas";
+import Relatorios from "./components/Relatorios";
+import Administracao from "./components/Administracao";
+import Sobre from "./components/Sobre";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -84,12 +85,14 @@ function App() {
 
           <div className="main-container">
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="*" element={<PageNotFound />} />
+              <Route path="/emendas" element={<Emendas />} />
+              <Route path="/despesas" element={<Despesas />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/administracao" element={<Administracao />} />
+              <Route path="/sobre" element={<Sobre />} />
+              <Route path="*" element={<Dashboard />} />
             </Routes>
           </div>
         </main>
