@@ -9,36 +9,14 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // ✅ CORREÇÃO DEFINITIVA: Usar APENAS valorExecutado calculado em Emendas.jsx
-  const calcularExecucao = (emenda) => {
-    const valorRecurso = emenda.valorRecurso || emenda.valor || 0;
-    
-    // ✅ USAR APENAS o valorExecutado já calculado (vem de Emendas.jsx)
-    const valorExecutado = emenda.valorExecutado || 0;
-
-    if (valorRecurso === 0) {
-      return { percentual: 0, texto: "0,0% (R$ 0,00)" };
-    }
-
-    const percentual = (valorExecutado / valorRecurso) * 100;
-    const valorFormatado = valorExecutado.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
-
-    return {
-      percentual,
-      texto: `${percentual.toFixed(1)}% (${valorFormatado})`,
-    };
-  };
+  // ✅ REMOVIDO: Função calcularExecucao (valores já vêm calculados de Emendas.jsx)
 
   // ❌ REMOVIDO: Função renderIconeDespesas (botão 💰)
   // Motivo: Redundante com botão de Editar que já dá acesso às despesas
 
-  // ✅ CORRIGIDO: Função para calcular status (agora sem considerar metas legadas)
+  // ✅ CORRIGIDO: Função para calcular status (usa percentualExecutado já calculado)
   const calcularStatus = (emenda) => {
-    const execucao = calcularExecucao(emenda);
-    const percentual = execucao.percentual;
+    const percentual = emenda.percentualExecutado || 0;
 
     // ✅ Verificar se há despesas REAIS (não metas)
     const temDespesas = emenda.totalDespesas > 0;
@@ -176,8 +154,8 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
           bValue = b.valorRecurso || b.valor || 0;
           break;
         case "execucao":
-          aValue = calcularExecucao(a).percentual;
-          bValue = calcularExecucao(b).percentual;
+          aValue = a.percentualExecutado || 0;
+          bValue = b.percentualExecutado || 0;
           break;
         case "status":
           aValue = calcularStatus(a).status;
@@ -311,16 +289,7 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
         </thead>
         <tbody>
           {emendasOrdenadas.map((emenda, index) => {
-            const execucao = calcularExecucao(emenda);
             const status = calcularStatus(emenda);
-            const valorFormatado = (
-              emenda.valorRecurso ||
-              emenda.valor ||
-              0
-            ).toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            });
 
             return (
               <tr
@@ -376,7 +345,12 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                 {/* VALOR TOTAL */}
                 <td style={styles.td}>
                   <div style={styles.valorCell}>
-                    <strong style={styles.valorTexto}>{valorFormatado}</strong>
+                    <strong style={styles.valorTexto}>
+                      {(emenda.valorRecurso || emenda.valor || emenda.valorTotal || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </strong>
                     <small style={styles.saldoTexto}>
                       Saldo:{" "}
                       {(emenda.saldoDisponivel || 0).toLocaleString("pt-BR", {
@@ -390,14 +364,21 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                 {/* EXECUÇÃO */}
                 <td style={styles.td}>
                   <div style={styles.execucaoCell}>
-                    <div style={styles.execucaoTexto}>{execucao.texto}</div>
+                    <div style={styles.execucaoTexto}>
+                      {(emenda.valorExecutado || 0).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                      {" "}
+                      ({(emenda.percentualExecutado || 0).toFixed(1)}%)
+                    </div>
                     <div style={styles.progressBarContainer}>
                       <div
                         style={{
                           ...styles.progressBar,
-                          width: `${Math.min(execucao.percentual, 100)}%`,
+                          width: `${Math.min(emenda.percentualExecutado || 0, 100)}%`,
                           backgroundColor: getProgressColor(
-                            execucao.percentual,
+                            emenda.percentualExecutado || 0,
                           ),
                         }}
                       />
