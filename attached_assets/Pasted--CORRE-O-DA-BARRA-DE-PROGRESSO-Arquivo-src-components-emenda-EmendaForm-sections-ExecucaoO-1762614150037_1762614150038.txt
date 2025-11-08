@@ -1,0 +1,105 @@
+# 🎨 CORREÇÃO DA BARRA DE PROGRESSO
+## Arquivo: src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
+
+---
+
+## 📍 LOCALIZAÇÃO: Linhas 465-485
+
+### ❌ CÓDIGO ATUAL (ERRADO):
+
+```javascript
+{/* Progress Bar */}
+<div style={styles.progressSection}>
+  <div style={styles.progressLabel}>
+    <span>Execução</span>
+    <span>{percentualExecucao}%</span>
+  </div>
+  <div style={styles.progressBarContainer}>
+    <div
+      style={{
+        ...styles.progressBar,
+        width: `${Math.min(percentualExecucao, 100)}%`,
+        backgroundColor:
+          percentualExecucao <= 50
+            ? "#28a745"   // Verde até 50%
+            : percentualExecucao <= 80
+              ? "#ffc107"   // Amarelo 50-80%
+              : "#dc3545",  // ❌ Vermelho > 80% (ERRADO!)
+      }}
+    />
+  </div>
+</div>
+```
+
+---
+
+### ✅ CÓDIGO CORRIGIDO:
+
+```javascript
+{/* Progress Bar - Cores inteligentes baseadas no saldo restante */}
+<div style={styles.progressSection}>
+  <div style={styles.progressLabel}>
+    <span>Execução</span>
+    <span>{percentualExecucao}%</span>
+  </div>
+  <div style={styles.progressBarContainer}>
+    <div
+      style={{
+        ...styles.progressBar,
+        width: `${Math.min(percentualExecucao, 100)}%`,
+        backgroundColor:
+          percentualExecucao < 85     // Saldo ≥ 15%
+            ? "#27ae60"  // 🟢 Verde - Execução saudável
+            : percentualExecucao < 95  // Saldo entre 5-15%
+              ? "#f39c12"  // 🟡 Amarelo - Atenção
+              : "#e74c3c",  // 🔴 Vermelho - Saldo crítico < 5%
+      }}
+    />
+  </div>
+</div>
+```
+
+---
+
+## 📊 LÓGICA DE CORES:
+
+| Execução | Saldo Restante | Cor | Significado |
+|----------|----------------|-----|-------------|
+| 0% - 84% | ≥ 16% | 🟢 Verde (#27ae60) | Execução saudável |
+| 85% - 94% | 6% - 15% | 🟡 Amarelo (#f39c12) | Atenção - saldo baixo |
+| 95% - 100% | ≤ 5% | 🔴 Vermelho (#e74c3c) | Crítico - quase esgotado |
+
+---
+
+## 🎯 EXEMPLO NO SEU CASO:
+
+**Situação atual:**
+- Executado: 81%
+- Saldo: 19%
+
+**Resultado:**
+- ✅ Barra: **VERDE** (pois 81% < 85%)
+- ✅ Mensagem visual: Execução está OK, ainda há saldo razoável
+
+---
+
+## 🔧 COMO APLICAR:
+
+1. Abra o arquivo: `src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx`
+2. Localize as **linhas 465-485** (procure por "Progress Bar")
+3. **Substitua** todo o bloco pelo código corrigido acima
+4. Salve o arquivo
+5. Teste abrindo a aba "Execução Orçamentária" de uma emenda
+
+---
+
+## ✅ VALIDAÇÃO:
+
+Após aplicar, a barra deve ficar:
+- 🟢 **Verde** quando executado < 85%
+- 🟡 **Amarela** quando executado entre 85-94%
+- 🔴 **Vermelha** apenas quando executado ≥ 95%
+
+---
+
+**Correção concisa e cirúrgica!** 🎯

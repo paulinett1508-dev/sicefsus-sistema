@@ -1,6 +1,6 @@
 // src/components/despesa/DespesaFormEmendaInfo.jsx
 // ✅ Componente especializado para exibir informações da emenda selecionada
-// ✅ ATUALIZADO 05/11/2025: UX aprimorada com progresso visual e cores semafóricas
+// ✅ ATUALIZADO 08/11/2025: Lógica de cores corrigida (mais realista)
 
 import React from "react";
 
@@ -32,23 +32,26 @@ const DespesaFormEmendaInfo = ({
     valorRecurso > 0 ? (valorExecutado / valorRecurso) * 100 : 0;
   const percentualDisponivel = 100 - percentualExecutado;
 
-  // 🚦 CORES SEMAFÓRICAS BASEADAS NO SALDO
+  // 🚦 CORES SEMAFÓRICAS BASEADAS NO SALDO (LÓGICA CORRIGIDA)
   const getSaldoColor = () => {
-    if (percentualDisponivel > 70) return "#27ae60"; // Verde
-    if (percentualDisponivel > 30) return "#f39c12"; // Amarelo
-    return "#e74c3c"; // Vermelho
+    if (percentualDisponivel >= 15) return "#27ae60"; // Verde - Saldo saudável (≥15%)
+    if (percentualDisponivel >= 5) return "#f39c12"; // Amarelo - Saldo baixo (5-15%)
+    if (percentualDisponivel > 0) return "#e74c3c"; // Vermelho - Saldo crítico (<5%)
+    return "#95a5a6"; // Cinza - Sem saldo
   };
 
   const getSaldoBgColor = () => {
-    if (percentualDisponivel > 70) return "#d4edda";
-    if (percentualDisponivel > 30) return "#fff3cd";
-    return "#f8d7da";
+    if (percentualDisponivel >= 15) return "#d4edda"; // Verde claro
+    if (percentualDisponivel >= 5) return "#fff3cd"; // Amarelo claro
+    if (percentualDisponivel > 0) return "#f8d7da"; // Vermelho claro
+    return "#f0f0f0"; // Cinza claro
   };
 
   const getSaldoIcon = () => {
-    if (percentualDisponivel > 70) return "✅";
-    if (percentualDisponivel > 30) return "⚠️";
-    return "🚨";
+    if (percentualDisponivel >= 15) return "✅"; // Saldo OK
+    if (percentualDisponivel >= 5) return "⚠️"; // Atenção
+    if (percentualDisponivel > 0) return "🚨"; // Crítico
+    return "❌"; // Sem saldo
   };
 
   // 📊 STATUS DA EMENDA
@@ -142,7 +145,7 @@ const DespesaFormEmendaInfo = ({
         </div>
       </div>
 
-      {/* 📝 INFORMAÇÕES DETALHADAS */}
+      {/* 🔍 INFORMAÇÕES DETALHADAS */}
       <div style={styles.detailsGrid}>
         <div style={styles.detailCard}>
           <span style={styles.detailLabel}>👤 Parlamentar</span>
@@ -314,7 +317,7 @@ const styles = {
     color: "#6c757d",
   },
 
-  // 📝 GRID DE DETALHES
+  // 🔍 GRID DE DETALHES
   detailsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",

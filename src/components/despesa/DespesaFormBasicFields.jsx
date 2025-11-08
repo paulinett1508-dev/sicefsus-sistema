@@ -1,7 +1,10 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda e valor
+// ✅ VERSÃO MELHORADA - 08/11/2025
+// ✅ Botão "Limpar" discreto
+// ✅ Campo "Valor" mais compacto e destacado
+// ✅ Lógica de input corrigida
 
-import React, { useState, useEffect } from "react"; // Importei useEffect
+import React, { useState, useEffect } from "react";
 
 const parseValorMonetario = (valor) => {
   if (typeof valor === "number") return valor;
@@ -39,7 +42,7 @@ const DespesaFormBasicFields = ({
   modoVisualizacao = false,
   handleInputChange,
   despesaParaEditar = null,
-  onValorExcedeSaldo, // ✅ NOVA PROP
+  onValorExcedeSaldo,
 }) => {
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
   const [novoValorPendente, setNovoValorPendente] = useState(null);
@@ -69,31 +72,12 @@ const DespesaFormBasicFields = ({
   const valorNum = parseValorMonetario(formData.valor);
   const valorExcedeSaldo = valorNum > saldoDisponivel;
 
-  // ✅ DEBUG TEMPORÁRIO - REMOVER DEPOIS
-  React.useEffect(() => {
-    console.log("🔍 DEBUG SALDO:", {
-      saldoBase: emendaInfo?.saldoDisponivel,
-      valorAnteriorDespesa: despesaParaEditar?.valor,
-      saldoParaValidacao: saldoDisponivel,
-      valorAtual: valorNum,
-      excedeSaldo: valorExcedeSaldo,
-      despesaId: despesaParaEditar?.id,
-      modoEdicao: !!despesaParaEditar?.id,
-    });
-  }, [
-    emendaInfo,
-    despesaParaEditar,
-    saldoDisponivel,
-    valorNum,
-    valorExcedeSaldo,
-  ]);
-
-  // ✅ SOLUÇÃO CORRETA: Chamar callback diretamente sem causar loop
+  // ✅ Callback de saldo
   React.useEffect(() => {
     if (onValorExcedeSaldo) {
       onValorExcedeSaldo(valorExcedeSaldo);
     }
-  }, [valorExcedeSaldo]); // ✅ SÓ valorExcedeSaldo na dependência
+  }, [valorExcedeSaldo]);
 
   const formatarValorMonetario = (valor) => {
     if (!valor && valor !== 0) return "";
@@ -107,6 +91,7 @@ const DespesaFormBasicFields = ({
     });
   };
 
+  // ✅ LÓGICA SIMPLIFICADA E CORRIGIDA
   const handleValorChange = (e) => {
     const valorDigitado = e.target.value;
 
@@ -120,7 +105,7 @@ const DespesaFormBasicFields = ({
       return;
     }
 
-    // Remove tudo exceto números
+    // Remove TUDO exceto números
     let apenasNumeros = valorDigitado.replace(/\D/g, "");
 
     if (apenasNumeros === "") {
@@ -128,19 +113,8 @@ const DespesaFormBasicFields = ({
       return;
     }
 
-    // ✅ CORREÇÃO: Construir número com centavos
-    // Sempre considera os últimos 2 dígitos como centavos
-    let numeroValor;
-    if (apenasNumeros.length === 1) {
-      numeroValor = parseFloat(apenasNumeros) / 100; // "5" = 0.05
-    } else if (apenasNumeros.length === 2) {
-      numeroValor = parseFloat(apenasNumeros) / 100; // "50" = 0.50
-    } else {
-      // 3 ou mais dígitos: últimos 2 são centavos
-      const inteiros = apenasNumeros.slice(0, -2);
-      const centavos = apenasNumeros.slice(-2);
-      numeroValor = parseFloat(inteiros + "." + centavos); // "2699" + "11" = 2699.11
-    }
+    // ✅ LÓGICA SIMPLES: Sempre divide por 100 para tratar como centavos
+    const numeroValor = parseFloat(apenasNumeros) / 100;
 
     // Formata para exibição
     const valorFormatado = formatarValorMonetario(numeroValor);
@@ -212,26 +186,25 @@ const DespesaFormBasicFields = ({
     }
   }, [emendaInfo?.saldoDisponivel, despesaParaEditar]);
 
-  // Formatar valor ao carregar despesa para edição
+  // ✅ FORMATAR VALOR AO CARREGAR DESPESA PARA EDIÇÃO
   useEffect(() => {
-    if (despesaParaEditar && formData.valor) {
-      const valorAtual = formData.valor;
-      // Se o valor não está formatado (é apenas número), formatar
-      if (!valorAtual.includes(",") && !valorAtual.includes(".")) {
-        const valorFormatado = formatarMoedaInput(valorAtual);
-        if (valorFormatado !== valorAtual) {
-          handleInputChange({
-            target: {
-              name: "valor",
-              value: valorFormatado,
-            },
-          });
-        }
+    if (despesaParaEditar?.valor) {
+      const valorNum = parseValorMonetario(despesaParaEditar.valor);
+      const valorFormatado = formatarValorMonetario(valorNum);
+
+      // Só atualiza se o valor atual for diferente
+      const valorAtualFormatado = formatarValorMonetario(formData.valor);
+      if (valorFormatado !== valorAtualFormatado) {
+        handleInputChange({
+          target: {
+            name: "valor",
+            value: valorFormatado,
+          },
+        });
       }
     }
-  }, [despesaParaEditar, formData.valor]);
+  }, [despesaParaEditar?.valor]);
 
-  // Callback para validação de saldo
   const styles = {
     fieldset: {
       border: "2px solid #154360",
@@ -261,14 +234,11 @@ const DespesaFormBasicFields = ({
     },
     formGridRow: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr",
+      gridTemplateColumns: "1.2fr 0.8fr", // ✅ Emenda maior, Valor menor
       gap: "20px",
+      alignItems: "start",
     },
-    formGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-    },
+    formGroup: { display: "flex", flexDirection: "column", gap: "8px" },
     formGroupFull: {
       display: "flex",
       flexDirection: "column",
@@ -276,132 +246,107 @@ const DespesaFormBasicFields = ({
       gridColumn: "1 / -1",
     },
     label: {
-      fontWeight: "bold",
-      color: "#333",
+      fontWeight: "600",
+      color: "#2c3e50",
       fontSize: "14px",
       display: "flex",
       alignItems: "center",
-      gap: "5px",
+      gap: "6px",
     },
-    requiredMark: {
-      color: "#dc3545",
-      fontSize: "16px",
-    },
+    requiredMark: { color: "#e74c3c", fontSize: "16px", marginLeft: "2px" },
     input: {
       padding: "12px",
-      paddingRight: "90px",
-      border: "2px solid #dee2e6",
-      borderRadius: "6px",
-      fontSize: "14px",
-      transition: "border-color 0.3s ease",
+      border: "2px solid #bdc3c7",
+      borderRadius: "8px",
+      fontSize: "15px",
+      transition: "all 0.3s ease",
+      fontFamily: "inherit",
       backgroundColor: "white",
-      boxSizing: "border-box",
-      width: "100%",
-    },
-    inputCompact: {
-      padding: "8px 12px",
-      border: "2px solid #dee2e6",
-      borderRadius: "6px",
-      fontSize: "14px",
-      transition: "border-color 0.3s ease",
-      backgroundColor: "white",
-      boxSizing: "border-box",
-      maxWidth: "280px",
-    },
-    textarea: {
-      padding: "12px",
-      border: "2px solid #dee2e6",
-      borderRadius: "6px",
-      fontSize: "14px",
-      transition: "border-color 0.3s ease",
-      backgroundColor: "white",
-      boxSizing: "border-box",
-      minHeight: "100px",
-      resize: "vertical",
-      fontFamily: "Arial, sans-serif",
     },
     inputError: {
       padding: "12px",
-      paddingRight: "90px",
-      border: "2px solid #dc3545",
-      borderRadius: "6px",
-      fontSize: "14px",
-      transition: "border-color 0.3s ease",
+      border: "2px solid #e74c3c",
+      borderRadius: "8px",
+      fontSize: "15px",
+      transition: "all 0.3s ease",
+      fontFamily: "inherit",
       backgroundColor: "#fff5f5",
-      boxSizing: "border-box",
-      width: "100%",
     },
-    inputErrorCompact: {
-      padding: "8px 12px",
-      border: "2px solid #dc3545",
-      borderRadius: "6px",
-      fontSize: "14px",
-      transition: "border-color 0.3s ease",
-      backgroundColor: "#fff5f5",
-      boxSizing: "border-box",
-      maxWidth: "280px",
+    // ✅ CAMPO VALOR DESTACADO
+    inputValor: {
+      padding: "14px 16px",
+      border: "2px solid #27ae60",
+      borderRadius: "8px",
+      fontSize: "18px", // ✅ Fonte maior
+      fontWeight: "600", // ✅ Negrito
+      transition: "all 0.3s ease",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      backgroundColor: "#f0fdf4",
+      color: "#065f46",
+      textAlign: "right", // ✅ Alinhado à direita (padrão para valores)
+      letterSpacing: "0.5px",
     },
-    textareaError: {
-      padding: "12px",
-      border: "2px solid #dc3545",
-      borderRadius: "6px",
+    inputValorError: {
+      padding: "14px 16px",
+      border: "2px solid #e74c3c",
+      borderRadius: "8px",
+      fontSize: "18px",
+      fontWeight: "600",
+      transition: "all 0.3s ease",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      backgroundColor: "#fef2f2",
+      color: "#991b1b",
+      textAlign: "right",
+      letterSpacing: "0.5px",
+    },
+    emendaInfoBox: {
+      padding: "12px 15px",
+      backgroundColor: "#e8f4f8",
+      border: "2px solid #3498db",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+    emendaText: {
+      color: "#2c3e50",
+      fontWeight: "500",
       fontSize: "14px",
-      transition: "border-color 0.3s ease",
-      backgroundColor: "#fff5f5",
-      boxSizing: "border-box",
-      minHeight: "100px",
-      resize: "vertical",
-      fontFamily: "Arial, sans-serif",
+    },
+    errorText: {
+      color: "#e74c3c",
+      fontSize: "13px",
+      marginTop: "4px",
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
     },
     inputWrapper: {
       position: "relative",
       display: "flex",
+      gap: "10px",
       alignItems: "center",
-      width: "100%",
     },
+    // ✅ BOTÃO LIMPAR DISCRETO
     clearButton: {
-      position: "absolute",
-      right: "10px",
-      top: "50%",
-      transform: "translateY(-50%)",
-      background: "#f8f9fa",
-      border: "1px solid #dee2e6",
-      borderRadius: "4px",
-      color: "#dc3545",
-      fontSize: "12px",
+      padding: "8px 12px",
+      backgroundColor: "#f8f9fa", // ✅ Cinza claro
+      color: "#6c757d", // ✅ Texto cinza
+      border: "1px solid #dee2e6", // ✅ Borda sutil
+      borderRadius: "6px",
+      fontSize: "12px", // ✅ Menor
+      fontWeight: "500",
       cursor: "pointer",
-      padding: "6px 10px",
-      lineHeight: "1",
+      transition: "all 0.2s",
+      whiteSpace: "nowrap",
       display: "flex",
       alignItems: "center",
       gap: "4px",
-      transition: "all 0.2s",
-      zIndex: 10,
     },
     clearButtonHover: {
-      background: "#dc3545",
-      color: "white",
-      borderColor: "#dc3545",
-    },
-    errorText: {
-      color: "#dc3545",
-      fontSize: "13px",
-      marginTop: "4px",
-      fontWeight: "500",
-    },
-    emendaInfoBox: {
-      padding: "12px",
-      border: "2px solid #17a2b8",
-      borderRadius: "6px",
-      backgroundColor: "#e7f5f7",
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-    },
-    emendaText: {
-      fontSize: "14px",
-      color: "#154360",
-      fontWeight: "600",
+      backgroundColor: "#e9ecef",
+      borderColor: "#adb5bd",
+      transform: "scale(1.02)",
     },
     modalOverlay: {
       position: "fixed",
@@ -409,11 +354,12 @@ const DespesaFormBasicFields = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backgroundColor: "rgba(0, 0, 0, 0.6)",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       zIndex: 10000,
+      backdropFilter: "blur(4px)",
     },
     modalContent: {
       backgroundColor: "white",
@@ -530,9 +476,9 @@ const DespesaFormBasicFields = ({
           Dados Básicos da Despesa
         </legend>
         <div style={styles.formGrid}>
-          {/* ✅ EMENDA E VALOR NA MESMA LINHA */}
+          {/* ✅ EMENDA E VALOR NA MESMA LINHA (proporções ajustadas) */}
           <div style={styles.formGridRow}>
-            {/* EMENDA VINCULADA (READ-ONLY) */}
+            {/* EMENDA VINCULADA (READ-ONLY) - 60% */}
             <div style={styles.formGroup}>
               <label style={styles.label}>
                 📌 Emenda Vinculada
@@ -546,7 +492,7 @@ const DespesaFormBasicFields = ({
               )}
             </div>
 
-            {/* VALOR DA DESPESA (SEMPRE EDITÁVEL) */}
+            {/* VALOR DA DESPESA (EDITÁVEL) - 40% */}
             <div style={styles.formGroup}>
               <label style={styles.label}>
                 💰 Valor da Despesa
@@ -555,19 +501,13 @@ const DespesaFormBasicFields = ({
               <input
                 type="text"
                 name="valor"
-                value={
-                  formData.valor
-                    ? formatarMoedaInput(
-                        String(parseValorMonetario(formData.valor)),
-                      )
-                    : ""
-                }
+                value={formData.valor || ""}
                 onChange={handleValorChange}
                 onBlur={handleValorBlur}
                 style={
                   valorExcedeSaldo || errors.valor
-                    ? styles.inputError
-                    : styles.input
+                    ? styles.inputValorError
+                    : styles.inputValor
                 }
                 placeholder="R$ 0,00"
                 disabled={false}
@@ -586,7 +526,7 @@ const DespesaFormBasicFields = ({
             </div>
           </div>
 
-          {/* ✅ DISCRIMINAÇÃO - LARGURA TOTAL OCUPANDO 2 COLUNAS */}
+          {/* ✅ DISCRIMINAÇÃO - LARGURA TOTAL */}
           <div style={styles.formGroupFull}>
             <label style={styles.label}>📝 Discriminação da Despesa</label>
             <div style={styles.inputWrapper}>
@@ -616,7 +556,8 @@ const DespesaFormBasicFields = ({
                   }}
                   title="Limpar campo"
                 >
-                  🗑️ Limpar
+                  <span style={{ fontSize: "10px" }}>✕</span>
+                  <span>Limpar</span>
                 </button>
               )}
             </div>
