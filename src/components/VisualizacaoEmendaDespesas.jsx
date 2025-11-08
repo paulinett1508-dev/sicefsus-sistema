@@ -647,6 +647,12 @@ const VisualizacaoEmendaDespesas = ({
                             {formatDate(despesa.data)} •{" "}
                             {despesa.naturezaDespesa}
                           </div>
+                          <button
+                            onClick={() => handleEditarDespesa(despesa)}
+                            style={styles.editButton} // Assuming a style for the edit button
+                          >
+                            ✏️ Editar
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -1270,6 +1276,19 @@ const styles = {
     fontSize: "16px",
     color: "#6c757d",
     margin: "0 0 24px 0",
+  },
+
+  editButton: {
+    padding: "8px 12px",
+    backgroundColor: "#ffc107",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "12px",
+    fontWeight: "500",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    marginTop: "10px",
   },
 
   // ==================================
