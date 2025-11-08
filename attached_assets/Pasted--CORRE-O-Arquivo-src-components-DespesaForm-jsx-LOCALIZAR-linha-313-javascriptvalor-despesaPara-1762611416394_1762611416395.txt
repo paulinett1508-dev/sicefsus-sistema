@@ -1,0 +1,83 @@
+✅ CORREÇÃO
+Arquivo: src/components/DespesaForm.jsx
+LOCALIZAR linha 313:
+javascriptvalor: despesaParaEditar.valor != null ? String(despesaParaEditar.valor) : "",
+SUBSTITUIR POR:
+javascriptvalor: despesaParaEditar.valor != null 
+  ? formatarMoedaInput(String(despesaParaEditar.valor)) 
+  : "",
+
+📄 TRECHO COMPLETO CORRIGIDO
+Linhas 303-362 (useEffect que carrega despesa):
+javascript// ✅ CARREGAR DADOS DA DESPESA PARA EDITAR
+useEffect(() => {
+  if (despesaParaEditar) {
+    console.log("🔍 DEBUG: Carregando Despesa para Edição");
+    console.log("despesaParaEditar recebida:", despesaParaEditar);
+
+    const dadosCarregados = {
+      emendaId: despesaParaEditar.emendaId || "",
+      discriminacao: despesaParaEditar.discriminacao || "",
+      fornecedor: despesaParaEditar.fornecedor || "",
+      valor: despesaParaEditar.valor != null 
+        ? formatarMoedaInput(String(despesaParaEditar.valor))  // ✅ CORREÇÃO AQUI
+        : "",
+      numeroEmpenho: despesaParaEditar.numeroEmpenho || "",
+      numeroNota: despesaParaEditar.numeroNota || "",
+      dataEmpenho: convertToDateString(despesaParaEditar.dataEmpenho),
+      dataLiquidacao: convertToDateString(despesaParaEditar.dataLiquidacao),
+      dataPagamento: convertToDateString(despesaParaEditar.dataPagamento),
+      acao: despesaParaEditar.acao || "",
+      classificacaoFuncional: despesaParaEditar.classificacaoFuncional || "",
+      numeroContrato: despesaParaEditar.numeroContrato || "",
+      categoria: despesaParaEditar.categoria || "",
+      descricao: despesaParaEditar.descricao || "",
+      observacoes: despesaParaEditar.observacoes || "",
+      status: despesaParaEditar.status || "PLANEJADA",
+      statusPagamento: despesaParaEditar.statusPagamento || "pendente",
+      naturezaDespesa:
+        despesaParaEditar.naturezaDespesa ||
+        "3.3.9.0.30 – Material de Despesa",
+      elementoDespesa:
+        despesaParaEditar.elementoDespesa ||
+        "3.3.90.30.99 - Outros Materiais de Consumo",
+      fonteRecurso: despesaParaEditar.fonteRecurso || "",
+      programaTrabalho: despesaParaEditar.programaTrabalho || "",
+      planoInterno: despesaParaEditar.planoInterno || "",
+      contrapartida: despesaParaEditar.contrapartida || 0,
+      percentualExecucao: despesaParaEditar.percentualExecucao || 0,
+      etapaExecucao: despesaParaEditar.etapaExecucao || "",
+      coordenadasGeograficas: despesaParaEditar.coordenadasGeograficas || "",
+      populacaoBeneficiada: despesaParaEditar.populacaoBeneficiada || "",
+      impactoSocial: despesaParaEditar.impactoSocial || "",
+      cnpjFornecedor: despesaParaEditar.cnpjFornecedor || "",
+      nomeFantasia: despesaParaEditar.nomeFantasia || "",
+      enderecoFornecedor: despesaParaEditar.enderecoFornecedor || "",
+      cidadeUf: despesaParaEditar.cidadeUf || "",
+      cep: despesaParaEditar.cep || "",
+      telefoneFornecedor: despesaParaEditar.telefoneFornecedor || "",
+      emailFornecedor: despesaParaEditar.emailFornecedor || "",
+      situacaoCadastral: despesaParaEditar.situacaoCadastral || "",
+      dataUltimaAtualizacao:
+        convertToDateString(despesaParaEditar.dataUltimaAtualizacao) ||
+        new Date().toISOString().split("T")[0],
+    };
+
+    console.log("Campos carregados para o formulário:", dadosCarregados);
+    setFormData(dadosCarregados);
+
+    if (despesaParaEditar.emendaId) {
+      carregarDadosEmenda(despesaParaEditar.emendaId);
+    }
+  }
+}, [despesaParaEditar, carregarDadosEmenda]);
+
+🔧 ADICIONAR IMPORT NECESSÁRIO
+No início do arquivo DespesaForm.jsx, verificar se já existe a importação de formatarMoedaInput:
+Linha 62-66 (imports):
+javascriptimport {
+  useMoedaFormatting,
+  parseValorMonetario,
+  formatarMoedaDisplay,
+  formatarMoedaInput,  // ✅ ADICIONAR SE NÃO EXISTIR
+} from "../utils/formatters";
