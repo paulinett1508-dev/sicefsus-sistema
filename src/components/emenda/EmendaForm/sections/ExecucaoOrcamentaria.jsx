@@ -621,10 +621,19 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
           <DespesasList
             despesas={despesasExecutadas}
-            onEditar={handleEditarDespesa}
-            onVisualizar={handleVisualizarDespesa}
-            onRemover={handleRemoverDespesa}
-            onExecutar={handleExecutarDespesa}
+            emendas={[
+              {
+                id: emendaId,
+                valor: stats.valorEmenda,
+                saldoDisponivel: stats.saldoDisponivel,
+                ...formData,
+              },
+            ]}
+            onEdit={handleEditarDespesa}
+            onView={handleVisualizarDespesa}
+            onDelete={handleRemoverDespesa}
+            onRecarregar={carregarDespesas}
+            usuario={usuario}
           />
         </div>
       )}
