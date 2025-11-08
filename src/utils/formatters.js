@@ -62,10 +62,17 @@ export const formatarMoedaInput = (valor) => {
 export const parseValorMonetario = (valorFormatado) => {
   if (!valorFormatado) return 0;
 
-  const numero = valorFormatado
-    .toString()
-    .replace(/[^\d,]/g, "") // Remove tudo exceto números e vírgula
-    .replace(",", "."); // Troca vírgula por ponto
+  // Se já é número, retorna direto
+  if (typeof valorFormatado === 'number') return valorFormatado;
+
+  const valorString = valorFormatado.toString();
+  
+  // Formato brasileiro: 1.234.567,89 ou 1234,89
+  // Remove pontos (separador de milhar) e substitui vírgula (decimal) por ponto
+  const numero = valorString
+    .replace(/\./g, "")     // Remove pontos (separador de milhar)
+    .replace(",", ".")      // Substitui vírgula (decimal) por ponto
+    .replace(/[^\d.-]/g, ""); // Remove qualquer outro caractere não numérico
 
   return parseFloat(numero) || 0;
 };
