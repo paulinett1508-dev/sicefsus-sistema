@@ -5,7 +5,7 @@ import DiagnosticoSistema from "../components/dev/DiagnosticoSistema";
 import "./FerramentasDev.css";
 
 function FerramentasDev() {
-  const { user: usuario } = useUser();
+  const { usuario } = useUser();
   const [abaAtiva, setAbaAtiva] = useState("recalcular");
 
   // Verificação de SuperAdmin
@@ -18,11 +18,6 @@ function FerramentasDev() {
         <div className="icone-alerta">🚫</div>
         <h2>Acesso Negado</h2>
         <p>Esta área é restrita a Super Administradores.</p>
-        <p className="detalhe-acesso">
-          {usuario?.tipo === "admin"
-            ? "Você é um Admin, mas não possui permissões de SuperAdmin."
-            : "Apenas administradores com privilégios especiais podem acessar esta área."}
-        </p>
       </div>
     );
   }
@@ -43,19 +38,7 @@ function FerramentasDev() {
         <span className="icone-aviso">⚠️</span>
         <div>
           <strong>Área Técnica:</strong> Ferramentas avançadas para diagnóstico
-          e correção do sistema. Todas as ações são registradas em log e podem
-          impactar o sistema. Use com cautela.
-        </div>
-      </div>
-
-      {/* Info do Usuário */}
-      <div className="info-usuario">
-        <div className="avatar">
-          {usuario?.nome?.charAt(0).toUpperCase() || "S"}
-        </div>
-        <div className="usuario-dados">
-          <strong>{usuario?.nome || "SuperAdmin"}</strong>
-          <span>{usuario?.email}</span>
+          e correção do sistema. Use com cautela.
         </div>
       </div>
 
@@ -65,15 +48,13 @@ function FerramentasDev() {
           className={`aba ${abaAtiva === "recalcular" ? "ativa" : ""}`}
           onClick={() => setAbaAtiva("recalcular")}
         >
-          <span className="aba-icone">🔧</span>
-          <span className="aba-texto">Recalcular Emenda</span>
+          🔧 Recalcular Emenda
         </button>
         <button
           className={`aba ${abaAtiva === "diagnostico" ? "ativa" : ""}`}
           onClick={() => setAbaAtiva("diagnostico")}
         >
-          <span className="aba-icone">🔍</span>
-          <span className="aba-texto">Diagnóstico do Sistema</span>
+          🔍 Diagnóstico do Sistema
         </button>
       </div>
 
@@ -81,14 +62,6 @@ function FerramentasDev() {
       <div className="conteudo-ferramenta">
         {abaAtiva === "recalcular" && <RecalcularEmenda />}
         {abaAtiva === "diagnostico" && <DiagnosticoSistema />}
-      </div>
-
-      {/* Footer */}
-      <div className="footer-dev">
-        <span className="footer-texto">
-          👑 SuperAdmin: {usuario?.nome} • Sessão iniciada em:{" "}
-          {new Date().toLocaleString("pt-BR")}
-        </span>
       </div>
     </div>
   );

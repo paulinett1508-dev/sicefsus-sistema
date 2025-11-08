@@ -3,6 +3,20 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { formatarMoeda } from "../../utils/formatters";
 
+// ✅ FUNÇÃO CRÍTICA: Parse monetário correto para formato BR
+const parseValorMonetario = (valor) => {
+  if (typeof valor === "number") return valor;
+  if (typeof valor !== "string") valor = String(valor);
+
+  const valorLimpo = valor
+    .replace(/[R$\s]/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
+
+  const valorFloat = parseFloat(valorLimpo);
+  return isNaN(valorFloat) ? 0 : valorFloat;
+};
+
 function DiagnosticoSistema() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState(null);
@@ -30,32 +44,42 @@ function DiagnosticoSistema() {
         const despesasSnapshot = await getDocs(despesasQuery);
         const despesas = despesasSnapshot.docs.map((doc) => doc.data());
 
-        // Calcular valores corretos
-        const valorExecutadoReal = despesas.reduce(
-          (sum, d) => sum + (d.valor || 0),
-          0,
+        // ✅ CORREÇÃO: Parse monetário correto
+        const valorTotal = parseValorMonetario(
+          emenda.valor || emenda.valorTotal || emenda.valorRecurso || 0,
         );
-        const saldoReal = emenda.valorTotal - valorExecutadoReal;
+
+        // ✅ CORREÇÃO: Parse individual de cada despesa
+        const valorExecutadoReal = despesas.reduce((sum, d) => {
+          const valorDespesa = parseValorMonetario(d.valor || 0);
+          return sum + valorDespesa;
+        }, 0);
+
+        const saldoReal = valorTotal - valorExecutadoReal;
+
+        // ✅ CORREÇÃO: Parse dos valores no banco
+        const valorExecutadoBanco = parseValorMonetario(
+          emenda.valorExecutado || 0,
+        );
+        const saldoBanco = parseValorMonetario(emenda.saldoDisponivel || 0);
 
         // Verificar discrepâncias
         const diferencaExecutado = Math.abs(
-          valorExecutadoReal - (emenda.valorExecutado || 0),
+          valorExecutadoReal - valorExecutadoBanco,
         );
-        const diferencaSaldo = Math.abs(
-          saldoReal - (emenda.saldoDisponivel || 0),
-        );
+        const diferencaSaldo = Math.abs(saldoReal - saldoBanco);
 
         if (diferencaExecutado > 1 || diferencaSaldo > 1) {
           problemas.push({
             id: emenda.id,
-            numero: emenda.numeroEmenda,
+            numero: emenda.numeroEmenda || emenda.numero,
             municipio: emenda.municipio,
             uf: emenda.uf,
-            valorTotal: emenda.valorTotal,
+            valorTotal: valorTotal, // ✅ Já parseado
             despesas: despesas.length,
-            executadoBanco: emenda.valorExecutado || 0,
+            executadoBanco: valorExecutadoBanco, // ✅ Já parseado
             executadoReal: valorExecutadoReal,
-            saldoBanco: emenda.saldoDisponivel || 0,
+            saldoBanco: saldoBanco, // ✅ Já parseado
             saldoReal: saldoReal,
             diferencaExecutado: diferencaExecutado,
             diferencaSaldo: diferencaSaldo,

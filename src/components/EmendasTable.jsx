@@ -303,12 +303,14 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                       {emenda.numero || emenda.numeroEmenda || "N/A"}
                     </strong>
                     <small style={styles.emendaData}>
-                      Criada:{" "}
-                      {emenda.criadaEm
-                        ? new Date(
+                      {emenda.criadaEm && (
+                        <>
+                          Criada:{" "}
+                          {new Date(
                             emenda.criadaEm.seconds * 1000,
-                          ).toLocaleDateString("pt-BR")
-                        : "N/A"}
+                          ).toLocaleDateString("pt-BR")}
+                        </>
+                      )}
                     </small>
                   </div>
                 </td>
@@ -346,7 +348,12 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                 <td style={styles.td}>
                   <div style={styles.valorCell}>
                     <strong style={styles.valorTexto}>
-                      {(emenda.valorRecurso || emenda.valor || emenda.valorTotal || 0).toLocaleString("pt-BR", {
+                      {(
+                        emenda.valorRecurso ||
+                        emenda.valor ||
+                        emenda.valorTotal ||
+                        0
+                      ).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
@@ -368,8 +375,7 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                       {(emenda.valorExecutado || 0).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
-                      })}
-                      {" "}
+                      })}{" "}
                       ({(emenda.percentualExecutado || 0).toFixed(1)}%)
                     </div>
                     <div style={styles.progressBarContainer}>
