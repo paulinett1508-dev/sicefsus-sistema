@@ -9,22 +9,12 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
   const [sortField, setSortField] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
 
-  // ✅ CORRIGIDO: Função para calcular execução real SEM usar acoesServicos
+  // ✅ CORREÇÃO DEFINITIVA: Usar APENAS valorExecutado calculado em Emendas.jsx
   const calcularExecucao = (emenda) => {
-    // Buscar valor total da emenda
     const valorRecurso = emenda.valorRecurso || emenda.valor || 0;
-
-    // ✅ MÉTODO 1: Usar valorExecutado já calculado (se existir)
-    let valorExecutado = emenda.valorExecutado || 0;
-
-    // ✅ MÉTODO 2: Calcular baseado no saldo disponível (mais confiável)
-    if (emenda.saldoDisponivel !== undefined) {
-      const saldoAtual = emenda.saldoDisponivel || 0;
-      valorExecutado = Math.max(0, valorRecurso - saldoAtual);
-    }
-
-    // ❌ REMOVIDO: Bloco que somava acoesServicos incorretamente
-    // O campo acoesServicos contém METAS PLANEJADAS, não despesas executadas!
+    
+    // ✅ USAR APENAS o valorExecutado já calculado (vem de Emendas.jsx)
+    const valorExecutado = emenda.valorExecutado || 0;
 
     if (valorRecurso === 0) {
       return { percentual: 0, texto: "0,0% (R$ 0,00)" };
