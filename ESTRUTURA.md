@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 07/11/2025, 10:40
+**📅 Gerado em:** 08/11/2025, 20:22
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,25 +8,25 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 58
-- **📄 Total de Arquivos:** 292
-- **⚛️ Componentes React:** 114
+- **📁 Total de Diretórios:** 65
+- **📄 Total de Arquivos:** 328
+- **⚛️ Componentes React:** 116
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 126 arquivos
-- **.js**: 50 arquivos
-- **.json**: 23 arquivos
-- **.txt**: 19 arquivos
-- **.png**: 17 arquivos
+- **.jsx**: 129 arquivos
+- **.js**: 55 arquivos
+- **.txt**: 31 arquivos
+- **.json**: 29 arquivos
+- **.png**: 21 arquivos
+- **.bin**: 13 arquivos
 - **sem extensão**: 10 arquivos
-- **.bin**: 9 arquivos
+- **.cjs**: 9 arquivos
+- **.css**: 8 arquivos
 - **.md**: 7 arquivos
-- **.cjs**: 7 arquivos
-- **.css**: 7 arquivos
 
 ---
 
@@ -50,6 +50,11 @@
 │   │   ├── 📁 nix/
 │   │   │   ├── 📄 dotreplitenv.json (1 linhas)
 │   │   │   └── 📄 env.json (1 linhas)
+│   │   ├── 📁 security-scan/
+│   │   │   ├── 📄 dependencyAudit.json (1 linhas)
+│   │   │   ├── 📄 maliciousFile.json (1 linhas)
+│   │   │   └── 📄 sast.json (1 linhas)
+│   │   ├── 📁 transfers/
 │   │   ├── 📄 __replit_disk_meta.json (2 linhas)
 │   │   ├── 📄 modules.stamp (1 linhas)
 │   │   └── 📄 toolchain.json (1 linhas)
@@ -67,12 +72,15 @@
 ├── 📁 .config/
 │   ├── 📁 configstore/
 │   │   ├── 📄 firebase-tools.json (15 linhas)
-│   │   └── 📄 update-notifier-firebase-tools.json (4 linhas)
-│   └── 📁 npm/
-│       └── 📁 node_global/
-│           ├── 📁 bin/
-│           │   └── 📄 firebase (20 linhas)
-│           └── 📁 lib/
+│   │   └── 📄 update-notifier-firebase-tools.json (10 linhas)
+│   ├── 📁 npm/
+│   │   └── 📁 node_global/
+│   │       ├── 📁 bin/
+│   │       │   └── 📄 firebase (20 linhas)
+│   │       └── 📁 lib/
+│   └── 📁 replit/
+│       └── 📁 .semgrep/
+│           └── 📄 semgrep_rules.json (51879 linhas)
 ├── 📁 .local/
 │   └── 📁 state/
 │       └── 📁 replit/
@@ -81,14 +89,18 @@
 │               │   └── 📄 filesystem_state.json (1 linhas)
 │               ├── 📄 .agent_state_29097d0abfe80ac0d2c78ef71d12dd40cfe09932.bin (121 linhas)
 │               ├── 📄 .agent_state_4fcb05e7ec96b62fa73d63f3c1080a415c7e186a.bin (133 linhas)
+│               ├── 📄 .agent_state_56189630406c3c522acd57f9d04d3cf43fbaf539.bin (133 linhas)
+│               ├── 📄 .agent_state_5d109c8b17fbb8d1513cceed890088b7ac7a44d7.bin (131 linhas)
 │               ├── 📄 .agent_state_6e574c77b377a0ae49ad2569b9d3e346febd772f.bin (127 linhas)
+│               ├── 📄 .agent_state_a0c46daa11676e46ee8a22f0788375cb7fc22795.bin (129 linhas)
 │               ├── 📄 .agent_state_b1dc7e61a73988d2bc40a887dbb22b82597c4e4e.bin (119 linhas)
 │               ├── 📄 .agent_state_bd5cfefc43fb48e1deb214e9c28e672b94b15a71.bin (125 linhas)
 │               ├── 📄 .agent_state_e93134fdb34ced64d37a3fd0dcacd730f612b249.bin (120 linhas)
+│               ├── 📄 .agent_state_ebe61cfabaf47cfadb00e8ad2ebfdd07c683f753.bin (135 linhas)
 │               ├── 📄 .agent_state_f8c575371db8049dae6307a0b091cfeb1e71293a.bin (124 linhas)
-│               ├── 📄 .agent_state_main.bin (115 linhas)
+│               ├── 📄 .agent_state_main.bin (120 linhas)
 │               ├── 📄 .latest.json (1 linhas)
-│               └── 📄 repl_state.bin (5 linhas)
+│               └── 📄 repl_state.bin (3 linhas)
 ├── 📁 .upm/
 │   └── 📄 store.json (2 linhas)
 ├── 📁 api/
@@ -111,12 +123,24 @@
 │   ├── 📄 image_1762476019645.png (163 linhas)
 │   ├── 📄 image_1762476253560.png (79 linhas)
 │   ├── 📄 image_1762476499466.png (129 linhas)
+│   ├── 📄 image_1762595352373.png (944 linhas)
+│   ├── 📄 image_1762627962804.png (354 linhas)
+│   ├── 📄 image_1762628223251.png (147 linhas)
+│   ├── 📄 image_1762629082750.png (19 linhas)
 │   ├── 📄 Pasted--ALTERA-ES-PONTUAIS-DespesaForm-jsx-ARQUIVO-src-components-DespesaForm-jsx-AL-1762268688285_1762268688286.txt (106 linhas)
+│   ├── 📄 Pasted--ARQUIVOS-CORRIGIDOS-BUG-DE-FORMATA-O-MONET-RIA-RESUMO-DA-CORRE-O-Problema--1762548394530_1762548394532.txt (1381 linhas)
 │   ├── 📄 Pasted--C-DIGO-FINAL-PARA-index-jsx-Arquivo-src-comp-1762435448618_1762435448619.txt (85 linhas)
 │   ├── 📄 Pasted--CORRE-ES-ExecucaoOrcamentaria--1762110876597_1762110876597.txt (211 linhas)
 │   ├── 📄 Pasted--CORRE-ES-NO-ExecucaoOrcamentaria-jsx-ALTERA-ES-NECESS-RIAS-1-Bot-es-da-tabela--1762121604958_1762121604959.txt (104 linhas)
 │   ├── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
+│   ├── 📄 Pasted--CORRE-ES-PONTUAIS-DespesaForm-jsx-Arquivo-src-components-DespesaForm-jsx--1762561839006_1762561839007.txt (129 linhas)
+│   ├── 📄 Pasted--CORRE-O-Alinhamento-dos-Campos-Emenda-e-Valor-PROBLEMA-Campo-Valor-da-Despesa-ve-1762631881453_1762631881453.txt (96 linhas)
+│   ├── 📄 Pasted--CORRE-O-Arquivo-src-components-DespesaForm-jsx-LOCALIZAR-linha-313-javascriptvalor-despesaPara-1762611416394_1762611416395.txt (83 linhas)
+│   ├── 📄 Pasted--CORRE-O-Bloquear-Salvamento-com-Saldo-Insuficiente-PROBLEMA-IDENTIFICADO-O-sistem-1762559935067_1762559935069.txt (170 linhas)
+│   ├── 📄 Pasted--CORRE-O-Bug-de-Parsing-de-Valor-na-Edi-o-de-Despesa-PROBLEMA-Ao-editar-uma-despesa-1762631369424_1762631369425.txt (119 linhas)
 │   ├── 📄 Pasted--CORRE-O-CR-TICA-EmendasTable-jsx-Props-Incompat-veis-PROBLEMA-IDENTIFICADO-O-Eme-1762123288681_1762123288682.txt (89 linhas)
+│   ├── 📄 Pasted--CORRE-O-DA-BARRA-DE-PROGRESSO-Arquivo-src-components-emenda-EmendaForm-sections-ExecucaoO-1762614150037_1762614150038.txt (105 linhas)
+│   ├── 📄 Pasted--CORRE-O-DEFINITIVA-Valida-o-de-Saldo-com-Tratamento-de-Casos-Extremos-PROBLEMAS-IDE-1762561172926_1762561172928.txt (262 linhas)
 │   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762439838809_1762439838810.txt (102 linhas)
 │   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762440451620_1762440451621.txt (102 linhas)
 │   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762441450693_1762441450694.txt (102 linhas)
@@ -127,6 +151,10 @@
 │   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762455428368_1762455428370.txt (1596 linhas)
 │   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762459074181_1762459074181.txt (99 linhas)
 │   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762474870927_1762474870928.txt (102 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599092236_1762599092237.txt (78 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599199548_1762599199549.txt (78 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599280044_1762599280044.txt (65 linhas)
+│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762625675673_1762625675674.txt (99 linhas)
 │   └── 📄 Pasted-vejo-o-problema-Quando-a-despesa-carregada-para-edi-o-o-useEffect-preenche-o-formData-emenda-1762453946864_1762453946865.txt (146 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
@@ -141,6 +169,11 @@
 ├── 📁 docs/
 │   ├── 📄 estrutura-atual.md (9 linhas)
 │   └── 📄 GUIA_DESENVOLVEDOR.md (245 linhas)
+├── 📁 firebase-migration/
+│   ├── 📄 migrate.cjs (94 linhas)
+│   ├── 📄 prod-credentials.json (14 linhas)
+│   ├── 📄 test-connection.cjs (52 linhas)
+│   └── 📄 test-credentials.json (14 linhas)
 ├── 📁 functions/
 │   ├── 📄 index.js (1 linhas)
 │   └── 📄 package.json (1 linhas)
@@ -185,16 +218,19 @@
 │   │   │   ├── 📄 DespesaFormActions.jsx (79 linhas)
 │   │   │   ├── 📄 DespesaFormAdvancedFields.jsx (269 linhas)
 │   │   │   ├── 📄 DespesaFormBanners.jsx (119 linhas)
-│   │   │   ├── 📄 DespesaFormBasicFields.jsx (581 linhas)
+│   │   │   ├── 📄 DespesaFormBasicFields.jsx (636 linhas)
 │   │   │   ├── 📄 DespesaFormClassificacaoFuncional.jsx (892 linhas)
 │   │   │   ├── 📄 DespesaFormDateFields.jsx (439 linhas)
-│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (349 linhas)
+│   │   │   ├── 📄 DespesaFormEmendaInfo.jsx (352 linhas)
 │   │   │   ├── 📄 DespesaFormEmpenhoFields.jsx (160 linhas)
 │   │   │   ├── 📄 DespesaFormHeader.jsx (95 linhas)
 │   │   │   ├── 📄 DespesaFormOrcamentoFields.jsx (311 linhas)
 │   │   │   ├── 📄 DespesasBanner.jsx (136 linhas)
 │   │   │   ├── 📄 DespesasListHeader.jsx (273 linhas)
 │   │   │   └── 📄 DespesasStats.jsx (92 linhas)
+│   │   ├── 📁 dev/
+│   │   │   ├── 📄 DiagnosticoSistema.jsx (368 linhas)
+│   │   │   └── 📄 RecalcularEmenda.jsx (429 linhas)
 │   │   ├── 📁 emenda/
 │   │   │   ├── 📁 EmendaDetail/
 │   │   │   │   ├── 📁 components/
@@ -202,7 +238,7 @@
 │   │   │   │   │   ├── 📄 EmendaKPIs.jsx (71 linhas)
 │   │   │   │   │   └── 📄 EmendaTabs.jsx (31 linhas)
 │   │   │   │   ├── 📁 sections/
-│   │   │   │   │   ├── 📄 DespesasTab.jsx (95 linhas)
+│   │   │   │   │   ├── 📄 DespesasTab.jsx (94 linhas)
 │   │   │   │   │   ├── 📄 NovaDespesaTab.jsx (120 linhas)
 │   │   │   │   │   └── 📄 VisaoGeralTab.jsx (183 linhas)
 │   │   │   │   ├── 📁 styles/
@@ -225,7 +261,7 @@
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
 │   │   │   │   │   ├── 📄 DespesasTab.jsx (451 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1186 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1081 linhas)
 │   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (708 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
@@ -234,7 +270,7 @@
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
 │   │   │   ├── 📄 EmendasStats.jsx (108 linhas)
-│   │   │   ├── 📄 EmendasTable.jsx (470 linhas)
+│   │   │   ├── 📄 EmendasTable.jsx (487 linhas)
 │   │   │   └── 📄 ModalExclusaoEmenda.jsx (224 linhas)
 │   │   ├── 📁 relatorios/
 │   │   │   ├── 📁 geradores/
@@ -255,20 +291,20 @@
 │   │   ├── 📄 CNPJInput.jsx (269 linhas)
 │   │   ├── 📄 CNPJTester.jsx (146 linhas)
 │   │   ├── 📄 ConfirmationModal.jsx (207 linhas)
-│   │   ├── 📄 ContextPanel.jsx (237 linhas)
+│   │   ├── 📄 ContextPanel.jsx (236 linhas)
 │   │   ├── 📄 Dashboard.jsx (572 linhas)
 │   │   ├── 📄 DataManager.jsx (977 linhas)
 │   │   ├── 📄 DebugPanel.jsx (92 linhas)
 │   │   ├── 📄 DebugUsuarios.jsx (236 linhas)
-│   │   ├── 📄 DespesaForm.jsx (720 linhas)
+│   │   ├── 📄 DespesaForm.jsx (727 linhas)
 │   │   ├── 📄 Despesas.jsx (314 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
 │   │   ├── 📄 DespesasList.jsx (656 linhas)
 │   │   ├── 📄 DespesasTable.jsx (1230 linhas)
-│   │   ├── 📄 Emendas.jsx (806 linhas)
+│   │   ├── 📄 Emendas.jsx (799 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
-│   │   ├── 📄 EmendasTable.jsx (806 linhas)
+│   │   ├── 📄 EmendasTable.jsx (651 linhas)
 │   │   ├── 📄 EnvironmentIndicator.jsx (119 linhas)
 │   │   ├── 📄 ErrorBoundary.jsx (186 linhas)
 │   │   ├── 📄 FirebaseError.jsx (118 linhas)
@@ -289,7 +325,7 @@
 │   │   ├── 📄 SaldoEmendaWidget.jsx (328 linhas)
 │   │   ├── 📄 SaldoNaturezaWidget (copy).jsx (434 linhas)
 │   │   ├── 📄 SaldoNaturezaWidget.jsx (500 linhas)
-│   │   ├── 📄 Sidebar.jsx (481 linhas)
+│   │   ├── 📄 Sidebar.jsx (578 linhas)
 │   │   ├── 📄 Sobre.jsx (617 linhas)
 │   │   ├── 📄 TemporaryBanner.jsx (148 linhas)
 │   │   ├── 📄 TesteUsuarios.jsx (144 linhas)
@@ -298,19 +334,19 @@
 │   │   ├── 📄 UpdateNotification.jsx (185 linhas)
 │   │   ├── 📄 UserForm.jsx (1251 linhas)
 │   │   ├── 📄 UsersTable.jsx (417 linhas)
-│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1303 linhas)
+│   │   ├── 📄 VisualizacaoEmendaDespesas.jsx (1299 linhas)
 │   │   └── 📄 WorkflowManager.jsx (685 linhas)
 │   ├── 📁 config/
 │   │   └── 📄 constants.js (125 linhas)
 │   ├── 📁 context/
 │   │   └── 📄 UserContext.jsx (196 linhas)
 │   ├── 📁 firebase/
-│   │   └── 📄 firebaseConfig.js (67 linhas)
+│   │   └── 📄 firebaseConfig.js (86 linhas)
 │   ├── 📁 hooks/
-│   │   ├── 📄 useDashboardData.js (310 linhas)
+│   │   ├── 📄 useDashboardData.js (314 linhas)
 │   │   ├── 📄 useDespesasCalculos.js (92 linhas)
 │   │   ├── 📄 useDespesasData.js (150 linhas)
-│   │   ├── 📄 useEmendaDespesa.js (662 linhas)
+│   │   ├── 📄 useEmendaDespesa.js (669 linhas)
 │   │   ├── 📄 useEmendaFormData.js (883 linhas)
 │   │   ├── 📄 useEmendaFormNavigation.js (164 linhas)
 │   │   ├── 📄 useNavigationProtection.js (351 linhas)
@@ -324,6 +360,9 @@
 │   │   ├── 📄 logo-sicefsus.png (4595 linhas)
 │   │   ├── 📄 logo-sopro.jpeg (125 linhas)
 │   │   └── 📄 logoaraujoinfo.png (334 linhas)
+│   ├── 📁 pages/
+│   │   ├── 📄 FerramentasDev.css (1207 linhas)
+│   │   └── 📄 FerramentasDev.jsx (71 linhas)
 │   ├── 📁 services/
 │   │   ├── 📄 auditService.js (420 linhas)
 │   │   ├── 📄 createAdminUser.js (146 linhas)
@@ -341,9 +380,9 @@
 │   │   ├── 📄 DisableConsole.jsx (299 linhas)
 │   │   ├── 📄 errorHandlers.js (164 linhas)
 │   │   ├── 📄 exportImport.js (1 linhas)
-│   │   ├── 📄 firebaseCollections.js (340 linhas)
+│   │   ├── 📄 firebaseCollections.js (369 linhas)
 │   │   ├── 📄 firebaseHelpers.js (50 linhas)
-│   │   ├── 📄 formatters.js (181 linhas)
+│   │   ├── 📄 formatters.js (188 linhas)
 │   │   ├── 📄 formStyles.js (677 linhas)
 │   │   ├── 📄 municipiosCache.js (265 linhas)
 │   │   ├── 📄 pdfHelpers.js (184 linhas)
@@ -354,7 +393,7 @@
 │   │   └── 📄 versionControl.js (333 linhas)
 │   ├── 📄 App (copy).jsx (794 linhas)
 │   ├── 📄 App.css (454 linhas)
-│   ├── 📄 App.jsx (794 linhas)
+│   ├── 📄 App.jsx (747 linhas)
 │   └── 📄 index.jsx (18 linhas)
 ├── 📄 .env (25 linhas)
 ├── 📄 .env.backup (25 linhas)
@@ -365,19 +404,23 @@
 ├── 📄 .gitignore (130 linhas)
 ├── 📄 .replit (72 linhas)
 ├── 📄 backup_original.jsx (1682 linhas)
+├── 📄 backup-emenda.js (114 linhas)
 ├── 📄 check-env.cjs (63 linhas)
 ├── 📄 check-estrutura.cjs (437 linhas)
 ├── 📄 comandos basicos.txt (91 linhas)
 ├── 📄 ESTRUTURA_DESPESAS.md (487 linhas)
-├── 📄 ESTRUTURA_EMENDAS.md (1053 linhas)
-├── 📄 ESTRUTURA.md (2632 linhas)
-├── 📄 firebase-debug.log (18 linhas)
+├── 📄 ESTRUTURA_EMENDAS.md (1072 linhas)
 ├── 📄 firebase.json (1 linhas)
 ├── 📄 generate-version.js (69 linhas)
 ├── 📄 index.html (38 linhas)
-├── 📄 package.json (50 linhas)
+├── 📄 marcar-superadmin.js (108 linhas)
+├── 📄 package.json (52 linhas)
+├── 📄 recalcular-emenda.js (116 linhas)
+├── 📄 recalcular-fixed.js (109 linhas)
+├── 📄 recalcular.js (89 linhas)
 ├── 📄 remove-console-prod.cjs (146 linhas)
 ├── 📄 restore.cjs (45 linhas)
+├── 📄 RESUMO_SISTEMA.md (374 linhas)
 ├── 📄 switch-env.sh (136 linhas)
 ├── 📄 tsconfig.json (21 linhas)
 ├── 📄 vercel.json (19 linhas)
@@ -410,7 +453,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 94 componentes*
+- *...e mais 96 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -746,7 +789,7 @@ return (
 ```
 
 
-#### ⚛️ Componente React `DespesaFormBasicFields.jsx` (581 linhas)
+#### 💻 JavaScript `DespesaFormBasicFields.jsx` (636 linhas)
 
 **Exports:**
 ```javascript
@@ -756,10 +799,10 @@ export default DespesaFormBasicFields;
 **Preview:**
 ```javascript
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda, valor e discriminação
-import React, { useState } from "react";
-const parseValorMonetario = (valor) => {
-if (typeof valor === "number") return valor;
+// ✅ VERSÃO MELHORADA - 08/11/2025
+// ✅ Botão "Limpar" discreto
+// ✅ Campo "Valor" mais compacto e destacado
+// ✅ Lógica de input corrigida
 ```
 
 
@@ -797,7 +840,7 @@ validarDatasDespesaEmenda,
 ```
 
 
-#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (349 linhas)
+#### ⚛️ Componente React `DespesaFormEmendaInfo.jsx` (352 linhas)
 
 **Exports:**
 ```javascript
@@ -808,7 +851,7 @@ export default DespesaFormEmendaInfo;
 ```javascript
 // src/components/despesa/DespesaFormEmendaInfo.jsx
 // ✅ Componente especializado para exibir informações da emenda selecionada
-// ✅ ATUALIZADO 05/11/2025: UX aprimorada com progresso visual e cores semafóricas
+// ✅ ATUALIZADO 08/11/2025: Lógica de cores corrigida (mais realista)
 import React from "react";
 const DespesaFormEmendaInfo = ({
 ```
@@ -916,6 +959,43 @@ loading,
 ```
 
 
+##### 📁 dev/
+
+
+#### ⚛️ Componente React `DiagnosticoSistema.jsx` (368 linhas)
+
+**Exports:**
+```javascript
+export default DiagnosticoSistema;
+```
+
+**Preview:**
+```javascript
+import React, { useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../firebase/firebaseConfig";
+import { formatarMoeda } from "../../utils/formatters";
+// ✅ FUNÇÃO CRÍTICA: Parse monetário correto para formato BR
+```
+
+
+#### ⚛️ Componente React `RecalcularEmenda.jsx` (429 linhas)
+
+**Exports:**
+```javascript
+export default RecalcularEmenda;
+```
+
+**Preview:**
+```javascript
+import React, { useState, useEffect } from "react";
+import {
+doc,
+getDoc,
+updateDoc,
+```
+
+
 ##### 📁 emenda/
 
 
@@ -987,7 +1067,7 @@ return null;
 ```
 
 
-#### ⚛️ Componente React `EmendasTable.jsx` (470 linhas)
+#### ⚛️ Componente React `EmendasTable.jsx` (487 linhas)
 
 **Exports:**
 ```javascript
@@ -1178,7 +1258,7 @@ title,
 ```
 
 
-#### ⚛️ Componente React `ContextPanel.jsx` (237 linhas)
+#### ⚛️ Componente React `ContextPanel.jsx` (236 linhas)
 
 **Exports:**
 ```javascript
@@ -1190,7 +1270,7 @@ export default ContextPanel;
 // 🔧 CORREÇÃO URGENTE: ContextPanel.jsx - Cálculo de Saldo Disponível
 // PROBLEMA: Saldo mostrando R$ 0,00 quando deveria mostrar R$ 73.000,00
 import React, { useMemo } from "react";
-import { formatarMoeda } from "../utils/formatters";
+import { formatarMoedaDisplay, parseValorMonetario } from "../utils/formatters";
 const ContextPanel = ({ emenda, despesas = [] }) => {
 ```
 
@@ -1263,7 +1343,7 @@ const [debugInfo, setDebugInfo] = useState({
 ```
 
 
-#### ⚛️ Componente React `DespesaForm.jsx` (720 linhas)
+#### ⚛️ Componente React `DespesaForm.jsx` (727 linhas)
 
 **Exports:**
 ```javascript
@@ -1348,7 +1428,7 @@ export default function DespesasTable({
 ```
 
 
-#### 💻 JavaScript `Emendas.jsx` (806 linhas)
+#### 💻 JavaScript `Emendas.jsx` (799 linhas)
 
 **Exports:**
 ```javascript
@@ -1399,7 +1479,7 @@ import EmendasListHeader from "./emenda/EmendasListHeader";
 ```
 
 
-#### ⚛️ Componente React `EmendasTable.jsx` (806 linhas)
+#### ⚛️ Componente React `EmendasTable.jsx` (651 linhas)
 
 **Exports:**
 ```javascript
@@ -1408,11 +1488,11 @@ export default EmendasTable;
 
 **Preview:**
 ```javascript
-// EmendasTable.jsx - Com integração para Despesas
-// ✅ Cálculos baseados nos dados reais das emendas + Botão Despesas
-// 🔧 CORREÇÃO: Campo Execução agora calcula corretamente baseado em saldo
+// EmendasTable.jsx - CORRIGIDO
+// ✅ BUG CORRIGIDO: Removida soma incorreta de acoesServicos como despesas
+// ✅ Cálculo baseado APENAS em dados reais: valorRecurso - saldoDisponivel
+// ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas) - Redundantes
 import React, { useState, useMemo } from "react";
-const EmendasTable = ({ emendas, onEdit, onView, onDelete, onDespesas }) => {
 ```
 
 
@@ -1739,7 +1819,7 @@ export default SaldoNaturezaWidget;
 ```
 
 
-#### ⚛️ Componente React `Sidebar.jsx` (481 linhas)
+#### ⚛️ Componente React `Sidebar.jsx` (578 linhas)
 
 **Exports:**
 ```javascript
@@ -1886,7 +1966,7 @@ onEdit,
 ```
 
 
-#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1303 linhas)
+#### ⚛️ Componente React `VisualizacaoEmendaDespesas.jsx` (1299 linhas)
 
 **Exports:**
 ```javascript
@@ -1967,13 +2047,13 @@ import { onAuthStateChanged } from "firebase/auth";
 #### 📁 firebase/
 
 
-#### ⚙️ Configuração `firebaseConfig.js` (67 linhas)
+#### ⚙️ Configuração `firebaseConfig.js` (86 linhas)
 
 **Exports:**
 ```javascript
+export const currentEnvironment = isProduction
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export default app;
 ```
 
 **Preview:**
@@ -1989,7 +2069,7 @@ import { getFirestore } from "firebase/firestore";
 #### 📁 hooks/
 
 
-#### 🎣 Hook React `useDashboardData.js` (310 linhas)
+#### 🎣 Hook React `useDashboardData.js` (314 linhas)
 
 **Exports:**
 ```javascript
@@ -2002,7 +2082,7 @@ export default useDashboardData;
 // 🎯 Hook centralizado para dados do Dashboard
 // ✅ CORREÇÃO: Filtro operador com município + UF
 // ✅ PRESERVADO: Lógica Admin 100% funcional
-import { useState, useEffect } from "react";
+// ✅ CORREÇÃO: parseValorMonetario para cálculos monetários
 ```
 
 
@@ -2040,7 +2120,7 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
 ```
 
 
-#### 🎣 Hook React `useEmendaDespesa.js` (662 linhas)
+#### 🎣 Hook React `useEmendaDespesa.js` (669 linhas)
 
 **Exports:**
 ```javascript
@@ -2218,6 +2298,38 @@ import { getCurrentVersion } from "../utils/versionControl.js";
 
 
 #### 📁 images/
+
+
+#### 📁 pages/
+
+
+#### 🎨 Estilos `FerramentasDev.css` (1207 linhas)
+
+**Preview:**
+```javascript
+/* ========================================
+FERRAMENTAS DEV - ESTILOS GERAIS
+======================================== */
+.ferramentas-dev {
+padding: 20px;
+```
+
+
+#### ⚛️ Componente React `FerramentasDev.jsx` (71 linhas)
+
+**Exports:**
+```javascript
+export default FerramentasDev;
+```
+
+**Preview:**
+```javascript
+import React, { useState } from "react";
+import { useUser } from "../context/UserContext";
+import RecalcularEmenda from "../components/dev/RecalcularEmenda";
+import DiagnosticoSistema from "../components/dev/DiagnosticoSistema";
+import "./FerramentasDev.css";
+```
 
 
 #### 📁 services/
@@ -2438,7 +2550,7 @@ export const handleNetworkError = (error, context = 'Network Operation') => {
 #### 💻 JavaScript `exportImport.js` (1 linhas)
 
 
-#### 💻 JavaScript `firebaseCollections.js` (340 linhas)
+#### 💻 JavaScript `firebaseCollections.js` (369 linhas)
 
 **Exports:**
 ```javascript
@@ -2449,11 +2561,11 @@ export const USER_SCHEMA = {
 
 **Preview:**
 ```javascript
-// src/utils/firebaseCollections.js - ATUALIZADO CONFORME PRINTS
+// src/utils/firebaseCollections.js - CORRIGIDO
+// ✅ BUG CORRIGIDO: parseValorMonetario para strings formatadas "200.000,00"
 // ✅ Sincronizado com os campos mostrados nas imagens
-// ✅ ATUALIZADO 04/11/2025: Separação de status em despesas
+// ✅ ATUALIZADO 08/11/2025: Correção crítica na função calcularValorTotalAcoesServicos
 export const COLLECTIONS = {
-USERS: "usuarios", // Corrigido para usar a coleção correta
 ```
 
 
@@ -2475,7 +2587,7 @@ import { db } from '../firebase/firebaseConfig';
 ```
 
 
-#### 💻 JavaScript `formatters.js` (181 linhas)
+#### 💻 JavaScript `formatters.js` (188 linhas)
 
 **Exports:**
 ```javascript
@@ -2668,7 +2780,7 @@ padding: 0;
 ```
 
 
-#### ⚛️ Componente React `App.jsx` (794 linhas)
+#### ⚛️ Componente React `App.jsx` (747 linhas)
 
 **Exports:**
 ```javascript

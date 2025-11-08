@@ -257,6 +257,7 @@ const DespesaFormBasicFields = ({
     input: {
       padding: "14px 16px",
       height: "54px",
+      width: "100%",
       border: "2px solid #bdc3c7",
       borderRadius: "8px",
       fontSize: "15px",
@@ -268,6 +269,7 @@ const DespesaFormBasicFields = ({
     inputError: {
       padding: "14px 16px",
       height: "54px",
+      width: "100%",
       border: "2px solid #e74c3c",
       borderRadius: "8px",
       fontSize: "15px",
@@ -279,6 +281,7 @@ const DespesaFormBasicFields = ({
     // ✅ CAMPO VALOR DESTACADO
     inputValor: {
       padding: "14px 16px",
+      height: "54px", // ✅ ALTURA FIXA
       border: "2px solid #27ae60",
       borderRadius: "8px",
       fontSize: "18px", // ✅ Fonte maior
@@ -289,9 +292,11 @@ const DespesaFormBasicFields = ({
       color: "#065f46",
       textAlign: "right", // ✅ Alinhado à direita (padrão para valores)
       letterSpacing: "0.5px",
+      boxSizing: "border-box", // ✅ IMPORTANTE!
     },
     inputValorError: {
       padding: "14px 16px",
+      height: "54px", // ✅ ALTURA FIXA
       border: "2px solid #e74c3c",
       borderRadius: "8px",
       fontSize: "18px",
@@ -302,15 +307,18 @@ const DespesaFormBasicFields = ({
       color: "#991b1b",
       textAlign: "right",
       letterSpacing: "0.5px",
+      boxSizing: "border-box", // ✅ IMPORTANTE!
     },
     emendaInfoBox: {
       padding: "14px 16px",
+      height: "54px", // ✅ ALTURA FIXA
       backgroundColor: "#e8f4f8",
       border: "2px solid #3498db",
       borderRadius: "8px",
       display: "flex",
       alignItems: "center",
       gap: "10px",
+      boxSizing: "border-box", // ✅ IMPORTANTE!
     },
     emendaText: {
       color: "#2c3e50",

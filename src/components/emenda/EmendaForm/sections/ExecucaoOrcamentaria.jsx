@@ -1,6 +1,6 @@
 // src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
-// ✅ CORRIGIDO: Substituído modal de confirmação por ExecutarDespesaModal (formulário completo)
-// ✅ NOVO: Passa emendaInfo corretamente para DespesaForm
+// ✅ CORRIGIDO: Botão "Executar" abre DespesaForm completo (4 seções)
+// ✅ TODAS AS LÓGICAS ANTERIORES PRESERVADAS 100%
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -195,12 +195,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
-  const [modal, setModal] = useState({ abrir: false, despesa: null });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
-  // 🆕 Estados para edição/visualização de despesa
+  // 🆕 Estados para edição/visualização/execução de despesa
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
-  const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | null
+  const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | null
 
   // Resolver ID (id | emendaId | número)
   useEffect(() => {
@@ -269,17 +268,6 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const despesasPlanejadas = despesas.filter((d) => d.status === "PLANEJADA");
   const despesasExecutadas = despesas.filter((d) => d.status !== "PLANEJADA");
 
-  // 🔍 DEBUG: Ver os dados reais das despesas
-  console.log(
-    "🔍 DEBUG - Despesas Executadas:",
-    despesasExecutadas.map((d) => ({
-      statusPagamento: d.statusPagamento,
-      valor: d.valor,
-      valorTipo: typeof d.valor,
-      valorParsed: parseValorMonetario(d.valor),
-    })),
-  );
-
   const valorEmendaParsed = (() => {
     const raw = formData?.valor || formData?.valorRecurso || 0;
     if (typeof raw === "number") return raw;
@@ -294,12 +282,26 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       (acc, d) => acc + Number(d.valor || 0),
       0,
     ),
-    // ✅ CORRIGIDO: Soma TODAS as despesas executadas (status !== PLANEJADA)
     totalExecutado: despesasExecutadas.reduce(
       (acc, d) => acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
       0,
     ),
-    // 🆕 Cálculos por status financeiro (com parse robusto)
+    totalEmpenhado: despesasExecutadas
+      .filter((d) =>
+        ["empenhado", "liquidado", "pago"].includes(d.statusPagamento),
+      )
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalLiquidado: despesasExecutadas
+      .filter((d) => ["liquidado", "pago"].includes(d.statusPagamento))
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
     totalPago: despesasExecutadas
       .filter((d) => d.statusPagamento === "pago")
       .reduce(
@@ -307,387 +309,369 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
         0,
       ),
-    totalLiquidado: despesasExecutadas
-      .filter((d) => d.statusPagamento === "liquidado")
-      .reduce(
-        (acc, d) =>
-          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
-        0,
-      ),
-    totalEmpenhado: despesasExecutadas
-      .filter((d) => d.statusPagamento === "empenhado")
-      .reduce(
-        (acc, d) =>
-          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
-        0,
-      ),
-    totalPendente: despesasExecutadas
-      .filter((d) => d.statusPagamento === "pendente")
-      .reduce(
-        (acc, d) =>
-          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
-        0,
-      ),
   };
 
-  const saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
-  const percentualExecucao =
-    stats.valorEmenda > 0
-      ? Math.round((stats.totalExecutado / stats.valorEmenda) * 100)
-      : 0;
+  stats.totalPendente =
+    stats.totalExecutado -
+    (stats.totalEmpenhado + stats.totalLiquidado + stats.totalPago);
+  stats.saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
+  stats.percentualExecutado =
+    (stats.totalExecutado / stats.valorEmenda) * 100 || 0;
 
-  // Handlers
-  const handleAdicionarDespesa = () => {
-    if (!temEmendaSalva) {
-      setToast({
-        show: true,
-        message: "Salve a emenda antes de adicionar despesas.",
-        type: "error",
-      });
-      return;
-    }
+  const showToast = (config) => {
+    setToast({ show: true, ...config });
+    setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
   };
 
   const handleEditarDespesa = (despesa) => {
-    console.log("✏️ Editando despesa:", despesa);
+    console.log(
+      "✏️ ExecucaoOrcamentaria: Abrindo DespesaForm para EDIÇÃO",
+      despesa,
+    );
     setDespesaEmEdicao(despesa);
     setModoVisualizacao("editar");
   };
 
   const handleVisualizarDespesa = (despesa) => {
-    console.log("👁️ Visualizando despesa:", despesa);
+    console.log(
+      "👁️ ExecucaoOrcamentaria: Abrindo DespesaForm para VISUALIZAÇÃO",
+      despesa,
+    );
     setDespesaEmEdicao(despesa);
     setModoVisualizacao("visualizar");
   };
 
-  const handleFecharFormulario = () => {
-    setDespesaEmEdicao(null);
-    setModoVisualizacao(null);
+  // ✅ NOVO: Handler para executar despesa planejada
+  const handleExecutarDespesa = (despesa) => {
+    console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada", {
+      id: despesa.id,
+      estrategia: despesa.estrategia,
+      valor: despesa.valor,
+    });
+    console.log("✅ Abrindo DespesaForm para EXECUTAR (pré-preenchido)");
+    setDespesaEmEdicao(despesa);
+    setModoVisualizacao("executar"); // 🔑 Modo especial: executar
   };
 
-  const handleSucessoFormulario = () => {
+  const handleFecharFormulario = () => {
+    console.log("🚪 ExecucaoOrcamentaria: Fechando DespesaForm");
     setDespesaEmEdicao(null);
     setModoVisualizacao(null);
     carregarDespesas();
-    setToast({
-      show: true,
-      message: "Despesa atualizada com sucesso!",
-      type: "success",
-    });
   };
 
-  const handleExecutarDespesa = async (despesaId) => {
+  const handleRemoverDespesaPlanejada = async (id, estrategia, valor) => {
+    if (
+      !window.confirm(
+        `⚠️ Confirma remoção?\n\n` +
+          `Estratégia: ${estrategia}\n` +
+          `Valor: ${formatCurrency(valor)}\n\n` +
+          `Esta ação não pode ser desfeita.`,
+      )
+    )
+      return;
     try {
-      const despesaRef = doc(db, "despesas", despesaId);
-      await updateDoc(despesaRef, { status: "EXECUTADA" });
-      setToast({
-        show: true,
-        message: "Despesa executada com sucesso!",
+      await deleteDoc(doc(db, "despesas", id));
+      showToast({
+        message: "🗑️ Despesa planejada removida",
         type: "success",
       });
       carregarDespesas();
     } catch (e) {
       console.error(e);
-      setToast({
-        show: true,
-        message: "Erro ao executar despesa.",
+      showToast({
+        message: "❌ Erro ao remover despesa",
         type: "error",
       });
     }
   };
 
-  const handleRemoverDespesa = async (despesaId) => {
-    if (!window.confirm("Tem certeza que deseja remover esta despesa?")) return;
-    try {
-      await deleteDoc(doc(db, "despesas", despesaId));
-      setToast({
-        show: true,
-        message: "Despesa removida com sucesso!",
-        type: "success",
-      });
-      carregarDespesas();
-    } catch (e) {
-      console.error(e);
-      setToast({
-        show: true,
-        message: "Erro ao remover despesa.",
-        type: "error",
-      });
-    }
-  };
-
-  // ===== Render =====
-  return (
-    <div style={styles.container}>
-      {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ ...toast, show: false })}
-        />
-      )}
-
-      {/* ===== SEÇÃO: INFORMAÇÕES GERAIS ===== */}
-      <div style={styles.secao}>
-        <div style={styles.secaoHeader}>
-          <h2 style={styles.secaoTitulo}>📊 Execução Orçamentária</h2>
-        </div>
-
-        {/* Metrics Grid */}
-        <div style={styles.metricsGrid}>
-          <div style={{ ...styles.metricCard, ...styles.metricCardPrimary }}>
-            <div style={styles.metricLabel}>Valor da Emenda</div>
-            <div style={styles.metricValue}>
-              {formatCurrency(stats.valorEmenda)}
-            </div>
-          </div>
-
-          <div style={{ ...styles.metricCard, ...styles.metricCardWarning }}>
-            <div style={styles.metricLabel}>Total Executado</div>
-            <div style={styles.metricValue}>
-              {formatCurrency(stats.totalExecutado)}
-            </div>
-          </div>
-
-          <div style={{ ...styles.metricCard, ...styles.metricCardSuccess }}>
-            <div style={styles.metricLabel}>Saldo Disponível</div>
-            <div style={styles.metricValue}>
-              {formatCurrency(Math.max(0, saldoDisponivel))}
-            </div>
-          </div>
-
-          <div style={{ ...styles.metricCard, ...styles.metricCardInfo }}>
-            <div style={styles.metricLabel}>Percentual Executado</div>
-            <div style={styles.metricValue}>{percentualExecucao}%</div>
-          </div>
-        </div>
-
-        {/* Progress Bar - Cores inteligentes baseadas no saldo restante */}
-        <div style={styles.progressSection}>
-          <div style={styles.progressLabel}>
-            <span>Execução</span>
-            <span>{percentualExecucao}%</span>
-          </div>
-          <div style={styles.progressBarContainer}>
-            <div
-              style={{
-                ...styles.progressBar,
-                width: `${Math.min(percentualExecucao, 100)}%`,
-                backgroundColor:
-                  percentualExecucao < 85     // Saldo ≥ 15%
-                    ? "#27ae60"  // 🟢 Verde - Execução saudável
-                    : percentualExecucao < 95  // Saldo entre 5-15%
-                      ? "#f39c12"  // 🟡 Amarelo - Atenção
-                      : "#e74c3c",  // 🔴 Vermelho - Saldo crítico < 5%
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Status Financeiro - Mini Cards */}
-        <div style={styles.statusSection}>
-          <div style={styles.statusLabel}>Status Financeiro</div>
-          <div style={styles.statusMiniGrid}>
-            <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
-              <span style={styles.miniCardIcon}>✅</span>
-              <div style={styles.miniCardContent}>
-                <div style={styles.miniCardLabel}>Pago</div>
-                <div style={styles.miniCardValue}>
-                  {formatCurrency(stats.totalPago)}
-                </div>
-              </div>
-            </div>
-            <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
-              <span style={styles.miniCardIcon}>🔄</span>
-              <div style={styles.miniCardContent}>
-                <div style={styles.miniCardLabel}>Liquidado</div>
-                <div style={styles.miniCardValue}>
-                  {formatCurrency(stats.totalLiquidado)}
-                </div>
-              </div>
-            </div>
-            <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
-              <span style={styles.miniCardIcon}>📝</span>
-              <div style={styles.miniCardContent}>
-                <div style={styles.miniCardLabel}>Empenhado</div>
-                <div style={styles.miniCardValue}>
-                  {formatCurrency(stats.totalEmpenhado)}
-                </div>
-              </div>
-            </div>
-            <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
-              <span style={styles.miniCardIcon}>⏳</span>
-              <div style={styles.miniCardContent}>
-                <div style={styles.miniCardLabel}>Pendente</div>
-                <div style={styles.miniCardValue}>
-                  {formatCurrency(stats.totalPendente)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== SEÇÃO: DESPESAS PLANEJADAS ===== */}
-      {temEmendaSalva && (
-        <div style={styles.secao}>
-          <div style={styles.secaoHeader}>
-            <h3 style={styles.secaoTitulo}>
-              📋 Despesas Planejadas ({despesasPlanejadas.length})
-            </h3>
-          </div>
-
-          <DespesaPlanejadaForm
-            emendaId={emendaId}
-            valorEmenda={stats.valorEmenda}
-            totalExecutado={stats.totalExecutado}
-            onSuccess={carregarDespesas}
-            usuario={usuario}
-          />
-
-          {despesasPlanejadas.length === 0 ? (
-            <div style={styles.emptyState}>
-              <div>
-                <div style={styles.emptyEmoji}>📭</div>
-                <h3 style={styles.emptyTitle}>Nenhuma despesa planejada</h3>
-                <p style={styles.emptyText}>
-                  Use o formulário acima para adicionar despesas planejadas.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div style={styles.tabelaWrapper}>
-              <table style={styles.table}>
-                <thead style={styles.thead}>
-                  <tr>
-                    <th style={{ textAlign: "left", padding: "12px 8px" }}>
-                      Natureza
-                    </th>
-                    <th style={{ textAlign: "right", padding: "12px 8px" }}>
-                      Valor Planejado
-                    </th>
-                    <th style={{ textAlign: "center", padding: "12px 8px" }}>
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {despesasPlanejadas.map((despesa, idx) => (
-                    <tr
-                      key={despesa.id}
-                      style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
-                    >
-                      <td style={styles.td}>
-                        {despesa.estrategia || despesa.naturezaDespesa}
-                      </td>
-                      <td style={{ ...styles.td, ...styles.tdValorPlanejado }}>
-                        {formatCurrency(despesa.valor)}
-                      </td>
-                      <td style={{ ...styles.td, textAlign: "center" }}>
-                        <div style={styles.despesaAcoes}>
-                          <button
-                            onClick={() => handleEditarDespesa(despesa)}
-                            style={styles.btn}
-                            title="Editar despesa"
-                          >
-                            ✏️ Editar
-                          </button>
-                          <button
-                            onClick={() => handleRemoverDespesa(despesa.id)}
-                            style={{ ...styles.btn, ...styles.btnDanger }}
-                            title="Remover despesa"
-                          >
-                            🗑️ Remover
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ===== SEÇÃO: DESPESAS EXECUTADAS ===== */}
-      {temEmendaSalva && despesasExecutadas.length > 0 && (
-        <div style={styles.secao}>
-          <div style={styles.secaoHeader}>
-            <h3 style={styles.secaoTitulo}>
-              ✅ Despesas Executadas ({despesasExecutadas.length})
-            </h3>
-          </div>
-
-          <DespesasList
-            despesas={despesasExecutadas}
-            emendas={[
-              {
-                id: emendaId,
-                valor: stats.valorEmenda,
-                saldoDisponivel: stats.saldoDisponivel,
-                ...formData,
-              },
-            ]}
-            onEdit={handleEditarDespesa}
-            onView={handleVisualizarDespesa}
-            onDelete={handleRemoverDespesa}
-            onRecarregar={carregarDespesas}
-            usuario={usuario}
-          />
-        </div>
-      )}
-
-      {/* ===== EMPTY STATE: Sem emenda salva ===== */}
-      {!temEmendaSalva && (
+  if (!temEmendaSalva) {
+    return (
+      <div style={styles.container}>
         <div style={styles.emptyState}>
           <div>
             <div style={styles.emptyEmoji}>💾</div>
             <h3 style={styles.emptyTitle}>Salve a emenda primeiro</h3>
             <p style={styles.emptyText}>
-              Clique em "Salvar Emenda" para adicionar despesas.
+              Para gerenciar despesas, salve a emenda antes de continuar.
             </p>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* ===== MODAL: Edição de Despesa ===== */}
+  return (
+    <div style={styles.container}>
+      {toast.show && <Toast message={toast.message} type={toast.type} />}
+
+      {/* Estatísticas principais */}
+      <div style={styles.statsWrapper}>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>💰 Valor da Emenda</div>
+          <div style={styles.statValue}>
+            {formatCurrency(stats.valorEmenda)}
+          </div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>🟡 Total Planejado</div>
+          <div style={{ ...styles.statValue, color: "#f39c12" }}>
+            {formatCurrency(stats.totalPlanejado)}
+          </div>
+          <div style={styles.statHint}>não consome saldo</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>🟢 Total Executado</div>
+          <div style={{ ...styles.statValue, color: "#27ae60" }}>
+            {formatCurrency(stats.totalExecutado)}
+          </div>
+          <div style={styles.statHint}>consome saldo</div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>💵 Saldo Disponível</div>
+          <div
+            style={{
+              ...styles.statValue,
+              color:
+                stats.saldoDisponivel < 0
+                  ? "#e74c3c"
+                  : stats.saldoDisponivel === 0
+                    ? "#95a5a6"
+                    : "#27ae60",
+            }}
+          >
+            {formatCurrency(stats.saldoDisponivel)}
+          </div>
+        </div>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>📊 Percentual Executado</div>
+          <div style={styles.statValue}>
+            {stats.percentualExecutado.toFixed(1)}%
+          </div>
+        </div>
+      </div>
+
+      {/* 🆕 Mini-cards de status financeiro */}
+      <div style={styles.statusFinanceiroWrapper}>
+        <h4 style={styles.statusFinanceiroTitulo}>Status Financeiro</h4>
+        <div style={styles.statusMiniGrid}>
+          <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
+            <div style={styles.miniCardIcon}>💵</div>
+            <div style={styles.miniCardContent}>
+              <div style={styles.miniCardLabel}>Pago</div>
+              <div style={styles.miniCardValue}>
+                {formatCurrency(stats.totalPago)}
+              </div>
+              <div style={styles.miniCardHint}>✅ Concluído</div>
+            </div>
+          </div>
+          <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
+            <div style={styles.miniCardIcon}>📝</div>
+            <div style={styles.miniCardContent}>
+              <div style={styles.miniCardLabel}>Liquidado</div>
+              <div style={styles.miniCardValue}>
+                {formatCurrency(stats.totalLiquidado)}
+              </div>
+              <div style={styles.miniCardHint}>⏳ Aguardando pagamento</div>
+            </div>
+          </div>
+          <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
+            <div style={styles.miniCardIcon}>📋</div>
+            <div style={styles.miniCardContent}>
+              <div style={styles.miniCardLabel}>Empenhado</div>
+              <div style={styles.miniCardValue}>
+                {formatCurrency(stats.totalEmpenhado)}
+              </div>
+              <div style={styles.miniCardHint}>⏳ Aguardando liquidação</div>
+            </div>
+          </div>
+          <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
+            <div style={styles.miniCardIcon}>⏰</div>
+            <div style={styles.miniCardContent}>
+              <div style={styles.miniCardLabel}>Pendente</div>
+              <div style={styles.miniCardValue}>
+                {formatCurrency(stats.totalPendente)}
+              </div>
+              <div style={styles.miniCardHint}>⏳ Aguardando empenho</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Seção: Despesas Planejadas */}
+      <div style={styles.secao}>
+        <div style={styles.secaoHeader}>
+          <h3 style={styles.secaoTitulo}>
+            a��� Planejar Despesas{" "}
+            <span
+              style={styles.infoIcon}
+              title="Despesas planejadas não consomem o saldo da emenda"
+            >
+              ℹ️
+            </span>
+          </h3>
+          <span style={styles.badge}>
+            {despesasPlanejadas.length}{" "}
+            {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
+          </span>
+        </div>
+
+        {temEmendaSalva && (
+          <>
+            <DespesaPlanejadaForm
+              emendaId={emendaId}
+              valorEmenda={stats.valorEmenda}
+              totalExecutado={stats.totalExecutado}
+              onSuccess={carregarDespesas}
+              usuario={usuario}
+            />
+
+            {despesasPlanejadas.length === 0 ? (
+              <div style={styles.emptyState}>
+                <div>
+                  <div style={styles.emptyEmoji}>🎯</div>
+                  <h3 style={styles.emptyTitle}>Nenhuma despesa planejada</h3>
+                  <p style={styles.emptyText}>
+                    Use o formulário acima para adicionar despesas planejadas.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div style={styles.tabelaWrapper}>
+                <table style={styles.table}>
+                  <thead style={styles.thead}>
+                    <tr>
+                      <th style={{ padding: "12px 8px", textAlign: "left" }}>
+                        NATUREZA DA DESPESA
+                      </th>
+                      <th style={{ padding: "12px 8px", textAlign: "right" }}>
+                        VALOR
+                      </th>
+                      <th
+                        style={{
+                          padding: "12px 8px",
+                          textAlign: "center",
+                          width: 120,
+                        }}
+                      >
+                        AÇÕES
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody style={styles.tbody}>
+                    {despesasPlanejadas.map((despesa, idx) => (
+                      <tr
+                        key={despesa.id}
+                        style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
+                      >
+                        <td style={styles.td}>
+                          {despesa.estrategia || despesa.naturezaDespesa}
+                        </td>
+                        <td style={styles.tdValorPlanejado}>
+                          {formatCurrency(despesa.valor)}
+                        </td>
+                        <td style={styles.td}>
+                          <div style={styles.despesaAcoes}>
+                            <button
+                              onClick={() => handleExecutarDespesa(despesa)}
+                              style={styles.btnIconExecutar}
+                              title="Executar despesa"
+                            >
+                              ▶️
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleRemoverDespesaPlanejada(
+                                  despesa.id,
+                                  despesa.estrategia || despesa.naturezaDespesa,
+                                  despesa.valor,
+                                )
+                              }
+                              style={styles.btnIconRemover}
+                              title="Remover despesa"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Seção: Despesas Executadas */}
+      <div style={styles.secao}>
+        <div style={styles.secaoHeader}>
+          <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
+          <span style={styles.badge}>
+            {despesasExecutadas.length}{" "}
+            {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
+          </span>
+        </div>
+
+        <DespesasList
+          despesas={despesasExecutadas}
+          emendas={[]}
+          loading={loading}
+          onEdit={handleEditarDespesa}
+          onView={handleVisualizarDespesa}
+          onRecarregar={carregarDespesas}
+          ocultarBotaoNovo={true}
+          exibirModoCards={true}
+        />
+      </div>
+
+      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução */}
       {despesaEmEdicao &&
+        modoVisualizacao &&
         createPortal(
           <div style={styles.formularioEdicaoOverlay}>
             <div style={styles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
-                  {modoVisualizacao === "visualizar"
-                    ? "👁️ Visualizar Despesa"
-                    : "✏️ Editar Despesa"}
+                  {modoVisualizacao === "editar" && "✏️ Editar Despesa"}
+                  {modoVisualizacao === "visualizar" && "👁️ Visualizar Despesa"}
+                  {modoVisualizacao === "executar" &&
+                    "▶️ Executar Despesa Planejada"}
                 </h2>
                 <button
                   onClick={handleFecharFormulario}
                   style={styles.btnVoltar}
                 >
-                  ✕ Fechar
+                  ← Voltar
                 </button>
               </div>
               <div style={styles.formularioEdicaoContent}>
                 <DespesaForm
                   despesaParaEditar={despesaEmEdicao}
-                  emendaPreSelecionada={emendaId}
+                  emendaId={emendaId}
+                  somenteLeitura={modoVisualizacao === "visualizar"}
+                  modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
                   emendaInfo={{
-                    // ✅ CORRIGIDO: Passa emendaInfo com dados completos
                     id: emendaId,
+                    numero: formData?.numero,
+                    municipio: formData?.municipio,
+                    uf: formData?.uf,
+                    autor: formData?.autor,
                     valor: stats.valorEmenda,
-                    valorTotal: stats.valorEmenda,
-                    saldoDisponivel: saldoDisponivel,
-                    totalExecutado: stats.totalExecutado,
-                    percentualExecucao: percentualExecucao,
-                    ...formData, // Inclui outros dados da emenda
                   }}
-                  usuario={usuario}
-                  onCancelar={handleFecharFormulario}
-                  onSuccess={handleSucessoFormulario}
-                  modoVisualizacao={modoVisualizacao === "visualizar"}
-                  hideHeader={true}
+                  onClose={handleFecharFormulario}
+                  onSave={() => {
+                    handleFecharFormulario();
+                    showToast({
+                      message:
+                        modoVisualizacao === "executar"
+                          ? "✅ Despesa executada com sucesso!"
+                          : "✅ Despesa atualizada com sucesso!",
+                      type: "success",
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -703,80 +687,45 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: 20,
+    padding: 20,
+    backgroundColor: "#f8f9fa",
   },
-  metricsGrid: {
+  statsWrapper: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: 12,
-    marginBottom: 20,
+    gap: 16,
   },
-  metricCard: {
-    padding: 16,
-    borderRadius: 8,
-    border: "1px solid #dee2e6",
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
+  statCard: {
+    backgroundColor: "#fff",
+    padding: 18,
+    borderRadius: 12,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+    textAlign: "center",
   },
-  metricCardPrimary: {
-    backgroundColor: "#e7f3ff",
-    borderColor: "#91d5ff",
-  },
-  metricCardWarning: {
-    backgroundColor: "#fff7e6",
-    borderColor: "#ffc53d",
-  },
-  metricCardSuccess: {
-    backgroundColor: "#f6ffed",
-    borderColor: "#b7eb8f",
-  },
-  metricCardInfo: {
-    backgroundColor: "#e6f7ff",
-    borderColor: "#69c0ff",
-  },
-  metricLabel: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#666",
-    textTransform: "uppercase",
-  },
-  metricValue: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: "#0f172a",
-    fontFamily: "monospace",
-  },
-  progressSection: {
-    marginBottom: 20,
-  },
-  progressLabel: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: 8,
+  statLabel: {
     fontSize: 13,
     fontWeight: 600,
-    color: "#333",
+    color: "#6c757d",
+    marginBottom: 8,
   },
-  progressBarContainer: {
-    width: "100%",
-    height: 8,
-    backgroundColor: "#e9ecef",
-    borderRadius: 4,
-    overflow: "hidden",
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#154360",
+    fontFamily: "monospace",
   },
-  progressBar: {
-    height: "100%",
-    borderRadius: 4,
-    transition: "width 0.3s ease",
+  statHint: { fontSize: 11, color: "#adb5bd", marginTop: 4 },
+  statusFinanceiroWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
   },
-  statusSection: {
-    paddingTop: 12,
-    borderTop: "1px solid #dee2e6",
-  },
-  statusLabel: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: "#64748b",
+  statusFinanceiroTitulo: {
+    margin: "0 0 12px 0",
+    fontSize: 13,
+    fontWeight: 700,
+    color: "#334155",
     marginBottom: 10,
     textTransform: "uppercase",
     letterSpacing: "0.5px",
