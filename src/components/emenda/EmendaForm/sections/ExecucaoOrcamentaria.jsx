@@ -462,7 +462,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Bar - Cores inteligentes baseadas no saldo restante */}
         <div style={styles.progressSection}>
           <div style={styles.progressLabel}>
             <span>Execução</span>
@@ -474,11 +474,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 ...styles.progressBar,
                 width: `${Math.min(percentualExecucao, 100)}%`,
                 backgroundColor:
-                  percentualExecucao <= 50
-                    ? "#28a745"
-                    : percentualExecucao <= 80
-                      ? "#ffc107"
-                      : "#dc3545",
+                  percentualExecucao < 85     // Saldo ≥ 15%
+                    ? "#27ae60"  // 🟢 Verde - Execução saudável
+                    : percentualExecucao < 95  // Saldo entre 5-15%
+                      ? "#f39c12"  // 🟡 Amarelo - Atenção
+                      : "#e74c3c",  // 🔴 Vermelho - Saldo crítico < 5%
               }}
             />
           </div>
