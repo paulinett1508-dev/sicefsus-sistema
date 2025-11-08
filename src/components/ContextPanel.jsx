@@ -2,10 +2,7 @@
 // PROBLEMA: Saldo mostrando R$ 0,00 quando deveria mostrar R$ 73.000,00
 
 import React, { useMemo } from "react";
-import {
-  formatarMoedaDisplay,
-  parseValorMonetario,
-} from "../utils/formatters";
+import { formatarMoedaDisplay, parseValorMonetario } from "../utils/formatters";
 
 const ContextPanel = ({ emenda, despesas = [] }) => {
   // 🚨 CORREÇÃO PRINCIPAL: Cálculo do saldo com debug e validações
@@ -40,11 +37,10 @@ const ContextPanel = ({ emenda, despesas = [] }) => {
       console.warn("⚠️ Nenhum campo de valor encontrado na emenda");
     }
 
-    // 3. CONVERTER PARA NUMBER (caso seja string)
+    // 3. CONVERTER PARA NUMBER (caso seja string) - ✅ CORRIGIDO AQUI
     if (typeof valorTotalCalculado === "string") {
-      // Remove formatação monetária se existir
-      const valorLimpo = valorTotalCalculado.replace(/[R$\s.,]/g, "");
-      valorTotalCalculado = parseFloat(valorLimpo) || 0;
+      // ✅ USA parseValorMonetario CORRETAMENTE
+      valorTotalCalculado = parseValorMonetario(valorTotalCalculado) || 0;
       console.log("🔄 Valor convertido de string:", valorTotalCalculado);
     } else {
       valorTotalCalculado = Number(valorTotalCalculado) || 0;
