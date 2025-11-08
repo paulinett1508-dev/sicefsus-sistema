@@ -312,7 +312,7 @@ const DespesaForm = ({
         discriminacao: despesaParaEditar.discriminacao || "",
         fornecedor: despesaParaEditar.fornecedor || "",
         valor: despesaParaEditar.valor != null 
-          ? formatarMoedaInput(String(despesaParaEditar.valor))
+          ? formatarMoedaInput((despesaParaEditar.valor * 100).toFixed(0))
           : "",
         numeroEmpenho: despesaParaEditar.numeroEmpenho || "",
         numeroNota: despesaParaEditar.numeroNota || "",
