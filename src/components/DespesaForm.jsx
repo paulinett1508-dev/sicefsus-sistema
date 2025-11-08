@@ -413,7 +413,7 @@ const DespesaForm = ({
         ...formDataLimpo,
         emendaId:
           formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
-        valor: parseFloat(formData.valor) || 0,
+        valor: parseValorMonetario(formData.valor),
         contrapartida: parseFloat(formData.contrapartida) || 0,
         percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
         dataEmpenho:
