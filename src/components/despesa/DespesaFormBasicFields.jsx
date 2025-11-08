@@ -1,7 +1,7 @@
 // src/components/despesa/DespesaFormBasicFields.jsx
-// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda, valor e discriminação
+// ✅ SIMPLIFICADO 06/11/2025: Apenas emenda e valor
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Importei useEffect
 
 const parseValorMonetario = (valor) => {
   if (typeof valor === "number") return valor;
@@ -11,6 +11,19 @@ const parseValorMonetario = (valor) => {
     .replace(",", ".");
   const numero = parseFloat(valorLimpo);
   return isNaN(numero) ? 0 : numero;
+};
+
+// Função auxiliar para formatar moeda no input (sem R$)
+const formatarMoedaInput = (valor) => {
+  if (!valor && valor !== 0) return "";
+  const num = typeof valor === "number" ? valor : parseValorMonetario(valor);
+  if (isNaN(num)) return "";
+
+  // Formata para exibição no input (ex: 1.234,56)
+  return num.toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 const DespesaFormBasicFields = ({
@@ -157,6 +170,39 @@ const DespesaFormBasicFields = ({
     setValorAnterior(null);
   };
 
+  // Atualizar valor quando emendaInfo mudar (para modo criar)
+  useEffect(() => {
+    if (!despesaParaEditar && emendaInfo?.saldoDisponivel) {
+      const valorFormatado = formatarMoedaInput(String(emendaInfo.saldoDisponivel));
+      handleInputChange({
+        target: {
+          name: "valor",
+          value: valorFormatado,
+        },
+      });
+    }
+  }, [emendaInfo?.saldoDisponivel, despesaParaEditar]);
+
+  // Formatar valor ao carregar despesa para edição
+  useEffect(() => {
+    if (despesaParaEditar && formData.valor) {
+      const valorAtual = formData.valor;
+      // Se o valor não está formatado (é apenas número), formatar
+      if (!valorAtual.includes(',') && !valorAtual.includes('.')) {
+        const valorFormatado = formatarMoedaInput(valorAtual);
+        if (valorFormatado !== valorAtual) {
+          handleInputChange({
+            target: {
+              name: "valor",
+              value: valorFormatado,
+            },
+          });
+        }
+      }
+    }
+  }, [despesaParaEditar, formData.valor]);
+
+  // Callback para validação de saldo
   const styles = {
     fieldset: {
       border: "2px solid #154360",
