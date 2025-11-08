@@ -93,7 +93,7 @@ const DespesaForm = ({
     isExecucao,
     isEdicao,
     despesaId: despesaParaEditar?.id,
-    status: despesaParaEditar?.status
+    status: despesaParaEditar?.status,
   });
 
   // ✅ HOOKS REUTILIZADOS
@@ -331,12 +331,15 @@ const DespesaForm = ({
             despesaParaEditar.estrategia ||
             despesaParaEditar.naturezaDespesa ||
             "3.3.9.0.30 – Material de Despesa",
-          valor: despesaParaEditar.valor != null
-            ? formatarMoedaInput((despesaParaEditar.valor * 100).toFixed(0))
-            : "",
+          valor:
+            despesaParaEditar.valor != null
+              ? formatarMoedaInput((despesaParaEditar.valor * 100).toFixed(0))
+              : "",
           // ✅ SE FOR EXECUÇÃO: discriminacao vazia (usuário preenche)
           // ✅ SE FOR EDIÇÃO: discriminacao da despesa existente
-          discriminacao: isExecucao ? "" : (despesaParaEditar.discriminacao || ""),
+          discriminacao: isExecucao
+            ? ""
+            : despesaParaEditar.discriminacao || "",
           fornecedor: despesaParaEditar.fornecedor || "",
           numeroEmpenho: despesaParaEditar.numeroEmpenho || "",
           numeroNota: despesaParaEditar.numeroNota || "",
@@ -344,7 +347,8 @@ const DespesaForm = ({
           dataLiquidacao: convertToDateString(despesaParaEditar.dataLiquidacao),
           dataPagamento: convertToDateString(despesaParaEditar.dataPagamento),
           acao: despesaParaEditar.acao || "",
-          classificacaoFuncional: despesaParaEditar.classificacaoFuncional || "",
+          classificacaoFuncional:
+            despesaParaEditar.classificacaoFuncional || "",
           numeroContrato: despesaParaEditar.numeroContrato || "",
           categoria: despesaParaEditar.categoria || "",
           descricao: despesaParaEditar.descricao || "",
@@ -360,7 +364,8 @@ const DespesaForm = ({
           contrapartida: despesaParaEditar.contrapartida || 0,
           percentualExecucao: despesaParaEditar.percentualExecucao || 0,
           etapaExecucao: despesaParaEditar.etapaExecucao || "",
-          coordenadasGeograficas: despesaParaEditar.coordenadasGeograficas || "",
+          coordenadasGeograficas:
+            despesaParaEditar.coordenadasGeograficas || "",
           populacaoBeneficiada: despesaParaEditar.populacaoBeneficiada || "",
           impactoSocial: despesaParaEditar.impactoSocial || "",
           cnpjFornecedor: despesaParaEditar.cnpjFornecedor || "",
@@ -387,7 +392,9 @@ const DespesaForm = ({
   // ✅ BLOQUEAR FECHAMENTO AUTOMÁTICO EM MODO EXECUÇÃO
   useEffect(() => {
     if (isExecucao && despesaParaEditar) {
-      console.log("⚠️ Modo execução ativado - formulário deve permanecer aberto");
+      console.log(
+        "⚠️ Modo execução ativado - formulário deve permanecer aberto",
+      );
     }
   }, [isExecucao, despesaParaEditar]);
 
@@ -405,28 +412,42 @@ const DespesaForm = ({
 
   // ✅ NAVEGAÇÃO PÓS SALVAR
   const navegarAposSalvar = () => {
+    // 🔑 PRIORIDADE 1: onSuccess (modal/emenda)
     if (onSuccess) {
+      console.log(
+        "✅ DespesaForm: Chamando onSuccess (retorna ao contexto de origem)",
+      );
       onSuccess();
-    } else if (onSalvar) {
+      return; // ⚠️ CRÍTICO: Prevenir navegação
+    }
+
+    // 🔑 PRIORIDADE 2: onSalvar
+    if (onSalvar) {
+      console.log("✅ DespesaForm: Chamando onSalvar");
       onSalvar();
-    } else if (
-      despesaParaEditar?.emendaId ||
-      emendaPreSelecionada ||
-      emendaId
-    ) {
+      return; // ⚠️ CRÍTICO: Prevenir navegação
+    }
+
+    // 🔑 PRIORIDADE 3: Navegar para emenda se houver contexto
+    if (despesaParaEditar?.emendaId || emendaPreSelecionada || emendaId) {
       const targetEmendaId =
         despesaParaEditar?.emendaId || emendaPreSelecionada || emendaId;
+      console.log("🔄 DespesaForm: Navegando para emenda", targetEmendaId);
       navigate(`/emendas/${targetEmendaId}`);
-    } else {
-      navigate("/despesas");
+      return;
     }
+
+    // 🔑 FALLBACK: Navegar para listagem de despesas
+    console.log("🔄 DespesaForm: Navegando para /despesas");
+    navigate("/despesas");
   };
 
   // ✅ SUBMIT DO FORMULÁRIO
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (modoVisualizacao) {
+    // ✅ Permitir edição em modo execução
+    if (modoVisualizacao && !isExecucao) {
       console.log("Modo visualização - submit ignorado");
       return;
     }
@@ -498,37 +519,40 @@ const DespesaForm = ({
           await deleteDoc(doc(db, "despesas", despesaParaEditar.id));
           console.log("✅ Despesa planejada deletada:", despesaParaEditar.id);
         }
-         setToast({
+        setToast({
           show: true,
           message: "✅ Despesa executada com sucesso!",
           type: "success",
         });
-
       } else if (despesaRef) {
         // ✅ EDIÇÃO NORMAL
         console.log("✏️ Atualizando despesa existente");
         await updateDoc(despesaRef, despesaData);
         console.log("✅ Despesa atualizada com sucesso");
-         setToast({
+        setToast({
           show: true,
           message: "✅ Despesa atualizada com sucesso!",
           type: "success",
         });
-
       } else {
         // ✅ CRIAÇÃO NORMAL
         console.log("🆕 Criando nova despesa");
         await addDoc(collection(db, "despesas"), despesaData);
         console.log("✅ Nova despesa criada com sucesso");
-         setToast({
+        setToast({
           show: true,
           message: "✅ Despesa cadastrada com sucesso!",
           type: "success",
         });
       }
 
+      console.log("🔍 DespesaForm: ANTES de chamar navegarAposSalvar");
+      console.log("🔍 DespesaForm: onSuccess existe?", !!onSuccess);
+      console.log("🔍 DespesaForm: onSalvar existe?", !!onSalvar);
+
       navegarAposSalvar();
 
+      console.log("🔍 DespesaForm: DEPOIS de chamar navegarAposSalvar");
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);
       setToast({
@@ -630,14 +654,14 @@ const DespesaForm = ({
 
       {/* Header do modal/formulário */}
       <h2 style={styles.modalTitle}>
-          {modoVisualizacao
-            ? "👁️ Visualizar Despesa"
-            : isExecucao
-              ? "▶️ Executar Despesa Planejada"
-              : despesaParaEditar
-                ? "✏️ Editar Despesa"
-                : "🆕 Nova Despesa"}
-        </h2>
+        {modoVisualizacao
+          ? "👁️ Visualizar Despesa"
+          : isExecucao
+            ? "▶️ Executar Despesa Planejada"
+            : despesaParaEditar
+              ? "✏️ Editar Despesa"
+              : "🆕 Nova Despesa"}
+      </h2>
 
       {/* ✅ ATUALIZADO: Props corretas incluindo formData e handleInputChange */}
       {(emendaInfoDinamica || emendaInfo) && (
@@ -645,7 +669,7 @@ const DespesaForm = ({
           emendaInfo={emendaInfoDinamica || emendaInfo}
           formData={formData}
           handleInputChange={handleInputChange}
-          modoVisualizacao={modoVisualizacao || isExecucao} // Bloqueia edição em modo visualização OU execução
+          modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
         />
       )}
 
@@ -658,7 +682,7 @@ const DespesaForm = ({
           emendaInfo={emendaInfoDinamica || emendaInfo}
           userRole={userRole}
           userMunicipio={userMunicipio}
-          modoVisualizacao={modoVisualizacao || isExecucao} // Bloqueia edição em modo visualização OU execução
+          modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
           onValorExcedeSaldo={setValorExcedeSaldo} // ✅ NOVO: Callback para receber status do saldo
@@ -667,14 +691,14 @@ const DespesaForm = ({
         <DespesaFormEmpenhoFields
           formData={formData}
           errors={errors}
-          modoVisualizacao={modoVisualizacao || isExecucao} // Bloqueia edição em modo visualização OU execução
+          modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
           handleInputChange={handleInputChange}
         />
 
         <DespesaFormDateFields
           formData={formData}
           errors={errors}
-          modoVisualizacao={modoVisualizacao || isExecucao} // Bloqueia edição em modo visualização OU execução
+          modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
           handleInputChange={handleInputChange}
           emendaInfo={emendaInfoDinamica || emendaInfo}
         />
@@ -683,7 +707,7 @@ const DespesaForm = ({
         <DespesaFormClassificacaoFuncional
           formData={formData}
           errors={errors}
-          modoVisualizacao={modoVisualizacao || isExecucao} // Bloqueia edição em modo visualização OU execução
+          modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
           handleInputChange={handleInputChange}
         />
 

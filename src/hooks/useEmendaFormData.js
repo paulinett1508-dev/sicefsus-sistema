@@ -357,7 +357,10 @@ export const useEmendaFormData = () => {
     const [field, message] = firstError;
     const errorCount = Object.keys(errors).length;
 
-    let modalMessage = "🚨 FORMULÁRIO INCOMPLETO\n\n" + errorCount + " campo(s) obrigatório(s):\n";
+    let modalMessage =
+      "🚨 FORMULÁRIO INCOMPLETO\n\n" +
+      errorCount +
+      " campo(s) obrigatório(s):\n";
 
     Object.entries(errors).forEach(([key, msg]) => {
       modalMessage += "• " + msg.replace("🚨 ", "") + "\n";
@@ -610,7 +613,10 @@ export const useEmendaFormData = () => {
       if (criticalErrors.length > 0) {
         setToast({
           show: true,
-          message: "🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n" + criticalErrors.join("\n") + "\n\n✅ Sistema com melhorias aplicadas.",
+          message:
+            "🚨 ERRO CRÍTICO - Salvamento bloqueado:\n\n" +
+            criticalErrors.join("\n") +
+            "\n\n✅ Sistema com melhorias aplicadas.",
           type: "error",
         });
         return;
@@ -676,10 +682,9 @@ export const useEmendaFormData = () => {
             type: "success",
           });
 
-          // ✅ CORREÇÃO: Voltar para listagem após atualizar
-          setTimeout(() => {
-            navigate("/emendas");
-          }, 1500); // Aguarda 1.5s para usuário ver o toast
+          // ✅ EM MODO EDIÇÃO: NÃO navegar automaticamente
+          // Deixa usuário onde está (pode estar gerenciando despesas/cronograma)
+          // Navegação manual apenas via botões "Voltar" ou "Cancelar"
         } else {
           // 🆕 CRIAÇÃO: Salvar e perguntar sobre primeira despesa
           dadosParaSalvar.criadoEm = serverTimestamp();

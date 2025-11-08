@@ -1,6 +1,5 @@
 // src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx
-// ✅ CORRIGIDO: DespesaForm não fecha mais automaticamente ao executar
-// ✅ CORRIGIDO: Proteções contra fechamento acidental
+// ✅ CORRIGIDO: Botão "Executar" abre DespesaForm completo (4 seções)
 // ✅ TODAS AS LÓGICAS ANTERIORES PRESERVADAS 100%
 
 import React, { useState, useEffect } from "react";
@@ -342,7 +341,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     setModoVisualizacao("visualizar");
   };
 
-  // ✅ Handler para executar despesa planejada
+  // ✅ NOVO: Handler para executar despesa planejada
   const handleExecutarDespesa = (despesa) => {
     console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada", {
       id: despesa.id,
@@ -351,28 +350,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     });
     console.log("✅ Abrindo DespesaForm para EXECUTAR (pré-preenchido)");
     setDespesaEmEdicao(despesa);
-    setModoVisualizacao("executar");
+    setModoVisualizacao("executar"); // 🔑 Modo especial: executar
   };
 
-  // ✅ Handler para fechar formulário (COM PROTEÇÃO)
   const handleFecharFormulario = () => {
-    console.log("🚪 ExecucaoOrcamentaria: Tentando fechar DespesaForm");
-    console.log("📝 Modo atual:", modoVisualizacao);
-
-    // ✅ PROTEÇÃO: Confirmar antes de fechar em modo execução
-    if (modoVisualizacao === "executar") {
-      const confirmacao = window.confirm(
-        "⚠️ Tem certeza que deseja cancelar a execução desta despesa?\n\n" +
-          "Os dados preenchidos serão perdidos.",
-      );
-
-      if (!confirmacao) {
-        console.log("❌ Fechamento cancelado pelo usuário");
-        return; // NÃO FECHA
-      }
-    }
-
-    console.log("✅ Fechando formulário");
+    console.log("🚪 ExecucaoOrcamentaria: Fechando DespesaForm");
     setDespesaEmEdicao(null);
     setModoVisualizacao(null);
     carregarDespesas();
@@ -403,19 +385,6 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       });
     }
   };
-
-  // ✅ PROTEÇÃO: Rastrear mudanças de estado
-  useEffect(() => {
-    console.log("🔄 ExecucaoOrcamentaria - Estado mudou:", {
-      despesaEmEdicao: despesaEmEdicao?.id || null,
-      modoVisualizacao,
-      timestamp: new Date().toISOString(),
-    });
-
-    if (modoVisualizacao === "executar" && despesaEmEdicao) {
-      console.log("🔒 Modo execução ATIVO - estado protegido");
-    }
-  }, [despesaEmEdicao, modoVisualizacao]);
 
   if (!temEmendaSalva) {
     return (
@@ -534,7 +503,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>
-            🟡 Planejar Despesas{" "}
+            a��� Planejar Despesas{" "}
             <span
               style={styles.infoIcon}
               title="Despesas planejadas não consomem o saldo da emenda"
@@ -662,25 +631,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       {despesaEmEdicao &&
         modoVisualizacao &&
         createPortal(
-          <div
-            style={styles.formularioEdicaoOverlay}
-            onClick={(e) => {
-              // ✅ BLOQUEAR fechamento ao clicar fora em modo execução
-              if (
-                e.target === e.currentTarget &&
-                modoVisualizacao === "executar"
-              ) {
-                console.log("⚠️ Clique fora bloqueado - modo execução ativo");
-                e.stopPropagation();
-                return;
-              }
-
-              // Permitir fechar clicando fora em outros modos
-              if (e.target === e.currentTarget) {
-                handleFecharFormulario();
-              }
-            }}
-          >
+          <div style={styles.formularioEdicaoOverlay}>
             <div style={styles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
@@ -690,13 +641,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     "▶️ Executar Despesa Planejada"}
                 </h2>
                 <button
-                  onClick={() => {
-                    console.log(
-                      "🔘 Botão Voltar clicado - Modo:",
-                      modoVisualizacao,
-                    );
-                    handleFecharFormulario();
-                  }}
+                  onClick={handleFecharFormulario}
                   style={styles.btnVoltar}
                 >
                   ← Voltar
@@ -716,29 +661,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     autor: formData?.autor,
                     valor: stats.valorEmenda,
                   }}
-                  onClose={() => {
-                    console.log("📞 DespesaForm.onClose chamado");
-                    handleFecharFormulario();
-                  }}
-                  onSuccess={() => {
-                    console.log(
-                      "📞 DespesaForm.onSuccess chamado - Modo:",
-                      modoVisualizacao,
-                    );
-                    handleFecharFormulario();
-                    showToast({
-                      message:
-                        modoVisualizacao === "executar"
-                          ? "✅ Despesa executada com sucesso!"
-                          : "✅ Despesa atualizada com sucesso!",
-                      type: "success",
-                    });
-                  }}
+                  onClose={handleFecharFormulario}
                   onSave={() => {
-                    console.log(
-                      "📞 DespesaForm.onSave chamado - Modo:",
-                      modoVisualizacao,
-                    );
                     handleFecharFormulario();
                     showToast({
                       message:
