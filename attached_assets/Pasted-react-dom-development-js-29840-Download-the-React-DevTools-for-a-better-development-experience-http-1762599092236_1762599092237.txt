@@ -1,0 +1,77 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.jsx:36 🔥 PROD Firebase Check: {mode: 'development', projectId: 'emendas-parlamentares-60dbd', hasApiKey: true, authDomain: 'emendas-parlamentares-60dbd.firebaseapp.com'}
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: {criadoPor: 'sistema', dataCriacao: _Timestamp, municipio: '', email: 'paulinett1508@gmail.com', atualizadoPor: 'uWCu6k4RY1URWfxx1EVEtI3KGmc2', …}
+DisableConsole.jsx:172 👤 Usuário configurado: {nome: 'Paulinett Miranda', tipo: 'admin', municipio: '', uf: ''}
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: {userEmail: 'paulinett1508@gmail.com', userTipo: 'admin', acessoTotal: true, filtroAplicado: false}
+DisableConsole.jsx:172 🔓 ADMIN: Carregando TODOS os dados do sistema
+DisableConsole.jsx:172 ✅ ADMIN carregou: 23 emendas, 65 despesas
+DisableConsole.jsx:172 🔍 Tentativa de navegação para Emendas: {currentPath: '/dashboard', isInFormMode: false, isCreatingEmenda: false, isEditingEmenda: false}
+DisableConsole.jsx:172 ✅ Navegação normal para Emendas
+DisableConsole.jsx:172 📋 Emendas.jsx v2.3 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: '', uf: '', user: {…}}
+DisableConsole.jsx:172 📊 Carregando emendas e despesas...
+DisableConsole.jsx:172 👤 Usuário: {role: 'admin', municipio: '', uf: ''}
+DisableConsole.jsx:172 🔓 Admin - carregando TODAS as emendas
+DisableConsole.jsx:172 ✅ Emendas encontradas: 23
+DisableConsole.jsx:172 ✅ Despesas encontradas: 65
+DisableConsole.jsx:172 💰 Emenda 42980003 (Passagem Franca/MA): {valorTotal: 800000, valorExecutadoDespesas: 0, saldoDisponivel: 800000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 44190002 (Passagem Franca/MA): {valorTotal: 550000, valorExecutadoDespesas: 0, saldoDisponivel: 550000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 30460003 (Passagem Franca/MA): {valorTotal: 200000, valorExecutadoDespesas: 13559888, saldoDisponivel: -13359888, percentualExecutado: '6779.9%'}
+DisableConsole.jsx:172 💰 Emenda 43590002 (Sucupira do Riachão/MA): {valorTotal: 1000000, valorExecutadoDespesas: 4270179, saldoDisponivel: -3270179, percentualExecutado: '427.0%'}
+DisableConsole.jsx:172 💰 Emenda 43210001 (Antônio Almeida/PI): {valorTotal: 200000, valorExecutadoDespesas: 0, saldoDisponivel: 200000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda CIRO NOGUEIRA (Antônio Almeida/PI): {valorTotal: 200000, valorExecutadoDespesas: 3500, saldoDisponivel: 196500, percentualExecutado: '1.8%'}
+DisableConsole.jsx:172 💰 Emenda 34520202 (Atalaia/AL): {valorTotal: 1500, valorExecutadoDespesas: 1000, saldoDisponivel: 500, percentualExecutado: '66.7%'}
+DisableConsole.jsx:172 💰 Emenda 50410001 (Antônio Almeida/PI): {valorTotal: 500004, valorExecutadoDespesas: 0, saldoDisponivel: 500004, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 40840005 (Sucupira do Riachão/MA): {valorTotal: 300000, valorExecutadoDespesas: 4299412, saldoDisponivel: -3999412, percentualExecutado: '1433.1%'}
+DisableConsole.jsx:172 💰 Emenda 304612542 (Passagem Franca/MA): {valorTotal: 5000, valorExecutadoDespesas: 4778.5, saldoDisponivel: 221.5, percentualExecutado: '95.6%'}
+DisableConsole.jsx:172 💰 Emenda 37580004 (Passagem Franca/MA): {valorTotal: 750000, valorExecutadoDespesas: 0, saldoDisponivel: 750000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 5120222 (Ferreira Gomes/AP): {valorTotal: 1000, valorExecutadoDespesas: 0, saldoDisponivel: 1000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda Programa (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 40840005 (Passagem Franca/MA): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 45120220 (Aguanil/MG): {valorTotal: 5200, valorExecutadoDespesas: 508, saldoDisponivel: 4692, percentualExecutado: '9.8%'}
+DisableConsole.jsx:172 💰 Emenda 41830007 (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 25000, saldoDisponivel: 275000, percentualExecutado: '8.3%'}
+DisableConsole.jsx:172 💰 Emenda 451202512 (Areia de Baraúnas/PB): {valorTotal: 3500, valorExecutadoDespesas: 3510, saldoDisponivel: -10, percentualExecutado: '100.3%'}
+DisableConsole.jsx:172 💰 Emenda 44190001 (Passagem Franca/MA): {valorTotal: 450000, valorExecutadoDespesas: 0, saldoDisponivel: 450000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 2202120 (Ferreira Gomes/AP): {valorTotal: 1000, valorExecutadoDespesas: 5, saldoDisponivel: 995, percentualExecutado: '0.5%'}
+DisableConsole.jsx:172 💰 Emenda 12460003 (Antônio Almeida/PI): {valorTotal: 350000, valorExecutadoDespesas: 0, saldoDisponivel: 350000, percentualExecutado: '0.0%'}
+DisableConsole.jsx:172 💰 Emenda 30460001 (Passagem Franca/MA): {valorTotal: 1000000, valorExecutadoDespesas: 23661578, saldoDisponivel: -22661578, percentualExecutado: '2366.2%'}
+DisableConsole.jsx:172 ✅ 23 emendas processadas para usuário admin
+DisableConsole.jsx:172 📊 Estatísticas calculadas: {totalEmendas: 23, emendasExecutadas: 5, emendasAtivas: 6, valorTotal: 7767204}
+DisableConsole.jsx:172 🔍 Aplicando filtros: 23
+DisableConsole.jsx:172 💰 Visualizando despesas da emenda: 7MXuX8veyPeL54igKbbW
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: {modo: 'editar', hasUnsavedChanges: false, salvando: false, isEdit: true, modoVisualizacao: false}
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: []
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+DisableConsole.jsx:163 🔍 DEBUG - Despesas Executadas: (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props {despesasCount: 7, emendasCount: 0, loading: false, error: null, temOnEdit: false, …}
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 7
+DisableConsole.jsx:172 🔧 DespesasList.handleEdit CHAMADO: {despesaId: 'C9VyWjdp5eGLRp6a9Z6c', despesaDiscriminacao: 'MEDICAMENTOS'}
+DisableConsole.jsx:172  ❌ onEdit não é uma função! {onEdit: undefined}onEdit: undefined[[Prototype]]: Object
+(anônimo) @ DisableConsole.jsx:172
+handleEdit @ DespesasList.jsx:110
+handleEditar @ DespesasTable.jsx:320
+onClick @ DespesasTable.jsx:433
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anônimo) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26140
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
