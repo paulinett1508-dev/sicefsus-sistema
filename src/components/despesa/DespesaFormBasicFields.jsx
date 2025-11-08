@@ -234,7 +234,7 @@ const DespesaFormBasicFields = ({
     },
     formGridRow: {
       display: "grid",
-      gridTemplateColumns: "1.2fr 0.8fr", // ✅ Emenda maior, Valor menor
+      gridTemplateColumns: "0.8fr 1.2fr", // ✅ Emenda 40%, Valor 60%
       gap: "20px",
       alignItems: "start",
     },
