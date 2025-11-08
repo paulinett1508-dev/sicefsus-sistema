@@ -255,22 +255,26 @@ const DespesaFormBasicFields = ({
     },
     requiredMark: { color: "#e74c3c", fontSize: "16px", marginLeft: "2px" },
     input: {
-      padding: "12px",
+      padding: "14px 16px",
+      height: "54px",
       border: "2px solid #bdc3c7",
       borderRadius: "8px",
       fontSize: "15px",
       transition: "all 0.3s ease",
       fontFamily: "inherit",
       backgroundColor: "white",
+      boxSizing: "border-box",
     },
     inputError: {
-      padding: "12px",
+      padding: "14px 16px",
+      height: "54px",
       border: "2px solid #e74c3c",
       borderRadius: "8px",
       fontSize: "15px",
       transition: "all 0.3s ease",
       fontFamily: "inherit",
       backgroundColor: "#fff5f5",
+      boxSizing: "border-box",
     },
     // ✅ CAMPO VALOR DESTACADO
     inputValor: {
