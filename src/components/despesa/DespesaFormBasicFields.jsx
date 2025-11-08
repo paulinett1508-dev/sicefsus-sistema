@@ -549,7 +549,9 @@ const DespesaFormBasicFields = ({
               <input
                 type="text"
                 name="valor"
-                value={formData.valor || ""}
+                value={formatarValorMonetario(
+                  parseValorMonetario(formData.valor),
+                )}
                 onChange={handleValorChange}
                 onBlur={handleValorBlur}
                 style={
