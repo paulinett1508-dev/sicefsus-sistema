@@ -1,0 +1,262 @@
+# 🔒 CORREÇÃO DEFINITIVA: Validação de Saldo com Tratamento de Casos Extremos
+
+## 🚨 PROBLEMAS IDENTIFICADOS
+
+1. ❌ Sistema mostra aviso mas permite salvar
+2. ❌ `saldoBase` vindo como `undefined` ou **negativo**
+3. ❌ Valores digitados desaparecem (loop infinito)
+4. ❌ Emendas já estouradas (saldo negativo) não bloqueiam novas despesas
+
+---
+
+## 🔧 SOLUÇÃO COMPLETA EM 2 ARQUIVOS
+
+### 📄 ARQUIVO 1: `DespesaFormBasicFields.jsx`
+
+**📍 Localização:** `src/components/despesa/DespesaFormBasicFields.jsx`
+
+#### 🔧 MODIFICAÇÃO 1: Adicionar prop (linha 16-23)
+
+```javascript
+const DespesaFormBasicFields = ({
+  formData,
+  errors = {},
+  emendaInfo = null,
+  modoVisualizacao = false,
+  handleInputChange,
+  despesaParaEditar = null,
+  onValorExcedeSaldo, // ✅ NOVA PROP
+}) => {
+```
+
+#### 🔧 MODIFICAÇÃO 2: Corrigir cálculo de saldo (linhas 39-46)
+
+**SUBSTITUIR:**
+```javascript
+const calcularSaldoParaValidacao = () => {
+  let saldoBase = emendaInfo?.saldoDisponivel ?? 0;
+  if (despesaParaEditar?.id && despesaParaEditar?.valor) {
+    const valorAnteriorDespesa = parseValorMonetario(despesaParaEditar.valor);
+    saldoBase += valorAnteriorDespesa;
+  }
+  return saldoBase;
+};
+```
+
+**POR:**
+```javascript
+const calcularSaldoParaValidacao = () => {
+  // ✅ CORREÇÃO: Tratar undefined e usar valorTotal da emenda
+  const saldoEmenda = emendaInfo?.saldoDisponivel ?? emendaInfo?.valorTotal ?? 0;
+  
+  // ✅ Se está editando, somar o valor anterior de volta
+  if (despesaParaEditar?.id && despesaParaEditar?.valor) {
+    const valorAnteriorDespesa = parseValorMonetario(despesaParaEditar.valor);
+    return saldoEmenda + valorAnteriorDespesa;
+  }
+  
+  return saldoEmenda;
+};
+```
+
+#### 🔧 MODIFICAÇÃO 3: Adicionar validação robusta (após linha 50)
+
+**ADICIONAR:**
+```javascript
+const saldoDisponivel = calcularSaldoParaValidacao();
+const valorNum = parseValorMonetario(formData.valor);
+
+// ✅ VALIDAÇÃO ROBUSTA com múltiplas condições
+const valorExcedeSaldo = 
+  valorNum > saldoDisponivel ||           // Valor maior que saldo
+  (valorNum > 0 && saldoDisponivel <= 0); // Ou saldo já esgotado/negativo
+
+// ✅ NOTIFICAR PAI (sem causar loop infinito)
+React.useEffect(() => {
+  if (onValorExcedeSaldo) {
+    onValorExcedeSaldo(valorExcedeSaldo);
+  }
+}, [valorExcedeSaldo]); // ⚠️ SÓ valorExcedeSaldo na dependência!
+```
+
+#### 🔧 MODIFICAÇÃO 4: Melhorar mensagem de erro (linha 475-479)
+
+**SUBSTITUIR:**
+```javascript
+{valorExcedeSaldo && (
+  <span style={styles.errorText}>
+    ⚠️ Valor excede o saldo disponível (
+    {formatarValorMonetario(saldoDisponivel)})
+  </span>
+)}
+```
+
+**POR:**
+```javascript
+{valorExcedeSaldo && (
+  <span style={styles.errorText}>
+    {saldoDisponivel <= 0 
+      ? "⚠️ Esta emenda não possui saldo disponível!"
+      : `⚠️ Valor excede o saldo disponível (${formatarValorMonetario(saldoDisponivel)})`
+    }
+  </span>
+)}
+```
+
+---
+
+### 📄 ARQUIVO 2: `DespesaForm.jsx`
+
+**📍 Localização:** `src/components/DespesaForm.jsx`
+
+#### 🔧 MODIFICAÇÃO 1: Adicionar estado (após linha 141)
+
+```javascript
+const [emendaInfoDinamica, setEmendaInfoDinamica] = useState(emendaInfo);
+const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+const [valorExcedeSaldo, setValorExcedeSaldo] = useState(false); // ✅ NOVO ESTADO
+```
+
+#### 🔧 MODIFICAÇÃO 2: Modificar validação canSubmit (linha 524-525)
+
+**SUBSTITUIR:**
+```javascript
+const canSubmit =
+  Boolean(naturezaSelecionada) && valorNum > 0 && formData.fornecedor?.trim();
+```
+
+**POR:**
+```javascript
+const canSubmit =
+  Boolean(naturezaSelecionada) && 
+  valorNum > 0 && 
+  formData.fornecedor?.trim() &&
+  !valorExcedeSaldo; // ✅ BLOQUEIA SE SALDO INSUFICIENTE
+```
+
+#### 🔧 MODIFICAÇÃO 3: Passar callback para filho (encontre `<DespesaFormBasicFields`)
+
+Procure o uso do componente `DespesaFormBasicFields` e **ADICIONE** a prop:
+
+```javascript
+<DespesaFormBasicFields
+  formData={formData}
+  errors={errors}
+  emendaInfo={emendaInfoDinamica || emendaInfo}
+  modoVisualizacao={modoVisualizacao}
+  handleInputChange={handleInputChange}
+  despesaParaEditar={despesaParaEditar}
+  onValorExcedeSaldo={setValorExcedeSaldo} // ✅ NOVA PROP
+/>
+```
+
+---
+
+## ✅ RESULTADO ESPERADO
+
+Após aplicar todas as correções:
+
+### ✅ CRIANDO NOVA DESPESA
+- Digite valor > saldo disponível
+- **Aviso vermelho aparece**
+- **Botão "Cadastrar" fica cinza/desabilitado**
+- Corrija para valor ≤ saldo
+- **Botão volta a ficar verde/habilitado**
+
+### ✅ EDITANDO DESPESA EXISTENTE
+- Sistema soma valor anterior ao saldo
+- Permite editar valor dentro do saldo recalculado
+- Bloqueia se novo valor > saldo disponível + valor anterior
+
+### ✅ EMENDA COM SALDO NEGATIVO
+- **Bloqueia qualquer valor** (mesmo R$ 0,01)
+- Mensagem: "Esta emenda não possui saldo disponível!"
+
+---
+
+## 🎯 CASOS DE TESTE
+
+### Teste 1: Nova Despesa - Valor OK
+```
+Emenda: R$ 1.500,00 | Saldo: R$ 1.447,00
+Nova despesa: R$ 500,00
+Resultado: ✅ Botão habilitado
+```
+
+### Teste 2: Nova Despesa - Valor Excede
+```
+Emenda: R$ 1.500,00 | Saldo: R$ 1.447,00
+Nova despesa: R$ 1.500,00
+Resultado: ❌ Botão desabilitado + aviso
+```
+
+### Teste 3: Editar Despesa - Valor OK
+```
+Emenda: R$ 1.500,00 | Saldo: R$ 1.447,00
+Despesa original: R$ 500,00
+Saldo para validação: R$ 1.947,00
+Novo valor: R$ 800,00
+Resultado: ✅ Botão habilitado
+```
+
+### Teste 4: Editar Despesa - Valor Excede
+```
+Emenda: R$ 1.500,00 | Saldo: R$ 1.447,00
+Despesa original: R$ 500,00
+Saldo para validação: R$ 1.947,00
+Novo valor: R$ 2.000,00
+Resultado: ❌ Botão desabilitado + aviso
+```
+
+### Teste 5: Emenda Estourada
+```
+Emenda: R$ 3.500,00 | Saldo: -R$ 10,00
+Qualquer valor > R$ 0
+Resultado: ❌ Botão desabilitado + "Emenda sem saldo"
+```
+
+---
+
+## 📋 CHECKLIST FINAL
+
+- [ ] `DespesaFormBasicFields.jsx` - Adicionar prop `onValorExcedeSaldo`
+- [ ] `DespesaFormBasicFields.jsx` - Corrigir `calcularSaldoParaValidacao()`
+- [ ] `DespesaFormBasicFields.jsx` - Adicionar useEffect (só `valorExcedeSaldo` na dependência)
+- [ ] `DespesaFormBasicFields.jsx` - Melhorar mensagem de erro
+- [ ] `DespesaForm.jsx` - Adicionar estado `valorExcedeSaldo`
+- [ ] `DespesaForm.jsx` - Modificar `canSubmit` para incluir `!valorExcedeSaldo`
+- [ ] `DespesaForm.jsx` - Passar prop `onValorExcedeSaldo={setValorExcedeSaldo}`
+- [ ] **REMOVER** logs de debug após confirmar funcionamento
+- [ ] Testar os 5 casos de teste acima
+
+---
+
+## 🐛 TROUBLESHOOTING COMUM
+
+### Problema: Valores digitados somem
+**Causa:** useEffect com dependência errada causando loop infinito  
+**Solução:** Remover `onValorExcedeSaldo` das dependências do useEffect
+
+### Problema: Botão não desabilita
+**Causa:** Prop `onValorExcedeSaldo` não está sendo passada  
+**Solução:** Verificar se prop foi adicionada em `<DespesaFormBasicFields>`
+
+### Problema: Saldo vem como `undefined`
+**Causa:** `emendaInfo` não tem `saldoDisponivel`  
+**Solução:** Usar fallback `?? emendaInfo?.valorTotal ?? 0`
+
+### Problema: Não permite editar despesa existente
+**Causa:** Não está somando valor anterior ao saldo  
+**Solução:** Verificar lógica em `calcularSaldoParaValidacao()`
+
+---
+
+## 🎉 APÓS CORREÇÃO
+
+O sistema estará **100% seguro** contra:
+- ✅ Despesas que excedem saldo
+- ✅ Emendas com saldo negativo
+- ✅ Edições que estouram o orçamento
+- ✅ Bugs de interface (valores sumindo)
+
+**Sistema de validação robusto e user-friendly!** 🚀
