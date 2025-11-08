@@ -300,7 +300,7 @@ const DespesaFormBasicFields = ({
       letterSpacing: "0.5px",
     },
     emendaInfoBox: {
-      padding: "12px 15px",
+      padding: "14px 16px",
       backgroundColor: "#e8f4f8",
       border: "2px solid #3498db",
       borderRadius: "8px",
