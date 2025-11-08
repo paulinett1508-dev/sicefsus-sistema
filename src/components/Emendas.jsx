@@ -25,13 +25,20 @@ import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
 // Função auxiliar para parsear valores monetários (ex: R$ 1.000,50 para 1000.50)
 const parseValorMonetario = (valor) => {
-  if (typeof valor !== "string") {
-    valor = String(valor);
-  }
-  // Remove todos os caracteres que não são dígitos ou ponto decimal
-  const valorLimpo = valor.replace(/[^\d,]/g, "").replace(",", ".");
-  // Converte para float, tratando casos de múltiplos pontos decimais ou valores inválidos
-  const valorFloat = parseFloat(valorLimpo);
+  if (!valor && valor !== 0) return 0;
+  
+  // Se já é número, retorna direto
+  if (typeof valor === 'number') return valor;
+  
+  const valorString = String(valor);
+  
+  // Remove pontos (separador de milhar) e substitui vírgula (decimal) por ponto
+  const numero = valorString
+    .replace(/\./g, "")     // Remove pontos (separador de milhar)
+    .replace(",", ".")      // Substitui vírgula (decimal) por ponto
+    .replace(/[^\d.-]/g, ""); // Remove qualquer outro caractere não numérico
+  
+  const valorFloat = parseFloat(numero);
   return isNaN(valorFloat) ? 0 : valorFloat;
 };
 
@@ -169,8 +176,10 @@ const Emendas = () => {
         // ✅ TOTAL EXECUTADO: Apenas Despesas
         const valorExecutadoTotal = valorExecutadoDespesas;
 
-        // Calcular valores finais
-        const valorTotal = emenda.valorRecurso || emenda.valor || 0;
+        // ✅ CORRIGIDO: Parse correto do valor total usando parseValorMonetario
+        const valorTotal = parseValorMonetario(
+          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0
+        );
         const saldoDisponivel = valorTotal - valorExecutadoTotal;
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0;
