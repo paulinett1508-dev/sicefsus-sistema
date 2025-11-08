@@ -20,7 +20,7 @@ const DespesaFormBasicFields = ({
   modoVisualizacao = false,
   handleInputChange,
   despesaParaEditar = null,
-  onValorExcedeSaldo, // ✅ NOVA PROP: Callback para notificar quando valor excede saldo
+  onValorExcedeSaldo, // ✅ NOVA PROP
 }) => {
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
   const [novoValorPendente, setNovoValorPendente] = useState(null);

@@ -523,10 +523,10 @@ const DespesaForm = ({
   const naturezaSelecionada = pick(formData, ["naturezaDespesa", "natureza"]);
   const valorNum = parseBRL(formData?.valor);
   const canSubmit =
-    Boolean(naturezaSelecionada) && 
-    valorNum > 0 && 
+    Boolean(naturezaSelecionada) &&
+    valorNum > 0 &&
     formData.fornecedor?.trim() &&
-    !valorExcedeSaldo; // ✅ BLOQUEIO: Não permite salvar se valor excede saldo
+    !valorExcedeSaldo; // ✅ BLOQUEIA SE SALDO INSUFICIENTE
 
   return (
     <div style={styles.container}>
