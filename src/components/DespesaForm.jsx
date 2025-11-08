@@ -310,7 +310,7 @@ const DespesaForm = ({
         emendaId: despesaParaEditar.emendaId || "",
         discriminacao: despesaParaEditar.discriminacao || "",
         fornecedor: despesaParaEditar.fornecedor || "",
-        valor: despesaParaEditar.valor?.toString() || "",
+        valor: despesaParaEditar.valor != null ? String(despesaParaEditar.valor) : "",
         numeroEmpenho: despesaParaEditar.numeroEmpenho || "",
         numeroNota: despesaParaEditar.numeroNota || "",
         dataEmpenho: convertToDateString(despesaParaEditar.dataEmpenho),
