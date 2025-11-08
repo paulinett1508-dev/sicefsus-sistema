@@ -7,8 +7,7 @@ import Despesas from "./components/Despesas";
 import Relatorios from "./components/Relatorios";
 import Administracao from "./components/Administracao";
 import Sobre from "./components/Sobre";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { ToastProvider } from "./components/Toast";
 import "./App.css";
 
 function App() {
@@ -35,9 +34,9 @@ function App() {
   };
 
   return (
-    <Router>
-      <ToastContainer />
-      <div style={appStyle}>
+    <ToastProvider>
+      <Router>
+        <div style={appStyle}>
         <aside
           id="sidebar"
           style={{ width: sidebarOpen ? 220 : 0, transition: "width 0.2s ease" }}
@@ -97,7 +96,8 @@ function App() {
           </div>
         </main>
       </div>
-    </Router>
+      </Router>
+    </ToastProvider>
   );
 }
 
