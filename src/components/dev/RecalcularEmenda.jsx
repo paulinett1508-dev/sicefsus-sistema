@@ -11,6 +11,28 @@ import {
 import { db } from "../../firebase/firebaseConfig";
 import { formatarMoeda } from "../../utils/formatters";
 
+// ✅ FUNÇÃO CRÍTICA: Parse monetário correto para formato BR
+const parseValorMonetario = (valor) => {
+  // Se já é número, retorna direto
+  if (typeof valor === "number") return valor;
+
+  // Se não é string, converte
+  if (typeof valor !== "string") {
+    valor = String(valor);
+  }
+
+  // Remove "R$", espaços e caracteres especiais
+  // Remove TODOS os pontos (separador de milhar)
+  // Converte vírgula em ponto (separador decimal)
+  const valorLimpo = valor
+    .replace(/[R$\s]/g, "") // Remove R$ e espaços
+    .replace(/\./g, "") // Remove pontos (milhar)
+    .replace(",", "."); // Converte vírgula em ponto
+
+  const valorFloat = parseFloat(valorLimpo);
+  return isNaN(valorFloat) ? 0 : valorFloat;
+};
+
 function RecalcularEmenda() {
   const [emendas, setEmendas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +40,7 @@ function RecalcularEmenda() {
   const [preview, setPreview] = useState(null);
   const [sucesso, setSucesso] = useState(false);
   const [busca, setBusca] = useState("");
-  const [filtroProblema, setFiltroProblema] = useState("todas"); // 'todas' | 'apenas-problemas'
+  const [filtroProblema, setFiltroProblema] = useState("todas");
 
   // Carregar todas as emendas ao montar
   useEffect(() => {
@@ -42,23 +64,30 @@ function RecalcularEmenda() {
         const despesasSnapshot = await getDocs(despesasQuery);
         const despesas = despesasSnapshot.docs.map((doc) => doc.data());
 
-        // ✅ CORREÇÃO: Usar (emenda.valor || emenda.valorTotal)
-        const valorTotal = emenda.valor || emenda.valorTotal || 0;
-
-        // Calcular valores reais
-        const valorExecutadoReal = despesas.reduce(
-          (sum, d) => sum + (d.valor || 0),
-          0,
+        // ✅ CORREÇÃO: Parse monetário correto + fallback para múltiplos campos
+        const valorTotal = parseValorMonetario(
+          emenda.valor || emenda.valorTotal || emenda.valorRecurso || 0,
         );
+
+        // ✅ CORREÇÃO: Parse de cada despesa individualmente
+        const valorExecutadoReal = despesas.reduce((sum, d) => {
+          const valorDespesa = parseValorMonetario(d.valor || 0);
+          return sum + valorDespesa;
+        }, 0);
+
         const saldoReal = valorTotal - valorExecutadoReal;
+
+        // ✅ CORREÇÃO: Parse dos valores no banco também
+        const valorExecutadoBanco = parseValorMonetario(
+          emenda.valorExecutado || 0,
+        );
+        const saldoBanco = parseValorMonetario(emenda.saldoDisponivel || 0);
 
         // Verificar discrepância
         const diferencaExecutado = Math.abs(
-          valorExecutadoReal - (emenda.valorExecutado || 0),
+          valorExecutadoReal - valorExecutadoBanco,
         );
-        const diferencaSaldo = Math.abs(
-          saldoReal - (emenda.saldoDisponivel || 0),
-        );
+        const diferencaSaldo = Math.abs(saldoReal - saldoBanco);
         const temProblema = diferencaExecutado > 1 || diferencaSaldo > 1;
 
         emendasData.push({
@@ -66,6 +95,7 @@ function RecalcularEmenda() {
           despesas: despesas.length,
           valorExecutadoReal,
           saldoReal,
+          valorTotalParsed: valorTotal, // ✅ Armazena valor parseado
           diferencaExecutado,
           diferencaSaldo,
           temProblema,
@@ -94,16 +124,18 @@ function RecalcularEmenda() {
   };
 
   const selecionarEmenda = (emenda) => {
-    // ✅ CORREÇÃO: Usar (emenda.valor || emenda.valorTotal)
-    const valorTotal = emenda.valor || emenda.valorTotal || 0;
+    // ✅ Usa valor já parseado
+    const valorTotal = emenda.valorTotalParsed || 0;
 
     setPreview({
       emenda,
       despesas: emenda.despesas,
       valoresBanco: {
-        valorExecutado: emenda.valorExecutado || 0,
-        saldoDisponivel: emenda.saldoDisponivel || 0,
-        percentualExecutado: emenda.percentualExecutado || 0,
+        valorExecutado: parseValorMonetario(emenda.valorExecutado || 0),
+        saldoDisponivel: parseValorMonetario(emenda.saldoDisponivel || 0),
+        percentualExecutado: parseValorMonetario(
+          emenda.percentualExecutado || 0,
+        ),
       },
       valoresCalculados: {
         valorExecutado: emenda.valorExecutadoReal,
@@ -121,7 +153,7 @@ function RecalcularEmenda() {
     const confirma = window.confirm(
       `⚠️ CONFIRMAR RECÁLCULO?\n\n` +
         `Emenda: ${preview.emenda.id}\n` +
-        `Número: ${preview.emenda.numeroEmenda}\n\n` +
+        `Número: ${preview.emenda.numeroEmenda || preview.emenda.numero}\n\n` +
         `Esta ação não pode ser desfeita.\n\n` +
         `Deseja continuar?`,
     );
@@ -162,6 +194,7 @@ function RecalcularEmenda() {
     const matchBusca =
       !busca ||
       emenda.numeroEmenda?.toLowerCase().includes(busca.toLowerCase()) ||
+      emenda.numero?.toLowerCase().includes(busca.toLowerCase()) ||
       emenda.municipio?.toLowerCase().includes(busca.toLowerCase()) ||
       emenda.id?.toLowerCase().includes(busca.toLowerCase());
 
@@ -252,7 +285,7 @@ function RecalcularEmenda() {
             >
               <div className="emenda-header">
                 <div>
-                  <strong>{emenda.numeroEmenda}</strong>
+                  <strong>{emenda.numeroEmenda || emenda.numero}</strong>
                   <span className="emenda-municipio">
                     {emenda.municipio}/{emenda.uf}
                   </span>
@@ -270,7 +303,7 @@ function RecalcularEmenda() {
                 <div className="info-item">
                   <span className="label">Valor Total:</span>
                   <span className="valor">
-                    {formatarMoeda(emenda.valor || emenda.valorTotal)}
+                    {formatarMoeda(emenda.valorTotalParsed)}
                   </span>
                 </div>
                 <div className="info-item">
@@ -316,7 +349,8 @@ function RecalcularEmenda() {
 
             <div className="info-emenda">
               <p>
-                <strong>Número:</strong> {preview.emenda.numeroEmenda}
+                <strong>Número:</strong>{" "}
+                {preview.emenda.numeroEmenda || preview.emenda.numero}
               </p>
               <p>
                 <strong>Município:</strong> {preview.emenda.municipio}/
@@ -324,9 +358,7 @@ function RecalcularEmenda() {
               </p>
               <p>
                 <strong>Valor Total:</strong>{" "}
-                {formatarMoeda(
-                  preview.emenda.valor || preview.emenda.valorTotal,
-                )}
+                {formatarMoeda(preview.emenda.valorTotalParsed)}
               </p>
               <p>
                 <strong>Despesas:</strong> {preview.despesas} cadastrada(s)
