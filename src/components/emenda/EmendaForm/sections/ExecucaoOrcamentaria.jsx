@@ -450,6 +450,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 <DespesaForm
                   despesaParaEditar={despesaEmEdicao}
                   emendaPreSelecionada={emendaId}
+                  emendaInfo={formData}
                   usuario={usuario}
                   onCancelar={handleFecharFormulario}
                   onSuccess={handleSucessoFormulario}
