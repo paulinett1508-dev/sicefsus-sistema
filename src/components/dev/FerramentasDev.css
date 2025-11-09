@@ -1,0 +1,418 @@
+/* ========================================
+   FERRAMENTAS DEV - CSS MINIMALISTA
+   Design: Clean, simples, sem firulas
+   ======================================== */
+
+/* Container Principal */
+.ferramentas-dev-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.ferramentas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #e1e4e8;
+}
+
+.header-titulo h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #24292e;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icone-ferramenta {
+  font-size: 24px;
+}
+
+.header-subtitulo {
+  font-size: 13px;
+  color: #586069;
+  margin: 0;
+}
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-usuario {
+  font-size: 13px;
+  color: #586069;
+}
+
+.badge-superadmin {
+  background: #ffd33d;
+  color: #24292e;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ===== ALERTA ===== */
+.alerta-seguranca {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.alerta-icone {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.alerta-conteudo {
+  font-size: 13px;
+  color: #856404;
+  line-height: 1.5;
+}
+
+.alerta-conteudo strong {
+  font-weight: 600;
+  color: #533f03;
+}
+
+/* ===== NAVEGAÇÃO - ABAS ===== */
+.abas-navegacao {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: #f6f8fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e1e4e8;
+  overflow-x: auto;
+}
+
+.aba-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #586069;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.aba-btn:hover {
+  background: #ffffff;
+  border-color: #d1d5da;
+  color: #24292e;
+}
+
+.aba-btn.ativa {
+  background: #ffffff;
+  border-color: #0366d6;
+  color: #0366d6;
+  box-shadow: 0 1px 3px rgba(3, 102, 214, 0.1);
+}
+
+.aba-icone {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.aba-label {
+  font-size: 13px;
+}
+
+.aba-badge {
+  background: #28a745;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== CONTEÚDO DA ABA ===== */
+.conteudo-aba {
+  background: #ffffff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 24px;
+  min-height: 400px;
+}
+
+/* ===== FOOTER ===== */
+.ferramentas-footer {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f6f8fa;
+  border-radius: 6px;
+  border: 1px solid #e1e4e8;
+}
+
+.footer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #586069;
+}
+
+.footer-info span:not(:last-child)::after {
+  content: '';
+}
+
+/* ===== ESTILOS COMUNS PARA TABS ===== */
+
+/* Headers de Tabs */
+.tab-header {
+  margin-bottom: 24px;
+}
+
+.tab-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #24292e;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-descricao {
+  font-size: 13px;
+  color: #586069;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Botões Padrão */
+.btn-primario,
+.btn-secundario {
+  padding: 10px 20px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primario {
+  background: #0366d6;
+  border-color: #0366d6;
+  color: white;
+}
+
+.btn-primario:hover {
+  background: #0256c4;
+}
+
+.btn-secundario {
+  background: white;
+  border-color: #d1d5da;
+  color: #24292e;
+}
+
+.btn-secundario:hover {
+  background: #f6f8fa;
+  border-color: #a1a7ae;
+}
+
+/* Tabelas Simples */
+.tabela-simples {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabela-simples thead {
+  background: #f6f8fa;
+}
+
+.tabela-simples th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #24292e;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.tabela-simples td {
+  padding: 12px;
+  border-bottom: 1px solid #e1e4e8;
+  color: #24292e;
+}
+
+.tabela-simples tbody tr:hover {
+  background: #f6f8fa;
+}
+
+/* Cards Informativos Simples */
+.info-card {
+  padding: 16px;
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.info-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #24292e;
+  margin: 0 0 8px 0;
+}
+
+.info-card p {
+  font-size: 13px;
+  color: #586069;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Estados de Carregamento */
+.loading-simples {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #586069;
+  font-size: 13px;
+}
+
+.loading-simples::before {
+  content: '⏳';
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Mensagens de Status */
+.msg-sucesso,
+.msg-erro,
+.msg-aviso {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  border: 1px solid;
+}
+
+.msg-sucesso {
+  background: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.msg-erro {
+  background: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.msg-aviso {
+  background: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+/* Badge de Status */
+.badge-status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-ok {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-problema {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.badge-aviso {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Inputs e Selects */
+.input-simples,
+.select-simples {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #24292e;
+  background: white;
+  transition: border-color 0.15s ease;
+}
+
+.input-simples:focus,
+.select-simples:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
+}
+
+/* Grid Simples 2 Colunas */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .ferramentas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .abas-navegacao {
+    overflow-x: auto;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== FIM DO CSS ===== */
