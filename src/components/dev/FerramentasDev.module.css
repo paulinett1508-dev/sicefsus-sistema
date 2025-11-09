@@ -1,177 +1,110 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../../context/UserContext";
+/* FerramentasDev.module.css */
 
-// Importar abas
-import RecalculoTab from "./tabs/RecalculoTab";
-import DiagnosticoTab from "./tabs/DiagnosticoTab";
-import LimpezaTab from "./tabs/LimpezaTab";
-import BackupTab from "./tabs/BackupTab";
-import UsuariosTab from "./tabs/UsuariosTab";
-import ValidacaoTab from "./tabs/ValidacaoTab";
-import AnalisesTab from "./tabs/AnalisesTab";
-import ConfigTab from "./tabs/ConfigTab";
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 20px;
+}
 
-const FerramentasDev = () => {
-  const { usuario } = useUser();
-  const navigate = useNavigate();
-  const [abaAtiva, setAbaAtiva] = useState("recalculo");
+.header {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border-radius: 12px;
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
 
-  const isSuperAdmin = usuario?.tipo === "admin" && usuario?.superAdmin === true;
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  useEffect(() => {
-    if (!isSuperAdmin) {
-      navigate("/dashboard");
-    }
-  }, [isSuperAdmin, navigate]);
+.title {
+  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
 
-  if (!isSuperAdmin) {
-    return null;
-  }
+.badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 
-  const abas = [
-    { id: "recalculo", icon: "🔄", label: "Recálculo", componente: RecalculoTab },
-    { id: "diagnostico", icon: "🔍", label: "Diagnóstico", componente: DiagnosticoTab },
-    { id: "limpeza", icon: "🧹", label: "Limpeza", componente: LimpezaTab },
-    { id: "backup", icon: "📥", label: "Backup", componente: BackupTab },
-    { id: "usuarios", icon: "👥", label: "Usuários", componente: UsuariosTab },
-    { id: "validacao", icon: "✅", label: "Validação", componente: ValidacaoTab },
-    { id: "analises", icon: "📈", label: "Análises", componente: AnalisesTab },
-    { id: "config", icon: "⚙️", label: "Configurações", componente: ConfigTab },
-  ];
+.alertaBanner {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  const abaAtual = abas.find((aba) => aba.id === abaAtiva);
-  const ComponenteAtivo = abaAtual?.componente;
+.tabsContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: '#f8f9fa',
-      padding: '20px'
-    },
-    header: {
-      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-      borderRadius: '12px',
-      padding: '24px 32px',
-      marginBottom: '24px',
-      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.15)',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '16px'
-    },
-    headerLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px'
-    },
-    icon: {
-      fontSize: '28px'
-    },
-    title: {
-      color: 'white',
-      fontSize: '24px',
-      fontWeight: '600',
-      margin: 0
-    },
-    badge: {
-      background: 'rgba(255, 255, 255, 0.2)',
-      color: 'white',
-      padding: '4px 12px',
-      borderRadius: '12px',
-      fontSize: '12px',
-      fontWeight: '600',
-      letterSpacing: '0.5px'
-    },
-    alert: {
-      background: 'rgba(255, 255, 255, 0.15)',
-      color: 'white',
-      padding: '8px 16px',
-      borderRadius: '8px',
-      fontSize: '13px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px'
-    },
-    tabsContainer: {
-      background: 'white',
-      borderRadius: '12px',
-      padding: '8px',
-      marginBottom: '24px',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '4px'
-    },
-    tab: {
-      background: 'transparent',
-      border: 'none',
-      padding: '10px 16px',
-      borderRadius: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#64748b'
-    },
-    tabActive: {
-      background: '#2563eb',
-      color: 'white'
-    },
-    tabIcon: {
-      fontSize: '16px'
-    },
-    content: {
-      background: 'white',
-      borderRadius: '12px',
-      padding: '24px',
-      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-      minHeight: '400px'
-    }
-  };
+.tabButton {
+  background: transparent;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
 
-  return (
-    <div style={styles.container}>
-      {/* Header Profissional */}
-      <div style={styles.header}>
-        <div style={styles.headerLeft}>
-          <span style={styles.icon}>🔧</span>
-          <h1 style={styles.title}>Ferramentas de Desenvolvimento</h1>
-          <span style={styles.badge}>SUPER ADMIN</span>
-        </div>
-        <div style={styles.alert}>
-          <span>⚠️</span>
-          <span>Área restrita. Todas as ações são registradas.</span>
-        </div>
-      </div>
+.tabButton:hover {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+}
 
-      {/* Tabs Profissionais */}
-      <div style={styles.tabsContainer}>
-        {abas.map((aba) => (
-          <button
-            key={aba.id}
-            onClick={() => setAbaAtiva(aba.id)}
-            style={{
-              ...styles.tab,
-              ...(abaAtiva === aba.id ? styles.tabActive : {})
-            }}
-          >
-            <span style={styles.tabIcon}>{aba.icon}</span>
-            <span>{aba.label}</span>
-          </button>
-        ))}
-      </div>
+.tabButtonActive {
+  background: #2563eb;
+  color: white;
+}
 
-      {/* Conteúdo */}
-      <div style={styles.content}>
-        {ComponenteAtivo ? <ComponenteAtivo /> : <div>Aba não encontrada</div>}
-      </div>
-    </div>
-  );
-};
+.tabButtonActive:hover {
+  background: #1d4ed8;
+}
 
-export default FerramentasDev;
+.tabIcon {
+  font-size: 16px;
+}
+
+.tabLabel {
+  white-space: nowrap;
+}
+
+.content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+}
