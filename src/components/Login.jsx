@@ -473,10 +473,10 @@ const styles = {
   },
   input: {
     width: "100% !important",
-    padding: "14px 12px !important",
+    padding: "12px 10px !important",
     borderRadius: "8px !important",
     border: "2px solid #e1e8ed !important",
-    fontSize: "14px !important",
+    fontSize: "13px !important",
     transition: "border-color 0.3s ease !important",
     boxSizing: "border-box !important",
     display: "block !important",
@@ -486,8 +486,8 @@ const styles = {
     zIndex: "10 !important",
     background: "#ffffff !important",
     color: "#000000 !important",
-    minHeight: "48px !important",
-    letterSpacing: "-0.2px !important",
+    minHeight: "44px !important",
+    letterSpacing: "-0.3px !important",
   },
   checkboxContainer: {
     display: "flex",
