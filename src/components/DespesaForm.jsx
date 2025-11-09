@@ -22,6 +22,7 @@ import {
   deleteDoc, // Import deleteDoc
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { recalcularSaldoEmenda } from "../utils/emendaCalculos"; // ✅ RECÁLCULO AUTOMÁTICO
 
 // ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
 const pick = (obj, keys) => {
@@ -544,6 +545,24 @@ const DespesaForm = ({
           message: "✅ Despesa cadastrada com sucesso!",
           type: "success",
         });
+      }
+
+      // 🔄 RECÁLCULO AUTOMÁTICO DA EMENDA
+      const emendaIdParaRecalcular =
+        formData.emendaId || despesaParaEditar?.emendaId || emendaId;
+
+      if (emendaIdParaRecalcular) {
+        console.log(
+          `🔄 Iniciando recálculo automático da emenda ${emendaIdParaRecalcular}...`,
+        );
+        const resultado = await recalcularSaldoEmenda(emendaIdParaRecalcular);
+
+        if (resultado.success) {
+          console.log(`✅ Recálculo automático concluído:`, resultado.valores);
+        } else {
+          console.warn(`⚠️ Recálculo automático falhou: ${resultado.error}`);
+          // ⚠️ NÃO bloqueia o fluxo - apenas loga o aviso
+        }
       }
 
       console.log("🔍 DespesaForm: ANTES de chamar navegarAposSalvar");
