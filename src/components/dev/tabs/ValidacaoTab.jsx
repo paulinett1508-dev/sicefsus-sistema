@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 function ValidacaoTab() {
   return (
@@ -11,36 +11,6 @@ function ValidacaoTab() {
       </div>
 
       <div className="validacoes-grid">
-        <div className="validacao-card">
-          <div className="validacao-status pendente">⏳</div>
-          <h3>Validar CNPJs</h3>
-          <p>Verificar CNPJs contra base da Receita Federal</p>
-          <div className="validacao-info">
-            <span>0 CNPJs validados</span>
-            <button disabled>Validar Todos</button>
-          </div>
-        </div>
-
-        <div className="validacao-card">
-          <div className="validacao-status pendente">⏳</div>
-          <h3>Documentos Obrigatórios</h3>
-          <p>Verificar despesas sem documentação</p>
-          <div className="validacao-info">
-            <span>--- pendentes</span>
-            <button disabled>Verificar</button>
-          </div>
-        </div>
-
-        <div className="validacao-card">
-          <div className="validacao-status pendente">⏳</div>
-          <h3>Detectar Anomalias</h3>
-          <p>Valores suspeitos ou padrões estranhos</p>
-          <div className="validacao-info">
-            <span>--- anomalias</span>
-            <button disabled>Analisar</button>
-          </div>
-        </div>
-
         <div className="validacao-card">
           <div className="validacao-status pendente">⏳</div>
           <h3>Auditoria Completa</h3>
@@ -58,16 +28,6 @@ function ValidacaoTab() {
           <div className="validacao-info">
             <span>--- erros</span>
             <button disabled>Verificar</button>
-          </div>
-        </div>
-
-        <div className="validacao-card">
-          <div className="validacao-status pendente">⏳</div>
-          <h3>Campos Obrigatórios</h3>
-          <p>Detectar registros com dados faltantes</p>
-          <div className="validacao-info">
-            <span>--- incompletos</span>
-            <button disabled>Listar</button>
           </div>
         </div>
       </div>
