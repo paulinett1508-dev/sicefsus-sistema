@@ -1,19 +1,28 @@
 /* ========================================
-   FERRAMENTAS DEV - CSS MINIMALISTA
-   Design: Clean, simples, sem firulas
+   FERRAMENTAS DEV - CSS 100% ISOLADO
+
+   ZERO impacto em outras páginas!
+   Todos os estilos com escopo restrito
    ======================================== */
 
-/* Container Principal */
+/* Container principal - único elemento que não precisa prefixo */
 .ferramentas-dev-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
   background: #ffffff;
   min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ===== HEADER ===== */
-.ferramentas-header {
+/* Garantir que elementos filhos não vazem */
+.ferramentas-dev-container * {
+  box-sizing: border-box;
+}
+
+/* Header */
+.ferramentas-dev-container .ferramentas-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,7 +33,7 @@
   border: 1px solid #e1e4e8;
 }
 
-.header-titulo h1 {
+.ferramentas-dev-container .header-titulo h1 {
   font-size: 20px;
   font-weight: 600;
   color: #24292e;
@@ -34,28 +43,28 @@
   gap: 8px;
 }
 
-.icone-ferramenta {
+.ferramentas-dev-container .icone-ferramenta {
   font-size: 24px;
 }
 
-.header-subtitulo {
+.ferramentas-dev-container .header-subtitulo {
   font-size: 13px;
   color: #586069;
   margin: 0;
 }
 
-.header-info {
+.ferramentas-dev-container .header-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.info-usuario {
+.ferramentas-dev-container .info-usuario {
   font-size: 13px;
   color: #586069;
 }
 
-.badge-superadmin {
+.ferramentas-dev-container .badge-superadmin {
   background: #ffd33d;
   color: #24292e;
   padding: 4px 10px;
@@ -65,8 +74,8 @@
   letter-spacing: 0.5px;
 }
 
-/* ===== ALERTA ===== */
-.alerta-seguranca {
+/* Alerta */
+.ferramentas-dev-container .alerta-seguranca {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -77,24 +86,24 @@
   margin-bottom: 16px;
 }
 
-.alerta-icone {
+.ferramentas-dev-container .alerta-icone {
   font-size: 20px;
   line-height: 1;
 }
 
-.alerta-conteudo {
+.ferramentas-dev-container .alerta-conteudo {
   font-size: 13px;
   color: #856404;
   line-height: 1.5;
 }
 
-.alerta-conteudo strong {
+.ferramentas-dev-container .alerta-conteudo strong {
   font-weight: 600;
   color: #533f03;
 }
 
-/* ===== NAVEGAÇÃO - ABAS ===== */
-.abas-navegacao {
+/* Abas */
+.ferramentas-dev-container .abas-navegacao {
   display: flex;
   gap: 4px;
   padding: 8px;
@@ -105,7 +114,7 @@
   overflow-x: auto;
 }
 
-.aba-btn {
+.ferramentas-dev-container .aba-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -119,32 +128,31 @@
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
-  position: relative;
 }
 
-.aba-btn:hover {
+.ferramentas-dev-container .aba-btn:hover {
   background: #ffffff;
   border-color: #d1d5da;
   color: #24292e;
 }
 
-.aba-btn.ativa {
+.ferramentas-dev-container .aba-btn.ativa {
   background: #ffffff;
   border-color: #0366d6;
   color: #0366d6;
   box-shadow: 0 1px 3px rgba(3, 102, 214, 0.1);
 }
 
-.aba-icone {
+.ferramentas-dev-container .aba-icone {
   font-size: 16px;
   line-height: 1;
 }
 
-.aba-label {
+.ferramentas-dev-container .aba-label {
   font-size: 13px;
 }
 
-.aba-badge {
+.ferramentas-dev-container .aba-badge {
   background: #28a745;
   color: white;
   padding: 2px 6px;
@@ -155,8 +163,8 @@
   letter-spacing: 0.3px;
 }
 
-/* ===== CONTEÚDO DA ABA ===== */
-.conteudo-aba {
+/* Conteúdo */
+.ferramentas-dev-container .conteudo-aba {
   background: #ffffff;
   border: 1px solid #e1e4e8;
   border-radius: 8px;
@@ -164,8 +172,8 @@
   min-height: 400px;
 }
 
-/* ===== FOOTER ===== */
-.ferramentas-footer {
+/* Footer */
+.ferramentas-dev-container .ferramentas-footer {
   margin-top: 24px;
   padding: 16px;
   background: #f6f8fa;
@@ -173,7 +181,7 @@
   border: 1px solid #e1e4e8;
 }
 
-.footer-info {
+.ferramentas-dev-container .footer-info {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,18 +190,12 @@
   color: #586069;
 }
 
-.footer-info span:not(:last-child)::after {
-  content: '';
-}
-
-/* ===== ESTILOS COMUNS PARA TABS ===== */
-
 /* Headers de Tabs */
-.tab-header {
+.ferramentas-dev-container .tab-header {
   margin-bottom: 24px;
 }
 
-.tab-header h2 {
+.ferramentas-dev-container .tab-header h2 {
   font-size: 18px;
   font-weight: 600;
   color: #24292e;
@@ -203,216 +205,22 @@
   gap: 8px;
 }
 
-.tab-descricao {
+.ferramentas-dev-container .tab-descricao {
   font-size: 13px;
   color: #586069;
   line-height: 1.5;
   margin: 0;
-}
-
-/* Botões Padrão */
-.btn-primario,
-.btn-secundario {
-  padding: 10px 20px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.btn-primario {
-  background: #0366d6;
-  border-color: #0366d6;
-  color: white;
-}
-
-.btn-primario:hover {
-  background: #0256c4;
-}
-
-.btn-secundario {
-  background: white;
-  border-color: #d1d5da;
-  color: #24292e;
-}
-
-.btn-secundario:hover {
-  background: #f6f8fa;
-  border-color: #a1a7ae;
-}
-
-/* Tabelas Simples */
-.tabela-simples {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tabela-simples thead {
-  background: #f6f8fa;
-}
-
-.tabela-simples th {
-  padding: 12px;
-  text-align: left;
-  font-weight: 600;
-  color: #24292e;
-  border-bottom: 2px solid #e1e4e8;
-}
-
-.tabela-simples td {
-  padding: 12px;
-  border-bottom: 1px solid #e1e4e8;
-  color: #24292e;
-}
-
-.tabela-simples tbody tr:hover {
-  background: #f6f8fa;
-}
-
-/* Cards Informativos Simples */
-.info-card {
-  padding: 16px;
-  background: #f6f8fa;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  margin-bottom: 16px;
-}
-
-.info-card h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #24292e;
-  margin: 0 0 8px 0;
-}
-
-.info-card p {
-  font-size: 13px;
-  color: #586069;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* Estados de Carregamento */
-.loading-simples {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #586069;
-  font-size: 13px;
-}
-
-.loading-simples::before {
-  content: '⏳';
-  font-size: 32px;
-  margin-bottom: 12px;
-  display: block;
-}
-
-/* Mensagens de Status */
-.msg-sucesso,
-.msg-erro,
-.msg-aviso {
-  padding: 12px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  margin-bottom: 16px;
-  border: 1px solid;
-}
-
-.msg-sucesso {
-  background: #d4edda;
-  border-color: #c3e6cb;
-  color: #155724;
-}
-
-.msg-erro {
-  background: #f8d7da;
-  border-color: #f5c6cb;
-  color: #721c24;
-}
-
-.msg-aviso {
-  background: #fff3cd;
-  border-color: #ffeaa7;
-  color: #856404;
-}
-
-/* Badge de Status */
-.badge-status {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.badge-ok {
-  background: #d4edda;
-  color: #155724;
-}
-
-.badge-problema {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.badge-aviso {
-  background: #fff3cd;
-  color: #856404;
-}
-
-/* Inputs e Selects */
-.input-simples,
-.select-simples {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5da;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #24292e;
-  background: white;
-  transition: border-color 0.15s ease;
-}
-
-.input-simples:focus,
-.select-simples:focus {
-  outline: none;
-  border-color: #0366d6;
-  box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
-}
-
-/* Grid Simples 2 Colunas */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
 }
 
 /* Responsivo */
 @media (max-width: 768px) {
-  .ferramentas-header {
+  .ferramentas-dev-container .ferramentas-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .abas-navegacao {
+  .ferramentas-dev-container .abas-navegacao {
     overflow-x: auto;
   }
-
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
 }
-
-/* ===== FIM DO CSS ===== */
