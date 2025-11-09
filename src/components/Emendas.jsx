@@ -154,17 +154,38 @@ const Emendas = () => {
           (despesa) => despesa.emendaId === emenda.id,
         );
 
-        // ✅ Valor Total - Parsing robusto
-        const valorTotal = parseValorMonetario(emenda.valorTotal);
+        // ✅ Valor Total - Parsing robusto com fallback
+        // Tenta valorTotal, se não existir tenta valorRecurso, se não existir tenta valor
+        const valorTotal = parseValorMonetario(
+          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0,
+        );
 
-        // 🔍 DEBUG: Verificar se valorTotal está vindo do Firebase
+        // 🔍 DEBUG: Verificar qual campo foi usado
         if (valorTotal === 0) {
           console.warn(
             `⚠️ Emenda ${emenda.numero || emenda.id} com valorTotal = 0`,
             {
-              valorOriginal: emenda.valorTotal,
-              tipoValor: typeof emenda.valorTotal,
+              valorTotal: emenda.valorTotal,
+              valorRecurso: emenda.valorRecurso,
+              valor: emenda.valor,
+              tipoValorTotal: typeof emenda.valorTotal,
+              tipoValorRecurso: typeof emenda.valorRecurso,
+              tipoValor: typeof emenda.valor,
               emendaCompleta: emenda,
+            },
+          );
+        } else {
+          console.log(
+            `✅ Emenda ${emenda.numero || emenda.id} valorTotal OK:`,
+            {
+              valorParsed: valorTotal,
+              campoUsado: emenda.valorTotal
+                ? "valorTotal"
+                : emenda.valorRecurso
+                  ? "valorRecurso"
+                  : emenda.valor
+                    ? "valor"
+                    : "nenhum",
             },
           );
         }
