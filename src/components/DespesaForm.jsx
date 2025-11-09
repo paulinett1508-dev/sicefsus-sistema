@@ -715,15 +715,6 @@ const DespesaForm = ({
         {!modoVisualizacao && (
           <div style={styles.formActions}>
             <button
-              type="button"
-              onClick={onCancelar}
-              style={styles.cancelButton}
-              disabled={salvando}
-            >
-              ← Voltar
-            </button>
-
-            <button
               type="button" // Mudado para button normal para evitar submit automático
               onClick={handleSubmit}
               style={{

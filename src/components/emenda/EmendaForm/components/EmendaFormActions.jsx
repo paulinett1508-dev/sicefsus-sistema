@@ -90,7 +90,7 @@ const EmendaFormActions = ({
         </button>
       )}
 
-      {/* FORMULÁRIO PREENCHIDO: Mostrar [❌ Cancelar] */}
+      {/* FORMULÁRIO PREENCHIDO: Mostrar [← Voltar] */}
       {hasUnsavedChanges && (
         <button
           type="button"
@@ -100,7 +100,7 @@ const EmendaFormActions = ({
           onMouseEnter={(e) => (e.target.style.backgroundColor = "#c82333")}
           onMouseLeave={(e) => (e.target.style.backgroundColor = "#dc3545")}
         >
-          ❌ Cancelar
+          ← Voltar
         </button>
       )}
 

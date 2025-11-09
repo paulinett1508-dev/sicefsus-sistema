@@ -359,7 +359,7 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                       })}
                     </strong>
                     <small style={styles.saldoTexto}>
-                      Saldo:{" "}
+                      Saldo Disponível:{" "}
                       {(emenda.saldoDisponivel || 0).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
