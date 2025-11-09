@@ -24,7 +24,7 @@ import FluxoEmenda from "./components/FluxoEmenda";
 import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import MigracaoCompleta from "./components/admin/MigracaoCompleta";
-import FerramentasDev from "./pages/FerramentasDev";
+import FerramentasDev from "./components/dev/FerramentasDev";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 // import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
