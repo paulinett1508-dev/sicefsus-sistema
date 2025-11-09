@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import logoSicefsus from "../images/logo-sicefsus.png";
 import logoAraujoInfo from "../images/logoaraujoinfo.png";
 import { useVersion } from "../hooks/useVersion";
-import { gerarGuiaPDF } from "../utils/guiaPdfGenerator";
 
 const Sobre = () => {
   const { version, loading } = useVersion();
-  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     document.title = "Sobre - SICEFSUS";
@@ -14,19 +12,6 @@ const Sobre = () => {
       document.title = "SICEFSUS";
     };
   }, []);
-
-  const handleDownloadPDF = async () => {
-    setGenerating(true);
-    try {
-      const nomeArquivo = await gerarGuiaPDF();
-      alert(`✅ Guia em PDF gerado com sucesso!\n\nArquivo: ${nomeArquivo}`);
-    } catch (error) {
-      console.error("Erro ao gerar PDF:", error);
-      alert("❌ Erro ao gerar o PDF. Tente novamente.");
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   return (
     <>
@@ -55,38 +40,6 @@ const Sobre = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleDownloadPDF}
-            disabled={generating}
-            className="btn-download-guia"
-            style={{
-              marginTop: "15px",
-              padding: "12px 24px",
-              backgroundColor: generating ? "#ccc" : "#154360",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              cursor: generating ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              transition: "all 0.3s ease"
-            }}
-          >
-            {generating ? (
-              <>
-                <span>⏳</span>
-                <span>Gerando PDF...</span>
-              </>
-            ) : (
-              <>
-                <span>📥</span>
-                <span>Baixar Guia em PDF</span>
-              </>
-            )}
-          </button>
         </div>
 
         {/* Content Grid */}
