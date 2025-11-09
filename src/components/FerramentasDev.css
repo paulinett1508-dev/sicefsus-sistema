@@ -1,0 +1,273 @@
+/* ========================================
+   FERRAMENTAS DE DESENVOLVEDOR - ESTILOS
+   ======================================== */
+
+.ferramentas-dev-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f8f9fa;
+  min-height: calc(100vh - 60px);
+}
+
+/* ========== HEADER ========== */
+.ferramentas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px 32px;
+  border-radius: 12px;
+  color: white;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.header-titulo h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icone-ferramenta {
+  font-size: 32px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.header-subtitulo {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.header-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.info-usuario {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.badge-superadmin {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+}
+
+/* ========== ALERTA DE SEGURANÇA ========== */
+.alerta-seguranca {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.alerta-icone {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.alerta-conteudo {
+  font-size: 14px;
+  color: #856404;
+  line-height: 1.5;
+}
+
+.alerta-conteudo strong {
+  font-weight: 700;
+  color: #664d03;
+}
+
+/* ========== NAVEGAÇÃO ABAS ========== */
+.abas-navegacao {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+.abas-navegacao::-webkit-scrollbar {
+  height: 6px;
+}
+
+.abas-navegacao::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.aba-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  white-space: nowrap;
+  position: relative;
+}
+
+.aba-btn:hover {
+  background: #f7fafc;
+  border-color: #e2e8f0;
+}
+
+.aba-btn.ativa {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.aba-icone {
+  font-size: 18px;
+}
+
+.aba-label {
+  font-weight: 600;
+}
+
+.aba-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #f56565;
+  color: white;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.aba-btn.ativa .aba-badge {
+  background: #ffd700;
+  color: #2d3748;
+}
+
+/* ========== CONTEÚDO DA ABA ========== */
+.conteudo-aba {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  min-height: 400px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+/* ========== FOOTER ========== */
+.ferramentas-footer {
+  background: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.footer-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #718096;
+}
+
+.footer-info span:not(:last-child)::after {
+  content: '';
+}
+
+/* ========== RESPONSIVIDADE ========== */
+@media (max-width: 768px) {
+  .ferramentas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-info {
+    align-items: flex-start;
+  }
+
+  .abas-navegacao {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+  }
+
+  .aba-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .conteudo-aba {
+    padding: 16px;
+  }
+}
+
+/* ========== ANIMAÇÕES ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.conteudo-aba {
+  animation: fadeIn 0.3s ease;
+}
+
+/* ========== TEMA ESCURO (futuro) ========== */
+@media (prefers-color-scheme: dark) {
+  .ferramentas-dev-container {
+    background: #1a202c;
+  }
+
+  .abas-navegacao,
+  .conteudo-aba,
+  .ferramentas-footer {
+    background: #2d3748;
+  }
+
+  .aba-btn {
+    color: #e2e8f0;
+  }
+
+  .aba-btn:hover {
+    background: #4a5568;
+  }
+
+  .footer-info {
+    color: #a0aec0;
+  }
+}

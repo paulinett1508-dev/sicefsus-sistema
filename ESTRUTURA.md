@@ -1,6 +1,6 @@
 # 🏗️ ESTRUTURA DO PROJETO - SICEFSUS
 
-**📅 Gerado em:** 08/11/2025, 20:22
+**📅 Gerado em:** 09/11/2025, 13:35
 
 **📍 Diretório:** `/home/runner/workspace`
 
@@ -8,25 +8,25 @@
 
 ## 📊 ESTATÍSTICAS GERAIS
 
-- **📁 Total de Diretórios:** 65
-- **📄 Total de Arquivos:** 328
-- **⚛️ Componentes React:** 116
+- **📁 Total de Diretórios:** 66
+- **📄 Total de Arquivos:** 300
+- **⚛️ Componentes React:** 129
 - **🎣 Hooks Customizados:** 15
 - **🔧 Services:** 2
 - **🛠️ Utilitários:** 0
 
 ### 📈 Distribuição por Extensão
 
-- **.jsx**: 129 arquivos
-- **.js**: 55 arquivos
-- **.txt**: 31 arquivos
+- **.jsx**: 142 arquivos
+- **.js**: 57 arquivos
 - **.json**: 29 arquivos
-- **.png**: 21 arquivos
 - **.bin**: 13 arquivos
 - **sem extensão**: 10 arquivos
 - **.cjs**: 9 arquivos
-- **.css**: 8 arquivos
-- **.md**: 7 arquivos
+- **.css**: 9 arquivos
+- **.md**: 8 arquivos
+- **.res**: 4 arquivos
+- **.txt**: 4 arquivos
 
 ---
 
@@ -109,53 +109,8 @@
 │   ├── 📄 package.json (19 linhas)
 │   └── 📄 server.js (332 linhas)
 ├── 📁 attached_assets/
-│   ├── 📄 image_1762032358714.png (325 linhas)
-│   ├── 📄 image_1762032564858.png (152 linhas)
-│   ├── 📄 image_1762033273030.png (238 linhas)
-│   ├── 📄 image_1762123376260.png (160 linhas)
-│   ├── 📄 image_1762215376492.png (187 linhas)
-│   ├── 📄 image_1762215929692.png (42 linhas)
-│   ├── 📄 image_1762366447504.png (78 linhas)
-│   ├── 📄 image_1762459773013.png (215 linhas)
-│   ├── 📄 image_1762459973489.png (109 linhas)
-│   ├── 📄 image_1762460152393.png (158 linhas)
-│   ├── 📄 image_1762475904275.png (107 linhas)
-│   ├── 📄 image_1762476019645.png (163 linhas)
-│   ├── 📄 image_1762476253560.png (79 linhas)
-│   ├── 📄 image_1762476499466.png (129 linhas)
-│   ├── 📄 image_1762595352373.png (944 linhas)
-│   ├── 📄 image_1762627962804.png (354 linhas)
-│   ├── 📄 image_1762628223251.png (147 linhas)
-│   ├── 📄 image_1762629082750.png (19 linhas)
-│   ├── 📄 Pasted--ALTERA-ES-PONTUAIS-DespesaForm-jsx-ARQUIVO-src-components-DespesaForm-jsx-AL-1762268688285_1762268688286.txt (106 linhas)
-│   ├── 📄 Pasted--ARQUIVOS-CORRIGIDOS-BUG-DE-FORMATA-O-MONET-RIA-RESUMO-DA-CORRE-O-Problema--1762548394530_1762548394532.txt (1381 linhas)
-│   ├── 📄 Pasted--C-DIGO-FINAL-PARA-index-jsx-Arquivo-src-comp-1762435448618_1762435448619.txt (85 linhas)
-│   ├── 📄 Pasted--CORRE-ES-ExecucaoOrcamentaria--1762110876597_1762110876597.txt (211 linhas)
-│   ├── 📄 Pasted--CORRE-ES-NO-ExecucaoOrcamentaria-jsx-ALTERA-ES-NECESS-RIAS-1-Bot-es-da-tabela--1762121604958_1762121604959.txt (104 linhas)
-│   ├── 📄 Pasted--CORRE-ES-Padroniza-o-dos-Cards-de-Despesas-ARQUIVO-src-components-VisualizacaoEmendaDespes-1762080246895_1762080246896.txt (220 linhas)
-│   ├── 📄 Pasted--CORRE-ES-PONTUAIS-DespesaForm-jsx-Arquivo-src-components-DespesaForm-jsx--1762561839006_1762561839007.txt (129 linhas)
-│   ├── 📄 Pasted--CORRE-O-Alinhamento-dos-Campos-Emenda-e-Valor-PROBLEMA-Campo-Valor-da-Despesa-ve-1762631881453_1762631881453.txt (96 linhas)
-│   ├── 📄 Pasted--CORRE-O-Arquivo-src-components-DespesaForm-jsx-LOCALIZAR-linha-313-javascriptvalor-despesaPara-1762611416394_1762611416395.txt (83 linhas)
-│   ├── 📄 Pasted--CORRE-O-Bloquear-Salvamento-com-Saldo-Insuficiente-PROBLEMA-IDENTIFICADO-O-sistem-1762559935067_1762559935069.txt (170 linhas)
-│   ├── 📄 Pasted--CORRE-O-Bug-de-Parsing-de-Valor-na-Edi-o-de-Despesa-PROBLEMA-Ao-editar-uma-despesa-1762631369424_1762631369425.txt (119 linhas)
-│   ├── 📄 Pasted--CORRE-O-CR-TICA-EmendasTable-jsx-Props-Incompat-veis-PROBLEMA-IDENTIFICADO-O-Eme-1762123288681_1762123288682.txt (89 linhas)
-│   ├── 📄 Pasted--CORRE-O-DA-BARRA-DE-PROGRESSO-Arquivo-src-components-emenda-EmendaForm-sections-ExecucaoO-1762614150037_1762614150038.txt (105 linhas)
-│   ├── 📄 Pasted--CORRE-O-DEFINITIVA-Valida-o-de-Saldo-com-Tratamento-de-Casos-Extremos-PROBLEMAS-IDE-1762561172926_1762561172928.txt (262 linhas)
-│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762439838809_1762439838810.txt (102 linhas)
-│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762440451620_1762440451621.txt (102 linhas)
-│   ├── 📄 Pasted--CORRE-O-DespesaForm-jsx-Erro-de-Data-Inv-lida-Problema-Ao-editar-despesa-erro--1762441450693_1762441450694.txt (102 linhas)
-│   ├── 📄 Pasted--Corre-o-Remover-Bot-es-de-Agrupamento-Arquivo-src-components-DespesasTable-jsx--1762386052129_1762386052129.txt (202 linhas)
-│   ├── 📄 Pasted-Abaixo-vai-um-patch-gen-rico-e-drop-in-que-funciona-mesmo-que-seus-nomes-de-estado-mudem-pega-os-ma-1762354320983_1762354320984.txt (81 linhas)
-│   ├── 📄 Pasted-cat-src-components-despesa-DespesaFormBasicFields-jsx-EOF-src-components-despesa-DespesaF-1762456759079_1762456759080.txt (208 linhas)
-│   ├── 📄 Pasted-MODIFICA-ES-NECESS-RIAS-Fa-a-estas-3-altera-es-no-arquivo-DespesaFormClassificacaoFuncional-jsx-1-1762394108181_1762394108181.txt (84 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762455428368_1762455428370.txt (1596 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762459074181_1762459074181.txt (99 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762474870927_1762474870928.txt (102 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599092236_1762599092237.txt (78 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599199548_1762599199549.txt (78 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762599280044_1762599280044.txt (65 linhas)
-│   ├── 📄 Pasted-react-dom-development-js-29840-Download-the-React-DevTools-for-a-better-development-experience-http-1762625675673_1762625675674.txt (99 linhas)
-│   └── 📄 Pasted-vejo-o-problema-Quando-a-despesa-carregada-para-edi-o-o-useEffect-preenche-o-formData-emenda-1762453946864_1762453946865.txt (146 linhas)
+│   ├── 📄 Pasted--CORRE-O-DespesaForm-Fecha-Imediatamente-ao-Executar-PROBLEMA-IDENTIFICADO-Logs-1762635220564_1762635220565.txt (466 linhas)
+│   └── 📄 Pasted--CORRE-O-Navega-o-ap-s-Atualizar-Emenda-ARQUIVO-src-hooks-useEmendaFormData-js--1762634891525_1762634891525.txt (171 linhas)
 ├── 📁 backups/
 │   └── 📁 v2.3.71/
 │       ├── 📄 BACKUP_AcoesServicos_v2.3.71.jsx (516 linhas)
@@ -168,7 +123,8 @@
 │       └── 📄 VALIDACAO_BACKUP.txt (54 linhas)
 ├── 📁 docs/
 │   ├── 📄 estrutura-atual.md (9 linhas)
-│   └── 📄 GUIA_DESENVOLVEDOR.md (245 linhas)
+│   ├── 📄 GUIA_DESENVOLVEDOR.md (245 linhas)
+│   └── 📄 ORQUESTRADORES_SISTEMA.md (332 linhas)
 ├── 📁 firebase-migration/
 │   ├── 📄 migrate.cjs (94 linhas)
 │   ├── 📄 prod-credentials.json (14 linhas)
@@ -229,8 +185,26 @@
 │   │   │   ├── 📄 DespesasListHeader.jsx (273 linhas)
 │   │   │   └── 📄 DespesasStats.jsx (92 linhas)
 │   │   ├── 📁 dev/
+│   │   │   ├── 📁 shared/
+│   │   │   │   ├── 📄 AlertaBanner.jsx (35 linhas)
+│   │   │   │   ├── 📄 ConfirmDialog.jsx (71 linhas)
+│   │   │   │   ├── 📄 ProgressBar.jsx (35 linhas)
+│   │   │   │   ├── 📄 ResultTable.jsx (52 linhas)
+│   │   │   │   └── 📄 shared-styles.css (329 linhas)
+│   │   │   ├── 📁 tabs/
+│   │   │   │   ├── 📄 AnalisesTab.jsx (156 linhas)
+│   │   │   │   ├── 📄 BackupTab.jsx (133 linhas)
+│   │   │   │   ├── 📄 ConfigTab.jsx (268 linhas)
+│   │   │   │   ├── 📄 DashboardTab.jsx (124 linhas)
+│   │   │   │   ├── 📄 DiagnosticoTab.jsx (241 linhas)
+│   │   │   │   ├── 📄 GeografiaTab.jsx (210 linhas)
+│   │   │   │   ├── 📄 index.js (13 linhas)
+│   │   │   │   ├── 📄 LimpezaTab.jsx (120 linhas)
+│   │   │   │   ├── 📄 RecalculoTab.jsx (27 linhas)
+│   │   │   │   ├── 📄 UsuariosTab.jsx (118 linhas)
+│   │   │   │   └── 📄 ValidacaoTab.jsx (159 linhas)
 │   │   │   ├── 📄 DiagnosticoSistema.jsx (368 linhas)
-│   │   │   └── 📄 RecalcularEmenda.jsx (429 linhas)
+│   │   │   └── 📄 RecalcularEmenda.jsx (448 linhas)
 │   │   ├── 📁 emenda/
 │   │   │   ├── 📁 EmendaDetail/
 │   │   │   │   ├── 📁 components/
@@ -261,11 +235,11 @@
 │   │   │   │   │   ├── 📄 DadosBasicosTab.jsx (66 linhas)
 │   │   │   │   │   ├── 📄 DadosBeneficiario.jsx (430 linhas)
 │   │   │   │   │   ├── 📄 DespesasTab.jsx (451 linhas)
-│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1081 linhas)
+│   │   │   │   │   ├── 📄 ExecucaoOrcamentaria.jsx (1121 linhas)
 │   │   │   │   │   ├── 📄 ExecutarDespesaModal.jsx (708 linhas)
 │   │   │   │   │   ├── 📄 Identificacao.jsx (300 linhas)
 │   │   │   │   │   └── 📄 InformacoesComplementares.jsx (256 linhas)
-│   │   │   │   └── 📄 index.jsx (303 linhas)
+│   │   │   │   └── 📄 index.jsx (305 linhas)
 │   │   │   ├── 📄 DespesaModal.jsx (616 linhas)
 │   │   │   ├── 📄 EmendasFilters.jsx (214 linhas)
 │   │   │   ├── 📄 EmendasListHeader.jsx (213 linhas)
@@ -296,17 +270,19 @@
 │   │   ├── 📄 DataManager.jsx (977 linhas)
 │   │   ├── 📄 DebugPanel.jsx (92 linhas)
 │   │   ├── 📄 DebugUsuarios.jsx (236 linhas)
-│   │   ├── 📄 DespesaForm.jsx (727 linhas)
+│   │   ├── 📄 DespesaForm.jsx (848 linhas)
 │   │   ├── 📄 Despesas.jsx (314 linhas)
 │   │   ├── 📄 DespesasFilters.jsx (370 linhas)
 │   │   ├── 📄 DespesasList.jsx (656 linhas)
 │   │   ├── 📄 DespesasTable.jsx (1230 linhas)
-│   │   ├── 📄 Emendas.jsx (799 linhas)
+│   │   ├── 📄 Emendas.jsx (765 linhas)
 │   │   ├── 📄 EmendasFilters.jsx (291 linhas)
 │   │   ├── 📄 EmendasList.jsx (243 linhas)
 │   │   ├── 📄 EmendasTable.jsx (651 linhas)
 │   │   ├── 📄 EnvironmentIndicator.jsx (119 linhas)
 │   │   ├── 📄 ErrorBoundary.jsx (186 linhas)
+│   │   ├── 📄 FerramentasDev.css (274 linhas)
+│   │   ├── 📄 FerramentasDev.jsx (143 linhas)
 │   │   ├── 📄 FirebaseError.jsx (118 linhas)
 │   │   ├── 📄 FluxoEmenda.jsx (668 linhas)
 │   │   ├── 📄 GlobalSearch.jsx (662 linhas)
@@ -347,7 +323,7 @@
 │   │   ├── 📄 useDespesasCalculos.js (92 linhas)
 │   │   ├── 📄 useDespesasData.js (150 linhas)
 │   │   ├── 📄 useEmendaDespesa.js (669 linhas)
-│   │   ├── 📄 useEmendaFormData.js (883 linhas)
+│   │   ├── 📄 useEmendaFormData.js (887 linhas)
 │   │   ├── 📄 useEmendaFormNavigation.js (164 linhas)
 │   │   ├── 📄 useNavigationProtection.js (351 linhas)
 │   │   ├── 📄 usePageTitle.js (15 linhas)
@@ -360,9 +336,6 @@
 │   │   ├── 📄 logo-sicefsus.png (4595 linhas)
 │   │   ├── 📄 logo-sopro.jpeg (125 linhas)
 │   │   └── 📄 logoaraujoinfo.png (334 linhas)
-│   ├── 📁 pages/
-│   │   ├── 📄 FerramentasDev.css (1207 linhas)
-│   │   └── 📄 FerramentasDev.jsx (71 linhas)
 │   ├── 📁 services/
 │   │   ├── 📄 auditService.js (420 linhas)
 │   │   ├── 📄 createAdminUser.js (146 linhas)
@@ -378,6 +351,7 @@
 │   │   ├── 📄 cnpjUtils.js (187 linhas)
 │   │   ├── 📄 despesaValidators.js (95 linhas)
 │   │   ├── 📄 DisableConsole.jsx (299 linhas)
+│   │   ├── 📄 emendaCalculos.js (186 linhas)
 │   │   ├── 📄 errorHandlers.js (164 linhas)
 │   │   ├── 📄 exportImport.js (1 linhas)
 │   │   ├── 📄 firebaseCollections.js (369 linhas)
@@ -391,9 +365,8 @@
 │   │   ├── 📄 simpleErrorModal.js (51 linhas)
 │   │   ├── 📄 validators.js (856 linhas)
 │   │   └── 📄 versionControl.js (333 linhas)
-│   ├── 📄 App (copy).jsx (794 linhas)
 │   ├── 📄 App.css (454 linhas)
-│   ├── 📄 App.jsx (747 linhas)
+│   ├── 📄 App.jsx (761 linhas)
 │   └── 📄 index.jsx (18 linhas)
 ├── 📄 .env (25 linhas)
 ├── 📄 .env.backup (25 linhas)
@@ -453,7 +426,7 @@
 - `src/components/despesa/DespesaCard/DespesaCardExecutada.jsx`
 - `src/components/despesa/DespesaCard/DespesaCardPlanejada.jsx`
 - `src/components/despesa/DespesaFormActions.jsx`
-- *...e mais 96 componentes*
+- *...e mais 109 componentes*
 
 ### 🎣 Hooks Customizados
 
@@ -979,7 +952,7 @@ import { formatarMoeda } from "../../utils/formatters";
 ```
 
 
-#### ⚛️ Componente React `RecalcularEmenda.jsx` (429 linhas)
+#### ⚛️ Componente React `RecalcularEmenda.jsx` (448 linhas)
 
 **Exports:**
 ```javascript
@@ -1343,7 +1316,7 @@ const [debugInfo, setDebugInfo] = useState({
 ```
 
 
-#### ⚛️ Componente React `DespesaForm.jsx` (727 linhas)
+#### ⚛️ Componente React `DespesaForm.jsx` (848 linhas)
 
 **Exports:**
 ```javascript
@@ -1428,7 +1401,7 @@ export default function DespesasTable({
 ```
 
 
-#### 💻 JavaScript `Emendas.jsx` (799 linhas)
+#### 💻 JavaScript `Emendas.jsx` (765 linhas)
 
 **Exports:**
 ```javascript
@@ -1527,6 +1500,35 @@ class ErrorBoundary extends React.Component {
 constructor(props) {
 super(props);
 this.state = {
+```
+
+
+#### 🎨 Estilos `FerramentasDev.css` (274 linhas)
+
+**Preview:**
+```javascript
+/* ========================================
+FERRAMENTAS DE DESENVOLVEDOR - ESTILOS
+======================================== */
+.ferramentas-dev-container {
+padding: 20px;
+```
+
+
+#### ⚛️ Componente React `FerramentasDev.jsx` (143 linhas)
+
+**Exports:**
+```javascript
+export default FerramentasDev;
+```
+
+**Preview:**
+```javascript
+import React, { useState } from 'react';
+import { useUser } from '../../context/UserContext';
+import { useNavigate } from 'react-router-dom';
+import './FerramentasDev.css';
+// Importar abas
 ```
 
 
@@ -2138,7 +2140,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 ```
 
 
-#### 🎣 Hook React `useEmendaFormData.js` (883 linhas)
+#### 🎣 Hook React `useEmendaFormData.js` (887 linhas)
 
 **Exports:**
 ```javascript
@@ -2298,38 +2300,6 @@ import { getCurrentVersion } from "../utils/versionControl.js";
 
 
 #### 📁 images/
-
-
-#### 📁 pages/
-
-
-#### 🎨 Estilos `FerramentasDev.css` (1207 linhas)
-
-**Preview:**
-```javascript
-/* ========================================
-FERRAMENTAS DEV - ESTILOS GERAIS
-======================================== */
-.ferramentas-dev {
-padding: 20px;
-```
-
-
-#### ⚛️ Componente React `FerramentasDev.jsx` (71 linhas)
-
-**Exports:**
-```javascript
-export default FerramentasDev;
-```
-
-**Preview:**
-```javascript
-import React, { useState } from "react";
-import { useUser } from "../context/UserContext";
-import RecalcularEmenda from "../components/dev/RecalcularEmenda";
-import DiagnosticoSistema from "../components/dev/DiagnosticoSistema";
-import "./FerramentasDev.css";
-```
 
 
 #### 📁 services/
@@ -2525,6 +2495,24 @@ export const restoreOriginalConsole = () => {
 const LOG_LEVELS = {
 ERROR: 0,
 WARN: 1,
+```
+
+
+#### 💻 JavaScript `emendaCalculos.js` (186 linhas)
+
+**Exports:**
+```javascript
+export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
+export const recalcularEmendasEmLote = async (emendaIds) => {
+```
+
+**Preview:**
+```javascript
+// src/utils/emendaCalculos.js
+// ✅ Função de recálculo automático de valores da emenda
+// Chamada automaticamente após criar/editar/deletar despesas
+import {
+doc,
 ```
 
 
@@ -2750,24 +2738,6 @@ date: "22/10/2025",
 ```
 
 
-#### ⚛️ Componente React `App (copy).jsx` (794 linhas)
-
-**Exports:**
-```javascript
-export const useNavigationProtection = () => {
-export default App;
-```
-
-**Preview:**
-```javascript
-// App.jsx - VERSÃO CORRIGIDA PARA SICEFSUS
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import {
-BrowserRouter as Router,
-Routes,
-```
-
-
 #### 🎨 Estilos `App.css` (454 linhas)
 
 **Preview:**
@@ -2780,7 +2750,7 @@ padding: 0;
 ```
 
 
-#### ⚛️ Componente React `App.jsx` (747 linhas)
+#### ⚛️ Componente React `App.jsx` (761 linhas)
 
 **Exports:**
 ```javascript
