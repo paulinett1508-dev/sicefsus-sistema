@@ -797,8 +797,8 @@ export const useEmendaFormData = () => {
             btnSim.onclick = () => {
               document.body.removeChild(modalOverlay);
               // ✅ NAVEGAR PARA A EMENDA COM ABA DE EXECUÇÃO ATIVA
-              // Usa window.location para garantir que a página recarregue corretamente
-              window.location.href = `/emendas/${emendaId}?tab=execucao`;
+              // Usa navigate() do React Router para navegação SPA
+              navigate(`/emendas/${emendaId}?tab=execucao`);
             };
 
             btnNao.onclick = () => {
