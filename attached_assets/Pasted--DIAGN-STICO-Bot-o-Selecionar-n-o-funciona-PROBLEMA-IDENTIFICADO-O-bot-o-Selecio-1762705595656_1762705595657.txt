@@ -1,0 +1,380 @@
+# 🔴 DIAGNÓSTICO: Botão "Selecionar" não funciona
+
+## 🔍 PROBLEMA IDENTIFICADO
+
+O botão "Selecionar" na tabela de emendas do RecalcularEmenda.jsx não está respondendo aos cliques.
+
+---
+
+## 🎯 POSSÍVEIS CAUSAS
+
+### **1. Função `handleSelecionarEmenda` não está definida**
+### **2. onClick não está corretamente vinculado**
+### **3. Estado não está sendo atualizado**
+### **4. Modal não está aparecendo**
+
+---
+
+## 🔧 CÓDIGO CORRETO DO BOTÃO SELECIONAR
+
+### **No JSX da Tabela (dentro do map):**
+
+```jsx
+<button
+  className="btn-selecionar-tabela"
+  onClick={() => handleSelecionarEmenda(emenda)}
+  title="Selecionar esta emenda para recalcular"
+>
+  🔧 Selecionar
+</button>
+```
+
+---
+
+## 🔧 FUNÇÃO handleSelecionarEmenda
+
+**Deve estar ANTES do return:**
+
+```javascript
+const handleSelecionarEmenda = (emenda) => {
+  console.log("🎯 Emenda selecionada:", emenda);
+  
+  // 1. Definir emenda selecionada
+  setEmendaSelecionada(emenda);
+  
+  // 2. Calcular valores
+  const valorCalculado = emenda.despesas?.reduce(
+    (total, desp) => total + (parseFloat(desp.valor) || 0),
+    0
+  ) || 0;
+  
+  const valorBanco = parseFloat(emenda.valorExecutado) || 0;
+  const diferenca = Math.abs(valorBanco - valorCalculado);
+  
+  // 3. Definir preview
+  setPreview({
+    numero: emenda.numeroEmenda || emenda.numero,
+    municipio: emenda.municipio,
+    uf: emenda.uf,
+    valorTotal: parseFloat(emenda.valorTotal) || 0,
+    valorBanco: valorBanco,
+    valorCalculado: valorCalculado,
+    diferenca: diferenca,
+    percentualBanco: valorBanco > 0 ? (valorBanco / parseFloat(emenda.valorTotal)) * 100 : 0,
+    percentualCalculado: valorCalculado > 0 ? (valorCalculado / parseFloat(emenda.valorTotal)) * 100 : 0,
+  });
+  
+  // 4. Abrir modal
+  setMostrarModal(true);
+  
+  console.log("✅ Modal aberto com preview:", preview);
+};
+```
+
+---
+
+## 🔧 ESTADOS NECESSÁRIOS
+
+**No início do componente (após `const [emendasCarregadas, setEmendasCarregadas] = useState([]);`):**
+
+```javascript
+const [emendaSelecionada, setEmendaSelecionada] = useState(null);
+const [mostrarModal, setMostrarModal] = useState(false);
+const [preview, setPreview] = useState(null);
+const [processando, setProcessando] = useState(false);
+```
+
+---
+
+## 🔧 MODAL DE PREVIEW
+
+**Adicionar ANTES do fechamento do return principal:**
+
+```jsx
+{/* MODAL DE PREVIEW */}
+{mostrarModal && preview && (
+  <div style={styles.modalOverlay}>
+    <div style={styles.modalContent}>
+      <div style={styles.modalHeader}>
+        <h3>🔧 Preview do Recálculo</h3>
+        <button 
+          onClick={() => setMostrarModal(false)}
+          style={styles.btnFechar}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={styles.modalBody}>
+        <div style={styles.previewSection}>
+          <h4>📋 Dados da Emenda</h4>
+          <p><strong>Número:</strong> {preview.numero}</p>
+          <p><strong>Município/UF:</strong> {preview.municipio}/{preview.uf}</p>
+          <p><strong>Valor Total:</strong> {formatarMoeda(preview.valorTotal)}</p>
+        </div>
+
+        <div style={styles.previewSection}>
+          <h4>💰 Comparação de Valores</h4>
+          <table style={styles.tabelaComparacao}>
+            <thead>
+              <tr>
+                <th>Métrica</th>
+                <th>Banco</th>
+                <th>Calculado</th>
+                <th>Diferença</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Valor Executado</td>
+                <td>{formatarMoeda(preview.valorBanco)}</td>
+                <td>{formatarMoeda(preview.valorCalculado)}</td>
+                <td style={{ 
+                  color: preview.diferenca > 1000 ? '#dc3545' : '#28a745',
+                  fontWeight: 'bold'
+                }}>
+                  {formatarMoeda(preview.diferenca)}
+                </td>
+              </tr>
+              <tr>
+                <td>Percentual</td>
+                <td>{preview.percentualBanco.toFixed(2)}%</td>
+                <td>{preview.percentualCalculado.toFixed(2)}%</td>
+                <td>-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {preview.diferenca > 1000 && (
+          <div style={styles.alerta}>
+            ⚠️ <strong>ATENÇÃO:</strong> Diferença significativa detectada!
+          </div>
+        )}
+      </div>
+
+      <div style={styles.modalFooter}>
+        <button
+          onClick={() => setMostrarModal(false)}
+          style={styles.btnCancelar}
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleAplicarRecalculo}
+          disabled={processando}
+          style={{
+            ...styles.btnAplicar,
+            opacity: processando ? 0.6 : 1,
+            cursor: processando ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {processando ? '⏳ Aplicando...' : '✅ Aplicar Correção'}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+```
+
+---
+
+## 🔧 FUNÇÃO handleAplicarRecalculo
+
+```javascript
+const handleAplicarRecalculo = async () => {
+  if (!emendaSelecionada || !preview) {
+    alert("❌ Erro: Nenhuma emenda selecionada");
+    return;
+  }
+
+  if (!window.confirm(
+    `Confirma a aplicação do recálculo?\n\n` +
+    `Emenda: ${preview.numero}\n` +
+    `Valor Atual: ${formatarMoeda(preview.valorBanco)}\n` +
+    `Novo Valor: ${formatarMoeda(preview.valorCalculado)}`
+  )) {
+    return;
+  }
+
+  setProcessando(true);
+
+  try {
+    const emendaRef = doc(db, "emendas", emendaSelecionada.id);
+    
+    const novoSaldo = preview.valorTotal - preview.valorCalculado;
+    
+    await updateDoc(emendaRef, {
+      valorExecutado: preview.valorCalculado,
+      saldoDisponivel: novoSaldo,
+      percentualExecutado: preview.percentualCalculado,
+      recalculadoEm: new Date().toISOString(),
+      recalculadoPor: "SuperAdmin",
+    });
+
+    alert(`✅ Recálculo aplicado com sucesso!\n\nEmenda: ${preview.numero}\nNovo valor executado: ${formatarMoeda(preview.valorCalculado)}`);
+    
+    // Fechar modal e recarregar
+    setMostrarModal(false);
+    setEmendaSelecionada(null);
+    setPreview(null);
+    
+    // Recarregar emendas
+    handleBuscar();
+    
+  } catch (error) {
+    console.error("❌ Erro ao aplicar recálculo:", error);
+    alert(`❌ Erro ao aplicar recálculo: ${error.message}`);
+  } finally {
+    setProcessando(false);
+  }
+};
+```
+
+---
+
+## 🎨 ESTILOS DO MODAL
+
+**Adicionar no objeto `styles` no final do arquivo:**
+
+```javascript
+const styles = {
+  // ... estilos existentes ...
+  
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+  },
+  
+  modalContent: {
+    background: 'white',
+    borderRadius: '12px',
+    width: '90%',
+    maxWidth: '700px',
+    maxHeight: '90vh',
+    overflow: 'auto',
+    boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+  },
+  
+  modalHeader: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: '12px 12px 0 0',
+  },
+  
+  btnFechar: {
+    background: 'transparent',
+    border: 'none',
+    color: 'white',
+    fontSize: '24px',
+    cursor: 'pointer',
+    padding: '0 10px',
+  },
+  
+  modalBody: {
+    padding: '30px',
+  },
+  
+  previewSection: {
+    marginBottom: '25px',
+    padding: '15px',
+    background: '#f8f9fa',
+    borderRadius: '8px',
+  },
+  
+  tabelaComparacao: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '15px',
+  },
+  
+  alerta: {
+    background: '#fff3cd',
+    border: '1px solid #ffc107',
+    color: '#856404',
+    padding: '15px',
+    borderRadius: '8px',
+    marginTop: '20px',
+  },
+  
+  modalFooter: {
+    padding: '20px 30px',
+    borderTop: '1px solid #e9ecef',
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+  },
+  
+  btnCancelar: {
+    padding: '12px 24px',
+    background: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+  
+  btnAplicar: {
+    padding: '12px 24px',
+    background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+};
+```
+
+---
+
+## 📋 CHECKLIST DE VERIFICAÇÃO
+
+Execute esta checklist no código:
+
+- [ ] Estados `emendaSelecionada`, `mostrarModal`, `preview` existem?
+- [ ] Função `handleSelecionarEmenda` está definida?
+- [ ] Botão tem `onClick={() => handleSelecionarEmenda(emenda)}`?
+- [ ] Modal está sendo renderizado quando `mostrarModal === true`?
+- [ ] Função `handleAplicarRecalculo` existe?
+- [ ] Estilos do modal estão definidos?
+
+---
+
+## 🚀 TESTE RÁPIDO
+
+Após aplicar as correções:
+
+1. Abrir Ferramentas Dev
+2. Ir na aba Recálculo
+3. Buscar emendas
+4. Clicar em "🔧 Selecionar"
+5. **Verificar Console** - deve aparecer: `🎯 Emenda selecionada: Object`
+6. **Modal deve abrir** com preview
+7. Clicar em "✅ Aplicar Correção"
+8. Confirmação deve aparecer
+
+---
+
+## 💡 SE AINDA NÃO FUNCIONAR
+
+Me envie:
+1. Print do Console (F12) após clicar no botão
+2. O arquivo `RecalcularEmenda.jsx` atual
+
+Vou criar a correção específica! 🚀

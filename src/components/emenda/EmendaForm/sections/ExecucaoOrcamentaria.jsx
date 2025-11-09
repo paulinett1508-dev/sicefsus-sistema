@@ -289,6 +289,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     return 0;
   })();
 
+  // ✅ CORRIGIDO: Cada despesa em apenas 1 categoria (sem duplicação)
   const stats = {
     valorEmenda: valorEmendaParsed,
     totalPlanejado: despesasPlanejadas.reduce(
@@ -299,22 +300,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       (acc, d) => acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
       0,
     ),
-    totalEmpenhado: despesasExecutadas
-      .filter((d) =>
-        ["empenhado", "liquidado", "pago"].includes(d.statusPagamento),
-      )
-      .reduce(
-        (acc, d) =>
-          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
-        0,
-      ),
-    totalLiquidado: despesasExecutadas
-      .filter((d) => ["liquidado", "pago"].includes(d.statusPagamento))
-      .reduce(
-        (acc, d) =>
-          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
-        0,
-      ),
+    // ✅ Cada status é EXCLUSIVO (uma despesa só pode estar em 1 status)
     totalPago: despesasExecutadas
       .filter((d) => d.statusPagamento === "pago")
       .reduce(
@@ -322,11 +308,30 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
         0,
       ),
+    totalLiquidado: despesasExecutadas
+      .filter((d) => d.statusPagamento === "liquidado")
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalEmpenhado: despesasExecutadas
+      .filter((d) => d.statusPagamento === "empenhado")
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
+    totalPendente: despesasExecutadas
+      .filter((d) => !d.statusPagamento || d.statusPagamento === "pendente")
+      .reduce(
+        (acc, d) =>
+          acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
+        0,
+      ),
   };
 
-  stats.totalPendente =
-    stats.totalExecutado -
-    (stats.totalEmpenhado + stats.totalLiquidado + stats.totalPago);
+  // ✅ Cálculos derivados (mantidos intactos)
   stats.saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
   stats.percentualExecutado =
     (stats.totalExecutado / stats.valorEmenda) * 100 || 0;

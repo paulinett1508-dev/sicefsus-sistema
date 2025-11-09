@@ -1,283 +1,285 @@
 import React, { useState, useEffect } from "react";
 import {
-  doc,
-  getDoc,
-  updateDoc,
   collection,
+  getDocs,
   query,
   where,
-  getDocs,
+  doc,
+  updateDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
-import { formatarMoeda } from "../../utils/formatters";
+import { formatarMoeda, parseValorMonetario } from "../../utils/formatters";
 
-// ✅ FUNÇÃO CRÍTICA: Parse monetário correto para formato BR
-const parseValorMonetario = (valor) => {
-  // Se já é número, retorna direto
-  if (typeof valor === "number") return valor;
+export default function RecalcularEmenda() {
+  // 🔧 ESTADOS
+  const [emendasCarregadas, setEmendasCarregadas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
 
-  // Se não é string, converte
-  if (typeof valor !== "string") {
-    valor = String(valor);
-  }
-
-  // Remove "R$", espaços e caracteres especiais
-  // Remove TODOS os pontos (separador de milhar)
-  // Converte vírgula em ponto (separador decimal)
-  const valorLimpo = valor
-    .replace(/[R$\s]/g, "") // Remove R$ e espaços
-    .replace(/\./g, "") // Remove pontos (milhar)
-    .replace(",", "."); // Converte vírgula em ponto
-
-  const valorFloat = parseFloat(valorLimpo);
-  return isNaN(valorFloat) ? 0 : valorFloat;
-};
-
-function RecalcularEmenda() {
-  const [emendas, setEmendas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingRecalculo, setLoadingRecalculo] = useState(false);
+  // Estados para modal e preview
+  const [emendaSelecionada, setEmendaSelecionada] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [preview, setPreview] = useState(null);
-  const [sucesso, setSucesso] = useState(false);
-  const [busca, setBusca] = useState("");
-  const [filtroProblema, setFiltroProblema] = useState("todas");
+  const [processando, setProcessando] = useState(false);
 
-  // Carregar todas as emendas ao montar
+  // Estados para busca e filtros
+  const [termoBusca, setTermoBusca] = useState("");
+  const [filtroProblema, setFiltroProblema] = useState("todos");
+
+  // 🔍 CARREGAR EMENDAS AO MONTAR
   useEffect(() => {
     carregarEmendas();
   }, []);
 
+  // 📥 CARREGAR EMENDAS DO FIREBASE
   const carregarEmendas = async () => {
     setLoading(true);
+    setErro("");
+    setSucesso("");
+
     try {
+      console.log("📥 Carregando emendas...");
+
+      // Buscar todas as emendas
       const emendasSnapshot = await getDocs(collection(db, "emendas"));
-      const emendasData = [];
+      const emendas = [];
 
-      for (const docEmenda of emendasSnapshot.docs) {
-        const emenda = { id: docEmenda.id, ...docEmenda.data() };
+      for (const emendaDoc of emendasSnapshot.docs) {
+        const emendaData = emendaDoc.data();
 
-        // Buscar despesas desta emenda
+        // Buscar despesas da emenda
         const despesasQuery = query(
           collection(db, "despesas"),
-          where("emendaId", "==", emenda.id),
+          where("emendaId", "==", emendaDoc.id),
         );
         const despesasSnapshot = await getDocs(despesasQuery);
-        const despesas = despesasSnapshot.docs.map((doc) => doc.data());
 
-        // ✅ CORREÇÃO: Parse monetário correto + fallback para múltiplos campos
-        const valorTotal = parseValorMonetario(
-          emenda.valor || emenda.valorTotal || emenda.valorRecurso || 0,
+        // Calcular valor executado REAL (soma das despesas)
+        const valorExecutadoReal = despesasSnapshot.docs.reduce(
+          (total, despDoc) => {
+            const desp = despDoc.data();
+            return total + (parseFloat(desp.valor) || 0);
+          },
+          0,
         );
 
-        // ✅ CORREÇÃO: Parse de cada despesa individualmente
-        const valorExecutadoReal = despesas.reduce((sum, d) => {
-          const valorDespesa = parseValorMonetario(d.valor || 0);
-          return sum + valorDespesa;
-        }, 0);
+        // Valor que está no banco
+        const valorExecutadoBanco = parseFloat(emendaData.valorExecutado) || 0;
+        const valorTotal = parseFloat(emendaData.valorTotal) || 0;
 
-        const saldoReal = valorTotal - valorExecutadoReal;
+        // Calcular diferença
+        const diferenca = Math.abs(valorExecutadoBanco - valorExecutadoReal);
 
-        // ✅ CORREÇÃO: Parse dos valores no banco também
-        const valorExecutadoBanco = parseValorMonetario(
-          emenda.valorExecutado || 0,
-        );
-        const saldoBanco = parseValorMonetario(emenda.saldoDisponivel || 0);
+        // Classificar severidade
+        let severidade = "ok";
+        if (diferenca > 10000) severidade = "crítica";
+        else if (diferenca > 1000) severidade = "moderada";
+        else if (diferenca > 100) severidade = "leve";
 
-        // Verificar discrepância
-        const diferencaExecutado = Math.abs(
-          valorExecutadoReal - valorExecutadoBanco,
-        );
-        const diferencaSaldo = Math.abs(saldoReal - saldoBanco);
-        const temProblema = diferencaExecutado > 1 || diferencaSaldo > 1;
-
-        emendasData.push({
-          ...emenda,
-          despesas: despesas.length,
+        emendas.push({
+          id: emendaDoc.id,
+          ...emendaData,
+          numeroDespesas: despesasSnapshot.size,
           valorExecutadoReal,
-          saldoReal,
-          valorTotalParsed: valorTotal, // ✅ Armazena valor parseado
-          diferencaExecutado,
-          diferencaSaldo,
-          temProblema,
-          severidade:
-            diferencaExecutado > 10000
-              ? "CRÍTICA"
-              : diferencaExecutado > 100
-                ? "MODERADA"
-                : "LEVE",
+          valorExecutadoBanco,
+          diferenca,
+          severidade,
         });
       }
 
-      // Ordenar: problemas primeiro, depois por diferença
-      emendasData.sort((a, b) => {
-        if (a.temProblema && !b.temProblema) return -1;
-        if (!a.temProblema && b.temProblema) return 1;
-        return b.diferencaExecutado - a.diferencaExecutado;
-      });
-
-      setEmendas(emendasData);
+      setEmendasCarregadas(emendas);
+      console.log(`✅ ${emendas.length} emendas carregadas`);
     } catch (error) {
-      console.error("Erro ao carregar emendas:", error);
-      alert(`Erro: ${error.message}`);
+      console.error("❌ Erro ao carregar emendas:", error);
+      setErro(`Erro ao carregar emendas: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const selecionarEmenda = (emenda) => {
-    // ✅ Usa valor já parseado
-    const valorTotal = emenda.valorTotalParsed || 0;
+  // 🎯 SELECIONAR EMENDA (ABRE MODAL)
+  const handleSelecionarEmenda = (emenda) => {
+    console.log("🎯 Emenda selecionada:", emenda);
 
+    // Calcular valores
+    const valorTotal = parseFloat(emenda.valorTotal) || 0;
+    const valorBanco = parseFloat(emenda.valorExecutadoBanco) || 0;
+    const valorCalculado = parseFloat(emenda.valorExecutadoReal) || 0;
+    const diferenca = Math.abs(valorBanco - valorCalculado);
+
+    const saldoBanco = valorTotal - valorBanco;
+    const saldoCalculado = valorTotal - valorCalculado;
+
+    // Montar preview
     setPreview({
-      emenda,
-      despesas: emenda.despesas,
-      valoresBanco: {
-        valorExecutado: parseValorMonetario(emenda.valorExecutado || 0),
-        saldoDisponivel: parseValorMonetario(emenda.saldoDisponivel || 0),
-        percentualExecutado: parseValorMonetario(
-          emenda.percentualExecutado || 0,
-        ),
-      },
-      valoresCalculados: {
-        valorExecutado: emenda.valorExecutadoReal,
-        saldoDisponivel: emenda.saldoReal,
-        percentualExecutado:
-          valorTotal > 0 ? (emenda.valorExecutadoReal / valorTotal) * 100 : 0,
-      },
+      numero: emenda.numeroEmenda || emenda.numero || "Sem número",
+      municipio: emenda.municipio || "N/A",
+      uf: emenda.uf || "N/A",
+      valorTotal: valorTotal,
+      valorBanco: valorBanco,
+      valorCalculado: valorCalculado,
+      diferenca: diferenca,
+      saldoBanco: saldoBanco,
+      saldoCalculado: saldoCalculado,
+      percentualBanco: valorTotal > 0 ? (valorBanco / valorTotal) * 100 : 0,
+      percentualCalculado:
+        valorTotal > 0 ? (valorCalculado / valorTotal) * 100 : 0,
+      numeroDespesas: emenda.numeroDespesas || 0,
     });
-    setSucesso(false);
+
+    setEmendaSelecionada(emenda);
+    setMostrarModal(true);
+
+    console.log("✅ Modal aberto");
   };
 
-  const aplicarCorrecao = async () => {
-    if (!preview) return;
+  // ✅ APLICAR RECÁLCULO
+  const handleAplicarRecalculo = async () => {
+    if (!emendaSelecionada || !preview) {
+      alert("❌ Erro: Nenhuma emenda selecionada");
+      return;
+    }
 
-    const confirma = window.confirm(
-      `⚠️ CONFIRMAR RECÁLCULO?\n\n` +
-        `Emenda: ${preview.emenda.id}\n` +
-        `Número: ${preview.emenda.numeroEmenda || preview.emenda.numero}\n\n` +
-        `Esta ação não pode ser desfeita.\n\n` +
-        `Deseja continuar?`,
-    );
+    // Confirmação
+    if (
+      !window.confirm(
+        `⚠️ CONFIRMA O RECÁLCULO?\n\n` +
+          `Emenda: ${preview.numero}\n` +
+          `Município: ${preview.municipio}/${preview.uf}\n\n` +
+          `Valor Executado Atual: ${formatarMoeda(preview.valorBanco)}\n` +
+          `Novo Valor Calculado: ${formatarMoeda(preview.valorCalculado)}\n` +
+          `Diferença: ${formatarMoeda(preview.diferenca)}\n\n` +
+          `Esta ação NÃO pode ser desfeita!`,
+      )
+    ) {
+      return;
+    }
 
-    if (!confirma) return;
-
-    setLoadingRecalculo(true);
+    setProcessando(true);
 
     try {
-      // ✅ CORREÇÃO: Arredondar para 2 casas decimais
-      await updateDoc(doc(db, "emendas", preview.emenda.id), {
-        valorExecutado:
-          Math.round(preview.valoresCalculados.valorExecutado * 100) / 100,
-        saldoDisponivel:
-          Math.round(preview.valoresCalculados.saldoDisponivel * 100) / 100,
-        percentualExecutado:
-          Math.round(preview.valoresCalculados.percentualExecutado * 100) / 100,
-        atualizadoEm: new Date(),
+      const emendaRef = doc(db, "emendas", emendaSelecionada.id);
+
+      // Calcular novo saldo
+      const novoSaldo = preview.valorTotal - preview.valorCalculado;
+
+      // Atualizar no Firebase
+      await updateDoc(emendaRef, {
+        valorExecutado: preview.valorCalculado,
+        saldoDisponivel: novoSaldo,
+        percentualExecutado: preview.percentualCalculado,
+        recalculadoEm: Timestamp.now(),
+        recalculadoPor: "SuperAdmin",
       });
 
-      setSucesso(true);
-      alert("✅ Emenda recalculada com sucesso!");
+      setSucesso(
+        `✅ Recálculo aplicado com sucesso!\n\n` +
+          `Emenda: ${preview.numero}\n` +
+          `Novo valor executado: ${formatarMoeda(preview.valorCalculado)}\n` +
+          `Novo saldo disponível: ${formatarMoeda(novoSaldo)}`,
+      );
 
-      // Recarregar lista
-      await carregarEmendas();
+      // Fechar modal
+      setMostrarModal(false);
+      setEmendaSelecionada(null);
       setPreview(null);
-    } catch (error) {
-      console.error("Erro ao atualizar:", error);
-      alert(`❌ Erro: ${error.message}`);
-    }
 
-    setLoadingRecalculo(false);
+      // Recarregar emendas
+      setTimeout(() => {
+        carregarEmendas();
+        setSucesso("");
+      }, 3000);
+    } catch (error) {
+      console.error("❌ Erro ao aplicar recálculo:", error);
+      setErro(`❌ Erro ao aplicar recálculo: ${error.message}`);
+    } finally {
+      setProcessando(false);
+    }
   };
 
-  // Filtrar emendas
-  const emendasFiltradas = emendas.filter((emenda) => {
-    // Filtro de busca
-    const matchBusca =
-      !busca ||
-      emenda.numeroEmenda?.toLowerCase().includes(busca.toLowerCase()) ||
-      emenda.numero?.toLowerCase().includes(busca.toLowerCase()) ||
-      emenda.municipio?.toLowerCase().includes(busca.toLowerCase()) ||
-      emenda.id?.toLowerCase().includes(busca.toLowerCase());
+  // 🔍 FILTRAR EMENDAS
+  const emendasFiltradas = emendasCarregadas.filter((emenda) => {
+    // Filtro de texto
+    const textoMatch =
+      !termoBusca ||
+      (emenda.numeroEmenda || "")
+        .toLowerCase()
+        .includes(termoBusca.toLowerCase()) ||
+      (emenda.municipio || "")
+        .toLowerCase()
+        .includes(termoBusca.toLowerCase()) ||
+      (emenda.parlamentar || "")
+        .toLowerCase()
+        .includes(termoBusca.toLowerCase());
 
     // Filtro de problema
-    const matchProblema =
-      filtroProblema === "todas" ||
-      (filtroProblema === "apenas-problemas" && emenda.temProblema);
+    const problemaMatch =
+      filtroProblema === "todos" ||
+      (filtroProblema === "com-problema" && emenda.severidade !== "ok") ||
+      (filtroProblema === "ok" && emenda.severidade === "ok");
 
-    return matchBusca && matchProblema;
+    return textoMatch && problemaMatch;
   });
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: "center", padding: "40px" }}>
-        <div className="loading-spinner"></div>
-        <p>Carregando emendas...</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="recalcular-emenda">
-      <h2>🔧 Recalcular Valores de Emenda</h2>
-      <p className="descricao">
-        Selecione uma emenda da lista para recalcular seus valores baseado nas
-        despesas cadastradas.
-      </p>
+    <div style={styles.container}>
+      {/* CABEÇALHO */}
+      <div style={styles.header}>
+        <h2 style={styles.title}>🔄 Recalcular Emendas</h2>
+        <p style={styles.subtitle}>
+          Recalcule valores executados e saldos das emendas com base nas
+          despesas cadastradas
+        </p>
+      </div>
 
-      {/* Filtros */}
-      <div className="filtros">
+      {/* FILTROS */}
+      <div style={styles.filtros}>
         <input
           type="text"
-          placeholder="🔍 Buscar por número, município ou ID..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="input-busca"
+          placeholder="🔍 Buscar por número, município ou parlamentar..."
+          value={termoBusca}
+          onChange={(e) => setTermoBusca(e.target.value)}
+          style={styles.inputBusca}
         />
 
         <select
           value={filtroProblema}
           onChange={(e) => setFiltroProblema(e.target.value)}
-          className="select-filtro"
+          style={styles.select}
         >
-          <option value="todas">📋 Todas as emendas ({emendas.length})</option>
-          <option value="apenas-problemas">
-            ⚠️ Apenas com problemas (
-            {emendas.filter((e) => e.temProblema).length})
-          </option>
+          <option value="todos">📊 Todas as emendas</option>
+          <option value="com-problema">⚠️ Apenas com problemas</option>
+          <option value="ok">✅ Apenas OK</option>
         </select>
 
-        <button onClick={carregarEmendas} className="btn-recarregar">
-          🔄 Recarregar
+        <button
+          onClick={carregarEmendas}
+          style={styles.btnRecarregar}
+          disabled={loading}
+        >
+          {loading ? "⏳ Carregando..." : "🔄 Recarregar"}
         </button>
       </div>
 
-      {/* Estatísticas */}
-      <div className="estatisticas">
-        <div className="stat">
-          <span className="stat-label">Total:</span>
-          <span className="stat-valor">{emendas.length}</span>
-        </div>
-        <div className="stat problema">
-          <span className="stat-label">Com Problemas:</span>
-          <span className="stat-valor">
-            {emendas.filter((e) => e.temProblema).length}
-          </span>
-        </div>
-        <div className="stat critica">
-          <span className="stat-label">Críticas:</span>
-          <span className="stat-valor">
-            {emendas.filter((e) => e.severidade === "CRÍTICA").length}
-          </span>
-        </div>
-      </div>
+      {/* MENSAGENS */}
+      {erro && <div style={styles.erro}>❌ {erro}</div>}
 
-      {/* Tabela de Emendas */}
-      <div className="tabela-emendas">
-        {emendasFiltradas.length === 0 ? (
-          <div className="sem-resultados">
-            <p>🔍 Nenhuma emenda encontrada com esses filtros.</p>
-          </div>
-        ) : (
-          <table className="tabela-recalculo">
+      {sucesso && <div style={styles.sucesso}>{sucesso}</div>}
+
+      {/* LOADING */}
+      {loading && (
+        <div style={styles.loading}>
+          <div style={styles.spinner}></div>
+          <p>Carregando emendas...</p>
+        </div>
+      )}
+
+      {/* TABELA */}
+      {!loading && emendasFiltradas.length > 0 && (
+        <div style={styles.tabelaContainer}>
+          <table className="tabela-recalculo" style={styles.tabela}>
             <thead>
               <tr>
                 <th>Número</th>
@@ -295,48 +297,74 @@ function RecalcularEmenda() {
               {emendasFiltradas.map((emenda) => (
                 <tr
                   key={emenda.id}
-                  className={emenda.temProblema ? "com-problema" : ""}
+                  className={emenda.severidade !== "ok" ? "com-problema" : ""}
                 >
                   <td>
-                    <strong>{emenda.numeroEmenda || emenda.numero}</strong>
+                    <strong>
+                      {emenda.numeroEmenda || emenda.numero || "N/A"}
+                    </strong>
                   </td>
                   <td>
-                    {emenda.municipio}/{emenda.uf}
+                    {emenda.municipio || "N/A"}/{emenda.uf || "N/A"}
                   </td>
-                  <td>{formatarMoeda(emenda.valorTotalParsed)}</td>
-                  <td style={{ textAlign: "center" }}>{emenda.despesas}</td>
-                  <td>
-                    {formatarMoeda(
-                      parseValorMonetario(emenda.valorExecutado || 0),
-                    )}
+                  <td>{formatarMoeda(emenda.valorTotal)}</td>
+                  <td style={{ textAlign: "center" }}>
+                    {emenda.numeroDespesas}
                   </td>
+                  <td>{formatarMoeda(emenda.valorExecutadoBanco)}</td>
                   <td>{formatarMoeda(emenda.valorExecutadoReal)}</td>
                   <td>
-                    {emenda.temProblema ? (
+                    {emenda.diferenca > 100 ? (
                       <span
-                        className={`diferenca ${emenda.severidade?.toLowerCase()}`}
+                        className={`diferenca ${emenda.severidade}`}
+                        style={{
+                          color:
+                            emenda.severidade === "crítica"
+                              ? "#dc3545"
+                              : emenda.severidade === "moderada"
+                                ? "#856404"
+                                : "#0c5460",
+                          fontWeight: "bold",
+                        }}
                       >
-                        {formatarMoeda(emenda.diferencaExecutado)}
+                        {formatarMoeda(emenda.diferenca)}
                       </span>
                     ) : (
                       <span className="ok">-</span>
                     )}
                   </td>
                   <td>
-                    {emenda.temProblema ? (
-                      <span
-                        className={`badge-severidade ${emenda.severidade?.toLowerCase()}`}
-                      >
-                        {emenda.severidade}
-                      </span>
-                    ) : (
+                    {emenda.severidade === "ok" ? (
                       <span className="badge-ok">✅ OK</span>
+                    ) : (
+                      <span
+                        style={{
+                          padding: "4px 10px",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                          textTransform: "uppercase",
+                          background:
+                            emenda.severidade === "crítica"
+                              ? "#dc3545"
+                              : emenda.severidade === "moderada"
+                                ? "#ffc107"
+                                : "#17a2b8",
+                          color: "white",
+                        }}
+                      >
+                        {emenda.severidade === "crítica" && "🔴 CRÍTICA"}
+                        {emenda.severidade === "moderada" && "🟡 MODERADA"}
+                        {emenda.severidade === "leve" && "🔵 LEVE"}
+                      </span>
                     )}
                   </td>
                   <td>
                     <button
                       className="btn-selecionar-tabela"
-                      onClick={() => selecionarEmenda(emenda)}
+                      onClick={() => handleSelecionarEmenda(emenda)}
+                      style={styles.btnSelecionar}
+                      title="Selecionar esta emenda para recalcular"
                     >
                       🔧 Selecionar
                     </button>
@@ -345,103 +373,445 @@ function RecalcularEmenda() {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Preview */}
-      {preview && (
-        <>
-          {/* Overlay */}
-          <div
-            className="preview-overlay"
-            onClick={() => setPreview(null)}
-          ></div>
+      {/* SEM RESULTADOS */}
+      {!loading && emendasFiltradas.length === 0 && (
+        <div style={styles.semResultados}>
+          <p>📭 Nenhuma emenda encontrada com os filtros aplicados.</p>
+        </div>
+      )}
 
-          {/* Modal */}
-          <div className="preview-recalculo">
-            <div className="preview-header">
-              <h3>📊 Preview do Recálculo</h3>
-              <button onClick={() => setPreview(null)} className="btn-fechar">
+      {/* MODAL DE PREVIEW */}
+      {mostrarModal && preview && (
+        <div
+          style={styles.modalOverlay}
+          onClick={() => !processando && setMostrarModal(false)}
+        >
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            {/* HEADER */}
+            <div style={styles.modalHeader}>
+              <h3 style={{ margin: 0 }}>🔧 Preview do Recálculo</h3>
+              <button
+                onClick={() => setMostrarModal(false)}
+                style={styles.btnFechar}
+                disabled={processando}
+              >
                 ✕
               </button>
             </div>
 
-            <div className="info-emenda">
-              <p>
-                <strong>Número:</strong>{" "}
-                {preview.emenda.numeroEmenda || preview.emenda.numero}
-              </p>
-              <p>
-                <strong>Município:</strong> {preview.emenda.municipio}/
-                {preview.emenda.uf}
-              </p>
-              <p>
-                <strong>Valor Total:</strong>{" "}
-                {formatarMoeda(preview.emenda.valorTotalParsed)}
-              </p>
-              <p>
-                <strong>Despesas:</strong> {preview.despesas} cadastrada(s)
-              </p>
-            </div>
-
-            <div className="comparacao">
-              <div className="coluna banco">
-                <h4>❌ Valores no Banco</h4>
+            {/* BODY */}
+            <div style={styles.modalBody}>
+              {/* DADOS DA EMENDA */}
+              <div style={styles.previewSection}>
+                <h4 style={styles.sectionTitle}>📋 Dados da Emenda</h4>
                 <p>
-                  Executado:{" "}
-                  {formatarMoeda(preview.valoresBanco.valorExecutado)}
+                  <strong>Número:</strong> {preview.numero}
                 </p>
                 <p>
-                  Saldo: {formatarMoeda(preview.valoresBanco.saldoDisponivel)}
+                  <strong>Município/UF:</strong> {preview.municipio}/
+                  {preview.uf}
                 </p>
                 <p>
-                  Percentual:{" "}
-                  {preview.valoresBanco.percentualExecutado.toFixed(2)}%
+                  <strong>Valor Total:</strong>{" "}
+                  {formatarMoeda(preview.valorTotal)}
+                </p>
+                <p>
+                  <strong>Nº Despesas:</strong> {preview.numeroDespesas}
                 </p>
               </div>
 
-              <div className="seta">→</div>
-
-              <div className="coluna calculado">
-                <h4>✅ Valores Calculados</h4>
-                <p>
-                  Executado:{" "}
-                  {formatarMoeda(preview.valoresCalculados.valorExecutado)}
-                </p>
-                <p>
-                  Saldo:{" "}
-                  {formatarMoeda(preview.valoresCalculados.saldoDisponivel)}
-                </p>
-                <p>
-                  Percentual:{" "}
-                  {preview.valoresCalculados.percentualExecutado.toFixed(2)}%
-                </p>
+              {/* COMPARAÇÃO */}
+              <div style={styles.previewSection}>
+                <h4 style={styles.sectionTitle}>💰 Comparação de Valores</h4>
+                <table style={styles.tabelaComparacao}>
+                  <thead>
+                    <tr>
+                      <th style={styles.thComparacao}>Métrica</th>
+                      <th style={styles.thComparacao}>Banco (Atual)</th>
+                      <th style={styles.thComparacao}>Calculado (Novo)</th>
+                      <th style={styles.thComparacao}>Diferença</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={styles.tdComparacao}>Valor Executado</td>
+                      <td style={styles.tdComparacao}>
+                        {formatarMoeda(preview.valorBanco)}
+                      </td>
+                      <td
+                        style={{
+                          ...styles.tdComparacao,
+                          fontWeight: "bold",
+                          color: "#28a745",
+                        }}
+                      >
+                        {formatarMoeda(preview.valorCalculado)}
+                      </td>
+                      <td
+                        style={{
+                          ...styles.tdComparacao,
+                          color:
+                            preview.diferenca > 1000 ? "#dc3545" : "#28a745",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {formatarMoeda(preview.diferenca)}
+                      </td>
+                    </tr>
+                    <tr style={{ background: "#f8f9fa" }}>
+                      <td style={styles.tdComparacao}>Saldo Disponível</td>
+                      <td style={styles.tdComparacao}>
+                        {formatarMoeda(preview.saldoBanco)}
+                      </td>
+                      <td
+                        style={{
+                          ...styles.tdComparacao,
+                          fontWeight: "bold",
+                          color: "#28a745",
+                        }}
+                      >
+                        {formatarMoeda(preview.saldoCalculado)}
+                      </td>
+                      <td style={styles.tdComparacao}>-</td>
+                    </tr>
+                    <tr>
+                      <td style={styles.tdComparacao}>Percentual Executado</td>
+                      <td style={styles.tdComparacao}>
+                        {preview.percentualBanco.toFixed(2)}%
+                      </td>
+                      <td
+                        style={{
+                          ...styles.tdComparacao,
+                          fontWeight: "bold",
+                          color: "#28a745",
+                        }}
+                      >
+                        {preview.percentualCalculado.toFixed(2)}%
+                      </td>
+                      <td style={styles.tdComparacao}>-</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+
+              {/* ALERTA */}
+              {preview.diferenca > 1000 && (
+                <div style={styles.alerta}>
+                  ⚠️ <strong>ATENÇÃO:</strong> Diferença significativa
+                  detectada! Revise os valores antes de aplicar.
+                </div>
+              )}
             </div>
 
-            <div className="acoes">
+            {/* FOOTER */}
+            <div style={styles.modalFooter}>
               <button
-                className="btn-aplicar"
-                onClick={aplicarCorrecao}
-                disabled={loadingRecalculo}
+                onClick={() => setMostrarModal(false)}
+                style={styles.btnCancelar}
+                disabled={processando}
               >
-                {loadingRecalculo ? "⏳ Aplicando..." : "✅ Aplicar Correção"}
-              </button>
-              <button className="btn-cancelar" onClick={() => setPreview(null)}>
                 ❌ Cancelar
               </button>
+              <button
+                onClick={handleAplicarRecalculo}
+                disabled={processando}
+                style={{
+                  ...styles.btnAplicar,
+                  opacity: processando ? 0.6 : 1,
+                  cursor: processando ? "not-allowed" : "pointer",
+                }}
+              >
+                {processando ? "⏳ Aplicando..." : "✅ Aplicar Correção"}
+              </button>
             </div>
-
-            {sucesso && (
-              <div className="sucesso-msg">
-                ✅ Correção aplicada com sucesso!
-              </div>
-            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
 }
 
-export default RecalcularEmenda;
+// 🎨 ESTILOS
+const styles = {
+  container: {
+    padding: "20px",
+  },
+  header: {
+    marginBottom: "30px",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: "8px",
+  },
+  subtitle: {
+    color: "#6c757d",
+    fontSize: "14px",
+    margin: 0,
+  },
+  filtros: {
+    display: "flex",
+    gap: "12px",
+    marginBottom: "24px",
+    flexWrap: "wrap",
+  },
+  inputBusca: {
+    flex: 1,
+    minWidth: "300px",
+    padding: "10px 14px",
+    border: "1px solid #dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+  },
+  select: {
+    padding: "10px 14px",
+    border: "1px solid #dee2e6",
+    borderRadius: "6px",
+    fontSize: "14px",
+    minWidth: "200px",
+    cursor: "pointer",
+  },
+  btnRecarregar: {
+    padding: "10px 20px",
+    background: "#667eea",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  erro: {
+    background: "#f8d7da",
+    color: "#721c24",
+    padding: "12px",
+    borderRadius: "6px",
+    marginBottom: "16px",
+    border: "1px solid #f5c6cb",
+  },
+  sucesso: {
+    background: "#d4edda",
+    color: "#155724",
+    padding: "12px",
+    borderRadius: "6px",
+    marginBottom: "16px",
+    border: "1px solid #c3e6cb",
+    whiteSpace: "pre-line",
+  },
+  loading: {
+    textAlign: "center",
+    padding: "40px",
+  },
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "4px solid #f3f3f3",
+    borderTop: "4px solid #667eea",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 16px",
+  },
+  tabelaContainer: {
+    overflowX: "auto",
+    background: "white",
+    borderRadius: "8px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  },
+  tabela: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: "13px",
+  },
+  btnSelecionar: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "white",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    transition: "all 0.3s ease",
+  },
+  semResultados: {
+    textAlign: "center",
+    padding: "60px 20px",
+    background: "white",
+    borderRadius: "8px",
+    color: "#6c757d",
+  },
+
+  // MODAL
+  modalOverlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0, 0, 0, 0.7)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+  },
+  modalContent: {
+    background: "white",
+    borderRadius: "12px",
+    width: "90%",
+    maxWidth: "800px",
+    maxHeight: "90vh",
+    overflow: "auto",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+  },
+  modalHeader: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "white",
+    padding: "20px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderRadius: "12px 12px 0 0",
+  },
+  btnFechar: {
+    background: "transparent",
+    border: "none",
+    color: "white",
+    fontSize: "24px",
+    cursor: "pointer",
+    padding: "0 10px",
+  },
+  modalBody: {
+    padding: "30px",
+  },
+  previewSection: {
+    marginBottom: "25px",
+    padding: "20px",
+    background: "#f8f9fa",
+    borderRadius: "8px",
+  },
+  sectionTitle: {
+    marginTop: 0,
+    marginBottom: "15px",
+    fontSize: "16px",
+    color: "#2c3e50",
+  },
+  tabelaComparacao: {
+    width: "100%",
+    borderCollapse: "collapse",
+    marginTop: "15px",
+    fontSize: "14px",
+  },
+  thComparacao: {
+    background: "#e9ecef",
+    padding: "12px",
+    textAlign: "left",
+    fontWeight: "600",
+    borderBottom: "2px solid #dee2e6",
+  },
+  tdComparacao: {
+    padding: "12px",
+    borderBottom: "1px solid #dee2e6",
+  },
+  alerta: {
+    background: "#fff3cd",
+    border: "1px solid #ffc107",
+    color: "#856404",
+    padding: "15px",
+    borderRadius: "8px",
+    marginTop: "20px",
+    fontSize: "14px",
+  },
+  modalFooter: {
+    padding: "20px 30px",
+    borderTop: "1px solid #e9ecef",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+  },
+  btnCancelar: {
+    padding: "12px 24px",
+    background: "#6c757d",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  btnAplicar: {
+    padding: "12px 24px",
+    background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+};
+
+// Adicionar animação do spinner
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .tabela-recalculo thead th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 14px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tabela-recalculo tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .tabela-recalculo tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.005);
+    }
+
+    .tabela-recalculo tbody tr.com-problema {
+      background-color: #fff3cd;
+    }
+
+    .tabela-recalculo tbody tr.com-problema:hover {
+      background-color: #ffe69c;
+    }
+
+    .tabela-recalculo td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .badge-ok {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #28a745;
+      color: white;
+      text-transform: uppercase;
+    }
+
+    .btn-selecionar-tabela:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  `;
+  document.head.appendChild(style);
+}
