@@ -210,8 +210,17 @@ const Emendas = () => {
         `✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`,
       );
 
-      setEmendas(emendasComExecucao);
-      setEmendasFiltradas(emendasComExecucao);
+      // ✅ ORDENAR: Emendas mais recentes primeiro
+      const emendasOrdenadas = emendasComExecucao.sort((a, b) => {
+        const dataA = a.criadaEm?.seconds || 0;
+        const dataB = b.criadaEm?.seconds || 0;
+        return dataB - dataA; // Decrescente (mais recente primeiro)
+      });
+
+      console.log("✅ Emendas ordenadas por data de criação (mais recentes primeiro)");
+
+      setEmendas(emendasOrdenadas);
+      setEmendasFiltradas(emendasOrdenadas);
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
       setError(`Erro ao carregar dados: ${error.message}`);
