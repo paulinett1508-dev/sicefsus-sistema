@@ -65,9 +65,11 @@ export default function EmendaForm() {
     const tabParam = searchParams.get('tab');
     if (tabParam === 'despesas' || tabParam === 'execucao') {
       setActiveTab('execucao');
-      // Limpar query string da URL
-      const currentPath = window.location.pathname;
-      window.history.replaceState({}, '', currentPath);
+      // Limpar query string da URL APÓS renderizar
+      setTimeout(() => {
+        const currentPath = window.location.pathname;
+        window.history.replaceState({}, '', currentPath);
+      }, 100);
     }
   }, [searchParams]);
 
