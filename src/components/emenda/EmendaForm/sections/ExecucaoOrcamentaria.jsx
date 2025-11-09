@@ -356,7 +356,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
   // ✅ Handler para fechar formulário (COM PROTEÇÃO)
   const handleFecharFormulario = (foiSalvoComSucesso = false) => {
-    console.log("🚪 Tentando fechar - Modo:", modoVisualizacao, "| Salvou?", foiSalvoComSucesso);
+    console.log(
+      "🚪 Tentando fechar - Modo:",
+      modoVisualizacao,
+      "| Salvou?",
+      foiSalvoComSucesso,
+    );
 
     // ✅ PROTEÇÃO: Só confirmar cancelamento se NÃO foi salvo com sucesso
     if (modoVisualizacao === "executar" && !foiSalvoComSucesso) {
@@ -741,11 +746,6 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     showToast({
                       message:
                         modoVisualizacao === "executar"
-                          ? "✅ Despesa executada com sucesso!"
-                          : "✅ Despesa atualizada com sucesso!",
-                      type: "success",
-                    });
-                  }}o === "executar"
                           ? "✅ Despesa executada com sucesso!"
                           : "✅ Despesa atualizada com sucesso!",
                       type: "success",
