@@ -323,7 +323,11 @@ function AppContent() {
           )}
           <span style={{ opacity: 0.5 }}>|</span>
           <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            📍 {usuario.municipio || "N/A"}
+            📍 {usuario.tipo === "admin" 
+              ? "Acesso Total" 
+              : usuario.municipio 
+                ? `${usuario.municipio}/${usuario.uf || ""}` 
+                : "Sem município"}
           </span>
           <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
             <span style={{ opacity: 0.7, fontSize: "11px" }}>
