@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth, db } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
 import {
@@ -154,19 +157,19 @@ export default function Login({ onLoginSuccess }) {
       }
     } catch (err) {
       console.error("❌ Erro no login:", err);
-      
+
       // Tratar diferentes tipos de erro
       let mensagemErro = "Erro inesperado no login";
-      
+
       if (err.code) {
         switch (err.code) {
-          case 'auth/user-not-found':
+          case "auth/user-not-found":
             mensagemErro = "Usuário não encontrado";
             break;
-          case 'auth/wrong-password':
+          case "auth/wrong-password":
             mensagemErro = "Senha incorreta";
             break;
-          case 'auth/too-many-requests':
+          case "auth/too-many-requests":
             mensagemErro = "Muitas tentativas. Tente novamente mais tarde";
             break;
           default:
@@ -175,7 +178,7 @@ export default function Login({ onLoginSuccess }) {
       } else if (err.message) {
         mensagemErro = err.message;
       }
-      
+
       setErro(mensagemErro);
     } finally {
       setCarregando(false);
@@ -377,7 +380,8 @@ export default function Login({ onLoginSuccess }) {
               <div style={styles.successIcon}>✅</div>
               <h3 style={styles.successTitle}>Email Enviado!</h3>
               <p style={styles.successText}>
-                Enviamos um link de recuperação para <strong>{emailReset}</strong>
+                Enviamos um link de recuperação para{" "}
+                <strong>{emailReset}</strong>
               </p>
               <p style={styles.successText}>
                 Verifique sua caixa de entrada e spam.
@@ -468,13 +472,21 @@ const styles = {
     fontSize: "0.9em",
   },
   input: {
-    width: "100%",
-    padding: 12,
-    borderRadius: 8,
-    border: "2px solid #e1e8ed",
-    fontSize: 16,
-    transition: "border-color 0.3s ease",
-    boxSizing: "border-box",
+    width: "100% !important",
+    padding: "12px !important",
+    borderRadius: "8px !important",
+    border: "2px solid #e1e8ed !important",
+    fontSize: "16px !important",
+    transition: "border-color 0.3s ease !important",
+    boxSizing: "border-box !important",
+    display: "block !important",
+    visibility: "visible !important",
+    opacity: "1 !important",
+    position: "relative !important",
+    zIndex: "10 !important",
+    background: "#ffffff !important",
+    color: "#000000 !important",
+    minHeight: "44px !important",
   },
   checkboxContainer: {
     display: "flex",

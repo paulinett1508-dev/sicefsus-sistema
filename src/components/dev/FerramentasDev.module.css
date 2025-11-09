@@ -1,12 +1,6 @@
-/* ========================================
-   FERRAMENTAS DEV - CSS 100% ISOLADO
+/* FerramentasDev.module.css - CSS MODULES (100% ISOLADO) */
 
-   ZERO impacto em outras páginas!
-   Todos os estilos com escopo restrito
-   ======================================== */
-
-/* Container principal - único elemento que não precisa prefixo */
-.ferramentas-dev-container {
+.container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
@@ -16,13 +10,11 @@
   box-sizing: border-box;
 }
 
-/* Garantir que elementos filhos não vazem */
-.ferramentas-dev-container * {
+.container * {
   box-sizing: border-box;
 }
 
-/* Header */
-.ferramentas-dev-container .ferramentas-header {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,7 +25,7 @@
   border: 1px solid #e1e4e8;
 }
 
-.ferramentas-dev-container .header-titulo h1 {
+.headerTitulo h1 {
   font-size: 20px;
   font-weight: 600;
   color: #24292e;
@@ -43,28 +35,28 @@
   gap: 8px;
 }
 
-.ferramentas-dev-container .icone-ferramenta {
+.iconeFerramenta {
   font-size: 24px;
 }
 
-.ferramentas-dev-container .header-subtitulo {
+.headerSubtitulo {
   font-size: 13px;
   color: #586069;
   margin: 0;
 }
 
-.ferramentas-dev-container .header-info {
+.headerInfo {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.ferramentas-dev-container .info-usuario {
+.infoUsuario {
   font-size: 13px;
   color: #586069;
 }
 
-.ferramentas-dev-container .badge-superadmin {
+.badgeSuperadmin {
   background: #ffd33d;
   color: #24292e;
   padding: 4px 10px;
@@ -74,8 +66,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Alerta */
-.ferramentas-dev-container .alerta-seguranca {
+.alertaSeguranca {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -86,24 +77,23 @@
   margin-bottom: 16px;
 }
 
-.ferramentas-dev-container .alerta-icone {
+.alertaIcone {
   font-size: 20px;
   line-height: 1;
 }
 
-.ferramentas-dev-container .alerta-conteudo {
+.alertaConteudo {
   font-size: 13px;
   color: #856404;
   line-height: 1.5;
 }
 
-.ferramentas-dev-container .alerta-conteudo strong {
+.alertaConteudo strong {
   font-weight: 600;
   color: #533f03;
 }
 
-/* Abas */
-.ferramentas-dev-container .abas-navegacao {
+.abasNavegacao {
   display: flex;
   gap: 4px;
   padding: 8px;
@@ -114,7 +104,7 @@
   overflow-x: auto;
 }
 
-.ferramentas-dev-container .aba-btn {
+.abaBtn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -130,29 +120,29 @@
   white-space: nowrap;
 }
 
-.ferramentas-dev-container .aba-btn:hover {
+.abaBtn:hover {
   background: #ffffff;
   border-color: #d1d5da;
   color: #24292e;
 }
 
-.ferramentas-dev-container .aba-btn.ativa {
+.abaBtn.ativa {
   background: #ffffff;
   border-color: #0366d6;
   color: #0366d6;
   box-shadow: 0 1px 3px rgba(3, 102, 214, 0.1);
 }
 
-.ferramentas-dev-container .aba-icone {
+.abaIcone {
   font-size: 16px;
   line-height: 1;
 }
 
-.ferramentas-dev-container .aba-label {
+.abaLabel {
   font-size: 13px;
 }
 
-.ferramentas-dev-container .aba-badge {
+.abaBadge {
   background: #28a745;
   color: white;
   padding: 2px 6px;
@@ -163,8 +153,7 @@
   letter-spacing: 0.3px;
 }
 
-/* Conteúdo */
-.ferramentas-dev-container .conteudo-aba {
+.conteudoAba {
   background: #ffffff;
   border: 1px solid #e1e4e8;
   border-radius: 8px;
@@ -172,8 +161,7 @@
   min-height: 400px;
 }
 
-/* Footer */
-.ferramentas-dev-container .ferramentas-footer {
+.footer {
   margin-top: 24px;
   padding: 16px;
   background: #f6f8fa;
@@ -181,7 +169,7 @@
   border: 1px solid #e1e4e8;
 }
 
-.ferramentas-dev-container .footer-info {
+.footerInfo {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,12 +178,11 @@
   color: #586069;
 }
 
-/* Headers de Tabs */
-.ferramentas-dev-container .tab-header {
+.tabHeader {
   margin-bottom: 24px;
 }
 
-.ferramentas-dev-container .tab-header h2 {
+.tabHeader h2 {
   font-size: 18px;
   font-weight: 600;
   color: #24292e;
@@ -205,22 +192,21 @@
   gap: 8px;
 }
 
-.ferramentas-dev-container .tab-descricao {
+.tabDescricao {
   font-size: 13px;
   color: #586069;
   line-height: 1.5;
   margin: 0;
 }
 
-/* Responsivo */
 @media (max-width: 768px) {
-  .ferramentas-dev-container .ferramentas-header {
+  .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
 
-  .ferramentas-dev-container .abas-navegacao {
+  .abasNavegacao {
     overflow-x: auto;
   }
 }
