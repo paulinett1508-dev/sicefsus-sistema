@@ -796,12 +796,9 @@ export const useEmendaFormData = () => {
             // Handlers dos botões
             btnSim.onclick = () => {
               document.body.removeChild(modalOverlay);
-              // ✅ USAR NAVIGATE DO REACT ROUTER
-              // Replace: true força recarga da rota mesmo se for a mesma
-              navigate(`/emendas/${emendaId}`, {
-                replace: true,
-                state: { activeTab: "execucao" },
-              });
+              // ✅ NAVEGAR PARA A EMENDA COM ABA DE EXECUÇÃO ATIVA
+              // Usa window.location para garantir que a página recarregue corretamente
+              window.location.href = `/emendas/${emendaId}?tab=execucao`;
             };
 
             btnNao.onclick = () => {
