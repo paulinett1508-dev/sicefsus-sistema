@@ -95,15 +95,32 @@ function BackupTab() {
       setLoading(true);
       setMensagem({ tipo: 'info', texto: 'Iniciando backup completo...' });
 
-      const colecoes = ['emendas', 'despesas', 'usuarios', 'auditLogs'];
+      const colecoes = ['emendas', 'despesas', 'usuarios'];
       const backupCompleto = {};
 
       for (const nomeColecao of colecoes) {
-        const snapshot = await getDocs(collection(db, nomeColecao));
-        backupCompleto[nomeColecao] = snapshot.docs.map(doc => ({
+        try {
+          const snapshot = await getDocs(collection(db, nomeColecao));
+          backupCompleto[nomeColecao] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+        } catch (error) {
+          console.warn(`Pulando coleção ${nomeColecao}:`, error.message);
+          backupCompleto[nomeColecao] = [];
+        }
+      }
+      
+      // Tentar carregar auditLogs separadamente (pode falhar por permissões)
+      try {
+        const auditSnapshot = await getDocs(collection(db, 'auditLogs'));
+        backupCompleto['auditLogs'] = auditSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+      } catch (error) {
+        console.warn('AuditLogs não disponível:', error.message);
+        backupCompleto['auditLogs'] = [];
       }
 
       const metadata = {
@@ -230,7 +247,7 @@ function BackupTab() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .backup-section {
           margin-top: 24px;
           padding: 24px;
