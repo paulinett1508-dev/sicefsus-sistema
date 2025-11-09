@@ -303,11 +303,11 @@ const EmendasTable = ({ emendas, onEdit, onDelete }) => {
                       {emenda.numero || emenda.numeroEmenda || "N/A"}
                     </strong>
                     <small style={styles.emendaData}>
-                      {emenda.criadaEm && (
+                      {emenda.criadoEm && (
                         <>
                           Criada:{" "}
                           {new Date(
-                            emenda.criadaEm.seconds * 1000,
+                            emenda.criadoEm.seconds * 1000,
                           ).toLocaleDateString("pt-BR")}
                         </>
                       )}

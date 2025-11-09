@@ -425,6 +425,16 @@ function AppContent() {
                 }
               />
               <Route
+                path="/emendas/:id"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <EmendaForm usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/emendas/:id/editar"
                 element={
                   <PrivateRoute usuario={usuario}>

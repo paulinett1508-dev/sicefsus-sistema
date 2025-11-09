@@ -4,6 +4,7 @@
 // ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
 // 🔧 CORREÇÃO: Versão dinâmica integrada com versionControl.js
 // ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas) - Redundantes
+// 🔧 FIX: Navegação corrigida para /emendas/novo
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -26,18 +27,18 @@ import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 // Função auxiliar para parsear valores monetários (ex: R$ 1.000,50 para 1000.50)
 const parseValorMonetario = (valor) => {
   if (!valor && valor !== 0) return 0;
-  
+
   // Se já é número, retorna direto
-  if (typeof valor === 'number') return valor;
-  
+  if (typeof valor === "number") return valor;
+
   const valorString = String(valor);
-  
+
   // Remove pontos (separador de milhar) e substitui vírgula (decimal) por ponto
   const numero = valorString
-    .replace(/\./g, "")     // Remove pontos (separador de milhar)
-    .replace(",", ".")      // Substitui vírgula (decimal) por ponto
+    .replace(/\./g, "") // Remove pontos (separador de milhar)
+    .replace(",", ".") // Substitui vírgula (decimal) por ponto
     .replace(/[^\d.-]/g, ""); // Remove qualquer outro caractere não numérico
-  
+
   const valorFloat = parseFloat(numero);
   return isNaN(valorFloat) ? 0 : valorFloat;
 };
@@ -98,11 +99,9 @@ const Emendas = () => {
     );
   }
 
-  // ✅ FUNÇÃO: Carregar dados principais COM DESPESAS
+  // ✅ FUNÇÃO: Carregar dados com useCallback (prevenir re-renders desnecessários)
   const carregarDados = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
       console.log("📊 Carregando emendas e despesas...");
       console.log("👤 Usuário:", {
         role: userRole,
@@ -110,93 +109,95 @@ const Emendas = () => {
         uf: userUf,
       });
 
-      // ✅ CORREÇÃO: Query com filtro baseado no tipo de usuário
-      let emendasQuery;
+      setLoading(true);
+      setError(null);
 
+      let emendasQuery;
       if (userRole === "admin") {
-        // Admin vê todas as emendas
         console.log("🔓 Admin - carregando TODAS as emendas");
         emendasQuery = collection(db, "emendas");
       } else {
-        // Operador vê apenas emendas do seu município/UF
-        if (userMunicipio && userUf) {
-          console.log(`🔒 Operador - filtrando por ${userMunicipio}/${userUf}`);
-          emendasQuery = query(
-            collection(db, "emendas"),
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf),
-          );
-        } else {
-          console.warn(
-            "⚠️ Operador sem município/UF definido - não carregando emendas",
-          );
-          setEmendas([]);
-          setEmendasFiltradas([]);
-          setLoading(false);
-          return;
-        }
+        console.log(
+          "🔒 Operador - filtrando por município:",
+          userMunicipio,
+          "e UF:",
+          userUf,
+        );
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", userMunicipio),
+          where("uf", "==", userUf),
+        );
       }
 
-      // Carregar emendas (com filtro) e despesas em paralelo
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
-        getDocs(emendasQuery), // ✅ AGORA COM FILTRO!
+        getDocs(emendasQuery),
         getDocs(collection(db, "despesas")),
       ]);
 
-      const emendasData = [];
-      emendasSnapshot.forEach((doc) => {
-        emendasData.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
+      const emendasData = emendasSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-      const despesasData = [];
-      despesasSnapshot.forEach((doc) => {
-        despesasData.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
+      const despesasData = despesasSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-      console.log(`✅ Emendas encontradas: ${emendasData.length}`);
-      console.log(`✅ Despesas encontradas: ${despesasData.length}`);
+      console.log("✅ Emendas encontradas:", emendasData.length);
+      console.log("✅ Despesas encontradas:", despesasData.length);
 
-      // ✅ Mapear emendas com execução calculada
+      // ✅ CALCULAR EXECUÇÃO: Baseado APENAS em despesas reais (não metas)
       const emendasComExecucao = emendasData.map((emenda) => {
         const despesasEmenda = despesasData.filter(
           (despesa) => despesa.emendaId === emenda.id,
         );
 
-        // ✅ CALCULAR EXECUÇÃO REAL baseado APENAS nas despesas
-        const valorExecutadoDespesas = despesasEmenda.reduce((sum, despesa) => {
-          return sum + parseValorMonetario(despesa.valor);
+        // ✅ Valor Total - Parsing robusto
+        const valorTotal = parseValorMonetario(emenda.valorTotal);
+
+        // 🔍 DEBUG: Verificar se valorTotal está vindo do Firebase
+        if (valorTotal === 0) {
+          console.warn(
+            `⚠️ Emenda ${emenda.numero || emenda.id} com valorTotal = 0`,
+            {
+              valorOriginal: emenda.valorTotal,
+              tipoValor: typeof emenda.valorTotal,
+              emendaCompleta: emenda,
+            },
+          );
+        }
+
+        // ✅ Total Executado - Soma APENAS despesas reais (não metas)
+        const valorExecutado = despesasEmenda.reduce((acc, despesa) => {
+          const valorDespesa = parseValorMonetario(despesa.valor);
+          return acc + valorDespesa;
         }, 0);
 
-        // ✅ TOTAL EXECUTADO: Apenas Despesas
-        const valorExecutadoTotal = valorExecutadoDespesas;
+        // ✅ Saldo Disponível
+        const saldoDisponivel = valorTotal - valorExecutado;
 
-        // ✅ CORRIGIDO: Parse correto do valor total usando parseValorMonetario
-        const valorTotal = parseValorMonetario(
-          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0
-        );
-        const saldoDisponivel = valorTotal - valorExecutadoTotal;
+        // ✅ Percentual Executado (arredondado para 1 casa decimal) - RETORNA NÚMERO
         const percentualExecutado =
-          valorTotal > 0 ? (valorExecutadoTotal / valorTotal) * 100 : 0;
+          valorTotal > 0
+            ? parseFloat(((valorExecutado / valorTotal) * 100).toFixed(1))
+            : 0;
 
         console.log(
           `💰 Emenda ${emenda.numero} (${emenda.municipio}/${emenda.uf}):`,
           {
-            valorTotal,
-            valorExecutadoDespesas,
-            saldoDisponivel,
-            percentualExecutado: percentualExecutado.toFixed(1) + "%",
+            valorTotal: valorTotal,
+            valorExecutadoDespesas: valorExecutado,
+            saldoDisponivel: saldoDisponivel,
+            percentualExecutado: percentualExecutado,
           },
         );
 
         return {
           ...emenda,
-          valorExecutado: valorExecutadoTotal,
+          valorTotal: valorTotal,
+          valorExecutado: valorExecutado,
           saldoDisponivel: saldoDisponivel,
           percentualExecutado: percentualExecutado,
           totalDespesas: despesasEmenda.length,
@@ -210,14 +211,12 @@ const Emendas = () => {
         `✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`,
       );
 
-      // ✅ ORDENAR: Emendas mais recentes primeiro
+      // ✅ ORDENAR por data de criação (mais recentes primeiro)
       const emendasOrdenadas = emendasComExecucao.sort((a, b) => {
-        const dataA = a.criadaEm?.seconds || 0;
-        const dataB = b.criadaEm?.seconds || 0;
-        return dataB - dataA; // Decrescente (mais recente primeiro)
+        const dataA = a.criadoEm?.seconds || 0;
+        const dataB = b.criadoEm?.seconds || 0;
+        return dataB - dataA; // Decrescente (mais recentes primeiro)
       });
-
-      console.log("✅ Emendas ordenadas por data de criação (mais recentes primeiro)");
 
       setEmendas(emendasOrdenadas);
       setEmendasFiltradas(emendasOrdenadas);
@@ -248,7 +247,7 @@ const Emendas = () => {
   // ✅ HANDLERS: Ações das emendas
   const handleCriar = () => {
     console.log("➕ Criando nova emenda");
-    navigate("/emendas/novo");
+    navigate("/emendas/novo"); // 🔧 CORREÇÃO: Rota corrigida
   };
 
   const handleEditar = (emenda) => {
@@ -358,25 +357,21 @@ const Emendas = () => {
         prevEmendasFiltradas.filter((emenda) => emenda.id !== emendaId),
       );
 
-      // Exibir mensagem de sucesso
-      setToast({
-        show: true,
-        message: `✅ Emenda ${modalExclusao.emenda.numero || emendaId} excluída com sucesso!`,
-        type: "success",
-      });
-
       // Fechar modal
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
-    } catch (error) {
-      console.error("❌ Erro ao excluir emenda:", error);
 
-      // Desativar loading
-      setModalExclusao((prev) => ({ ...prev, loading: false }));
-
-      // Exibir mensagem de erro
+      // Exibir toast de sucesso
       setToast({
         show: true,
-        message: `❌ Erro ao excluir emenda: ${error.message}`,
+        message: "✅ Emenda excluída com sucesso!",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("❌ Erro ao excluir emenda:", error);
+      setModalExclusao((prev) => ({ ...prev, loading: false }));
+      setToast({
+        show: true,
+        message: `Erro ao excluir emenda: ${error.message}`,
         type: "error",
       });
     }
@@ -388,26 +383,16 @@ const Emendas = () => {
     setModalExclusao({ isOpen: false, emenda: null, loading: false });
   };
 
-  // Loading state
-  if (loading && emendas.length === 0) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Carregando emendas...</p>
-      </div>
-    );
-  }
-
-  // ✅ CÁLCULOS: Estatísticas simples
+  // ✅ CÁLCULOS: Estatísticas das emendas
   const totalEmendas = emendasFiltradas.length;
   const emendasExecutadas = emendasFiltradas.filter(
-    (e) => e.percentualExecutado >= 100,
+    (emenda) => parseFloat(emenda.percentualExecutado) >= 100,
   ).length;
   const emendasAtivas = emendasFiltradas.filter(
-    (e) => e.percentualExecutado > 0 && e.percentualExecutado < 100,
+    (emenda) => parseFloat(emenda.percentualExecutado) > 0,
   ).length;
   const valorTotal = emendasFiltradas.reduce(
-    (sum, emenda) => sum + (emenda.valorRecurso || emenda.valor || 0),
+    (acc, emenda) => acc + (emenda.valorTotal || 0),
     0,
   );
 
@@ -418,45 +403,36 @@ const Emendas = () => {
     valorTotal,
   });
 
+  // ✅ RENDERIZAÇÃO: Loading
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div style={styles.spinner}></div>
+        <p style={styles.loadingText}>Carregando emendas...</p>
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       {/* Header compacto */}
       <div style={styles.compactHeader}>
-        <div style={styles.statusInfo}>
-          <span style={styles.statusText}>📋 EMENDAS</span>
-          <span style={styles.divider}>|</span>
-          <span style={styles.statusText}>
-            {userRole === "admin" ? "👑 Administrador" : "👤 Operador"}
+        <span style={styles.statusInfo}>
+          <span style={styles.statusText}>📊 Sistema:</span>
+          <span style={styles.statusValue}>Ativo</span>
+        </span>
+        <span style={styles.statusInfo}>|</span>
+        <span style={styles.statusInfo}>
+          <span style={styles.statusText}>👤 Usuário:</span>
+          <span style={styles.statusValue}>{user?.nome}</span>
+        </span>
+        <span style={styles.statusInfo}>|</span>
+        <span style={styles.statusInfo}>
+          <span style={styles.versionText}>
+            {formatVersion("Emendas.jsx v2.3")}
           </span>
-          {userRole === "operador" && (
-            <>
-              <span style={styles.divider}>|</span>
-              <span style={styles.statusValue}>
-                {userMunicipio}/{userUf}
-              </span>
-            </>
-          )}
-          <span style={styles.divider}>|</span>
-          <span style={styles.versionText}>v{formatVersion()}</span>
-        </div>
+        </span>
       </div>
-
-      {/* Permissões de operador */}
-      {userRole === "operador" && (
-        <div style={styles.permissaoInfo}>
-          <div style={styles.permissaoIcon}>ℹ️</div>
-          <div style={styles.permissaoContent}>
-            <div style={styles.permissaoTexto}>
-              Você visualiza apenas emendas do município de{" "}
-              <strong>{userMunicipio}</strong>
-            </div>
-            <div style={styles.permissaoSubtexto}>
-              Permissões de operador: criar despesas, visualizar e editar
-              emendas do seu município
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Toast de feedback */}
       {toast.show && (
@@ -608,200 +584,160 @@ const styles = {
     fontWeight: "normal",
   },
 
-  versionValue: {
-    fontWeight: "500",
-  },
-
-  divider: {
-    opacity: 0.7,
-    margin: "0 4px",
-  },
-
-  permissaoInfo: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "16px 20px",
-    backgroundColor: "#e8f5e8",
-    border: "2px solid #4caf50",
-    borderRadius: 12,
-    marginBottom: "20px",
-    fontSize: 14,
-    color: "#2e7d32",
-    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.15)",
-  },
-
-  permissaoIcon: {
-    fontSize: 20,
-    flexShrink: 0,
-    marginTop: 2,
-  },
-
-  permissaoContent: {
+  loadingContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: 4,
-    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    gap: "20px",
   },
 
-  permissaoTexto: {
-    fontSize: 14,
-    lineHeight: 1.4,
+  spinner: {
+    width: "50px",
+    height: "50px",
+    border: "5px solid #f3f3f3",
+    borderTop: "5px solid #154360",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+  },
+
+  loadingText: {
+    color: "#154360",
+    fontSize: "18px",
     fontWeight: "500",
-  },
-
-  permissaoSubtexto: {
-    fontSize: 12,
-    opacity: 0.8,
-    fontWeight: "400",
   },
 
   statsContainer: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "15px",
-    marginBottom: "20px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "20px",
+    marginBottom: "30px",
   },
 
   statCard: {
     backgroundColor: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    padding: "25px",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
     textAlign: "center",
+    border: "2px solid #dee2e6",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    cursor: "default",
   },
 
   statNumber: {
-    fontSize: "24px",
+    fontSize: "32px",
     fontWeight: "bold",
     color: "#154360",
     margin: "0 0 10px 0",
   },
 
   statLabel: {
-    fontSize: "11px",
-    fontWeight: "bold",
+    fontSize: "14px",
     color: "#666",
+    fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: "1px",
-    margin: 0,
+    letterSpacing: "0.5px",
+    margin: "0",
   },
 
   actionContainer: {
-    marginBottom: "20px",
     display: "flex",
-    gap: "10px",
+    gap: "15px",
+    marginBottom: "20px",
+    flexWrap: "wrap",
   },
 
   primaryButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#154360",
     color: "white",
-    border: "none",
     padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-
-  refreshButton: {
-    backgroundColor: "#007bff",
-    color: "white",
     border: "none",
-    padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-
-  loadingContainer: {
-    textAlign: "center",
-    padding: "40px",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-
-  spinner: {
-    width: "40px",
-    height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #007bff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    marginLeft: "auto",
-    marginRight: "auto",
-    marginBottom: "16px",
-  },
-
-  loadingText: {
-    fontSize: "18px",
-    color: "#666",
-  },
-
-  emptyContainer: {
-    textAlign: "center",
-    padding: "60px 20px",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  },
-
-  emptyIcon: {
-    fontSize: "48px",
-    marginBottom: "16px",
-  },
-
-  emptyText: {
-    fontSize: "16px",
-    color: "#666",
-    marginBottom: "10px",
-  },
-
-  emptyButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "14px 28px",
     borderRadius: "8px",
     fontSize: "16px",
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 4px 12px rgba(40, 167, 69, 0.3)",
+    boxShadow: "0 4px 6px rgba(21, 67, 96, 0.3)",
+  },
+
+  refreshButton: {
+    backgroundColor: "#6c757d",
+    color: "white",
+    padding: "12px 24px",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 4px 6px rgba(108, 117, 125, 0.3)",
+  },
+
+  emptyContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "60px 20px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    marginTop: "20px",
+    border: "2px dashed #dee2e6",
+  },
+
+  emptyIcon: {
+    fontSize: "64px",
+    marginBottom: "20px",
+  },
+
+  emptyText: {
+    color: "#666",
+    fontSize: "16px",
+    marginTop: "10px",
   },
 
   retryButton: {
-    backgroundColor: "#007bff",
+    marginTop: "20px",
+    backgroundColor: "#154360",
     color: "white",
-    border: "none",
     padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "14px",
-    fontWeight: "bold",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    marginTop: "10px",
   },
 };
 
-// CSS para animação (evita conflito)
-if (!document.getElementById("emendas-animations")) {
-  const styleSheet = document.createElement("style");
-  styleSheet.id = "emendas-animations";
-  styleSheet.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  document.head.appendChild(styleSheet);
-}
+// ✅ Adicionar keyframes para animação do spinner
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  ${Object.keys(styles)
+    .map((key) => {
+      if (key === "primaryButton" || key === "refreshButton") {
+        return `
+          .${key}:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+          }
+          .${key}:active {
+            transform: translateY(0);
+          }
+        `;
+      }
+      return "";
+    })
+    .join("")}
+`;
+document.head.appendChild(style);
 
 export default Emendas;
