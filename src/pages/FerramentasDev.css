@@ -1205,3 +1205,152 @@
     min-width: 100%;
   }
 }
+
+/* ========================================
+   TABELA DE RECÁLCULO (NOVA)
+   ======================================== */
+
+.tabela-emendas {
+  margin-top: 24px;
+  overflow-x: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tabela-recalculo {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabela-recalculo thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.tabela-recalculo thead th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.tabela-recalculo tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.tabela-recalculo tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: scale(1.005);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tabela-recalculo tbody tr.com-problema {
+  background-color: #fff3cd;
+}
+
+.tabela-recalculo tbody tr.com-problema:hover {
+  background-color: #ffe69c;
+}
+
+.tabela-recalculo td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+.tabela-recalculo td strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Badge OK */
+.badge-ok {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #28a745;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Diferença na Tabela */
+.diferenca {
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.diferenca.crítica {
+  color: #dc3545;
+  background: #f8d7da;
+}
+
+.diferenca.moderada {
+  color: #856404;
+  background: #fff3cd;
+}
+
+.diferenca.leve {
+  color: #0c5460;
+  background: #d1ecf1;
+}
+
+.ok {
+  color: #28a745;
+  font-weight: 600;
+}
+
+/* Botão Selecionar na Tabela */
+.btn-selecionar-tabela {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-selecionar-tabela:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-selecionar-tabela:active {
+  transform: translateY(0);
+}
+
+/* Responsividade da Tabela */
+@media (max-width: 1200px) {
+  .tabela-recalculo {
+    font-size: 13px;
+  }
+
+  .tabela-recalculo thead th,
+  .tabela-recalculo td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tabela-emendas {
+    overflow-x: scroll;
+  }
+
+  .tabela-recalculo {
+    min-width: 1000px;
+  }
+}

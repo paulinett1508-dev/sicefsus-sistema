@@ -249,7 +249,19 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         where("emendaId", "==", emendaId),
       );
       const snap = await getDocs(q);
-      setDespesas(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      const despesasCarregadas = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+
+      // ✅ ORDENAR por data de criação (mais recentes primeiro)
+      despesasCarregadas.sort((a, b) => {
+        const dataA = a.criadoEm?.seconds || a.criadaEm?.seconds || 0;
+        const dataB = b.criadoEm?.seconds || b.criadaEm?.seconds || 0;
+        return dataB - dataA; // DESC (mais recente primeiro)
+      });
+
+      setDespesas(despesasCarregadas);
     } catch (e) {
       console.error(e);
       setToast({

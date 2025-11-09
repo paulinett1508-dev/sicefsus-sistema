@@ -270,62 +270,81 @@ function RecalcularEmenda() {
         </div>
       </div>
 
-      {/* Lista de Emendas */}
-      <div className="lista-emendas">
+      {/* Tabela de Emendas */}
+      <div className="tabela-emendas">
         {emendasFiltradas.length === 0 ? (
           <div className="sem-resultados">
             <p>🔍 Nenhuma emenda encontrada com esses filtros.</p>
           </div>
         ) : (
-          emendasFiltradas.map((emenda) => (
-            <div
-              key={emenda.id}
-              className={`emenda-card ${emenda.temProblema ? "com-problema" : ""} ${emenda.severidade?.toLowerCase()}`}
-              onClick={() => selecionarEmenda(emenda)}
-            >
-              <div className="emenda-header">
-                <div>
-                  <strong>{emenda.numeroEmenda || emenda.numero}</strong>
-                  <span className="emenda-municipio">
+          <table className="tabela-recalculo">
+            <thead>
+              <tr>
+                <th>Número</th>
+                <th>Município/UF</th>
+                <th>Valor Total</th>
+                <th>Despesas</th>
+                <th>Exec. Banco</th>
+                <th>Exec. Real</th>
+                <th>Diferença</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {emendasFiltradas.map((emenda) => (
+                <tr
+                  key={emenda.id}
+                  className={emenda.temProblema ? "com-problema" : ""}
+                >
+                  <td>
+                    <strong>{emenda.numeroEmenda || emenda.numero}</strong>
+                  </td>
+                  <td>
                     {emenda.municipio}/{emenda.uf}
-                  </span>
-                </div>
-                {emenda.temProblema && (
-                  <span
-                    className={`badge-severidade ${emenda.severidade.toLowerCase()}`}
-                  >
-                    {emenda.severidade}
-                  </span>
-                )}
-              </div>
-
-              <div className="emenda-info">
-                <div className="info-item">
-                  <span className="label">Valor Total:</span>
-                  <span className="valor">
-                    {formatarMoeda(emenda.valorTotalParsed)}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="label">Despesas:</span>
-                  <span className="valor">{emenda.despesas}</span>
-                </div>
-              </div>
-
-              {emenda.temProblema && (
-                <div className="diferenca-alerta">
-                  <span>
-                    ⚠️ Diferença: {formatarMoeda(emenda.diferencaExecutado)}
-                  </span>
-                </div>
-              )}
-
-              <div className="emenda-footer">
-                <span className="emenda-id">ID: {emenda.id}</span>
-                <button className="btn-selecionar">👉 Selecionar</button>
-              </div>
-            </div>
-          ))
+                  </td>
+                  <td>{formatarMoeda(emenda.valorTotalParsed)}</td>
+                  <td style={{ textAlign: "center" }}>{emenda.despesas}</td>
+                  <td>
+                    {formatarMoeda(
+                      parseValorMonetario(emenda.valorExecutado || 0),
+                    )}
+                  </td>
+                  <td>{formatarMoeda(emenda.valorExecutadoReal)}</td>
+                  <td>
+                    {emenda.temProblema ? (
+                      <span
+                        className={`diferenca ${emenda.severidade?.toLowerCase()}`}
+                      >
+                        {formatarMoeda(emenda.diferencaExecutado)}
+                      </span>
+                    ) : (
+                      <span className="ok">-</span>
+                    )}
+                  </td>
+                  <td>
+                    {emenda.temProblema ? (
+                      <span
+                        className={`badge-severidade ${emenda.severidade?.toLowerCase()}`}
+                      >
+                        {emenda.severidade}
+                      </span>
+                    ) : (
+                      <span className="badge-ok">✅ OK</span>
+                    )}
+                  </td>
+                  <td>
+                    <button
+                      className="btn-selecionar-tabela"
+                      onClick={() => selecionarEmenda(emenda)}
+                    >
+                      🔧 Selecionar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
