@@ -476,7 +476,7 @@ const styles = {
     padding: "14px 12px !important",
     borderRadius: "8px !important",
     border: "2px solid #e1e8ed !important",
-    fontSize: "15px !important",
+    fontSize: "14px !important",
     transition: "border-color 0.3s ease !important",
     boxSizing: "border-box !important",
     display: "block !important",
