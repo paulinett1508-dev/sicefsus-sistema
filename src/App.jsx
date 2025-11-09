@@ -373,7 +373,10 @@ function AppContent() {
                   usuario ? (
                     <Navigate to="/dashboard" replace />
                   ) : (
-                    <Home onShowLogin={handleShowLogin} />
+                    <Login 
+                      onLoginSuccess={handleLoginSuccess}
+                      onClose={() => {}} 
+                    />
                   )
                 }
               />
