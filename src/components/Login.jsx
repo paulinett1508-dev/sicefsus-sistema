@@ -440,8 +440,8 @@ const styles = {
     background: "#fff",
     borderRadius: 16,
     padding: 0,
-    minWidth: 450,
-    maxWidth: 550,
+    minWidth: 500,
+    maxWidth: 600,
     width: "90%",
     boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
     border: "2px solid #3498db",
@@ -459,7 +459,7 @@ const styles = {
     fontWeight: "600",
   },
   form: {
-    padding: 32,
+    padding: "32px 40px",
   },
   inputGroup: {
     marginBottom: 20,
@@ -473,7 +473,7 @@ const styles = {
   },
   input: {
     width: "100% !important",
-    padding: "14px !important",
+    padding: "14px 16px !important",
     borderRadius: "8px !important",
     border: "2px solid #e1e8ed !important",
     fontSize: "16px !important",
@@ -486,7 +486,7 @@ const styles = {
     zIndex: "10 !important",
     background: "#ffffff !important",
     color: "#000000 !important",
-    minHeight: "48px !important",
+    minHeight: "50px !important",
   },
   checkboxContainer: {
     display: "flex",
