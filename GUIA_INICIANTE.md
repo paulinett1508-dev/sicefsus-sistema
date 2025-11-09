@@ -203,4 +203,296 @@ Menu → **"Dashboard"**
 
 ---
 
-**Versão:** 1.0 | **Data:** 2025-01-15
+## 💳 STATUS DE PAGAMENTO - O QUE SIGNIFICAM?
+
+### **Entendendo o Ciclo Financeiro**
+
+Cada despesa passa por **3 etapas obrigatórias** até estar completamente paga:
+
+```
+1️⃣ EMPENHADO → 2️⃣ LIQUIDADO → 3️⃣ PAGO
+```
+
+---
+
+### **📋 Status: EMPENHADO**
+
+**O que é?**
+- Primeiro estágio do processo de pagamento
+- É o momento em que você **reserva** o dinheiro para aquela compra
+- O valor já foi comprometido, mas ainda não foi efetivamente gasto
+
+**Quando usar?**
+- Logo após fazer a compra ou contratar o serviço
+- Quando você tem o número do empenho
+
+**Exemplo prático:**
+- Você comprou medicamentos por R$ 10.000
+- O setor de compras emitiu o empenho nº 2025NE000123
+- Status: **EMPENHADO** ✅
+
+**Campos obrigatórios:**
+- ✅ Número do Empenho
+- ✅ Data do Empenho
+- ✅ Fornecedor
+- ✅ CNPJ do Fornecedor
+
+---
+
+### **📝 Status: LIQUIDADO**
+
+**O que é?**
+- Segundo estágio do processo
+- É quando você **confirma** que recebeu o produto/serviço
+- Verifica se está tudo correto antes de pagar
+
+**Quando usar?**
+- Depois de receber os medicamentos/materiais
+- Após verificar se está tudo conforme o pedido
+- Quando a nota fiscal foi conferida
+
+**Exemplo prático:**
+- Os medicamentos chegaram
+- Você conferiu: quantidade, validade, especificações
+- Está tudo certo → pode marcar como **LIQUIDADO** ✅
+
+**Campos obrigatórios:**
+- ✅ Data da Liquidação
+- ✅ Número da Nota Fiscal
+
+---
+
+### **💵 Status: PAGO**
+
+**O que é?**
+- Estágio final do processo
+- O dinheiro foi **efetivamente transferido** para o fornecedor
+- Despesa totalmente concluída
+
+**Quando usar?**
+- Depois que o pagamento foi feito pelo banco
+- Quando você tem a comprovação bancária
+
+**Exemplo prático:**
+- O banco transferiu os R$ 10.000 para o fornecedor
+- Data de pagamento: 15/01/2025
+- Status: **PAGO** ✅ (Concluído)
+
+**Campos obrigatórios:**
+- ✅ Data do Pagamento
+
+---
+
+## 📊 PAINEL FINANCEIRO - COMO LER OS NÚMEROS
+
+### **Localização**
+- **Dashboard**: Visão geral de todas as emendas
+- **Detalhes da Emenda**: Visão específica de cada emenda
+
+---
+
+### **📦 Painel "Status Financeiro" (Mini-Cards)**
+
+Quando você abre uma emenda, verá **3 mini-cards coloridos**:
+
+#### **💵 Card PAGO (Verde)**
+```
+💵 Pago
+R$ 40.000,00
+✅ Concluído
+```
+
+**Significado:**
+- Mostra quanto **já foi pago completamente**
+- Dinheiro que saiu da conta e foi para o fornecedor
+- Processo 100% finalizado
+
+---
+
+#### **📝 Card LIQUIDADO (Amarelo)**
+```
+📝 Liquidado
+R$ 25.000,00
+⏳ Aguardando pagamento
+```
+
+**Significado:**
+- Produto/serviço **recebido e conferido**
+- Aguardando o setor financeiro fazer o pagamento
+- Dinheiro ainda não saiu, mas está confirmado
+
+---
+
+#### **📋 Card EMPENHADO (Azul)**
+```
+📋 Empenhado
+R$ 35.000,00
+⏳ Aguardando recebimento
+```
+
+**Significado:**
+- Compra **feita e reservada**
+- Aguardando receber o produto/serviço
+- Depois de receber → marcar como liquidado
+
+---
+
+### **💡 Interpretando o Painel Completo**
+
+**Exemplo real:**
+
+```
+Valor Total da Emenda: R$ 100.000,00
+
+Status Financeiro:
+├─ 💵 Pago:       R$ 40.000 (40%)
+├─ 📝 Liquidado:  R$ 25.000 (25%)
+├─ 📋 Empenhado:  R$ 35.000 (35%)
+└─ 💰 Disponível: R$ 0,00    (0%)
+```
+
+**O que isso significa?**
+- ✅ **R$ 40.000** → Processo 100% concluído (pagos)
+- 🕐 **R$ 25.000** → Próximo a ser pago (liquidados)
+- 📦 **R$ 35.000** → Aguardando recebimento (empenhados)
+- ✔️ **Emenda 100% executada** (nada disponível)
+
+---
+
+## 🏢 CADASTRO AUTOMÁTICO DE FORNECEDOR
+
+### **🚀 Como Funciona**
+
+O sistema **busca automaticamente** os dados do fornecedor quando você digita o CNPJ!
+
+---
+
+### **📝 Passo a Passo**
+
+1. **Digite o CNPJ** (apenas números ou com máscara)
+   ```
+   Exemplo: 00.000.000/0001-00
+   ```
+
+2. **Aguarde a validação automática**
+   - ✅ CNPJ válido → Ícone verde aparece
+   - ❌ CNPJ inválido → Mensagem de erro
+
+3. **Clique no botão 🔄 ao lado do campo CNPJ**
+   - Botão aparece como: `🔍 Buscar Dados`
+
+4. **Sistema preenche automaticamente:**
+   - ✅ Razão Social (Nome da Empresa)
+   - ✅ Nome Fantasia
+   - ✅ Endereço completo
+   - ✅ Cidade/UF
+   - ✅ CEP
+   - ✅ Telefone
+   - ✅ Situação Cadastral
+
+5. **Você só precisa conferir se está correto!**
+
+---
+
+### **🎯 Exemplo Prático**
+
+**Antes:**
+```
+CNPJ: [           ] 🔍 Buscar Dados (botão desabilitado)
+Fornecedor: [                    ]
+Nome Fantasia: [                 ]
+Endereço: [                      ]
+```
+
+**Você digita:** `06.597.801/0001-62`
+
+**Depois (automático):**
+```
+CNPJ: 06.597.801/0001-62 ✅
+Fornecedor: EMPRESA EXEMPLO LTDA (preenchido)
+Nome Fantasia: EXEMPLO (preenchido)
+Endereço: RUA EXEMPLO, 123 (preenchido)
+Cidade/UF: SÃO PAULO/SP (preenchido)
+CEP: 01234-567 (preenchido)
+Telefone: (11) 98765-4321 (preenchido)
+Situação: ATIVA (preenchido)
+```
+
+---
+
+### **⚠️ Observações Importantes**
+
+#### **✅ Vantagens:**
+- ⚡ Economiza tempo (não precisa digitar tudo)
+- 📋 Evita erros de digitação
+- 🔍 Garante dados oficiais e atualizados
+
+#### **⚠️ O que fazer se não funcionar:**
+1. Verifique se o CNPJ está correto (14 dígitos)
+2. Confira se tem conexão com internet
+3. Se persistir, preencha manualmente os campos
+
+#### **🔑 Campos que você ainda precisa preencher:**
+- Número do Empenho
+- Número da Nota Fiscal
+- Datas (Empenho, Liquidação, Pagamento)
+- Valor da despesa
+
+---
+
+## 🎨 CORES E BADGES DO SISTEMA
+
+### **Status de Pagamento**
+
+| Badge | Significado | Ação Necessária |
+|-------|-------------|-----------------|
+| 🟢 **PAGO** | Processo concluído | ✅ Nenhuma |
+| 🟡 **LIQUIDADO** | Aguardando pagamento | 💵 Efetuar pagamento |
+| 🔵 **EMPENHADO** | Aguardando recebimento | 📦 Receber e liquidar |
+| ⚪ **PLANEJADO** | Ainda não executado | ▶️ Executar despesa |
+
+### **Status da Emenda**
+
+| Cor | Significado |
+|-----|-------------|
+| 🟢 **Verde** | Emenda ativa com saldo |
+| 🟡 **Amarelo** | Emenda próxima do vencimento |
+| 🔴 **Vermelho** | Emenda vencida ou sem saldo |
+
+---
+
+## 🔄 FLUXO COMPLETO: DO PLANEJAMENTO AO PAGAMENTO
+
+```
+1. PLANEJAR DESPESA
+   ↓
+2. EXECUTAR (Preencher CNPJ → Buscar dados → Confirmar)
+   ↓
+3. EMPENHAR (Status: EMPENHADO)
+   ↓
+4. RECEBER PRODUTO/SERVIÇO
+   ↓
+5. LIQUIDAR (Status: LIQUIDADO)
+   ↓
+6. PAGAR (Status: PAGO) ✅
+```
+
+---
+
+## 📞 DÚVIDAS FREQUENTES
+
+**P: Posso pular etapas do processo de pagamento?**
+R: ❌ Não. O fluxo EMPENHADO → LIQUIDADO → PAGO deve ser seguido conforme a legislação.
+
+**P: O que fazer se o fornecedor não for encontrado pelo CNPJ?**
+R: Verifique se o CNPJ está correto. Se estiver, preencha os dados manualmente.
+
+**P: Posso editar dados que foram preenchidos automaticamente?**
+R: ✅ Sim! Todos os campos podem ser editados se necessário.
+
+**P: Como sei em qual etapa está minha despesa?**
+R: Verifique o badge colorido ao lado da despesa ou no painel Status Financeiro.
+
+---
+
+**Versão:** 1.1 | **Data:** 2025-01-15 | **Atualização:** Status de Pagamento e Cadastro Automático
