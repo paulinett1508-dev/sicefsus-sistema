@@ -239,7 +239,7 @@ const Emendas = () => {
   // ✅ HANDLERS: Ações das emendas
   const handleCriar = () => {
     console.log("➕ Criando nova emenda");
-    navigate("/emendas/criar");
+    navigate("/emendas/novo");
   };
 
   const handleEditar = (emenda) => {
