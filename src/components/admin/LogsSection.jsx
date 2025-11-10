@@ -156,10 +156,12 @@ const LogsSection = ({
             <thead>
               <tr>
                 <th style={styles.tableHeader}>📅 Data/Hora</th>
-                <th style={styles.tableHeader}>👤 Usuário</th>
-                <th style={styles.tableHeader}>⚡ Ação Executada</th>
-                <th style={styles.tableHeader}>📋 Recurso Afetado</th>
-                <th style={styles.tableHeader}>🏢 Município/UF</th>
+                <th style={styles.tableHeader}>👤 Usuário (Nome + Email)</th>
+                <th style={styles.tableHeader}>⚡ Ação</th>
+                <th style={styles.tableHeader}>📋 Recurso</th>
+                <th style={styles.tableHeader}>📝 Dados ANTES</th>
+                <th style={styles.tableHeader}>✏️ Dados DEPOIS</th>
+                <th style={styles.tableHeader}>✅ Status</th>
               </tr>
             </thead>
             <tbody>
@@ -259,21 +261,70 @@ const LogsSection = ({
                       ID: {(log.resourceId || "N/A").substring(0, 8)}...
                     </div>
                   </td>
-                  <td style={styles.tableCell}>
-                    {log.userMunicipio && log.userUf ? (
-                      <div>
-                        <div style={{ fontWeight: "500" }}>
-                          {log.userMunicipio}
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#666" }}>
-                          {log.userUf}
-                        </div>
-                      </div>
+                  {/* DADOS ANTES */}
+                  <td style={{...styles.tableCell, maxWidth: '200px'}}>
+                    {log.dataBefore ? (
+                      <details style={styles.detailsExpand}>
+                        <summary style={styles.detailsSummary}>
+                          Ver dados anteriores 🔍
+                        </summary>
+                        <pre style={styles.jsonPre}>
+                          {JSON.stringify(log.dataBefore, null, 2)}
+                        </pre>
+                      </details>
                     ) : (
-                      <span style={{ color: "#999", fontStyle: "italic" }}>
-                        N/A
+                      <span style={{ color: "#999", fontSize: "11px" }}>
+                        {log.action?.includes('CREATE') ? '(Criação - sem dados anteriores)' : 'N/A'}
                       </span>
                     )}
+                  </td>
+
+                  {/* DADOS DEPOIS */}
+                  <td style={{...styles.tableCell, maxWidth: '200px'}}>
+                    {log.dataAfter ? (
+                      <details style={styles.detailsExpand}>
+                        <summary style={styles.detailsSummary}>
+                          Ver dados atualizados 🔍
+                        </summary>
+                        <pre style={styles.jsonPre}>
+                          {JSON.stringify(log.dataAfter, null, 2)}
+                        </pre>
+                      </details>
+                    ) : (
+                      <span style={{ color: "#999", fontSize: "11px" }}>
+                        {log.action?.includes('DELETE') ? '(Exclusão - sem dados finais)' : 'N/A'}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* STATUS */}
+                  <td style={{...styles.tableCell, textAlign: 'center'}}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <span style={{
+                        fontSize: '20px',
+                        filter: log.success !== false ? 'none' : 'grayscale(100%)'
+                      }}>
+                        {log.success !== false ? '✅' : '❌'}
+                      </span>
+                      {log.errorMessage && (
+                        <span style={{
+                          fontSize: '10px',
+                          color: '#dc3545',
+                          backgroundColor: '#f8d7da',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          maxWidth: '120px',
+                          wordBreak: 'break-word'
+                        }}>
+                          {log.errorMessage}
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -390,6 +441,35 @@ const styles = {
     fontSize: "13px",
     verticalAlign: "top",
   },
+  
+  // Estilos para expansão de dados
+  detailsExpand: {
+    cursor: "pointer",
+    backgroundColor: "#f8f9fa",
+    borderRadius: "4px",
+    padding: "4px 8px",
+    border: "1px solid #dee2e6"
+  },
+  detailsSummary: {
+    fontSize: "11px",
+    fontWeight: "600",
+    color: "#007bff",
+    userSelect: "none",
+    listStyle: "none",
+    padding: "4px 0"
+  },
+  jsonPre: {
+    fontSize: "10px",
+    backgroundColor: "#282c34",
+    color: "#61dafb",
+    padding: "8px",
+    borderRadius: "4px",
+    overflow: "auto",
+    maxHeight: "200px",
+    marginTop: "8px",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word"
+  }
 };
 
 export default LogsSection;
