@@ -623,17 +623,24 @@ const Administracao = () => {
 
       {/* CONTEÚDO CONDICIONAL MODULAR */}
       {activeTab === "users" ? (
-        <UsersSection
-          users={getFilteredUsers()}
-          userFilter={userFilter}
-          setUserFilter={setUserFilter}
-          onEdit={handleEditarUsuario}
-          onDelete={handleDelete}
-          onToggleStatus={handleToggleStatus}
-          onNovoUsuario={handleNovoUsuario}
-          loading={loading}
-          currentUserType={currentUser?.tipo || "operador"} // ✅ Passar tipo do usuário
-        />
+        <>
+          {console.warn("🔍 PROPS para UsersSection:", {
+            usersCount: getFilteredUsers().length,
+            currentUserTipo: currentUser?.tipo,
+            hasNovoUsuario: !!handleNovoUsuario
+          })}
+          <UsersSection
+            users={getFilteredUsers()}
+            userFilter={userFilter}
+            setUserFilter={setUserFilter}
+            onEdit={handleEditarUsuario}
+            onDelete={handleDelete}
+            onToggleStatus={handleToggleStatus}
+            onNovoUsuario={handleNovoUsuario}
+            loading={loading}
+            currentUserType={currentUser?.tipo || "operador"} // ✅ Passar tipo do usuário
+          />
+        </>
       ) : (
         <LogsSection
           logs={getFilteredLogs()}

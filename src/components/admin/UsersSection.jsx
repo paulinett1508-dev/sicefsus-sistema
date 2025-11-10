@@ -13,9 +13,15 @@ const UsersSection = ({
   loading,
   currentUserType, // ✅ Receber tipo do usuário
 }) => {
+  // ⚠️ LOG IMEDIATO - antes de qualquer coisa
+  console.warn("🔍 UsersSection RENDERIZADO");
+  console.warn("🔍 currentUserType:", currentUserType);
+  console.warn("🔍 onNovoUsuario existe?:", typeof onNovoUsuario);
+  console.warn("🔍 Deveria mostrar botão?:", currentUserType === "admin" && !!onNovoUsuario);
+  
   // Debug: verificar valores
   React.useEffect(() => {
-    console.log("🔍 UsersSection Debug:", {
+    console.warn("🔍 UsersSection useEffect executado!", {
       currentUserType,
       onNovoUsuario: typeof onNovoUsuario,
       shouldShow: currentUserType === "admin" && !!onNovoUsuario
