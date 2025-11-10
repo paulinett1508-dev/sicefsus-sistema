@@ -701,18 +701,7 @@ const DespesaForm = ({
         </>
       )}
 
-      {/* Header do modal/formulário */}
-      <h2 style={styles.modalTitle}>
-        {modoVisualizacao
-          ? "👁️ Visualizar Despesa"
-          : isExecucao
-            ? "▶️ Executar Despesa Planejada"
-            : isCriacaoDireta
-              ? "➕ Nova Despesa Executada"
-              : despesaParaEditar
-                ? "✏️ Editar Despesa"
-                : "🆕 Nova Despesa"}
-      </h2>
+      {/* Header do modal/formulário - Removido: título já existe no modal pai */}
 
       {/* ✅ ATUALIZADO: Props corretas incluindo formData e handleInputChange */}
       {(emendaInfoDinamica || emendaInfo) && (

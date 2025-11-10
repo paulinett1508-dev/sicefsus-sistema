@@ -740,8 +740,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             <div style={styles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
-                  {modoVisualizacao === "editar" && "✏️ Editar Despesa"}
-                  {modoVisualizacao === "visualizar" && "👁️ Visualizar Despesa"}
+                  {modoVisualizacao === "editar" && "📋 Informações da Despesa"}
+                  {modoVisualizacao === "visualizar" && "📋 Informações da Despesa"}
                   {modoVisualizacao === "executar" && "▶️ Executar Despesa Planejada"}
                   {modoVisualizacao === "criar" && "➕ Nova Despesa"}
                   {modoVisualizacao === "criar-executada" && "➕ Nova Despesa Executada"}
