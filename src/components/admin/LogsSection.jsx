@@ -156,7 +156,7 @@ const LogsSection = ({
             <thead>
               <tr>
                 <th style={styles.tableHeader}>📅 Data/Hora</th>
-                <th style={styles.tableHeader}>👤 Usuário (Email e Perfil)</th>
+                <th style={styles.tableHeader}>👤 Usuário</th>
                 <th style={styles.tableHeader}>⚡ Ação Executada</th>
                 <th style={styles.tableHeader}>📋 Recurso Afetado</th>
                 <th style={styles.tableHeader}>🏢 Município/UF</th>
@@ -193,39 +193,45 @@ const LogsSection = ({
                     <div style={{ 
                       display: "flex", 
                       flexDirection: "column", 
-                      gap: "4px" 
+                      gap: "6px" 
                     }}>
+                      {/* Nome do usuário em destaque (se disponível) */}
+                      {log.userName && (
+                        <div style={{ 
+                          fontWeight: "700",
+                          color: "#2c3e50",
+                          fontSize: "14px"
+                        }}>
+                          {log.userName}
+                        </div>
+                      )}
+                      
+                      {/* Email */}
                       <div style={{ 
-                        fontWeight: "600",
-                        color: "#2c3e50",
-                        fontSize: "13px"
+                        fontWeight: log.userName ? "400" : "600",
+                        color: "#495057",
+                        fontSize: "12px"
                       }}>
-                        {log.userEmail || "Sistema"}
+                        📧 {log.userEmail || "Sistema"}
                       </div>
-                      <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                      
+                      {/* Badge do perfil */}
+                      <div>
                         <span
                           style={{
                             fontSize: "10px",
                             color: "white",
                             backgroundColor:
                               log.userRole === "admin" ? "#dc3545" : "#28a745",
-                            padding: "3px 8px",
+                            padding: "4px 10px",
                             borderRadius: "12px",
                             textTransform: "uppercase",
                             fontWeight: "bold",
+                            display: "inline-block"
                           }}
                         >
                           {log.userRole === "admin" ? "👑 ADMIN" : "👤 OPERADOR"}
                         </span>
-                        {log.userName && (
-                          <span style={{
-                            fontSize: "11px",
-                            color: "#6c757d",
-                            fontStyle: "italic"
-                          }}>
-                            ({log.userName})
-                          </span>
-                        )}
                       </div>
                     </div>
                   </td>
