@@ -1,0 +1,309 @@
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🔥 PROD Firebase Check: Object
+ 🔧 Console configurado - Nível: INFO (2) - DEV: true
+ 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+ ✅ Dados do usuário encontrados: Object
+ 👤 Usuário configurado: Object
+ 🔍 PrivateRoute verificação: Object
+ ✅ PrivateRoute: Acesso autorizado
+ 🔄 Iniciando carregamento de dados: Object
+ 🔓 ADMIN: Carregando TODOS os dados do sistema
+ ✅ ADMIN carregou: 19 emendas, 71 despesas
+ 🔍 Tentativa de navegação para Emendas: Object
+ ✅ Navegação normal para Emendas
+ 📋 Emendas.jsx v2.3 - Dados do usuário: Object
+ 📊 Estatísticas calculadas: Object
+ 📊 Carregando emendas e despesas...
+ 👤 Usuário: Object
+ 🔓 Admin - carregando TODAS as emendas
+ ✅ Emendas encontradas: 19
+ ✅ Despesas encontradas: 71
+ ✅ Emenda 42980003 valorTotal OK: Object
+ 💰 Emenda 42980003 (Passagem Franca/MA): Object
+ ✅ Emenda 44190002 valorTotal OK: Object
+ 💰 Emenda 44190002 (Passagem Franca/MA): Object
+ ✅ Emenda 30460003 valorTotal OK: Object
+ 💰 Emenda 30460003 (Passagem Franca/MA): Object
+ ✅ Emenda 43590002 valorTotal OK: Object
+ 💰 Emenda 43590002 (Sucupira do Riachão/MA): Object
+ ✅ Emenda 43210001 valorTotal OK: Object
+ 💰 Emenda 43210001 (Antônio Almeida/PI): Object
+ ✅ Emenda CIRO NOGUEIRA valorTotal OK: Object
+ 💰 Emenda CIRO NOGUEIRA (Antônio Almeida/PI): Object
+ ✅ Emenda 50410001 valorTotal OK: Object
+ 💰 Emenda 50410001 (Antônio Almeida/PI): Object
+ ✅ Emenda 40840005 valorTotal OK: Object
+ 💰 Emenda 40840005 (Sucupira do Riachão/MA): Object
+ ✅ Emenda 304612542 valorTotal OK: Object
+ 💰 Emenda 304612542 (Passagem Franca/MA): Object
+ ✅ Emenda 37580004 valorTotal OK: Object
+ 💰 Emenda 37580004 (Passagem Franca/MA): Object
+ ✅ Emenda 304512000 valorTotal OK: Object
+ 💰 Emenda 304512000 (Ferreira Gomes/AP): Object
+ ✅ Emenda Programa valorTotal OK: Object
+ 💰 Emenda Programa (Antônio Almeida/PI): Object
+ 💰 Emenda 40840005 (Passagem Franca/MA): Object
+ ✅ Emenda 41830007 valorTotal OK: Object
+ 💰 Emenda 41830007 (Antônio Almeida/PI): Object
+ ✅ Emenda 44190001 valorTotal OK: Object
+ 💰 Emenda 44190001 (Passagem Franca/MA): Object
+ ✅ Emenda 12460003 valorTotal OK: Object
+ 💰 Emenda 12460003 (Antônio Almeida/PI): Object
+ ✅ Emenda 30460001 valorTotal OK: Object
+ 💰 Emenda 30460001 (Passagem Franca/MA): Object
+ ✅ 19 emendas processadas para usuário admin
+ 🔍 Aplicando filtros: 19
+ ➕ Criando nova emenda
+ 📋 DadosBasicos renderizado
+ 🔧 EmendaFormActions - Estado: Object
+ 🚀 RADICAL - Input: 0 → 0
+ 🚀 VALIDAÇÃO INTERNA - Input: 06597801000160
+ 🚀 VALIDAÇÃO INTERNA - Numero limpo: 06597801000160
+ 🚀 VALIDAÇÃO INTERNA - Resultado: false
+ ✅ VALIDAÇÃO INTERNA - CNPJ 06597801000162 FORÇADO COMO VÁLIDO
+ 📋 DadosBasicos renderizado
+ 🔧 EmendaFormActions - Estado: Object
+ 🏙️ Carregando municípios para GO...
+ 🌐 Tentativa 1/2 - API IBGE para GO
+ ✅ API IBGE sucesso para GO: 246 municípios
+ 💾 Cache salvo para GO: 246 municípios
+ ✅ 246 municípios carregados para GO
+ 📄 Campo objeto alterado para: "T"
+ 📄 Campo objeto alterado para: "TE"
+ 📄 Campo objeto alterado para: "TES"
+ 📄 Campo objeto alterado para: "TEST"
+ 📋 DadosBasicos renderizado
+ 🔧 EmendaFormActions - Estado: Object
+ 📄 Campo objeto alterado para: "TESTE"
+ 📄 Campo autor alterado para: "P"
+ 📄 Campo autor alterado para: "PA"
+ 📄 Campo autor alterado para: "PAU"
+ 📄 Campo autor alterado para: "PAUL"
+ 📄 Campo autor alterado para: "PAULI"
+ 📄 Campo autor alterado para: "PAULIN"
+ 📄 Campo autor alterado para: "PAULINE"
+ 📄 Campo autor alterado para: "PAULINET"
+ 📄 Campo autor alterado para: "PAULINETT"
+ 📄 Campo autor alterado para: "PAULINETT "
+ 📄 Campo autor alterado para: "PAULINETT M"
+ 📄 Campo autor alterado para: "PAULINETT MI"
+ 📄 Campo autor alterado para: "PAULINETT MIR"
+ 📄 Campo autor alterado para: "PAULINETT MIRA"
+ 📄 Campo autor alterado para: "PAULINETT MIRAN"
+ 📄 Campo autor alterado para: "PAULINETT MIRAND"
+ 📄 Campo autor alterado para: "PAULINETT MIRANDA"
+ 📄 Campo autor alterado para: "PAULINETT MIRANDA "
+ 📄 Campo numero alterado para: "2"
+ 📋 DadosBasicos renderizado
+ 🔧 EmendaFormActions - Estado: Object
+ 📄 Campo numero alterado para: "20"
+DisableConsole.jsx:163 📄 Campo numero alterado para: "202"
+DisableConsole.jsx:163 📄 Campo numero alterado para: "2020"
+DisableConsole.jsx:163 📄 Campo numero alterado para: "20200"
+DisableConsole.jsx:163 📄 Campo numero alterado para: "202002"
+DisableConsole.jsx:163 📄 Campo numero alterado para: "2020022"
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 🚀 RADICAL - Input: 0 → 0
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "0"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.5"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.59"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.8"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.80"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801"
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/0"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/00"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/000"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/0001"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/0001-6"
+DisableConsole.jsx:163 📄 CNPJInput beneficiario: "06.597.801/0001-62"
+DisableConsole.jsx:172 🚀 VALIDAÇÃO INTERNA - Input: 06597801000162
+DisableConsole.jsx:172 🚀 VALIDAÇÃO INTERNA - Numero limpo: 06597801000162
+DisableConsole.jsx:172 ✅ VALIDAÇÃO INTERNA - CNPJ 06597801000162 FORÇADO COMO VÁLIDO
+DisableConsole.jsx:163 📄 Campo valor alterado para: "1"
+DisableConsole.jsx:163 📄 Campo valor alterado para: "R$ 0,010"
+DisableConsole.jsx:163 📄 Campo valor alterado para: "R$ 0,100"
+DisableConsole.jsx:163 📄 Campo valor alterado para: "R$ 1,000"
+DisableConsole.jsx:163 📄 Campo valor alterado para: "R$ 10,000"
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 🖱️ Botão Submit clicado!
+DisableConsole.jsx:172 🔍 Validação executada - campos: Object
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Input: 06.597.801/0001-62
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Numero limpo: 06597801000162
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Digits array: Array(14)
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Primeiro dígito calculado: 6 vs esperado: 6
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Segundo dígito calculado: 2 vs esperado: 2
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Resultado final: true
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE "
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE D"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE "
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE V"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VA"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VAL"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALI"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALID"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALIDA"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALIDAÇ"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALIDAÇÃ"
+DisableConsole.jsx:163 📄 Campo objeto alterado para: "TESTE DE VALIDAÇÃO"
+DisableConsole.jsx:172 🖱️ Botão Submit clicado!
+DisableConsole.jsx:172 🔍 Validação executada - campos: Object
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Input: 06.597.801/0001-62
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Numero limpo: 06597801000162
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Digits array: Array(14)
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Primeiro dígito calculado: 6 vs esperado: 6
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Segundo dígito calculado: 2 vs esperado: 2
+DisableConsole.jsx:163 🔧 DEBUG validarCNPJ - Resultado final: true
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: Object
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:172 🔄 ExecucaoOrcamentaria - Estado mudou: Object
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:172 🆕 Abrindo formulário para criar despesa executada diretamente
+DisableConsole.jsx:172 📊 DespesasList: Recebendo dados via props Object
+DisableConsole.jsx:172 🔍 DespesaForm - Modo: Object
+DisableConsole.jsx:172 📊 DespesasList: Sincronizando dados 0
+DisableConsole.jsx:163  🚨 Erro global capturado: ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at commitPassiveMountOnFiber (react-dom.development.js:24926:13)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24891:9)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24878:7)
+    at commitPassiveMountEffects (react-dom.development.js:24866:3)
+    at flushPassiveEffectsImpl (react-dom.development.js:27039:3)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+(anônimo) @ DisableConsole.jsx:163
+react-dom.development.js:22839  Uncaught ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at commitPassiveMountOnFiber (react-dom.development.js:24926:13)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24891:9)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24878:7)
+    at commitPassiveMountEffects (react-dom.development.js:24866:3)
+    at flushPassiveEffectsImpl (react-dom.development.js:27039:3)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+DisableConsole.jsx:172 🔄 ExecucaoOrcamentaria - Estado mudou: Object
+DisableConsole.jsx:163  🚨 Erro global capturado: ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at invokePassiveEffectMountInDEV (react-dom.development.js:25154:13)
+    at invokeEffectsInDev (react-dom.development.js:27351:11)
+    at commitDoubleInvokeEffectsInDEV (react-dom.development.js:27330:7)
+    at flushPassiveEffectsImpl (react-dom.development.js:27056:5)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+    at performSyncWorkOnRoot (react-dom.development.js:26117:3)
+(anônimo) @ DisableConsole.jsx:163
+react-dom.development.js:22839  Uncaught ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at invokePassiveEffectMountInDEV (react-dom.development.js:25154:13)
+    at invokeEffectsInDev (react-dom.development.js:27351:11)
+    at commitDoubleInvokeEffectsInDEV (react-dom.development.js:27330:7)
+    at flushPassiveEffectsImpl (react-dom.development.js:27056:5)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+    at performSyncWorkOnRoot (react-dom.development.js:26117:3)
+DisableConsole.jsx:172  The above error occurred in the <DespesaFormBasicFields> component:
+
+    at DespesaFormBasicFields (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/despesa/DespesaFormBasicFields.jsx:41:3)
+    at div
+    at div
+    at DespesaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/DespesaForm.jsx:76:3)
+    at div
+    at div
+    at div
+    at div
+    at ExecucaoOrcamentaria (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx:307:33)
+    at div
+    at form
+    at div
+    at EmendaForm (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/emenda/EmendaForm/index.jsx:35:18)
+    at div
+    at ProtectedRouteWrapper (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:131:34)
+    at PrivateRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/PrivateRoute.jsx:19:40)
+    at RenderedRoute (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=5e478764:5464:26)
+    at Routes (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=5e478764:6198:3)
+    at ErrorBoundary (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/ErrorBoundary.jsx:5:5)
+    at div
+    at div
+    at div
+    at AppContent (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:196:37)
+    at NavigationProtectionProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/App.jsx:92:41)
+    at Router (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=5e478764:6141:13)
+    at BrowserRouter (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/node_modules/.vite/deps/react-router-dom.js?v=5e478764:9183:3)
+    at ToastProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/components/Toast.jsx:20:33)
+    at UserProvider (https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev/src/context/UserContext.jsx:32:32)
+    at App
+
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
+(anônimo) @ DisableConsole.jsx:172
+DisableConsole.jsx:163  🚨 ErrorBoundary caught an error: ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at commitPassiveMountOnFiber (react-dom.development.js:24926:13)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24891:9)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24878:7)
+    at commitPassiveMountEffects (react-dom.development.js:24866:3)
+    at flushPassiveEffectsImpl (react-dom.development.js:27039:3)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5) Object
+(anônimo) @ DisableConsole.jsx:163
+ErrorBoundary.jsx:32 🐛 Error Details
+DisableConsole.jsx:172  Error: ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at commitPassiveMountOnFiber (react-dom.development.js:24926:13)
+    at commitPassiveMountEffects_complete (react-dom.development.js:24891:9)
+    at commitPassiveMountEffects_begin (react-dom.development.js:24878:7)
+    at commitPassiveMountEffects (react-dom.development.js:24866:3)
+    at flushPassiveEffectsImpl (react-dom.development.js:27039:3)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+(anônimo) @ DisableConsole.jsx:172
+DisableConsole.jsx:172  Error Info: Object
+(anônimo) @ DisableConsole.jsx:172
+DisableConsole.jsx:163  🚨 ErrorBoundary caught an error: ReferenceError: setValorExcedeSaldo is not defined
+    at DespesaFormBasicFields.jsx:221:7
+    at commitHookEffectListMount (react-dom.development.js:23150:26)
+    at invokePassiveEffectMountInDEV (react-dom.development.js:25154:13)
+    at invokeEffectsInDev (react-dom.development.js:27351:11)
+    at commitDoubleInvokeEffectsInDEV (react-dom.development.js:27330:7)
+    at flushPassiveEffectsImpl (react-dom.development.js:27056:5)
+    at flushPassiveEffects (react-dom.development.js:26984:14)
+    at commitRootImpl (react-dom.development.js:26935:5)
+    at commitRoot (react-dom.development.js:26682:5)
+    at performSyncWorkOnRoot (react-dom.development.js:26117:3) Object
+(anônimo) @ DisableConsole.jsx:163
+ErrorBoundary.jsx:32 🐛 Error Details
+M3qsDLMz6x00SiiD7xD9:1  Form submission canceled because the form is not connected
