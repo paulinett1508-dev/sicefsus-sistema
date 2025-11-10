@@ -11,23 +11,8 @@ const UsersSection = ({
   onToggleStatus,
   onNovoUsuario,
   loading,
-  currentUserType, // ✅ Receber tipo do usuário
+  currentUserType,
 }) => {
-  // ⚠️ LOG IMEDIATO - antes de qualquer coisa
-  console.warn("🔍 UsersSection RENDERIZADO");
-  console.warn("🔍 currentUserType:", currentUserType);
-  console.warn("🔍 onNovoUsuario existe?:", typeof onNovoUsuario);
-  console.warn("🔍 Deveria mostrar botão?:", currentUserType === "admin" && !!onNovoUsuario);
-  
-  // Debug: verificar valores
-  React.useEffect(() => {
-    console.warn("🔍 UsersSection useEffect executado!", {
-      currentUserType,
-      onNovoUsuario: typeof onNovoUsuario,
-      shouldShow: currentUserType === "admin" && !!onNovoUsuario
-    });
-  }, [currentUserType, onNovoUsuario]);
-
   return (
     <div style={styles.tableContainer}>
       {/* Cabeçalho da seção com botão */}

@@ -624,11 +624,6 @@ const Administracao = () => {
       {/* CONTEÚDO CONDICIONAL MODULAR */}
       {activeTab === "users" ? (
         <>
-          {console.warn("🔍 PROPS para UsersSection:", {
-            usersCount: getFilteredUsers().length,
-            currentUserTipo: currentUser?.tipo,
-            hasNovoUsuario: !!handleNovoUsuario
-          })}
           <UsersSection
             users={getFilteredUsers()}
             userFilter={userFilter}
@@ -638,7 +633,7 @@ const Administracao = () => {
             onToggleStatus={handleToggleStatus}
             onNovoUsuario={handleNovoUsuario}
             loading={loading}
-            currentUserType={currentUser?.tipo || "operador"} // ✅ Passar tipo do usuário
+            currentUserType={currentUser?.tipo || "operador"} // ✅ Usar tipo direto do banco
           />
         </>
       ) : (
