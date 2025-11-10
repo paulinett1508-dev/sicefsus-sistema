@@ -50,7 +50,8 @@ function LimpezaTab() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .ferramentas-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -111,7 +112,8 @@ function LimpezaTab() {
           cursor: not-allowed;
           opacity: 0.6;
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }
