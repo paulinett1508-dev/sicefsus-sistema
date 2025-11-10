@@ -26,8 +26,7 @@ const LogsSection = ({
 
       // Filtro por data início
       if (logFilters.dataInicio) {
-        const dataInicio = new Date(logFilters.dataInicio);
-        dataInicio.setHours(0, 0, 0, 0);
+        const dataInicio = new Date(logFilters.dataInicio + 'T00:00:00');
         
         const logDate = log.timestamp?.seconds 
           ? new Date(log.timestamp.seconds * 1000)
@@ -38,8 +37,7 @@ const LogsSection = ({
 
       // Filtro por data fim
       if (logFilters.dataFim) {
-        const dataFim = new Date(logFilters.dataFim);
-        dataFim.setHours(23, 59, 59, 999);
+        const dataFim = new Date(logFilters.dataFim + 'T23:59:59');
         
         const logDate = log.timestamp?.seconds 
           ? new Date(log.timestamp.seconds * 1000)
