@@ -47,6 +47,7 @@ const DespesaFormBasicFields = ({
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
   const [novoValorPendente, setNovoValorPendente] = useState(null);
   const [valorAnterior, setValorAnterior] = useState(null);
+  const [valorExcedeSaldo, setValorExcedeSaldo] = useState(false);
 
   const emendaDisplay = emendaInfo
     ? `${emendaInfo.numero || emendaInfo.numeroEmenda || ""} - ${emendaInfo.parlamentar || emendaInfo.autor || ""}`
