@@ -30,13 +30,6 @@ function DiagnosticoTab() {
 
   return (
     <div className="tab-diagnostico">
-      <div className="tab-header">
-        <h2>🔍 Diagnóstico do Sistema</h2>
-        <p className="tab-descricao">
-          Analisa todas as emendas do sistema em busca de inconsistências nos valores calculados vs armazenados.
-        </p>
-      </div>
-
       <AlertaBanner
         tipo="info"
         mensagem="Este diagnóstico verifica a integridade dos dados financeiros das emendas. Execute sempre que suspeitar de inconsistências nos saldos."
