@@ -278,6 +278,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     if (temEmendaSalva) carregarDespesas(); /* eslint-disable-next-line */
   }, [emendaId]);
 
+  // ✅ CRÍTICO: Separação ESTRITA entre planejadas e executadas
   const despesasPlanejadas = despesas.filter((d) => d.status === "PLANEJADA");
   const despesasExecutadas = despesas.filter((d) => d.status !== "PLANEJADA");
 
@@ -289,13 +290,15 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     return 0;
   })();
 
-  // ✅ CORRIGIDO: Cada despesa em apenas 1 categoria (sem duplicação)
+  // ✅ CORREÇÃO CRÍTICA: Despesas planejadas NÃO consomem saldo
   const stats = {
     valorEmenda: valorEmendaParsed,
+    // 🟡 Planejadas: Apenas para visualização (não debitam)
     totalPlanejado: despesasPlanejadas.reduce(
-      (acc, d) => acc + Number(d.valor || 0),
+      (acc, d) => acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
       0,
     ),
+    // 💸 Executadas: SOMENTE estas consomem o saldo
     totalExecutado: despesasExecutadas.reduce(
       (acc, d) => acc + (parseValorMonetario(d.valor) || Number(d.valor) || 0),
       0,
@@ -359,13 +362,27 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     setModoVisualizacao("visualizar");
   };
 
-  // ✅ Handler para executar despesa planejada
+  // ✅ Handler para executar despesa planejada (COM VALIDAÇÃO DE SALDO)
   const handleExecutarDespesa = (despesa) => {
     console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada", {
       id: despesa.id,
       estrategia: despesa.estrategia,
       valor: despesa.valor,
     });
+
+    // ⚠️ VALIDAÇÃO: Verificar se há saldo disponível
+    const valorDespesa = parseValorMonetario(despesa.valor) || Number(despesa.valor) || 0;
+    
+    if (valorDespesa > stats.saldoDisponivel) {
+      alert(
+        `⚠️ SALDO INSUFICIENTE!\n\n` +
+        `Valor da despesa: ${formatCurrency(valorDespesa)}\n` +
+        `Saldo disponível: ${formatCurrency(stats.saldoDisponivel)}\n\n` +
+        `Reduza o valor da despesa ou libere saldo antes de executar.`
+      );
+      return; // BLOQUEIA execução
+    }
+
     console.log("✅ Abrindo DespesaForm para EXECUTAR (pré-preenchido)");
     setDespesaEmEdicao(despesa);
     setModoVisualizacao("executar");

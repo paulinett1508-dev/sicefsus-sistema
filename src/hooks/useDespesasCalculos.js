@@ -13,7 +13,10 @@ export function useDespesasCalculos(despesas, emendas) {
       const emenda = emendas.find(e => e.id === emendaId);
       if (!emenda) return null;
 
-      const despesasDaEmenda = despesas.filter(d => d.emendaId === emendaId);
+      // ✅ CRÍTICO: Filtrar APENAS despesas executadas (status !== "PLANEJADA")
+      const despesasDaEmenda = despesas.filter(
+        d => d.emendaId === emendaId && d.status !== "PLANEJADA"
+      );
 
       const valorExecutado = despesasDaEmenda.reduce((soma, despesa) => {
         return soma + (Number(despesa.valor) || 0);

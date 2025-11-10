@@ -64,13 +64,16 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
 
     const emenda = emendaSnap.data();
 
-    // 2️⃣ Buscar todas as despesas da emenda
+    // 2️⃣ Buscar APENAS despesas EXECUTADAS da emenda (status !== "PLANEJADA")
     const despesasQuery = query(
       collection(db, "despesas"),
       where("emendaId", "==", emendaId),
     );
     const despesasSnapshot = await getDocs(despesasQuery);
-    const despesas = despesasSnapshot.docs.map((doc) => doc.data());
+    const todasDespesas = despesasSnapshot.docs.map((doc) => doc.data());
+    
+    // ✅ FILTRO CRÍTICO: Remover despesas planejadas do cálculo
+    const despesas = todasDespesas.filter(d => d.status !== "PLANEJADA");
 
     // 3️⃣ Calcular valor total (com fallback)
     const valorTotal = parseValorMonetario(
