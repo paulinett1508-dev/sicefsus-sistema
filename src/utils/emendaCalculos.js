@@ -71,8 +71,8 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     );
     const despesasSnapshot = await getDocs(despesasQuery);
     const todasDespesas = despesasSnapshot.docs.map((doc) => doc.data());
-    
-    // ✅ FILTRO CRÍTICO: Remover despesas planejadas do cálculo
+
+    // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
     const despesas = todasDespesas.filter(d => d.status !== "PLANEJADA");
 
     // 3️⃣ Calcular valor total (com fallback)

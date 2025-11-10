@@ -106,15 +106,16 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     (emendaData, despesasData) => {
       if (!emendaData) return metricas;
 
-      // ✅ CORREÇÃO: Parse correto do valor total
       const valorTotal = parseValorMonetario(
         emendaData.valorTotal || emendaData.valorRecurso || 0,
       );
+
+      // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
       const despesasValidas = despesasData.filter(
-        (d) => d.emendaId === emendaData.id,
+        (d) => d.emendaId === emendaData.id && d.status !== "PLANEJADA"
       );
 
-      // ✅ CORREÇÃO: Parse correto de cada despesa
+      // ✅ CORREÇÃO: Parse correto de cada despesa válida
       const valorExecutado = despesasValidas.reduce(
         (sum, d) => sum + parseValorMonetario(d.valor),
         0,

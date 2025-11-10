@@ -190,11 +190,13 @@ const Emendas = () => {
           );
         }
 
-        // ✅ Total Executado - Soma APENAS despesas reais (não metas)
-        const valorExecutado = despesasEmenda.reduce((acc, despesa) => {
-          const valorDespesa = parseValorMonetario(despesa.valor);
-          return acc + valorDespesa;
-        }, 0);
+        // ✅ Total Executado - Soma despesas que NÃO são planejadas
+        const valorExecutado = despesasEmenda
+          .filter(d => d.status !== "PLANEJADA")
+          .reduce((acc, despesa) => {
+            const valorDespesa = parseValorMonetario(despesa.valor);
+            return acc + valorDespesa;
+          }, 0);
 
         // ✅ Saldo Disponível
         const saldoDisponivel = valorTotal - valorExecutado;
