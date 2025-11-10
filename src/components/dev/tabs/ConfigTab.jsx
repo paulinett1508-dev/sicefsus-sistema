@@ -112,7 +112,7 @@ function ConfigTab() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .config-sections {
           display: flex;
           flex-direction: column;
