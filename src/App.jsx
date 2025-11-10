@@ -578,16 +578,16 @@ function App() {
   }
 
   return (
-    <ToastProvider>
-      <UserProvider>
+    <UserProvider>
+      <ToastProvider>
         <Router>
           <NavigationProtectionProvider>
             <AppContent />
             <UpdateNotification />
           </NavigationProtectionProvider>
         </Router>
-      </UserProvider>
-    </ToastProvider>
+      </ToastProvider>
+    </UserProvider>
   );
 }
 

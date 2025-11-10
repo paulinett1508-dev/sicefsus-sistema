@@ -13,6 +13,15 @@ const UsersSection = ({
   loading,
   currentUserType, // ✅ Receber tipo do usuário
 }) => {
+  // Debug: verificar valores
+  React.useEffect(() => {
+    console.log("🔍 UsersSection Debug:", {
+      currentUserType,
+      onNovoUsuario: typeof onNovoUsuario,
+      shouldShow: currentUserType === "admin" && !!onNovoUsuario
+    });
+  }, [currentUserType, onNovoUsuario]);
+
   return (
     <div style={styles.tableContainer}>
       {/* Cabeçalho da seção com botão */}
