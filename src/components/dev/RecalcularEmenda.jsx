@@ -56,18 +56,22 @@ export default function RecalcularEmenda() {
         );
         const despesasSnapshot = await getDocs(despesasQuery);
 
-        // Calcular valor executado REAL (soma das despesas)
+        // ✅ CORREÇÃO: Calcular valor executado REAL (soma das despesas) com parse correto
         const valorExecutadoReal = despesasSnapshot.docs.reduce(
           (total, despDoc) => {
             const desp = despDoc.data();
-            return total + (parseFloat(desp.valor) || 0);
+            return total + parseValorMonetario(desp.valor || 0);
           },
           0,
         );
 
-        // Valor que está no banco
-        const valorExecutadoBanco = parseFloat(emendaData.valorExecutado) || 0;
-        const valorTotal = parseFloat(emendaData.valorTotal) || 0;
+        // ✅ CORREÇÃO: Valor que está no banco com parse correto
+        const valorExecutadoBanco = parseValorMonetario(emendaData.valorExecutado || 0);
+        
+        // ✅ CORREÇÃO: Valor total com fallback igual ao Diagnóstico
+        const valorTotal = parseValorMonetario(
+          emendaData.valorTotal || emendaData.valor || emendaData.valorRecurso || 0
+        );
 
         // Calcular diferença
         const diferenca = Math.abs(valorExecutadoBanco - valorExecutadoReal);
@@ -103,10 +107,12 @@ export default function RecalcularEmenda() {
   const handleSelecionarEmenda = (emenda) => {
     console.log("🎯 Emenda selecionada:", emenda);
 
-    // Calcular valores
-    const valorTotal = parseFloat(emenda.valorTotal) || 0;
-    const valorBanco = parseFloat(emenda.valorExecutadoBanco) || 0;
-    const valorCalculado = parseFloat(emenda.valorExecutadoReal) || 0;
+    // ✅ CORREÇÃO: Calcular valores com parse correto
+    const valorTotal = parseValorMonetario(
+      emenda.valorTotal || emenda.valor || emenda.valorRecurso || 0
+    );
+    const valorBanco = parseValorMonetario(emenda.valorExecutadoBanco || 0);
+    const valorCalculado = parseValorMonetario(emenda.valorExecutadoReal || 0);
     const diferenca = Math.abs(valorBanco - valorCalculado);
 
     const saldoBanco = valorTotal - valorBanco;
