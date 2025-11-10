@@ -278,9 +278,28 @@ const LogsSection = ({
                 >
                   <td style={styles.tableCell}>
                     <div style={{ fontWeight: "500", fontSize: "13px" }}>
-                      {new Date(
-                        log.timestamp?.seconds * 1000 || log.timestamp,
-                      ).toLocaleDateString("pt-BR")}
+                      {(() => {
+                        let logDate;
+                        if (log.timestamp?.seconds) {
+                          logDate = new Date(log.timestamp.seconds * 1000);
+                        } else if (log.timestamp?.toDate) {
+                          logDate = log.timestamp.toDate();
+                        } else if (log.timestamp instanceof Date) {
+                          logDate = log.timestamp;
+                        } else if (typeof log.timestamp === 'string') {
+                          logDate = new Date(log.timestamp);
+                        } else {
+                          return "-";
+                        }
+                        
+                        // Formatar data no padrão brasileiro
+                        return logDate.toLocaleDateString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          timeZone: "America/Sao_Paulo"
+                        });
+                      })()}
                     </div>
                     <div
                       style={{
@@ -289,9 +308,28 @@ const LogsSection = ({
                         marginTop: "2px",
                       }}
                     >
-                      {new Date(
-                        log.timestamp?.seconds * 1000 || log.timestamp,
-                      ).toLocaleTimeString("pt-BR")}
+                      {(() => {
+                        let logDate;
+                        if (log.timestamp?.seconds) {
+                          logDate = new Date(log.timestamp.seconds * 1000);
+                        } else if (log.timestamp?.toDate) {
+                          logDate = log.timestamp.toDate();
+                        } else if (log.timestamp instanceof Date) {
+                          logDate = log.timestamp;
+                        } else if (typeof log.timestamp === 'string') {
+                          logDate = new Date(log.timestamp);
+                        } else {
+                          return "-";
+                        }
+                        
+                        // Formatar hora no padrão brasileiro (24h)
+                        return logDate.toLocaleTimeString("pt-BR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                          timeZone: "America/Sao_Paulo"
+                        });
+                      })()}
                     </div>
                   </td>
                   <td style={styles.tableCell}>
