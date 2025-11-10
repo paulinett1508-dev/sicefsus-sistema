@@ -28,7 +28,7 @@ import FerramentasDev from "./components/dev/FerramentasDev";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 // import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
-import { useUser } from "./context/UserContext";
+import { useUser, UserProvider } from "./context/UserContext";
 import { checkVersion } from "./utils/versionControl";
 import { useVersion } from "./hooks/useVersion";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -579,12 +579,14 @@ function App() {
 
   return (
     <ToastProvider>
-      <Router>
-        <NavigationProtectionProvider>
-          <AppContent />
-          <UpdateNotification />
-        </NavigationProtectionProvider>
-      </Router>
+      <UserProvider>
+        <Router>
+          <NavigationProtectionProvider>
+            <AppContent />
+            <UpdateNotification />
+          </NavigationProtectionProvider>
+        </Router>
+      </UserProvider>
     </ToastProvider>
   );
 }
