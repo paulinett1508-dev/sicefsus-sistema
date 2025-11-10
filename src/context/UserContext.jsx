@@ -181,8 +181,9 @@ export const UserProvider = ({ children }) => {
 
   // ✅ CORREÇÃO CRÍTICA: Retornar 'user' para compatibilidade com Dashboard
   const value = {
-    user: usuario, // ✅ CORREÇÃO: user = usuario para compatibilidade
-    usuario,       // ✅ MANTER: Para compatibilidade com código existente
+    user: usuario,         // ✅ CORREÇÃO: user = usuario para compatibilidade
+    usuario,               // ✅ MANTER: Para compatibilidade com código existente
+    currentUser: usuario,  // ✅ ADICIONAR: currentUser para Administracao.jsx
     setUsuario,
     loading,
     isAuthenticated: !!usuario,
