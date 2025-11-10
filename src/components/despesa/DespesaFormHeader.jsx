@@ -26,8 +26,8 @@ const DespesaFormHeader = ({
           {configModo.modo === "criar"
             ? "💰 Criar Despesa"
             : configModo.modo === "editar"
-              ? "✏️ Editar Despesa"
-              : "👁️ Visualizar Despesa"}
+              ? "📋 Informações da Despesa"
+              : "📋 Informações da Despesa"}
         </h2>
         <p style={styles.headerSubtitle}>
           {titulo ||
