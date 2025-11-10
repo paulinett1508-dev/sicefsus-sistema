@@ -84,14 +84,18 @@ const DespesaForm = ({
   onSuccess,
   hideHeader = false, // 🆕 Nova prop para esconder header redundante no modal
   modoExecucao = false, // ✅ NOVA PROP: Indica se está executando uma despesa planejada
+  modoCriacaoDireta = false, // 🆕 NOVA PROP: Indica criação direta de despesa executada
 }) => {
   // ✅ DETECTAR MODO DE OPERAÇÃO
   const isExecucao = modoExecucao === true;
-  const isEdicao = !isExecucao && despesaParaEditar?.id;
+  const isCriacaoDireta = modoCriacaoDireta === true;
+  const isEdicao = !isExecucao && !isCriacaoDireta && despesaParaEditar?.id;
 
   console.log("🔍 DespesaForm - Modo:", {
     modoExecucao,
+    modoCriacaoDireta,
     isExecucao,
+    isCriacaoDireta,
     isEdicao,
     despesaId: despesaParaEditar?.id,
     status: despesaParaEditar?.status,
@@ -123,7 +127,7 @@ const DespesaForm = ({
     categoria: "",
     descricao: "",
     observacoes: "",
-    status: "PLANEJADA",
+    status: modoCriacaoDireta || modoExecucao ? "EXECUTADA" : "PLANEJADA", // ✅ Status correto
     statusPagamento: "pendente",
     naturezaDespesa: "3.3.9.0.30 – Material de Despesa",
     elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
@@ -531,6 +535,26 @@ const DespesaForm = ({
           message: "✅ Despesa executada com sucesso!",
           type: "success",
         });
+      } else if (isCriacaoDireta) {
+        // 🆕 MODO CRIAÇÃO DIRETA: Criar despesa executada sem planejada
+        console.log("➕ Criando despesa executada diretamente (sem planejamento)");
+
+        const dadosExecutada = {
+          ...despesaData,
+          status: "EXECUTADA", // 🔑 Status executada
+          criadaEm: new Date().toISOString(),
+          executadaEm: new Date().toISOString(),
+          criadaDiretamente: true, // ✅ Flag para rastreabilidade
+        };
+
+        await addDoc(collection(db, "despesas"), dadosExecutada);
+        console.log("✅ Despesa executada criada diretamente com sucesso");
+
+        setToast({
+          show: true,
+          message: "✅ Despesa executada cadastrada com sucesso!",
+          type: "success",
+        });
       } else if (despesaRef) {
         // ✅ EDIÇÃO NORMAL
         console.log("✏️ Atualizando despesa existente");
@@ -683,9 +707,11 @@ const DespesaForm = ({
           ? "👁️ Visualizar Despesa"
           : isExecucao
             ? "▶️ Executar Despesa Planejada"
-            : despesaParaEditar
-              ? "✏️ Editar Despesa"
-              : "🆕 Nova Despesa"}
+            : isCriacaoDireta
+              ? "➕ Nova Despesa Executada"
+              : despesaParaEditar
+                ? "✏️ Editar Despesa"
+                : "🆕 Nova Despesa"}
       </h2>
 
       {/* ✅ ATUALIZADO: Props corretas incluindo formData e handleInputChange */}
@@ -753,9 +779,11 @@ const DespesaForm = ({
                 ? "Processando..."
                 : isExecucao
                   ? "✅ Confirmar Execução"
-                  : despesaParaEditar
-                    ? "↻ Atualizar Despesa"
-                    : "✓ Cadastrar Despesa"}
+                  : isCriacaoDireta
+                    ? "✅ Cadastrar Despesa Executada"
+                    : despesaParaEditar
+                      ? "↻ Atualizar Despesa"
+                      : "✓ Cadastrar Despesa"}
             </button>
           </div>
         )}

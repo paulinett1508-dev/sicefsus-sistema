@@ -200,7 +200,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
   // 🆕 Estados para edição/visualização/execução de despesa
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
-  const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | null
+  const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | 'criar' | 'criar-executada' | null
 
   // Resolver ID (id | emendaId | número)
   useEffect(() => {
@@ -372,7 +372,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
     // ⚠️ VALIDAÇÃO: Verificar se há saldo disponível
     const valorDespesa = parseValorMonetario(despesa.valor) || Number(despesa.valor) || 0;
-    
+
     if (valorDespesa > stats.saldoDisponivel) {
       alert(
         `⚠️ SALDO INSUFICIENTE!\n\n` +
@@ -567,7 +567,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         </div>
       </div>
 
-      
+
 
       {/* Seção: Despesas Planejadas */}
       <div style={styles.secao}>
@@ -689,13 +689,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             onClick={() => {
               console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
               setDespesaEmEdicao({
+                status: 'EXECUTADA',
                 emendaId: emendaId,
-                status: "EXECUTADA",
-                valor: "",
-                discriminacao: "",
-                fornecedor: "",
+                discriminacao: '',
+                valor: '',
               });
-              setModoVisualizacao("criar");
+              setModoVisualizacao("criar-executada");
             }}
             style={styles.btnNovaDespesa}
             title="Criar despesa executada"
@@ -716,9 +715,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         />
       </div>
 
-      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criar */}
-      {despesaEmEdicao &&
-        modoVisualizacao &&
+      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
+      {modoVisualizacao &&
         createPortal(
           <div
             style={styles.formularioEdicaoOverlay}
@@ -726,7 +724,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               // ✅ BLOQUEAR fechamento ao clicar fora em modo execução ou criação
               if (
                 e.target === e.currentTarget &&
-                (modoVisualizacao === "executar" || modoVisualizacao === "criar")
+                (modoVisualizacao === "executar" || modoVisualizacao === "criar" || modoVisualizacao === "criar-executada")
               ) {
                 console.log("⚠️ Clique fora bloqueado - modo ativo:", modoVisualizacao);
                 e.stopPropagation();
@@ -745,7 +743,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   {modoVisualizacao === "editar" && "✏️ Editar Despesa"}
                   {modoVisualizacao === "visualizar" && "👁️ Visualizar Despesa"}
                   {modoVisualizacao === "executar" && "▶️ Executar Despesa Planejada"}
-                  {modoVisualizacao === "criar" && "🆕 Nova Despesa Executada"}
+                  {modoVisualizacao === "criar" && "➕ Nova Despesa"}
+                  {modoVisualizacao === "criar-executada" && "➕ Nova Despesa Executada"}
                 </h2>
                 <button
                   onClick={() => {
@@ -762,10 +761,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               </div>
               <div style={styles.formularioEdicaoContent}>
                 <DespesaForm
+                  usuario={usuario}
                   despesaParaEditar={modoVisualizacao === "criar" ? null : despesaEmEdicao}
                   emendaId={emendaId}
                   somenteLeitura={modoVisualizacao === "visualizar"}
                   modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
+                  modoCriacaoDireta={modoVisualizacao === "criar-executada"}
                   emendaInfo={{
                     id: emendaId,
                     numero: formData?.numero,
@@ -788,9 +789,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       message:
                         modoVisualizacao === "executar"
                           ? "✅ Despesa executada com sucesso!"
-                          : modoVisualizacao === "criar"
+                          : modoVisualizacao === "criar-executada"
                             ? "✅ Despesa criada com sucesso!"
-                            : "✅ Despesa atualizada com sucesso!",
+                            : modoVisualizacao === "criar"
+                              ? "✅ Despesa criada com sucesso!"
+                              : "✅ Despesa atualizada com sucesso!",
                       type: "success",
                     });
                   }}
@@ -804,9 +807,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       message:
                         modoVisualizacao === "executar"
                           ? "✅ Despesa executada com sucesso!"
-                          : modoVisualizacao === "criar"
+                          : modoVisualizacao === "criar-executada"
                             ? "✅ Despesa criada com sucesso!"
-                            : "✅ Despesa atualizada com sucesso!",
+                            : modoVisualizacao === "criar"
+                              ? "✅ Despesa criada com sucesso!"
+                              : "✅ Despesa atualizada com sucesso!",
                       type: "success",
                     });
                   }}
