@@ -32,7 +32,32 @@ function ValidacaoTab() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
+        .tab-validacao {
+          padding: 30px;
+          background: #f8fafc;
+          min-height: calc(100vh - 100px);
+        }
+
+        .tab-header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+
+        .tab-header h2 {
+          font-size: 28px;
+          color: #2d3748;
+          margin-bottom: 8px;
+        }
+
+        .tab-descricao {
+          font-size: 16px;
+          color: #718096;
+          max-width: 600px;
+          margin: 0 auto;
+        }
+
         .validacoes-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -108,9 +133,11 @@ function ValidacaoTab() {
 
         .validacao-info button:disabled {
           background: #cbd5e0;
+          opacity: 0.6;
           cursor: not-allowed;
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }
