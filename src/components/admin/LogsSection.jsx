@@ -8,42 +8,103 @@ const LogsSection = ({
   onAtualizarLogs, // ✅ NOVA PROP
   loading,
 }) => {
-  // 🔍 Função para filtrar logs
+  // 🔍 Função para filtrar logs - VERSÃO CORRIGIDA E ROBUSTA
   const getFilteredLogs = () => {
+    if (!Array.isArray(logs)) {
+      console.warn('⚠️ logs não é um array válido');
+      return [];
+    }
+
     return logs.filter((log) => {
-      // Filtro por usuário
-      if (logFilters.usuario) {
-        const matchUsuario = 
-          (log.userEmail || "").toLowerCase().includes(logFilters.usuario.toLowerCase()) ||
-          (log.userName || "").toLowerCase().includes(logFilters.usuario.toLowerCase());
+      // Validação básica do log
+      if (!log || typeof log !== 'object') return false;
+
+      // ✅ Filtro por usuário (email ou nome)
+      if (logFilters.usuario && logFilters.usuario.trim() !== '') {
+        const searchTerm = logFilters.usuario.toLowerCase().trim();
+        const userEmail = (log.userEmail || '').toLowerCase();
+        const userName = (log.userName || '').toLowerCase();
+        
+        const matchUsuario = userEmail.includes(searchTerm) || userName.includes(searchTerm);
         if (!matchUsuario) return false;
       }
 
-      // Filtro por ação
-      if (logFilters.acao && log.action !== logFilters.acao) {
-        return false;
+      // ✅ Filtro por ação
+      if (logFilters.acao && logFilters.acao !== '') {
+        const logAction = (log.action || '').toUpperCase();
+        const filterAction = logFilters.acao.toUpperCase();
+        
+        if (logAction !== filterAction) return false;
       }
 
-      // Filtro por data início
-      if (logFilters.dataInicio) {
-        const dataInicio = new Date(logFilters.dataInicio + 'T00:00:00');
-        
-        const logDate = log.timestamp?.seconds 
-          ? new Date(log.timestamp.seconds * 1000)
-          : new Date(log.timestamp);
-        
-        if (logDate < dataInicio) return false;
+      // ✅ Filtro por data início - CORRIGIDO
+      if (logFilters.dataInicio && logFilters.dataInicio.trim() !== '') {
+        try {
+          // Criar data de início às 00:00:00 do dia selecionado
+          const [ano, mes, dia] = logFilters.dataInicio.split('-');
+          const dataInicio = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia), 0, 0, 0, 0);
+          
+          // Converter timestamp do log para Date
+          let logDate;
+          if (log.timestamp?.seconds) {
+            // Firestore Timestamp
+            logDate = new Date(log.timestamp.seconds * 1000);
+          } else if (log.timestamp?.toDate) {
+            // Firestore Timestamp com método toDate
+            logDate = log.timestamp.toDate();
+          } else if (log.timestamp instanceof Date) {
+            // Já é um objeto Date
+            logDate = log.timestamp;
+          } else if (typeof log.timestamp === 'string') {
+            // String de data
+            logDate = new Date(log.timestamp);
+          } else {
+            // Timestamp inválido
+            console.warn('⚠️ Timestamp inválido no log:', log);
+            return false;
+          }
+          
+          // Comparar apenas as datas (ignorar horário)
+          if (logDate < dataInicio) return false;
+        } catch (error) {
+          console.error('❌ Erro ao processar data início:', error);
+          return false;
+        }
       }
 
-      // Filtro por data fim
-      if (logFilters.dataFim) {
-        const dataFim = new Date(logFilters.dataFim + 'T23:59:59');
-        
-        const logDate = log.timestamp?.seconds 
-          ? new Date(log.timestamp.seconds * 1000)
-          : new Date(log.timestamp);
-        
-        if (logDate > dataFim) return false;
+      // ✅ Filtro por data fim - CORRIGIDO
+      if (logFilters.dataFim && logFilters.dataFim.trim() !== '') {
+        try {
+          // Criar data de fim às 23:59:59 do dia selecionado
+          const [ano, mes, dia] = logFilters.dataFim.split('-');
+          const dataFim = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia), 23, 59, 59, 999);
+          
+          // Converter timestamp do log para Date
+          let logDate;
+          if (log.timestamp?.seconds) {
+            // Firestore Timestamp
+            logDate = new Date(log.timestamp.seconds * 1000);
+          } else if (log.timestamp?.toDate) {
+            // Firestore Timestamp com método toDate
+            logDate = log.timestamp.toDate();
+          } else if (log.timestamp instanceof Date) {
+            // Já é um objeto Date
+            logDate = log.timestamp;
+          } else if (typeof log.timestamp === 'string') {
+            // String de data
+            logDate = new Date(log.timestamp);
+          } else {
+            // Timestamp inválido
+            console.warn('⚠️ Timestamp inválido no log:', log);
+            return false;
+          }
+          
+          // Comparar apenas as datas (ignorar horário)
+          if (logDate > dataFim) return false;
+        } catch (error) {
+          console.error('❌ Erro ao processar data fim:', error);
+          return false;
+        }
       }
 
       return true;
