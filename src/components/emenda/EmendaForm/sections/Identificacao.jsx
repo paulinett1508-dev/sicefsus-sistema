@@ -18,6 +18,35 @@ const Identificacao = ({
   const { user } = useContext(UserContext);
   const isOperador = user?.tipo === "operador";
 
+  // ✅ PRÉ-PREENCHER MUNICÍPIO/UF DO OPERADOR AO CRIAR NOVA EMENDA
+  useEffect(() => {
+    if (isOperador && user?.municipio && user?.uf && !formData?.numero) {
+      // Só preenche se for operador E se for nova emenda (sem número)
+      console.log("✅ Pré-preenchendo localização do operador:", {
+        municipio: user.municipio,
+        uf: user.uf,
+      });
+
+      // Preencher UF
+      onChange({
+        target: {
+          name: "uf",
+          value: user.uf,
+        },
+      });
+
+      // Preencher município (com delay para garantir que municípios foram carregados)
+      setTimeout(() => {
+        onChange({
+          target: {
+            name: "municipio",
+            value: user.municipio,
+          },
+        });
+      }, 500);
+    }
+  }, [isOperador, user?.municipio, user?.uf, formData?.numero]);
+
   // Lista de UFs brasileiras
   const ufs = [
     { sigla: "AC", nome: "Acre" },
