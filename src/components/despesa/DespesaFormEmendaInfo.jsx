@@ -1,6 +1,8 @@
+
 // src/components/despesa/DespesaFormEmendaInfo.jsx
 // ✅ Componente especializado para exibir informações da emenda selecionada
-// ✅ ATUALIZADO 08/11/2025: Lógica de cores corrigida (mais realista)
+// ✅ CORRIGIDO: Cálculo de saldo baseado APENAS no valor total da emenda
+// ✅ Saldo = Valor Total - Valor Executado (despesas executadas)
 
 import React from "react";
 
@@ -19,15 +21,20 @@ const DespesaFormEmendaInfo = ({
   const municipio = emendaInfo?.municipio || "Não informado";
   const uf = emendaInfo?.uf || "";
   const valorRecurso = emendaInfo?.valorRecurso || emendaInfo?.valor || 0;
-  const saldoDisponivel = emendaInfo?.saldoDisponivel ?? 0;
   const programa =
     emendaInfo?.programa ||
     emendaInfo?.programaSaude ||
     emendaInfo?.objeto ||
     "Não informado";
 
+  // ✅ CORREÇÃO CRÍTICA: Calcular valores corretamente
+  // Valor executado vem da emenda OU é 0 se não existir
+  const valorExecutado = emendaInfo?.valorExecutado || 0;
+  
+  // ✅ Saldo disponível = Valor Total - Valor Executado
+  const saldoDisponivel = valorRecurso - valorExecutado;
+
   // 🎯 CÁLCULOS PARA UX APRIMORADA
-  const valorExecutado = valorRecurso - saldoDisponivel;
   const percentualExecutado =
     valorRecurso > 0 ? (valorExecutado / valorRecurso) * 100 : 0;
   const percentualDisponivel = 100 - percentualExecutado;
