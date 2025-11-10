@@ -156,10 +156,10 @@ const LogsSection = ({
             <thead>
               <tr>
                 <th style={styles.tableHeader}>📅 Data/Hora</th>
-                <th style={styles.tableHeader}>👤 Usuário</th>
-                <th style={styles.tableHeader}>⚡ Ação</th>
-                <th style={styles.tableHeader}>📋 Recurso</th>
-                <th style={styles.tableHeader}>🏢 Local</th>
+                <th style={styles.tableHeader}>👤 Usuário (Email e Perfil)</th>
+                <th style={styles.tableHeader}>⚡ Ação Executada</th>
+                <th style={styles.tableHeader}>📋 Recurso Afetado</th>
+                <th style={styles.tableHeader}>🏢 Município/UF</th>
               </tr>
             </thead>
             <tbody>
@@ -190,23 +190,44 @@ const LogsSection = ({
                     </div>
                   </td>
                   <td style={styles.tableCell}>
-                    <div style={{ fontWeight: "500" }}>
-                      {log.userEmail || "N/A"}
+                    <div style={{ 
+                      display: "flex", 
+                      flexDirection: "column", 
+                      gap: "4px" 
+                    }}>
+                      <div style={{ 
+                        fontWeight: "600",
+                        color: "#2c3e50",
+                        fontSize: "13px"
+                      }}>
+                        {log.userEmail || "Sistema"}
+                      </div>
+                      <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "white",
+                            backgroundColor:
+                              log.userRole === "admin" ? "#dc3545" : "#28a745",
+                            padding: "3px 8px",
+                            borderRadius: "12px",
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {log.userRole === "admin" ? "👑 ADMIN" : "👤 OPERADOR"}
+                        </span>
+                        {log.userName && (
+                          <span style={{
+                            fontSize: "11px",
+                            color: "#6c757d",
+                            fontStyle: "italic"
+                          }}>
+                            ({log.userName})
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        color: "white",
-                        backgroundColor:
-                          log.userRole === "admin" ? "#dc3545" : "#28a745",
-                        padding: "2px 6px",
-                        borderRadius: "10px",
-                        textTransform: "uppercase",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {log.userRole || "N/A"}
-                    </span>
                   </td>
                   <td style={styles.tableCell}>
                     <span

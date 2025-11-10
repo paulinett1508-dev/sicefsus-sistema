@@ -65,6 +65,39 @@ class AuditService {
       }
 
       const logEntry = {
+        // Timestamp do servidor (mais confiável que cliente)
+        timestamp: serverTimestamp(),
+
+        // Dados do usuário que executou a ação
+        userId: user.uid || user.id || null,
+        userEmail: user.email || "sistema@sicefsus.com",
+        userName: user.nome || user.displayName || user.name || null,
+        userRole: user.tipo || user.role || "operador",
+        userMunicipio: user.municipio || null,
+        userUf: user.uf || null,
+
+        // Dados da ação
+        action: action.toUpperCase(),
+        resourceType: resourceType.toLowerCase(),
+        resourceId: resourceId,
+
+        // Dados antes e depois (se fornecidos)
+        dataBefore: dataBefore || null,
+        dataAfter: dataAfter || null,
+
+        // Metadados adicionais
+        metadata: {
+          ...metadata,
+          userAgent: navigator?.userAgent || "N/A",
+          timestamp: new Date().toISOString(),
+        },
+
+        // Recursos relacionados (opcional)
+        relatedResources: relatedResources || {},
+
+        // Status da operação
+        success: true,
+        
         // Timestamp do servidor (mais confiável)
         timestamp: serverTimestamp(),
 
