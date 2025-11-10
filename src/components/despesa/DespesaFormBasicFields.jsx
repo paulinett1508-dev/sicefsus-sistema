@@ -69,17 +69,6 @@ const DespesaFormBasicFields = ({
     return saldoBase;
   };
 
-  const saldoDisponivel = calcularSaldoParaValidacao();
-  const valorNum = parseValorMonetario(formData.valor);
-  const valorExcedeSaldo = valorNum > saldoDisponivel;
-
-  // ✅ Callback de saldo
-  React.useEffect(() => {
-    if (onValorExcedeSaldo) {
-      onValorExcedeSaldo(valorExcedeSaldo);
-    }
-  }, [valorExcedeSaldo]);
-
   const formatarValorMonetario = (valor) => {
     if (!valor && valor !== 0) return "";
     const num = typeof valor === "number" ? valor : parseValorMonetario(valor);
