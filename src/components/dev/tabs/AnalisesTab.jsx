@@ -74,7 +74,8 @@ function AnalisesTab() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .analises-container {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -147,7 +148,8 @@ function AnalisesTab() {
           color: #718096;
           font-size: 14px;
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }
