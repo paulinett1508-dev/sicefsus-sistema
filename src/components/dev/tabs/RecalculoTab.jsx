@@ -10,14 +10,6 @@ import RecalcularEmenda from '../RecalcularEmenda';
 function RecalculoTab() {
   return (
     <div className="tab-recalculo">
-      <div className="tab-header">
-        <h2>🔄 Recálculo de Emendas</h2>
-        <p className="tab-descricao">
-          Recalcule valores de emendas individuais ou em massa. 
-          Útil para corrigir inconsistências entre valores executados e saldos disponíveis.
-        </p>
-      </div>
-
       <RecalcularEmenda />
     </div>
   );
