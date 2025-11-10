@@ -504,22 +504,28 @@ const DespesaForm = ({
         // ✅ MODO EXECUÇÃO: Deletar planejada + Criar executada
         console.log("▶️ Executando transição: PLANEJADA → EXECUTADA");
 
-        // 1. Criar despesa executada (SEM o ID da planejada)
+        // ✅ CORREÇÃO: Salvar ID antes de deletar
+        const idPlanejada = despesaParaEditar?.id;
+
+        // 1️⃣ DELETAR despesa planejada PRIMEIRO
+        if (idPlanejada) {
+          await deleteDoc(doc(db, "despesas", idPlanejada));
+          console.log("✅ Despesa planejada deletada:", idPlanejada);
+        }
+
+        // 2️⃣ CRIAR despesa executada DEPOIS
         const dadosExecutada = {
           ...despesaData,
           status: "EXECUTADA", // 🔑 Força status como executada
           criadaEm: new Date().toISOString(),
           executadaEm: new Date().toISOString(),
+          // ✅ Rastreabilidade: Guardar referência da planejada original
+          planejadaOriginalId: idPlanejada || null,
         };
 
         await addDoc(collection(db, "despesas"), dadosExecutada);
         console.log("✅ Despesa executada criada com sucesso");
 
-        // 2. Deletar despesa planejada
-        if (despesaParaEditar?.id) {
-          await deleteDoc(doc(db, "despesas", despesaParaEditar.id));
-          console.log("✅ Despesa planejada deletada:", despesaParaEditar.id);
-        }
         setToast({
           show: true,
           message: "✅ Despesa executada com sucesso!",
