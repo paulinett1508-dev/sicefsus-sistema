@@ -61,11 +61,17 @@ const DespesaFormBasicFields = ({
   }, [despesaParaEditar, emendaInfo]);
 
   const calcularSaldoParaValidacao = () => {
+    // ✅ CORREÇÃO CRÍTICA: Usar o saldo da emenda (que já exclui planejadas)
+    // O saldoDisponivel da emenda é calculado APENAS com despesas executadas
     let saldoBase = emendaInfo?.saldoDisponivel ?? 0;
-    if (despesaParaEditar?.id && despesaParaEditar?.valor) {
+    
+    // Se estiver editando uma despesa executada existente, 
+    // devolver o valor dela ao saldo para revalidação
+    if (despesaParaEditar?.id && despesaParaEditar?.status !== "PLANEJADA" && despesaParaEditar?.valor) {
       const valorAnteriorDespesa = parseValorMonetario(despesaParaEditar.valor);
       saldoBase += valorAnteriorDespesa;
     }
+    
     return saldoBase;
   };
 
@@ -195,23 +201,27 @@ const DespesaFormBasicFields = ({
     }
   }, [despesaParaEditar?.valor]);
 
-  // ✅ Validar se valor excede saldo disponível (APENAS se for EDIÇÃO de despesa existente)
+  // ✅ Validar se valor excede saldo disponível
   useEffect(() => {
     const valorNum = parseValorMonetario(formData.valor);
-    const saldoDisp = emendaInfo?.saldoDisponivel || 0;
+    const saldoDisp = calcularSaldoParaValidacao();
 
-    // ✅ CRÍTICO: Só validar saldo se estiver EDITANDO despesa existente
-    // Em modo criar, o saldo será atualizado APÓS salvar
-    const isEdicao = despesaParaEditar?.id;
-
-    if (isEdicao && valorNum > saldoDisp && valorNum > 0) {
+    // ✅ CRÍTICO: Só validar saldo para despesas EXECUTADAS
+    // Despesas planejadas NÃO consomem saldo
+    const isDespesaExecutada = !despesaParaEditar || despesaParaEditar?.status !== "PLANEJADA";
+    
+    // Só mostrar erro se:
+    // 1. For despesa executada (não planejada)
+    // 2. Valor exceder o saldo disponível
+    // 3. Valor for maior que zero
+    if (isDespesaExecutada && valorNum > saldoDisp && valorNum > 0) {
       setValorExcedeSaldo(true);
       onValorExcedeSaldo?.(true);
     } else {
       setValorExcedeSaldo(false);
       onValorExcedeSaldo?.(false);
     }
-  }, [formData.valor, emendaInfo?.saldoDisponivel, onValorExcedeSaldo, despesaParaEditar?.id]);
+  }, [formData.valor, emendaInfo?.saldoDisponivel, onValorExcedeSaldo, despesaParaEditar?.id, despesaParaEditar?.status]);
 
 
   const styles = {
