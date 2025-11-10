@@ -1,117 +1,149 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../../firebase/firebaseConfig';
+import AlertaBanner from '../shared/AlertaBanner';
 
 function UsuariosTab() {
+  const [stats, setStats] = useState({
+    total: 0,
+    ativos: 0,
+    inativos: 0,
+    admins: 0,
+    operadores: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    carregarEstatisticas();
+  }, []);
+
+  const carregarEstatisticas = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'usuarios'));
+      const usuarios = snapshot.docs.map(doc => doc.data());
+
+      setStats({
+        total: usuarios.length,
+        ativos: usuarios.filter(u => u.status === 'ativo').length,
+        inativos: usuarios.filter(u => u.status !== 'ativo').length,
+        admins: usuarios.filter(u => u.tipo === 'admin').length,
+        operadores: usuarios.filter(u => u.tipo === 'operador').length,
+        loading: false,
+      });
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+      setStats({ ...stats, loading: false });
+    }
+  };
+
   return (
     <div className="tab-usuarios">
       <div className="tab-header">
         <h2>👥 Gerenciamento de Usuários</h2>
         <p className="tab-descricao">
-          Ferramentas avançadas para gerenciar usuários do sistema.
+          Estatísticas e análises sobre usuários do sistema.
         </p>
       </div>
 
-      <div className="ferramentas-usuarios">
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">🔐</div>
-          <h3>Resetar Senhas em Massa</h3>
-          <p>Enviar email de redefinição para múltiplos usuários</p>
-          <button disabled>Em breve</button>
+      <AlertaBanner
+        tipo="info"
+        mensagem="Para gerenciar usuários (criar, editar, excluir), use o módulo Administração no menu principal."
+      />
+
+      {/* Estatísticas */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '16px',
+        marginTop: '24px',
+      }}>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>👥</div>
+          <div style={styles.statValue}>{stats.loading ? '...' : stats.total}</div>
+          <div style={styles.statLabel}>Total de Usuários</div>
         </div>
 
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">🚫</div>
-          <h3>Suspender/Reativar</h3>
-          <p>Gerenciar status de usuários em lote</p>
-          <button disabled>Em breve</button>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>✅</div>
+          <div style={styles.statValue}>{stats.loading ? '...' : stats.ativos}</div>
+          <div style={styles.statLabel}>Usuários Ativos</div>
         </div>
 
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">📊</div>
-          <h3>Auditoria de Acesso</h3>
-          <p>Logs de login e ações dos usuários</p>
-          <button disabled>Em breve</button>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>🚫</div>
+          <div style={styles.statValue}>{stats.loading ? '...' : stats.inativos}</div>
+          <div style={styles.statLabel}>Usuários Inativos</div>
         </div>
 
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">👑</div>
-          <h3>Promover/Rebaixar</h3>
-          <p>Alterar permissões (operador ↔ admin)</p>
-          <button disabled>Em breve</button>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>👑</div>
+          <div style={styles.statValue}>{stats.loading ? '...' : stats.admins}</div>
+          <div style={styles.statLabel}>Administradores</div>
         </div>
 
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">📈</div>
-          <h3>Usuários Mais Ativos</h3>
-          <p>Ranking por atividade no sistema</p>
-          <button disabled>Em breve</button>
-        </div>
-
-        <div className="ferramenta-usuario">
-          <div className="usuario-icone">⏰</div>
-          <h3>Horários de Pico</h3>
-          <p>Análise de uso por período</p>
-          <button disabled>Em breve</button>
+        <div style={styles.statCard}>
+          <div style={styles.statIcon}>👤</div>
+          <div style={styles.statValue}>{stats.loading ? '...' : stats.operadores}</div>
+          <div style={styles.statLabel}>Operadores</div>
         </div>
       </div>
 
-      <style jsx>{`
-        .ferramentas-usuarios {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 20px;
-          margin-top: 24px;
-        }
-
-        .ferramenta-usuario {
-          background: white;
-          padding: 24px;
-          border-radius: 12px;
-          border: 2px solid #e2e8f0;
-          text-align: center;
-          transition: all 0.3s ease;
-        }
-
-        .ferramenta-usuario:hover {
-          border-color: #667eea;
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-          transform: translateY(-4px);
-        }
-
-        .usuario-icone {
-          font-size: 48px;
-          margin-bottom: 16px;
-        }
-
-        .ferramenta-usuario h3 {
-          margin: 0 0 8px 0;
-          font-size: 18px;
-          color: #2d3748;
-        }
-
-        .ferramenta-usuario p {
-          margin: 0 0 16px 0;
-          font-size: 14px;
-          color: #718096;
-          min-height: 40px;
-        }
-
-        .ferramenta-usuario button {
-          padding: 10px 24px;
-          background: #667eea;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
-        .ferramenta-usuario button:disabled {
-          background: #cbd5e0;
-          cursor: not-allowed;
-        }
-      `}</style>
+      {/* Link para Administração */}
+      <div style={{
+        marginTop: '32px',
+        padding: '20px',
+        backgroundColor: '#f7fafc',
+        borderRadius: '8px',
+        textAlign: 'center',
+      }}>
+        <h4 style={{ margin: '0 0 12px 0' }}>🔧 Gerenciar Usuários</h4>
+        <p style={{ margin: '0 0 16px 0', color: '#666' }}>
+          Para criar, editar ou excluir usuários, acesse o módulo de Administração
+        </p>
+        <button
+          onClick={() => window.location.href = '/administracao'}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: '#667eea',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: 'pointer',
+          }}
+        >
+          Ir para Administração →
+        </button>
+      </div>
     </div>
   );
 }
+
+const styles = {
+  statCard: {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '8px',
+    border: '2px solid #e2e8f0',
+    textAlign: 'center',
+  },
+  statIcon: {
+    fontSize: '32px',
+    marginBottom: '8px',
+  },
+  statValue: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#2d3748',
+    marginBottom: '4px',
+  },
+  statLabel: {
+    fontSize: '13px',
+    color: '#718096',
+    fontWeight: '500',
+  },
+};
 
 export default UsuariosTab;
