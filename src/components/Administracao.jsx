@@ -630,8 +630,9 @@ const Administracao = () => {
           onEdit={handleEditarUsuario}
           onDelete={handleDelete}
           onToggleStatus={handleToggleStatus}
-          onNovoUsuario={handleNovoUsuario} // ✅ ADICIONAR: Função para novo usuário
+          onNovoUsuario={handleNovoUsuario}
           loading={loading}
+          currentUserType={currentUser?.tipo || "operador"} // ✅ Passar tipo do usuário
         />
       ) : (
         <LogsSection

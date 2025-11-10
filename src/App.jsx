@@ -177,7 +177,7 @@ function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
   const { user: usuario, loading } = useUser();
-  const { version, loading: versionLoading } = useVersion();
+  const { version } = useVersion();
   const navigate = useNavigate();
   const location = useLocation();
   const { canNavigate } = useNavigationProtection();

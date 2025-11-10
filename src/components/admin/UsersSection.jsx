@@ -9,8 +9,9 @@ const UsersSection = ({
   onEdit,
   onDelete,
   onToggleStatus,
-  onNovoUsuario, // ✅ NOVA PROP
+  onNovoUsuario,
   loading,
+  currentUserType, // ✅ Receber tipo do usuário
 }) => {
   return (
     <div style={styles.tableContainer}>
@@ -19,7 +20,16 @@ const UsersSection = ({
         <h3 style={styles.sectionTitle}>
           📋 Lista de Usuários ({users.length})
         </h3>
-        {/* ⚠️ OPERADORES NÃO PODEM CRIAR USUÁRIOS */}
+        {currentUserType === "admin" && onNovoUsuario && (
+          <button
+            onClick={onNovoUsuario}
+            style={styles.newUserButton}
+            onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
+          >
+            ➕ Novo Usuário
+          </button>
+        )}
       </div>
 
       {/* Campo de busca */}
