@@ -8,6 +8,50 @@ const LogsSection = ({
   onAtualizarLogs, // ✅ NOVA PROP
   loading,
 }) => {
+  // 🔍 Função para filtrar logs
+  const getFilteredLogs = () => {
+    return logs.filter((log) => {
+      // Filtro por usuário
+      if (logFilters.usuario) {
+        const matchUsuario = 
+          (log.userEmail || "").toLowerCase().includes(logFilters.usuario.toLowerCase()) ||
+          (log.userName || "").toLowerCase().includes(logFilters.usuario.toLowerCase());
+        if (!matchUsuario) return false;
+      }
+
+      // Filtro por ação
+      if (logFilters.acao && log.action !== logFilters.acao) {
+        return false;
+      }
+
+      // Filtro por data início
+      if (logFilters.dataInicio) {
+        const dataInicio = new Date(logFilters.dataInicio);
+        dataInicio.setHours(0, 0, 0, 0);
+        
+        const logDate = log.timestamp?.seconds 
+          ? new Date(log.timestamp.seconds * 1000)
+          : new Date(log.timestamp);
+        
+        if (logDate < dataInicio) return false;
+      }
+
+      // Filtro por data fim
+      if (logFilters.dataFim) {
+        const dataFim = new Date(logFilters.dataFim);
+        dataFim.setHours(23, 59, 59, 999);
+        
+        const logDate = log.timestamp?.seconds 
+          ? new Date(log.timestamp.seconds * 1000)
+          : new Date(log.timestamp);
+        
+        if (logDate > dataFim) return false;
+      }
+
+      return true;
+    });
+  };
+
   // Funções auxiliares para logs
   const getActionColor = (action) => {
     switch (action) {
@@ -137,7 +181,7 @@ const LogsSection = ({
           <div style={styles.spinner}></div>
           <p>Carregando logs...</p>
         </div>
-      ) : logs.length === 0 ? (
+      ) : getFilteredLogs().length === 0 ? (
         <div style={styles.emptyLogs}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>📋</div>
           <h3>Nenhum log encontrado</h3>
@@ -165,7 +209,7 @@ const LogsSection = ({
               </tr>
             </thead>
             <tbody>
-              {logs.map((log, index) => (
+              {getFilteredLogs().map((log, index) => (
                 <tr
                   key={log.id || index}
                   style={{
