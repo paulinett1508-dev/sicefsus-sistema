@@ -362,26 +362,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     setModoVisualizacao("visualizar");
   };
 
-  // ✅ Handler para executar despesa planejada (COM VALIDAÇÃO DE SALDO)
+  // ✅ Handler para executar despesa planejada (validação de saldo ocorre no salvamento)
   const handleExecutarDespesa = (despesa) => {
     console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada", {
       id: despesa.id,
       estrategia: despesa.estrategia,
       valor: despesa.valor,
     });
-
-    // ⚠️ VALIDAÇÃO: Verificar se há saldo disponível
-    const valorDespesa = parseValorMonetario(despesa.valor) || Number(despesa.valor) || 0;
-
-    if (valorDespesa > stats.saldoDisponivel) {
-      alert(
-        `⚠️ SALDO INSUFICIENTE!\n\n` +
-        `Valor da despesa: ${formatCurrency(valorDespesa)}\n` +
-        `Saldo disponível: ${formatCurrency(stats.saldoDisponivel)}\n\n` +
-        `Reduza o valor da despesa ou libere saldo antes de executar.`
-      );
-      return; // BLOQUEIA execução
-    }
 
     console.log("✅ Abrindo DespesaForm para EXECUTAR (pré-preenchido)");
     setDespesaEmEdicao(despesa);
