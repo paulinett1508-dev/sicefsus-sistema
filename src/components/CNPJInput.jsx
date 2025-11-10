@@ -214,16 +214,16 @@ const styles = {
   },
   input: {
     width: "100%",
-    padding: "12px 40px 12px 12px", // ✅ ALINHAMENTO: padding igual aos outros campos
-    fontSize: "14px", // ✅ ALINHAMENTO: fonte igual aos outros campos
-    borderWidth: "2px", // ← Separado
-    borderStyle: "solid", // ← Separado
-    borderColor: "#dee2e6", // ← Separado
-    borderRadius: "6px", // ✅ ALINHAMENTO: border-radius igual aos outros campos
+    padding: "12px", // ✅ CORREÇÃO: padding uniforme como UF/Município
+    fontSize: "14px",
+    borderWidth: "2px",
+    borderStyle: "solid",
+    borderColor: "#dee2e6",
+    borderRadius: "6px",
     outline: "none",
     transition: "all 0.3s ease",
-    backgroundColor: "white", // ✅ ALINHAMENTO: fundo igual aos outros campos
-    boxSizing: "border-box", // ✅ ALINHAMENTO: garantir box-sizing consistente
+    backgroundColor: "white",
+    boxSizing: "border-box",
   },
 
   inputError: {
@@ -239,7 +239,10 @@ const styles = {
   validationIcon: {
     position: "absolute",
     right: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
     fontSize: "20px",
+    pointerEvents: "none",
   },
   successIcon: {
     color: "#27ae60",
