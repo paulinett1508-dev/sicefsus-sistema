@@ -567,6 +567,35 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         </div>
       </div>
 
+      {/* 🆕 BOTÃO PRINCIPAL: CRIAR DESPESA EXECUTADA DIRETAMENTE */}
+      <div style={styles.acaoRapidaContainer}>
+        <div style={styles.acaoRapidaHeader}>
+          <div>
+            <h3 style={styles.acaoRapidaTitulo}>⚡ Ação Rápida</h3>
+            <p style={styles.acaoRapidaDescricao}>
+              Crie uma despesa executada sem precisar planejar primeiro
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
+              setDespesaEmEdicao({
+                emendaId: emendaId,
+                status: "EXECUTADA", // 🔑 Já marca como executada
+                valor: "",
+                discriminacao: "",
+                fornecedor: "",
+              });
+              setModoVisualizacao("criar"); // 🔑 Modo criar direto
+            }}
+            style={styles.btnNovaDespesaExecutada}
+            title="Criar despesa executada sem planejar"
+          >
+            ➕ Nova Despesa Executada
+          </button>
+        </div>
+      </div>
+
       {/* Seção: Despesas Planejadas */}
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
@@ -695,19 +724,19 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         />
       </div>
 
-      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução */}
+      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criar */}
       {despesaEmEdicao &&
         modoVisualizacao &&
         createPortal(
           <div
             style={styles.formularioEdicaoOverlay}
             onClick={(e) => {
-              // ✅ BLOQUEAR fechamento ao clicar fora em modo execução
+              // ✅ BLOQUEAR fechamento ao clicar fora em modo execução ou criação
               if (
                 e.target === e.currentTarget &&
-                modoVisualizacao === "executar"
+                (modoVisualizacao === "executar" || modoVisualizacao === "criar")
               ) {
-                console.log("⚠️ Clique fora bloqueado - modo execução ativo");
+                console.log("⚠️ Clique fora bloqueado - modo ativo:", modoVisualizacao);
                 e.stopPropagation();
                 return;
               }
@@ -723,8 +752,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 <h2 style={styles.formularioTitulo}>
                   {modoVisualizacao === "editar" && "✏️ Editar Despesa"}
                   {modoVisualizacao === "visualizar" && "👁️ Visualizar Despesa"}
-                  {modoVisualizacao === "executar" &&
-                    "▶️ Executar Despesa Planejada"}
+                  {modoVisualizacao === "executar" && "▶️ Executar Despesa Planejada"}
+                  {modoVisualizacao === "criar" && "🆕 Nova Despesa Executada"}
                 </h2>
                 <button
                   onClick={() => {
@@ -741,7 +770,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               </div>
               <div style={styles.formularioEdicaoContent}>
                 <DespesaForm
-                  despesaParaEditar={despesaEmEdicao}
+                  despesaParaEditar={modoVisualizacao === "criar" ? null : despesaEmEdicao}
                   emendaId={emendaId}
                   somenteLeitura={modoVisualizacao === "visualizar"}
                   modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
@@ -767,7 +796,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       message:
                         modoVisualizacao === "executar"
                           ? "✅ Despesa executada com sucesso!"
-                          : "✅ Despesa atualizada com sucesso!",
+                          : modoVisualizacao === "criar"
+                            ? "✅ Despesa criada com sucesso!"
+                            : "✅ Despesa atualizada com sucesso!",
                       type: "success",
                     });
                   }}
@@ -781,7 +812,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                       message:
                         modoVisualizacao === "executar"
                           ? "✅ Despesa executada com sucesso!"
-                          : "✅ Despesa atualizada com sucesso!",
+                          : modoVisualizacao === "criar"
+                            ? "✅ Despesa criada com sucesso!"
+                            : "✅ Despesa atualizada com sucesso!",
                       type: "success",
                     });
                   }}
@@ -802,6 +835,43 @@ const styles = {
     gap: 20,
     padding: 20,
     backgroundColor: "#f8f9fa",
+  },
+  acaoRapidaContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    border: "2px solid #0d6efd",
+  },
+  acaoRapidaHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 20,
+  },
+  acaoRapidaTitulo: {
+    margin: 0,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#0d6efd",
+  },
+  acaoRapidaDescricao: {
+    margin: "4px 0 0 0",
+    fontSize: 14,
+    color: "#6c757d",
+  },
+  btnNovaDespesaExecutada: {
+    backgroundColor: "#0d6efd",
+    color: "#fff",
+    border: "none",
+    padding: "12px 24px",
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    boxShadow: "0 4px 12px rgba(13, 110, 253, 0.3)",
+    whiteSpace: "nowrap",
   },
   statsWrapper: {
     display: "grid",
