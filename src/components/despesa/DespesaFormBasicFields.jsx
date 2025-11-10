@@ -205,6 +205,25 @@ const DespesaFormBasicFields = ({
     }
   }, [despesaParaEditar?.valor]);
 
+  // ✅ Validar se valor excede saldo disponível (APENAS se for EDIÇÃO de despesa existente)
+  useEffect(() => {
+    const valorNum = parseValorMonetario(formData.valor);
+    const saldoDisp = emendaInfo?.saldoDisponivel || 0;
+
+    // ✅ CRÍTICO: Só validar saldo se estiver EDITANDO despesa existente
+    // Em modo criar, o saldo será atualizado APÓS salvar
+    const isEdicao = despesaParaEditar?.id;
+
+    if (isEdicao && valorNum > saldoDisp && valorNum > 0) {
+      setValorExcedeSaldo(true);
+      onValorExcedeSaldo?.(true);
+    } else {
+      setValorExcedeSaldo(false);
+      onValorExcedeSaldo?.(false);
+    }
+  }, [formData.valor, emendaInfo?.saldoDisponivel, onValorExcedeSaldo, despesaParaEditar?.id]);
+
+
   const styles = {
     fieldset: {
       border: "2px solid #154360",

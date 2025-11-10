@@ -567,34 +567,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         </div>
       </div>
 
-      {/* 🆕 BOTÃO PRINCIPAL: CRIAR DESPESA EXECUTADA DIRETAMENTE */}
-      <div style={styles.acaoRapidaContainer}>
-        <div style={styles.acaoRapidaHeader}>
-          <div>
-            <h3 style={styles.acaoRapidaTitulo}>⚡ Ação Rápida</h3>
-            <p style={styles.acaoRapidaDescricao}>
-              Crie uma despesa executada sem precisar planejar primeiro
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
-              setDespesaEmEdicao({
-                emendaId: emendaId,
-                status: "EXECUTADA", // 🔑 Já marca como executada
-                valor: "",
-                discriminacao: "",
-                fornecedor: "",
-              });
-              setModoVisualizacao("criar"); // 🔑 Modo criar direto
-            }}
-            style={styles.btnNovaDespesaExecutada}
-            title="Criar despesa executada sem planejar"
-          >
-            ➕ Nova Despesa Executada
-          </button>
-        </div>
-      </div>
+      
 
       {/* Seção: Despesas Planejadas */}
       <div style={styles.secao}>
@@ -705,11 +678,30 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       {/* Seção: Despesas Executadas */}
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
-          <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
-          <span style={styles.badge}>
-            {despesasExecutadas.length}{" "}
-            {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
+            <span style={styles.badge}>
+              {despesasExecutadas.length}{" "}
+              {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
+              setDespesaEmEdicao({
+                emendaId: emendaId,
+                status: "EXECUTADA",
+                valor: "",
+                discriminacao: "",
+                fornecedor: "",
+              });
+              setModoVisualizacao("criar");
+            }}
+            style={styles.btnNovaDespesa}
+            title="Criar despesa executada"
+          >
+            ➕ Nova Despesa
+          </button>
         </div>
 
         <DespesasList
@@ -836,41 +828,17 @@ const styles = {
     padding: 20,
     backgroundColor: "#f8f9fa",
   },
-  acaoRapidaContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-    border: "2px solid #0d6efd",
-  },
-  acaoRapidaHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 20,
-  },
-  acaoRapidaTitulo: {
-    margin: 0,
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#0d6efd",
-  },
-  acaoRapidaDescricao: {
-    margin: "4px 0 0 0",
-    fontSize: 14,
-    color: "#6c757d",
-  },
-  btnNovaDespesaExecutada: {
+  btnNovaDespesa: {
     backgroundColor: "#0d6efd",
     color: "#fff",
     border: "none",
-    padding: "12px 24px",
+    padding: "10px 20px",
     borderRadius: 8,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 600,
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 4px 12px rgba(13, 110, 253, 0.3)",
+    boxShadow: "0 2px 8px rgba(13, 110, 253, 0.3)",
     whiteSpace: "nowrap",
   },
   statsWrapper: {
