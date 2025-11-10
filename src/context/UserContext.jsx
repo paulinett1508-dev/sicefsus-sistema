@@ -102,11 +102,11 @@ export const UserProvider = ({ children }) => {
               email: firebaseUser.email,
               nome: nomeBasico,
               tipo: isAdminEmail ? "admin" : "operador",
-              status: "ativo",
+              status: isAdminEmail ? "ativo" : "pendente", // Operadores começam pendentes até configuração
 
-              // ✅ CORREÇÃO: Operadores criados SEM município (admin deve definir)
-              municipio: "", // Admin deve configurar o município correto
-              uf: "", // Admin deve configurar a UF correta
+              // ✅ OPERADORES CRIADOS SEM MUNICÍPIO - ADMIN DEVE CONFIGURAR
+              municipio: isAdminEmail ? null : null,
+              uf: isAdminEmail ? null : null,
 
               primeiroAcesso: true,
               criadoPor: "sistema",
@@ -117,9 +117,9 @@ export const UserProvider = ({ children }) => {
               ...(isAdminEmail
                 ? {}
                 : {
-                    permissoes: ["visualizar_emendas", "criar_despesas"],
+                    permissoes: [],
                     observacoes:
-                      "⚠️ OPERADOR SEM MUNICÍPIO - Admin deve configurar localização antes do primeiro acesso",
+                      "⚠️ OPERADOR NÃO CONFIGURADO - Admin deve definir município/UF e ativar antes do primeiro acesso",
                   }),
             };
 
@@ -133,17 +133,17 @@ export const UserProvider = ({ children }) => {
               nome: nomeBasico,
               displayName: nomeBasico,
               tipo: isAdminEmail ? "admin" : "operador",
-              isActive: true,
-              status: "ativo",
-              municipio: basicUserData.municipio,
-              uf: basicUserData.uf,
+              isActive: isAdminEmail,
+              status: isAdminEmail ? "ativo" : "pendente",
+              municipio: null,
+              uf: null,
               ...basicUserData,
             });
 
-            // ✅ AVISO PARA OPERADORES SEM MUNICÍPIO DEFINIDO
+            // ✅ AVISO PARA OPERADORES NÃO CONFIGURADOS
             if (!isAdminEmail) {
               console.warn(
-                "⚠️ Operador criado com município padrão (Floriano/PI). Configure o município correto no perfil.",
+                "⚠️ Operador criado mas NÃO configurado. Admin deve definir município/UF e ativar o usuário.",
               );
             }
           }
