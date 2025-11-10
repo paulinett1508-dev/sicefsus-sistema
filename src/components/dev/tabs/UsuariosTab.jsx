@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 import AlertaBanner from '../shared/AlertaBanner';
 
 function UsuariosTab() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     total: 0,
     ativos: 0,
@@ -102,7 +104,7 @@ function UsuariosTab() {
           Para criar, editar ou excluir usuários, acesse o módulo de Administração
         </p>
         <button
-          onClick={() => window.location.href = '/administracao'}
+          onClick={() => navigate('/administracao')}
           style={{
             padding: '10px 20px',
             backgroundColor: '#667eea',
