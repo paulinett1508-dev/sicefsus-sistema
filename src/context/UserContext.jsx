@@ -104,9 +104,9 @@ export const UserProvider = ({ children }) => {
               tipo: isAdminEmail ? "admin" : "operador",
               status: "ativo",
 
-              // ✅ CORREÇÃO CRÍTICA: Operadores precisam de município
-              municipio: isAdminEmail ? "" : "Floriano", // Município padrão para operadores
-              uf: isAdminEmail ? "" : "PI", // UF padrão para operadores
+              // ✅ CORREÇÃO: Operadores criados SEM município (admin deve definir)
+              municipio: "", // Admin deve configurar o município correto
+              uf: "", // Admin deve configurar a UF correta
 
               primeiroAcesso: true,
               criadoPor: "sistema",
@@ -119,7 +119,7 @@ export const UserProvider = ({ children }) => {
                 : {
                     permissoes: ["visualizar_emendas", "criar_despesas"],
                     observacoes:
-                      "Usuário criado automaticamente - Definir município correto",
+                      "⚠️ OPERADOR SEM MUNICÍPIO - Admin deve configurar localização antes do primeiro acesso",
                   }),
             };
 
@@ -165,8 +165,8 @@ export const UserProvider = ({ children }) => {
             tipo: isAdminEmail ? "admin" : "operador",
             isActive: true,
             status: "ativo",
-            municipio: isAdminEmail ? "" : "Floriano", // Fallback com município
-            uf: isAdminEmail ? "" : "PI",
+            municipio: "", // Sem município definido
+            uf: "", // Sem UF definida
           });
         }
       } else {

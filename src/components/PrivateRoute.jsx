@@ -55,20 +55,14 @@ export default function PrivateRoute({ children, usuario, requiredRole }) {
   }
 
   // ✅ VERIFICAÇÃO ESPECIAL: Operador sem localização
+  // ⚠️ MUDANÇA: Não bloquear mais, apenas registrar aviso
   if (usuario.tipo === "operador") {
     if (!usuario.municipio || !usuario.uf) {
-      console.log(
-        "❌ PrivateRoute: Operador sem localização definida, redirecionando para /unauthorized",
+      console.warn(
+        "⚠️ PrivateRoute: Operador sem localização definida, mas permitindo acesso básico",
       );
-      return (
-        <Navigate
-          to="/unauthorized"
-          state={{
-            message:
-              "Operador sem localização definida. Contate o administrador para configurar município/UF.",
-          }}
-        />
-      );
+      // NÃO BLOQUEIA: usePermissions já gerencia isso
+      // O usuário verá aviso no Dashboard
     }
   }
 

@@ -19,14 +19,7 @@ const UsersSection = ({
         <h3 style={styles.sectionTitle}>
           📋 Lista de Usuários ({users.length})
         </h3>
-        <button
-          onClick={onNovoUsuario}
-          style={styles.newUserButton}
-          disabled={loading}
-          title="Criar novo usuário"
-        >
-          ➕ Novo Usuário
-        </button>
+        {/* ⚠️ OPERADORES NÃO PODEM CRIAR USUÁRIOS */}
       </div>
 
       {/* Campo de busca */}

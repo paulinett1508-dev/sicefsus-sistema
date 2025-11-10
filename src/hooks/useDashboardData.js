@@ -48,6 +48,12 @@ const useDashboardData = (user, permissions) => {
   const carregarDadosOperador = async () => {
     try {
       const userMunicipio = user?.municipio?.trim();
+      
+      // ✅ VALIDAÇÃO: Município vazio = sem dados
+      if (!userMunicipio || userMunicipio === "") {
+        console.warn("⚠️ Operador sem município definido, retornando dados vazios");
+        return { emendasData: [], despesasData: [] };
+      }
       const userUf = user?.uf?.trim();
 
       console.log("🔐 OPERADOR: Aplicando filtros geográficos");
