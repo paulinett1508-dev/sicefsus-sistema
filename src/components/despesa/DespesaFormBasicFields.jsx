@@ -201,27 +201,14 @@ const DespesaFormBasicFields = ({
     }
   }, [despesaParaEditar?.valor]);
 
-  // ✅ Validar se valor excede saldo disponível
+  // ✅ CORREÇÃO: Despesas planejadas NUNCA validam saldo
+  // Validação de saldo só acontece na EXECUÇÃO (modal de executar)
   useEffect(() => {
-    const valorNum = parseValorMonetario(formData.valor);
-    const saldoDisp = calcularSaldoParaValidacao();
-
-    // ✅ CRÍTICO: Só validar saldo para despesas EXECUTADAS
-    // Despesas planejadas NÃO consomem saldo
-    const isDespesaExecutada = !despesaParaEditar || despesaParaEditar?.status !== "PLANEJADA";
-    
-    // Só mostrar erro se:
-    // 1. For despesa executada (não planejada)
-    // 2. Valor exceder o saldo disponível
-    // 3. Valor for maior que zero
-    if (isDespesaExecutada && valorNum > saldoDisp && valorNum > 0) {
-      setValorExcedeSaldo(true);
-      onValorExcedeSaldo?.(true);
-    } else {
-      setValorExcedeSaldo(false);
-      onValorExcedeSaldo?.(false);
-    }
-  }, [formData.valor, emendaInfo?.saldoDisponivel, onValorExcedeSaldo, despesaParaEditar?.id, despesaParaEditar?.status]);
+    // 🚫 Despesas planejadas: SEM validação de saldo
+    // ✅ É apenas planejamento, pode ser qualquer valor
+    setValorExcedeSaldo(false);
+    onValorExcedeSaldo?.(false);
+  }, [formData.valor, onValorExcedeSaldo]);
 
 
   const styles = {
