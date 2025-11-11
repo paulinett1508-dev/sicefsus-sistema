@@ -1,7 +1,7 @@
 // src/hooks/usePermissions.js - HOOK CENTRALIZADO DE PERMISSÕES
 // ✅ Centraliza toda lógica de permissões do sistema
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   validateLocation,
   normalizeUF,
@@ -48,6 +48,43 @@ const usePermissions = (usuario) => {
       };
     }
 
+    // ✅ GESTOR: Acesso total em seu município/UF
+    if (usuario.tipo === "gestor") {
+      const municipio = normalizeMunicipio(usuario.municipio);
+      const uf = normalizeUF(usuario.uf);
+      const localizacao = validateLocation(municipio, uf);
+
+      if (localizacao.valido) {
+        return {
+          acessoTotal: false, // Não vê tudo, mas gerencia seu município
+          filtroAplicado: true,
+          semAcesso: false,
+          temAcessoSistema: true,
+          podeGerenciarUsuarios: false, // Gestor não gerencia usuários globalmente
+          motivo: `Gestor com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
+          aviso: null,
+          filtroMunicipio: localizacao.municipio,
+          filtroUf: localizacao.uf,
+          tipo: "gestor_filtrado",
+        };
+      } else {
+        // Gestor sem localização válida - acesso bloqueado até completar
+        return {
+          acessoTotal: false,
+          filtroAplicado: false,
+          semAcesso: true,
+          temAcessoSistema: false,
+          podeGerenciarUsuarios: false,
+          motivo: "Gestor com localização incompleta",
+          aviso: "⚠️ Complete seu cadastro com município/UF para acessar o sistema como Gestor",
+          filtroMunicipio: null,
+          filtroUf: null,
+          tipo: "gestor_localização_pendente",
+          errosLocalizacao: localizacao.erros,
+        };
+      }
+    }
+
     // ✅ OPERADOR: Verificar dados de localização
     const municipio = normalizeMunicipio(usuario.municipio);
     const uf = normalizeUF(usuario.uf);
@@ -85,33 +122,9 @@ const usePermissions = (usuario) => {
     };
   }, [usuario]);
 
-  // ✅ ATUALIZAR PERMISSÕES QUANDO USUÁRIO MUDAR
-  useEffect(() => {
-    setLoading(true);
-
-    const novasPermissoes = calcularPermissoes;
-    setPermissoes(novasPermissoes);
-
-    setLoading(false);
-  }, [calcularPermissoes, usuario]);
-
-  // ✅ MÉTODOS UTILITÁRIOS
-  const methods = useMemo(
+  // ✅ MÉTODOS QUE PODEM SER CHAMADOS POR QUALQUER TIPO DE USUÁRIO
+  const methodsComuns = useMemo(
     () => ({
-      /**
-       * Verificar se usuário pode ver todas as emendas
-       */
-      podeVerTodasEmendas: () => {
-        return permissoes?.acessoTotal === true;
-      },
-
-      /**
-       * Verificar se usuário tem acesso ao sistema
-       */
-      temAcesso: () => {
-        return permissoes && (permissoes.temAcessoSistema || permissoes.acessoTotal);
-      },
-
       /**
        * Verificar se usuário pode gerenciar outros usuários
        */
@@ -124,6 +137,13 @@ const usePermissions = (usuario) => {
        */
       isAdmin: () => {
         return usuario?.tipo === "admin";
+      },
+
+      /**
+       * Verificar se é gestor
+       */
+      isGestor: () => {
+        return usuario?.tipo === "gestor";
       },
 
       /**
@@ -156,10 +176,14 @@ const usePermissions = (usuario) => {
         switch (permissoes.tipo) {
           case "admin_total":
             return `👑 Administrador - Visualizando todas as emendas do sistema`;
+          case "gestor_filtrado":
+            return `💼 Gestor - Visualizando emendas de ${permissoes.filtroMunicipio}/${permissoes.filtroUf.toUpperCase()}`;
           case "operador_filtrado":
             return `📍 Operador - Visualizando emendas de ${permissoes.filtroMunicipio}/${permissoes.filtroUf.toUpperCase()}`;
           case "operador_localização_pendente":
             return `⚠️ Operador - Complete o cadastro de localização`;
+          case "gestor_localização_pendente":
+            return `⚠️ Gestor - Complete o cadastro de localização`;
           case "operador_bloqueado":
             return `🚫 Acesso bloqueado - Complete seu cadastro`;
           case "sem_autenticacao":
@@ -197,6 +221,61 @@ const usePermissions = (usuario) => {
     [permissoes, usuario, loading, calcularPermissoes],
   );
 
+  // ✅ MÉTODOS ESPECÍFICOS PARA CONTROLE DE AÇÕES
+  const methodsEspecificos = useMemo(
+    () => ({
+      /**
+       * Verificar se usuário pode ver todas as emendas
+       */
+      podeVerTodasEmendas: () => {
+        return permissoes?.acessoTotal === true;
+      },
+    }),
+    [permissoes],
+  );
+
+  // ✅ FILTRAR EMENDAS POR PERMISSÃO
+  const filtrarEmendasPorPermissao = useCallback(
+    (emendas) => {
+      if (!usuario) return [];
+
+      // Admin vê tudo
+      if (usuario.tipo === "admin") {
+        return emendas;
+      }
+
+      // Gestor e Operador veem apenas do seu município
+      if (usuario.tipo === "gestor" || usuario.tipo === "operador") {
+        return emendas.filter(
+          (emenda) =>
+            emenda.municipio === usuario.municipio && emenda.uf === usuario.uf,
+        );
+      }
+
+      return [];
+    },
+    [usuario],
+  );
+
+  // ✅ PERMISSÃO PARA DELETAR EMENDA E DESPESA (ADMIN E GESTOR)
+  const podeDeletarEmenda = useCallback(() => {
+    return usuario?.tipo === "admin" || usuario?.tipo === "gestor";
+  }, [usuario]);
+
+  const podeDeletarDespesa = useCallback(() => {
+    return usuario?.tipo === "admin" || usuario?.tipo === "gestor";
+  }, [usuario]);
+
+  // ✅ ATUALIZAR PERMISSÕES QUANDO USUÁRIO MUDAR
+  useEffect(() => {
+    setLoading(true);
+
+    const novasPermissoes = calcularPermissoes;
+    setPermissoes(novasPermissoes);
+
+    setLoading(false);
+  }, [calcularPermissoes, usuario]);
+
   return {
     // Estados
     permissoes,
@@ -216,7 +295,11 @@ const usePermissions = (usuario) => {
     aviso: permissoes?.aviso || null,
 
     // Métodos
-    ...methods,
+    ...methodsComuns,
+    ...methodsEspecificos,
+    filtrarEmendasPorPermissao,
+    podeDeletarEmenda,
+    podeDeletarDespesa,
   };
 };
 

@@ -122,3 +122,12 @@ export const ELEMENTOS_DESPESA = [
   "4.4.90.51.00 - Obras e Instalações",
   "4.4.90.52.00 - Equipamentos e Material Permanente",
 ];
+
+// ========================================
+// 👤 TIPOS DE USUÁRIO
+// ========================================
+export const USER_TYPES = {
+  ADMIN: "admin",
+  GESTOR: "gestor",
+  OPERADOR: "user",
+};

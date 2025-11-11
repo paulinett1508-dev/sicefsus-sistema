@@ -66,14 +66,18 @@ const UsersTable = ({
                     fontSize: "10px",
                     color: "white",
                     backgroundColor:
-                      usuario.tipo === "admin" ? "#dc3545" : "#28a745",
+                      usuario.tipo === "admin" 
+                        ? "#dc3545" 
+                        : usuario.tipo === "gestor"
+                        ? "#ffc107"
+                        : "#28a745",
                     padding: "4px 8px",
                     borderRadius: "12px",
                     textTransform: "uppercase",
                     fontWeight: "bold",
                   }}
                 >
-                  {usuario.tipo || "N/A"}
+                  {usuario.tipo === "gestor" ? "🏛️ GESTOR" : usuario.tipo || "N/A"}
                 </span>
               </td>
               <td style={styles.tableCell}>

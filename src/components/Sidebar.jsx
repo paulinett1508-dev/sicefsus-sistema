@@ -486,22 +486,28 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             >
               <span
                 style={{
-                  backgroundColor:
-                    usuario.tipo === "admin" ? "#dc3545" : "#28a745",
-                  color: "#ffffff",
-                  borderRadius: "6px",
-                  padding: "3px 10px",
-                  fontWeight: "bold",
-                  fontSize: 10,
-                  letterSpacing: 0.5,
+                  fontSize: "10px",
+                  color: "white",
+                  backgroundColor: isAdmin 
+                    ? "#dc3545" 
+                    : usuario?.tipo === "gestor"
+                    ? "#ffc107"
+                    : "#28a745",
+                  padding: "3px 8px",
+                  borderRadius: "10px",
                   textTransform: "uppercase",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
-                  border: "1px solid rgba(255,255,255,0.3)",
-                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
+                  fontWeight: "bold",
+                  marginLeft: "8px",
                 }}
-                title={usuario.tipo === "admin" ? "Administrador" : "Operador"}
+                title={
+                  isAdmin
+                    ? "Administrador"
+                    : usuario?.tipo === "gestor"
+                    ? "Gestor"
+                    : "Operador"
+                }
               >
-                {usuario.tipo === "admin" ? "ADMIN" : "OPERADOR"}
+                {isAdmin ? "ADMIN" : usuario?.tipo === "gestor" ? "GESTOR" : "OPERADOR"}
               </span>
               {/* 👑 Badge SuperAdmin */}
               {isSuperAdmin && (

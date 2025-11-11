@@ -72,14 +72,14 @@ const UserForm = ({
       return;
     }
 
-    // Validação para operadores
-    if (formData.role === "user") {
+    // Validação para operadores e gestores
+    if (formData.role === "user" || formData.role === "gestor") {
       if (!formData.municipio?.trim()) {
-        alert("Município é obrigatório para operadores");
+        alert(`Município é obrigatório para ${formData.role === "gestor" ? "gestores" : "operadores"}`);
         return;
       }
       if (!formData.uf?.trim()) {
-        alert("UF é obrigatória para operadores");
+        alert(`UF é obrigatória para ${formData.role === "gestor" ? "gestores" : "operadores"}`);
         return;
       }
     }
@@ -158,8 +158,8 @@ const UserForm = ({
 
   // 🆕 FUNÇÃO PARA RENDERIZAR LOCALIZAÇÃO DINAMICAMENTE
   const renderLocalizacaoSection = () => {
-    // ❌ Se não é operador, não mostra nada
-    if (formData.role !== "user") return null;
+    // ❌ Se não é operador nem gestor, não mostra nada
+    if (formData.role !== "user" && formData.role !== "gestor") return null;
 
     // ✅ Se está criando usuário OU se houve mudança de tipo, mostra campos habilitados
     const mostrarCamposHabilitados = !editingUser || tipoAlteradoDuranteEdicao;
@@ -181,10 +181,10 @@ const UserForm = ({
           }}
         >
           <span style={styles.legendIcon}>📍</span>
-          Localização de Acesso (OBRIGATÓRIO PARA OPERADORES)
+          Localização de Acesso (OBRIGATÓRIO PARA OPERADORES E GESTORES)
           <span
             style={styles.infoIcon}
-            title="Operadores só podem visualizar e gerenciar emendas do município cadastrado"
+            title="Operadores e Gestores só podem visualizar e gerenciar emendas do município cadastrado"
           >
             ℹ️
           </span>
@@ -369,7 +369,9 @@ const UserForm = ({
               <br />
               🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
               <br />
-              👤 <strong>Permissões:</strong> Visualizar, criar despesas
+              👤 <strong>Permissões:</strong> {formData.role === "gestor" 
+                ? "Visualizar, criar, editar e deletar emendas/despesas"
+                : "Visualizar, criar despesas"}
             </div>
           </div>
         )}
@@ -629,11 +631,14 @@ const UserForm = ({
                   required
                 >
                   <option value="user">👤 Operador</option>
+                  <option value="gestor">🏛️ Gestor</option>
                   <option value="admin">👑 Administrador</option>
                 </select>
                 <small style={styles.helpText}>
                   {formData.role === "admin"
                     ? "🌐 Acesso total ao sistema (todos os municípios)"
+                    : formData.role === "gestor"
+                    ? "🏛️ Gerencia emendas/despesas do município (pode deletar)"
                     : "📍 Acesso restrito ao município cadastrado"}
                 </small>
               </div>
