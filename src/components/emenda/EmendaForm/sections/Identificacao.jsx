@@ -19,6 +19,16 @@ const Identificacao = ({
   const isGestor = user?.tipo === "gestor";
   const isBloqueadoLocalizacao = isOperador || isGestor; // ✅ Bloquear para operador E gestor
 
+  // ✅ DEBUG: Verificar props recebidas
+  useEffect(() => {
+    console.log('📋 Identificacao - Props recebidas:', {
+      hasOnChange: typeof onChange === 'function',
+      hasFormData: !!formData,
+      userTipo: user?.tipo,
+      isBloqueado: isBloqueadoLocalizacao
+    });
+  }, [onChange, formData, user?.tipo, isBloqueadoLocalizacao]);
+
   // ✅ OBSERVAÇÃO: O pré-preenchimento de UF/Município para GESTOR/OPERADOR
   // agora é feito diretamente no hook useEmendaFormData.js
   // Este componente apenas EXIBE os campos (já bloqueados para edição)
@@ -88,7 +98,11 @@ const Identificacao = ({
   // ✅ HANDLER COM LIMPEZA DE ERRO
   const handleChange = (e) => {
     const { name } = e.target;
-    onChange(e);
+    
+    // Verificar se onChange existe antes de chamar
+    if (onChange && typeof onChange === 'function') {
+      onChange(e);
+    }
 
     // Limpar erro se campo foi preenchido
     if (onClearError && fieldErrors[name]) {
@@ -109,7 +123,7 @@ const Identificacao = ({
         },
       };
       setTimeout(() => {
-        if (onChange) {
+        if (onChange && typeof onChange === 'function') {
           onChange(municipioEvent);
         }
       }, 100);
