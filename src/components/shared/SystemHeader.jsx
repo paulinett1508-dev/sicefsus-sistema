@@ -33,7 +33,9 @@ const SystemHeader = ({
           <span style={styles.versionValue}>
             {userRole === "admin"
               ? "👑 Admin"
-              : `🏛️ ${userMunicipio || "Município não cadastrado"}`}
+              : userRole === "gestor"
+              ? `🏛️ Gestor - ${userMunicipio || "Município não cadastrado"}`
+              : `👤 Operador - ${userMunicipio || "Município não cadastrado"}`}
           </span>
           <span style={styles.divider}>|</span>
 
