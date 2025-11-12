@@ -65,7 +65,14 @@ export default function ModalExclusaoEmenda({
   }
 
   return (
-    <div className="modal-exclusao-overlay" onClick={onClose}>
+    <div 
+      className="modal-exclusao-overlay" 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="modal-exclusao-content"
         onClick={(e) => e.stopPropagation()}
