@@ -295,10 +295,15 @@ export default function DespesasTable({
           throw new Error("Emenda não encontrada");
         }
 
-        const saldoAtual = emendaDoc.data().saldo;
-        const novoSaldo = saldoAtual + (despesa.valor || 0);
-
-        transaction.update(emendaRef, { saldo: novoSaldo });
+        // ✅ CORREÇÃO: Apenas despesas EXECUTADAS devolvem saldo
+        if (despesa.status === "EXECUTADA") {
+          const saldoAtual = emendaDoc.data().saldo;
+          const novoSaldo = saldoAtual + parseFloat(despesa.valor || 0);
+          transaction.update(emendaRef, { saldo: novoSaldo });
+          console.log(`✅ Despesa EXECUTADA deletada - Saldo devolvido: R$ ${despesa.valor}`);
+        } else {
+          console.log(`ℹ️ Despesa PLANEJADA deletada - Saldo não alterado`);
+        }
 
         const despesaRef = doc(db, "despesas", despesa.id);
         transaction.delete(despesaRef);
