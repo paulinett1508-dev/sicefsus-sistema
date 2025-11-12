@@ -17,12 +17,14 @@ const Identificacao = ({
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
   const { user } = useContext(UserContext);
   const isOperador = user?.tipo === "operador";
+  const isGestor = user?.tipo === "gestor";
+  const isBloqueadoLocalizacao = isOperador || isGestor; // ✅ Bloquear para operador E gestor
 
-  // ✅ PRÉ-PREENCHER MUNICÍPIO/UF DO OPERADOR AO CRIAR NOVA EMENDA
+  // ✅ PRÉ-PREENCHER MUNICÍPIO/UF DO OPERADOR/GESTOR AO CRIAR NOVA EMENDA
   useEffect(() => {
-    if (isOperador && user?.municipio && user?.uf && !formData?.numero) {
-      // Só preenche se for operador E se for nova emenda (sem número)
-      console.log("✅ Pré-preenchendo localização do operador:", {
+    if (isBloqueadoLocalizacao && user?.municipio && user?.uf && !formData?.numero) {
+      // Só preenche se for operador/gestor E se for nova emenda (sem número)
+      console.log(`✅ Pré-preenchendo localização do ${user?.tipo}:`, {
         municipio: user.municipio,
         uf: user.uf,
       });
@@ -45,7 +47,7 @@ const Identificacao = ({
         });
       }, 500);
     }
-  }, [isOperador, user?.municipio, user?.uf, formData?.numero]);
+  }, [isBloqueadoLocalizacao, user?.municipio, user?.uf, formData?.numero]);
 
   // Lista de UFs brasileiras
   const ufs = [
@@ -189,7 +191,7 @@ const Identificacao = ({
             name="uf"
             value={formData.uf || ""}
             onChange={handleUfChange}
-            disabled={disabled || isOperador}
+            disabled={disabled || isBloqueadoLocalizacao}
             style={{
               ...styles.input,
               ...(fieldErrors.uf && styles.inputError), // ✅ USANDO fieldErrors
@@ -218,7 +220,7 @@ const Identificacao = ({
             value={formData.municipio || ""}
             onChange={handleChange}
             disabled={
-              disabled || !formData?.uf || loadingMunicipios || isOperador
+              disabled || !formData?.uf || loadingMunicipios || isBloqueadoLocalizacao
             }
             style={{
               ...styles.input,
