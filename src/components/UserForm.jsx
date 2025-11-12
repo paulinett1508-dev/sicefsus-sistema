@@ -162,9 +162,11 @@ const UserForm = ({
     if (formData.role !== "user" && formData.role !== "gestor") return null;
 
     // 🎯 VERIFICAR SE CAMPOS DEVEM SER BLOQUEADOS
-    // ✅ Admins podem sempre editar localização
+    // ✅ Admins NUNCA têm campos bloqueados
     // ✅ Operadores/Gestores: bloqueado em edição, livre em criação
-    const isBloqueadoLocalizacao = editingUser && currentUser?.tipo !== "admin";
+    const isBloqueadoLocalizacao = currentUser?.tipo === "admin" 
+      ? false 
+      : editingUser; // Não-admins bloqueados apenas em edição
 
     // Lista de UFs brasileiras
     const ufs = [

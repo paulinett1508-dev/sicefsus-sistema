@@ -23,22 +23,26 @@ const Identificacao = ({
   // - Admin: NUNCA bloqueado
   // - Operador: SEMPRE bloqueado
   // - Gestor: Bloqueado apenas se já tiver UF/Município definidos
-  const isBloqueadoLocalizacao = isAdmin 
-    ? false 
-    : isOperador 
-      ? true 
-      : (isGestor && formData?.municipio && formData?.uf);
+  const isBloqueadoLocalizacao = 
+    isAdmin ? false : // Admin nunca bloqueado
+    isOperador ? true : // Operador sempre bloqueado
+    (isGestor && formData?.municipio && formData?.uf); // Gestor bloqueado se já tiver dados
 
 
-  // ✅ DEBUG: Verificar props recebidas
+  // ✅ DEBUG: Verificar props recebidas e bloqueio
   useEffect(() => {
-    console.log('📋 Identificacao - Props recebidas:', {
+    console.log('📋 Identificacao - Estado de bloqueio:', {
       hasOnChange: typeof onChange === 'function',
       hasFormData: !!formData,
       userTipo: user?.tipo,
+      isAdmin,
+      isOperador,
+      isGestor,
+      hasMunicipio: !!formData?.municipio,
+      hasUF: !!formData?.uf,
       isBloqueado: isBloqueadoLocalizacao
     });
-  }, [onChange, formData, user?.tipo, isBloqueadoLocalizacao]);
+  }, [onChange, formData, user?.tipo, isBloqueadoLocalizacao, isAdmin, isOperador, isGestor]);
 
   // ✅ OBSERVAÇÃO: O pré-preenchimento de UF/Município para GESTOR/OPERADOR
   // agora é feito diretamente no hook useEmendaFormData.js
