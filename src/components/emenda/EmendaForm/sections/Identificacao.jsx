@@ -17,6 +17,10 @@ const Identificacao = ({
   const { user } = useContext(UserContext);
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
+  // 🔒 BLOQUEAR LOCALIZAÇÃO EM EDIÇÃO (NUNCA para admin)
+  // ✅ Admin SEMPRE pode editar UF/Município (criar e editar)
+  const isBloqueadoLocalizacaoParaAdmin = false; // Admin nunca bloqueado
+
   // 🔒 VERIFICAR SE CAMPOS DEVEM SER BLOQUEADOS
   // Admins: nunca bloqueados
   // Operadores: sempre bloqueados
