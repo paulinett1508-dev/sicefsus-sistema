@@ -15,7 +15,7 @@ import {
   doc,
   deleteDoc,
 } from "firebase/firestore";
-import { db } from "../../../../firebase/firebaseConfig";
+import { db, auth } from "../../../../firebase/firebaseConfig"; // Import auth para obter o usuário atual
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
@@ -107,7 +107,7 @@ const DespesaPlanejadaForm = ({
     try {
       setSalvando(true);
       const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
-      
+
       // ✅ CORREÇÃO CRÍTICA: Incluir município e UF da emenda
       const novaDespesa = {
         emendaId,
@@ -117,12 +117,12 @@ const DespesaPlanejadaForm = ({
         valor: parseValorMonetario(valor),
         status: "PLANEJADA",
         statusPagamento: "pendente",
-        
+
         // ✅ ADICIONAR CAMPOS GEOGRÁFICOS (necessários para as regras do Firestore)
         municipio: emendaInfo?.municipio || usuario?.municipio || "",
         uf: emendaInfo?.uf || usuario?.uf || "",
         numeroEmenda: emendaInfo?.numero || "",
-        
+
         // Campos vazios (serão preenchidos na execução)
         fornecedor: "",
         numeroEmpenho: "",
@@ -131,7 +131,7 @@ const DespesaPlanejadaForm = ({
         dataEmpenho: null,
         dataLiquidacao: null,
         dataPagamento: null,
-        
+
         // Metadados
         criadaEm: new Date().toISOString(),
         criadaPor: usuario?.email || "sistema",
@@ -149,17 +149,17 @@ const DespesaPlanejadaForm = ({
         collection: "despesas",
         timestamp: new Date().toISOString()
       });
-      
+
       const docRef = await addDoc(collection(db, "despesas"), novaDespesa);
-      
+
       console.log("✅ Despesa planejada criada com sucesso! ID:", docRef.id);
-      
+
       // Limpar formulário
       setEstrategia("");
       setDespesaCustomizada("");
       setValor("");
       setModoCustomizado(false);
-      
+
       onSuccess?.();
     } catch (e) {
       console.error("❌ ERRO DETALHADO ao adicionar despesa:", {
@@ -330,6 +330,20 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         collection(db, "despesas"),
         where("emendaId", "==", emendaId)
       );
+
+      // 🔍 LOG DETALHADO DE PERMISSÕES GESTOR
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const token = await currentUser.getIdTokenResult();
+        console.log("🔑 Token de autenticação:", {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          claims: token.claims,
+          tipo: token.claims.tipo,
+          municipio: token.claims.municipio,
+          uf: token.claims.uf
+        });
+      }
 
       console.log('🔍 Query de despesas:', {
         emendaId,
