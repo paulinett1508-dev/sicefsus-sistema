@@ -23,10 +23,21 @@ const Identificacao = ({
   // - Admin: NUNCA bloqueado
   // - Operador: SEMPRE bloqueado
   // - Gestor: Bloqueado apenas se já tiver UF/Município definidos
-  const isBloqueadoLocalizacao = 
-    isAdmin ? false : // Admin nunca bloqueado
-    isOperador ? true : // Operador sempre bloqueado
-    (isGestor && formData?.municipio && formData?.uf); // Gestor bloqueado se já tiver dados
+  const isBloqueadoLocalizacao = isAdmin 
+    ? false // Admin NUNCA bloqueado
+    : isOperador 
+    ? true // Operador SEMPRE bloqueado
+    : (isGestor && formData?.municipio && formData?.uf); // Gestor bloqueado se já tiver dados
+
+  console.log('🔐 Identificacao - Bloqueio UF/Município:', {
+    isAdmin,
+    isOperador,
+    isGestor,
+    hasMunicipio: !!formData?.municipio,
+    hasUF: !!formData?.uf,
+    isBloqueadoLocalizacao,
+    disabled // prop disabled do componente
+  });
 
 
   // ✅ DEBUG: Verificar props recebidas e bloqueio
@@ -162,10 +173,11 @@ const Identificacao = ({
             name="uf"
             value={formData.uf || ""}
             onChange={handleUfChange}
-            disabled={isBloqueadoLocalizacao}
+            disabled={disabled || isBloqueadoLocalizacao}
             style={{
               ...styles.input,
               ...(fieldErrors.uf && styles.inputError),
+              ...(isBloqueadoLocalizacao && styles.inputDisabled),
             }}
             required
           >
@@ -179,6 +191,11 @@ const Identificacao = ({
           {fieldErrors.uf && (
             <small style={styles.errorText}>{fieldErrors.uf}</small>
           )}
+          {isAdmin && !isBloqueadoLocalizacao && (
+            <small style={{ ...styles.helpText, color: "var(--success)", fontSize: "11px" }}>
+              ✅ Você pode alterar a UF
+            </small>
+          )}
         </div>
 
         {/* Município */}
@@ -190,11 +207,12 @@ const Identificacao = ({
             name="municipio"
             value={formData.municipio || ""}
             onChange={handleChange}
-            disabled={!formData?.uf || loadingMunicipios || isBloqueadoLocalizacao}
+            disabled={disabled || !formData?.uf || loadingMunicipios || isBloqueadoLocalizacao}
             style={{
               ...styles.input,
               ...(fieldErrors.municipio && styles.inputError),
               ...(loadingMunicipios && styles.inputLoading),
+              ...(isBloqueadoLocalizacao && styles.inputDisabled),
             }}
             required
           >
@@ -214,6 +232,11 @@ const Identificacao = ({
 
           {fieldErrors.municipio && (
             <small style={styles.errorText}>{fieldErrors.municipio}</small>
+          )}
+          {isAdmin && formData?.uf && !isBloqueadoLocalizacao && (
+            <small style={{ ...styles.helpText, color: "var(--success)", fontSize: "11px" }}>
+              ✅ Você pode alterar o município
+            </small>
           )}
         </div>
       </div>
@@ -293,6 +316,11 @@ const styles = {
   inputLoading: {
     backgroundColor: "#f8f9fa",
     cursor: "wait",
+  },
+  inputDisabled: {
+    backgroundColor: "#e9ecef",
+    cursor: "not-allowed",
+    opacity: 0.6,
   },
   errorText: {
     color: "#dc3545",
