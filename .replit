@@ -11,7 +11,7 @@ packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano", "tree"]
 language = "nodejs"
 
 [deployment]
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "npm run preview"]
 build = ["sh", "-c", "npm run build"]
 deploymentTarget = "static"
 publicDir = "dist"
@@ -43,6 +43,10 @@ externalPort = 4200
 [[ports]]
 localPort = 4176
 externalPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 8000
 
 [[ports]]
 localPort = 5173
