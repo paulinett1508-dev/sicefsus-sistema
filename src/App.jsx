@@ -302,10 +302,10 @@ function AppContent() {
           </span>
           <span style={{ opacity: 0.5 }}>|</span>
           <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            🔐 {usuario.tipo === "admin" 
-              ? "Admin" 
-              : usuario.tipo === "gestor" 
-              ? "Gestor" 
+            🔐 {usuario.tipo === "admin"
+              ? "Admin"
+              : usuario.tipo === "gestor"
+              ? "Gestor"
               : "Operador"}
           </span>
           {usuario.superAdmin && (
@@ -327,10 +327,10 @@ function AppContent() {
           )}
           <span style={{ opacity: 0.5 }}>|</span>
           <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            📍 {usuario.tipo === "admin" 
-              ? "Acesso Total" 
-              : usuario.municipio 
-                ? `${usuario.municipio}/${usuario.uf || ""}` 
+            📍 {usuario.tipo === "admin"
+              ? "Acesso Total"
+              : usuario.municipio
+                ? `${usuario.municipio}/${usuario.uf || ""}`
                 : "Sem município"}
           </span>
           <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
@@ -377,9 +377,9 @@ function AppContent() {
                   usuario ? (
                     <Navigate to="/dashboard" replace />
                   ) : (
-                    <Login 
+                    <Login
                       onLoginSuccess={handleLoginSuccess}
-                      onClose={() => {}} 
+                      onClose={() => {}}
                     />
                   )
                 }

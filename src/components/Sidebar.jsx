@@ -488,8 +488,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
                 style={{
                   fontSize: "10px",
                   color: "white",
-                  backgroundColor: isAdmin 
-                    ? "#dc3545" 
+                  backgroundColor: isAdmin
+                    ? "#dc3545"
                     : usuario?.tipo === "gestor"
                     ? "#ffc107"
                     : "#28a745",
