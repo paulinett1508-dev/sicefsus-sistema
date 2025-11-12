@@ -7,9 +7,18 @@ import React, { useState } from "react";
 const DadosBancarios = ({
   formData = {},
   onChange,
-  disabled = false,
   fieldErrors = {},
+  onClearError,
+  disabled = false,
 }) => {
+  // ✅ DEBUG: Verificar props recebidas
+  React.useEffect(() => {
+    console.log('📋 DadosBancarios - Props recebidas:', {
+      hasOnChange: typeof onChange === 'function',
+      hasFormData: !!formData
+    });
+  }, [onChange, formData]);
+
   const [showBankCodes, setShowBankCodes] = useState(false);
   // ✅ HANDLER DE MUDANÇA
   const handleInputChange = (e) => {

@@ -6,7 +6,16 @@ const Cronograma = ({
   onChange,
   fieldErrors = {},
   onClearError,
+  disabled = false,
 }) => {
+  // ✅ DEBUG: Verificar props recebidas
+  React.useEffect(() => {
+    console.log('📋 Cronograma - Props recebidas:', {
+      hasOnChange: typeof onChange === 'function',
+      hasFormData: !!formData
+    });
+  }, [onChange, formData]);
+
   // Handler para limpar erro ao digitar
   const handleChange = (e) => {
     const { name } = e.target;

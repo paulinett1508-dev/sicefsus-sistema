@@ -18,6 +18,16 @@ const DadosBeneficiario = ({
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
+  // ✅ DEBUG: Verificar props recebidas
+  React.useEffect(() => {
+    console.log('📋 DadosBeneficiario - Props recebidas:', {
+      hasOnChange: typeof onChange === 'function',
+      hasFormData: !!formData,
+      cnpj: formData?.cnpjBeneficiario || formData?.beneficiario
+    });
+  }, [onChange, formData]);
+
+
   // ✅ OTIMIZAÇÃO: useCallback para evitar re-renderizações
   const toggleExpanded = useCallback(() => {
     if (onToggle) {
