@@ -19,36 +19,9 @@ const Identificacao = ({
   const isGestor = user?.tipo === "gestor";
   const isBloqueadoLocalizacao = isOperador || isGestor; // ✅ Bloquear para operador E gestor
 
-  // ✅ PRÉ-PREENCHER MUNICÍPIO/UF DO OPERADOR/GESTOR AO CRIAR NOVA EMENDA
-  useEffect(() => {
-    // ✅ CORREÇÃO: Só preencher se for NOVA emenda (não tem UF nem município preenchidos ainda)
-    const isNovaEmenda = !formData?.uf && !formData?.municipio;
-
-    if (isBloqueadoLocalizacao && user?.municipio && user?.uf && isNovaEmenda) {
-      console.log(`✅ Pré-preenchendo localização do ${user?.tipo}:`, {
-        municipio: user.municipio,
-        uf: user.uf,
-      });
-
-      // Preencher UF
-      onChange({
-        target: {
-          name: "uf",
-          value: user.uf,
-        },
-      });
-
-      // Preencher município (com delay para garantir que municípios foram carregados)
-      setTimeout(() => {
-        onChange({
-          target: {
-            name: "municipio",
-            value: user.municipio,
-          },
-        });
-      }, 500);
-    }
-  }, [isBloqueadoLocalizacao, user?.municipio, user?.uf, formData?.uf, formData?.municipio, onChange]);
+  // ✅ OBSERVAÇÃO: O pré-preenchimento de UF/Município para GESTOR/OPERADOR
+  // agora é feito diretamente no hook useEmendaFormData.js
+  // Este componente apenas EXIBE os campos (já bloqueados para edição)
 
   // Lista de UFs brasileiras
   const ufs = [
