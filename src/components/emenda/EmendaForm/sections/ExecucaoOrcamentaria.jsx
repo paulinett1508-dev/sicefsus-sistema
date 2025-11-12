@@ -20,6 +20,7 @@ import { db, auth } from "../../../../firebase/firebaseConfig"; // Import auth p
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
+import ConfirmationModal from "../../../ConfirmationModal";
 import { NATUREZAS_DESPESA } from "../../../../config/constants";
 import {
   formatarMoedaInput,
@@ -287,6 +288,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   // 🆕 Estados para edição/visualização/execução de despesa
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | 'criar' | 'criar-executada' | null
+  
+  // 🆕 Estado para modal de confirmação de exclusão de despesa planejada
+  const [modalExclusaoPlanejada, setModalExclusaoPlanejada] = useState({
+    isVisible: false,
+    despesa: null,
+  });
 
   // ✅ RESOLVER ID - PRIORIZAR ID DIRETO (evitar consultas desnecessárias)
   useEffect(() => {
@@ -595,22 +602,25 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     carregarDespesas();
   };
 
-  const handleRemoverDespesaPlanejada = async (id, estrategia, valor) => {
-    if (
-      !window.confirm(
-        `⚠️ Confirma remoção?\n\n` +
-          `Estratégia: ${estrategia}\n` +
-          `Valor: ${formatCurrency(valor)}\n\n` +
-          `Esta ação não pode ser desfeita.`,
-      )
-    )
-      return;
+  const handleRemoverDespesaPlanejada = (despesa) => {
+    setModalExclusaoPlanejada({
+      isVisible: true,
+      despesa: despesa,
+    });
+  };
+
+  const confirmarRemocaoPlanejada = async () => {
+    const despesa = modalExclusaoPlanejada.despesa;
+    
+    if (!despesa) return;
+
     try {
-      await deleteDoc(doc(db, "despesas", id));
+      await deleteDoc(doc(db, "despesas", despesa.id));
       showToast({
         message: "🗑️ Despesa planejada removida",
         type: "success",
       });
+      setModalExclusaoPlanejada({ isVisible: false, despesa: null });
       carregarDespesas();
     } catch (e) {
       console.error(e);
@@ -618,6 +628,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         message: "❌ Erro ao remover despesa",
         type: "error",
       });
+      setModalExclusaoPlanejada({ isVisible: false, despesa: null });
     }
   };
 
@@ -869,13 +880,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                               ▶️
                             </button>
                             <button
-                              onClick={() =>
-                                handleRemoverDespesaPlanejada(
-                                  despesa.id,
-                                  despesa.estrategia || despesa.naturezaDespesa,
-                                  despesa.valor,
-                                )
-                              }
+                              onClick={() => handleRemoverDespesaPlanejada(despesa)}
                               style={styles.btnIconRemover}
                               title="Remover despesa"
                             >
@@ -1119,6 +1124,25 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           document.body,
         )}
 
+      {/* Modal de Confirmação de Exclusão de Despesa Planejada */}
+      <ConfirmationModal
+        isVisible={modalExclusaoPlanejada.isVisible}
+        title="Remover Despesa Planejada"
+        message={
+          modalExclusaoPlanejada.despesa ? (
+            <div style={{ textAlign: 'left' }}>
+              <p><strong>Estratégia:</strong> {modalExclusaoPlanejada.despesa.estrategia || modalExclusaoPlanejada.despesa.naturezaDespesa}</p>
+              <p><strong>Valor:</strong> {formatCurrency(modalExclusaoPlanejada.despesa.valor)}</p>
+              <p style={{ marginTop: 16, color: '#856404' }}>⚠️ Esta ação não pode ser desfeita.</p>
+            </div>
+          ) : null
+        }
+        onConfirm={confirmarRemocaoPlanejada}
+        onCancel={() => setModalExclusaoPlanejada({ isVisible: false, despesa: null })}
+        confirmText="Confirmar Remoção"
+        cancelText="Cancelar"
+        type="danger"
+      />
       </div>
   );
 };
