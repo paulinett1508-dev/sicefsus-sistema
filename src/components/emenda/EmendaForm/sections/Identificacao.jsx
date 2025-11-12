@@ -157,14 +157,17 @@ const Identificacao = ({
           <CNPJInput
             label="CNPJ"
             value={formData.cnpj || ""}
-            onChange={(value, isValid) => {
-              console.log("🔍 CNPJInput onChange:", { value, isValid });
+            onChange={(e) => {
+              console.log("🔍 CNPJInput onChange evento:", e);
               handleChange({
                 target: {
                   name: "cnpj",
-                  value: value, // Valor já vem limpo do CNPJInput
+                  value: e.target.value,
                 },
               });
+            }}
+            onValidChange={(isValid, valorFormatado) => {
+              console.log("🔍 CNPJInput validação:", { isValid, valorFormatado });
             }}
             required={true}
             showValidation={true}
