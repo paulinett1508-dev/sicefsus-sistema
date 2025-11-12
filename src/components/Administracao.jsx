@@ -40,12 +40,15 @@ const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
   const { currentUser } = useContext(UserContext);
 
+  // 🎯 VERIFICAR SE É SUPERADMIN
+  const isSuperAdmin = currentUser?.tipo === "admin" && currentUser?.superAdmin === true;
+
   // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("usuarios");
 
   // 🎯 ESTADOS DO MODAL DE USUÁRIO
   const [showUserModal, setShowUserModal] = useState(false);
@@ -621,13 +624,31 @@ const Administracao = () => {
         setActiveTab={setActiveTab}
         usersCount={usuarios.length}
         logsCount={logs.length}
+        isSuperAdmin={isSuperAdmin}
       />
 
       {/* CONTEÚDO CONDICIONAL MODULAR */}
-      {activeTab === "usuarios" && <UsersSection />}
-      {activeTab === "logs" && <LogsSection />}
-      {activeTab === "rules" && <FirestoreRulesSection />}
-      {activeTab === "migracao" && <MigracaoCompleta />}
+      {activeTab === "usuarios" && (
+        <UsersSection
+          usuarios={getFilteredUsers()}
+          loading={loading}
+          userFilter={userFilter}
+          setUserFilter={setUserFilter}
+          handleNovoUsuario={handleNovoUsuario}
+          handleEditarUsuario={handleEditarUsuario}
+          handleDelete={handleDelete}
+          handleToggleStatus={handleToggleStatus}
+        />
+      )}
+      {activeTab === "logs" && (
+        <LogsSection
+          logs={getFilteredLogs()}
+          logFilters={logFilters}
+          setLogFilters={setLogFilters}
+        />
+      )}
+      {isSuperAdmin && activeTab === "rules" && <FirestoreRulesSection />}
+      {isSuperAdmin && activeTab === "migracao" && <MigracaoCompleta />}
     </div>
   );
 };
