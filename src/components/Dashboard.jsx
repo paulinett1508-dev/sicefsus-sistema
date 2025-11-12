@@ -108,14 +108,25 @@ const Dashboard = ({ usuario }) => {
           <div style={styles.headerTop}>
             <h1 style={styles.title}>👋 Bem-vindo, {user.nome || "Usuário"}</h1>
             <div style={styles.badges}>
+              {/* Badge do Tipo de Usuário */}
               <span
                 style={{
                   ...styles.badge,
                   backgroundColor:
-                    user.tipo === "admin" ? "#E74C3C" : "#27AE60",
+                    user.tipo === "admin"
+                      ? "#dc3545"
+                      : user.tipo === "gestor"
+                      ? "#ffc107"
+                      : "#28a745",
+                  fontSize: "12px",
+                  padding: "6px 12px",
                 }}
               >
-                {user.tipo === "admin" ? "👑 Admin" : "👤 Operador"}
+                {user.tipo === "admin"
+                  ? "👑 Admin"
+                  : user.tipo === "gestor"
+                  ? "🏛️ Gestor"
+                  : "👤 Operador"}
               </span>
               {!permissions.acessoTotal && (
                 <span style={{ ...styles.badge, backgroundColor: "#3498DB" }}>
