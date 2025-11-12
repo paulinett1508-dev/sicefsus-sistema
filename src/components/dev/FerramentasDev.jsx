@@ -56,12 +56,6 @@ const FerramentasDev = () => {
     },
     { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
     { id: "usuarios", icone: "👥", label: "Usuários", componente: UsuariosTab },
-    {
-      id: "validacao",
-      icone: "✅",
-      label: "Validação",
-      componente: ValidacaoTab,
-    },
     { id: "analises", icone: "📈", label: "Análises", componente: AnalisesTab },
     {
       id: "iam",
