@@ -23,7 +23,7 @@ const Identificacao = ({
   useEffect(() => {
     // ✅ CORREÇÃO: Só preencher se for NOVA emenda (não tem UF nem município preenchidos ainda)
     const isNovaEmenda = !formData?.uf && !formData?.municipio;
-    
+
     if (isBloqueadoLocalizacao && user?.municipio && user?.uf && isNovaEmenda) {
       console.log(`✅ Pré-preenchendo localização do ${user?.tipo}:`, {
         municipio: user.municipio,
