@@ -61,6 +61,9 @@ const usePermissions = (usuario) => {
           semAcesso: false,
           temAcessoSistema: true,
           podeGerenciarUsuarios: false, // Gestor não gerencia usuários globalmente
+          podeGerenciarDespesas: true, // ✅ GESTOR PODE CRIAR/EDITAR/DELETAR DESPESAS
+          podeCriarDespesas: true, // ✅ GESTOR PODE CRIAR DESPESAS
+          podeEditarDespesas: true, // ✅ GESTOR PODE EDITAR DESPESAS
           motivo: `Gestor com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
           aviso: null,
           filtroMunicipio: localizacao.municipio,
@@ -75,6 +78,9 @@ const usePermissions = (usuario) => {
           semAcesso: true,
           temAcessoSistema: false,
           podeGerenciarUsuarios: false,
+          podeGerenciarDespesas: false,
+          podeCriarDespesas: false,
+          podeEditarDespesas: false,
           motivo: "Gestor com localização incompleta",
           aviso: "⚠️ Complete seu cadastro com município/UF para acessar o sistema como Gestor",
           filtroMunicipio: null,
@@ -236,6 +242,27 @@ const usePermissions = (usuario) => {
        */
       podeVerTodasEmendas: () => {
         return permissoes?.acessoTotal === true;
+      },
+
+      /**
+       * Verificar se usuário pode criar despesas
+       */
+      podeCriarDespesas: () => {
+        return permissoes?.podeCriarDespesas === true || permissoes?.acessoTotal === true;
+      },
+
+      /**
+       * Verificar se usuário pode editar despesas
+       */
+      podeEditarDespesas: () => {
+        return permissoes?.podeEditarDespesas === true || permissoes?.acessoTotal === true;
+      },
+
+      /**
+       * Verificar se usuário pode gerenciar despesas
+       */
+      podeGerenciarDespesas: () => {
+        return permissoes?.podeGerenciarDespesas === true || permissoes?.acessoTotal === true;
       },
     }),
     [permissoes],

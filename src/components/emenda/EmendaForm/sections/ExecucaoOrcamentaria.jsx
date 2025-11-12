@@ -387,7 +387,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     // ✅ PROTEÇÃO: Só confirmar cancelamento se NÃO foi salvo com sucesso
     if (modoVisualizacao === "executar" && !foiSalvoComSucesso) {
       const confirmacao = window.confirm(
-        "⚠️ Cancelar execução?\n\nDados não salvos serão perdidos.",
+        "⚠️ Cancelar execução?\n\n" +
+          "Dados não salvos serão perdidos.",
       );
 
       if (!confirmacao) {
@@ -675,13 +676,29 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <button
             onClick={() => {
               console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
+              console.log("📋 Usuário:", usuario?.tipo);
+              console.log("📋 Emenda ID:", emendaId);
+              console.log("📋 Form Data:", formData);
+
+              // ✅ VALIDAÇÃO: Verificar se usuário pode criar despesas
+              if (usuario?.tipo !== "admin" && usuario?.tipo !== "gestor") {
+                alert("⚠️ Apenas Administradores e Gestores podem criar despesas executadas.");
+                return;
+              }
+
+              // ✅ CORREÇÃO: Criar objeto de despesa vazio para nova criação
               setDespesaEmEdicao({
                 status: 'EXECUTADA',
                 emendaId: emendaId,
                 discriminacao: '',
                 valor: '',
+                numeroEmenda: formData?.numero || '',
+                municipio: formData?.municipio || '',
+                uf: formData?.uf || '',
               });
               setModoVisualizacao("criar-executada");
+
+              console.log("✅ Modal configurado - Modo: criar-executada | Usuário:", usuario?.tipo);
             }}
             style={styles.btnNovaDespesa}
             title="Criar despesa executada"
