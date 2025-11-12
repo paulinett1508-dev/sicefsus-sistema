@@ -161,8 +161,8 @@ const UserForm = ({
     // ❌ Se não é operador nem gestor, não mostra nada
     if (formData.role !== "user" && formData.role !== "gestor") return null;
 
-    // ✅ Se está criando usuário OU se houve mudança de tipo, mostra campos habilitados
-    const mostrarCamposHabilitados = !editingUser || tipoAlteradoDuranteEdicao;
+    // ✅ SEMPRE MOSTRAR CAMPOS HABILITADOS (admins podem selecionar UF/município livremente)
+    const mostrarCamposHabilitados = true;
 
     return (
       <fieldset
@@ -244,75 +244,12 @@ const UserForm = ({
                   municipio: municipio,
                 }));
               }}
-              disabled={
-                saving ||
-                (currentUser?.tipo === "operador" && !tipoAlteradoDuranteEdicao)
-              }
+              disabled={saving}
             />
 
-            {tipoAlteradoDuranteEdicao && (
-              <small style={{ ...styles.helpText, color: "var(--success)" }}>
-                ✅ Selecione o estado e município para o operador
-              </small>
-            )}
-          </div>
-        ) : (
-          /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
-          <div style={styles.formGroup}>
-            {/* Usar UFMunicipioSelector desabilitado para manter consistência */}
-            <UFMunicipioSelector
-              ufSelecionada={formData.uf || ""}
-              municipioSelecionado={formData.municipio || ""}
-              onUfChange={() => {}} // Não faz nada quando desabilitado
-              onMunicipioChange={() => {}} // Não faz nada quando desabilitado
-              disabled={true} // Sempre desabilitado neste caso
-            />
-
-            {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
-            <div
-              style={{
-                textAlign: "center",
-                marginTop: "16px",
-                padding: "16px",
-                backgroundColor: "rgba(52, 152, 219, 0.1)",
-                borderRadius: "8px",
-                border: "1px dashed rgba(52, 152, 219, 0.3)",
-              }}
-            >
-              <p
-                style={{
-                  margin: "0 0 12px 0",
-                  fontSize: "14px",
-                  color: "var(--primary)",
-                }}
-              >
-                💡 <strong>Dica:</strong> Para alterar a localização, mude o
-                tipo de usuário acima.
-              </p>
-              <button
-                type="button"
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "var(--primary)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                }}
-                onClick={() => {
-                  // Forçar mudança para admin e depois permitir volta para operador
-                  handleTipoChange("admin");
-                  setTimeout(() => {
-                    handleTipoChange("user");
-                  }, 100);
-                }}
-                disabled={saving}
-              >
-                🔄 Habilitar Edição de Localização
-              </button>
-            </div>
+            <small style={{ ...styles.helpText, color: "var(--success)" }}>
+              ✅ Selecione o estado e município para o operador/gestor
+            </small>
           </div>
         )}
 
