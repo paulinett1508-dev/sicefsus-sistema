@@ -302,7 +302,11 @@ function AppContent() {
           </span>
           <span style={{ opacity: 0.5 }}>|</span>
           <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            🔐 {usuario.tipo === "admin" ? "Admin" : "Operador"}
+            🔐 {usuario.tipo === "admin" 
+              ? "Admin" 
+              : usuario.tipo === "gestor" 
+              ? "Gestor" 
+              : "Operador"}
           </span>
           {usuario.superAdmin && (
             <>
