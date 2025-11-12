@@ -2,7 +2,7 @@
 // 🎯 MODAL DE CONFIRMAÇÃO ANTES DE EXECUTAR DESPESA
 
 import React from "react";
-import { formatCurrency } from "../../../../utils/formatters";
+import { formatarMoeda } from "../../../../utils/formatters";
 
 const ConfirmarExecucaoDespesaModal = ({
   isOpen,
@@ -53,7 +53,7 @@ const ConfirmarExecucaoDespesaModal = ({
             <div style={styles.infoRow}>
               <span style={styles.infoLabel}>Valor a executar:</span>
               <span style={{ ...styles.infoValue, ...styles.valorDestaque }}>
-                {formatCurrency(valorDespesa)}
+                {formatarMoeda(valorDespesa)}
               </span>
             </div>
 
@@ -61,7 +61,7 @@ const ConfirmarExecucaoDespesaModal = ({
 
             <div style={styles.infoRow}>
               <span style={styles.infoLabel}>Saldo atual da emenda:</span>
-              <span style={styles.infoValue}>{formatCurrency(saldoAtual)}</span>
+              <span style={styles.infoValue}>{formatarMoeda(saldoAtual)}</span>
             </div>
 
             <div style={styles.infoRow}>
@@ -73,7 +73,7 @@ const ConfirmarExecucaoDespesaModal = ({
                   fontWeight: "bold",
                 }}
               >
-                {formatCurrency(novoSaldo)}
+                {formatarMoeda(novoSaldo)}
               </span>
             </div>
           </div>
@@ -122,13 +122,6 @@ const ConfirmarExecucaoDespesaModal = ({
       </div>
     </div>
   );
-};
-
-const formatCurrency = (valor) => {
-  return (Number(valor) || 0).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
 };
 
 const styles = {
