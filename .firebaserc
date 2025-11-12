@@ -1,0 +1,8 @@
+
+{
+  "projects": {
+    "default": "emendas-parlamentares-60dbd",
+    "development": "emendas-parlamentares-60dbd",
+    "production": "emendas-parlamentares-prod"
+  }
+}
