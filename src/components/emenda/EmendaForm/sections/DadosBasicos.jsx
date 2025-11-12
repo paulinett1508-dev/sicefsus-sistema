@@ -210,13 +210,25 @@ const DadosBasicos = React.memo(
               label="Beneficiário (CNPJ)"
               value={formData.beneficiario || ""}
               onChange={(e) => {
+                const cnpjValue = e.target.value;
+                
                 if (process.env.NODE_ENV === "development") {
-                  console.log(`📄 CNPJInput beneficiario: "${e.target.value}"`);
+                  console.log(`📄 CNPJInput beneficiario: "${cnpjValue}"`);
                 }
+                
+                // ✅ CORREÇÃO: Atualizar AMBOS os campos simultaneamente
                 handleInputChange({
                   target: {
                     name: "beneficiario",
-                    value: e.target.value,
+                    value: cnpjValue,
+                  },
+                });
+                
+                // Sincronizar cnpjBeneficiario
+                handleInputChange({
+                  target: {
+                    name: "cnpjBeneficiario",
+                    value: cnpjValue,
                   },
                 });
               }}
