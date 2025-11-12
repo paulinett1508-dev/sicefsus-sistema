@@ -127,6 +127,15 @@ service cloud.firestore {
     }
 
     // ========================================
+    // COLEÇÃO: LOGS
+    // ========================================
+
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if isAuthenticated();
+    }
+
+    // ========================================
     // COLEÇÃO: METADATA
     // ========================================
 
