@@ -38,20 +38,31 @@ import MigracaoCompleta from "./admin/MigracaoCompleta";
 
 const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
-  const { currentUser } = useContext(UserContext);
+  const { currentUser, isSuperAdmin: isSuperAdminFromContext } = useContext(UserContext);
 
-  // 🎯 VERIFICAR SE É SUPERADMIN - CORREÇÃO: Aguardar currentUser estar disponível
+  // 🎯 VERIFICAR SE É SUPERADMIN - USAR DO CONTEXTO OU CALCULAR LOCALMENTE
   const isSuperAdmin = React.useMemo(() => {
     if (!currentUser) return false;
+    
+    // ✅ PRIORIZAR O VALOR DO CONTEXTO
+    if (isSuperAdminFromContext !== undefined) {
+      console.log("🔐 SuperAdmin Check (do contexto):", {
+        isSuperAdmin: isSuperAdminFromContext,
+        email: currentUser.email
+      });
+      return isSuperAdminFromContext;
+    }
+    
+    // ✅ FALLBACK: CALCULAR LOCALMENTE
     const result = currentUser.tipo === "admin" && currentUser.superAdmin === true;
-    console.log("🔐 SuperAdmin Check:", {
+    console.log("🔐 SuperAdmin Check (calculado):", {
       tipo: currentUser.tipo,
       superAdmin: currentUser.superAdmin,
       isSuperAdmin: result,
       email: currentUser.email
     });
     return result;
-  }, [currentUser]);
+  }, [currentUser, isSuperAdminFromContext]);
 
   // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);

@@ -17,21 +17,32 @@ import IAMTab from "./tabs/IAMTab";
 import styles from "./FerramentasDev.module.css";
 
 const FerramentasDev = () => {
-  const { usuario } = useUser();
+  const { usuario: currentUser } = useUser(); // Renamed from 'usuario' to 'currentUser' for clarity
   const navigate = useNavigate();
   const [abaAtiva, setAbaAtiva] = useState("recalculo");
 
-  // Verificar se é SuperAdmin
-  const isSuperAdmin =
-    usuario?.tipo === "admin" && usuario?.superAdmin === true;
+  // 🎯 Verificar se é SuperAdmin
+  const isSuperAdmin = React.useMemo(() => {
+    const result = currentUser?.tipo === "admin" && currentUser?.superAdmin === true;
+    console.log("🛠️ FerramentasDev - SuperAdmin Check:", {
+      tipo: currentUser?.tipo,
+      superAdmin: currentUser?.superAdmin,
+      isSuperAdmin: result
+    });
+    return result;
+  }, [currentUser]);
 
   useEffect(() => {
     if (!isSuperAdmin) {
+      console.log("🛠️ FerramentasDev - Not SuperAdmin, redirecting to dashboard.");
       navigate("/dashboard");
+    } else {
+      console.log("🛠️ FerramentasDev - SuperAdmin confirmed, proceeding.");
     }
   }, [isSuperAdmin, navigate]);
 
   if (!isSuperAdmin) {
+    console.log("🛠️ FerramentasDev - Render null because not SuperAdmin.");
     return null;
   }
 
@@ -76,6 +87,8 @@ const FerramentasDev = () => {
   const abaAtual = abas.find((aba) => aba.id === abaAtiva);
   const ComponenteAtivo = abaAtual?.componente;
 
+  console.log("🛠️ FerramentasDev - Rendering component with active tab:", abaAtiva);
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -96,7 +109,10 @@ const FerramentasDev = () => {
           <button
             key={aba.id}
             className={`${styles.tabButton} ${abaAtiva === aba.id ? styles.tabButtonActive : ""}`}
-            onClick={() => setAbaAtiva(aba.id)}
+            onClick={() => {
+              setAbaAtiva(aba.id);
+              console.log(`🛠️ FerramentasDev - Navigated to tab: ${aba.label} (${aba.id})`);
+            }}
           >
             <span className={styles.tabIcon}>{aba.icone}</span>
             <span className={styles.tabLabel}>{aba.label}</span>
@@ -106,7 +122,11 @@ const FerramentasDev = () => {
 
       {/* Conteúdo da Aba Ativa */}
       <div className={styles.content}>
-        {ComponenteAtivo ? <ComponenteAtivo /> : <div>Aba não encontrada</div>}
+        {ComponenteAtivo ? (
+          <ComponenteAtivo />
+        ) : (
+          <div>Aba não encontrada</div>
+        )}
       </div>
     </div>
   );

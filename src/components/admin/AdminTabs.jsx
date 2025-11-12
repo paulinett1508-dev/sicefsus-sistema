@@ -2,6 +2,14 @@
 import React from "react";
 
 const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmin = false }) => {
+  console.log("🎬 AdminTabs RENDER - Props recebidas:", {
+    activeTab,
+    usersCount,
+    logsCount,
+    isSuperAdmin,
+    typeOfSuperAdmin: typeof isSuperAdmin
+  });
+
   const allTabs = [
     { id: "usuarios", label: "👥 Usuários", icon: "👥", showAlways: true },
     { id: "logs", label: "📊 Logs", icon: "📊", showAlways: true },
@@ -9,19 +17,22 @@ const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmi
     { id: "migracao", label: "🔄 Migração", icon: "🔄", superAdminOnly: true },
   ];
   
-  const tabs = allTabs.filter(tab => tab.showAlways || (tab.superAdminOnly && isSuperAdmin));
+  const tabs = allTabs.filter(tab => {
+    const shouldShow = tab.showAlways || (tab.superAdminOnly && isSuperAdmin);
+    console.log(`🔍 Tab "${tab.id}":`, {
+      showAlways: tab.showAlways,
+      superAdminOnly: tab.superAdminOnly,
+      isSuperAdmin,
+      shouldShow
+    });
+    return shouldShow;
+  });
   
-  console.log("🔍 AdminTabs Debug:", {
+  console.log("✅ AdminTabs RESULTADO:", {
     isSuperAdmin,
     totalTabs: allTabs.length,
     visibleTabs: tabs.length,
-    tabsVisiveis: tabs.map(t => t.id),
-    tabsConfig: allTabs.map(t => ({
-      id: t.id,
-      superAdminOnly: t.superAdminOnly,
-      showAlways: t.showAlways,
-      visible: t.showAlways || (t.superAdminOnly && isSuperAdmin)
-    }))
+    tabsVisiveis: tabs.map(t => t.id)
   });
 
   return (
