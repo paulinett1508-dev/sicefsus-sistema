@@ -39,6 +39,7 @@ const DespesaPlanejadaForm = ({
   totalExecutado,
   onSuccess,
   usuario,
+  emendaInfo, // 🆕 Receber info da emenda
 }) => {
   const [modoCustomizado, setModoCustomizado] = useState(false);
   const [despesaCustomizada, setDespesaCustomizada] = useState("");
@@ -89,10 +90,10 @@ const DespesaPlanejadaForm = ({
         municipio: usuario?.municipio,
         uf: usuario?.uf
       },
-      formData: {
-        numero: formData?.numero,
-        municipio: formData?.municipio,
-        uf: formData?.uf
+      emendaInfo: {
+        numero: emendaInfo?.numero,
+        municipio: emendaInfo?.municipio,
+        uf: emendaInfo?.uf
       }
     });
 
@@ -118,9 +119,9 @@ const DespesaPlanejadaForm = ({
         statusPagamento: "pendente",
         
         // ✅ ADICIONAR CAMPOS GEOGRÁFICOS (necessários para as regras do Firestore)
-        municipio: formData?.municipio || usuario?.municipio || "",
-        uf: formData?.uf || usuario?.uf || "",
-        numeroEmenda: formData?.numero || "",
+        municipio: emendaInfo?.municipio || usuario?.municipio || "",
+        uf: emendaInfo?.uf || usuario?.uf || "",
+        numeroEmenda: emendaInfo?.numero || "",
         
         // Campos vazios (serão preenchidos na execução)
         fornecedor: "",
@@ -173,8 +174,8 @@ const DespesaPlanejadaForm = ({
       if (e.code === 'permission-denied') {
         console.error("🔒 ERRO DE PERMISSÃO - Detalhes:", {
           emendaId,
-          municipio: formData?.municipio || usuario?.municipio,
-          uf: formData?.uf || usuario?.uf,
+          municipio: emendaInfo?.municipio || usuario?.municipio,
+          uf: emendaInfo?.uf || usuario?.uf,
           usuarioTipo: usuario?.tipo,
           usuarioRole: usuario?.role
         });
@@ -715,6 +716,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               totalExecutado={stats.totalExecutado}
               onSuccess={carregarDespesas}
               usuario={usuario}
+              emendaInfo={{
+                numero: formData?.numero,
+                municipio: formData?.municipio,
+                uf: formData?.uf,
+              }}
             />
 
             {despesasPlanejadas.length === 0 ? (
