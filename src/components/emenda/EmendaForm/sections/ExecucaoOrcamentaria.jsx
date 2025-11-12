@@ -24,6 +24,7 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
+import { useLocation } from "react-router-dom";
 
 const formatCurrency = (valor) =>
   (Number(valor) || 0).toLocaleString("pt-BR", {
@@ -193,6 +194,8 @@ const DespesaPlanejadaForm = ({
 
 // ===== Principal =====
 const ExecucaoOrcamentaria = ({ formData, usuario }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
@@ -274,9 +277,33 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     }
   };
 
+  // 🔄 CARREGAR DESPESAS
   useEffect(() => {
-    if (temEmendaSalva) carregarDespesas(); /* eslint-disable-next-line */
+    carregarDespesas();
   }, [emendaId]);
+
+  // ✅ DETECTAR FLAG DE PRIMEIRA DESPESA (vindo do modal pós-criação)
+  useEffect(() => {
+    if (location.state?.criarPrimeiraDespesa && despesas.length === 0) {
+      console.log("🎯 GESTOR: Abrindo modal de primeira despesa automaticamente");
+      // Aguardar renderização completa
+      setTimeout(() => {
+        setModoVisualizacao("criar-executada"); // Abrir diretamente como criação executada
+        setDespesaEmEdicao({
+          status: 'EXECUTADA',
+          emendaId: emendaId,
+          discriminacao: '',
+          valor: '',
+          numeroEmenda: formData?.numero || '',
+          municipio: formData?.municipio || '',
+          uf: formData?.uf || '',
+        });
+        // Limpar state para não reabrir
+        window.history.replaceState({}, document.title);
+      }, 500);
+    }
+  }, [location.state, despesas.length, emendaId, formData?.numero, formData?.municipio, formData?.uf]);
+
 
   // ✅ CRÍTICO: Separação ESTRITA entre planejadas e executadas
   const despesasPlanejadas = despesas.filter((d) => d.status === "PLANEJADA");

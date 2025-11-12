@@ -295,7 +295,8 @@ const Emendas = () => {
 
   const handleEditar = (emenda) => {
     console.log("✏️ Editando emenda:", emenda.id);
-    navigate(`/emendas/${emenda.id}/editar`);
+    // ✅ CORREÇÃO: Rota correta sem /editar
+    navigate(`/emendas/${emenda.id}`);
   };
 
   // ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas)

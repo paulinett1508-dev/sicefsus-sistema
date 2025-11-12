@@ -64,6 +64,8 @@ const usePermissions = (usuario) => {
           podeGerenciarDespesas: true, // ✅ GESTOR PODE CRIAR/EDITAR/DELETAR DESPESAS
           podeCriarDespesas: true, // ✅ GESTOR PODE CRIAR DESPESAS
           podeEditarDespesas: true, // ✅ GESTOR PODE EDITAR DESPESAS
+          podeDeletarDespesas: true, // ✅ GESTOR PODE DELETAR DESPESAS
+          podeExecutarDespesas: true, // ✅ GESTOR PODE EXECUTAR DESPESAS PLANEJADAS
           motivo: `Gestor com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
           aviso: null,
           filtroMunicipio: localizacao.municipio,

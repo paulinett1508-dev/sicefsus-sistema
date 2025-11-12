@@ -840,7 +840,10 @@ export const useEmendaFormData = () => {
               document.body.removeChild(modalOverlay);
               // ✅ NAVEGAR PARA A EMENDA COM ABA DE EXECUÇÃO ATIVA
               // Usa navigate() do React Router para navegação SPA
-              navigate(`/emendas/${emendaId}?tab=execucao`);
+              console.log(`🎯 GESTOR: Navegando para primeira despesa da emenda ${emendaId}`);
+              navigate(`/emendas/${emendaId}?tab=execucao`, { 
+                state: { criarPrimeiraDespesa: true } 
+              });
             };
 
             btnNao.onclick = () => {
