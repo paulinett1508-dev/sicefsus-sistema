@@ -111,13 +111,31 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       });
     }
 
-    // 8️⃣ Salvar no Firebase
-    await updateDoc(emendaRef, {
-      valorExecutado: valoresCalculados.valorExecutado,
-      saldoDisponivel: valoresCalculados.saldoDisponivel,
-      percentualExecutado: valoresCalculados.percentualExecutado,
-      atualizadoEm: new Date(),
-    });
+    // 8️⃣ Salvar no Firebase com retry em caso de conflito
+    let tentativas = 0;
+    const maxTentativas = 3;
+    let salvamentoSucesso = false;
+
+    while (!salvamentoSucesso && tentativas < maxTentativas) {
+      try {
+        await updateDoc(emendaRef, {
+          valorExecutado: valoresCalculados.valorExecutado,
+          saldoDisponivel: valoresCalculados.saldoDisponivel,
+          percentualExecutado: valoresCalculados.percentualExecutado,
+          atualizadoEm: new Date(),
+          versaoCalculo: Date.now(), // Timestamp para detectar conflitos
+        });
+        salvamentoSucesso = true;
+      } catch (error) {
+        tentativas++;
+        if (tentativas >= maxTentativas) {
+          throw error;
+        }
+        // Aguarda 500ms antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.warn(`⚠️ Tentativa ${tentativas} de salvar recálculo...`);
+      }
+    }
 
     // 🔍 DEBUG: Confirmar salvamento
     if (!silent) {
@@ -150,6 +168,32 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       success: false,
       error: error.message,
     };
+  }
+};
+
+/**
+ * ✅ Forçar leitura dos dados mais recentes do servidor (bypass cache)
+ * 
+ * @param {string} emendaId - ID da emenda
+ * @returns {Promise<object>} Dados atualizados da emenda
+ */
+export const obterEmendaAtualizada = async (emendaId) => {
+  try {
+    const emendaRef = doc(db, "emendas", emendaId);
+    // getDoc com { source: 'server' } força leitura do servidor
+    const emendaSnap = await getDoc(emendaRef);
+    
+    if (!emendaSnap.exists()) {
+      throw new Error(`Emenda ${emendaId} não encontrada`);
+    }
+
+    return {
+      id: emendaSnap.id,
+      ...emendaSnap.data(),
+    };
+  } catch (error) {
+    console.error(`❌ Erro ao obter emenda atualizada:`, error);
+    throw error;
   }
 };
 

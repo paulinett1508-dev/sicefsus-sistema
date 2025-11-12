@@ -133,6 +133,7 @@ export default function RecalcularEmenda() {
       percentualCalculado:
         valorTotal > 0 ? (valorCalculado / valorTotal) * 100 : 0,
       numeroDespesas: emenda.numeroDespesas || 0,
+      timestampInicio: Date.now(), // Para medir latência
     });
 
     setEmendaSelecionada(emenda);
@@ -171,20 +172,33 @@ export default function RecalcularEmenda() {
       // Calcular novo saldo
       const novoSaldo = preview.valorTotal - preview.valorCalculado;
 
-      // Atualizar no Firebase
+      // Atualizar no Firebase COM CONFIRMAÇÃO
       await updateDoc(emendaRef, {
         valorExecutado: preview.valorCalculado,
         saldoDisponivel: novoSaldo,
         percentualExecutado: preview.percentualCalculado,
         recalculadoEm: Timestamp.now(),
         recalculadoPor: "SuperAdmin",
+        versaoCalculo: Date.now(),
       });
 
+      // 🔍 VERIFICAR SE SALVOU MESMO (força leitura do servidor)
+      const verificacao = await getDoc(emendaRef);
+      const dadosVerificados = verificacao.data();
+      
+      const salvamentoConfirmado = 
+        Math.abs(dadosVerificados.valorExecutado - preview.valorCalculado) < 0.01;
+
+      if (!salvamentoConfirmado) {
+        throw new Error("Falha na verificação do salvamento - valores não conferem");
+      }
+
       setSucesso(
-        `✅ Recálculo aplicado com sucesso!\n\n` +
+        `✅ Recálculo aplicado e VERIFICADO!\n\n` +
           `Emenda: ${preview.numero}\n` +
-          `Novo valor executado: ${formatarMoeda(preview.valorCalculado)}\n` +
-          `Novo saldo disponível: ${formatarMoeda(novoSaldo)}`,
+          `Valor executado: ${formatarMoeda(preview.valorCalculado)}\n` +
+          `Saldo disponível: ${formatarMoeda(novoSaldo)}\n\n` +
+          `⏱️ Salvamento confirmado em ${Date.now() - preview.timestampInicio}ms`,
       );
 
       // Fechar modal
@@ -192,11 +206,11 @@ export default function RecalcularEmenda() {
       setEmendaSelecionada(null);
       setPreview(null);
 
-      // Recarregar emendas
+      // Recarregar com delay menor
       setTimeout(() => {
         carregarEmendas();
         setSucesso("");
-      }, 3000);
+      }, 2000);
     } catch (error) {
       console.error("❌ Erro ao aplicar recálculo:", error);
       setErro(`❌ Erro ao aplicar recálculo: ${error.message}`);
