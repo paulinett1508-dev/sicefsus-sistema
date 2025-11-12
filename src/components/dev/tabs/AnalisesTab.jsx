@@ -1,156 +1,171 @@
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, where, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
 import { formatarMoeda } from '../../../utils/formatters';
 
 function AnalisesTab() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const [metricas, setMetricas] = useState({
+    integridade: {
+      despesasOrfas: 0,
+      emendasSemDespesas: 0,
+      camposObrigatoriosFaltando: 0,
+      inconsistenciasFinanceiras: 0,
+    },
     performance: {
-      totalEmendas: 0,
-      totalDespesas: 0,
-      valorTotalEmendas: 0,
-      valorTotalExecutado: 0,
-      taxaExecucao: 0,
+      totalDocumentos: 0,
+      storageEstimado: '0 KB',
+      queriesLentas: [],
+      tempoMedioResposta: 0,
     },
-    atividade: {
-      loginsHoje: 0,
-      usuariosAtivos7d: 0,
-      emendasCriadas30d: 0,
-      despesasExecutadas30d: 0,
+    seguranca: {
+      tentativasAcessoNegado: 0,
+      alteracoesCriticas24h: 0,
+      usuariosElevados: 0,
+      logsErro: [],
     },
-    topMunicipios: [],
-    topUsuarios: [],
-    execucaoPorMes: [],
+    estrutura: {
+      documentosMalformados: [],
+      tiposInconsistentes: [],
+      indicesFaltando: [],
+    },
   });
 
   useEffect(() => {
-    carregarAnalises();
+    analisarSistema();
   }, []);
 
-  const carregarAnalises = async () => {
+  const analisarSistema = async () => {
     setLoading(true);
+    const inicio = performance.now();
+
     try {
-      // 1️⃣ Dados de Performance
-      const [emendasSnap, despesasSnap] = await Promise.all([
+      // 1️⃣ INTEGRIDADE DE DADOS
+      const [emendasSnap, despesasSnap, usuariosSnap, logsSnap] = await Promise.all([
         getDocs(collection(db, 'emendas')),
         getDocs(collection(db, 'despesas')),
+        getDocs(collection(db, 'usuarios')),
+        getDocs(query(collection(db, 'audit_logs'), orderBy('timestamp', 'desc'), limit(100))),
       ]);
 
       const emendas = emendasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const despesas = despesasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const usuarios = usuariosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const logs = logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      const valorTotalEmendas = emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
-      const valorTotalExecutado = emendas.reduce((sum, e) => sum + (e.valorExecutado || 0), 0);
-      const taxaExecucao = valorTotalEmendas > 0 
-        ? (valorTotalExecutado / valorTotalEmendas) * 100 
-        : 0;
+      // 🔍 Despesas órfãs (sem emenda vinculada)
+      const emendasIds = new Set(emendas.map(e => e.id));
+      const despesasOrfas = despesas.filter(d => !emendasIds.has(d.emendaId)).length;
 
-      // 2️⃣ Atividade Recente
+      // 🔍 Emendas sem despesas
+      const despesasPorEmenda = despesas.reduce((acc, d) => {
+        acc[d.emendaId] = (acc[d.emendaId] || 0) + 1;
+        return acc;
+      }, {});
+      const emendasSemDespesas = emendas.filter(e => !despesasPorEmenda[e.id]).length;
+
+      // 🔍 Campos obrigatórios faltando
+      const camposFaltando = emendas.filter(e => 
+        !e.numeroEmenda || !e.municipio || !e.uf || !e.valorTotal
+      ).length + despesas.filter(d => 
+        !d.descricao || !d.valor || !d.emendaId
+      ).length;
+
+      // 🔍 Inconsistências financeiras
+      const inconsistenciasFinanceiras = emendas.filter(e => {
+        const valorExecutado = e.valorExecutado || 0;
+        const valorTotal = e.valorTotal || 0;
+        return valorExecutado > valorTotal || valorExecutado < 0;
+      }).length;
+
+      // 2️⃣ PERFORMANCE
+      const totalDocumentos = emendas.length + despesas.length + usuarios.length + logs.length;
+      const storageEstimado = ((JSON.stringify([...emendas, ...despesas]).length) / 1024).toFixed(2);
+
+      const fim = performance.now();
+      const tempoMedioResposta = ((fim - inicio) / 1000).toFixed(2);
+
+      // 3️⃣ SEGURANÇA
       const agora = new Date();
       const umDiaAtras = new Date(agora - 24 * 60 * 60 * 1000);
-      const seteDiasAtras = new Date(agora - 7 * 24 * 60 * 60 * 1000);
-      const trintaDiasAtras = new Date(agora - 30 * 24 * 60 * 60 * 1000);
 
-      const usuariosSnap = await getDocs(collection(db, 'usuarios'));
-      const usuarios = usuariosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      const loginsHoje = usuarios.filter(u => {
-        const ultimoAcesso = u.ultimoAcesso?.toDate?.() || new Date(0);
-        return ultimoAcesso > umDiaAtras;
+      const alteracoesCriticas24h = logs.filter(log => {
+        const logDate = log.timestamp?.toDate?.() || new Date(0);
+        return logDate > umDiaAtras && (
+          log.action?.includes('DELETE') || 
+          log.action?.includes('UPDATE_USER')
+        );
       }).length;
 
-      const usuariosAtivos7d = usuarios.filter(u => {
-        const ultimoAcesso = u.ultimoAcesso?.toDate?.() || new Date(0);
-        return ultimoAcesso > seteDiasAtras;
-      }).length;
+      const tentativasAcessoNegado = logs.filter(log => 
+        log.success === false
+      ).length;
 
-      const emendasCriadas30d = emendas.filter(e => {
-        const dataCriacao = e.dataCriacao?.toDate?.() || new Date(0);
-        return dataCriacao > trintaDiasAtras;
-      }).length;
+      const usuariosElevados = usuarios.filter(u => 
+        u.tipo === 'admin' || u.superAdmin === true
+      ).length;
 
-      const despesasExecutadas30d = despesas.filter(d => {
-        const dataExecucao = d.dataExecucao?.toDate?.();
-        return dataExecucao && dataExecucao > trintaDiasAtras;
-      }).length;
+      const logsErro = logs
+        .filter(log => log.success === false)
+        .slice(0, 5)
+        .map(log => ({
+          acao: log.action,
+          usuario: log.userEmail,
+          erro: log.errorMessage,
+          timestamp: log.timestamp?.toDate?.()?.toLocaleString('pt-BR') || 'N/A',
+        }));
 
-      // 3️⃣ Top Municípios por Execução
-      const execucaoPorMunicipio = {};
-      emendas.forEach(emenda => {
-        const municipio = emenda.municipio || 'Não informado';
-        if (!execucaoPorMunicipio[municipio]) {
-          execucaoPorMunicipio[municipio] = {
-            municipio,
-            totalEmendas: 0,
-            valorExecutado: 0,
-          };
+      // 4️⃣ ESTRUTURA
+      const documentosMalformados = [];
+      
+      emendas.forEach(e => {
+        if (typeof e.valorTotal !== 'number' && e.valorTotal) {
+          documentosMalformados.push({
+            tipo: 'emenda',
+            id: e.id,
+            campo: 'valorTotal',
+            problema: `Tipo inválido: ${typeof e.valorTotal}`,
+          });
         }
-        execucaoPorMunicipio[municipio].totalEmendas++;
-        execucaoPorMunicipio[municipio].valorExecutado += emenda.valorExecutado || 0;
       });
 
-      const topMunicipios = Object.values(execucaoPorMunicipio)
-        .sort((a, b) => b.valorExecutado - a.valorExecutado)
-        .slice(0, 5);
-
-      // 4️⃣ Top Usuários por Atividade
-      const atividadePorUsuario = {};
-      [...emendas, ...despesas].forEach(item => {
-        const usuario = item.criadoPor || 'Sistema';
-        if (!atividadePorUsuario[usuario]) {
-          atividadePorUsuario[usuario] = {
-            usuario,
-            totalAcoes: 0,
-          };
+      despesas.forEach(d => {
+        if (typeof d.valor !== 'number' && d.valor) {
+          documentosMalformados.push({
+            tipo: 'despesa',
+            id: d.id,
+            campo: 'valor',
+            problema: `Tipo inválido: ${typeof d.valor}`,
+          });
         }
-        atividadePorUsuario[usuario].totalAcoes++;
       });
 
-      const topUsuarios = Object.values(atividadePorUsuario)
-        .sort((a, b) => b.totalAcoes - a.totalAcoes)
-        .slice(0, 5);
-
-      // 5️⃣ Execução por Mês (últimos 6 meses)
-      const execucaoPorMes = [];
-      for (let i = 5; i >= 0; i--) {
-        const mesData = new Date();
-        mesData.setMonth(mesData.getMonth() - i);
-        const mesNome = mesData.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-        
-        const despesasDoMes = despesas.filter(d => {
-          const dataExecucao = d.dataExecucao?.toDate?.();
-          if (!dataExecucao) return false;
-          return dataExecucao.getMonth() === mesData.getMonth() &&
-                 dataExecucao.getFullYear() === mesData.getFullYear();
-        });
-
-        const valorMes = despesasDoMes.reduce((sum, d) => sum + (d.valor || 0), 0);
-        execucaoPorMes.push({ mes: mesNome, valor: valorMes, quantidade: despesasDoMes.length });
-      }
-
-      setStats({
+      setMetricas({
+        integridade: {
+          despesasOrfas,
+          emendasSemDespesas,
+          camposObrigatoriosFaltando: camposFaltando,
+          inconsistenciasFinanceiras,
+        },
         performance: {
-          totalEmendas: emendas.length,
-          totalDespesas: despesas.length,
-          valorTotalEmendas,
-          valorTotalExecutado,
-          taxaExecucao,
+          totalDocumentos,
+          storageEstimado: `${storageEstimado} KB`,
+          tempoMedioResposta: `${tempoMedioResposta}s`,
         },
-        atividade: {
-          loginsHoje,
-          usuariosAtivos7d,
-          emendasCriadas30d,
-          despesasExecutadas30d,
+        seguranca: {
+          tentativasAcessoNegado,
+          alteracoesCriticas24h,
+          usuariosElevados,
+          logsErro,
         },
-        topMunicipios,
-        topUsuarios,
-        execucaoPorMes,
+        estrutura: {
+          documentosMalformados,
+        },
       });
 
     } catch (error) {
-      console.error('❌ Erro ao carregar análises:', error);
+      console.error('❌ Erro ao analisar sistema:', error);
     } finally {
       setLoading(false);
     }
@@ -160,7 +175,7 @@ function AnalisesTab() {
     return (
       <div style={{ textAlign: 'center', padding: '60px' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
-        <p>Carregando análises...</p>
+        <p>Analisando integridade do sistema...</p>
       </div>
     );
   }
@@ -168,137 +183,139 @@ function AnalisesTab() {
   return (
     <div className="tab-analises">
       <div className="tab-header">
-        <h2>📈 Análises & Estatísticas do Sistema</h2>
+        <h2>🔧 Análises Técnicas do Sistema</h2>
         <p className="tab-descricao">
-          Análises em tempo real sobre uso, performance e dados do sistema.
+          Métricas de integridade, performance, segurança e estrutura de dados.
         </p>
-        <button onClick={carregarAnalises} className="btn-refresh">
-          🔄 Atualizar Dados
+        <button onClick={analisarSistema} className="btn-refresh">
+          🔄 Atualizar Análises
         </button>
       </div>
 
       <div className="analises-container">
-        {/* Performance Geral */}
+        {/* 1️⃣ INTEGRIDADE DE DADOS */}
         <div className="analise-secao">
-          <h3>📊 Performance do Sistema</h3>
+          <h3>🔍 Integridade de Dados</h3>
+          <div className="analise-cards">
+            <div className={`analise-item ${metricas.integridade.despesasOrfas > 0 ? 'warning' : ''}`}>
+              <span className="analise-label">Despesas Órfãs (sem emenda)</span>
+              <span className="analise-valor">{metricas.integridade.despesasOrfas}</span>
+            </div>
+            <div className={`analise-item ${metricas.integridade.emendasSemDespesas > 10 ? 'warning' : ''}`}>
+              <span className="analise-label">Emendas sem Despesas</span>
+              <span className="analise-valor">{metricas.integridade.emendasSemDespesas}</span>
+            </div>
+            <div className={`analise-item ${metricas.integridade.camposObrigatoriosFaltando > 0 ? 'error' : ''}`}>
+              <span className="analise-label">Campos Obrigatórios Faltando</span>
+              <span className="analise-valor">{metricas.integridade.camposObrigatoriosFaltando}</span>
+            </div>
+            <div className={`analise-item ${metricas.integridade.inconsistenciasFinanceiras > 0 ? 'error' : ''}`}>
+              <span className="analise-label">Inconsistências Financeiras</span>
+              <span className="analise-valor">{metricas.integridade.inconsistenciasFinanceiras}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2️⃣ PERFORMANCE */}
+        <div className="analise-secao">
+          <h3>⚡ Performance & Disponibilidade</h3>
           <div className="analise-cards">
             <div className="analise-item">
-              <span className="analise-label">Total de Emendas</span>
-              <span className="analise-valor">{stats.performance.totalEmendas}</span>
+              <span className="analise-label">Total de Documentos</span>
+              <span className="analise-valor">{metricas.performance.totalDocumentos}</span>
             </div>
             <div className="analise-item">
-              <span className="analise-label">Total de Despesas</span>
-              <span className="analise-valor">{stats.performance.totalDespesas}</span>
+              <span className="analise-label">Storage Estimado</span>
+              <span className="analise-valor">{metricas.performance.storageEstimado}</span>
             </div>
             <div className="analise-item">
-              <span className="analise-label">Valor Total Emendas</span>
-              <span className="analise-valor">{formatarMoeda(stats.performance.valorTotalEmendas)}</span>
-            </div>
-            <div className="analise-item">
-              <span className="analise-label">Valor Executado</span>
-              <span className="analise-valor">{formatarMoeda(stats.performance.valorTotalExecutado)}</span>
-            </div>
-            <div className="analise-item highlight">
-              <span className="analise-label">Taxa de Execução</span>
-              <span className="analise-valor">{stats.performance.taxaExecucao.toFixed(1)}%</span>
+              <span className="analise-label">Tempo de Análise Completa</span>
+              <span className="analise-valor">{metricas.performance.tempoMedioResposta}</span>
             </div>
           </div>
         </div>
 
-        {/* Atividade de Usuários */}
+        {/* 3️⃣ SEGURANÇA */}
         <div className="analise-secao">
-          <h3>👥 Atividade de Usuários</h3>
+          <h3>🔒 Segurança & Auditoria</h3>
           <div className="analise-cards">
-            <div className="analise-item">
-              <span className="analise-label">Logins Hoje (24h)</span>
-              <span className="analise-valor">{stats.atividade.loginsHoje}</span>
+            <div className={`analise-item ${metricas.seguranca.tentativasAcessoNegado > 0 ? 'warning' : ''}`}>
+              <span className="analise-label">Tentativas de Acesso Negado</span>
+              <span className="analise-valor">{metricas.seguranca.tentativasAcessoNegado}</span>
             </div>
             <div className="analise-item">
-              <span className="analise-label">Usuários Ativos (7d)</span>
-              <span className="analise-valor">{stats.atividade.usuariosAtivos7d}</span>
+              <span className="analise-label">Alterações Críticas (24h)</span>
+              <span className="analise-valor">{metricas.seguranca.alteracoesCriticas24h}</span>
             </div>
             <div className="analise-item">
-              <span className="analise-label">Emendas Criadas (30d)</span>
-              <span className="analise-valor">{stats.atividade.emendasCriadas30d}</span>
-            </div>
-            <div className="analise-item">
-              <span className="analise-label">Despesas Executadas (30d)</span>
-              <span className="analise-valor">{stats.atividade.despesasExecutadas30d}</span>
+              <span className="analise-label">Usuários com Permissões Elevadas</span>
+              <span className="analise-valor">{metricas.seguranca.usuariosElevados}</span>
             </div>
           </div>
+
+          {metricas.seguranca.logsErro.length > 0 && (
+            <div className="logs-erro-section">
+              <h4>❌ Últimos Erros Registrados:</h4>
+              <div className="logs-erro-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Ação</th>
+                      <th>Usuário</th>
+                      <th>Erro</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {metricas.seguranca.logsErro.map((log, idx) => (
+                      <tr key={idx}>
+                        <td>{log.timestamp}</td>
+                        <td>{log.acao}</td>
+                        <td>{log.usuario}</td>
+                        <td style={{ color: '#dc3545' }}>{log.erro || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Top Municípios */}
+        {/* 4️⃣ ESTRUTURA */}
         <div className="analise-secao full-width">
-          <h3>🏆 Top 5 Municípios por Execução</h3>
-          <div className="ranking-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Município</th>
-                  <th>Emendas</th>
-                  <th>Valor Executado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.topMunicipios.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item.municipio}</td>
-                    <td>{item.totalEmendas}</td>
-                    <td>{formatarMoeda(item.valorExecutado)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Top Usuários */}
-        <div className="analise-secao full-width">
-          <h3>👤 Top 5 Usuários por Atividade</h3>
-          <div className="ranking-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Usuário</th>
-                  <th>Total de Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.topUsuarios.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item.usuario}</td>
-                    <td>{item.totalAcoes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Execução Mensal */}
-        <div className="analise-secao full-width">
-          <h3>📅 Execução por Mês (Últimos 6 meses)</h3>
-          <div className="grafico-barras">
-            {stats.execucaoPorMes.map((mes, index) => {
-              const maxValor = Math.max(...stats.execucaoPorMes.map(m => m.valor), 1);
-              const altura = (mes.valor / maxValor) * 100;
-              return (
-                <div key={index} className="barra-container">
-                  <div className="barra-info">
-                    <span className="barra-valor">{formatarMoeda(mes.valor)}</span>
-                    <span className="barra-qtd">({mes.quantidade} despesas)</span>
-                  </div>
-                  <div className="barra" style={{ height: `${altura}%` }}></div>
-                  <span className="barra-label">{mes.mes}</span>
-                </div>
-              );
-            })}
-          </div>
+          <h3>🏗️ Estrutura de Dados</h3>
+          {metricas.estrutura.documentosMalformados.length > 0 ? (
+            <div className="docs-malformados">
+              <h4>⚠️ Documentos Malformados ({metricas.estrutura.documentosMalformados.length}):</h4>
+              <div className="malformados-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>ID</th>
+                      <th>Campo</th>
+                      <th>Problema</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {metricas.estrutura.documentosMalformados.slice(0, 10).map((doc, idx) => (
+                      <tr key={idx}>
+                        <td>{doc.tipo}</td>
+                        <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>{doc.id.substring(0, 12)}...</td>
+                        <td><code>{doc.campo}</code></td>
+                        <td style={{ color: '#dc3545' }}>{doc.problema}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="status-ok">
+              ✅ Nenhum documento malformado detectado
+            </div>
+          )}
         </div>
       </div>
 
@@ -372,6 +389,7 @@ function AnalisesTab() {
           padding: 12px 16px;
           background: #f7fafc;
           border-radius: 8px;
+          border-left: 4px solid #cbd5e1;
           transition: all 0.2s;
         }
 
@@ -379,14 +397,14 @@ function AnalisesTab() {
           background: #edf2f7;
         }
 
-        .analise-item.highlight {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
+        .analise-item.warning {
+          border-left-color: #f59e0b;
+          background: #fef3c7;
         }
 
-        .analise-item.highlight .analise-label,
-        .analise-item.highlight .analise-valor {
-          color: white;
+        .analise-item.error {
+          border-left-color: #dc2626;
+          background: #fee2e2;
         }
 
         .analise-label {
@@ -401,87 +419,51 @@ function AnalisesTab() {
           color: #667eea;
         }
 
-        .ranking-table {
-          overflow-x: auto;
+        .logs-erro-section,
+        .docs-malformados {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #e2e8f0;
         }
 
-        .ranking-table table {
+        .logs-erro-section h4,
+        .docs-malformados h4 {
+          margin: 0 0 12px 0;
+          font-size: 14px;
+          color: #4a5568;
+        }
+
+        .logs-erro-table table,
+        .malformados-table table {
           width: 100%;
           border-collapse: collapse;
         }
 
-        .ranking-table th {
+        .logs-erro-table th,
+        .malformados-table th {
           background: #f7fafc;
           padding: 12px;
           text-align: left;
           font-weight: 600;
           color: #4a5568;
           border-bottom: 2px solid #e2e8f0;
+          font-size: 12px;
         }
 
-        .ranking-table td {
+        .logs-erro-table td,
+        .malformados-table td {
           padding: 12px;
           border-bottom: 1px solid #e2e8f0;
           color: #2d3748;
-        }
-
-        .ranking-table tr:hover {
-          background: #f7fafc;
-        }
-
-        .grafico-barras {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-around;
-          height: 300px;
-          padding: 20px 0;
-          gap: 12px;
-        }
-
-        .barra-container {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .barra-info {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-height: 50px;
-        }
-
-        .barra-valor {
           font-size: 13px;
-          font-weight: 700;
-          color: #667eea;
         }
 
-        .barra-qtd {
-          font-size: 11px;
-          color: #718096;
-        }
-
-        .barra {
-          width: 100%;
-          max-width: 80px;
-          background: linear-gradient(to top, #667eea, #764ba2);
-          border-radius: 8px 8px 0 0;
-          min-height: 4px;
-          transition: all 0.3s ease;
-        }
-
-        .barra:hover {
-          opacity: 0.8;
-        }
-
-        .barra-label {
-          font-size: 12px;
-          color: #4a5568;
+        .status-ok {
+          padding: 20px;
+          text-align: center;
+          color: #10b981;
+          font-size: 16px;
           font-weight: 600;
-          text-transform: uppercase;
         }
       `}
       </style>
