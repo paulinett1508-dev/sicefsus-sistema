@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
@@ -16,7 +15,7 @@ function UsuariosTab() {
     loading: true,
   });
   const [usuarios, setUsuarios] = useState([]);
-  const [cardExpandido, setCardExpandido] = useState(null);
+  const [expandedCards, setExpandedCards] = useState({});
 
   useEffect(() => {
     carregarEstatisticas();
@@ -62,14 +61,21 @@ function UsuariosTab() {
     }
   };
 
+  const toggleCard = (userId) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [userId]: !prev[userId]
+    }));
+  };
+
   const renderCard = (tipo, icone, valor, label) => {
     const usuariosFiltrados = getUsuariosPorTipo(tipo);
-    const isExpandido = cardExpandido === tipo;
+    const isExpandido = expandedCards[tipo];
 
     return (
       <div style={styles.statCard}>
         <div 
-          onClick={() => setCardExpandido(isExpandido ? null : tipo)}
+          onClick={() => toggleCard(tipo)}
           style={{ cursor: 'pointer' }}
         >
           <div style={styles.statIcon}>{icone}</div>
