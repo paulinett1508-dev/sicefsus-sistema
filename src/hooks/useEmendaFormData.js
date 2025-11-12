@@ -82,7 +82,7 @@ export const useEmendaFormData = () => {
       .replace(/\u2009/g, " ") // Remove thin spaces
       .replace(/\uFEFF/g, ""); // Remove BOM (Byte Order Mark)
   }, []);
-  
+
   // 🚨 FUNÇÃO SEGURA PARA CNPJ - NÃO REMOVE FORMATAÇÃO
   const cleanCNPJ = useCallback((value) => {
     if (!value) return "";
@@ -666,7 +666,7 @@ export const useEmendaFormData = () => {
 
         // 🚨 CORREÇÃO CRÍTICA: Sincronizar beneficiario e cnpjBeneficiario
         const cnpjBeneficiarioFinal = formData.beneficiario || formData.cnpjBeneficiario || "";
-        
+
         const dadosParaSalvar = {
           numero: cleanField(formData.numero),
           autor: cleanField(formData.autor),
@@ -674,7 +674,7 @@ export const useEmendaFormData = () => {
           municipio: cleanField(formData.municipio),
           uf: cleanField(formData.uf),
           valor: valorNumerico,
-          valorRecurso: valorNumerico,
+          valorRecurso: valorNumerico, // Este campo será convertido para número
           programa: cleanField(formData.programa),
           beneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
           cnpjBeneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
@@ -708,39 +708,45 @@ export const useEmendaFormData = () => {
           cnpjBeneficiario: dadosParaSalvar.cnpjBeneficiario,
           municipio: dadosParaSalvar.municipio,
           uf: dadosParaSalvar.uf,
-          valor: dadosParaSalvar.valor,
           valorRecurso: dadosParaSalvar.valorRecurso,
         });
-        
-        // 🚨 DIAGNÓSTICO CRÍTICO - ANTES DE cleanField()
+
+        // 🔬 DIAGNÓSTICO DO CNPJ
         console.log("🔬 DIAGNÓSTICO PRÉ-LIMPEZA:", {
           beneficiario_RAW: formData.beneficiario,
           cnpjBeneficiario_RAW: formData.cnpjBeneficiario,
           beneficiario_TYPE: typeof formData.beneficiario,
           cnpjBeneficiario_TYPE: typeof formData.cnpjBeneficiario,
         });
-        
-        // 🚨 DIAGNÓSTICO CRÍTICO - DEPOIS de cleanField()
+
+        // ✅ LIMPAR FORMATAÇÃO DO CNPJ (manter apenas dígitos)
+        const cnpjLimpo = dadosParaSalvar.cnpjBeneficiario?.replace(/\D/g, "") || "";
+        dadosParaSalvar.cnpjBeneficiario = cnpjLimpo;
+        dadosParaSalvar.beneficiario = cnpjLimpo; // Garantir que ambos fiquem limpos
+
         console.log("🔬 DIAGNÓSTICO PÓS-LIMPEZA:", {
-          beneficiario_CLEAN: cleanField(formData.beneficiario),
-          cnpjBeneficiario_CLEAN: cleanField(formData.cnpjBeneficiario),
-          beneficiario_LENGTH: cleanField(formData.beneficiario)?.length || 0,
-          cnpjBeneficiario_LENGTH: cleanField(formData.cnpjBeneficiario)?.length || 0,
+          beneficiario_CLEAN: dadosParaSalvar.beneficiario,
+          cnpjBeneficiario_CLEAN: dadosParaSalvar.cnpjBeneficiario,
+          beneficiario_LENGTH: dadosParaSalvar.beneficiario?.length,
+          cnpjBeneficiario_LENGTH: dadosParaSalvar.cnpjBeneficiario?.length,
         });
-        
-        // 🚨 VALIDAÇÃO DE CAMPOS VAZIOS CRÍTICOS
-        const camposVaziosCriticos = [];
-        if (!dadosParaSalvar.beneficiario) camposVaziosCriticos.push("beneficiario");
-        if (!dadosParaSalvar.cnpjBeneficiario) camposVaziosCriticos.push("cnpjBeneficiario");
-        if (!dadosParaSalvar.banco) camposVaziosCriticos.push("banco");
-        if (!dadosParaSalvar.agencia) camposVaziosCriticos.push("agencia");
-        if (!dadosParaSalvar.conta) camposVaziosCriticos.push("conta");
-        
-        if (camposVaziosCriticos.length > 0) {
-          console.error("🚨 CAMPOS OBRIGATÓRIOS VAZIOS:", camposVaziosCriticos);
+
+        // ✅ CONVERTER valorRecurso PARA NUMBER
+        if (typeof dadosParaSalvar.valorRecurso === 'string') {
+          const valorNumericoRecurso = parseFloat(
+            dadosParaSalvar.valorRecurso
+              .replace(/[R$\s]/g, '')
+              .replace(/\./g, '')
+              .replace(',', '.')
+          ) || 0;
+          dadosParaSalvar.valorRecurso = valorNumericoRecurso;
+          console.log("💰 valorRecurso convertido:", {
+            string: dadosParaSalvar.valorRecurso,
+            number: valorNumericoRecurso
+          });
         }
 
-        // SALVAR NO FIREBASE
+        // ✅ SALVAR NO FIRESTORE
         let emendaId = id; // Para edição
 
         if (isEdicao) {
@@ -915,6 +921,7 @@ export const useEmendaFormData = () => {
       id,
       user,
       navigate,
+      cleanCNPJ
     ],
   );
 
