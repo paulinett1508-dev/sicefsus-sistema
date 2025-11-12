@@ -420,13 +420,6 @@ export const useEmendaFormData = () => {
     }));
   }, []);
 
-  const toggleSection = useCallback((section) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  }, []);
-
   // 🔍 BUSCAR DADOS DO FORNECEDOR (CNPJ)
   const buscarDadosFornecedor = useCallback(
     async (cnpj) => {
