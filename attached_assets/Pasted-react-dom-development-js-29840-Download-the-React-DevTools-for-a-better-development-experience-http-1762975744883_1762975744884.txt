@@ -1,0 +1,117 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+firebaseConfig.js:31 🔥 Firebase Environment: Object
+firebaseConfig.js:52 🔥 Firebase Config Status: Object
+firebaseConfig.js:69 ✅ Firebase inicializado com sucesso
+auditService.js:23 🔒 AuditService inicializado
+App.jsx:37 🔥 PROD Firebase Check: Object
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: Object
+DisableConsole.jsx:172 👤 Usuário configurado: Object
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+DisableConsole.jsx:172 👤 UserContext atualizado: Object
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: Object
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: Object
+DisableConsole.jsx:172 🔓 ADMIN: Carregando TODOS os dados do sistema
+DisableConsole.jsx:172 ✅ ADMIN carregou: 22 emendas, 92 despesas
+DisableConsole.jsx:172 🔍 Tentativa de navegação para Emendas: Object
+DisableConsole.jsx:172 ✅ Navegação normal para Emendas
+DisableConsole.jsx:172 📋 Emendas.jsx v2.3 - Dados do usuário: Object
+DisableConsole.jsx:172 📊 Estatísticas calculadas: Object
+DisableConsole.jsx:172 📊 Carregando emendas e despesas...
+DisableConsole.jsx:172 👤 Usuário: Object
+DisableConsole.jsx:172 🔓 Admin - carregando TODAS as emendas
+DisableConsole.jsx:172 ✅ Emendas encontradas: 22
+DisableConsole.jsx:172 ✅ Despesas encontradas: 92
+DisableConsole.jsx:172 ✅ Emenda 42980003 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 42980003 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 44190002 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 44190002 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 3045000212 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 3045000212 (Belém/AL): Object
+DisableConsole.jsx:172 ✅ Emenda 30460003 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 30460003 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 43590002 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 43590002 (Sucupira do Riachão/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 43210001 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 43210001 (Antônio Almeida/PI): Object
+DisableConsole.jsx:172 ✅ Emenda 50410001 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 50410001 (Antônio Almeida/PI): Object
+DisableConsole.jsx:172 ✅ Emenda 2020022 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 2020022 (Águas Lindas de Goiás/GO): Object
+DisableConsole.jsx:172 ✅ Emenda 40840005 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 40840005 (Sucupira do Riachão/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 304612542 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 304612542 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 37580004 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 37580004 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 304510002 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 304510002 (Anori/AM): Object
+DisableConsole.jsx:172 ✅ Emenda 304512000 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 304512000 (Ferreira Gomes/AP): Object
+DisableConsole.jsx:172 ✅ Emenda 304500020 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 304500020 (Autazes/AM): Object
+DisableConsole.jsx:172 ✅ Emenda Programa valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda Programa (Antônio Almeida/PI): Object
+DisableConsole.jsx:172 💰 Emenda 40840005 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 41830007 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 41830007 (Antônio Almeida/PI): Object
+DisableConsole.jsx:172 ✅ Emenda 44190001 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 44190001 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ Emenda 12460003 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 12460003 (Antônio Almeida/PI): Object
+DisableConsole.jsx:172 ✅ Emenda 30460001 valorTotal OK: Object
+DisableConsole.jsx:172 💰 Emenda 30460001 (Passagem Franca/MA): Object
+DisableConsole.jsx:172 ✅ 22 emendas processadas para usuário admin
+DisableConsole.jsx:172 🔍 Aplicando filtros: 22
+DisableConsole.jsx:172 ➕ Criando nova emenda
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: Object
+DisableConsole.jsx:163  🚨 Erro global capturado: TypeError: onChange is not a function
+    at handleChange (Identificacao.jsx:91:5)
+    at handleUfChange (Identificacao.jsx:101:5)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:4291:25)
+    at executeDispatch (react-dom.development.js:9041:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:9073:7)
+    at processDispatchQueue (react-dom.development.js:9086:5)
+    at dispatchEventsForPlugins (react-dom.development.js:9097:3)
+(anônimo) @ DisableConsole.jsx:163
+Identificacao.jsx:91  Uncaught TypeError: onChange is not a function
+    at handleChange (Identificacao.jsx:91:5)
+    at handleUfChange (Identificacao.jsx:101:5)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:4291:25)
+    at executeDispatch (react-dom.development.js:9041:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:9073:7)
+    at processDispatchQueue (react-dom.development.js:9086:5)
+    at dispatchEventsForPlugins (react-dom.development.js:9097:3)
+DisableConsole.jsx:163  🚨 Erro global capturado: TypeError: onChange is not a function
+    at handleChange (Identificacao.jsx:91:5)
+    at handleUfChange (Identificacao.jsx:101:5)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:4291:25)
+    at executeDispatch (react-dom.development.js:9041:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:9073:7)
+    at processDispatchQueue (react-dom.development.js:9086:5)
+    at dispatchEventsForPlugins (react-dom.development.js:9097:3)
+(anônimo) @ DisableConsole.jsx:163
+react-dom.development.js:4312  Uncaught TypeError: onChange is not a function
+    at handleChange (Identificacao.jsx:91:5)
+    at handleUfChange (Identificacao.jsx:101:5)
+    at HTMLUnknownElement.callCallback2 (react-dom.development.js:4164:14)
+    at Object.invokeGuardedCallbackDev (react-dom.development.js:4213:16)
+    at invokeGuardedCallback (react-dom.development.js:4277:31)
+    at invokeGuardedCallbackAndCatchFirstError (react-dom.development.js:4291:25)
+    at executeDispatch (react-dom.development.js:9041:3)
+    at processDispatchQueueItemsInOrder (react-dom.development.js:9073:7)
+    at processDispatchQueue (react-dom.development.js:9086:5)
+    at dispatchEventsForPlugins (react-dom.development.js:9097:3)
