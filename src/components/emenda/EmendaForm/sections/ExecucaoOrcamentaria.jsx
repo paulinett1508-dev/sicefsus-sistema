@@ -242,24 +242,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       setLoading(true);
       console.log('📥 Carregando despesas para emenda:', emendaId);
 
-      // ✅ PARA GESTOR: Adicionar filtros geográficos obrigatórios
-      const despesasQueryConstraints = [
-        where("emendaId", "==", emendaId)
-      ];
-
-      // Se for gestor/operador, adicionar filtros de município/UF
-      if (usuario?.tipo === 'gestor' || usuario?.tipo === 'operador') {
-        if (formData?.municipio) {
-          despesasQueryConstraints.push(where("municipio", "==", formData.municipio));
-        }
-        if (formData?.uf) {
-          despesasQueryConstraints.push(where("uf", "==", formData.uf));
-        }
-      }
-
+      // ✅ CORREÇÃO CRÍTICA: Filtrar APENAS por emendaId
+      // Despesas planejadas não têm município/UF, então não podemos usar esses filtros
       const despesasQuery = query(
         collection(db, "despesas"),
-        ...despesasQueryConstraints
+        where("emendaId", "==", emendaId)
       );
 
       const despesasSnapshot = await getDocs(despesasQuery);
@@ -268,18 +255,21 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         ...doc.data()
       }));
 
-      console.log(`✅ ${despesasData.length} despesas carregadas`);
+      console.log(`✅ ${despesasData.length} despesas carregadas para emenda ${emendaId}`);
       setDespesas(despesasData);
     } catch (error) {
       console.error('❌ Erro ao carregar despesas:', error);
 
       // ✅ TRATAMENTO ESPECÍFICO PARA ERRO DE PERMISSÃO
       if (error.code === 'permission-denied') {
-        console.warn('🔒 Erro de permissão - Gestor precisa de filtros geográficos');
-        setDespesas([]); // Mostrar vazio ao invés de erro
-      } else {
-        setDespesas([]);
+        console.warn('🔒 Erro de permissão ao carregar despesas');
+        setToast({
+          show: true,
+          message: "Sem permissão para carregar despesas",
+          type: "error",
+        });
       }
+      setDespesas([]);
     } finally {
       setLoading(false);
     }
