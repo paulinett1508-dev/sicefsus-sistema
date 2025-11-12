@@ -19,7 +19,7 @@ import styles from "./FerramentasDev.module.css";
 const FerramentasDev = () => {
   const { usuario: currentUser } = useUser(); // Renamed from 'usuario' to 'currentUser' for clarity
   const navigate = useNavigate();
-  const [abaAtiva, setAbaAtiva] = useState("recalculo");
+  const [abaAtiva, setAbaAtiva] = useState(null);
 
   // 🎯 Verificar se é SuperAdmin
   const isSuperAdmin = React.useMemo(() => {
@@ -148,7 +148,59 @@ const FerramentasDev = () => {
 
       {/* Conteúdo da Aba Ativa */}
       <div className={styles.content}>
-        {ComponenteAtivo ? (
+        {!abaAtiva ? (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px',
+            padding: '40px',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '64px', marginBottom: '24px' }}>🔧</div>
+            <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>
+              Ferramentas de Desenvolvimento
+            </h2>
+            <p style={{ fontSize: '16px', color: '#64748b', maxWidth: '600px', marginBottom: '32px' }}>
+              Selecione uma das ferramentas acima para começar. Estas ferramentas permitem realizar diagnósticos, 
+              recálculos, backups e outras operações avançadas no sistema.
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '16px',
+              maxWidth: '800px',
+              width: '100%'
+            }}>
+              {abas.slice(0, 6).map((aba) => (
+                <div
+                  key={aba.id}
+                  style={{
+                    padding: '20px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onClick={() => setAbaAtiva(aba.id)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#eff6ff';
+                    e.currentTarget.style.borderColor = '#3b82f6';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#f8fafc';
+                    e.currentTarget.style.borderColor = '#e2e8f0';
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{aba.icone}</div>
+                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#475569' }}>{aba.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : ComponenteAtivo ? (
           <ComponenteAtivo />
         ) : (
           <div>Aba não encontrada</div>
