@@ -6,12 +6,11 @@ const UsersSection = ({
   users,
   userFilter,
   setUserFilter,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  onNovoUsuario,
+  handleNovoUsuario,
+  handleEditarUsuario,
+  handleDelete,
+  handleToggleStatus,
   loading,
-  currentUserType,
 }) => {
   return (
     <div style={styles.tableContainer}>
@@ -20,16 +19,14 @@ const UsersSection = ({
         <h3 style={styles.sectionTitle}>
           📋 Lista de Usuários ({users?.length || 0})
         </h3>
-        {currentUserType === "admin" && onNovoUsuario && (
-          <button
-            onClick={onNovoUsuario}
-            style={styles.newUserButton}
-            onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
-            onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
-          >
-            ➕ Novo Usuário
-          </button>
-        )}
+        <button
+          onClick={handleNovoUsuario}
+          style={styles.newUserButton}
+          onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
+          onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
+        >
+          ➕ Novo Usuário
+        </button>
       </div>
 
       {/* Campo de busca */}
@@ -51,19 +48,9 @@ const UsersSection = ({
       ) : (
         <UsersTable
           users={users}
-          onEdit={onEdit}
-          onDelete={(usuario) => {
-            console.log(
-              "🔗 UsersSection: onDelete chamado para:",
-              usuario.nome,
-            );
-            console.log(
-              "🔗 Função onDelete existe:",
-              typeof onDelete === "function",
-            );
-            onDelete(usuario);
-          }}
-          onToggleStatus={onToggleStatus}
+          onEdit={handleEditarUsuario}
+          onDelete={handleDelete}
+          onToggleStatus={handleToggleStatus}
           loading={loading}
         />
       )}
