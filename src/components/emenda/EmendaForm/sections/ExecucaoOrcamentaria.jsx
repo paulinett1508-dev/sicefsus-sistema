@@ -4,6 +4,7 @@
 // ✅ TODAS AS LÓGICAS ANTERIORES PRESERVADAS 100%
 
 import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   collection,
