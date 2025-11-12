@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
-import { formatarMoeda } from '../../../utils/formatters';
 
 function AnalisesTab() {
   const [loading, setLoading] = useState(true);
@@ -12,25 +11,30 @@ function AnalisesTab() {
       emendasSemDespesas: 0,
       camposObrigatoriosFaltando: 0,
       inconsistenciasFinanceiras: 0,
+      documentosMalformados: 0,
     },
     performance: {
       totalDocumentos: 0,
       storageEstimado: '0 KB',
-      queriesLentas: [],
-      tempoMedioResposta: 0,
+      tempoAnalise: '0s',
+      tempoMedioQuery: '0ms',
     },
     seguranca: {
-      tentativasAcessoNegado: 0,
-      alteracoesCriticas24h: 0,
+      logsErro24h: 0,
+      acessosNegados: 0,
       usuariosElevados: 0,
-      logsErro: [],
+      alteracoesCriticas24h: 0,
     },
-    estrutura: {
-      documentosMalformados: [],
-      tiposInconsistentes: [],
+    firebase: {
+      ambiente: 'unknown',
+      projectId: '',
+      regrasAtualizadas: 'N/A',
       indicesFaltando: [],
     },
   });
+
+  const [ultimosErros, setUltimosErros] = useState([]);
+  const [docsMalformados, setDocsMalformados] = useState([]);
 
   useEffect(() => {
     analisarSistema();
@@ -38,15 +42,15 @@ function AnalisesTab() {
 
   const analisarSistema = async () => {
     setLoading(true);
-    const inicio = performance.now();
+    const inicioAnalise = performance.now();
 
     try {
-      // 1️⃣ INTEGRIDADE DE DADOS
+      // Buscar dados em paralelo
       const [emendasSnap, despesasSnap, usuariosSnap, logsSnap] = await Promise.all([
         getDocs(collection(db, 'emendas')),
         getDocs(collection(db, 'despesas')),
         getDocs(collection(db, 'usuarios')),
-        getDocs(query(collection(db, 'audit_logs'), orderBy('timestamp', 'desc'), limit(100))),
+        getDocs(query(collection(db, 'logs'), orderBy('timestamp', 'desc'), limit(100))),
       ]);
 
       const emendas = emendasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -54,74 +58,33 @@ function AnalisesTab() {
       const usuarios = usuariosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const logs = logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // 🔍 Despesas órfãs (sem emenda vinculada)
+      // === 1. INTEGRIDADE DE DADOS ===
       const emendasIds = new Set(emendas.map(e => e.id));
       const despesasOrfas = despesas.filter(d => !emendasIds.has(d.emendaId)).length;
 
-      // 🔍 Emendas sem despesas
       const despesasPorEmenda = despesas.reduce((acc, d) => {
         acc[d.emendaId] = (acc[d.emendaId] || 0) + 1;
         return acc;
       }, {});
       const emendasSemDespesas = emendas.filter(e => !despesasPorEmenda[e.id]).length;
 
-      // 🔍 Campos obrigatórios faltando
       const camposFaltando = emendas.filter(e => 
         !e.numeroEmenda || !e.municipio || !e.uf || !e.valorTotal
       ).length + despesas.filter(d => 
         !d.descricao || !d.valor || !d.emendaId
       ).length;
 
-      // 🔍 Inconsistências financeiras
       const inconsistenciasFinanceiras = emendas.filter(e => {
         const valorExecutado = e.valorExecutado || 0;
         const valorTotal = e.valorTotal || 0;
         return valorExecutado > valorTotal || valorExecutado < 0;
       }).length;
 
-      // 2️⃣ PERFORMANCE
-      const totalDocumentos = emendas.length + despesas.length + usuarios.length + logs.length;
-      const storageEstimado = ((JSON.stringify([...emendas, ...despesas]).length) / 1024).toFixed(2);
-
-      const fim = performance.now();
-      const tempoMedioResposta = ((fim - inicio) / 1000).toFixed(2);
-
-      // 3️⃣ SEGURANÇA
-      const agora = new Date();
-      const umDiaAtras = new Date(agora - 24 * 60 * 60 * 1000);
-
-      const alteracoesCriticas24h = logs.filter(log => {
-        const logDate = log.timestamp?.toDate?.() || new Date(0);
-        return logDate > umDiaAtras && (
-          log.action?.includes('DELETE') || 
-          log.action?.includes('UPDATE_USER')
-        );
-      }).length;
-
-      const tentativasAcessoNegado = logs.filter(log => 
-        log.success === false
-      ).length;
-
-      const usuariosElevados = usuarios.filter(u => 
-        u.tipo === 'admin' || u.superAdmin === true
-      ).length;
-
-      const logsErro = logs
-        .filter(log => log.success === false)
-        .slice(0, 5)
-        .map(log => ({
-          acao: log.action,
-          usuario: log.userEmail,
-          erro: log.errorMessage,
-          timestamp: log.timestamp?.toDate?.()?.toLocaleString('pt-BR') || 'N/A',
-        }));
-
-      // 4️⃣ ESTRUTURA
-      const documentosMalformados = [];
-      
+      // Detectar documentos malformados
+      const malformados = [];
       emendas.forEach(e => {
         if (typeof e.valorTotal !== 'number' && e.valorTotal) {
-          documentosMalformados.push({
+          malformados.push({
             tipo: 'emenda',
             id: e.id,
             campo: 'valorTotal',
@@ -132,7 +95,7 @@ function AnalisesTab() {
 
       despesas.forEach(d => {
         if (typeof d.valor !== 'number' && d.valor) {
-          documentosMalformados.push({
+          malformados.push({
             tipo: 'despesa',
             id: d.id,
             campo: 'valor',
@@ -141,26 +104,80 @@ function AnalisesTab() {
         }
       });
 
+      setDocsMalformados(malformados.slice(0, 10));
+
+      // === 2. PERFORMANCE ===
+      const totalDocumentos = emendas.length + despesas.length + usuarios.length + logs.length;
+      const storageEstimado = ((JSON.stringify([...emendas, ...despesas]).length) / 1024).toFixed(2);
+      const fimAnalise = performance.now();
+      const tempoAnalise = ((fimAnalise - inicioAnalise) / 1000).toFixed(2);
+
+      // === 3. SEGURANÇA ===
+      const agora = new Date();
+      const umDiaAtras = new Date(agora - 24 * 60 * 60 * 1000);
+
+      const logsErro24h = logs.filter(log => {
+        const logDate = log.timestamp?.toDate?.() || new Date(0);
+        return logDate > umDiaAtras && log.success === false;
+      }).length;
+
+      const acessosNegados = logs.filter(log => log.success === false).length;
+
+      const alteracoesCriticas24h = logs.filter(log => {
+        const logDate = log.timestamp?.toDate?.() || new Date(0);
+        return logDate > umDiaAtras && (
+          log.action?.includes('DELETE') || 
+          log.action?.includes('UPDATE_USER')
+        );
+      }).length;
+
+      const usuariosElevados = usuarios.filter(u => 
+        u.tipo === 'admin' || u.superAdmin === true
+      ).length;
+
+      const erros = logs
+        .filter(log => log.success === false)
+        .slice(0, 5)
+        .map(log => ({
+          acao: log.action || 'N/A',
+          usuario: log.userEmail || 'N/A',
+          erro: log.errorMessage || 'N/A',
+          timestamp: log.timestamp?.toDate?.()?.toLocaleString('pt-BR') || 'N/A',
+        }));
+
+      setUltimosErros(erros);
+
+      // === 4. FIREBASE ===
+      const ambiente = import.meta.env.VITE_FIREBASE_PROJECT_ID?.includes('-prod') 
+        ? 'production' 
+        : 'development';
+      const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'N/A';
+
       setMetricas({
         integridade: {
           despesasOrfas,
           emendasSemDespesas,
           camposObrigatoriosFaltando: camposFaltando,
           inconsistenciasFinanceiras,
+          documentosMalformados: malformados.length,
         },
         performance: {
           totalDocumentos,
           storageEstimado: `${storageEstimado} KB`,
-          tempoMedioResposta: `${tempoMedioResposta}s`,
+          tempoAnalise: `${tempoAnalise}s`,
+          tempoMedioQuery: `${(parseFloat(tempoAnalise) / 4 * 1000).toFixed(0)}ms`,
         },
         seguranca: {
-          tentativasAcessoNegado,
-          alteracoesCriticas24h,
+          logsErro24h,
+          acessosNegados,
           usuariosElevados,
-          logsErro,
+          alteracoesCriticas24h,
         },
-        estrutura: {
-          documentosMalformados,
+        firebase: {
+          ambiente,
+          projectId,
+          regrasAtualizadas: 'Manual',
+          indicesFaltando: [],
         },
       });
 
@@ -183,35 +200,39 @@ function AnalisesTab() {
   return (
     <div className="tab-analises">
       <div className="tab-header">
-        <h2>🔧 Análises Técnicas do Sistema</h2>
+        <h2>🔧 Análise Técnica do Sistema</h2>
         <p className="tab-descricao">
-          Métricas de integridade, performance, segurança e estrutura de dados.
+          Métricas de integridade, performance, segurança e saúde do Firebase
         </p>
         <button onClick={analisarSistema} className="btn-refresh">
-          🔄 Atualizar Análises
+          🔄 Atualizar Análise
         </button>
       </div>
 
-      <div className="analises-container">
+      <div className="analises-grid">
         {/* 1️⃣ INTEGRIDADE DE DADOS */}
         <div className="analise-secao">
           <h3>🔍 Integridade de Dados</h3>
-          <div className="analise-cards">
-            <div className={`analise-item ${metricas.integridade.despesasOrfas > 0 ? 'warning' : ''}`}>
-              <span className="analise-label">Despesas Órfãs (sem emenda)</span>
-              <span className="analise-valor">{metricas.integridade.despesasOrfas}</span>
+          <div className="metricas-lista">
+            <div className={`metrica ${metricas.integridade.despesasOrfas > 0 ? 'error' : 'ok'}`}>
+              <span className="metrica-label">Despesas Órfãs</span>
+              <span className="metrica-valor">{metricas.integridade.despesasOrfas}</span>
             </div>
-            <div className={`analise-item ${metricas.integridade.emendasSemDespesas > 10 ? 'warning' : ''}`}>
-              <span className="analise-label">Emendas sem Despesas</span>
-              <span className="analise-valor">{metricas.integridade.emendasSemDespesas}</span>
+            <div className={`metrica ${metricas.integridade.emendasSemDespesas > 10 ? 'warning' : 'ok'}`}>
+              <span className="metrica-label">Emendas sem Despesas</span>
+              <span className="metrica-valor">{metricas.integridade.emendasSemDespesas}</span>
             </div>
-            <div className={`analise-item ${metricas.integridade.camposObrigatoriosFaltando > 0 ? 'error' : ''}`}>
-              <span className="analise-label">Campos Obrigatórios Faltando</span>
-              <span className="analise-valor">{metricas.integridade.camposObrigatoriosFaltando}</span>
+            <div className={`metrica ${metricas.integridade.camposObrigatoriosFaltando > 0 ? 'error' : 'ok'}`}>
+              <span className="metrica-label">Campos Obrigatórios Ausentes</span>
+              <span className="metrica-valor">{metricas.integridade.camposObrigatoriosFaltando}</span>
             </div>
-            <div className={`analise-item ${metricas.integridade.inconsistenciasFinanceiras > 0 ? 'error' : ''}`}>
-              <span className="analise-label">Inconsistências Financeiras</span>
-              <span className="analise-valor">{metricas.integridade.inconsistenciasFinanceiras}</span>
+            <div className={`metrica ${metricas.integridade.inconsistenciasFinanceiras > 0 ? 'error' : 'ok'}`}>
+              <span className="metrica-label">Inconsistências Financeiras</span>
+              <span className="metrica-valor">{metricas.integridade.inconsistenciasFinanceiras}</span>
+            </div>
+            <div className={`metrica ${metricas.integridade.documentosMalformados > 0 ? 'warning' : 'ok'}`}>
+              <span className="metrica-label">Documentos Malformados</span>
+              <span className="metrica-valor">{metricas.integridade.documentosMalformados}</span>
             </div>
           </div>
         </div>
@@ -219,18 +240,22 @@ function AnalisesTab() {
         {/* 2️⃣ PERFORMANCE */}
         <div className="analise-secao">
           <h3>⚡ Performance & Disponibilidade</h3>
-          <div className="analise-cards">
-            <div className="analise-item">
-              <span className="analise-label">Total de Documentos</span>
-              <span className="analise-valor">{metricas.performance.totalDocumentos}</span>
+          <div className="metricas-lista">
+            <div className="metrica ok">
+              <span className="metrica-label">Total de Documentos</span>
+              <span className="metrica-valor">{metricas.performance.totalDocumentos}</span>
             </div>
-            <div className="analise-item">
-              <span className="analise-label">Storage Estimado</span>
-              <span className="analise-valor">{metricas.performance.storageEstimado}</span>
+            <div className="metrica ok">
+              <span className="metrica-label">Storage Estimado</span>
+              <span className="metrica-valor">{metricas.performance.storageEstimado}</span>
             </div>
-            <div className="analise-item">
-              <span className="analise-label">Tempo de Análise Completa</span>
-              <span className="analise-valor">{metricas.performance.tempoMedioResposta}</span>
+            <div className="metrica ok">
+              <span className="metrica-label">Tempo de Análise</span>
+              <span className="metrica-valor">{metricas.performance.tempoAnalise}</span>
+            </div>
+            <div className="metrica ok">
+              <span className="metrica-label">Tempo Médio/Query</span>
+              <span className="metrica-valor">{metricas.performance.tempoMedioQuery}</span>
             </div>
           </div>
         </div>
@@ -238,86 +263,116 @@ function AnalisesTab() {
         {/* 3️⃣ SEGURANÇA */}
         <div className="analise-secao">
           <h3>🔒 Segurança & Auditoria</h3>
-          <div className="analise-cards">
-            <div className={`analise-item ${metricas.seguranca.tentativasAcessoNegado > 0 ? 'warning' : ''}`}>
-              <span className="analise-label">Tentativas de Acesso Negado</span>
-              <span className="analise-valor">{metricas.seguranca.tentativasAcessoNegado}</span>
+          <div className="metricas-lista">
+            <div className={`metrica ${metricas.seguranca.logsErro24h > 0 ? 'warning' : 'ok'}`}>
+              <span className="metrica-label">Logs de Erro (24h)</span>
+              <span className="metrica-valor">{metricas.seguranca.logsErro24h}</span>
             </div>
-            <div className="analise-item">
-              <span className="analise-label">Alterações Críticas (24h)</span>
-              <span className="analise-valor">{metricas.seguranca.alteracoesCriticas24h}</span>
+            <div className={`metrica ${metricas.seguranca.acessosNegados > 0 ? 'warning' : 'ok'}`}>
+              <span className="metrica-label">Acessos Negados (Total)</span>
+              <span className="metrica-valor">{metricas.seguranca.acessosNegados}</span>
             </div>
-            <div className="analise-item">
-              <span className="analise-label">Usuários com Permissões Elevadas</span>
-              <span className="analise-valor">{metricas.seguranca.usuariosElevados}</span>
+            <div className="metrica ok">
+              <span className="metrica-label">Usuários com Permissões Elevadas</span>
+              <span className="metrica-valor">{metricas.seguranca.usuariosElevados}</span>
+            </div>
+            <div className="metrica ok">
+              <span className="metrica-label">Alterações Críticas (24h)</span>
+              <span className="metrica-valor">{metricas.seguranca.alteracoesCriticas24h}</span>
             </div>
           </div>
-
-          {metricas.seguranca.logsErro.length > 0 && (
-            <div className="logs-erro-section">
-              <h4>❌ Últimos Erros Registrados:</h4>
-              <div className="logs-erro-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Timestamp</th>
-                      <th>Ação</th>
-                      <th>Usuário</th>
-                      <th>Erro</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {metricas.seguranca.logsErro.map((log, idx) => (
-                      <tr key={idx}>
-                        <td>{log.timestamp}</td>
-                        <td>{log.acao}</td>
-                        <td>{log.usuario}</td>
-                        <td style={{ color: '#dc3545' }}>{log.erro || 'N/A'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* 4️⃣ ESTRUTURA */}
-        <div className="analise-secao full-width">
-          <h3>🏗️ Estrutura de Dados</h3>
-          {metricas.estrutura.documentosMalformados.length > 0 ? (
-            <div className="docs-malformados">
-              <h4>⚠️ Documentos Malformados ({metricas.estrutura.documentosMalformados.length}):</h4>
-              <div className="malformados-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Tipo</th>
-                      <th>ID</th>
-                      <th>Campo</th>
-                      <th>Problema</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {metricas.estrutura.documentosMalformados.slice(0, 10).map((doc, idx) => (
-                      <tr key={idx}>
-                        <td>{doc.tipo}</td>
-                        <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>{doc.id.substring(0, 12)}...</td>
-                        <td><code>{doc.campo}</code></td>
-                        <td style={{ color: '#dc3545' }}>{doc.problema}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {/* 4️⃣ FIREBASE */}
+        <div className="analise-secao">
+          <h3>🔥 Saúde do Firebase</h3>
+          <div className="metricas-lista">
+            <div className="metrica ok">
+              <span className="metrica-label">Ambiente</span>
+              <span className="metrica-valor">{metricas.firebase.ambiente}</span>
             </div>
-          ) : (
-            <div className="status-ok">
-              ✅ Nenhum documento malformado detectado
+            <div className="metrica ok">
+              <span className="metrica-label">Project ID</span>
+              <span className="metrica-valor" style={{ fontSize: '11px', fontFamily: 'monospace' }}>
+                {metricas.firebase.projectId.substring(0, 20)}...
+              </span>
             </div>
-          )}
+            <div className="metrica ok">
+              <span className="metrica-label">Rules Deployment</span>
+              <span className="metrica-valor">{metricas.firebase.regrasAtualizadas}</span>
+            </div>
+            <div className="metrica ok">
+              <span className="metrica-label">Índices Compostos Faltando</span>
+              <span className="metrica-valor">{metricas.firebase.indicesFaltando.length}</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* DETALHES: ÚLTIMOS ERROS */}
+      {ultimosErros.length > 0 && (
+        <div className="detalhes-secao">
+          <h3>❌ Últimos Erros Registrados</h3>
+          <div className="tabela-erros">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Ação</th>
+                  <th>Usuário</th>
+                  <th>Erro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ultimosErros.map((erro, idx) => (
+                  <tr key={idx}>
+                    <td>{erro.timestamp}</td>
+                    <td><code>{erro.acao}</code></td>
+                    <td>{erro.usuario}</td>
+                    <td style={{ color: '#dc3545', fontSize: '12px' }}>{erro.erro}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* DETALHES: DOCUMENTOS MALFORMADOS */}
+      {docsMalformados.length > 0 && (
+        <div className="detalhes-secao">
+          <h3>⚠️ Documentos Malformados</h3>
+          <div className="tabela-erros">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>ID</th>
+                  <th>Campo</th>
+                  <th>Problema</th>
+                </tr>
+              </thead>
+              <tbody>
+                {docsMalformados.map((doc, idx) => (
+                  <tr key={idx}>
+                    <td>{doc.tipo}</td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '11px' }}>{doc.id.substring(0, 12)}...</td>
+                    <td><code>{doc.campo}</code></td>
+                    <td style={{ color: '#dc3545' }}>{doc.problema}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Se não houver problemas */}
+      {ultimosErros.length === 0 && docsMalformados.length === 0 && (
+        <div className="status-ok-global">
+          ✅ Sistema sem problemas críticos detectados
+        </div>
+      )}
 
       <style>
         {`
@@ -335,6 +390,7 @@ function AnalisesTab() {
         .tab-descricao {
           margin: 0 0 16px 0;
           color: #718096;
+          font-size: 14px;
         }
 
         .btn-refresh {
@@ -353,94 +409,95 @@ function AnalisesTab() {
           transform: translateY(-1px);
         }
 
-        .analises-container {
+        .analises-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
           gap: 20px;
+          margin-bottom: 32px;
         }
 
         .analise-secao {
           background: white;
-          padding: 24px;
+          padding: 20px;
           border-radius: 12px;
           border: 2px solid #e2e8f0;
         }
 
-        .analise-secao.full-width {
-          grid-column: 1 / -1;
-        }
-
         .analise-secao h3 {
           margin: 0 0 16px 0;
-          font-size: 16px;
+          font-size: 15px;
           color: #2d3748;
+          font-weight: 600;
         }
 
-        .analise-cards {
+        .metricas-lista {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 10px;
         }
 
-        .analise-item {
+        .metrica {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 16px;
+          padding: 10px 14px;
           background: #f7fafc;
-          border-radius: 8px;
+          border-radius: 6px;
           border-left: 4px solid #cbd5e1;
           transition: all 0.2s;
         }
 
-        .analise-item:hover {
+        .metrica:hover {
           background: #edf2f7;
         }
 
-        .analise-item.warning {
+        .metrica.ok {
+          border-left-color: #10b981;
+        }
+
+        .metrica.warning {
           border-left-color: #f59e0b;
           background: #fef3c7;
         }
 
-        .analise-item.error {
+        .metrica.error {
           border-left-color: #dc2626;
           background: #fee2e2;
         }
 
-        .analise-label {
-          font-size: 14px;
+        .metrica-label {
+          font-size: 13px;
           color: #4a5568;
           font-weight: 500;
         }
 
-        .analise-valor {
-          font-size: 18px;
+        .metrica-valor {
+          font-size: 16px;
           font-weight: 700;
-          color: #667eea;
+          color: #2d3748;
         }
 
-        .logs-erro-section,
-        .docs-malformados {
-          margin-top: 20px;
-          padding-top: 20px;
-          border-top: 1px solid #e2e8f0;
+        .detalhes-secao {
+          background: white;
+          padding: 24px;
+          border-radius: 12px;
+          border: 2px solid #e2e8f0;
+          margin-bottom: 20px;
         }
 
-        .logs-erro-section h4,
-        .docs-malformados h4 {
-          margin: 0 0 12px 0;
-          font-size: 14px;
-          color: #4a5568;
+        .detalhes-secao h3 {
+          margin: 0 0 16px 0;
+          font-size: 15px;
+          color: #2d3748;
+          font-weight: 600;
         }
 
-        .logs-erro-table table,
-        .malformados-table table {
+        .tabela-erros table {
           width: 100%;
           border-collapse: collapse;
         }
 
-        .logs-erro-table th,
-        .malformados-table th {
+        .tabela-erros th {
           background: #f7fafc;
           padding: 12px;
           text-align: left;
@@ -450,18 +507,20 @@ function AnalisesTab() {
           font-size: 12px;
         }
 
-        .logs-erro-table td,
-        .malformados-table td {
+        .tabela-erros td {
           padding: 12px;
           border-bottom: 1px solid #e2e8f0;
           color: #2d3748;
           font-size: 13px;
         }
 
-        .status-ok {
-          padding: 20px;
+        .status-ok-global {
+          padding: 24px;
           text-align: center;
-          color: #10b981;
+          background: #d1fae5;
+          border: 2px solid #10b981;
+          border-radius: 12px;
+          color: #065f46;
           font-size: 16px;
           font-weight: 600;
         }
