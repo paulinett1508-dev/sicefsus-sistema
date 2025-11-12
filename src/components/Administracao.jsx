@@ -3,7 +3,7 @@
 // ✅ PRESERVADO: Todo fluxo e UI existente
 // ✅ BYPASS: Cloud Function problemática
 
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback, useMemo } from "react";
 import {
   collection,
   addDoc,
@@ -43,7 +43,7 @@ const Administracao = () => {
   // 🎯 VERIFICAR SE É SUPERADMIN - USAR DO CONTEXTO OU CALCULAR LOCALMENTE
   const isSuperAdmin = React.useMemo(() => {
     if (!currentUser) return false;
-    
+
     // ✅ PRIORIZAR O VALOR DO CONTEXTO
     if (isSuperAdminFromContext !== undefined) {
       console.log("🔐 SuperAdmin Check (do contexto):", {
@@ -52,7 +52,7 @@ const Administracao = () => {
       });
       return isSuperAdminFromContext;
     }
-    
+
     // ✅ FALLBACK: CALCULAR LOCALMENTE
     const result = currentUser.tipo === "admin" && currentUser.superAdmin === true;
     console.log("🔐 SuperAdmin Check (calculado):", {
@@ -639,14 +639,28 @@ const Administracao = () => {
         dadosContador={usuarios.length}
       />
 
-      {/* TABS MODULARES */}
-      <AdminTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        usersCount={usuarios.length}
-        logsCount={logs.length}
-        isSuperAdmin={isSuperAdmin}
-      />
+      {/* Tabs de navegação */}
+      {(() => {
+        console.log("🎬 Administracao.jsx - ANTES DE RENDERIZAR AdminTabs:", {
+          activeTab,
+          usuariosCount: usuarios.length,
+          logsCount: logs.length,
+          isSuperAdmin,
+          isSuperAdminType: typeof isSuperAdmin,
+          currentUser,
+          currentUserSuperAdmin: currentUser?.superAdmin,
+          currentUserIsSuperAdmin: currentUser?.isSuperAdmin
+        });
+        return (
+          <AdminTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            usersCount={usuarios.length}
+            logsCount={logs.length}
+            isSuperAdmin={isSuperAdmin}
+          />
+        );
+      })()}
 
       {/* CONTEÚDO CONDICIONAL MODULAR */}
       {activeTab === "usuarios" && (
