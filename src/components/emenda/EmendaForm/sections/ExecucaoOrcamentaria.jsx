@@ -85,22 +85,48 @@ const DespesaPlanejadaForm = ({
     try {
       setSalvando(true);
       const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
-      await addDoc(collection(db, "despesas"), {
+      
+      // ✅ CORREÇÃO: Incluir todos os campos obrigatórios
+      const novaDespesa = {
         emendaId,
         estrategia: estrategiaFinal,
         naturezaDespesa: estrategiaFinal,
+        discriminacao: estrategiaFinal, // ✅ Necessário
         valor: parseValorMonetario(valor),
         status: "PLANEJADA",
+        statusPagamento: "pendente", // ✅ Campo obrigatório
+        
+        // Campos vazios (serão preenchidos na execução)
+        fornecedor: "",
+        numeroEmpenho: "",
+        numeroNota: "",
+        numeroContrato: "",
+        dataEmpenho: null,
+        dataLiquidacao: null,
+        dataPagamento: null,
+        
+        // Metadados
         criadaEm: new Date().toISOString(),
-        criadaPor: usuario?.email,
-      });
+        criadaPor: usuario?.email || "sistema",
+        atualizadoEm: new Date().toISOString(),
+      };
+
+      console.log("💾 Salvando despesa planejada:", novaDespesa);
+      
+      await addDoc(collection(db, "despesas"), novaDespesa);
+      
+      console.log("✅ Despesa planejada criada com sucesso");
+      
+      // Limpar formulário
       setEstrategia("");
       setDespesaCustomizada("");
       setValor("");
+      setModoCustomizado(false);
+      
       onSuccess?.();
     } catch (e) {
-      console.error(e);
-      alert("Erro ao adicionar despesa.");
+      console.error("❌ Erro ao adicionar despesa:", e);
+      alert(`Erro ao adicionar despesa: ${e.message || "Erro desconhecido"}`);
     } finally {
       setSalvando(false);
     }
