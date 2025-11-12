@@ -55,7 +55,7 @@ const usePermissions = (usuario) => {
       const localizacao = validateLocation(municipio, uf);
 
       if (localizacao.valido) {
-        return {
+        const permissoesGestor = {
           acessoTotal: false, // Não vê tudo, mas gerencia seu município
           filtroAplicado: true,
           semAcesso: false,
@@ -72,6 +72,9 @@ const usePermissions = (usuario) => {
           filtroUf: localizacao.uf,
           tipo: "gestor_filtrado",
         };
+
+        console.log("✅ usePermissions - Permissões GESTOR calculadas:", permissoesGestor);
+        return permissoesGestor;
       } else {
         // Gestor sem localização válida - acesso bloqueado até completar
         return {

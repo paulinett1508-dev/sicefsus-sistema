@@ -52,7 +52,7 @@ export const UserProvider = ({ children }) => {
             
             const status = userData.status || "ativo";
 
-            setUsuario({
+            const usuarioFinal = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
 
@@ -73,7 +73,9 @@ export const UserProvider = ({ children }) => {
 
               // ✅ MANTER TODOS OS CAMPOS ORIGINAIS:
               ...userData,
-            });
+            };
+
+            setUsuario(usuarioFinal);
 
             console.log("👤 Usuário configurado:", {
               nome: nome,
@@ -81,6 +83,14 @@ export const UserProvider = ({ children }) => {
               municipio: userData.municipio,
               uf: userData.uf,
             });
+
+            // ✅ LOG ESPECIAL PARA GESTOR
+            if (tipo === "gestor") {
+              console.log("🏛️ GESTOR DETECTADO - Dados completos:", {
+                ...usuarioFinal,
+                timestamp: new Date().toISOString()
+              });
+            }
           } else {
             console.log(
               "⚠️ Documento do usuário não encontrado, criando básico...",

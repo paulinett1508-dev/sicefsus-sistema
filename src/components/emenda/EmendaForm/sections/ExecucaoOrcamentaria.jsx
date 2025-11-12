@@ -481,6 +481,16 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     numeroEmenda: formData?.numeroEmenda
   });
 
+  // ✅ LOG DETALHADO DE PERMISSÕES GESTOR
+  console.log('👤 ExecucaoOrcamentaria - Usuário:', {
+    email: usuario?.email,
+    tipo: usuario?.tipo,
+    role: usuario?.role,
+    municipio: usuario?.municipio,
+    uf: usuario?.uf,
+    timestamp: new Date().toISOString()
+  });
+
   if (!emendaSalvaId) {
     return (
       <div style={{
@@ -719,29 +729,67 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <button
             onClick={() => {
               console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
-              console.log("📋 Usuário:", usuario?.tipo);
+              console.log("📋 Usuário completo:", {
+                tipo: usuario?.tipo,
+                role: usuario?.role,
+                email: usuario?.email,
+                municipio: usuario?.municipio,
+                uf: usuario?.uf
+              });
               console.log("📋 Emenda ID:", emendaId);
-              console.log("📋 Form Data:", formData);
+              console.log("📋 Form Data:", {
+                numero: formData?.numero,
+                municipio: formData?.municipio,
+                uf: formData?.uf,
+                valorRecurso: formData?.valorRecurso
+              });
 
-              // ✅ VALIDAÇÃO: Verificar se usuário pode criar despesas
-              if (usuario?.tipo !== "admin" && usuario?.tipo !== "gestor") {
+              // ✅ VALIDAÇÃO AMPLIADA: Verificar tipo e role
+              const isAdmin = usuario?.tipo === "admin" || usuario?.role === "admin";
+              const isGestor = usuario?.tipo === "gestor" || usuario?.role === "gestor";
+
+              console.log("🔐 Verificação de permissões:", {
+                isAdmin,
+                isGestor,
+                tipoOriginal: usuario?.tipo,
+                roleOriginal: usuario?.role
+              });
+
+              if (!isAdmin && !isGestor) {
+                console.error("❌ ACESSO NEGADO - Tipo:", usuario?.tipo, "| Role:", usuario?.role);
                 alert("⚠️ Apenas Administradores e Gestores podem criar despesas executadas.");
                 return;
               }
 
-              // ✅ CORREÇÃO: Criar objeto de despesa vazio para nova criação
-              setDespesaEmEdicao({
+              // ✅ VALIDAÇÃO: Verificar se tem município/UF
+              if (isGestor && (!usuario?.municipio || !usuario?.uf)) {
+                console.error("❌ GESTOR SEM LOCALIZAÇÃO:", {
+                  municipio: usuario?.municipio,
+                  uf: usuario?.uf
+                });
+                alert("⚠️ Gestor precisa ter município/UF configurados para criar despesas.");
+                return;
+              }
+
+              // ✅ CORREÇÃO: Criar objeto de despesa com TODOS os campos necessários
+              const novaDespesa = {
                 status: 'EXECUTADA',
                 emendaId: emendaId,
                 discriminacao: '',
                 valor: '',
                 numeroEmenda: formData?.numero || '',
-                municipio: formData?.municipio || '',
-                uf: formData?.uf || '',
-              });
+                municipio: formData?.municipio || usuario?.municipio || '',
+                uf: formData?.uf || usuario?.uf || '',
+                criadoPor: usuario?.email || '',
+                tipoUsuario: usuario?.tipo || usuario?.role || '',
+              };
+
+              console.log("✅ Despesa pré-configurada:", novaDespesa);
+
+              setDespesaEmEdicao(novaDespesa);
               setModoVisualizacao("criar-executada");
 
-              console.log("✅ Modal configurado - Modo: criar-executada | Usuário:", usuario?.tipo);
+              console.log("✅ Modal configurado - Modo: criar-executada | Usuário:", usuario?.tipo || usuario?.role);
             }}
             style={styles.btnNovaDespesa}
             title="Criar despesa executada"
