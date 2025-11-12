@@ -24,7 +24,7 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const formatCurrency = (valor) =>
   (Number(valor) || 0).toLocaleString("pt-BR", {
