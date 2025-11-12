@@ -150,13 +150,24 @@ export default function EmendaForm() {
         );
       case "execucao":
         return (
-          <ExecucaoOrcamentaria
-            formData={formData}
-            onChange={handleInputChange}
+          <>
+            {console.log('🔄 EmendaForm - Passando formData para ExecucaoOrcamentaria:', {
+              formData,
+              keys: formData ? Object.keys(formData) : [],
+              id: formData?.id,
+              emendaId: formData?.emendaId,
+              numero: formData?.numero,
+              usuario: {
+                email: user?.email,
+                tipo: user?.tipo,
+                role: user?.role
+              }
+            })}
+            <ExecucaoOrcamentaria formData={formData} onChange={handleInputChange}
             fieldErrors={fieldErrors}
             onClearError={clearFieldError}
-            usuario={user}
-          />
+            usuario={user} />
+          </>
         );
       default:
         return null;

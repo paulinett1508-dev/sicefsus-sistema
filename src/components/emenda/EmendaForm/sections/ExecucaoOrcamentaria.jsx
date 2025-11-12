@@ -205,29 +205,60 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | 'criar' | 'criar-executada' | null
 
-  // Resolver ID (id | emendaId | número)
+  // ✅ RESOLVER ID COM LOGS DETALHADOS
   useEffect(() => {
+    console.log('🔍 ExecucaoOrcamentaria - formData COMPLETO recebido:', {
+      formData,
+      keys: formData ? Object.keys(formData) : [],
+      id: formData?.id,
+      emendaId: formData?.emendaId,
+      numero: formData?.numero,
+      numeroEmenda: formData?.numeroEmenda,
+    });
+
     const resolverId = async () => {
+      // Prioridade 1: IDs diretos
       if (formData?.id || formData?.emendaId) {
-        setEmendaIdReal(formData.id || formData.emendaId);
+        const idEncontrado = formData.id || formData.emendaId;
+        console.log('✅ ID direto encontrado:', idEncontrado);
+        setEmendaIdReal(idEncontrado);
         return;
       }
+
+      // Prioridade 2: Buscar por número
       const numero = formData?.numero || formData?.numeroEmenda;
       if (!numero) {
+        console.warn('⚠️ Nenhum ID ou número encontrado em formData');
         setEmendaIdReal(null);
         return;
       }
+
       try {
+        console.log('🔍 Buscando emenda por número:', numero);
         const q = query(
           collection(db, "emendas"),
           where("numero", "==", numero),
         );
         const snap = await getDocs(q);
-        setEmendaIdReal(!snap.empty ? snap.docs[0].id : null);
-      } catch {
+        
+        if (!snap.empty) {
+          const idEncontrado = snap.docs[0].id;
+          console.log('✅ Emenda encontrada por número:', {
+            numero,
+            id: idEncontrado,
+            data: snap.docs[0].data()
+          });
+          setEmendaIdReal(idEncontrado);
+        } else {
+          console.warn('⚠️ Nenhuma emenda encontrada com número:', numero);
+          setEmendaIdReal(null);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao buscar emenda por número:', error);
         setEmendaIdReal(null);
       }
     };
+    
     resolverId();
   }, [
     formData?.id,
