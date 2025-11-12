@@ -231,18 +231,18 @@ const UserForm = ({
               municipioSelecionado={formData.municipio || ""}
               onUfChange={(uf) => {
                 console.log("🔄 UF mudou via MunicipioSelector:", uf);
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   uf: uf,
-                  municipio: "",
-                });
+                  municipio: "", // Limpa município quando UF muda
+                }));
               }}
               onMunicipioChange={(municipio) => {
                 console.log("🔄 Município selecionado:", municipio);
-                setFormData({
-                  ...formData,
+                setFormData((prev) => ({
+                  ...prev,
                   municipio: municipio,
-                });
+                }));
               }}
               disabled={
                 saving ||

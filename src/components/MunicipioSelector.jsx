@@ -59,7 +59,7 @@ const MunicipioSelector = ({
     }
   }, [uf]);
 
-  const handleChange = (e) => {
+  const handleMunicipioChange = (e) => {
     const municipioNome = e.target.value;
     console.log(`🏙️ Município selecionado: ${municipioNome}`);
 
@@ -74,7 +74,7 @@ const MunicipioSelector = ({
 
       <select
         value={municipioSelecionado || ""}
-        onChange={handleChange}
+        onChange={handleMunicipioChange}
         disabled={disabled || loading || !uf}
         style={{
           ...styles.select,
