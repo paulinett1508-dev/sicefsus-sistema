@@ -182,13 +182,14 @@ export const useEmendaFormData = () => {
     // ============================================
     // 🚨 SEÇÃO BENEFICIÁRIO - OBRIGATÓRIA
     // ============================================
-    const beneficiarioLimpo = cleanField(formData.beneficiario);
+    // ✅ Aceitar CNPJ tanto em beneficiario quanto em cnpjBeneficiario
+    const beneficiarioLimpo = cleanField(formData.beneficiario) || cleanField(formData.cnpjBeneficiario);
     if (!beneficiarioLimpo) {
       errors.beneficiario = "🚨 Beneficiário (CNPJ) é obrigatório";
     } else {
-      const cnpjLimpo = limparCNPJ(formData.beneficiario);
+      const cnpjLimpo = limparCNPJ(beneficiarioLimpo);
       if (cnpjLimpo && cnpjLimpo.length === 14) {
-        if (!validarCNPJ(formData.beneficiario)) {
+        if (!validarCNPJ(beneficiarioLimpo)) {
           errors.beneficiario = "🚨 CNPJ do beneficiário é inválido";
         }
       } else if (cnpjLimpo && cnpjLimpo.length > 0) {
@@ -566,7 +567,8 @@ export const useEmendaFormData = () => {
       errors.push("❌ CRÍTICO: Valor do Recurso obrigatório");
 
     // SEÇÃO BENEFICIÁRIO - LIMPEZA APLICADA
-    const beneficiarioLimpo = cleanField(formData.beneficiario);
+    // ✅ Aceitar CNPJ tanto em beneficiario quanto em cnpjBeneficiario
+    const beneficiarioLimpo = cleanField(formData.beneficiario) || cleanField(formData.cnpjBeneficiario);
     if (!beneficiarioLimpo) errors.push("❌ CRÍTICO: Beneficiário obrigatório");
 
     // SEÇÃO DADOS BANCÁRIOS - LIMPEZA APLICADA
