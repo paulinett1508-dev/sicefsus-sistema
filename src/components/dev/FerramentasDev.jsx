@@ -4,11 +4,9 @@ import { useUser } from "../../context/UserContext";
 
 // Importar abas
 import DiagnosticoTab from "./tabs/DiagnosticoTab";
-import LimpezaTab from "./tabs/LimpezaTab";
+import ManutencaoTab from "./tabs/ManutencaoTab";
 import BackupTab from "./tabs/BackupTab";
 import UsuariosTab from "./tabs/UsuariosTab";
-import ValidacaoTab from "./tabs/ValidacaoTab";
-import AnalisesTab from "./tabs/AnalisesTab";
 import ConfigTab from "./tabs/ConfigTab";
 import IAMTab from "./tabs/IAMTab";
 
@@ -45,18 +43,22 @@ const FerramentasDev = () => {
     return null;
   }
 
-  // Abas disponíveis (sem Dashboard e Geografia)
+  // Abas disponíveis
   const abas = [
-    { id: "limpeza", icone: "🧹", label: "Limpeza", componente: LimpezaTab },
     {
       id: "diagnostico",
       icone: "🔍",
       label: "Diagnóstico & Recálculo",
       componente: DiagnosticoTab,
     },
+    { 
+      id: "manutencao", 
+      icone: "🔧", 
+      label: "Manutenção", 
+      componente: ManutencaoTab 
+    },
     { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
     { id: "usuarios", icone: "👥", label: "Usuários", componente: UsuariosTab },
-    { id: "analises", icone: "📈", label: "Análises", componente: AnalisesTab },
     {
       id: "iam",
       icone: "🔐",
