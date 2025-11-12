@@ -1,0 +1,146 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // FUNÇÕES AUXILIARES
+    // ========================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'admin';
+    }
+
+    function isGestor() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'gestor';
+    }
+
+    function isOperador() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'operador';
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function matchesUserLocation(data) {
+      let userData = getUserData();
+      return data.municipio == userData.municipio && 
+             data.uf == userData.uf;
+    }
+
+    // ========================================
+    // COLEÇÃO: USUÁRIOS
+    // ========================================
+
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        request.auth.uid == userId
+      );
+
+      allow create: if isAdmin();
+
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['tipo', 'status']))
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ========================================
+    // COLEÇÃO: EMENDAS
+    // ========================================
+
+    match /emendas/{emendaId} {
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Acesso restrito por localização
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      ) && matchesUserLocation(resource.data);
+
+      allow create: if isAuthenticated() && (
+        isGestor() || isOperador()
+      ) && matchesUserLocation(request.resource.data);
+
+      allow update: if isAuthenticated() && (
+        isGestor() || isOperador()
+      ) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data);
+
+      // 🔒 Apenas Admin e Gestor podem excluir
+      allow delete: if isAuthenticated() && (
+        isAdmin() || isGestor()
+      ) && matchesUserLocation(resource.data);
+    }
+
+    // ========================================
+    // COLEÇÃO: DESPESAS
+    // ========================================
+
+    match /despesas/{despesaId} {
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Leitura permitida se autenticado
+      // (validação de localização será feita via emendaId)
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      );
+
+      // Criar despesa: permitir sem validação de localização
+      // (será validada pela emenda relacionada)
+      allow create: if isAuthenticated() && (
+        isGestor() || isOperador()
+      );
+
+      // Atualizar: validar se tem os campos de localização
+      allow update: if isAuthenticated() && (
+        isGestor() || isOperador()
+      ) && (
+        !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
+        matchesUserLocation(request.resource.data)
+      );
+
+      // 🔒 Apenas Admin e Gestor podem excluir
+      allow delete: if isAuthenticated() && (
+        isAdmin() || isGestor()
+      );
+    }
+
+    // ========================================
+    // COLEÇÃO: AUDIT_LOGS
+    // ========================================
+
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if isAuthenticated();
+    }
+
+    // ========================================
+    // COLEÇÃO: METADATA
+    // ========================================
+
+    match /metadata/{metaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ========================================
+    // DENY ALL (Padrão)
+    // ========================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

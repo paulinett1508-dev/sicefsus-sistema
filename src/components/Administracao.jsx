@@ -33,6 +33,8 @@ import AdminHeader from "./admin/AdminHeader";
 import AdminTabs from "./admin/AdminTabs";
 import UsersSection from "./admin/UsersSection";
 import LogsSection from "./admin/LogsSection";
+import FirestoreRulesSection from "./admin/FirestoreRulesSection";
+import MigracaoCompleta from "./admin/MigracaoCompleta";
 
 const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
@@ -622,29 +624,10 @@ const Administracao = () => {
       />
 
       {/* CONTEÚDO CONDICIONAL MODULAR */}
-      {activeTab === "users" ? (
-        <>
-          <UsersSection
-            users={getFilteredUsers()}
-            userFilter={userFilter}
-            setUserFilter={setUserFilter}
-            onEdit={handleEditarUsuario}
-            onDelete={handleDelete}
-            onToggleStatus={handleToggleStatus}
-            onNovoUsuario={handleNovoUsuario}
-            loading={loading}
-            currentUserType={currentUser?.tipo || "operador"} // ✅ Usar tipo direto do banco
-          />
-        </>
-      ) : (
-        <LogsSection
-          logs={getFilteredLogs()}
-          logFilters={logFilters}
-          setLogFilters={setLogFilters}
-          onAtualizarLogs={carregarLogs} // ✅ ADICIONAR: Função para atualizar logs
-          loading={loading}
-        />
-      )}
+      {activeTab === "usuarios" && <UsersSection />}
+      {activeTab === "logs" && <LogsSection />}
+      {activeTab === "rules" && <FirestoreRulesSection />}
+      {activeTab === "migracao" && <MigracaoCompleta />}
     </div>
   );
 };

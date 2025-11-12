@@ -2,26 +2,27 @@
 import React from "react";
 
 const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount }) => {
+  const tabs = [
+    { id: "usuarios", label: "👥 Usuários", icon: "👥" },
+    { id: "logs", label: "📊 Logs", icon: "📊" },
+    { id: "rules", label: "🔐 Firestore Rules", icon: "🔐" },
+    { id: "migracao", label: "🔄 Migração", icon: "🔄" },
+  ];
+
   return (
     <div style={styles.tabsContainer}>
-      <button
-        onClick={() => setActiveTab("users")}
-        style={{
-          ...styles.tabButton,
-          ...(activeTab === "users" ? styles.tabButtonActive : {}),
-        }}
-      >
-        👥 Usuários ({usersCount})
-      </button>
-      <button
-        onClick={() => setActiveTab("logs")}
-        style={{
-          ...styles.tabButton,
-          ...(activeTab === "logs" ? styles.tabButtonActive : {}),
-        }}
-      >
-        📋 Logs de Auditoria ({logsCount})
-      </button>
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => setActiveTab(tab.id)}
+          style={{
+            ...styles.tabButton,
+            ...(activeTab === tab.id ? styles.tabButtonActive : {}),
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
     </div>
   );
 };
