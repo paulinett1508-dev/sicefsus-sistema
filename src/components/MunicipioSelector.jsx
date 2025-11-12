@@ -354,4 +354,6 @@ const styles = {
   },
 };
 
+// Exportar ambos os componentes
+export { MunicipioSelector };
 export default UFMunicipioSelector;

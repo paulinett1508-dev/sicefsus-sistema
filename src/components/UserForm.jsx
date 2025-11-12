@@ -1,6 +1,6 @@
 // src/components/UserForm.jsx - VERSÃO COMPLETA COM CORREÇÕES PARA EDIÇÃO ADMIN→OPERADOR
 import React, { useEffect } from "react";
-import MunicipioSelector from "./MunicipioSelector";
+import UFMunicipioSelector from "./MunicipioSelector";
 import { useUser } from "../context/UserContext";
 import { formStyles, addFormInteractivity } from "../utils/formStyles";
 
@@ -225,12 +225,12 @@ const UserForm = ({
           /* ✅ CAMPOS HABILITADOS - Criação OU Mudança de tipo */
           <div style={styles.formGroup}>
             {/* 🆕 MUNICIPIO SELECTOR COM KEY PARA FORÇAR RE-RENDER */}
-            <MunicipioSelector
+            <UFMunicipioSelector
               key={`municipio-${municipioSelectorKey}-${formData.uf}`} // ✅ Key dinâmica
               ufSelecionada={formData.uf || ""}
               municipioSelecionado={formData.municipio || ""}
               onUfChange={(uf) => {
-                console.log("🔄 UF mudou via MunicipioSelector:", uf);
+                console.log("🔄 UF mudou via UFMunicipioSelector:", uf);
                 setFormData((prev) => ({
                   ...prev,
                   uf: uf,
@@ -248,14 +248,6 @@ const UserForm = ({
                 saving ||
                 (currentUser?.tipo === "operador" && !tipoAlteradoDuranteEdicao)
               }
-              style={{
-                borderColor: tipoAlteradoDuranteEdicao
-                  ? "var(--success)"
-                  : "var(--primary)",
-                backgroundColor: tipoAlteradoDuranteEdicao
-                  ? "rgba(39, 174, 96, 0.05)"
-                  : "transparent",
-              }}
             />
 
             {tipoAlteradoDuranteEdicao && (
@@ -267,17 +259,13 @@ const UserForm = ({
         ) : (
           /* ❌ CAMPOS DESABILITADOS - Edição sem mudança de tipo */
           <div style={styles.formGroup}>
-            {/* Usar MunicipioSelector desabilitado para manter consistência */}
-            <MunicipioSelector
+            {/* Usar UFMunicipioSelector desabilitado para manter consistência */}
+            <UFMunicipioSelector
               ufSelecionada={formData.uf || ""}
               municipioSelecionado={formData.municipio || ""}
               onUfChange={() => {}} // Não faz nada quando desabilitado
               onMunicipioChange={() => {}} // Não faz nada quando desabilitado
               disabled={true} // Sempre desabilitado neste caso
-              style={{
-                borderColor: "var(--secondary)",
-                backgroundColor: "var(--theme-surface-secondary)",
-              }}
             />
 
             {/* 🆕 BOTÃO PARA PERMITIR EDIÇÃO */}
