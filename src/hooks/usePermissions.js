@@ -126,6 +126,13 @@ const usePermissions = (usuario) => {
   const methodsComuns = useMemo(
     () => ({
       /**
+       * Verificar se usuário tem acesso ao sistema
+       */
+      temAcesso: () => {
+        return permissoes?.temAcessoSistema === true;
+      },
+
+      /**
        * Verificar se usuário pode gerenciar outros usuários
        */
       podeGerenciarUsuarios: () => {
