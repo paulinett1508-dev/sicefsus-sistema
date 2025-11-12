@@ -92,70 +92,41 @@ export const UserProvider = ({ children }) => {
               });
             }
           } else {
-            console.log(
-              "⚠️ Documento do usuário não encontrado, criando básico...",
+            console.warn(
+              "⚠️ Documento do usuário não encontrado no Firestore",
             );
 
-            // ✅ DETERMINAR TIPO BASEADO NO EMAIL
+            // ✅ NÃO TENTAR CRIAR DOCUMENTO (evita erro de permissão)
+            // ✅ CRIAR USUÁRIO LOCAL BÁSICO para permitir acesso ao sistema
             const emailDomain = firebaseUser.email?.split("@")[1] || "";
             const isAdminEmail =
               firebaseUser.email === "paulinett1508@gmail.com";
 
-            // ✅ CRIAR DOCUMENTO BÁSICO se não existir
             const nomeBasico =
               firebaseUser.displayName ||
               firebaseUser.email?.split("@")[0] ||
               "Usuário";
 
-            const basicUserData = {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              nome: nomeBasico,
-              tipo: isAdminEmail ? "admin" : "operador",
-              status: isAdminEmail ? "ativo" : "pendente", // Operadores começam pendentes até configuração
-
-              // ✅ OPERADORES CRIADOS SEM MUNICÍPIO - ADMIN DEVE CONFIGURAR
-              municipio: isAdminEmail ? null : null,
-              uf: isAdminEmail ? null : null,
-
-              primeiroAcesso: true,
-              criadoPor: "sistema",
-              dataCriacao: new Date(),
-              dataAtualizacao: new Date(),
-
-              // ✅ CAMPOS ESPECÍFICOS PARA OPERADORES
-              ...(isAdminEmail
-                ? {}
-                : {
-                    permissoes: [],
-                    observacoes:
-                      "⚠️ OPERADOR NÃO CONFIGURADO - Admin deve definir município/UF e ativar antes do primeiro acesso",
-                  }),
-            };
-
-            // ✅ CRIAR NA COLEÇÃO CORRETA "usuarios"
-            await setDoc(doc(db, "usuarios", firebaseUser.uid), basicUserData);
-            console.log("✅ Novo usuário criado:", basicUserData);
-
-            setUsuario({
+            // ✅ CRIAR OBJETO LOCAL (NÃO SALVA NO FIRESTORE)
+            const localUserData = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               nome: nomeBasico,
               displayName: nomeBasico,
               tipo: isAdminEmail ? "admin" : "operador",
-              isActive: isAdminEmail,
-              status: isAdminEmail ? "ativo" : "pendente",
-              municipio: null,
-              uf: null,
-              ...basicUserData,
-            });
+              isActive: true, // Permitir acesso
+              status: "pendente", // Mas marcar como pendente
+              municipio: "", // Sem localização
+              uf: "",
+              primeiroAcesso: true,
+              needsConfiguration: true, // Flag para avisar admin
+            };
 
-            // ✅ AVISO PARA OPERADORES NÃO CONFIGURADOS
-            if (!isAdminEmail) {
-              console.warn(
-                "⚠️ Operador criado mas NÃO configurado. Admin deve definir município/UF e ativar o usuário.",
-              );
-            }
+            setUsuario(localUserData);
+
+            console.warn(
+              "⚠️ Usuário sem cadastro no Firestore - Acesso básico concedido. Admin deve criar o usuário.",
+            );
           }
         } catch (error) {
           console.error("❌ Erro ao carregar dados do usuário:", error);

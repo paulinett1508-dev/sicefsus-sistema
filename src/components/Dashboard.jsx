@@ -52,6 +52,29 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
+  // ✅ VERIFICAÇÃO ESPECIAL: Operador sem configuração
+  if (user?.tipo === "operador" && (!user.municipio || !user.uf)) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.configPendente}>
+          <div style={styles.configIcon}>⚙️</div>
+          <h2 style={styles.configTitle}>Configuração Pendente</h2>
+          <p style={styles.configMessage}>
+            Seu usuário ainda não foi configurado pelo administrador.
+          </p>
+          <p style={styles.configSubmessage}>
+            Entre em contato com o administrador para definir seu município e UF de acesso.
+          </p>
+          <div style={styles.configInfo}>
+            <strong>Email:</strong> {user.email}<br/>
+            <strong>Nome:</strong> {user.nome || user.displayName}<br/>
+            <strong>Status:</strong> Aguardando configuração
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Loading de dados
   if (loading) {
     return (
@@ -554,6 +577,44 @@ const styles = {
     fontSize: "64px",
     marginBottom: "16px",
     opacity: 0.3,
+  },
+  configPendente: {
+    textAlign: "center",
+    padding: "60px 24px",
+    backgroundColor: "white",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    maxWidth: "600px",
+    margin: "0 auto",
+  },
+  configIcon: {
+    fontSize: "64px",
+    marginBottom: "24px",
+  },
+  configTitle: {
+    fontSize: "24px",
+    fontWeight: "600",
+    color: "#154360",
+    marginBottom: "12px",
+  },
+  configMessage: {
+    fontSize: "16px",
+    color: "#666",
+    marginBottom: "8px",
+  },
+  configSubmessage: {
+    fontSize: "14px",
+    color: "#999",
+    marginBottom: "24px",
+  },
+  configInfo: {
+    backgroundColor: "#f8f9fa",
+    padding: "20px",
+    borderRadius: "8px",
+    textAlign: "left",
+    fontSize: "14px",
+    color: "#666",
+    lineHeight: "1.8",
   },
 };
 
