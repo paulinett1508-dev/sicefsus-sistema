@@ -521,38 +521,78 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   // ✅ Handler para executar despesa planejada (validação de saldo ocorre no salvamento)
   // Modificado para abrir modal de confirmação
   const handleExecutarDespesa = useCallback((despesa) => {
-    console.log("▶️ Iniciando processo de execução de despesa planejada:", despesa);
+    console.log("▶️ INÍCIO - handleExecutarDespesa chamado");
+    console.log("📋 Despesa recebida:", {
+      id: despesa?.id,
+      discriminacao: despesa?.discriminacao,
+      valor: despesa?.valor,
+      municipio: despesa?.municipio,
+      uf: despesa?.uf,
+      status: despesa?.status
+    });
+    console.log("👤 Usuário executando:", {
+      tipo: usuario?.tipo,
+      role: usuario?.role,
+      municipio: usuario?.municipio,
+      uf: usuario?.uf,
+      email: usuario?.email
+    });
 
     // Verificar permissão de gestor
     if (usuario?.tipo === "gestor" || usuario?.role === "gestor") {
+      console.log("🔐 Verificando permissões de GESTOR...");
+      
       const despesaMunicipio = despesa.municipio || formData?.municipio;
       const despesaUf = despesa.uf || formData?.uf;
       const usuarioMunicipio = usuario.municipio;
       const usuarioUf = usuario.uf;
 
+      console.log("📍 Comparação geográfica:", {
+        despesa: `${despesaMunicipio}/${despesaUf}`,
+        usuario: `${usuarioMunicipio}/${usuarioUf}`,
+        match: despesaMunicipio === usuarioMunicipio && despesaUf === usuarioUf
+      });
+
       if (despesaMunicipio !== usuarioMunicipio || despesaUf !== usuarioUf) {
+        console.error("❌ PERMISSÃO NEGADA - Localidades incompatíveis");
         alert(`⚠️ Você não tem permissão para executar despesas de ${despesaMunicipio}/${despesaUf}.\n\nSua localidade: ${usuarioMunicipio}/${usuarioUf}`);
         return;
       }
+      console.log("✅ Permissão de localidade verificada com sucesso");
     }
 
+    console.log("📤 Abrindo modal de confirmação...");
+    console.log("🔄 Estado antes de abrir modal:", {
+      mostrarConfirmacaoExecucao: false,
+      despesaPendenteExecucao: null
+    });
+    
     // Abrir modal de confirmação primeiro
     setDespesaPendenteExecucao(despesa);
     setMostrarConfirmacaoExecucao(true);
+    
+    console.log("✅ Modal de confirmação configurado para abrir");
   }, [usuario, formData]);
 
   const handleConfirmarExecucao = useCallback(() => {
-    console.log("✅ Execução confirmada, abrindo formulário");
+    console.log("✅ CONFIRMAÇÃO - Usuário confirmou execução");
+    console.log("📋 Despesa a ser executada:", despesaPendenteExecucao);
+    console.log("🔄 Fechando modal de confirmação...");
     setMostrarConfirmacaoExecucao(false);
+    console.log("📤 Configurando despesa para executar...");
     setDespesaParaExecutar(despesaPendenteExecucao);
+    console.log("🎯 Abrindo modal de execução...");
     setMostrarExecutarModal(true);
     setDespesaPendenteExecucao(null);
+    console.log("✅ Modal de execução deve estar aberto agora");
   }, [despesaPendenteExecucao]);
 
   const handleCancelarExecucao = useCallback(() => {
-    console.log("❌ Execução cancelada pelo usuário");
+    console.log("❌ CANCELAMENTO - Usuário cancelou execução");
+    console.log("🔄 Limpando estados...");
     setMostrarConfirmacaoExecucao(false);
     setDespesaPendenteExecucao(null);
+    console.log("✅ Estados limpos - modal fechado");
   }, []);
 
 
@@ -615,13 +655,25 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     console.log("🔄 ExecucaoOrcamentaria - Estado mudou:", {
       despesaEmEdicao: despesaEmEdicao?.id || null,
       modoVisualizacao,
+      mostrarConfirmacaoExecucao,
+      mostrarExecutarModal,
+      hasDespesaPendente: !!despesaPendenteExecucao,
+      hasDespesaParaExecutar: !!despesaParaExecutar,
       timestamp: new Date().toISOString(),
     });
 
     if (modoVisualizacao === "executar" && despesaEmEdicao) {
       console.log("🔒 Modo execução ATIVO - estado protegido");
     }
-  }, [despesaEmEdicao, modoVisualizacao]);
+    
+    if (mostrarConfirmacaoExecucao) {
+      console.log("📋 Modal de CONFIRMAÇÃO está ABERTO");
+    }
+    
+    if (mostrarExecutarModal) {
+      console.log("📋 Modal de EXECUÇÃO está ABERTO");
+    }
+  }, [despesaEmEdicao, modoVisualizacao, mostrarConfirmacaoExecucao, mostrarExecutarModal, despesaPendenteExecucao, despesaParaExecutar]);
 
 
   // Verificar se a emenda está salva
@@ -844,7 +896,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                         <td style={styles.td}>
                           <div style={styles.despesaAcoes}>
                             <button
-                              onClick={() => handleExecutarDespesa(despesa)}
+                              onClick={(e) => {
+                                console.log("🖱️ CLIQUE NO BOTÃO EXECUTAR");
+                                console.log("📋 Despesa a executar:", despesa);
+                                e.stopPropagation();
+                                handleExecutarDespesa(despesa);
+                              }}
                               style={styles.btnIconExecutar}
                               title="Executar despesa"
                             >
