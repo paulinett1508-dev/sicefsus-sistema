@@ -153,12 +153,17 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     }
 
     // 💾 Salvar no Firestore (agora o admin está logado)
+    // ✅ NORMALIZAR TIPO DE USUÁRIO
+    const tipoUsuario = userData.role === "admin" ? "admin" 
+                      : userData.role === "gestor" ? "gestor"
+                      : "operador";
+
     const userDoc = {
       uid: userCredential.user.uid,
       email: userData.email,
       nome: userData.nome,
-      tipo: userData.role || "operador",
-      role: userData.role || "operador",
+      tipo: tipoUsuario,
+      role: tipoUsuario,
       status: "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
@@ -287,11 +292,16 @@ export const updateUser = async (userId, userData, originalEmail) => {
 
     // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
     const userRef = doc(db, "usuarios", userId);
+    // ✅ NORMALIZAR TIPO DE USUÁRIO
+    const tipoUsuario = userData.role === "admin" ? "admin" 
+                      : userData.role === "gestor" ? "gestor"
+                      : "operador";
+
     const updateData = {
       nome: userData.nome,
       email: userData.email,
-      tipo: userData.role === "admin" ? "admin" : "operador",
-      role: userData.role === "admin" ? "admin" : "operador",
+      tipo: tipoUsuario,
+      role: tipoUsuario,
       status: userData.status || "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
