@@ -1,0 +1,30 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.jsx:37 🔥 PROD Firebase Check: {mode: 'development', projectId: 'emendas-parlamentares-60dbd', hasApiKey: true, authDomain: 'emendas-parlamentares-60dbd.firebaseapp.com'}
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: W9z8rVyOJJaHGbjSSVOPKaPaiYq1
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: {municipio: 'Antônio Almeida', nome: 'Simone Miranda', telefone: '89999128436', email: 'simonepaz1987@gmail.com', status: 'ativo', …}
+DisableConsole.jsx:172 👤 Usuário configurado: {nome: 'Simone Miranda', tipo: 'gestor', municipio: 'Antônio Almeida', uf: 'PI'}
+DisableConsole.jsx:172 🏛️ GESTOR DETECTADO - Dados completos: {uid: 'W9z8rVyOJJaHGbjSSVOPKaPaiYq1', email: 'simonepaz1987@gmail.com', nome: 'Simone Miranda', displayName: 'Simone Miranda', tipo: 'gestor', …}
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+loadAllData @ GlobalSearch.jsx:70
+(anônimo) @ GlobalSearch.jsx:36
+commitHookEffectListMount @ react-dom.development.js:23150
+commitPassiveMountOnFiber @ react-dom.development.js:24926
+commitPassiveMountEffects_complete @ react-dom.development.js:24891
+commitPassiveMountEffects_begin @ react-dom.development.js:24878
+commitPassiveMountEffects @ react-dom.development.js:24866
+flushPassiveEffectsImpl @ react-dom.development.js:27039
+flushPassiveEffects @ react-dom.development.js:26984
+(anônimo) @ react-dom.development.js:26769
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Simone Miranda', email: 'simonepaz1987@gmail.com', tipo: 'gestor', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 ✅ usePermissions - Permissões GESTOR calculadas: {acessoTotal: false, filtroAplicado: true, semAcesso: false, temAcessoSistema: true, podeGerenciarUsuarios: false, …}
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: {userEmail: 'simonepaz1987@gmail.com', userTipo: 'gestor', acessoTotal: false, filtroAplicado: true}
+DisableConsole.jsx:172 🔐 OPERADOR/GESTOR: Aplicando filtros geográficos
+DisableConsole.jsx:172 👤 Dados do usuário: {email: 'simonepaz1987@gmail.com', municipio: 'Antônio Almeida', uf: 'PI', tipo: 'gestor'}
+DisableConsole.jsx:172 ✅ OPERADOR/GESTOR encontrou: 8 emendas para Antônio Almeida/PI
+DisableConsole.jsx:172 ✅ OPERADOR/GESTOR carregou: 4 despesas
