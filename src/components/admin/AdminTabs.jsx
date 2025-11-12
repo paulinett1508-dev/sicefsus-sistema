@@ -15,7 +15,13 @@ const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmi
     isSuperAdmin,
     totalTabs: allTabs.length,
     visibleTabs: tabs.length,
-    tabsVisiveis: tabs.map(t => t.id)
+    tabsVisiveis: tabs.map(t => t.id),
+    tabsConfig: allTabs.map(t => ({
+      id: t.id,
+      superAdminOnly: t.superAdminOnly,
+      showAlways: t.showAlways,
+      visible: t.showAlways || (t.superAdminOnly && isSuperAdmin)
+    }))
   });
 
   return (

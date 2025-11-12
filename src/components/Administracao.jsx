@@ -40,19 +40,18 @@ const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
   const { currentUser } = useContext(UserContext);
 
-  // 🎯 VERIFICAR SE É SUPERADMIN
-  const isSuperAdmin = currentUser?.tipo === "admin" && currentUser?.superAdmin === true;
-  
-  // 🔍 DEBUG: Verificar status de superAdmin
-  useEffect(() => {
-    console.log("🔐 DEBUG SuperAdmin Check:", {
-      tipo: currentUser?.tipo,
-      superAdmin: currentUser?.superAdmin,
-      isSuperAdmin: isSuperAdmin,
-      email: currentUser?.email,
-      currentUserKeys: currentUser ? Object.keys(currentUser) : []
+  // 🎯 VERIFICAR SE É SUPERADMIN - CORREÇÃO: Aguardar currentUser estar disponível
+  const isSuperAdmin = React.useMemo(() => {
+    if (!currentUser) return false;
+    const result = currentUser.tipo === "admin" && currentUser.superAdmin === true;
+    console.log("🔐 SuperAdmin Check:", {
+      tipo: currentUser.tipo,
+      superAdmin: currentUser.superAdmin,
+      isSuperAdmin: result,
+      email: currentUser.email
     });
-  }, [currentUser, isSuperAdmin]);
+    return result;
+  }, [currentUser]);
 
   // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);

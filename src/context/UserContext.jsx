@@ -198,7 +198,20 @@ export const UserProvider = ({ children }) => {
     loading,
     isAuthenticated: !!usuario,
     isAdmin: usuario?.tipo === "admin",
+    isSuperAdmin: usuario?.tipo === "admin" && usuario?.superAdmin === true, // ✅ ADICIONAR
   };
+
+  // 🔍 DEBUG: Log do contexto quando usuario mudar
+  useEffect(() => {
+    if (usuario) {
+      console.log("👤 UserContext atualizado:", {
+        nome: usuario.nome,
+        tipo: usuario.tipo,
+        superAdmin: usuario.superAdmin,
+        isSuperAdmin: usuario.tipo === "admin" && usuario.superAdmin === true
+      });
+    }
+  }, [usuario]);
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
