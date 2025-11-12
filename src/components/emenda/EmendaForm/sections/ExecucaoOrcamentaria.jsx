@@ -25,11 +25,6 @@ import {
   parseValorMonetario,
 } from "../../../../utils/formatters";
 
-// Importações necessárias para a visualização de erro
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import SaveIcon from "@mui/icons-material/Save";
-
 const formatCurrency = (valor) =>
   (Number(valor) || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -461,21 +456,20 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
   if (!emendaSalvaId) {
     return (
-      <Box sx={{
+      <div style={{
         textAlign: 'center',
-        py: 8,
-        px: 3,
+        padding: '60px 24px',
         backgroundColor: '#f5f5f5',
-        borderRadius: 2
+        borderRadius: '12px'
       }}>
-        <SaveIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
-        <Typography variant="h6" gutterBottom color="text.secondary">
+        <div style={{ fontSize: '64px', color: '#ccc', marginBottom: '16px' }}>💾</div>
+        <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#666', marginBottom: '8px' }}>
           Salve a emenda primeiro
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
+        </h3>
+        <p style={{ fontSize: '14px', color: '#999' }}>
           Para gerenciar despesas, salve a emenda antes de continuar.
-        </Typography>
-      </Box>
+        </p>
+      </div>
     );
   }
 
