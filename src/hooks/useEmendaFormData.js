@@ -692,6 +692,18 @@ export const useEmendaFormData = () => {
           atualizadoPor: user.uid || user.email,
         };
 
+        console.log("💾 Dados COMPLETOS que serão salvos no Firebase:", dadosParaSalvar);
+        console.log("🔍 Campos críticos:", {
+          numero: dadosParaSalvar.numero,
+          autor: dadosParaSalvar.autor,
+          cnpj: dadosParaSalvar.cnpj,
+          cnpjBeneficiario: dadosParaSalvar.cnpjBeneficiario,
+          municipio: dadosParaSalvar.municipio,
+          uf: dadosParaSalvar.uf,
+          valor: dadosParaSalvar.valor,
+          valorRecurso: dadosParaSalvar.valorRecurso,
+        });
+
         // SALVAR NO FIREBASE
         let emendaId = id; // Para edição
 
