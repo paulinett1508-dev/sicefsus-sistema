@@ -1,0 +1,419 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.jsx:37 🔥 PROD Firebase Check: {mode: 'development', projectId: 'emendas-parlamentares-60dbd', hasApiKey: true, authDomain: 'emendas-parlamentares-60dbd.firebaseapp.com'}
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: {departamento: 'Secretaria de Saúde', municipio: '', status: 'ativo', telefone: '89999128436', uf: '', …}
+DisableConsole.jsx:172 👤 Usuário configurado: {nome: 'Paulinett Miranda', tipo: 'admin', municipio: '', uf: ''}
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+loadAllData @ GlobalSearch.jsx:70
+(anônimo) @ GlobalSearch.jsx:36
+commitHookEffectListMount @ react-dom.development.js:23150
+commitPassiveMountOnFiber @ react-dom.development.js:24926
+commitPassiveMountEffects_complete @ react-dom.development.js:24891
+commitPassiveMountEffects_begin @ react-dom.development.js:24878
+commitPassiveMountEffects @ react-dom.development.js:24866
+flushPassiveEffectsImpl @ react-dom.development.js:27039
+flushPassiveEffects @ react-dom.development.js:26984
+(anônimo) @ react-dom.development.js:26769
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 👤 UserContext atualizado: {nome: 'Paulinett Miranda', tipo: 'admin', superAdmin: true, isSuperAdmin: true}
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: {userEmail: 'paulinett1508@gmail.com', userTipo: 'admin', acessoTotal: true, filtroAplicado: false}
+DisableConsole.jsx:172 🔓 ADMIN: Carregando TODOS os dados do sistema
+DisableConsole.jsx:172 ✅ ADMIN carregou: 22 emendas, 92 despesas
+DisableConsole.jsx:172 🔍 Tentativa de navegação para Emendas: {currentPath: '/dashboard', isInFormMode: false, isCreatingEmenda: false, isEditingEmenda: false}
+DisableConsole.jsx:172 ✅ Navegação normal para Emendas
+DisableConsole.jsx:172 📋 Emendas.jsx v2.3 - Dados do usuário: {email: 'paulinett1508@gmail.com', role: 'admin', municipio: '', uf: '', user: {…}}
+DisableConsole.jsx:172 📊 Estatísticas calculadas: {totalEmendas: 0, emendasExecutadas: 0, emendasAtivas: 0, valorTotal: 0}
+DisableConsole.jsx:172 📊 Carregando emendas e despesas...
+DisableConsole.jsx:172 👤 Usuário: {role: 'admin', municipio: '', uf: ''}
+DisableConsole.jsx:172 🔓 Admin - carregando TODAS as emendas
+DisableConsole.jsx:172 ✅ Emendas encontradas: 22
+DisableConsole.jsx:172 ✅ Despesas encontradas: 92
+DisableConsole.jsx:172 ✅ Emenda 42980003 valorTotal OK: {valorParsed: 800000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 42980003 (Passagem Franca/MA): {valorTotal: 800000, valorExecutadoDespesas: 0, saldoDisponivel: 800000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 44190002 valorTotal OK: {valorParsed: 550000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 44190002 (Passagem Franca/MA): {valorTotal: 550000, valorExecutadoDespesas: 0, saldoDisponivel: 550000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 3045000212 valorTotal OK: {valorParsed: 100, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 3045000212 (Belém/AL): {valorTotal: 100, valorExecutadoDespesas: 0, saldoDisponivel: 100, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 30460003 valorTotal OK: {valorParsed: 200000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 30460003 (Passagem Franca/MA): {valorTotal: 200000, valorExecutadoDespesas: 179660.94999999998, saldoDisponivel: 20339.050000000017, percentualExecutado: 89.8}
+DisableConsole.jsx:172 ✅ Emenda 43590002 valorTotal OK: {valorParsed: 1000000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 43590002 (Sucupira do Riachão/MA): {valorTotal: 1000000, valorExecutadoDespesas: 115119.93000000001, saldoDisponivel: 884880.07, percentualExecutado: 11.5}
+DisableConsole.jsx:172 ✅ Emenda 43210001 valorTotal OK: {valorParsed: 200000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 43210001 (Antônio Almeida/PI): {valorTotal: 200000, valorExecutadoDespesas: 0, saldoDisponivel: 200000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 50410001 valorTotal OK: {valorParsed: 500004, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 50410001 (Antônio Almeida/PI): {valorTotal: 500004, valorExecutadoDespesas: 0, saldoDisponivel: 500004, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 2020022 valorTotal OK: {valorParsed: 100, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 2020022 (Águas Lindas de Goiás/GO): {valorTotal: 100, valorExecutadoDespesas: 0, saldoDisponivel: 100, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 40840005 valorTotal OK: {valorParsed: 300000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 40840005 (Sucupira do Riachão/MA): {valorTotal: 300000, valorExecutadoDespesas: 150544.75, saldoDisponivel: 149455.25, percentualExecutado: 50.2}
+DisableConsole.jsx:172 ✅ Emenda 304612542 valorTotal OK: {valorParsed: 5000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 304612542 (Passagem Franca/MA): {valorTotal: 5000, valorExecutadoDespesas: 4650.5, saldoDisponivel: 349.5, percentualExecutado: 93}
+DisableConsole.jsx:172 ✅ Emenda 37580004 valorTotal OK: {valorParsed: 750000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 37580004 (Passagem Franca/MA): {valorTotal: 750000, valorExecutadoDespesas: 0, saldoDisponivel: 750000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 304510002 valorTotal OK: {valorParsed: 100, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 304510002 (Anori/AM): {valorTotal: 100, valorExecutadoDespesas: 0, saldoDisponivel: 100, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 304512000 valorTotal OK: {valorParsed: 100, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 304512000 (Ferreira Gomes/AP): {valorTotal: 100, valorExecutadoDespesas: 0, saldoDisponivel: 100, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 304500020 valorTotal OK: {valorParsed: 100, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 304500020 (Autazes/AM): {valorTotal: 100, valorExecutadoDespesas: 0, saldoDisponivel: 100, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda Programa valorTotal OK: {valorParsed: 300000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda Programa (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: 0}
+DisableConsole.jsx:172 💰 Emenda 40840005 (Passagem Franca/MA): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 41830007 valorTotal OK: {valorParsed: 300000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 41830007 (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 25000, saldoDisponivel: 275000, percentualExecutado: 8.3}
+DisableConsole.jsx:172 ✅ Emenda 44190001 valorTotal OK: {valorParsed: 450000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 44190001 (Passagem Franca/MA): {valorTotal: 450000, valorExecutadoDespesas: 0, saldoDisponivel: 450000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 12460003 valorTotal OK: {valorParsed: 350000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 12460003 (Antônio Almeida/PI): {valorTotal: 350000, valorExecutadoDespesas: 0, saldoDisponivel: 350000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 30460001 valorTotal OK: {valorParsed: 1000000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 30460001 (Passagem Franca/MA): {valorTotal: 1000000, valorExecutadoDespesas: 479218.5199999999, saldoDisponivel: 520781.4800000001, percentualExecutado: 47.9}
+DisableConsole.jsx:172 ✅ 22 emendas processadas para usuário admin
+DisableConsole.jsx:172 🔍 Aplicando filtros: 22
+DisableConsole.jsx:172 ➕ Criando nova emenda
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔍 EmendaForm renderizando DadosBasicosTab: {hasHandleInputChange: false, hasFormData: true, handleInputChangeName: undefined}
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: {modo: 'criar', hasUnsavedChanges: false, salvando: false, isEdit: false, modoVisualizacao: false}
+DisableConsole.jsx:172 📋 Identificacao - Props recebidas: {hasOnChange: false, hasFormData: true, userTipo: 'admin', isBloqueado: false}
+DisableConsole.jsx:172 📋 DadosBancarios - Props recebidas: {hasOnChange: false, hasFormData: true}
+DisableConsole.jsx:172 📋 Cronograma - Props recebidas: {hasOnChange: false, hasFormData: true}
+DisableConsole.jsx:172 📦 DadosBasicosTab - Props recebidas: {hasOnChange: false, onChangeName: undefined, hasFormData: true, hasFieldErrors: true, hasOnClearError: false}
+DisableConsole.jsx:172 🚪 Usuário deslogado
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Não identificado', email: undefined, tipo: undefined, requiredRole: undefined, isAuthenticated: false, …}
+DisableConsole.jsx:172 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+DisableConsole.jsx:172 🔐 Iniciando processo de login...
+DisableConsole.jsx:172 📧 Email: simonepaz1987@gmail.com
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: W9z8rVyOJJaHGbjSSVOPKaPaiYq1
+DisableConsole.jsx:172 ✅ Autenticação Firebase Auth bem-sucedida
+DisableConsole.jsx:172 👤 UID: W9z8rVyOJJaHGbjSSVOPKaPaiYq1
+DisableConsole.jsx:172 🔍 Buscando dados do usuário no Firestore...
+DisableConsole.jsx:172 📋 UID: W9z8rVyOJJaHGbjSSVOPKaPaiYq1
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: {role: 'gestor', primeiroAcesso: false, ultimoAcesso: _Timestamp, municipio: 'Antônio Almeida', nome: 'Simone Miranda', …}
+DisableConsole.jsx:172 👤 Usuário configurado: {nome: 'Simone Miranda', tipo: 'gestor', municipio: 'Antônio Almeida', uf: 'PI'}
+DisableConsole.jsx:172 🏛️ GESTOR DETECTADO - Dados completos: {uid: 'W9z8rVyOJJaHGbjSSVOPKaPaiYq1', email: 'simonepaz1987@gmail.com', nome: 'Simone Miranda', displayName: 'Simone Miranda', tipo: 'gestor', …}
+DisableConsole.jsx:172 ✅ Usuário encontrado por UID: {role: 'gestor', primeiroAcesso: false, ultimoAcesso: _Timestamp, municipio: 'Antônio Almeida', nome: 'Simone Miranda', …}
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+loadAllData @ GlobalSearch.jsx:70
+(anônimo) @ GlobalSearch.jsx:36
+commitHookEffectListMount @ react-dom.development.js:23150
+commitPassiveMountOnFiber @ react-dom.development.js:24926
+commitPassiveMountEffects_complete @ react-dom.development.js:24891
+commitPassiveMountEffects_begin @ react-dom.development.js:24878
+commitPassiveMountEffects @ react-dom.development.js:24866
+flushPassiveEffectsImpl @ react-dom.development.js:27039
+flushPassiveEffects @ react-dom.development.js:26984
+(anônimo) @ react-dom.development.js:26769
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 👤 UserContext atualizado: {nome: 'Simone Miranda', tipo: 'gestor', superAdmin: undefined, isSuperAdmin: false}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 ✅ usePermissions - Permissões GESTOR calculadas: {acessoTotal: false, filtroAplicado: true, semAcesso: false, temAcessoSistema: true, podeGerenciarUsuarios: false, …}
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: {userEmail: 'simonepaz1987@gmail.com', userTipo: 'gestor', acessoTotal: false, filtroAplicado: true}
+DisableConsole.jsx:172 🔐 OPERADOR/GESTOR: Aplicando filtros geográficos
+DisableConsole.jsx:172 👤 Dados do usuário: {email: 'simonepaz1987@gmail.com', municipio: 'Antônio Almeida', uf: 'PI', tipo: 'gestor'}
+DisableConsole.jsx:172 ✅ OPERADOR/GESTOR encontrou: 7 emendas para Antônio Almeida/PI
+DisableConsole.jsx:172 ✅ Dados do usuário carregados: {nome: 'Simone Miranda', tipo: 'gestor', status: 'ativo', municipio: 'Antônio Almeida', uf: 'PI'}
+DisableConsole.jsx:172 ✅ Todas as validações passaram
+DisableConsole.jsx:172 ✅ handleLoginSuccess chamado: {id: 'W9z8rVyOJJaHGbjSSVOPKaPaiYq1', role: 'gestor', primeiroAcesso: false, ultimoAcesso: _Timestamp, municipio: 'Antônio Almeida', …}
+DisableConsole.jsx:172 📋 Definindo usuário com dados completos do Login.jsx: {id: 'W9z8rVyOJJaHGbjSSVOPKaPaiYq1', role: 'gestor', primeiroAcesso: false, ultimoAcesso: _Timestamp, municipio: 'Antônio Almeida', …}
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Simone Miranda', email: 'simonepaz1987@gmail.com', tipo: 'gestor', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ OPERADOR/GESTOR carregou: 1 despesas
+DisableConsole.jsx:172 🔍 Tentativa de navegação para Emendas: {currentPath: '/dashboard', isInFormMode: false, isCreatingEmenda: false, isEditingEmenda: false}
+DisableConsole.jsx:172 ✅ Navegação normal para Emendas
+DisableConsole.jsx:172 📋 Emendas.jsx v2.3 - Dados do usuário: {email: 'simonepaz1987@gmail.com', role: 'gestor', municipio: 'Antônio Almeida', uf: 'PI', user: {…}}
+DisableConsole.jsx:172 📊 Estatísticas calculadas: {totalEmendas: 0, emendasExecutadas: 0, emendasAtivas: 0, valorTotal: 0}
+DisableConsole.jsx:172 📊 Carregando emendas e despesas...
+DisableConsole.jsx:172 👤 Usuário: {role: 'gestor', municipio: 'Antônio Almeida', uf: 'PI'}
+DisableConsole.jsx:172 🔒 Operador - filtrando por município: Antônio Almeida e UF: PI
+DisableConsole.jsx:172 🔒 Operador - filtrando despesas por município: Antônio Almeida e UF: PI
+DisableConsole.jsx:172 ✅ Emendas encontradas: 7
+DisableConsole.jsx:172 ✅ Despesas encontradas: 1
+DisableConsole.jsx:172 ✅ Emenda 43210001 valorTotal OK: {valorParsed: 200000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 43210001 (Antônio Almeida/PI): {valorTotal: 200000, valorExecutadoDespesas: 0, saldoDisponivel: 200000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 50410001 valorTotal OK: {valorParsed: 500004, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 50410001 (Antônio Almeida/PI): {valorTotal: 500004, valorExecutadoDespesas: 0, saldoDisponivel: 500004, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda Programa valorTotal OK: {valorParsed: 300000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda Programa (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 41830007 valorTotal OK: {valorParsed: 300000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 41830007 (Antônio Almeida/PI): {valorTotal: 300000, valorExecutadoDespesas: 0, saldoDisponivel: 300000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ Emenda 12460003 valorTotal OK: {valorParsed: 350000, campoUsado: 'valorRecurso'}
+DisableConsole.jsx:172 💰 Emenda 12460003 (Antônio Almeida/PI): {valorTotal: 350000, valorExecutadoDespesas: 0, saldoDisponivel: 350000, percentualExecutado: 0}
+DisableConsole.jsx:172 ✅ 7 emendas processadas para usuário gestor
+DisableConsole.jsx:172 🔍 Aplicando filtros: 7
+DisableConsole.jsx:172 ➕ Criando nova emenda
+DisableConsole.jsx:172 🔍 EmendaForm renderizando DadosBasicosTab: {hasHandleInputChange: false, hasFormData: true, handleInputChangeName: undefined}
+DisableConsole.jsx:172 📋 DadosBasicos renderizado
+DisableConsole.jsx:172 🔧 EmendaFormActions - Estado: {modo: 'criar', hasUnsavedChanges: false, salvando: false, isEdit: false, modoVisualizacao: false}
+DisableConsole.jsx:172 📋 Identificacao - Props recebidas: {hasOnChange: false, hasFormData: true, userTipo: 'gestor', isBloqueado: true}
+DisableConsole.jsx:172 📋 DadosBancarios - Props recebidas: {hasOnChange: false, hasFormData: true}
+DisableConsole.jsx:172 📋 Cronograma - Props recebidas: {hasOnChange: false, hasFormData: true}
+DisableConsole.jsx:172 📦 DadosBasicosTab - Props recebidas: {hasOnChange: false, onChangeName: undefined, hasFormData: true, hasFieldErrors: true, hasOnClearError: false}
+DisableConsole.jsx:172 ✅ GESTOR: Preenchendo UF e Município automaticamente: {municipio: 'Antônio Almeida', uf: 'PI'}
+DisableConsole.jsx:172 🏙️ Carregando municípios para PI...
+DisableConsole.jsx:172 🌐 Tentativa 1/2 - API IBGE para PI
+DisableConsole.jsx:172 ✅ API IBGE sucesso para PI: 224 municípios
+DisableConsole.jsx:172 💾 Cache salvo para PI: 224 municípios
+DisableConsole.jsx:172 ✅ 224 municípios carregados para PI
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Não identificado', email: undefined, tipo: undefined, requiredRole: undefined, isAuthenticated: false, …}
+DisableConsole.jsx:172 ❌ PrivateRoute: Usuário não autenticado, redirecionando para /
+DisableConsole.jsx:172 🔐 Iniciando processo de login...
+DisableConsole.jsx:172 📧 Email: paulinete.miranda@laboratoriosobral.com.br
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: Idl157msVndkfJFGLVYnInSUG7i2
+DisableConsole.jsx:172 ✅ Autenticação Firebase Auth bem-sucedida
+DisableConsole.jsx:172 👤 UID: Idl157msVndkfJFGLVYnInSUG7i2
+DisableConsole.jsx:172 🔍 Buscando dados do usuário no Firestore...
+DisableConsole.jsx:172 📋 UID: Idl157msVndkfJFGLVYnInSUG7i2
+DisableConsole.jsx:172 ⚠️ Documento do usuário não encontrado, criando básico...
+DisableConsole.jsx:172 🔍 Não encontrado por UID, buscando por email...
+DisableConsole.jsx:172  ❌ Erro ao buscar dados do usuário: FirebaseError: Missing or insufficient permissions.
+(anônimo) @ DisableConsole.jsx:172
+buscarDadosUsuario @ Login.jsx:103
+await in buscarDadosUsuario
+handleSubmit @ Login.jsx:124
+await in handleSubmit
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anônimo) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26140
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+DisableConsole.jsx:172  ❌ Erro no login: FirebaseError: Missing or insufficient permissions.
+(anônimo) @ DisableConsole.jsx:172
+handleSubmit @ Login.jsx:159
+await in handleSubmit
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anônimo) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26140
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+DisableConsole.jsx:172  ❌ Erro ao carregar dados do usuário: FirebaseError: Missing or insufficient permissions.
+(anônimo) @ DisableConsole.jsx:172
+(anônimo) @ UserContext.jsx:161
+await in (anônimo)
+(anônimo) @ subscribe.ts:104
+(anônimo) @ subscribe.ts:233
+Promise.then
+sendOne @ subscribe.ts:230
+forEachObserver @ subscribe.ts:220
+next @ subscribe.ts:103
+notifyAuthListeners @ auth_impl.ts:724
+(anônimo) @ auth_impl.ts:448
+Promise.then
+queue @ auth_impl.ts:804
+_updateCurrentUser @ auth_impl.ts:446
+await in _updateCurrentUser
+_signInWithCredential @ credential.ts:56
+await in _signInWithCredential
+signInWithCredential @ credential.ts:79
+signInWithEmailAndPassword @ email_and_password.ts:355
+handleSubmit @ Login.jsx:119
+callCallback2 @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anônimo) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26140
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+loadAllData @ GlobalSearch.jsx:70
+(anônimo) @ GlobalSearch.jsx:36
+commitHookEffectListMount @ react-dom.development.js:23150
+commitPassiveMountOnFiber @ react-dom.development.js:24926
+commitPassiveMountEffects_complete @ react-dom.development.js:24891
+commitPassiveMountEffects_begin @ react-dom.development.js:24878
+commitPassiveMountEffects @ react-dom.development.js:24866
+flushPassiveEffectsImpl @ react-dom.development.js:27039
+flushPassiveEffects @ react-dom.development.js:26984
+(anônimo) @ react-dom.development.js:26769
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 👤 UserContext atualizado: {nome: 'paulinete.miranda', tipo: 'operador', superAdmin: undefined, isSuperAdmin: false}
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'paulinete.miranda', email: 'paulinete.miranda@laboratoriosobral.com.br', tipo: 'operador', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172  ⚠️ PrivateRoute: Operador sem localização definida, mas permitindo acesso básico
+(anônimo) @ DisableConsole.jsx:172
+PrivateRoute @ PrivateRoute.jsx:61
+renderWithHooks @ react-dom.development.js:16305
+mountIndeterminateComponent @ react-dom.development.js:20074
+beginWork @ react-dom.development.js:21587
+beginWork$1 @ react-dom.development.js:27426
+performUnitOfWork @ react-dom.development.js:26557
+workLoopConcurrent @ react-dom.development.js:26543
+renderRootConcurrent @ react-dom.development.js:26505
+performConcurrentWorkOnRoot @ react-dom.development.js:25738
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+   POST https://firestore.googleapis.com/google.firestore.v1.Firestore/Write/channel?VER=8&database=projects%2Femendas-parlamentares-60dbd%2Fdatabases%2F(default)&gsessionid=aKpam9b_NRh1eNu8BxojrTAMRfQC_cIqku8yiteNRPw&SID=_hhvU3SvNb7NZ2Tv4o2mNw&RID=26038&TYPE=terminate&zx=b6cd02xntdck 400 (Bad Request)
+gc @ firebase_firestore.js?v=5e478764:2340
+Y2.close @ firebase_firestore.js?v=5e478764:2704
+(anônimo) @ firebase_firestore.js?v=5e478764:13145
+(anônimo) @ firebase_firestore.js?v=5e478764:13108
+ab @ firebase_firestore.js?v=5e478764:1046
+F2 @ firebase_firestore.js?v=5e478764:1012
+Z2.ta @ firebase_firestore.js?v=5e478764:2756
+Rb @ firebase_firestore.js?v=5e478764:1553
+M2.Y @ firebase_firestore.js?v=5e478764:1400
+M2.ca @ firebase_firestore.js?v=5e478764:1324
+ab @ firebase_firestore.js?v=5e478764:1046
+F2 @ firebase_firestore.js?v=5e478764:1012
+Wc @ firebase_firestore.js?v=5e478764:2139
+h.bb @ firebase_firestore.js?v=5e478764:2133
+h.Ea @ firebase_firestore.js?v=5e478764:2130
+Lc @ firebase_firestore.js?v=5e478764:2022
+h.Pa @ firebase_firestore.js?v=5e478764:1987
+Promise.then
+Nc @ firebase_firestore.js?v=5e478764:1976
+h.Pa @ firebase_firestore.js?v=5e478764:1988
+Promise.then
+Nc @ firebase_firestore.js?v=5e478764:1976
+h.Sa @ firebase_firestore.js?v=5e478764:1971
+Promise.then
+h.send @ firebase_firestore.js?v=5e478764:1948
+h.ea @ firebase_firestore.js?v=5e478764:2106
+Jb @ firebase_firestore.js?v=5e478764:1317
+fd @ firebase_firestore.js?v=5e478764:2545
+h.Fa @ firebase_firestore.js?v=5e478764:2512
+Da @ firebase_firestore.js?v=5e478764:736
+Promise.then
+x2 @ firebase_firestore.js?v=5e478764:730
+ec @ firebase_firestore.js?v=5e478764:2497
+Rb @ firebase_firestore.js?v=5e478764:1548
+M2.Y @ firebase_firestore.js?v=5e478764:1400
+M2.ca @ firebase_firestore.js?v=5e478764:1324
+ab @ firebase_firestore.js?v=5e478764:1046
+F2 @ firebase_firestore.js?v=5e478764:1012
+Wc @ firebase_firestore.js?v=5e478764:2139
+h.bb @ firebase_firestore.js?v=5e478764:2133
+h.Ea @ firebase_firestore.js?v=5e478764:2130
+Lc @ firebase_firestore.js?v=5e478764:2022
+h.Pa @ firebase_firestore.js?v=5e478764:1987
+Promise.then
+Nc @ firebase_firestore.js?v=5e478764:1976
+h.Sa @ firebase_firestore.js?v=5e478764:1971
+Promise.then
+h.send @ firebase_firestore.js?v=5e478764:1948
+h.ea @ firebase_firestore.js?v=5e478764:2106
+Jb @ firebase_firestore.js?v=5e478764:1312
+Hb @ firebase_firestore.js?v=5e478764:1286
+h.Ga @ firebase_firestore.js?v=5e478764:2428
+Da @ firebase_firestore.js?v=5e478764:736
+Promise.then
+x2 @ firebase_firestore.js?v=5e478764:730
+fc @ firebase_firestore.js?v=5e478764:2365
+h.connect @ firebase_firestore.js?v=5e478764:2324
+Y2.m @ firebase_firestore.js?v=5e478764:2701
+Zo @ firebase_firestore.js?v=5e478764:13102
+send @ firebase_firestore.js?v=5e478764:12992
+Q_ @ firebase_firestore.js?v=5e478764:13312
+ia @ firebase_firestore.js?v=5e478764:13516
+__PRIVATE_onWriteStreamOpen @ firebase_firestore.js?v=5e478764:13875
+(anônimo) @ firebase_firestore.js?v=5e478764:13390
+(anônimo) @ firebase_firestore.js?v=5e478764:13414
+(anônimo) @ firebase_firestore.js?v=5e478764:16542
+(anônimo) @ firebase_firestore.js?v=5e478764:16574
+Promise.then
+_c @ firebase_firestore.js?v=5e478764:16574
+enqueue @ firebase_firestore.js?v=5e478764:16542
+enqueueAndForget @ firebase_firestore.js?v=5e478764:16524
+(anônimo) @ firebase_firestore.js?v=5e478764:13414
+(anônimo) @ firebase_firestore.js?v=5e478764:13390
+a_ @ firebase_firestore.js?v=5e478764:12998
+(anônimo) @ firebase_firestore.js?v=5e478764:13152
+setTimeout
+I_ @ firebase_firestore.js?v=5e478764:13151
+H_ @ firebase_firestore.js?v=5e478764:13495
+z_ @ firebase_firestore.js?v=5e478764:13387
+(anônimo) @ firebase_firestore.js?v=5e478764:13377
+Promise.then
+auth @ firebase_firestore.js?v=5e478764:13373
+start @ firebase_firestore.js?v=5e478764:13272
+start @ firebase_firestore.js?v=5e478764:13489
+__PRIVATE_startWriteStream @ firebase_firestore.js?v=5e478764:13872
+__PRIVATE_fillWritePipeline @ firebase_firestore.js?v=5e478764:13858
+await in __PRIVATE_fillWritePipeline
+__PRIVATE_syncEngineWrite @ firebase_firestore.js?v=5e478764:14886
+await in __PRIVATE_syncEngineWrite
+(anônimo) @ firebase_firestore.js?v=5e478764:18385
+await in (anônimo)
+(anônimo) @ firebase_firestore.js?v=5e478764:16542
+(anônimo) @ firebase_firestore.js?v=5e478764:16574
+Promise.then
+_c @ firebase_firestore.js?v=5e478764:16574
+enqueue @ firebase_firestore.js?v=5e478764:16542
+enqueueAndForget @ firebase_firestore.js?v=5e478764:16524
+__PRIVATE_firestoreClientWrite @ firebase_firestore.js?v=5e478764:18385
+executeWrite @ firebase_firestore.js?v=5e478764:18386
+setDoc @ firebase_firestore.js?v=5e478764:18315
+(anônimo) @ UserContext.jsx:114
+await in (anônimo)
+(anônimo) @ chunk-WD64COPP.js?v=5e478764:746
+(anônimo) @ chunk-WD64COPP.js?v=5e478764:838
+Promise.then
+sendOne @ chunk-WD64COPP.js?v=5e478764:835
+forEachObserver @ chunk-WD64COPP.js?v=5e478764:828
+next @ chunk-WD64COPP.js?v=5e478764:745
+notifyAuthListeners @ firebase_auth.js?v=5e478764:2739
+(anônimo) @ firebase_auth.js?v=5e478764:2548
+Promise.then
+queue @ firebase_auth.js?v=5e478764:2796
+_updateCurrentUser @ firebase_auth.js?v=5e478764:2546
+await in _updateCurrentUser
+_signInWithCredential @ firebase_auth.js?v=5e478764:4646
+await in _signInWithCredential
+signInWithCredential @ firebase_auth.js?v=5e478764:4651
+signInWithEmailAndPassword @ firebase_auth.js?v=5e478764:4886
+handleSubmit @ Login.jsx:111
+callCallback2 @ chunk-P5X465B4.js?v=5e478764:3674
+invokeGuardedCallbackDev @ chunk-P5X465B4.js?v=5e478764:3699
+invokeGuardedCallback @ chunk-P5X465B4.js?v=5e478764:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-P5X465B4.js?v=5e478764:3736
+executeDispatch @ chunk-P5X465B4.js?v=5e478764:7016
+processDispatchQueueItemsInOrder @ chunk-P5X465B4.js?v=5e478764:7036
+processDispatchQueue @ chunk-P5X465B4.js?v=5e478764:7045
+dispatchEventsForPlugins @ chunk-P5X465B4.js?v=5e478764:7053
+(anônimo) @ chunk-P5X465B4.js?v=5e478764:7177
+batchedUpdates$1 @ chunk-P5X465B4.js?v=5e478764:18909
+batchedUpdates @ chunk-P5X465B4.js?v=5e478764:3579
+dispatchEventForPluginEventSystem @ chunk-P5X465B4.js?v=5e478764:7176
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-P5X465B4.js?v=5e478764:5478
+dispatchEvent @ chunk-P5X465B4.js?v=5e478764:5472
+dispatchDiscreteEvent @ chunk-P5X465B4.js?v=5e478764:5449
