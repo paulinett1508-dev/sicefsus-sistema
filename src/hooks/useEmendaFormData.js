@@ -385,13 +385,19 @@ export const useEmendaFormData = () => {
   }, []);
 
   // 🔄 HANDLERS
-  const handleInputChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e) => {
+      const { name, value } = e.target;
+
+      console.log("📝 useEmendaFormData.handleInputChange executado:", {
+        field: name,
+        value: value,
+        valueType: typeof value,
+        isFunction: true
+      });
+    },
+    [],
+  );
 
   const toggleSection = useCallback((section) => {
     setExpandedSections((prev) => ({

@@ -9,6 +9,17 @@ import Cronograma from "./Cronograma";
 import InformacoesComplementares from "./InformacoesComplementares";
 
 const DadosBasicosTab = ({ formData, onChange, fieldErrors, onClearError }) => {
+  // ✅ DEBUG: Verificar props recebidas
+  React.useEffect(() => {
+    console.log('📦 DadosBasicosTab - Props recebidas:', {
+      hasOnChange: typeof onChange === 'function',
+      onChangeName: onChange?.name,
+      hasFormData: !!formData,
+      hasFieldErrors: !!fieldErrors,
+      hasOnClearError: typeof onClearError === 'function'
+    });
+  }, [onChange, formData, fieldErrors, onClearError]);
+
   return (
     <div style={styles.container}>
       {/* ✅ SEÇÃO: Identificação */}

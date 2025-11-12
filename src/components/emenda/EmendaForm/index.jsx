@@ -140,6 +140,12 @@ export default function EmendaForm() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "dadosBasicos":
+        console.log('🔍 EmendaForm renderizando DadosBasicosTab:', {
+          hasHandleInputChange: typeof handleInputChange === 'function',
+          hasFormData: !!formData,
+          handleInputChangeName: handleInputChange?.name
+        });
+
         return (
           <DadosBasicosTab
             formData={formData}
@@ -164,12 +170,12 @@ export default function EmendaForm() {
         });
 
         return (
-          <ExecucaoOrcamentaria 
+          <ExecucaoOrcamentaria
             formData={formDataComId}
             onChange={handleInputChange}
             fieldErrors={fieldErrors}
             onClearError={clearFieldError}
-            usuario={user} 
+            usuario={user}
           />
         );
       default:
