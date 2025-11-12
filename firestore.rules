@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -60,7 +61,7 @@ service cloud.firestore {
     // ========================================
 
     match /emendas/{emendaId} {
-      // Admin: Acesso total
+      // 🔓 Admin: Acesso total SEM restrição de localização
       allow read, write: if isAdmin();
 
       // Gestor/Operador: Acesso restrito por localização
@@ -68,18 +69,23 @@ service cloud.firestore {
         isGestor() || isOperador()
       ) && matchesUserLocation(resource.data);
 
+      // 🎯 CRIAR: Admin sem restrição, Gestor/Operador com validação
       allow create: if isAuthenticated() && (
-        isGestor() || isOperador()
-      ) && matchesUserLocation(request.resource.data);
+        isAdmin() || 
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+      );
 
+      // ATUALIZAR: Admin sem restrição, Gestor/Operador com validação
       allow update: if isAuthenticated() && (
-        isGestor() || isOperador()
-      ) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data);
+        isAdmin() || 
+        ((isGestor() || isOperador()) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data))
+      );
 
-      // 🔒 Apenas Admin e Gestor podem excluir
+      // 🔒 EXCLUIR: Apenas Admin e Gestor
       allow delete: if isAuthenticated() && (
-        isAdmin() || isGestor()
-      ) && matchesUserLocation(resource.data);
+        isAdmin() || 
+        (isGestor() && matchesUserLocation(resource.data))
+      );
     }
 
     // ========================================
@@ -91,23 +97,22 @@ service cloud.firestore {
       allow read, write: if isAdmin();
 
       // Gestor/Operador: Leitura permitida se autenticado
-      // (validação de localização será feita via emendaId)
       allow read: if isAuthenticated() && (
         isGestor() || isOperador()
       );
 
-      // Criar despesa: permitir sem validação de localização
-      // (será validada pela emenda relacionada)
+      // Criar despesa: Admin sem restrição, outros validam
       allow create: if isAuthenticated() && (
-        isGestor() || isOperador()
+        isAdmin() || isGestor() || isOperador()
       );
 
-      // Atualizar: validar se tem os campos de localização
+      // Atualizar: Admin sem restrição, outros validam localização se presente
       allow update: if isAuthenticated() && (
-        isGestor() || isOperador()
-      ) && (
-        !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
-        matchesUserLocation(request.resource.data)
+        isAdmin() || 
+        ((isGestor() || isOperador()) && (
+          !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
+          matchesUserLocation(request.resource.data)
+        ))
       );
 
       // 🔒 Apenas Admin e Gestor podem excluir
