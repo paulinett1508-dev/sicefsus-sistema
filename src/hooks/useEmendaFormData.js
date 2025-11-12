@@ -656,13 +656,20 @@ export const useEmendaFormData = () => {
       setSalvando(true);
 
       try {
+        // ✅ CONVERTER VALOR PARA NÚMERO ANTES DE TUDO
         const valorNumerico = parseFloat(
           formData.valor
             ?.toString()
             .replace(/[R$\s]/g, "")
             .replace(/\./g, "")
             .replace(",", "."),
-        );
+        ) || 0;
+
+        console.log("💰 Valor convertido:", {
+          original: formData.valor,
+          convertido: valorNumerico,
+          tipo: typeof valorNumerico
+        });
 
         // 🚨 CORREÇÃO CRÍTICA: Sincronizar beneficiario e cnpjBeneficiario
         const cnpjBeneficiarioFinal = formData.beneficiario || formData.cnpjBeneficiario || "";
@@ -674,7 +681,7 @@ export const useEmendaFormData = () => {
           municipio: cleanField(formData.municipio),
           uf: cleanField(formData.uf),
           valor: valorNumerico,
-          valorRecurso: valorNumerico, // Este campo será convertido para número
+          valorRecurso: valorNumerico, // ✅ Já é number aqui
           programa: cleanField(formData.programa),
           beneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
           cnpjBeneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
@@ -731,20 +738,12 @@ export const useEmendaFormData = () => {
           cnpjBeneficiario_LENGTH: dadosParaSalvar.cnpjBeneficiario?.length,
         });
 
-        // ✅ CONVERTER valorRecurso PARA NUMBER
-        if (typeof dadosParaSalvar.valorRecurso === 'string') {
-          const valorNumericoRecurso = parseFloat(
-            dadosParaSalvar.valorRecurso
-              .replace(/[R$\s]/g, '')
-              .replace(/\./g, '')
-              .replace(',', '.')
-          ) || 0;
-          dadosParaSalvar.valorRecurso = valorNumericoRecurso;
-          console.log("💰 valorRecurso convertido:", {
-            string: dadosParaSalvar.valorRecurso,
-            number: valorNumericoRecurso
-          });
-        }
+        // ✅ VALIDAÇÃO FINAL: Confirmar que valorRecurso é number
+        console.log("💰 Validação final valorRecurso:", {
+          valor: dadosParaSalvar.valorRecurso,
+          tipo: typeof dadosParaSalvar.valorRecurso,
+          isNumber: typeof dadosParaSalvar.valorRecurso === 'number'
+        });
 
         // ✅ SALVAR NO FIRESTORE
         let emendaId = id; // Para edição
