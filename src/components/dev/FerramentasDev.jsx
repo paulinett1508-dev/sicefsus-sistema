@@ -11,6 +11,7 @@ import UsuariosTab from "./tabs/UsuariosTab";
 import ValidacaoTab from "./tabs/ValidacaoTab";
 import AnalisesTab from "./tabs/AnalisesTab";
 import ConfigTab from "./tabs/ConfigTab";
+import IAMTab from "./tabs/IAMTab";
 
 // CSS Module
 import styles from "./FerramentasDev.module.css";
@@ -58,6 +59,12 @@ const FerramentasDev = () => {
       componente: ValidacaoTab,
     },
     { id: "analises", icone: "📈", label: "Análises", componente: AnalisesTab },
+    {
+      id: "iam",
+      icone: "🔐",
+      label: "IAM",
+      componente: IAMTab,
+    },
     {
       id: "config",
       icone: "⚙️",
