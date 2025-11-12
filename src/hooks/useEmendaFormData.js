@@ -35,7 +35,6 @@ export const useEmendaFormData = () => {
     autor: "",
     municipio: "",
     uf: "",
-    cnpj: "",
     valor: "",
     valorRecurso: "",
     programa: "",
@@ -460,7 +459,6 @@ export const useEmendaFormData = () => {
             autor: data.autor || data.parlamentar || "",
             municipio: data.municipio || "",
             uf: data.uf || "",
-            cnpj: data.cnpj || "",
             valor:
               data.valor?.toLocaleString("pt-BR", {
                 style: "currency",
@@ -673,7 +671,6 @@ export const useEmendaFormData = () => {
           parlamentar: cleanField(formData.autor),
           municipio: cleanField(formData.municipio),
           uf: cleanField(formData.uf),
-          cnpj: cleanCNPJ(formData.cnpj), // ✅ Usar cleanCNPJ
           valor: valorNumerico,
           valorRecurso: valorNumerico,
           programa: cleanField(formData.programa),
@@ -706,7 +703,6 @@ export const useEmendaFormData = () => {
         console.log("🔍 Campos críticos:", {
           numero: dadosParaSalvar.numero,
           autor: dadosParaSalvar.autor,
-          cnpj: dadosParaSalvar.cnpj,
           cnpjBeneficiario: dadosParaSalvar.cnpjBeneficiario,
           municipio: dadosParaSalvar.municipio,
           uf: dadosParaSalvar.uf,

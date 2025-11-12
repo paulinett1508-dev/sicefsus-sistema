@@ -2,7 +2,6 @@
 // ✅ CORREÇÃO CRÍTICA: Props alinhadas com EmendaForm
 
 import React, { useState, useEffect, useContext } from "react";
-import CNPJInput from "../../../CNPJInput";
 import { UserContext } from "../../../../context/UserContext";
 import { carregarMunicipios as carregarMunicipiosCache } from "../../../../utils/municipiosCache";
 
@@ -147,47 +146,11 @@ const Identificacao = ({
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📋</span>
-        Identificação
+        <span style={styles.legendIcon}>📍</span>
+        Localização
       </legend>
 
       <div style={styles.formGrid}>
-        {/* CNPJ */}
-        <div style={styles.formGroup}>
-          <CNPJInput
-            label="CNPJ"
-            value={formData.cnpj || ""}
-            onChange={(e) => {
-              console.log("🔍 CNPJInput onChange evento:", e);
-              handleChange({
-                target: {
-                  name: "cnpj",
-                  value: e.target.value,
-                },
-              });
-            }}
-            onValidChange={(isValid, valorFormatado) => {
-              console.log("🔍 CNPJInput validação:", { isValid, valorFormatado });
-            }}
-            required={true}
-            showValidation={true}
-            disabled={disabled}
-            style={styles.formGroup}
-            inputStyle={{
-              ...styles.input,
-              padding: "12px",
-              fontSize: "14px",
-              borderWidth: "2px",
-              borderStyle: "solid",
-              borderColor: fieldErrors.cnpj ? "#dc3545" : "#dee2e6",
-              borderRadius: "6px",
-            }}
-          />
-          {fieldErrors.cnpj && (
-            <small style={styles.errorText}>{fieldErrors.cnpj}</small>
-          )}
-        </div>
-
         {/* UF */}
         <div style={styles.formGroup}>
           <label style={styles.label}>
