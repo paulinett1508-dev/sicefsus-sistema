@@ -16,23 +16,40 @@ const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmi
     { id: "rules", label: "🔐 Firestore Rules", icon: "🔐", superAdminOnly: true },
     { id: "migracao", label: "🔄 Migração", icon: "🔄", superAdminOnly: true },
   ];
-  
+
   const tabs = allTabs.filter(tab => {
-    const shouldShow = tab.showAlways || (tab.superAdminOnly && isSuperAdmin);
-    console.log(`🔍 Tab "${tab.id}":`, {
+    // ✅ CORREÇÃO: Garantir que isSuperAdmin seja booleano
+    const isSuperAdminBool = Boolean(isSuperAdmin);
+    const shouldShow = tab.showAlways === true || (tab.superAdminOnly === true && isSuperAdminBool === true);
+
+    console.log(`🔍 Tab "${tab.id}" ANÁLISE DETALHADA:`, {
       showAlways: tab.showAlways,
+      showAlwaysType: typeof tab.showAlways,
       superAdminOnly: tab.superAdminOnly,
-      isSuperAdmin,
-      shouldShow
+      superAdminOnlyType: typeof tab.superAdminOnly,
+      isSuperAdmin: isSuperAdmin,
+      isSuperAdminType: typeof isSuperAdmin,
+      isSuperAdminBool: isSuperAdminBool,
+      shouldShow: shouldShow,
+      formula: `${tab.showAlways} || (${tab.superAdminOnly} && ${isSuperAdminBool})`
     });
+
     return shouldShow;
   });
-  
-  console.log("✅ AdminTabs RESULTADO:", {
+
+  console.log("✅ AdminTabs RESULTADO FINAL:", {
     isSuperAdmin,
+    isSuperAdminType: typeof isSuperAdmin,
     totalTabs: allTabs.length,
     visibleTabs: tabs.length,
-    tabsVisiveis: tabs.map(t => t.id)
+    tabsVisiveis: tabs.map(t => t.id),
+    tabsOcultas: allTabs.filter(t => !tabs.includes(t)).map(t => t.id),
+    detalhamento: allTabs.map(t => ({
+      id: t.id,
+      superAdminOnly: t.superAdminOnly,
+      showAlways: t.showAlways,
+      incluida: tabs.some(tab => tab.id === t.id)
+    }))
   });
 
   return (
