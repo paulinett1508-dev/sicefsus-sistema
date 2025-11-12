@@ -22,8 +22,10 @@ const Identificacao = ({
 
   // ✅ PRÉ-PREENCHER MUNICÍPIO/UF DO OPERADOR/GESTOR AO CRIAR NOVA EMENDA
   useEffect(() => {
-    if (isBloqueadoLocalizacao && user?.municipio && user?.uf && !formData?.numero) {
-      // Só preenche se for operador/gestor E se for nova emenda (sem número)
+    // ✅ CORREÇÃO: Só preencher se for NOVA emenda (não tem UF nem município preenchidos ainda)
+    const isNovaEmenda = !formData?.uf && !formData?.municipio;
+    
+    if (isBloqueadoLocalizacao && user?.municipio && user?.uf && isNovaEmenda) {
       console.log(`✅ Pré-preenchendo localização do ${user?.tipo}:`, {
         municipio: user.municipio,
         uf: user.uf,
@@ -47,7 +49,7 @@ const Identificacao = ({
         });
       }, 500);
     }
-  }, [isBloqueadoLocalizacao, user?.municipio, user?.uf, formData?.numero]);
+  }, [isBloqueadoLocalizacao, user?.municipio, user?.uf, formData?.uf, formData?.municipio, onChange]);
 
   // Lista de UFs brasileiras
   const ufs = [
