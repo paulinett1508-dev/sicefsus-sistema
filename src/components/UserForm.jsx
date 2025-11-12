@@ -251,7 +251,7 @@ const UserForm = ({
               ✅ Selecione o estado e município para o operador/gestor
             </small>
           </div>
-        )}
+        ) : null}
 
         {/* ✅ PREVIEW DA CONFIGURAÇÃO */}
         {formData.municipio && formData.uf && (
