@@ -11,9 +11,14 @@ packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano", "tree"]
 language = "nodejs"
 
 [deployment]
+run = ["sh", "-c", "npm run dev"]
+build = ["sh", "-c", "npm run build"]
 deploymentTarget = "static"
-build = ["sh", "-c", "npm run build:prod"]
 publicDir = "dist"
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
 
 [[ports]]
 localPort = 3000
