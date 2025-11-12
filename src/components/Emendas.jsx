@@ -117,22 +117,42 @@ const Emendas = () => {
         console.log("🔓 Admin - carregando TODAS as emendas");
         emendasQuery = collection(db, "emendas");
       } else {
-        console.log(
-          "🔒 Operador - filtrando por município:",
-          userMunicipio,
-          "e UF:",
-          userUf,
-        );
-        emendasQuery = query(
-          collection(db, "emendas"),
-          where("municipio", "==", userMunicipio),
-          where("uf", "==", userUf),
-        );
+        // ✅ GESTOR/OPERADOR: Filtrar por município E UF (query composta)
+        if (userRole === "gestor" || userRole === "operador") {
+          console.log(
+            `🔒 Operador - filtrando por município: ${userMunicipio} e UF: ${userUf}`,
+          );
+          emendasQuery = query(
+            collection(db, "emendas"),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf)
+          );
+        }
       }
+
+      // Buscar despesas com os mesmos filtros
+      let despesasQuery;
+      if (userRole === "admin") {
+        console.log("🔓 Admin - carregando TODAS as despesas");
+        despesasQuery = collection(db, "despesas");
+      } else {
+        // ✅ GESTOR/OPERADOR: Filtrar por município E UF (query composta)
+        if (userRole === "gestor" || userRole === "operador") {
+          console.log(
+            `🔒 Operador - filtrando despesas por município: ${userMunicipio} e UF: ${userUf}`,
+          );
+          despesasQuery = query(
+            collection(db, "despesas"),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf)
+          );
+        }
+      }
+
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
         getDocs(emendasQuery),
-        getDocs(collection(db, "despesas")),
+        getDocs(despesasQuery),
       ]);
 
       const emendasData = emendasSnapshot.docs.map((doc) => ({
