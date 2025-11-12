@@ -25,6 +25,11 @@ import {
   parseValorMonetario,
 } from "../../../../utils/formatters";
 
+// Importações necessárias para a visualização de erro
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import SaveIcon from "@mui/icons-material/Save";
+
 const formatCurrency = (valor) =>
   (Number(valor) || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -442,21 +447,38 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     }
   }, [despesaEmEdicao, modoVisualizacao]);
 
-  if (!temEmendaSalva) {
+
+  // Verificar se a emenda está salva
+  // Verifica tanto emendaId (criação) quanto formData.id (edição)
+  const emendaSalvaId = emendaId || formData?.id;
+
+  console.log('🔍 ExecucaoOrcamentaria - IDs:', {
+    emendaId,
+    formDataId: formData?.id,
+    emendaSalvaId,
+    numeroEmenda: formData?.numeroEmenda
+  });
+
+  if (!emendaSalvaId) {
     return (
-      <div style={styles.container}>
-        <div style={styles.emptyState}>
-          <div>
-            <div style={styles.emptyEmoji}>💾</div>
-            <h3 style={styles.emptyTitle}>Salve a emenda primeiro</h3>
-            <p style={styles.emptyText}>
-              Para gerenciar despesas, salve a emenda antes de continuar.
-            </p>
-          </div>
-        </div>
-      </div>
+      <Box sx={{
+        textAlign: 'center',
+        py: 8,
+        px: 3,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 2
+      }}>
+        <SaveIcon sx={{ fontSize: 64, color: '#ccc', mb: 2 }} />
+        <Typography variant="h6" gutterBottom color="text.secondary">
+          Salve a emenda primeiro
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Para gerenciar despesas, salve a emenda antes de continuar.
+        </Typography>
+      </Box>
     );
   }
+
 
   return (
     <div style={styles.container}>
