@@ -123,9 +123,11 @@ const Identificacao = ({
 
   // ✅ HANDLER COM LIMPEZA DE ERRO
   const handleChange = (e) => {
-    const { name } = e.target;
+    const { name, value } = e.target;
 
-    // Verificar se onChange existe antes de chamar
+    console.log('📝 Identificacao.handleChange:', { name, value });
+
+    // Chamar onChange do pai
     if (onChange && typeof onChange === 'function') {
       onChange(e);
     }
@@ -138,21 +140,25 @@ const Identificacao = ({
 
   // Handler específico para UF (limpa município)
   const handleUfChange = (e) => {
+    const ufSelecionada = e.target.value;
+    console.log('🗺️ UF selecionada:', ufSelecionada);
+
+    // Atualizar UF
     handleChange(e);
 
-    // Depois limpa o município se houver
+    // Limpar município quando UF mudar
     if (formData?.municipio) {
-      const municipioEvent = {
-        target: {
-          name: "municipio",
-          value: "",
-        },
-      };
       setTimeout(() => {
+        const municipioEvent = {
+          target: {
+            name: "municipio",
+            value: "",
+          },
+        };
         if (onChange && typeof onChange === 'function') {
           onChange(municipioEvent);
         }
-      }, 100);
+      }, 50);
     }
   };
 
@@ -191,11 +197,6 @@ const Identificacao = ({
           {fieldErrors.uf && (
             <small style={styles.errorText}>{fieldErrors.uf}</small>
           )}
-          {isAdmin && !isBloqueadoLocalizacao && (
-            <small style={{ ...styles.helpText, color: "var(--success)", fontSize: "11px" }}>
-              ✅ Você pode alterar a UF
-            </small>
-          )}
         </div>
 
         {/* Município */}
@@ -233,11 +234,6 @@ const Identificacao = ({
           {fieldErrors.municipio && (
             <small style={styles.errorText}>{fieldErrors.municipio}</small>
           )}
-          {isAdmin && formData?.uf && !isBloqueadoLocalizacao && (
-            <small style={{ ...styles.helpText, color: "var(--success)", fontSize: "11px" }}>
-              ✅ Você pode alterar o município
-            </small>
-          )}
         </div>
       </div>
       {isBloqueadoLocalizacao && (
@@ -245,11 +241,6 @@ const Identificacao = ({
               🔒 {isOperador
                 ? "Município e UF definidos automaticamente pelo seu perfil (não editável)"
                 : "Município e UF já definidos (não podem ser alterados)"}
-            </small>
-          )}
-          {isAdmin && (
-            <small style={{ ...styles.helpText, color: "var(--success)" }}>
-              ✅ Admin: pode selecionar qualquer UF e município
             </small>
           )}
     </fieldset>
