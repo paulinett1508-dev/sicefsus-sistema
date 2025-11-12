@@ -662,7 +662,7 @@ const Administracao = () => {
         );
       })()}
 
-      {/* CONTEÚDO CONDICIONAL MODULAR */}
+      {/* Conteúdo baseado na aba ativa */}
       {activeTab === "usuarios" && (
         <UsersSection
           usuarios={getFilteredUsers()}

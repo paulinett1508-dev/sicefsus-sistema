@@ -82,6 +82,32 @@ const FerramentasDev = () => {
       label: "Configurações",
       componente: ConfigTab,
     },
+    {
+      id: "rules",
+      icone: "📜",
+      label: "Firestore Rules",
+      componente: () => {
+        const FirestoreRulesSection = React.lazy(() => import("../admin/FirestoreRulesSection"));
+        return (
+          <React.Suspense fallback={<div>Carregando...</div>}>
+            <FirestoreRulesSection />
+          </React.Suspense>
+        );
+      },
+    },
+    {
+      id: "migracao",
+      icone: "🔄",
+      label: "Migração",
+      componente: () => {
+        const MigracaoCompleta = React.lazy(() => import("../admin/MigracaoCompleta"));
+        return (
+          <React.Suspense fallback={<div>Carregando...</div>}>
+            <MigracaoCompleta />
+          </React.Suspense>
+        );
+      },
+    },
   ];
 
   const abaAtual = abas.find((aba) => aba.id === abaAtiva);

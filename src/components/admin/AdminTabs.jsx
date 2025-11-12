@@ -13,8 +13,6 @@ const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmi
   const allTabs = [
     { id: "usuarios", label: "👥 Usuários", icon: "👥", showAlways: true },
     { id: "logs", label: "📊 Logs", icon: "📊", showAlways: true },
-    { id: "rules", label: "🔐 Firestore Rules", icon: "🔐", superAdminOnly: true },
-    { id: "migracao", label: "🔄 Migração", icon: "🔄", superAdminOnly: true },
   ];
 
   const tabs = allTabs.filter(tab => {

@@ -18,7 +18,7 @@ const UsersSection = ({
       {/* Cabeçalho da seção com botão */}
       <div style={styles.sectionHeader}>
         <h3 style={styles.sectionTitle}>
-          📋 Lista de Usuários ({users.length})
+          📋 Lista de Usuários ({users?.length || 0})
         </h3>
         {currentUserType === "admin" && onNovoUsuario && (
           <button
