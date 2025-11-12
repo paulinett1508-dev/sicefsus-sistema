@@ -233,11 +233,26 @@ export default function RecalcularEmenda() {
     <div style={styles.container}>
       {/* CABEÇALHO */}
       <div style={styles.header}>
-        <h2 style={styles.title}>🔄 Recalcular Emendas</h2>
+        <h2 style={styles.title}>🔍 Diagnóstico e Recálculo de Emendas</h2>
         <p style={styles.subtitle}>
-          Recalcule valores executados e saldos das emendas com base nas
-          despesas cadastradas
+          Visualize inconsistências nos valores das emendas e corrija-as quando necessário
         </p>
+        <div style={{
+          background: '#e0f2fe',
+          border: '1px solid #0ea5e9',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          marginTop: '12px',
+          fontSize: '14px',
+          color: '#0c4a6e'
+        }}>
+          <strong>💡 Como funciona:</strong>
+          <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
+            <li>🔍 <strong>Diagnóstico automático:</strong> Todas as emendas são analisadas em busca de inconsistências</li>
+            <li>🔧 <strong>Correção seletiva:</strong> Clique em "Selecionar" para revisar e corrigir cada emenda</li>
+            <li>✅ <strong>Segurança:</strong> Confirmação obrigatória antes de aplicar qualquer correção</li>
+          </ul>
+        </div>
       </div>
 
       {/* FILTROS */}

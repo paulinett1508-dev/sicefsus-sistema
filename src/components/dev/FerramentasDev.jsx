@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 
 // Importar abas
-import RecalculoTab from "./tabs/RecalculoTab";
 import DiagnosticoTab from "./tabs/DiagnosticoTab";
 import LimpezaTab from "./tabs/LimpezaTab";
 import BackupTab from "./tabs/BackupTab";
@@ -48,19 +47,13 @@ const FerramentasDev = () => {
 
   // Abas disponíveis (sem Dashboard e Geografia)
   const abas = [
-    {
-      id: "recalculo",
-      icone: "🔄",
-      label: "Recálculo",
-      componente: RecalculoTab,
-    },
+    { id: "limpeza", icone: "🧹", label: "Limpeza", componente: LimpezaTab },
     {
       id: "diagnostico",
       icone: "🔍",
-      label: "Diagnóstico",
+      label: "Diagnóstico & Recálculo",
       componente: DiagnosticoTab,
     },
-    { id: "limpeza", icone: "🧹", label: "Limpeza", componente: LimpezaTab },
     { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
     { id: "usuarios", icone: "👥", label: "Usuários", componente: UsuariosTab },
     {
