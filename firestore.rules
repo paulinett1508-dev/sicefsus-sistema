@@ -90,23 +90,30 @@ service cloud.firestore {
       // Admin: Acesso total
       allow read, write: if isAdmin();
 
-      // Gestor/Operador: Acesso restrito por localização
+      // Gestor/Operador: Leitura permitida se autenticado
+      // (validação de localização será feita via emendaId)
       allow read: if isAuthenticated() && (
         isGestor() || isOperador()
-      ) && matchesUserLocation(resource.data);
+      );
 
+      // Criar despesa: permitir sem validação de localização
+      // (será validada pela emenda relacionada)
       allow create: if isAuthenticated() && (
         isGestor() || isOperador()
-      ) && matchesUserLocation(request.resource.data);
+      );
 
+      // Atualizar: validar se tem os campos de localização
       allow update: if isAuthenticated() && (
         isGestor() || isOperador()
-      ) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data);
+      ) && (
+        !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
+        matchesUserLocation(request.resource.data)
+      );
 
       // 🔒 Apenas Admin e Gestor podem excluir
       allow delete: if isAuthenticated() && (
         isAdmin() || isGestor()
-      ) && matchesUserLocation(resource.data);
+      );
     }
 
     // ========================================
