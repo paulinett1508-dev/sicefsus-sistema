@@ -506,6 +506,27 @@ export const useEmendaFormData = () => {
     };
   }, [id, navigate]);
 
+  // ✅ PREENCHER UF e MUNICÍPIO automaticamente para OPERADORES e GESTORES
+  useEffect(() => {
+    if (!id && (user?.tipo === "operador" || user?.tipo === "gestor")) {
+      const userMunicipio = user?.municipio?.trim();
+      const userUf = user?.uf?.trim();
+
+      if (userMunicipio && userUf) {
+        console.log(`✅ ${user?.tipo?.toUpperCase()}: Preenchendo UF e Município automaticamente:`, {
+          municipio: userMunicipio,
+          uf: userUf,
+        });
+
+        setFormData((prev) => ({
+          ...prev,
+          municipio: userMunicipio,
+          uf: userUf,
+        }));
+      }
+    }
+  }, [id, user]);
+
   // 🚨 VALIDAÇÃO CRÍTICA ANTES DE SALVAR
   const criticalValidation = useCallback(() => {
     const errors = [];
