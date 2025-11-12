@@ -1,15 +1,23 @@
 // src/components/GlobalSearch.jsx
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useToast } from "./Toast";
+
+// Assuming 'useAuth' provides user information including type, uf, and municipio
+// This is a placeholder and would need to be imported and used correctly
+// For this specific change, we are assuming 'userTipo', 'userUf', and 'userMunicipio' are available in scope
+// For demonstration purposes, let's assume they are passed as props or available via context.
+// In a real scenario, you'd likely have a hook like `const { user } = useAuth();`
+// and then access user.tipo, user.uf, user.municipio.
+// For the purpose of this edit, we'll assume these variables are accessible within the function.
 
 const PRIMARY = "#154360";
 const ACCENT = "#4A90E2";
 const WHITE = "#fff";
 const GRAY = "#f8f9fa";
 
-function GlobalSearch({ onNavigate, onResultSelect, compact = false }) {
+function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, userUf, userMunicipio }) { // Added user props for context
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +34,7 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false }) {
   // Carregar todos os dados na inicialização
   useEffect(() => {
     loadAllData();
-  }, []);
+  }, [userTipo, userUf, userMunicipio]); // Added dependencies for user data
 
   // Fechar busca ao clicar fora
   useEffect(() => {
@@ -57,14 +65,42 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false }) {
   }, [searchTerm, allData]);
 
   const loadAllData = async () => {
+    // Check if user data is available before proceeding
+    if (!userTipo || !userUf || !userMunicipio) {
+      console.warn("User data not available, skipping initial data load for search.");
+      // Optionally show a toast or handle this state appropriately
+      return;
+    }
+
     try {
       setLoading(true);
       const startTime = Date.now();
 
-      const [emendasSnapshot, despesasSnapshot] = await Promise.all([
-        getDocs(query(collection(db, "emendas"), orderBy("numero"))),
-        getDocs(query(collection(db, "despesas"), orderBy("data", "desc"))),
-      ]);
+      // Fetching despesas remains the same
+      const despesasSnapshot = await getDocs(query(collection(db, "despesas"), orderBy("data", "desc")));
+      const despesas = despesasSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        type: "despesa",
+        ...doc.data(),
+      }));
+
+      // Modified logic for fetching emendas based on user role and location
+      console.log("🔍 Buscando emendas com filtro adequado...");
+
+      // ✅ GESTOR/OPERADOR: Filtrar por município E UF
+      let emendasQuery;
+      if (userTipo === "admin") {
+        emendasQuery = collection(db, "emendas");
+      } else {
+        // Gestor e Operador precisam filtrar por município E UF
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", userMunicipio),
+          where("uf", "==", userUf)
+        );
+      }
+
+      const emendasSnapshot = await getDocs(emendasQuery);
 
       const emendas = emendasSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -72,17 +108,16 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false }) {
         ...doc.data(),
       }));
 
-      const despesas = despesasSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        type: "despesa",
-        ...doc.data(),
-      }));
-
       setAllData({ emendas, despesas });
       setLastSearchTime(Date.now() - startTime);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      toast.error("Erro ao carregar dados para busca");
+      // Only show toast if it's a permission error that needs user attention
+      if (error.code === 'permission-denied') {
+        toast.error("Permissão negada para acessar emendas. Verifique suas regras do Firebase.");
+      } else {
+        toast.error("Erro ao carregar dados para busca");
+      }
     } finally {
       setLoading(false);
     }

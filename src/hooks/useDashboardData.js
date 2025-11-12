@@ -48,7 +48,7 @@ const useDashboardData = (user, permissions) => {
   const carregarDadosOperador = async () => {
     try {
       const userMunicipio = user?.municipio?.trim();
-      
+
       // ✅ VALIDAÇÃO: Município vazio = sem dados
       if (!userMunicipio || userMunicipio === "") {
         console.warn("⚠️ Operador sem município definido, retornando dados vazios");
@@ -56,7 +56,7 @@ const useDashboardData = (user, permissions) => {
       }
       const userUf = user?.uf?.trim();
 
-      console.log("🔐 OPERADOR: Aplicando filtros geográficos");
+      console.log("🔐 OPERADOR/GESTOR: Aplicando filtros geográficos");
       console.log("👤 Dados do usuário:", {
         email: user?.email,
         municipio: userMunicipio,
@@ -70,78 +70,22 @@ const useDashboardData = (user, permissions) => {
 
       const emendasRef = collection(db, "emendas");
 
-      // 🔧 ESTRATÉGIA: Buscar por UF e filtrar manualmente (resolve case sensitivity)
-      console.log(
-        "🔍 Buscando todas as emendas da UF para filtrar manualmente...",
+      // ✅ CARREGAR EMENDAS COM FILTRO COMPOSTO (município + UF)
+      const emendasQuery = query(
+        emendasRef,
+        where("municipio", "==", userMunicipio),
+        where("uf", "==", userUf)
       );
-
-      const emendasQuery = userUf
-        ? query(emendasRef, where("uf", "==", userUf))
-        : query(emendasRef);
 
       const emendasSnapshot = await getDocs(emendasQuery);
-      const todasEmendas = [];
+      const emendasData = [];
       emendasSnapshot.forEach((doc) => {
-        todasEmendas.push({ id: doc.id, ...doc.data() });
+        emendasData.push({ id: doc.id, ...doc.data() });
       });
 
       console.log(
-        `📊 Total de emendas na UF ${userUf}: ${todasEmendas.length}`,
+        `✅ OPERADOR/GESTOR encontrou: ${emendasData.length} emendas para ${userMunicipio}/${userUf}`,
       );
-
-      // 🎯 FILTRO MANUAL com normalização (resolve diferenças de case/acentos)
-      const normalizarTexto = (texto) => {
-        if (!texto) return "";
-        return texto
-          .toString()
-          .trim()
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
-      };
-
-      const municipioNormalizado = normalizarTexto(userMunicipio);
-      console.log("🔄 Município normalizado:", municipioNormalizado);
-
-      const emendasData = todasEmendas.filter((emenda) => {
-        const emendaMunicipio = normalizarTexto(emenda.municipio);
-        const match = emendaMunicipio === municipioNormalizado;
-
-        if (!match) {
-          console.log(
-            `🔎 Comparando: "${municipioNormalizado}" vs "${emendaMunicipio}" = ${match}`,
-          );
-        }
-
-        return match;
-      });
-
-      console.log(
-        `✅ Filtro manual encontrou: ${emendasData.length} emendas para ${userMunicipio}`,
-      );
-
-      // 🔍 DEBUG: Mostrar resultados da query
-      console.log(
-        `✅ OPERADOR encontrou: ${emendasData.length} emendas para ${userMunicipio}/${userUf}`,
-      );
-
-      if (emendasData.length > 0) {
-        console.log("📋 Emendas encontradas:");
-        emendasData.forEach((emenda) => {
-          console.log(
-            `  - ${emenda.numero || "S/N"}: ${emenda.municipio}/${emenda.uf} - ${emenda.autor}`,
-          );
-        });
-      } else {
-        console.warn("⚠️ Após filtro manual ainda não encontrou emendas");
-        console.warn("📊 Todas as emendas da UF para comparação:");
-        todasEmendas.forEach((emenda) => {
-          const normalizada = normalizarTexto(emenda.municipio);
-          console.warn(
-            `  - Original: "${emenda.municipio}" | Normalizada: "${normalizada}" | Match: ${normalizada === municipioNormalizado}`,
-          );
-        });
-      }
 
       // Carregar despesas das emendas encontradas
       let despesasData = [];
@@ -152,9 +96,11 @@ const useDashboardData = (user, permissions) => {
         for (let i = 0; i < emendasIds.length; i += batchSize) {
           const batch = emendasIds.slice(i, i + batchSize);
           const despesasRef = collection(db, "despesas");
+          // ✅ CARREGAR DESPESAS COM FILTRO COMPOSTO (município + UF)
           const despesasQuery = query(
             despesasRef,
-            where("emendaId", "in", batch),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf)
           );
           const despesasSnapshot = await getDocs(despesasQuery);
           despesasSnapshot.forEach((doc) => {
@@ -163,10 +109,10 @@ const useDashboardData = (user, permissions) => {
         }
       }
 
-      console.log(`✅ OPERADOR carregou: ${despesasData.length} despesas`);
+      console.log(`✅ OPERADOR/GESTOR carregou: ${despesasData.length} despesas`);
       return { emendasData, despesasData };
     } catch (error) {
-      console.error("❌ Erro operador:", error);
+      console.error("❌ Erro operador/gestor:", error);
       throw error;
     }
   };
