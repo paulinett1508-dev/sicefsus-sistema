@@ -233,33 +233,17 @@ export default function RecalcularEmenda() {
     <div style={styles.container}>
       {/* CABEÇALHO */}
       <div style={styles.header}>
-        <h2 style={styles.title}>🔍 Diagnóstico e Recálculo de Emendas</h2>
+        <h2 style={styles.title}>🔍 Diagnóstico e Recálculo</h2>
         <p style={styles.subtitle}>
-          Visualize inconsistências nos valores das emendas e corrija-as quando necessário
+          Identifica inconsistências automaticamente. Clique em "Selecionar" para corrigir.
         </p>
-        <div style={{
-          background: '#e0f2fe',
-          border: '1px solid #0ea5e9',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          marginTop: '12px',
-          fontSize: '14px',
-          color: '#0c4a6e'
-        }}>
-          <strong>💡 Como funciona:</strong>
-          <ul style={{ margin: '8px 0 0 20px', padding: 0 }}>
-            <li>🔍 <strong>Diagnóstico automático:</strong> Todas as emendas são analisadas em busca de inconsistências</li>
-            <li>🔧 <strong>Correção seletiva:</strong> Clique em "Selecionar" para revisar e corrigir cada emenda</li>
-            <li>✅ <strong>Segurança:</strong> Confirmação obrigatória antes de aplicar qualquer correção</li>
-          </ul>
-        </div>
       </div>
 
       {/* FILTROS */}
       <div style={styles.filtros}>
         <input
           type="text"
-          placeholder="🔍 Buscar por número, município ou parlamentar..."
+          placeholder="🔍 Buscar emenda..."
           value={termoBusca}
           onChange={(e) => setTermoBusca(e.target.value)}
           style={styles.inputBusca}
@@ -270,9 +254,9 @@ export default function RecalcularEmenda() {
           onChange={(e) => setFiltroProblema(e.target.value)}
           style={styles.select}
         >
-          <option value="todos">📊 Todas as emendas</option>
-          <option value="com-problema">⚠️ Apenas com problemas</option>
-          <option value="ok">✅ Apenas OK</option>
+          <option value="todos">Todas</option>
+          <option value="com-problema">Com problemas</option>
+          <option value="ok">OK</option>
         </select>
 
         <button
@@ -303,15 +287,15 @@ export default function RecalcularEmenda() {
           <table className="tabela-recalculo" style={styles.tabela}>
             <thead>
               <tr>
-                <th>Número</th>
-                <th>Município/UF</th>
-                <th>Valor Total</th>
-                <th>Despesas</th>
-                <th>Exec. Banco</th>
-                <th>Exec. Real</th>
-                <th>Diferença</th>
+                <th>Nº</th>
+                <th>Município</th>
+                <th>Total</th>
+                <th>Desp.</th>
+                <th>Banco</th>
+                <th>Real</th>
+                <th>Dif.</th>
                 <th>Status</th>
-                <th>Ações</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -356,7 +340,7 @@ export default function RecalcularEmenda() {
                   </td>
                   <td>
                     {emenda.severidade === "ok" ? (
-                      <span className="badge-ok">✅ OK</span>
+                      <span className="badge-ok">✅</span>
                     ) : (
                       <span
                         style={{
@@ -364,7 +348,6 @@ export default function RecalcularEmenda() {
                           borderRadius: "12px",
                           fontSize: "11px",
                           fontWeight: "600",
-                          textTransform: "uppercase",
                           background:
                             emenda.severidade === "crítica"
                               ? "#dc3545"
@@ -374,9 +357,9 @@ export default function RecalcularEmenda() {
                           color: "white",
                         }}
                       >
-                        {emenda.severidade === "crítica" && "🔴 CRÍTICA"}
-                        {emenda.severidade === "moderada" && "🟡 MODERADA"}
-                        {emenda.severidade === "leve" && "🔵 LEVE"}
+                        {emenda.severidade === "crítica" && "🔴"}
+                        {emenda.severidade === "moderada" && "🟡"}
+                        {emenda.severidade === "leve" && "🔵"}
                       </span>
                     )}
                   </td>
@@ -385,9 +368,9 @@ export default function RecalcularEmenda() {
                       className="btn-selecionar-tabela"
                       onClick={() => handleSelecionarEmenda(emenda)}
                       style={styles.btnSelecionar}
-                      title="Selecionar esta emenda para recalcular"
+                      title="Revisar e corrigir"
                     >
-                      🔧 Selecionar
+                      🔧
                     </button>
                   </td>
                 </tr>
@@ -400,7 +383,7 @@ export default function RecalcularEmenda() {
       {/* SEM RESULTADOS */}
       {!loading && emendasFiltradas.length === 0 && (
         <div style={styles.semResultados}>
-          <p>📭 Nenhuma emenda encontrada com os filtros aplicados.</p>
+          <p>📭 Nenhuma emenda encontrada</p>
         </div>
       )}
 
@@ -413,7 +396,7 @@ export default function RecalcularEmenda() {
           <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             {/* HEADER */}
             <div style={styles.modalHeader}>
-              <h3 style={{ margin: 0 }}>🔧 Preview do Recálculo</h3>
+              <h3 style={{ margin: 0 }}>🔧 Confirmação</h3>
               <button
                 onClick={() => setMostrarModal(false)}
                 style={styles.btnFechar}
@@ -427,26 +410,17 @@ export default function RecalcularEmenda() {
             <div style={styles.modalBody}>
               {/* DADOS DA EMENDA */}
               <div style={styles.previewSection}>
-                <h4 style={styles.sectionTitle}>📋 Dados da Emenda</h4>
                 <p>
-                  <strong>Número:</strong> {preview.numero}
+                  <strong>Emenda:</strong> {preview.numero} • {preview.municipio}/{preview.uf}
                 </p>
                 <p>
-                  <strong>Município/UF:</strong> {preview.municipio}/
-                  {preview.uf}
-                </p>
-                <p>
-                  <strong>Valor Total:</strong>{" "}
-                  {formatarMoeda(preview.valorTotal)}
-                </p>
-                <p>
-                  <strong>Nº Despesas:</strong> {preview.numeroDespesas}
+                  <strong>Total:</strong> {formatarMoeda(preview.valorTotal)} • {preview.numeroDespesas} despesas
                 </p>
               </div>
 
               {/* COMPARAÇÃO */}
               <div style={styles.previewSection}>
-                <h4 style={styles.sectionTitle}>💰 Comparação de Valores</h4>
+                <h4 style={styles.sectionTitle}>💰 Valores</h4>
                 <table style={styles.tabelaComparacao}>
                   <thead>
                     <tr>
@@ -521,8 +495,7 @@ export default function RecalcularEmenda() {
               {/* ALERTA */}
               {preview.diferenca > 1000 && (
                 <div style={styles.alerta}>
-                  ⚠️ <strong>ATENÇÃO:</strong> Diferença significativa
-                  detectada! Revise os valores antes de aplicar.
+                  ⚠️ Diferença significativa detectada
                 </div>
               )}
             </div>
@@ -534,7 +507,7 @@ export default function RecalcularEmenda() {
                 style={styles.btnCancelar}
                 disabled={processando}
               >
-                ❌ Cancelar
+                Cancelar
               </button>
               <button
                 onClick={handleAplicarRecalculo}
@@ -545,7 +518,7 @@ export default function RecalcularEmenda() {
                   cursor: processando ? "not-allowed" : "pointer",
                 }}
               >
-                {processando ? "⏳ Aplicando..." : "✅ Aplicar Correção"}
+                {processando ? "Aplicando..." : "✅ Confirmar"}
               </button>
             </div>
           </div>
