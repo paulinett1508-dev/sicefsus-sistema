@@ -287,6 +287,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   // 🆕 Estados para edição/visualização/execução de despesa
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | 'criar' | 'criar-executada' | null
+  
+  // Estados para confirmação e execução
+  const [mostrarConfirmacaoExecucao, setMostrarConfirmacaoExecucao] = useState(false);
+  const [despesaPendenteExecucao, setDespesaPendenteExecucao] = useState(null);
+  const [mostrarExecutarModal, setMostrarExecutarModal] = useState(false);
+  const [despesaParaExecutar, setDespesaParaExecutar] = useState(null);
 
   // ✅ RESOLVER ID - PRIORIZAR ID DIRETO (evitar consultas desnecessárias)
   useEffect(() => {
