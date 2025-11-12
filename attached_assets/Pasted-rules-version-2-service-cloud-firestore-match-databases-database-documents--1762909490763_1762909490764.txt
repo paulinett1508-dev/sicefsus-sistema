@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Funções auxiliares
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'admin';
+    }
+    
+    function isGestor() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'gestor';
+    }
+    
+    function isOperador() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'operador';
+    }
+    
+    function getUserMunicipio() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.municipio;
+    }
+    
+    function getUserUF() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.uf;
+    }
+    
+    // Regras para EMENDAS
+    match /emendas/{emendaId} {
+      // Admin pode tudo
+      allow read, write: if isAdmin();
+      
+      // Gestor pode ler, criar, atualizar e DELETAR emendas do seu município
+      allow read, create, update, delete: if isGestor() && 
+                                             resource.data.municipio == getUserMunicipio() &&
+                                             resource.data.uf == getUserUF();
+      
+      // Operador pode apenas ler emendas do seu município
+      allow read: if isOperador() && 
+                     resource.data.municipio == getUserMunicipio() &&
+                     resource.data.uf == getUserUF();
+    }
+    
+    // Regras para DESPESAS
+    match /despesas/{despesaId} {
+      // Admin pode tudo
+      allow read, write: if isAdmin();
+      
+      // Gestor pode gerenciar despesas de emendas do seu município
+      allow read, create, update, delete: if isGestor() && 
+                                             resource.data.municipio == getUserMunicipio() &&
+                                             resource.data.uf == getUserUF();
+      
+      // Operador pode apenas ler despesas do seu município
+      allow read: if isOperador() && 
+                     resource.data.municipio == getUserMunicipio() &&
+                     resource.data.uf == getUserUF();
+    }
+    
+    // Regras para USUÁRIOS
+    match /usuarios/{userId} {
+      // Admin pode tudo
+      allow read, write: if isAdmin();
+      
+      // Usuários podem ler e atualizar apenas seus próprios dados
+      allow read, update: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
