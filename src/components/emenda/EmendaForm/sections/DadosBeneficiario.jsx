@@ -33,6 +33,14 @@ const DadosBeneficiario = ({
   const handleChange = useCallback(
     (e) => {
       const { name } = e.target;
+
+      console.log("📄 DadosBeneficiario onChange:", {
+        name,
+        value: e.target.value,
+        valueTipo: typeof e.target.value,
+        valueLength: e.target.value?.length || 0,
+      });
+
       onChange(e);
 
       // Limpar erro se campo foi preenchido

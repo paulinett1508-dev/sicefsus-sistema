@@ -83,6 +83,13 @@ export const useEmendaFormData = () => {
       .replace(/\u2009/g, " ") // Remove thin spaces
       .replace(/\uFEFF/g, ""); // Remove BOM (Byte Order Mark)
   }, []);
+  
+  // 🚨 FUNÇÃO SEGURA PARA CNPJ - NÃO REMOVE FORMATAÇÃO
+  const cleanCNPJ = useCallback((value) => {
+    if (!value) return "";
+    // CNPJ pode ter pontos, barras e hífens - NÃO REMOVER!
+    return value.toString().trim();
+  }, []);
 
   // ✅ DETECÇÃO DE MUDANÇAS OTIMIZADA
   const isFormModified = useCallback(() => {
@@ -657,18 +664,21 @@ export const useEmendaFormData = () => {
             .replace(",", "."),
         );
 
+        // 🚨 CORREÇÃO CRÍTICA: Sincronizar beneficiario e cnpjBeneficiario
+        const cnpjBeneficiarioFinal = formData.beneficiario || formData.cnpjBeneficiario || "";
+        
         const dadosParaSalvar = {
           numero: cleanField(formData.numero),
           autor: cleanField(formData.autor),
           parlamentar: cleanField(formData.autor),
           municipio: cleanField(formData.municipio),
           uf: cleanField(formData.uf),
-          cnpj: cleanField(formData.cnpj),
+          cnpj: cleanCNPJ(formData.cnpj), // ✅ Usar cleanCNPJ
           valor: valorNumerico,
           valorRecurso: valorNumerico,
           programa: cleanField(formData.programa),
-          beneficiario: cleanField(formData.beneficiario),
-          cnpjBeneficiario: cleanField(formData.cnpjBeneficiario),
+          beneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
+          cnpjBeneficiario: cleanCNPJ(cnpjBeneficiarioFinal), // ✅ Usar cleanCNPJ
           tipo: formData.tipo,
           modalidade: cleanField(formData.modalidade),
           objeto: cleanField(formData.objeto),
@@ -703,6 +713,34 @@ export const useEmendaFormData = () => {
           valor: dadosParaSalvar.valor,
           valorRecurso: dadosParaSalvar.valorRecurso,
         });
+        
+        // 🚨 DIAGNÓSTICO CRÍTICO - ANTES DE cleanField()
+        console.log("🔬 DIAGNÓSTICO PRÉ-LIMPEZA:", {
+          beneficiario_RAW: formData.beneficiario,
+          cnpjBeneficiario_RAW: formData.cnpjBeneficiario,
+          beneficiario_TYPE: typeof formData.beneficiario,
+          cnpjBeneficiario_TYPE: typeof formData.cnpjBeneficiario,
+        });
+        
+        // 🚨 DIAGNÓSTICO CRÍTICO - DEPOIS de cleanField()
+        console.log("🔬 DIAGNÓSTICO PÓS-LIMPEZA:", {
+          beneficiario_CLEAN: cleanField(formData.beneficiario),
+          cnpjBeneficiario_CLEAN: cleanField(formData.cnpjBeneficiario),
+          beneficiario_LENGTH: cleanField(formData.beneficiario)?.length || 0,
+          cnpjBeneficiario_LENGTH: cleanField(formData.cnpjBeneficiario)?.length || 0,
+        });
+        
+        // 🚨 VALIDAÇÃO DE CAMPOS VAZIOS CRÍTICOS
+        const camposVaziosCriticos = [];
+        if (!dadosParaSalvar.beneficiario) camposVaziosCriticos.push("beneficiario");
+        if (!dadosParaSalvar.cnpjBeneficiario) camposVaziosCriticos.push("cnpjBeneficiario");
+        if (!dadosParaSalvar.banco) camposVaziosCriticos.push("banco");
+        if (!dadosParaSalvar.agencia) camposVaziosCriticos.push("agencia");
+        if (!dadosParaSalvar.conta) camposVaziosCriticos.push("conta");
+        
+        if (camposVaziosCriticos.length > 0) {
+          console.error("🚨 CAMPOS OBRIGATÓRIOS VAZIOS:", camposVaziosCriticos);
+        }
 
         // SALVAR NO FIREBASE
         let emendaId = id; // Para edição
