@@ -64,14 +64,15 @@ export default function EmendaForm() {
   useEffect(() => {
     const tabParam = searchParams.get('tab');
     if (tabParam === 'despesas' || tabParam === 'execucao') {
+      console.log("🔄 Ativando aba Execução via query param");
       setActiveTab('execucao');
       // Limpar query string da URL APÓS renderizar
       setTimeout(() => {
         const currentPath = window.location.pathname;
         window.history.replaceState({}, '', currentPath);
-      }, 100);
+      }, 500); // Aumentei para 500ms para garantir renderização
     }
-  }, [searchParams]);
+  }, [searchParams, id]); // Adicionei 'id' como dependência
 
   // Carrega despesas para o header
   const [despesas, setDespesas] = useState([]);
