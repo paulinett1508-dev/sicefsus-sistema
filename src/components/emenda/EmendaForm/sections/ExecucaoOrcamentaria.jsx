@@ -205,67 +205,26 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState(null); // 'editar' | 'visualizar' | 'executar' | 'criar' | 'criar-executada' | null
 
-  // ✅ RESOLVER ID COM LOGS DETALHADOS
+  // ✅ RESOLVER ID - PRIORIZAR ID DIRETO (evitar consultas desnecessárias)
   useEffect(() => {
-    console.log('🔍 ExecucaoOrcamentaria - formData COMPLETO recebido:', {
-      formData,
-      keys: formData ? Object.keys(formData) : [],
-      id: formData?.id,
-      emendaId: formData?.emendaId,
-      numero: formData?.numero,
-      numeroEmenda: formData?.numeroEmenda,
-    });
-
-    const resolverId = async () => {
-      // Prioridade 1: IDs diretos
-      if (formData?.id || formData?.emendaId) {
-        const idEncontrado = formData.id || formData.emendaId;
-        console.log('✅ ID direto encontrado:', idEncontrado);
-        setEmendaIdReal(idEncontrado);
-        return;
-      }
-
-      // Prioridade 2: Buscar por número
-      const numero = formData?.numero || formData?.numeroEmenda;
-      if (!numero) {
-        console.warn('⚠️ Nenhum ID ou número encontrado em formData');
-        setEmendaIdReal(null);
-        return;
-      }
-
-      try {
-        console.log('🔍 Buscando emenda por número:', numero);
-        const q = query(
-          collection(db, "emendas"),
-          where("numero", "==", numero),
-        );
-        const snap = await getDocs(q);
-        
-        if (!snap.empty) {
-          const idEncontrado = snap.docs[0].id;
-          console.log('✅ Emenda encontrada por número:', {
-            numero,
-            id: idEncontrado,
-            data: snap.docs[0].data()
-          });
-          setEmendaIdReal(idEncontrado);
-        } else {
-          console.warn('⚠️ Nenhuma emenda encontrada com número:', numero);
-          setEmendaIdReal(null);
-        }
-      } catch (error) {
-        console.error('❌ Erro ao buscar emenda por número:', error);
-        setEmendaIdReal(null);
-      }
-    };
+    // Prioridade absoluta: IDs diretos
+    const idDireto = formData?.id || formData?.emendaId;
     
-    resolverId();
-  }, [
-    formData?.id,
-    formData?.emendaId,
-    formData?.numero,
-    formData?.numeroEmenda,
-  ]);
+    if (idDireto) {
+      console.log('✅ ExecucaoOrcamentaria - ID direto encontrado:', {
+        id: idDireto,
+        numero: formData?.numero,
+        municipio: formData?.municipio
+      });
+      setEmendaIdReal(idDireto);
+    } else {
+      console.warn('⚠️ ExecucaoOrcamentaria - Nenhum ID encontrado:', {
+        formDataKeys: formData ? Object.keys(formData) : [],
+        numero: formData?.numero
+      });
+      setEmendaIdReal(null);
+    }
+  }, [formData?.id, formData?.emendaId]);
 
   const emendaId = emendaIdReal || formData?.id || formData?.emendaId;
   const temEmendaSalva = !!emendaId;
