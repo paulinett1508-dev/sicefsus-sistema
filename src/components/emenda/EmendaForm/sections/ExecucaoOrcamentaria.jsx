@@ -482,10 +482,29 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   };
 
   const handleEditarDespesa = (despesa) => {
-    console.log(
-      "✏️ ExecucaoOrcamentaria: Abrindo DespesaForm para EDIÇÃO",
-      despesa,
-    );
+    console.log("✏️ ExecucaoOrcamentaria: Tentando abrir EDIÇÃO", {
+      despesaId: despesa?.id,
+      despesaStatus: despesa?.status,
+      emendaId: emendaId,
+      temDespesa: !!despesa,
+      temEmenda: !!emendaId
+    });
+
+    // ✅ VALIDAÇÃO: Verificar se despesa existe
+    if (!despesa || !despesa.id) {
+      console.error("❌ Despesa inválida para edição:", despesa);
+      alert("⚠️ Erro: Despesa inválida");
+      return;
+    }
+
+    // ✅ VALIDAÇÃO: Verificar se emenda existe
+    if (!emendaId) {
+      console.error("❌ Emenda não identificada");
+      alert("⚠️ Erro: Emenda não identificada");
+      return;
+    }
+
+    console.log("✅ Abrindo modal de edição com despesa:", despesa);
     setDespesaEmEdicao(despesa);
     setModoVisualizacao("editar");
   };
@@ -951,7 +970,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       </div>
 
       {/* FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
-      {modoVisualizacao &&
+      {modoVisualizacao && despesaEmEdicao &&
         createPortal(
           <div
             style={styles.formularioEdicaoOverlay}
@@ -995,62 +1014,87 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 </button>
               </div>
               <div style={styles.formularioEdicaoContent}>
-                <DespesaForm
-                  usuario={usuario}
-                  despesaParaEditar={modoVisualizacao === "criar" ? null : despesaEmEdicao}
-                  emendaId={emendaId}
-                  somenteLeitura={modoVisualizacao === "visualizar"}
-                  modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
-                  modoCriacaoDireta={modoVisualizacao === "criar-executada"}
-                  emendaInfo={{
-                    id: emendaId,
-                    numero: formData?.numero,
-                    municipio: formData?.municipio,
-                    uf: formData?.uf,
-                    autor: formData?.autor,
-                    valor: stats.valorEmenda,
-                  }}
-                  onClose={() => {
-                    console.log("📞 DespesaForm.onClose chamado");
-                    handleFecharFormulario();
-                  }}
-                  onSuccess={() => {
-                    console.log(
-                      "📞 DespesaForm.onSuccess chamado - Modo:",
-                      modoVisualizacao,
-                    );
-                    handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
-                    showToast({
-                      message:
-                        modoVisualizacao === "executar"
-                          ? "✅ Despesa executada com sucesso!"
-                          : modoVisualizacao === "criar-executada"
-                            ? "✅ Despesa criada com sucesso!"
-                            : modoVisualizacao === "criar"
-                              ? "✅ Despesa criada com sucesso!"
-                              : "✅ Despesa atualizada com sucesso!",
-                      type: "success",
+                {(() => {
+                  try {
+                    console.log("🎨 Renderizando DespesaForm:", {
+                      modo: modoVisualizacao,
+                      temDespesa: !!despesaEmEdicao,
+                      despesaId: despesaEmEdicao?.id,
+                      emendaId: emendaId,
+                      temUsuario: !!usuario
                     });
-                  }}
-                  onSave={() => {
-                    console.log(
-                      "📞 DespesaForm.onSave chamado - Modo:",
-                      modoVisualizacao,
+
+                    return (
+                      <DespesaForm
+                        usuario={usuario}
+                        despesaParaEditar={modoVisualizacao === "criar" ? null : despesaEmEdicao}
+                        emendaId={emendaId}
+                        somenteLeitura={modoVisualizacao === "visualizar"}
+                        modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
+                        modoCriacaoDireta={modoVisualizacao === "criar-executada"}
+                        emendaInfo={{
+                          id: emendaId,
+                          numero: formData?.numero,
+                          municipio: formData?.municipio,
+                          uf: formData?.uf,
+                          autor: formData?.autor,
+                          valor: stats.valorEmenda,
+                        }}
+                        onClose={() => {
+                          console.log("📞 DespesaForm.onClose chamado");
+                          handleFecharFormulario();
+                        }}
+                        onSuccess={() => {
+                          console.log(
+                            "📞 DespesaForm.onSuccess chamado - Modo:",
+                            modoVisualizacao,
+                          );
+                          handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
+                          showToast({
+                            message:
+                              modoVisualizacao === "executar"
+                                ? "✅ Despesa executada com sucesso!"
+                                : modoVisualizacao === "criar-executada"
+                                  ? "✅ Despesa criada com sucesso!"
+                                  : modoVisualizacao === "criar"
+                                    ? "✅ Despesa criada com sucesso!"
+                                    : "✅ Despesa atualizada com sucesso!",
+                            type: "success",
+                          });
+                        }}
+                        onSave={() => {
+                          console.log(
+                            "📞 DespesaForm.onSave chamado - Modo:",
+                            modoVisualizacao,
+                          );
+                          handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
+                          showToast({
+                            message:
+                              modoVisualizacao === "executar"
+                                ? "✅ Despesa executada com sucesso!"
+                                : modoVisualizacao === "criar-executada"
+                                  ? "✅ Despesa criada com sucesso!"
+                                  : modoVisualizacao === "criar"
+                                    ? "✅ Despesa criada com sucesso!"
+                                    : "✅ Despesa atualizada com sucesso!",
+                            type: "success",
+                          });
+                        }}
+                      />
                     );
-                    handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
-                    showToast({
-                      message:
-                        modoVisualizacao === "executar"
-                          ? "✅ Despesa executada com sucesso!"
-                          : modoVisualizacao === "criar-executada"
-                            ? "✅ Despesa criada com sucesso!"
-                            : modoVisualizacao === "criar"
-                              ? "✅ Despesa criada com sucesso!"
-                              : "✅ Despesa atualizada com sucesso!",
-                      type: "success",
-                    });
-                  }}
-                />
+                  } catch (error) {
+                    console.error("❌ Erro ao renderizar DespesaForm:", error);
+                    return (
+                      <div style={{ padding: 20, textAlign: 'center' }}>
+                        <h3 style={{ color: '#e74c3c' }}>Erro ao carregar formulário</h3>
+                        <p>{error.message}</p>
+                        <button onClick={() => handleFecharFormulario()} style={styles.btnVoltar}>
+                          Fechar
+                        </button>
+                      </div>
+                    );
+                  }
+                })()}
               </div>
             </div>
           </div>,
