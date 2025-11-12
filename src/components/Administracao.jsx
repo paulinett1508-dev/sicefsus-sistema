@@ -42,6 +42,17 @@ const Administracao = () => {
 
   // 🎯 VERIFICAR SE É SUPERADMIN
   const isSuperAdmin = currentUser?.tipo === "admin" && currentUser?.superAdmin === true;
+  
+  // 🔍 DEBUG: Verificar status de superAdmin
+  useEffect(() => {
+    console.log("🔐 DEBUG SuperAdmin Check:", {
+      tipo: currentUser?.tipo,
+      superAdmin: currentUser?.superAdmin,
+      isSuperAdmin: isSuperAdmin,
+      email: currentUser?.email,
+      currentUserKeys: currentUser ? Object.keys(currentUser) : []
+    });
+  }, [currentUser, isSuperAdmin]);
 
   // 🎯 ESTADOS PRINCIPAIS
   const [usuarios, setUsuarios] = useState([]);
