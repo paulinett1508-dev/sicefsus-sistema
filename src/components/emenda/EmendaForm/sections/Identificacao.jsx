@@ -17,7 +17,14 @@ const Identificacao = ({
   const { user } = useContext(UserContext);
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
-  const isBloqueadoLocalizacao = isOperador || isGestor; // ✅ Bloquear para operador E gestor
+  // 🔒 VERIFICAR SE CAMPOS DEVEM SER BLOQUEADOS
+  // Admins: nunca bloqueados
+  // Operadores: sempre bloqueados
+  // Gestores: bloqueados apenas em edição
+  const isBloqueadoLocalizacao =
+    user?.tipo !== "admin" &&
+    (user?.tipo === "operador" || (user?.tipo === "gestor" && editingEmenda));
+
 
   // ✅ DEBUG: Verificar props recebidas
   useEffect(() => {
@@ -98,7 +105,7 @@ const Identificacao = ({
   // ✅ HANDLER COM LIMPEZA DE ERRO
   const handleChange = (e) => {
     const { name } = e.target;
-    
+
     // Verificar se onChange existe antes de chamar
     if (onChange && typeof onChange === 'function') {
       onChange(e);
@@ -204,6 +211,18 @@ const Identificacao = ({
           )}
         </div>
       </div>
+      {isBloqueadoLocalizacao && (
+            <small style={{ ...styles.helpText, color: "var(--warning)" }}>
+              🔒 {user?.tipo === "gestor"
+                ? "Município e UF não podem ser alterados ao editar emenda"
+                : "Município e UF definidos automaticamente (não editável)"}
+            </small>
+          )}
+          {!isBloqueadoLocalizacao && user?.tipo === "admin" && (
+            <small style={{ ...styles.helpText, color: "var(--success)" }}>
+              ✅ Administrador: pode selecionar qualquer UF e município
+            </small>
+          )}
     </fieldset>
   );
 };
@@ -280,6 +299,11 @@ const styles = {
     color: "#28a745",
     marginTop: "4px",
     fontWeight: "500",
+  },
+  helpText: {
+    fontSize: "12px",
+    marginTop: "10px",
+    display: "block",
   },
 };
 
