@@ -18,8 +18,21 @@ const ConfirmarExecucaoDespesaModal = ({
   const saldoNegativo = novoSaldo < 0;
 
   return (
-    <div style={styles.overlay} onClick={onCancel}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div 
+      style={styles.overlay} 
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onCancel();
+        }
+      }}
+    >
+      <div 
+        style={styles.modal} 
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         {/* Header */}
         <div style={styles.header}>
           <h2 style={styles.title}>⚠️ Confirmar Execução de Despesa</h2>

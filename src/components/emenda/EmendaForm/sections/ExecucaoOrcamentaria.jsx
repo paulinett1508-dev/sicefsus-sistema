@@ -562,16 +562,18 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     }
 
     console.log("📤 Abrindo modal de confirmação...");
-    console.log("🔄 Estado antes de abrir modal:", {
-      mostrarConfirmacaoExecucao: false,
-      despesaPendenteExecucao: null
-    });
     
-    // Abrir modal de confirmação primeiro
-    setDespesaPendenteExecucao(despesa);
-    setMostrarConfirmacaoExecucao(true);
+    // ✅ CORREÇÃO: Prevenir propagação de evento
+    event?.stopPropagation();
+    event?.preventDefault();
     
-    console.log("✅ Modal de confirmação configurado para abrir");
+    // Abrir modal de confirmação primeiro - com timeout para garantir renderização
+    setTimeout(() => {
+      setDespesaPendenteExecucao(despesa);
+      setMostrarConfirmacaoExecucao(true);
+      console.log("✅ Modal de confirmação ABERTO");
+    }, 100);
+    
   }, [usuario, formData]);
 
   const handleConfirmarExecucao = useCallback(() => {
@@ -900,10 +902,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                                 console.log("🖱️ CLIQUE NO BOTÃO EXECUTAR");
                                 console.log("📋 Despesa a executar:", despesa);
                                 e.stopPropagation();
+                                e.preventDefault();
                                 handleExecutarDespesa(despesa);
                               }}
                               style={styles.btnIconExecutar}
                               title="Executar despesa"
+                              type="button"
                             >
                               ▶️
                             </button>
@@ -1160,13 +1164,15 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
       {/* Modal de Confirmação de Execução */}
       {mostrarConfirmacaoExecucao && despesaPendenteExecucao && (
-        <ConfirmarExecucaoDespesaModal
-          isOpen={mostrarConfirmacaoExecucao}
-          onConfirm={handleConfirmarExecucao}
-          onCancel={handleCancelarExecucao}
-          despesa={despesaPendenteExecucao}
-          saldoAtual={stats.saldoDisponivel}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <ConfirmarExecucaoDespesaModal
+            isOpen={mostrarConfirmacaoExecucao}
+            onConfirm={handleConfirmarExecucao}
+            onCancel={handleCancelarExecucao}
+            despesa={despesaPendenteExecucao}
+            saldoAtual={stats.saldoDisponivel}
+          />
+        </div>
       )}
 
       {/* Modal de Executar Despesa */}
