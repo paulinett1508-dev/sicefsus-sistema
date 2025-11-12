@@ -12,7 +12,6 @@ const AdminTabs = ({ activeTab, setActiveTab, usersCount, logsCount, isSuperAdmi
 
   const allTabs = [
     { id: "usuarios", label: "👥 Usuários", icon: "👥", showAlways: true },
-    { id: "relatorio", label: "📊 Relatório de Usuários", icon: "📊", showAlways: true },
     { id: "logs", label: "📊 Logs", icon: "📊", showAlways: true },
   ];
 

@@ -35,7 +35,6 @@ import UsersSection from "./admin/UsersSection";
 import LogsSection from "./admin/LogsSection";
 import FirestoreRulesSection from "./admin/FirestoreRulesSection";
 import MigracaoCompleta from "./admin/MigracaoCompleta";
-import UsersReportSection from "./admin/UsersReportSection";
 
 const Administracao = () => {
   // 🎯 CONTEXTO DO USUÁRIO
@@ -675,10 +674,6 @@ const Administracao = () => {
           handleDelete={handleDelete}
           handleToggleStatus={handleToggleStatus}
         />
-      )}
-
-      {activeTab === "relatorio" && (
-        <UsersReportSection users={usuarios} loading={loading} />
       )}
 
       {activeTab === "logs" && (

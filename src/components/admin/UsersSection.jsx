@@ -12,21 +12,75 @@ const UsersSection = ({
   handleToggleStatus,
   loading,
 }) => {
+  const exportarUsuarios = () => {
+    if (!users || users.length === 0) {
+      alert("Nenhum usuário para exportar");
+      return;
+    }
+
+    // Preparar dados para exportação
+    const dadosExport = users.map(user => ({
+      Nome: user.nome || "",
+      Email: user.email || "",
+      Tipo: user.tipo || "",
+      Status: user.status || "",
+      Município: user.municipio || "",
+      UF: user.uf || "",
+      Departamento: user.departamento || "",
+      Telefone: user.telefone || "",
+      "Último Acesso": user.ultimoAcesso ? new Date(user.ultimoAcesso.seconds * 1000).toLocaleString("pt-BR") : "Nunca"
+    }));
+
+    // Criar CSV
+    const headers = Object.keys(dadosExport[0]);
+    const csvContent = [
+      headers.join(","),
+      ...dadosExport.map(row => 
+        headers.map(header => {
+          let value = row[header] || "";
+          value = String(value).replace(/"/g, '""');
+          return `"${value}"`;
+        }).join(",")
+      )
+    ].join("\n");
+
+    // Download
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `usuarios_${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div style={styles.tableContainer}>
-      {/* Cabeçalho da seção com botão */}
+      {/* Cabeçalho da seção com botões */}
       <div style={styles.sectionHeader}>
         <h3 style={styles.sectionTitle}>
           📋 Lista de Usuários ({users?.length || 0})
         </h3>
-        <button
-          onClick={handleNovoUsuario}
-          style={styles.newUserButton}
-          onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
-          onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
-        >
-          ➕ Novo Usuário
-        </button>
+        <div style={styles.buttonGroup}>
+          <button
+            onClick={exportarUsuarios}
+            style={styles.exportButton}
+            onMouseOver={(e) => e.target.style.backgroundColor = "#218838"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "#28a745"}
+          >
+            📥 Exportar CSV
+          </button>
+          <button
+            onClick={handleNovoUsuario}
+            style={styles.newUserButton}
+            onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
+            onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
+          >
+            ➕ Novo Usuário
+          </button>
+        </div>
       </div>
 
       {/* Campo de busca */}
@@ -78,6 +132,27 @@ const styles = {
     fontWeight: "bold",
     margin: 0,
     color: "#333",
+  },
+
+  buttonGroup: {
+    display: "flex",
+    gap: "10px",
+    alignItems: "center",
+  },
+
+  exportButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
   },
 
   newUserButton: {
