@@ -1,91 +1,101 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // Funções auxiliares
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isAdmin() {
       return isAuthenticated() && 
              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'admin';
     }
-    
+
     function isGestor() {
       return isAuthenticated() && 
              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'gestor';
     }
-    
+
     function isOperador() {
       return isAuthenticated() && 
              get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'operador';
     }
-    
+
+    function isGestorOrOperador() {
+      return isGestor() || isOperador();
+    }
+
     function getUserMunicipio() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.municipio;
     }
-    
+
     function getUserUF() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.uf;
     }
-    
+
     // ✅ VALIDAR CAMPOS OBRIGATÓRIOS
     function hasValidFields(data) {
       return data.keys().hasAll(['municipio', 'uf', 'valorRecurso']) &&
              data.valorRecurso is number &&
              data.valorRecurso >= 0;
     }
-    
+
     // Regras para EMENDAS
     match /emendas/{emendaId} {
       // Admin pode tudo
       allow read, write: if isAdmin();
-      
+
       // ✅ GESTOR - CREATE (usa request.resource.data)
       allow create: if isGestor() && 
                        request.resource.data.municipio == getUserMunicipio() &&
                        request.resource.data.uf == getUserUF() &&
                        hasValidFields(request.resource.data);
-      
+
       // ✅ GESTOR - READ/UPDATE/DELETE (usa resource.data)
       allow read, update, delete: if isGestor() && 
                                      resource.data.municipio == getUserMunicipio() &&
                                      resource.data.uf == getUserUF();
-      
+
       // Operador pode apenas ler emendas do seu município
       allow read: if isOperador() && 
                      resource.data.municipio == getUserMunicipio() &&
                      resource.data.uf == getUserUF();
     }
-    
+
     // Regras para DESPESAS
     match /despesas/{despesaId} {
       // Admin pode tudo
       allow read, write: if isAdmin();
-      
+
       // ✅ GESTOR - CREATE (usa request.resource.data)
       allow create: if isGestor() && 
                        request.resource.data.municipio == getUserMunicipio() &&
                        request.resource.data.uf == getUserUF();
-      
+
       // ✅ GESTOR - READ/UPDATE/DELETE (usa resource.data)
       allow read, update, delete: if isGestor() && 
                                      resource.data.municipio == getUserMunicipio() &&
                                      resource.data.uf == getUserUF();
-      
+
       // Operador pode apenas ler despesas do seu município
-      allow read: if isOperador() && 
-                     resource.data.municipio == getUserMunicipio() &&
-                     resource.data.uf == getUserUF();
+      // OU despesas planejadas vinculadas às emendas do município
+      allow read: if isAuthenticated() && 
+        (isAdmin() || 
+         (isGestorOrOperador() && 
+          ((resource.data.municipio == getUserMunicipio() && 
+            resource.data.uf == getUserUF()) ||
+           (resource.data.status == 'PLANEJADA' && 
+            exists(/databases/$(database)/documents/emendas/$(resource.data.emendaId)) &&
+            get(/databases/$(database)/documents/emendas/$(resource.data.emendaId)).data.municipio == getUserMunicipio() &&
+            get(/databases/$(database)/documents/emendas/$(resource.data.emendaId)).data.uf == getUserUF()))));
     }
-    
+
     // Regras para USUÁRIOS
     match /usuarios/{userId} {
       // Admin pode tudo
       allow read, write: if isAdmin();
-      
+
       // Usuários podem ler e atualizar apenas seus próprios dados
       allow read, update: if isAuthenticated() && request.auth.uid == userId;
     }

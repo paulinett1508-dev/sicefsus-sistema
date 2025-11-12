@@ -325,11 +325,20 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       console.log('📥 Carregando despesas para emenda:', emendaId);
 
       // ✅ CORREÇÃO CRÍTICA: Filtrar APENAS por emendaId
-      // Despesas planejadas não têm município/UF, então não podemos usar esses filtros
+      // As regras do Firestore já garantem que só veremos despesas autorizadas
       const despesasQuery = query(
         collection(db, "despesas"),
         where("emendaId", "==", emendaId)
       );
+
+      console.log('🔍 Query de despesas:', {
+        emendaId,
+        usuario: {
+          tipo: usuario?.tipo,
+          municipio: usuario?.municipio,
+          uf: usuario?.uf
+        }
+      });
 
       const despesasSnapshot = await getDocs(despesasQuery);
       const despesasData = despesasSnapshot.docs.map(doc => ({
