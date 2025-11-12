@@ -77,24 +77,50 @@ const DespesaPlanejadaForm = ({
   };
 
   const handleSalvarPlanejada = async () => {
+    console.log("🔍 INÍCIO handleSalvarPlanejada - Dados recebidos:", {
+      emendaId,
+      valorEmenda,
+      totalExecutado,
+      usuario: {
+        email: usuario?.email,
+        tipo: usuario?.tipo,
+        role: usuario?.role,
+        uid: usuario?.uid,
+        municipio: usuario?.municipio,
+        uf: usuario?.uf
+      },
+      formData: {
+        numero: formData?.numero,
+        municipio: formData?.municipio,
+        uf: formData?.uf
+      }
+    });
+
     const valid = validarFormulario();
     if (!valid.valido) {
+      console.warn("⚠️ Validação falhou:", valid.mensagem);
       alert(valid.mensagem);
       return;
     }
+
     try {
       setSalvando(true);
       const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
       
-      // ✅ CORREÇÃO: Incluir todos os campos obrigatórios
+      // ✅ CORREÇÃO CRÍTICA: Incluir município e UF da emenda
       const novaDespesa = {
         emendaId,
         estrategia: estrategiaFinal,
         naturezaDespesa: estrategiaFinal,
-        discriminacao: estrategiaFinal, // ✅ Necessário
+        discriminacao: estrategiaFinal,
         valor: parseValorMonetario(valor),
         status: "PLANEJADA",
-        statusPagamento: "pendente", // ✅ Campo obrigatório
+        statusPagamento: "pendente",
+        
+        // ✅ ADICIONAR CAMPOS GEOGRÁFICOS (necessários para as regras do Firestore)
+        municipio: formData?.municipio || usuario?.municipio || "",
+        uf: formData?.uf || usuario?.uf || "",
+        numeroEmenda: formData?.numero || "",
         
         // Campos vazios (serão preenchidos na execução)
         fornecedor: "",
@@ -111,11 +137,21 @@ const DespesaPlanejadaForm = ({
         atualizadoEm: new Date().toISOString(),
       };
 
-      console.log("💾 Salvando despesa planejada:", novaDespesa);
+      console.log("💾 Tentando salvar despesa planejada:", {
+        ...novaDespesa,
+        valorOriginal: valor,
+        valorParsed: parseValorMonetario(valor)
+      });
+
+      console.log("🔑 Verificando autenticação Firebase:", {
+        hasAuth: !!db,
+        collection: "despesas",
+        timestamp: new Date().toISOString()
+      });
       
-      await addDoc(collection(db, "despesas"), novaDespesa);
+      const docRef = await addDoc(collection(db, "despesas"), novaDespesa);
       
-      console.log("✅ Despesa planejada criada com sucesso");
+      console.log("✅ Despesa planejada criada com sucesso! ID:", docRef.id);
       
       // Limpar formulário
       setEstrategia("");
@@ -125,8 +161,27 @@ const DespesaPlanejadaForm = ({
       
       onSuccess?.();
     } catch (e) {
-      console.error("❌ Erro ao adicionar despesa:", e);
-      alert(`Erro ao adicionar despesa: ${e.message || "Erro desconhecido"}`);
+      console.error("❌ ERRO DETALHADO ao adicionar despesa:", {
+        code: e.code,
+        message: e.message,
+        name: e.name,
+        stack: e.stack,
+        fullError: e
+      });
+
+      // Mensagem específica para erro de permissão
+      if (e.code === 'permission-denied') {
+        console.error("🔒 ERRO DE PERMISSÃO - Detalhes:", {
+          emendaId,
+          municipio: formData?.municipio || usuario?.municipio,
+          uf: formData?.uf || usuario?.uf,
+          usuarioTipo: usuario?.tipo,
+          usuarioRole: usuario?.role
+        });
+        alert(`❌ Erro de permissão ao adicionar despesa.\n\nVerifique:\n1. Município/UF da emenda\n2. Permissões do usuário\n3. Regras do Firestore\n\nDetalhes: ${e.message}`);
+      } else {
+        alert(`Erro ao adicionar despesa: ${e.message || "Erro desconhecido"}`);
+      }
     } finally {
       setSalvando(false);
     }
