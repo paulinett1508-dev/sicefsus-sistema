@@ -38,6 +38,54 @@ const Dashboard = ({ usuario }) => {
     );
   }
 
+  // Verificar se usuário está autenticado
+  if (!user) {
+    return null;
+  }
+
+  // 🚨 BLOQUEAR ACESSO SE CADASTRO INCOMPLETO
+  if (user.cadastroIncompleto) {
+    return (
+      <div style={{
+        padding: '40px',
+        textAlign: 'center',
+        maxWidth: '600px',
+        margin: '100px auto',
+        backgroundColor: '#fff3cd',
+        border: '2px solid #ffc107',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      }}>
+        <h2 style={{ color: '#856404', marginBottom: '20px' }}>
+          ⚠️ Cadastro Incompleto
+        </h2>
+        <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#856404', marginBottom: '20px' }}>
+          Seu usuário <strong>{user.email}</strong> foi criado no sistema de autenticação,
+          mas ainda não foi completamente configurado no Firestore.
+        </p>
+        <div style={{
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          border: '1px solid #ffc107',
+          marginBottom: '20px',
+          textAlign: 'left'
+        }}>
+          <h3 style={{ color: '#856404', marginBottom: '12px' }}>🔧 O que precisa ser feito:</h3>
+          <ol style={{ color: '#856404', lineHeight: '1.8' }}>
+            <li>Solicite a um <strong>administrador</strong> que acesse o módulo <strong>Administração</strong></li>
+            <li>Peça para ele criar/completar seu cadastro no sistema</li>
+            <li>Certifique-se de que seu município e UF sejam definidos</li>
+            <li>Aguarde a confirmação de que o cadastro foi concluído</li>
+          </ol>
+        </div>
+        <p style={{ fontSize: '14px', color: '#856404', fontStyle: 'italic' }}>
+          💡 Após a conclusão do cadastro, faça logout e login novamente para acessar o sistema.
+        </p>
+      </div>
+    );
+  }
+
   // Verificação de permissões
   if (!permissions.temAcesso()) {
     return (

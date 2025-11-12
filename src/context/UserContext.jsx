@@ -41,7 +41,7 @@ export const UserProvider = ({ children }) => {
               firebaseUser.displayName ||
               firebaseUser.email?.split("@")[0] ||
               "Usuário";
-            
+
             // ✅ PADRONIZAR TIPO: sempre usar "tipo"
             let tipo = userData.tipo || "operador";
             if (userData.role === "user" || userData.role === "operador") {
@@ -49,7 +49,7 @@ export const UserProvider = ({ children }) => {
             } else if (userData.role === "admin") {
               tipo = "admin";
             }
-            
+
             const status = userData.status || "ativo";
 
             const usuarioFinal = {
@@ -92,41 +92,34 @@ export const UserProvider = ({ children }) => {
               });
             }
           } else {
-            console.warn(
-              "⚠️ Documento do usuário não encontrado no Firestore",
+            console.error(
+              "🚨 CRÍTICO: Usuário sem cadastro no Firestore! Email:", firebaseUser.email
+            );
+            console.error(
+              "🔧 AÇÃO NECESSÁRIA: Um administrador deve criar este usuário no módulo Administração"
             );
 
-            // ✅ NÃO TENTAR CRIAR DOCUMENTO (evita erro de permissão)
-            // ✅ CRIAR USUÁRIO LOCAL BÁSICO para permitir acesso ao sistema
-            const emailDomain = firebaseUser.email?.split("@")[1] || "";
-            const isAdminEmail =
-              firebaseUser.email === "paulinett1508@gmail.com";
+            // ⚠️ Mostra alerta visual para o usuário
+            alert(
+              `⚠️ CADASTRO INCOMPLETO\n\n` +
+              `Seu usuário (${firebaseUser.email}) ainda não foi completamente configurado.\n\n` +
+              `Entre em contato com um administrador para:\n` +
+              `1. Definir seu tipo de acesso (Operador/Gestor/Admin)\n` +
+              `2. Configurar seu município e UF\n` +
+              `3. Ativar todas as funcionalidades\n\n` +
+              `Você terá acesso limitado até que o cadastro seja concluído.`
+            );
 
-            const nomeBasico =
-              firebaseUser.displayName ||
-              firebaseUser.email?.split("@")[0] ||
-              "Usuário";
-
-            // ✅ CRIAR OBJETO LOCAL (NÃO SALVA NO FIRESTORE)
-            const localUserData = {
+            setUsuario({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
-              nome: nomeBasico,
-              displayName: nomeBasico,
-              tipo: isAdminEmail ? "admin" : "operador",
-              isActive: true, // Permitir acesso
-              status: "pendente", // Mas marcar como pendente
-              municipio: "", // Sem localização
-              uf: "",
-              primeiroAcesso: true,
-              needsConfiguration: true, // Flag para avisar admin
-            };
-
-            setUsuario(localUserData);
-
-            console.warn(
-              "⚠️ Usuário sem cadastro no Firestore - Acesso básico concedido. Admin deve criar o usuário.",
-            );
+              nome: firebaseUser.displayName || firebaseUser.email?.split("@")[0],
+              tipo: "operador",
+              superAdmin: false,
+              cadastroIncompleto: true, // 🆕 Flag para identificar problema
+            });
+            setLoading(false);
+            return;
           }
         } catch (error) {
           console.error("❌ Erro ao carregar dados do usuário:", error);
