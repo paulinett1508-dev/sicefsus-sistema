@@ -665,7 +665,7 @@ const Administracao = () => {
       {/* Conteúdo baseado na aba ativa */}
       {activeTab === "usuarios" && (
         <UsersSection
-          usuarios={getFilteredUsers()}
+          users={getFilteredUsers()}
           loading={loading}
           userFilter={userFilter}
           setUserFilter={setUserFilter}

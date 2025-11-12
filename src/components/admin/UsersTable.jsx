@@ -8,7 +8,7 @@ const UsersTable = ({
   onToggleStatus,
   loading,
 }) => {
-  if (users.length === 0) {
+  if (!users || users.length === 0) {
     return (
       <div style={styles.emptyState}>
         <div style={{ fontSize: "48px", marginBottom: "16px" }}>👥</div>
