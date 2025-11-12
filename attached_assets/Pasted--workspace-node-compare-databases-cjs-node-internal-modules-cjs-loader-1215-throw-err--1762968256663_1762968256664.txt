@@ -1,0 +1,104 @@
+~/workspace$ node compare-databases.cjs
+node:internal/modules/cjs/loader:1215
+  throw err;
+  ^
+
+Error: Cannot find module '/home/runner/workspace/compare-databases.cjs'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1212:15)
+    at Module._load (node:internal/modules/cjs/loader:1043:27)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+    at node:internal/main/run_main_module:28:49 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v20.19.3
+~/workspace$ node firebase-migration/compare-databases.cjs
+🔍 Iniciando comparação entre bancos Firebase...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 COMPARAÇÃO DETALHADA DE COLEÇÕES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📦 Analisando coleção: auditoria...
+   PROD: 1 documentos | DEV: 1 documentos
+   ✅ Sincronizado
+
+📦 Analisando coleção: configuracoes...
+   PROD: 2 documentos | DEV: 2 documentos
+   ✅ Sincronizado
+
+📦 Analisando coleção: despesas...
+   PROD: 68 documentos | DEV: 94 documentos
+   📉 DEV tem 26 doc(s) a mais
+
+📦 Analisando coleção: emendas...
+   PROD: 17 documentos | DEV: 25 documentos
+   📉 DEV tem 8 doc(s) a mais
+
+📦 Analisando coleção: estados...
+   PROD: 27 documentos | DEV: 27 documentos
+   ✅ Sincronizado
+
+📦 Analisando coleção: logs...
+   PROD: 21 documentos | DEV: 60 documentos
+   📉 DEV tem 39 doc(s) a mais
+
+📦 Analisando coleção: tipos_emenda...
+   PROD: 3 documentos | DEV: 3 documentos
+   ✅ Sincronizado
+
+📦 Analisando coleção: usuarios...
+   PROD: 10 documentos | DEV: 14 documentos
+   📉 DEV tem 4 doc(s) a mais
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 RELATÓRIO FINAL DA COMPARAÇÃO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📈 RESUMO POR COLEÇÃO:
+
+┌─────────┬─────────────────┬──────┬─────┬───────────┬───────────────────────────────┐
+│ (index) │ Coleção         │ PROD │ DEV │ Diferença │ Status                        │
+├─────────┼─────────────────┼──────┼─────┼───────────┼───────────────────────────────┤
+│ 0       │ 'auditoria'     │ 1    │ 1   │ 0         │ '✅ Sincronizado'             │
+│ 1       │ 'configuracoes' │ 2    │ 2   │ 0         │ '✅ Sincronizado'             │
+│ 2       │ 'despesas'      │ 68   │ 94  │ -26       │ '📉 DEV tem 26 doc(s) a mais' │
+│ 3       │ 'emendas'       │ 17   │ 25  │ -8        │ '📉 DEV tem 8 doc(s) a mais'  │
+│ 4       │ 'estados'       │ 27   │ 27  │ 0         │ '✅ Sincronizado'             │
+│ 5       │ 'logs'          │ 21   │ 60  │ -39       │ '📉 DEV tem 39 doc(s) a mais' │
+│ 6       │ 'tipos_emenda'  │ 3    │ 3   │ 0         │ '✅ Sincronizado'             │
+│ 7       │ 'usuarios'      │ 10   │ 14  │ -4        │ '📉 DEV tem 4 doc(s) a mais'  │
+└─────────┴─────────────────┴──────┴─────┴───────────┴───────────────────────────────┘
+
+📊 TOTAIS GERAIS:
+   PRODUÇÃO: 149 documentos
+   DESENVOLVIMENTO: 226 documentos
+   Diferença: -77 documentos
+
+⚠️  ALERTAS IMPORTANTES:
+
+   🟠 Coleções DESSINCRONIZADAS:
+      - despesas: 26 docs a mais em DEV
+      - emendas: 8 docs a mais em DEV
+      - logs: 39 docs a mais em DEV
+      - usuarios: 4 docs a mais em DEV
+
+💡 RECOMENDAÇÕES:
+   ⚠️  Ambientes dessincronizados
+   ➡️  PROD tem dados que DEV não tem (dados reais dos usuários)
+   ➡️  Qualquer migração DEVE preservar os dados de PROD
+
+✅ PRÓXIMOS PASSOS SEGUROS:
+   1. Revise este relatório cuidadosamente
+   2. Identifique quais dados de PROD são críticos
+   3. Se necessário, faça backup de PROD antes de qualquer operação
+   4. Migre apenas o que for realmente necessário
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 Relatório completo salvo em: ./comparison-report.json
+
+✅ Comparação concluída com sucesso!
+~/workspace$ 
