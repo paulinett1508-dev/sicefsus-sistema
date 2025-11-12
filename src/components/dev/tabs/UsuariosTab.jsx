@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
@@ -61,10 +62,10 @@ function UsuariosTab() {
     }
   };
 
-  const toggleCard = (userId) => {
+  const toggleCard = (cardId) => {
     setExpandedCards(prev => ({
       ...prev,
-      [userId]: !prev[userId]
+      [cardId]: !prev[cardId]
     }));
   };
 
@@ -73,21 +74,31 @@ function UsuariosTab() {
     const isExpandido = expandedCards[tipo];
 
     return (
-      <div style={styles.statCard}>
-        <div 
-          onClick={() => toggleCard(tipo)}
-          style={{ cursor: 'pointer' }}
-        >
+      <div 
+        style={{
+          ...styles.statCard,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          transform: isExpandido ? 'translateY(-2px)' : 'none',
+          boxShadow: isExpandido ? '0 4px 12px rgba(0,0,0,0.15)' : '0 1px 3px rgba(0,0,0,0.1)'
+        }}
+        onClick={() => toggleCard(tipo)}
+      >
+        <div>
           <div style={styles.statIcon}>{icone}</div>
           <div style={styles.statValue}>{stats.loading ? '...' : valor}</div>
           <div style={styles.statLabel}>{label}</div>
-          <div style={styles.expandIcon}>
+          <div style={{
+            ...styles.expandIcon,
+            transform: isExpandido ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 0.3s ease'
+          }}>
             {isExpandido ? '▼' : '▶'}
           </div>
         </div>
 
         {isExpandido && usuariosFiltrados.length > 0 && (
-          <div style={styles.usuariosList}>
+          <div style={styles.usuariosList} onClick={(e) => e.stopPropagation()}>
             {usuariosFiltrados.map((usuario, index) => (
               <div key={usuario.id || index} style={styles.usuarioItem}>
                 <div style={styles.usuarioInfo}>
@@ -195,7 +206,6 @@ const styles = {
     borderRadius: '8px',
     border: '2px solid #e2e8f0',
     textAlign: 'center',
-    transition: 'all 0.3s ease',
   },
   statIcon: {
     fontSize: '32px',
