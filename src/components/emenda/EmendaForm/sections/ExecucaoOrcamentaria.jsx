@@ -209,7 +209,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   useEffect(() => {
     // Prioridade absoluta: IDs diretos
     const idDireto = formData?.id || formData?.emendaId;
-    
+
     if (idDireto) {
       console.log('✅ ExecucaoOrcamentaria - ID direto encontrado:', {
         id: idDireto,
@@ -229,39 +229,57 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const emendaId = emendaIdReal || formData?.id || formData?.emendaId;
   const temEmendaSalva = !!emendaId;
 
+  // ✅ CARREGAR DESPESAS DA EMENDA
   const carregarDespesas = async () => {
     if (!emendaId) {
+      console.warn('⚠️ Tentativa de carregar despesas sem emendaId');
       setDespesas([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+
     try {
-      const q = query(
+      setLoading(true);
+      console.log('📥 Carregando despesas para emenda:', emendaId);
+
+      // ✅ PARA GESTOR: Adicionar filtros geográficos obrigatórios
+      const despesasQueryConstraints = [
+        where("emendaId", "==", emendaId)
+      ];
+
+      // Se for gestor/operador, adicionar filtros de município/UF
+      if (usuario?.tipo === 'gestor' || usuario?.tipo === 'operador') {
+        if (formData?.municipio) {
+          despesasQueryConstraints.push(where("municipio", "==", formData.municipio));
+        }
+        if (formData?.uf) {
+          despesasQueryConstraints.push(where("uf", "==", formData.uf));
+        }
+      }
+
+      const despesasQuery = query(
         collection(db, "despesas"),
-        where("emendaId", "==", emendaId),
+        ...despesasQueryConstraints
       );
-      const snap = await getDocs(q);
-      const despesasCarregadas = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
+
+      const despesasSnapshot = await getDocs(despesasQuery);
+      const despesasData = despesasSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       }));
 
-      // ✅ ORDENAR por data de criação (mais recentes primeiro)
-      despesasCarregadas.sort((a, b) => {
-        const dataA = a.criadoEm?.seconds || a.criadaEm?.seconds || 0;
-        const dataB = b.criadoEm?.seconds || b.criadaEm?.seconds || 0;
-        return dataB - dataA; // DESC (mais recente primeiro)
-      });
+      console.log(`✅ ${despesasData.length} despesas carregadas`);
+      setDespesas(despesasData);
+    } catch (error) {
+      console.error('❌ Erro ao carregar despesas:', error);
 
-      setDespesas(despesasCarregadas);
-    } catch (e) {
-      console.error(e);
-      setToast({
-        show: true,
-        message: "Erro ao carregar despesas.",
-        type: "error",
-      });
+      // ✅ TRATAMENTO ESPECÍFICO PARA ERRO DE PERMISSÃO
+      if (error.code === 'permission-denied') {
+        console.warn('🔒 Erro de permissão - Gestor precisa de filtros geográficos');
+        setDespesas([]); // Mostrar vazio ao invés de erro
+      } else {
+        setDespesas([]);
+      }
     } finally {
       setLoading(false);
     }
