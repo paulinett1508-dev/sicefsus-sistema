@@ -65,16 +65,31 @@ const ConfirmationModal = ({
         </div>
 
         <div style={styles.footer}>
-          <button onClick={onCancel} style={styles.cancelButton}>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("❌ Modal cancelado pelo usuário");
+              onCancel();
+            }} 
+            style={styles.cancelButton}
+            type="button"
+          >
             {cancelText}
           </button>
 
           <button
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log("✅ Modal confirmado pelo usuário");
+              onConfirm();
+            }}
             style={{
               ...styles.confirmButton,
               backgroundColor: getColorByType(),
             }}
+            type="button"
           >
             {confirmText}
           </button>

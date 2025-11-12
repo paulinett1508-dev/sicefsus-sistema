@@ -295,6 +295,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     despesa: null,
   });
 
+  // ✅ PROTEÇÃO: Prevenir navegação enquanto modal está aberto
+  useEffect(() => {
+    if (modalExclusaoPlanejada.isVisible) {
+      console.log("🔒 Modal de exclusão aberto - Navegação bloqueada");
+    }
+  }, [modalExclusaoPlanejada.isVisible]);
+
   // ✅ RESOLVER ID - PRIORIZAR ID DIRETO (evitar consultas desnecessárias)
   useEffect(() => {
     // Prioridade absoluta: IDs diretos
@@ -602,7 +609,18 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     carregarDespesas();
   };
 
-  const handleRemoverDespesaPlanejada = (despesa) => {
+  const handleRemoverDespesaPlanejada = (despesa, event) => {
+    // ✅ CRÍTICO: Prevenir propagação de eventos
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    console.log("🗑️ Abrindo modal de confirmação de exclusão:", {
+      despesaId: despesa.id,
+      discriminacao: despesa.discriminacao || despesa.estrategia
+    });
+
     setModalExclusaoPlanejada({
       isVisible: true,
       despesa: despesa,
@@ -612,20 +630,31 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const confirmarRemocaoPlanejada = async () => {
     const despesa = modalExclusaoPlanejada.despesa;
     
-    if (!despesa) return;
+    if (!despesa) {
+      console.warn("⚠️ Tentativa de remover despesa sem dados");
+      return;
+    }
+
+    console.log("✅ Confirmando remoção de despesa planejada:", despesa.id);
 
     try {
       await deleteDoc(doc(db, "despesas", despesa.id));
+      console.log("✅ Despesa removida com sucesso");
+      
       showToast({
         message: "🗑️ Despesa planejada removida",
         type: "success",
       });
+      
+      // ✅ IMPORTANTE: Fechar modal ANTES de recarregar
       setModalExclusaoPlanejada({ isVisible: false, despesa: null });
-      carregarDespesas();
+      
+      // Recarregar lista
+      await carregarDespesas();
     } catch (e) {
-      console.error(e);
+      console.error("❌ Erro ao remover despesa:", e);
       showToast({
-        message: "❌ Erro ao remover despesa",
+        message: "❌ Erro ao remover despesa: " + e.message,
         type: "error",
       });
       setModalExclusaoPlanejada({ isVisible: false, despesa: null });
@@ -880,9 +909,14 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                               ▶️
                             </button>
                             <button
-                              onClick={() => handleRemoverDespesaPlanejada(despesa)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleRemoverDespesaPlanejada(despesa, e);
+                              }}
                               style={styles.btnIconRemover}
                               title="Remover despesa"
+                              type="button"
                             >
                               🗑️
                             </button>
