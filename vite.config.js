@@ -18,8 +18,9 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY PARA ADMIN API
     server: {
-      port: 5173,
-      host: true,
+      port: 5000,
+      host: '0.0.0.0',
+      strictPort: false,
       proxy: {
         "/api": {
           target: "http://localhost:3001",
@@ -39,8 +40,8 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY TAMBÉM NO PREVIEW (PRODUÇÃO)
     preview: {
-      port: 4173,
-      host: true,
+      port: 5000,
+      host: '0.0.0.0',
       // ✅ CORREÇÃO: SPA routing para deploy estático
       historyApiFallback: true,
       proxy: {
@@ -53,8 +54,10 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
+      outDir: 'dist',
       sourcemap: false,
       minify: "terser",
+      chunkSizeWarningLimit: 1000,
       terserOptions: {
         compress: {
           drop_console: isProduction,
