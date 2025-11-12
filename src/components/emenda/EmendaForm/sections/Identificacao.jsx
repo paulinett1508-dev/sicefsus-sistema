@@ -18,7 +18,7 @@ const Identificacao = ({
   const isAdmin = user?.tipo === "admin";
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
-  
+
   // ✅ BLOQUEIO DE LOCALIZAÇÃO:
   // - Admin: NUNCA bloqueado
   // - Operador: SEMPRE bloqueado
