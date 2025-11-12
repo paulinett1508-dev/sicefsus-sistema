@@ -15,19 +15,19 @@ const Identificacao = ({
   const [municipios, setMunicipios] = useState([]);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
   const { user } = useContext(UserContext);
+  const isAdmin = user?.tipo === "admin";
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
-  // 🔒 BLOQUEAR LOCALIZAÇÃO EM EDIÇÃO (NUNCA para admin)
-  // ✅ Admin SEMPRE pode editar UF/Município (criar e editar)
-  const isBloqueadoLocalizacaoParaAdmin = false; // Admin nunca bloqueado
-
-  // 🔒 VERIFICAR SE CAMPOS DEVEM SER BLOQUEADOS
-  // Admins: nunca bloqueados
-  // Operadores: sempre bloqueados
-  // Gestores: bloqueados apenas em edição
-  const isBloqueadoLocalizacao =
-    user?.tipo !== "admin" &&
-    (user?.tipo === "operador" || (user?.tipo === "gestor" && editingEmenda));
+  
+  // ✅ BLOQUEIO DE LOCALIZAÇÃO:
+  // - Admin: NUNCA bloqueado
+  // - Operador: SEMPRE bloqueado
+  // - Gestor: Bloqueado apenas se já tiver UF/Município definidos
+  const isBloqueadoLocalizacao = isAdmin 
+    ? false 
+    : isOperador 
+      ? true 
+      : (isGestor && formData?.municipio && formData?.uf);
 
 
   // ✅ DEBUG: Verificar props recebidas
@@ -158,10 +158,10 @@ const Identificacao = ({
             name="uf"
             value={formData.uf || ""}
             onChange={handleUfChange}
-            disabled={disabled || isBloqueadoLocalizacao}
+            disabled={isBloqueadoLocalizacao}
             style={{
               ...styles.input,
-              ...(fieldErrors.uf && styles.inputError), // ✅ USANDO fieldErrors
+              ...(fieldErrors.uf && styles.inputError),
             }}
             required
           >
@@ -186,12 +186,10 @@ const Identificacao = ({
             name="municipio"
             value={formData.municipio || ""}
             onChange={handleChange}
-            disabled={
-              disabled || !formData?.uf || loadingMunicipios || isBloqueadoLocalizacao
-            }
+            disabled={!formData?.uf || loadingMunicipios || isBloqueadoLocalizacao}
             style={{
               ...styles.input,
-              ...(fieldErrors.municipio && styles.inputError), // ✅ USANDO fieldErrors
+              ...(fieldErrors.municipio && styles.inputError),
               ...(loadingMunicipios && styles.inputLoading),
             }}
             required
@@ -217,14 +215,14 @@ const Identificacao = ({
       </div>
       {isBloqueadoLocalizacao && (
             <small style={{ ...styles.helpText, color: "var(--warning)" }}>
-              🔒 {user?.tipo === "gestor"
-                ? "Município e UF não podem ser alterados ao editar emenda"
-                : "Município e UF definidos automaticamente (não editável)"}
+              🔒 {isOperador
+                ? "Município e UF definidos automaticamente pelo seu perfil (não editável)"
+                : "Município e UF já definidos (não podem ser alterados)"}
             </small>
           )}
-          {!isBloqueadoLocalizacao && user?.tipo === "admin" && (
+          {isAdmin && (
             <small style={{ ...styles.helpText, color: "var(--success)" }}>
-              ✅ Administrador: pode selecionar qualquer UF e município
+              ✅ Admin: pode selecionar qualquer UF e município
             </small>
           )}
     </fieldset>
