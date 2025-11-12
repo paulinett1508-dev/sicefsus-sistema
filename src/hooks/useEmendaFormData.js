@@ -393,11 +393,32 @@ export const useEmendaFormData = () => {
         field: name,
         value: value,
         valueType: typeof value,
-        isFunction: true
       });
+
+      // ✅ ATUALIZAR O ESTADO DO FORMULÁRIO
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // Limpar erro do campo se existir
+      if (fieldErrors[name]) {
+        setFieldErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[name];
+          return newErrors;
+        });
+      }
     },
-    [],
+    [fieldErrors],
   );
+
+  const toggleSection = useCallback((section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  }, []);
 
   const toggleSection = useCallback((section) => {
     setExpandedSections((prev) => ({
@@ -917,6 +938,13 @@ export const useEmendaFormData = () => {
     setFieldErrors,
     expandedSections,
     hasUnsavedChanges,
-    isEdicao
+    isEdicao,
+
+    // Handlers
+    handleInputChange,
+    handleSubmit,
+    toggleSection,
+    buscarDadosFornecedor,
+    clearFieldError,
   };
 };

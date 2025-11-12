@@ -143,10 +143,17 @@ const Identificacao = ({
     const ufSelecionada = e.target.value;
     console.log('🗺️ UF selecionada:', ufSelecionada);
 
-    // Atualizar UF
-    handleChange(e);
+    // PRIMEIRO: Atualizar UF no estado pai
+    if (onChange && typeof onChange === 'function') {
+      onChange(e);
+    }
 
-    // Limpar município quando UF mudar
+    // Limpar erro do campo UF se existir
+    if (onClearError && fieldErrors.uf) {
+      onClearError('uf');
+    }
+
+    // DEPOIS: Limpar município quando UF mudar
     if (formData?.municipio) {
       setTimeout(() => {
         const municipioEvent = {
