@@ -3,8 +3,8 @@
 // ✅ CORRIGIDO: Proteções contra fechamento acidental
 // ✅ TODAS AS LÓGICAS ANTERIORES PRESERVADAS 100%
 
-import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   collection,
   query,
@@ -24,7 +24,8 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
-import { useLocation, useNavigate } from "react-router-dom";
+import ExecutarDespesaModal from "./ExecutarDespesaModal";
+import ConfirmarExecucaoDespesaModal from "./ConfirmarExecucaoDespesaModal";
 
 const formatCurrency = (valor) =>
   (Number(valor) || 0).toLocaleString("pt-BR", {
@@ -493,17 +494,42 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   };
 
   // ✅ Handler para executar despesa planejada (validação de saldo ocorre no salvamento)
-  const handleExecutarDespesa = (despesa) => {
-    console.log("▶️ ExecucaoOrcamentaria: Executando despesa planejada", {
-      id: despesa.id,
-      estrategia: despesa.estrategia,
-      valor: despesa.valor,
-    });
+  // Modificado para abrir modal de confirmação
+  const handleExecutarDespesa = useCallback((despesa) => {
+    console.log("▶️ Iniciando processo de execução de despesa planejada:", despesa);
 
-    console.log("✅ Abrindo DespesaForm para EXECUTAR (pré-preenchido)");
-    setDespesaEmEdicao(despesa);
-    setModoVisualizacao("executar");
-  };
+    // Verificar permissão de gestor
+    if (usuario?.tipo === "gestor" || usuario?.role === "gestor") {
+      const despesaMunicipio = despesa.municipio || formData?.municipio;
+      const despesaUf = despesa.uf || formData?.uf;
+      const usuarioMunicipio = usuario.municipio;
+      const usuarioUf = usuario.uf;
+
+      if (despesaMunicipio !== usuarioMunicipio || despesaUf !== usuarioUf) {
+        alert(`⚠️ Você não tem permissão para executar despesas de ${despesaMunicipio}/${despesaUf}.\n\nSua localidade: ${usuarioMunicipio}/${usuarioUf}`);
+        return;
+      }
+    }
+
+    // Abrir modal de confirmação primeiro
+    setDespesaPendenteExecucao(despesa);
+    setMostrarConfirmacaoExecucao(true);
+  }, [usuario, formData]);
+
+  const handleConfirmarExecucao = useCallback(() => {
+    console.log("✅ Execução confirmada, abrindo formulário");
+    setMostrarConfirmacaoExecucao(false);
+    setDespesaParaExecutar(despesaPendenteExecucao);
+    setMostrarExecutarModal(true);
+    setDespesaPendenteExecucao(null);
+  }, [despesaPendenteExecucao]);
+
+  const handleCancelarExecucao = useCallback(() => {
+    console.log("❌ Execução cancelada pelo usuário");
+    setMostrarConfirmacaoExecucao(false);
+    setDespesaPendenteExecucao(null);
+  }, []);
+
 
   // ✅ Handler para fechar formulário (COM PROTEÇÃO)
   const handleFecharFormulario = (foiSalvoComSucesso = false) => {
@@ -918,7 +944,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         />
       </div>
 
-      {/* ✅ FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
+      {/* FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
       {modoVisualizacao &&
         createPortal(
           <div
@@ -1024,6 +1050,36 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>,
           document.body,
         )}
+
+      {/* Modal de Confirmação de Execução */}
+      {mostrarConfirmacaoExecucao && despesaPendenteExecucao && (
+        <ConfirmarExecucaoDespesaModal
+          isOpen={mostrarConfirmacaoExecucao}
+          onConfirm={handleConfirmarExecucao}
+          onCancel={handleCancelarExecucao}
+          despesa={despesaPendenteExecucao}
+          saldoAtual={stats.saldoDisponivel}
+        />
+      )}
+
+      {/* Modal de Executar Despesa */}
+      {mostrarExecutarModal && despesaParaExecutar && (
+        <ExecutarDespesaModal
+          isOpen={mostrarExecutarModal}
+          onClose={() => {
+            setMostrarExecutarModal(false);
+            setDespesaParaExecutar(null);
+          }}
+          despesa={despesaParaExecutar}
+          emendaId={emendaId}
+          saldoDisponivel={stats.saldoDisponivel}
+          onSuccess={() => {
+            setMostrarExecutarModal(false);
+            setDespesaParaExecutar(null);
+            // Recarregar será feito automaticamente pelo listener
+          }}
+        />
+      )}
     </div>
   );
 };
