@@ -9,6 +9,7 @@ import BackupTab from "./tabs/BackupTab";
 import UsuariosTab from "./tabs/UsuariosTab";
 import ConfigTab from "./tabs/ConfigTab";
 import IAMTab from "./tabs/IAMTab";
+import AnalyticsTab from './tabs/AnalyticsTab'; // Importar aba Analytics
 
 // CSS Module
 import styles from "./FerramentasDev.module.css";
@@ -51,13 +52,19 @@ const FerramentasDev = () => {
       label: "Diagnóstico & Recálculo",
       componente: DiagnosticoTab,
     },
-    { 
-      id: "manutencao", 
-      icone: "🔧", 
-      label: "Manutenção & Monitoramento", 
-      componente: ManutencaoTab 
+    {
+      id: "manutencao",
+      icone: "🔧",
+      label: "Manutenção & Monitoramento",
+      componente: ManutencaoTab
     },
     { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
+    {
+      id: "analytics", // Adicionado ID para Analytics
+      icone: "📊", // Ícone para Analytics
+      label: "Analytics", // Label para Analytics
+      componente: AnalyticsTab, // Componente para Analytics
+    },
     { id: "usuarios", icone: "👥", label: "Usuários", componente: UsuariosTab },
     {
       id: "iam",
