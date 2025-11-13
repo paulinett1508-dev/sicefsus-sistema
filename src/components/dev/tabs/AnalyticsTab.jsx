@@ -44,6 +44,8 @@ function AnalyticsTab() {
   const carregarAnalytics = async () => {
     setLoading(true);
     try {
+      console.log('📊 [Analytics] Iniciando carregamento de dados...');
+      
       // Calcular data de corte baseado no período
       const now = new Date();
       let cutoffDate = new Date();
@@ -62,6 +64,8 @@ function AnalyticsTab() {
           cutoffDate.setDate(now.getDate() - 7);
       }
 
+      console.log('📊 [Analytics] Período:', periodo, 'De:', cutoffDate.toLocaleString(), 'Até:', now.toLocaleString());
+
       // Buscar logs de auditoria do período
       const logsRef = collection(db, 'logs');
       const logsQuery = query(
@@ -71,18 +75,47 @@ function AnalyticsTab() {
         limit(5000)
       );
 
+      console.log('📊 [Analytics] Buscando logs no Firestore...');
       const logsSnapshot = await getDocs(logsQuery);
+      
+      console.log('📊 [Analytics] Logs encontrados:', logsSnapshot.size);
+
+      if (logsSnapshot.empty) {
+        console.warn('⚠️ [Analytics] Nenhum log encontrado no período!');
+        console.log('💡 [Analytics] Dica: Execute ações no sistema (criar, editar, deletar) para gerar logs');
+        
+        // Tentar buscar TODOS os logs (sem filtro de data)
+        const allLogsQuery = query(logsRef, orderBy('timestamp', 'desc'), limit(100));
+        const allLogsSnapshot = await getDocs(allLogsQuery);
+        
+        console.log('📊 [Analytics] Total de logs no banco (últimos 100):', allLogsSnapshot.size);
+        
+        if (allLogsSnapshot.empty) {
+          console.warn('⚠️ [Analytics] Coleção "logs" está completamente vazia!');
+          console.log('💡 [Analytics] O auditService registrará logs quando você usar o sistema');
+        }
+      }
+
       const logs = logsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
         timestamp: doc.data().timestamp?.toDate() || new Date()
       }));
 
+      console.log('📊 [Analytics] Processando', logs.length, 'logs...');
+
       // Processar analytics
       processarAnalytics(logs);
 
+      console.log('✅ [Analytics] Carregamento concluído!');
+
     } catch (error) {
-      console.error('❌ Erro ao carregar analytics:', error);
+      console.error('❌ [Analytics] Erro ao carregar analytics:', error);
+      console.error('📋 [Analytics] Detalhes do erro:', {
+        message: error.message,
+        code: error.code,
+        stack: error.stack
+      });
     } finally {
       setLoading(false);
     }
@@ -231,8 +264,35 @@ function AnalyticsTab() {
     );
   }
 
+  // Verificar se há dados
+  const temDados = analytics.requests.total > 0;
+
   return (
     <div className="tab-analytics">
+      {/* BANNER INFORMATIVO SE NÃO HOUVER DADOS */}
+      {!temDados && (
+        <div style={{
+          backgroundColor: '#fef3c7',
+          border: '1px solid #f59e0b',
+          borderRadius: '8px',
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{ fontSize: '24px' }}>💡</div>
+          <div>
+            <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>
+              Nenhum dado de analytics disponível
+            </div>
+            <div style={{ fontSize: '14px', color: '#78350f' }}>
+              Os dados de analytics são gerados automaticamente quando você usa o sistema.
+              Execute ações como criar, editar ou visualizar emendas/despesas para começar a coletar dados.
+            </div>
+          </div>
+        </div>
+      )}
       {/* HEADER */}
       <div style={styles.header}>
         <div>
