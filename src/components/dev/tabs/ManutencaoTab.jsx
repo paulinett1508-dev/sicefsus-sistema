@@ -1,67 +1,101 @@
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 
 function ManutencaoTab() {
-  const [loading, setLoading] = useState(false);
   const [metricas, setMetricas] = useState(null);
   const [expandido, setExpandido] = useState({
-    integridade: false,
+    integridade: true,
     performance: false,
     seguranca: false,
-    erros: false,
+    sistema: true
+  });
+  const [loading, setLoading] = useState(true);
+  const [metricsRealTime, setMetricsRealTime] = useState({
+    memory: { used: 0, total: 0, percentage: 0 },
+    uptime: 0,
+    firebase: { status: 'checking', latency: 0 },
+    env: { status: 'checking', count: 0 }
   });
 
   useEffect(() => {
     analisarSistema();
+    const interval = setInterval(updateRealTimeMetrics, 5000);
+    return () => clearInterval(interval);
   }, []);
+
+  const updateRealTimeMetrics = async () => {
+    try {
+      // Memória
+      const memory = performance.memory || {};
+      const used = memory.usedJSHeapSize || 0;
+      const total = memory.jsHeapSizeLimit || 100000000;
+      
+      // Uptime
+      const uptime = performance.now() / 1000;
+
+      // Firebase latency
+      const startTime = Date.now();
+      await getDocs(query(collection(db, 'usuarios'), where('tipo', '==', 'admin')));
+      const latency = Date.now() - startTime;
+
+      // Environment
+      const envCount = Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')).length;
+
+      setMetricsRealTime({
+        memory: {
+          used: (used / 1024 / 1024).toFixed(2),
+          total: (total / 1024 / 1024).toFixed(2),
+          percentage: ((used / total) * 100).toFixed(1)
+        },
+        uptime: Math.floor(uptime),
+        firebase: {
+          status: latency < 500 ? 'ok' : latency < 1000 ? 'warning' : 'slow',
+          latency
+        },
+        env: {
+          status: envCount >= 6 ? 'ok' : 'warning',
+          count: envCount
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar métricas:', error);
+    }
+  };
 
   const analisarSistema = async () => {
     setLoading(true);
-    const inicioAnalise = performance.now();
-
     try {
-      const [emendasSnap, despesasSnap, usuariosSnap, logsSnap] = await Promise.all([
-        getDocs(collection(db, 'emendas')),
-        getDocs(collection(db, 'despesas')),
-        getDocs(collection(db, 'usuarios')),
-        getDocs(query(collection(db, 'logs'), orderBy('timestamp', 'desc'), limit(100))),
-      ]);
+      const despesasSnap = await getDocs(collection(db, 'despesas'));
+      const emendasSnap = await getDocs(collection(db, 'emendas'));
+      const usuariosSnap = await getDocs(collection(db, 'usuarios'));
+      const logsSnap = await getDocs(collection(db, 'logs'));
 
-      const emendas = emendasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const despesas = despesasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const emendas = emendasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const usuarios = usuariosSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const logs = logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-      // INTEGRIDADE
-      const emendasIds = new Set(emendas.map(e => e.id));
-      const despesasOrfas = despesas.filter(d => !emendasIds.has(d.emendaId));
-      const despesasPorEmenda = despesas.reduce((acc, d) => {
-        acc[d.emendaId] = (acc[d.emendaId] || 0) + 1;
-        return acc;
-      }, {});
-      const emendasSemDespesas = emendas.filter(e => !despesasPorEmenda[e.id]);
-      const camposFaltando = emendas.filter(e => !e.numeroEmenda || !e.municipio || !e.valorTotal).length +
-                             despesas.filter(d => !d.descricao || !d.valor).length;
-      const inconsistenciasFinanceiras = emendas.filter(e => {
-        const executado = e.valorExecutado || 0;
-        const total = e.valorTotal || 0;
-        return executado > total || executado < 0;
+      // Integridade
+      const despesasOrfas = despesas.filter(d => !emendas.find(e => e.id === d.emendaId));
+      const emendasSemDespesas = emendas.filter(e => !despesas.find(d => d.emendaId === e.id));
+      const camposFaltando = despesas.filter(d => !d.valor || !d.data || !d.status);
+      const inconsistenciasFinanceiras = despesas.filter(d => {
+        const emenda = emendas.find(e => e.id === d.emendaId);
+        return emenda && parseFloat(d.valor || 0) > parseFloat(emenda.valorTotal || 0);
       });
 
-      // PERFORMANCE
-      const totalDocs = emendas.length + despesas.length + usuarios.length + logs.length;
-      const storageKB = (JSON.stringify([...emendas, ...despesas]).length / 1024).toFixed(2);
-      const tempoAnalise = ((performance.now() - inicioAnalise) / 1000).toFixed(2);
+      // Performance
+      const totalDocs = despesasSnap.size + emendasSnap.size + usuariosSnap.size + logsSnap.size;
+      const storageKB = (totalDocs / 1024).toFixed(2);
 
-      // SEGURANÇA
-      const agora = new Date();
-      const umDiaAtras = new Date(agora - 24 * 60 * 60 * 1000);
-      const logsErro24h = logs.filter(log => {
-        const logDate = log.timestamp?.toDate?.() || new Date(0);
-        return logDate > umDiaAtras && log.success === false;
-      });
+      // Segurança
+      const ontem = new Date();
+      ontem.setDate(ontem.getDate() - 1);
+      const logsErro24h = logsSnap.docs
+        .map(doc => doc.data())
+        .filter(log => log.success === false && log.timestamp?.toDate?.() > ontem);
+      
       const usuariosElevados = usuarios.filter(u => u.tipo === 'admin' || u.superAdmin);
 
       setMetricas({
@@ -74,7 +108,7 @@ function ManutencaoTab() {
         performance: {
           totalDocs,
           storageKB,
-          tempoAnalise,
+          tempoAnalise: Date.now(),
         },
         seguranca: {
           logsErro24h,
@@ -91,6 +125,22 @@ function ManutencaoTab() {
 
   const toggle = (secao) => setExpandido(prev => ({ ...prev, [secao]: !prev[secao] }));
 
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'ok': return '#10b981';
+      case 'warning': return '#f59e0b';
+      case 'slow': return '#ef4444';
+      default: return '#6b7280';
+    }
+  };
+
+  const formatUptime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${h}h ${m}m ${s}s`;
+  };
+
   if (loading) {
     return <div style={styles.loading}>⏳ Analisando sistema...</div>;
   }
@@ -99,13 +149,120 @@ function ManutencaoTab() {
     return <div style={styles.loading}>Carregando...</div>;
   }
 
+  const Metric = ({ label, value, status, unit = '' }) => (
+    <div style={styles.metric}>
+      <div style={styles.metricLabel}>{label}</div>
+      <div style={{...styles.metricValue, color: getStatusColor(status)}}>
+        {value}{unit}
+      </div>
+    </div>
+  );
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2 style={styles.title}>🔧 Manutenção & Integridade</h2>
+        <h2 style={styles.title}>🔧 Manutenção & Monitoramento</h2>
         <button onClick={analisarSistema} style={styles.btnRefresh}>
           🔄 Atualizar
         </button>
+      </div>
+
+      {/* MÉTRICAS EM TEMPO REAL */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader} onClick={() => toggle('sistema')}>
+          <span>📊 Métricas do Sistema (Tempo Real)</span>
+          <span style={styles.toggle}>{expandido.sistema ? '▼' : '▶'}</span>
+        </div>
+        {expandido.sistema && (
+          <div style={styles.realTimeGrid}>
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>💾</div>
+              <div style={styles.metricCardTitle}>Memória JS Heap</div>
+              <div style={styles.metricCardValue}>
+                {metricsRealTime.memory.used} MB
+              </div>
+              <div style={styles.metricCardSubtext}>
+                de {metricsRealTime.memory.total} MB ({metricsRealTime.memory.percentage}%)
+              </div>
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#f3f4f6',
+                borderRadius: '3px',
+                overflow: 'hidden',
+                marginTop: '8px'
+              }}>
+                <div style={{
+                  width: `${metricsRealTime.memory.percentage}%`,
+                  height: '100%',
+                  background: parseFloat(metricsRealTime.memory.percentage) > 80 ? '#ef4444' : '#10b981',
+                  transition: 'width 0.3s ease'
+                }} />
+              </div>
+            </div>
+
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>⏱️</div>
+              <div style={styles.metricCardTitle}>Uptime</div>
+              <div style={styles.metricCardValue}>
+                {formatUptime(metricsRealTime.uptime)}
+              </div>
+              <div style={styles.metricCardSubtext}>
+                Desde o último carregamento
+              </div>
+            </div>
+
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>🔥</div>
+              <div style={styles.metricCardTitle}>Firebase</div>
+              <div style={{
+                ...styles.metricCardValue,
+                color: getStatusColor(metricsRealTime.firebase.status)
+              }}>
+                {metricsRealTime.firebase.latency}ms
+              </div>
+              <div style={styles.metricCardSubtext}>
+                Latência de consulta
+              </div>
+            </div>
+
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>🔐</div>
+              <div style={styles.metricCardTitle}>Env Vars</div>
+              <div style={{
+                ...styles.metricCardValue,
+                color: getStatusColor(metricsRealTime.env.status)
+              }}>
+                {metricsRealTime.env.count}
+              </div>
+              <div style={styles.metricCardSubtext}>
+                Variáveis VITE carregadas
+              </div>
+            </div>
+
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>📦</div>
+              <div style={styles.metricCardTitle}>Storage Firestore</div>
+              <div style={styles.metricCardValue}>
+                {metricas.performance.storageKB} MB
+              </div>
+              <div style={styles.metricCardSubtext}>
+                {metricas.performance.totalDocs} documentos
+              </div>
+            </div>
+
+            <div style={styles.metricCard}>
+              <div style={styles.metricCardIcon}>👥</div>
+              <div style={styles.metricCardTitle}>Usuários</div>
+              <div style={styles.metricCardValue}>
+                {metricas.seguranca.usuariosElevados.length}
+              </div>
+              <div style={styles.metricCardSubtext}>
+                Administradores ativos
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* INTEGRIDADE */}
@@ -118,64 +275,34 @@ function ManutencaoTab() {
           <Metric 
             label="Despesas Órfãs" 
             value={metricas.integridade.despesasOrfas.length}
-            status={metricas.integridade.despesasOrfas.length === 0 ? 'ok' : 'error'}
+            status={metricas.integridade.despesasOrfas.length > 0 ? 'warning' : 'ok'}
           />
           <Metric 
             label="Emendas sem Despesas" 
             value={metricas.integridade.emendasSemDespesas.length}
-            status={metricas.integridade.emendasSemDespesas.length > 10 ? 'warning' : 'ok'}
+            status={metricas.integridade.emendasSemDespesas.length > 0 ? 'warning' : 'ok'}
           />
           <Metric 
             label="Campos Faltando" 
-            value={metricas.integridade.camposFaltando}
-            status={metricas.integridade.camposFaltando === 0 ? 'ok' : 'error'}
+            value={metricas.integridade.camposFaltando.length}
+            status={metricas.integridade.camposFaltando.length > 0 ? 'warning' : 'ok'}
           />
           <Metric 
-            label="Inconsistências Financeiras" 
+            label="Inconsistências $$" 
             value={metricas.integridade.inconsistenciasFinanceiras.length}
-            status={metricas.integridade.inconsistenciasFinanceiras.length === 0 ? 'ok' : 'error'}
+            status={metricas.integridade.inconsistenciasFinanceiras.length > 0 ? 'warning' : 'ok'}
           />
         </div>
-        {expandido.integridade && (
+        {expandido.integridade && metricas.integridade.despesasOrfas.length > 0 && (
           <div style={styles.details}>
-            {metricas.integridade.despesasOrfas.length > 0 && (
-              <div>
-                <strong>Despesas Órfãs:</strong>
-                <ul style={styles.list}>
-                  {metricas.integridade.despesasOrfas.slice(0, 5).map(d => (
-                    <li key={d.id}>{d.id} - {d.descricao}</li>
-                  ))}
-                </ul>
-                <button style={styles.btnAction} disabled>🗑️ Remover Órfãs (em breve)</button>
-              </div>
-            )}
-            {metricas.integridade.inconsistenciasFinanceiras.length > 0 && (
-              <div>
-                <strong>Inconsistências Financeiras:</strong>
-                <ul style={styles.list}>
-                  {metricas.integridade.inconsistenciasFinanceiras.slice(0, 5).map(e => (
-                    <li key={e.id}>
-                      Emenda {e.numeroEmenda}: Executado R$ {e.valorExecutado?.toFixed(2)} / Total R$ {e.valorTotal?.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            <strong>Despesas Órfãs (sem emenda):</strong>
+            <ul>
+              {metricas.integridade.despesasOrfas.slice(0, 5).map(d => (
+                <li key={d.id}>{d.descricao || 'Sem descrição'} - R$ {d.valor || 0}</li>
+              ))}
+            </ul>
           </div>
         )}
-      </div>
-
-      {/* PERFORMANCE */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader} onClick={() => toggle('performance')}>
-          <span>⚡ Performance</span>
-          <span style={styles.toggle}>{expandido.performance ? '▼' : '▶'}</span>
-        </div>
-        <div style={styles.metricsRow}>
-          <Metric label="Total Documentos" value={metricas.performance.totalDocs} status="ok" />
-          <Metric label="Storage" value={`${metricas.performance.storageKB} KB`} status="ok" />
-          <Metric label="Tempo Análise" value={`${metricas.performance.tempoAnalise}s`} status="ok" />
-        </div>
       </div>
 
       {/* SEGURANÇA */}
@@ -205,7 +332,6 @@ function ManutencaoTab() {
                   <th>Timestamp</th>
                   <th>Ação</th>
                   <th>Usuário</th>
-                  <th>Erro</th>
                 </tr>
               </thead>
               <tbody>
@@ -214,7 +340,6 @@ function ManutencaoTab() {
                     <td>{log.timestamp?.toDate?.()?.toLocaleString('pt-BR') || 'N/A'}</td>
                     <td><code>{log.action || 'N/A'}</code></td>
                     <td>{log.userEmail || 'N/A'}</td>
-                    <td style={{ color: '#dc3545', fontSize: '11px' }}>{log.errorMessage || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -222,163 +347,127 @@ function ManutencaoTab() {
           </div>
         )}
       </div>
-
-      {/* LIMPEZA */}
-      <div style={styles.section}>
-        <div style={styles.sectionHeader}>
-          <span>🧹 Ferramentas de Limpeza</span>
-        </div>
-        <div style={styles.toolsRow}>
-          <button style={styles.btnTool} disabled>🗑️ Remover Despesas Órfãs</button>
-          <button style={styles.btnTool} disabled>📋 Detectar Duplicatas</button>
-          <button style={styles.btnTool} disabled>🔄 Migrar Despesas</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Componente de Métrica
-function Metric({ label, value, status }) {
-  const colors = {
-    ok: '#10b981',
-    warning: '#f59e0b',
-    error: '#dc2626',
-  };
-
-  return (
-    <div style={{
-      ...styles.metric,
-      borderLeft: `4px solid ${colors[status]}`,
-    }}>
-      <div style={styles.metricLabel}>{label}</div>
-      <div style={styles.metricValue}>{value}</div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    padding: '20px',
-    fontFamily: 'monospace',
+    padding: '0'
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '24px',
-    paddingBottom: '12px',
-    borderBottom: '2px solid #e2e8f0',
+    marginBottom: '24px'
   },
   title: {
-    margin: 0,
     fontSize: '18px',
-    fontWeight: 600,
-    color: '#2d3748',
+    fontWeight: '600',
+    color: '#111827',
+    margin: 0
   },
   btnRefresh: {
     padding: '8px 16px',
-    background: '#667eea',
+    background: '#2563eb',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 600,
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
   },
   section: {
     background: 'white',
-    border: '1px solid #e2e8f0',
+    border: '1px solid #e5e7eb',
     borderRadius: '8px',
     marginBottom: '16px',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   sectionHeader: {
-    padding: '12px 16px',
-    background: '#f7fafc',
-    fontWeight: 600,
-    fontSize: '14px',
-    cursor: 'pointer',
+    padding: '16px',
+    background: '#f9fafb',
+    borderBottom: '1px solid #e5e7eb',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottom: '1px solid #e2e8f0',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '14px'
   },
   toggle: {
-    color: '#94a3b8',
     fontSize: '12px',
+    color: '#6b7280'
   },
   metricsRow: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '12px',
-    padding: '16px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    padding: '16px'
   },
   metric: {
-    background: '#f9fafb',
-    padding: '12px',
-    borderRadius: '6px',
-    borderLeft: '4px solid #cbd5e1',
+    textAlign: 'center'
   },
   metricLabel: {
-    fontSize: '11px',
-    color: '#64748b',
-    marginBottom: '4px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    fontSize: '12px',
+    color: '#6b7280',
+    marginBottom: '4px'
   },
   metricValue: {
-    fontSize: '20px',
-    fontWeight: 700,
-    color: '#1e293b',
+    fontSize: '24px',
+    fontWeight: '700'
   },
   details: {
     padding: '16px',
-    borderTop: '1px solid #e2e8f0',
-    fontSize: '13px',
-  },
-  list: {
-    margin: '8px 0',
-    paddingLeft: '20px',
-    fontSize: '12px',
+    background: '#f9fafb',
+    borderTop: '1px solid #e5e7eb',
+    fontSize: '13px'
   },
   table: {
     width: '100%',
     marginTop: '8px',
     borderCollapse: 'collapse',
-    fontSize: '12px',
-  },
-  btnAction: {
-    marginTop: '8px',
-    padding: '6px 12px',
-    background: '#dc2626',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '12px',
-  },
-  toolsRow: {
-    display: 'flex',
-    gap: '12px',
-    padding: '16px',
-  },
-  btnTool: {
-    padding: '8px 16px',
-    background: '#cbd5e0',
-    color: '#4a5568',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'not-allowed',
-    fontSize: '12px',
-    opacity: 0.6,
+    fontSize: '12px'
   },
   loading: {
     textAlign: 'center',
-    padding: '60px',
+    padding: '40px',
     fontSize: '16px',
-    color: '#64748b',
+    color: '#6b7280'
   },
+  realTimeGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    padding: '16px'
+  },
+  metricCard: {
+    background: '#f9fafb',
+    padding: '16px',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+    textAlign: 'center'
+  },
+  metricCardIcon: {
+    fontSize: '32px',
+    marginBottom: '8px'
+  },
+  metricCardTitle: {
+    fontSize: '12px',
+    color: '#6b7280',
+    marginBottom: '8px',
+    fontWeight: '500'
+  },
+  metricCardValue: {
+    fontSize: '24px',
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: '4px'
+  },
+  metricCardSubtext: {
+    fontSize: '11px',
+    color: '#9ca3af'
+  }
 };
 
 export default ManutencaoTab;

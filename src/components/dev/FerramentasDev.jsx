@@ -9,7 +9,6 @@ import BackupTab from "./tabs/BackupTab";
 import UsuariosTab from "./tabs/UsuariosTab";
 import ConfigTab from "./tabs/ConfigTab";
 import IAMTab from "./tabs/IAMTab";
-import MonitoramentoTab from "./tabs/MonitoramentoTab";
 
 // CSS Module
 import styles from "./FerramentasDev.module.css";
@@ -47,12 +46,6 @@ const FerramentasDev = () => {
   // Abas disponíveis
   const abas = [
     {
-      id: "monitoramento",
-      icone: "📊",
-      label: "Monitoramento",
-      componente: MonitoramentoTab,
-    },
-    {
       id: "diagnostico",
       icone: "🔍",
       label: "Diagnóstico & Recálculo",
@@ -61,7 +54,7 @@ const FerramentasDev = () => {
     { 
       id: "manutencao", 
       icone: "🔧", 
-      label: "Manutenção", 
+      label: "Manutenção & Monitoramento", 
       componente: ManutencaoTab 
     },
     { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
