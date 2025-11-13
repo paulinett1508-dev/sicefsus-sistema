@@ -9,6 +9,7 @@ import BackupTab from "./tabs/BackupTab";
 import UsuariosTab from "./tabs/UsuariosTab";
 import ConfigTab from "./tabs/ConfigTab";
 import IAMTab from "./tabs/IAMTab";
+import MonitoramentoTab from "./tabs/MonitoramentoTab";
 
 // CSS Module
 import styles from "./FerramentasDev.module.css";
@@ -46,6 +47,12 @@ const FerramentasDev = () => {
   // Abas disponíveis
   const abas = [
     {
+      id: "monitoramento",
+      icone: "📊",
+      label: "Monitoramento",
+      componente: MonitoramentoTab,
+    },
+    {
       id: "diagnostico",
       icone: "🔍",
       label: "Diagnóstico & Recálculo",
@@ -80,19 +87,6 @@ const FerramentasDev = () => {
         return (
           <React.Suspense fallback={<div>Carregando...</div>}>
             <FirestoreRulesSection />
-          </React.Suspense>
-        );
-      },
-    },
-    {
-      id: "migracao",
-      icone: "🔄",
-      label: "Migração",
-      componente: () => {
-        const MigracaoCompleta = React.lazy(() => import("../admin/MigracaoCompleta"));
-        return (
-          <React.Suspense fallback={<div>Carregando...</div>}>
-            <MigracaoCompleta />
           </React.Suspense>
         );
       },

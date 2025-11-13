@@ -56,60 +56,6 @@ function ConfigTab() {
             ))}
           </div>
         </div>
-
-        {/* Notificações */}
-        <div className="config-section">
-          <h3>🔔 Notificações do Sistema</h3>
-          <div className="config-opcoes">
-            <label className="config-option">
-              <input type="checkbox" disabled />
-              <span>Alertas de saldo baixo</span>
-            </label>
-            <label className="config-option">
-              <input type="checkbox" disabled />
-              <span>Notificar novos usuários</span>
-            </label>
-            <label className="config-option">
-              <input type="checkbox" disabled />
-              <span>Relatórios de erros</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Limites e Cotas */}
-        <div className="config-section">
-          <h3>📊 Limites e Cotas</h3>
-          <div className="limites-grid">
-            <div className="limite-item">
-              <span className="limite-label">Max emendas por município</span>
-              <input type="number" defaultValue="999" disabled />
-            </div>
-            <div className="limite-item">
-              <span className="limite-label">Max despesas por emenda</span>
-              <input type="number" defaultValue="999" disabled />
-            </div>
-            <div className="limite-item">
-              <span className="limite-label">Timeout de sessão (min)</span>
-              <input type="number" defaultValue="60" disabled />
-            </div>
-          </div>
-        </div>
-
-        {/* Personalização */}
-        <div className="config-section">
-          <h3>🎨 Personalização</h3>
-          <div className="personalizacao-opcoes">
-            <button className="btn-personalizacao" disabled>
-              🎨 Alterar Cores do Sistema
-            </button>
-            <button className="btn-personalizacao" disabled>
-              🖼️ Atualizar Logotipo
-            </button>
-            <button className="btn-personalizacao" disabled>
-              📝 Editar Textos da Interface
-            </button>
-          </div>
-        </div>
       </div>
 
       <style>{`
