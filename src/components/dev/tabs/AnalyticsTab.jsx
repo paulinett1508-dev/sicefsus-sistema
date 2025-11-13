@@ -41,6 +41,41 @@ function AnalyticsTab() {
     carregarAnalytics();
   }, [periodo]);
 
+  const gerarDadosTeste = () => {
+    console.log('🧪 Gerando dados de teste...');
+    
+    // Simular logs dos últimos 7 dias
+    const dadosTeste = [];
+    const agora = new Date();
+    
+    const acoes = ['CRIAR_EMENDA', 'EDITAR_EMENDA', 'DELETAR_EMENDA', 'CRIAR_DESPESA', 'EDITAR_DESPESA', 'DELETAR_DESPESA', 'BUSCAR', 'VISUALIZAR'];
+    const usuarios = ['admin@sistema.com', 'usuario1@teste.com', 'usuario2@teste.com', 'guest@sistema.com'];
+    const navegadores = ['Chrome', 'Firefox', 'Safari', 'Edge'];
+    const ufs = ['RO', 'AC', 'AM', 'RR', 'PA', 'AP', 'TO', 'MA', 'PI'];
+    
+    // Gerar ~500 logs distribuídos nos últimos 7 dias
+    for (let i = 0; i < 500; i++) {
+      const horasAtras = Math.random() * (7 * 24); // 7 dias em horas
+      const timestamp = new Date(agora.getTime() - horasAtras * 60 * 60 * 1000);
+      
+      dadosTeste.push({
+        id: `test_${i}`,
+        action: acoes[Math.floor(Math.random() * acoes.length)],
+        userEmail: usuarios[Math.floor(Math.random() * usuarios.length)],
+        timestamp: timestamp,
+        success: Math.random() > 0.1, // 90% de sucesso
+        metadata: {
+          userAgent: navegadores[Math.floor(Math.random() * navegadores.length)]
+        },
+        userUf: ufs[Math.floor(Math.random() * ufs.length)]
+      });
+    }
+    
+    console.log('✅ Dados de teste gerados:', dadosTeste.length);
+    processarAnalytics(dadosTeste);
+    setLoading(false);
+  };
+
   const carregarAnalytics = async () => {
     setLoading(true);
     try {
@@ -309,6 +344,9 @@ function AnalyticsTab() {
             <option value="7d">Últimos 7 dias</option>
             <option value="30d">Últimos 30 dias</option>
           </select>
+          <button onClick={gerarDadosTeste} style={{...styles.refreshBtn, backgroundColor: '#f59e0b', marginRight: '8px'}}>
+            🧪 Dados de Teste
+          </button>
           <button onClick={carregarAnalytics} style={styles.refreshBtn}>
             🔄 Atualizar
           </button>
