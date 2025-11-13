@@ -1,0 +1,32 @@
+react-dom.development.js:29840 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+App.jsx:37 🔥 PROD Firebase Check: {mode: 'development', projectId: 'emendas-parlamentares-60dbd', hasApiKey: true, authDomain: 'emendas-parlamentares-60dbd.firebaseapp.com'}
+DisableConsole.jsx:239 🔧 Console configurado - Nível: INFO (2) - DEV: true
+DisableConsole.jsx:172 🔍 Carregando dados do usuário: uWCu6k4RY1URWfxx1EVEtI3KGmc2
+DisableConsole.jsx:172 ✅ Dados do usuário encontrados: {uf: '', tipo: 'admin', departamento: 'Secretaria de Saúde', dataCriacao: _Timestamp, criadoPor: 'sistema', …}
+DisableConsole.jsx:172 👤 Usuário configurado: {nome: 'Paulinett Miranda', tipo: 'admin', municipio: '', uf: ''}
+DisableConsole.jsx:172  User data not available, skipping initial data load for search.
+(anônimo) @ DisableConsole.jsx:172
+loadAllData @ GlobalSearch.jsx:70
+(anônimo) @ GlobalSearch.jsx:36
+commitHookEffectListMount @ react-dom.development.js:23150
+commitPassiveMountOnFiber @ react-dom.development.js:24926
+commitPassiveMountEffects_complete @ react-dom.development.js:24891
+commitPassiveMountEffects_begin @ react-dom.development.js:24878
+commitPassiveMountEffects @ react-dom.development.js:24866
+flushPassiveEffectsImpl @ react-dom.development.js:27039
+flushPassiveEffects @ react-dom.development.js:26984
+(anônimo) @ react-dom.development.js:26769
+workLoop @ scheduler.development.js:266
+flushWork @ scheduler.development.js:239
+performWorkUntilDeadline @ scheduler.development.js:533
+DisableConsole.jsx:172 👤 UserContext atualizado: {nome: 'Paulinett Miranda', tipo: 'admin', superAdmin: true, isSuperAdmin: true}
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', requiredRole: undefined, isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🔄 Iniciando carregamento de dados: {userEmail: 'paulinett1508@gmail.com', userTipo: 'admin', acessoTotal: true, filtroAplicado: false}
+DisableConsole.jsx:172 🔓 ADMIN: Carregando TODOS os dados do sistema
+DisableConsole.jsx:172 ✅ ADMIN carregou: 22 emendas, 92 despesas
+DisableConsole.jsx:172 🔍 PrivateRoute verificação: {usuario: 'Paulinett Miranda', email: 'paulinett1508@gmail.com', tipo: 'admin', requiredRole: 'admin', isAuthenticated: true, …}
+DisableConsole.jsx:172 ✅ PrivateRoute: Acesso autorizado
+DisableConsole.jsx:172 🛠️ FerramentasDev - SuperAdmin Check: {tipo: 'admin', superAdmin: true, isSuperAdmin: true}
+DisableConsole.jsx:172 🛠️ FerramentasDev - Rendering component with active tab: null
+DisableConsole.jsx:172 🛠️ FerramentasDev - Navigated to tab: Manutenção & Monitoramento (manutencao)
