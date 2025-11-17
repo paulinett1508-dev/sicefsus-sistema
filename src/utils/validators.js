@@ -1,6 +1,5 @@
 // src/utils/validators.js - VALIDAÇÕES CENTRALIZADAS DO SISTEMA
 // ✅ Funções utilitárias para normalização e validação
-import { useState } from "react";
 
 // Lista oficial de UFs brasileiras
 const UFS_VALIDAS = [
@@ -511,6 +510,8 @@ export const createErrorReport = (context, error, additionalData = {}) => {
 };
 
 // ✅ HOOK PARA USO NO DESPESAFORM
+// ✅ CORREÇÃO: Import do React apenas aqui onde é necessário
+import { useState } from "react";
 
 export const useCNPJValidation = () => {
   const [cnpjError, setCnpjError] = useState("");
@@ -734,36 +735,7 @@ export const validarCronogramaEmenda = (cronograma) => {
     dataValidade
   } = cronograma || {};
 
-  // Normalizar todas as datas
-  const normalizarDataInput = (dataInput) => {
-    if (!dataInput) return null;
-
-    let data;
-
-    // Se já é Date
-    if (dataInput instanceof Date) {
-      data = dataInput;
-    }
-    // Se é string
-    else if (typeof dataInput === "string") {
-      // Limpar espaços
-      const dataLimpa = dataInput.trim();
-      if (!dataLimpa) return null;
-
-      // Tentar converter
-      data = new Date(dataLimpa);
-    }
-    else {
-      return null;
-    }
-
-    // Verificar se é válida
-    if (isNaN(data.getTime())) return null;
-
-    // Retornar no formato padrão
-    return data.toISOString().split('T')[0];
-  };
-
+  // ✅ CORREÇÃO: Usar função normalizarDataInput já exportada (evita duplicação)
   const datas = {
     dataAprovacao: normalizarDataInput(dataAprovacao),
     dataOb: normalizarDataInput(dataOb),

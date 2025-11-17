@@ -3,11 +3,41 @@
 // ✅ CORREÇÃO: Filtro operador com município + UF
 // ✅ PRESERVADO: Lógica Admin 100% funcional
 // ✅ CORREÇÃO: parseValorMonetario para cálculos monetários
+// ✅ NOVO: Cache com TTL para otimização de performance
 
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import { parseValorMonetario } from "../utils/formatters"; // ✅ IMPORT ADICIONADO
+import { parseValorMonetario } from "../utils/formatters";
+
+// ✅ CACHE GLOBAL com TTL de 5 minutos
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos em ms
+const dashboardCache = {
+  data: null,
+  timestamp: null,
+  userKey: null,
+};
+
+const getCacheKey = (user, permissions) => {
+  return `${user?.email}_${permissions?.acessoTotal ? 'admin' : user?.municipio}_${user?.uf}`;
+};
+
+const isCacheValid = (cacheKey) => {
+  if (!dashboardCache.data || dashboardCache.userKey !== cacheKey) {
+    return false;
+  }
+  const now = Date.now();
+  const elapsed = now - dashboardCache.timestamp;
+  return elapsed < CACHE_TTL;
+};
+
+const setCache = (data, cacheKey) => {
+  dashboardCache.data = data;
+  dashboardCache.timestamp = Date.now();
+  dashboardCache.userKey = cacheKey;
+};
+
+const getCache = () => dashboardCache.data;
 
 const useDashboardData = (user, permissions) => {
   const [emendas, setEmendas] = useState([]);
@@ -123,7 +153,21 @@ const useDashboardData = (user, permissions) => {
       setLoading(true);
       setError(null);
 
-      console.log("🔄 Iniciando carregamento de dados:", {
+      const cacheKey = getCacheKey(user, permissions);
+
+      // ✅ PERFORMANCE: Verificar cache antes de buscar do Firestore
+      if (isCacheValid(cacheKey)) {
+        console.log("⚡ Dados carregados do cache (válido por mais", 
+          Math.round((CACHE_TTL - (Date.now() - dashboardCache.timestamp)) / 1000), 
+          "segundos)");
+        const cachedData = getCache();
+        setEmendas(cachedData.emendas);
+        setDespesas(cachedData.despesas);
+        setLoading(false);
+        return;
+      }
+
+      console.log("🔄 Carregando dados do Firestore:", {
         userEmail: user?.email,
         userTipo: user?.tipo,
         acessoTotal: permissions?.acessoTotal,
@@ -176,6 +220,14 @@ const useDashboardData = (user, permissions) => {
 
       setEmendas(emendasComExecucao);
       setDespesas(resultado.despesasData);
+
+      // ✅ PERFORMANCE: Salvar no cache
+      setCache({
+        emendas: emendasComExecucao,
+        despesas: resultado.despesasData,
+      }, cacheKey);
+      
+      console.log("💾 Dados salvos no cache (válido por 5 minutos)");
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
       setError(error.message);

@@ -7,6 +7,49 @@ require("dotenv").config({ path: "../.env" }); // Ler .env da raiz
 const app = express();
 const PORT = process.env.ADMIN_API_PORT || 3001;
 
+// ✅ SEGURANÇA: Rate Limiting simples (sem dependências externas)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minuto
+const RATE_LIMIT_MAX_REQUESTS = 30; // 30 requisições por minuto
+
+const rateLimiter = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+  
+  const record = rateLimitMap.get(ip);
+  
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + RATE_LIMIT_WINDOW;
+    return next();
+  }
+  
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return res.status(429).json({
+      error: "Muitas requisições. Tente novamente em 1 minuto.",
+      retryAfter: Math.ceil((record.resetTime - now) / 1000),
+    });
+  }
+  
+  record.count++;
+  next();
+};
+
+// Limpar registros antigos a cada 5 minutos
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip);
+    }
+  }
+}, 5 * 60 * 1000);
+
 // 🔐 CONFIGURAR FIREBASE ADMIN SDK
 // Usar as mesmas credenciais do frontend
 const serviceAccount = {
@@ -94,7 +137,7 @@ app.get("/api/admin/status", (req, res) => {
 });
 
 // ✅ ROTA: Excluir usuário COMPLETAMENTE
-app.delete("/api/admin/users/:uid", authenticateAdmin, async (req, res) => {
+app.delete("/api/admin/users/:uid", rateLimiter, authenticateAdmin, async (req, res) => {
   try {
     const { uid } = req.params;
 
@@ -174,7 +217,7 @@ app.delete("/api/admin/users/:uid", authenticateAdmin, async (req, res) => {
 });
 
 // ✅ ROTA: Criar usuário com Admin SDK
-app.post("/api/admin/users", authenticateAdmin, async (req, res) => {
+app.post("/api/admin/users", rateLimiter, authenticateAdmin, async (req, res) => {
   try {
     const { email, nome, role, municipio, uf, departamento, telefone } =
       req.body;
@@ -264,6 +307,7 @@ app.post("/api/admin/users", authenticateAdmin, async (req, res) => {
 // ✅ ROTA: Reset de senha via Admin SDK
 app.post(
   "/api/admin/users/:uid/reset-password",
+  rateLimiter,
   authenticateAdmin,
   async (req, res) => {
     try {

@@ -26,28 +26,31 @@ export const currentEnvironment = isProduction
     : "unknown";
 export { isProduction, isDevelopment };
 
-// Log de ambiente apenas uma vez por sessão
-if (!sessionStorage.getItem("firebase_env_logged")) {
-  console.log("🔥 Firebase Environment:", {
-    projectId: currentEnv,
-    environment: currentEnvironment.toUpperCase(),
-    isProduction,
-    isDevelopment,
-    timestamp: new Date().toISOString(),
-  });
-  sessionStorage.setItem("firebase_env_logged", "true");
-}
+// ✅ CORREÇÃO: Logs apenas em desenvolvimento
+if (import.meta.env.DEV) {
+  // Log de ambiente apenas uma vez por sessão
+  if (!sessionStorage.getItem("firebase_env_logged")) {
+    console.log("🔥 Firebase Environment:", {
+      projectId: currentEnv,
+      environment: currentEnvironment.toUpperCase(),
+      isProduction,
+      isDevelopment,
+      timestamp: new Date().toISOString(),
+    });
+    sessionStorage.setItem("firebase_env_logged", "true");
+  }
 
-// ⚠️ Validação crítica
-if (!currentEnv) {
-  console.error("❌ ERRO CRÍTICO: VITE_FIREBASE_PROJECT_ID não encontrado!");
-  console.log("📋 Variáveis disponíveis:", Object.keys(import.meta.env));
+  // ⚠️ Validação crítica
+  if (!currentEnv) {
+    console.error("❌ ERRO CRÍTICO: VITE_FIREBASE_PROJECT_ID não encontrado!");
+    console.log("📋 Variáveis disponíveis:", Object.keys(import.meta.env));
+  }
 }
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Log da configuração atual apenas em desenvolvimento (uma vez por sessão)
+// ✅ CORREÇÃO: Log da configuração APENAS em desenvolvimento
 if (import.meta.env.DEV && !sessionStorage.getItem("firebase_config_logged")) {
   console.log("🔥 Firebase Config Status:", {
     apiKey: firebaseConfig.apiKey ? "✅ Configurada" : "❌ Ausente",
@@ -64,8 +67,8 @@ if (import.meta.env.DEV && !sessionStorage.getItem("firebase_config_logged")) {
   sessionStorage.setItem("firebase_config_logged", "true");
 }
 
-// Log de inicialização apenas uma vez por sessão
-if (!sessionStorage.getItem("firebase_initialized_logged")) {
+// ✅ CORREÇÃO: Log de inicialização APENAS em desenvolvimento
+if (import.meta.env.DEV && !sessionStorage.getItem("firebase_initialized_logged")) {
   console.log("✅ Firebase inicializado com sucesso");
   sessionStorage.setItem("firebase_initialized_logged", "true");
 }
