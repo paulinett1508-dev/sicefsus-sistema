@@ -604,10 +604,40 @@ const DespesaForm = ({
       console.log("🔍 DespesaForm: DEPOIS de chamar navegarAposSalvar");
     } catch (error) {
       console.error("❌ Erro ao salvar despesa:", error);
+      
+      // 🔍 Mensagem específica baseada no tipo de erro
+      let mensagemErro = "❌ Erro ao salvar despesa. ";
+      
+      if (error.code === "permission-denied") {
+        mensagemErro += "Você não tem permissão para esta operação. Verifique suas credenciais.";
+      } else if (error.code === "unavailable") {
+        mensagemErro += "Serviço temporariamente indisponível. Tente novamente em alguns instantes.";
+      } else if (error.code === "deadline-exceeded") {
+        mensagemErro += "Tempo limite excedido. Verifique sua conexão.";
+      } else if (error.message?.includes("emendaId")) {
+        mensagemErro += "Emenda não identificada. Selecione uma emenda válida.";
+      } else if (error.message) {
+        mensagemErro += error.message;
+      } else {
+        mensagemErro += "Tente novamente.";
+      }
+      
       setToast({
         show: true,
-        message: "❌ Erro ao salvar despesa. Tente novamente.",
+        message: mensagemErro,
         type: "error",
+      });
+      
+      // 📊 Log detalhado para debug
+      console.error("🔍 DETALHES DO ERRO:", {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+        formData: {
+          emendaId: formData.emendaId,
+          valor: formData.valor,
+          status: formData.status
+        }
       });
     } finally {
       setSalvando(false);
