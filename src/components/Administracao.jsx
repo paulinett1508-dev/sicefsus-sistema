@@ -217,12 +217,18 @@ const Administracao = () => {
       console.log("💾 Salvando usuário:", formData);
 
       if (editingUser) {
-        await userService.updateUser(
+        // 🔧 CORREÇÃO: Usar formData.tipo ao invés de role
+        const tipoUsuario = formData.role === "admin" ? "admin" 
+                          : formData.role === "gestor" ? "gestor"
+                          : "operador";
+
+        const resultado = await userService.updateUser(
           editingUser.id,
           {
             nome: formData.nome,
             email: formData.email,
-            role: formData.role === "admin" ? "admin" : "operador",
+            tipo: tipoUsuario, // ✅ Usar tipo normalizado
+            role: formData.role, // ✅ Manter role original
             municipio: formData.role === "admin" ? "" : formData.municipio,
             uf: formData.role === "admin" ? "" : formData.uf,
             status: formData.status,
@@ -232,10 +238,12 @@ const Administracao = () => {
           editingUser.email,
         );
 
+        console.log("✅ Resultado da atualização:", resultado);
+
         showToast({
           tipo: "success",
           titulo: "Sucesso",
-          mensagem: "Usuário atualizado com sucesso!",
+          mensagem: `Usuário atualizado para ${tipoUsuario === "gestor" ? "Gestor" : tipoUsuario}!`,
         });
       } else {
         const resultado = await userService.createUser({

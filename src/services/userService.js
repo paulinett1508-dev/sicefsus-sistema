@@ -293,16 +293,22 @@ export const updateUser = async (userId, userData, originalEmail) => {
     // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
     const userRef = doc(db, "usuarios", userId);
     
-    // ✅ NORMALIZAR TIPO DE USUÁRIO - usar userData.tipo diretamente
-    const tipoUsuario = userData.tipo === "admin" ? "admin" 
-                      : userData.tipo === "gestor" ? "gestor"
-                      : "operador";
+    // ✅ NORMALIZAR TIPO DE USUÁRIO - suportar role e tipo
+    let tipoUsuario = "operador"; // default
+    
+    if (userData.tipo === "admin" || userData.role === "admin") {
+      tipoUsuario = "admin";
+    } else if (userData.tipo === "gestor" || userData.role === "gestor") {
+      tipoUsuario = "gestor";
+    } else {
+      tipoUsuario = "operador";
+    }
 
     const updateData = {
       nome: userData.nome,
       email: userData.email,
       tipo: tipoUsuario,
-      role: tipoUsuario,
+      role: userData.role || tipoUsuario, // ✅ Priorizar role se existir
       status: userData.status || "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
