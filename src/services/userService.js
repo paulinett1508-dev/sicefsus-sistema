@@ -292,9 +292,10 @@ export const updateUser = async (userId, userData, originalEmail) => {
 
     // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
     const userRef = doc(db, "usuarios", userId);
-    // ✅ NORMALIZAR TIPO DE USUÁRIO
-    const tipoUsuario = userData.role === "admin" ? "admin" 
-                      : userData.role === "gestor" ? "gestor"
+    
+    // ✅ NORMALIZAR TIPO DE USUÁRIO - usar userData.tipo diretamente
+    const tipoUsuario = userData.tipo === "admin" ? "admin" 
+                      : userData.tipo === "gestor" ? "gestor"
                       : "operador";
 
     const updateData = {
@@ -305,19 +306,26 @@ export const updateUser = async (userId, userData, originalEmail) => {
       status: userData.status || "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
-      municipio: userData.role === "admin" ? "" : userData.municipio || "",
-      uf: userData.role === "admin" ? "" : userData.uf || "",
+      municipio: tipoUsuario === "admin" ? "" : userData.municipio || "",
+      uf: tipoUsuario === "admin" ? "" : userData.uf || "",
       dataAtualizacao: serverTimestamp(),
     };
 
-    await updateDoc(userRef, updateData);
-    console.log("✅ Usuário atualizado no Firestore");
+    console.log("💾 Dados que serão salvos:", updateData);
 
-    return {
+    await updateDoc(userRef, updateData);
+    console.log("✅ Usuário atualizado no Firestore com tipo:", tipoUsuario);
+
+    const resultado = {
       success: true,
       method: "firestore_direct",
       message: "Usuário atualizado com sucesso!",
+      userData: updateData,
+      userId: userId,
     };
+
+    console.log("📤 Retornando resultado:", resultado);
+    return resultado;
   } catch (error) {
     console.error("❌ Erro ao atualizar usuário:", error);
     throw new Error("Erro ao atualizar usuário: " + error.message);
