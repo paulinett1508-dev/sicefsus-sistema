@@ -52,6 +52,15 @@ export const useEmendaFormData = () => {
     dataUltimaAtualizacao: new Date().toISOString().split("T")[0],
     acoesServicos: [],
     observacoes: "",
+    // ✅ CAMPOS DE INFORMAÇÕES COMPLEMENTARES
+    areaAtuacao: "",
+    telefone: "",
+    emailContato: "",
+    modalidadeAplicacao: "",
+    publicoAlvo: "",
+    numeroBeneficiarios: "",
+    justificativa: "",
+    observacoesFinais: "",
   });
 
   const [expandedSections, setExpandedSections] = useState({
@@ -507,6 +516,15 @@ export const useEmendaFormData = () => {
               new Date().toISOString().split("T")[0],
             acoesServicos: data.acoesServicos || [],
             observacoes: data.observacoes || "",
+            // ✅ CAMPOS DE INFORMAÇÕES COMPLEMENTARES
+            areaAtuacao: data.areaAtuacao || "",
+            telefone: data.telefone || "",
+            emailContato: data.emailContato || "",
+            modalidadeAplicacao: data.modalidadeAplicacao || "",
+            publicoAlvo: data.publicoAlvo || "",
+            numeroBeneficiarios: data.numeroBeneficiarios || "",
+            justificativa: data.justificativa || "",
+            observacoesFinais: data.observacoesFinais || "",
           });
 
           setIsReady(true);
@@ -717,6 +735,15 @@ export const useEmendaFormData = () => {
           funcional: cleanField(formData.funcional),
           acoesServicos: formData.acoesServicos || [],
           observacoes: cleanField(formData.observacoes),
+          // ✅ CAMPOS DE INFORMAÇÕES COMPLEMENTARES
+          areaAtuacao: cleanField(formData.areaAtuacao) || null,
+          telefone: cleanField(formData.telefone) || null,
+          emailContato: cleanField(formData.emailContato) || null,
+          modalidadeAplicacao: cleanField(formData.modalidadeAplicacao) || null,
+          publicoAlvo: cleanField(formData.publicoAlvo) || null,
+          numeroBeneficiarios: formData.numeroBeneficiarios ? parseInt(formData.numeroBeneficiarios, 10) : null,
+          justificativa: cleanField(formData.justificativa) || null,
+          observacoesFinais: cleanField(formData.observacoesFinais) || null,
           valorExecutado: 0,
           status: "Ativa",
           dataUltimaAtualizacao: dataAtual,
