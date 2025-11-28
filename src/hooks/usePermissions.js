@@ -113,7 +113,7 @@ const usePermissions = (usuario) => {
         podeCriarDespesas: true, // ✅ OPERADOR PODE CRIAR DESPESAS
         podeEditarDespesas: true, // ✅ OPERADOR PODE EDITAR DESPESAS
         podeDeletarDespesas: true, // ✅ OPERADOR PODE DELETAR DESPESAS
-        podeExecutarDespesas: false, // ❌ OPERADOR NÃO PODE EXECUTAR DESPESAS
+        podeExecutarDespesas: true, // ✅ OPERADOR PODE EXECUTAR DESPESAS (do seu município)
         podeEditarEmendas: true, // ✅ OPERADOR PODE EDITAR EMENDAS
         podeDeletarEmendas: false, // ❌ OPERADOR NÃO PODE DELETAR EMENDAS
         motivo: `Operador com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,

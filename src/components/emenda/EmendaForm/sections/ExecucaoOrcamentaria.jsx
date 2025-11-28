@@ -549,9 +549,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     event?.stopPropagation();
     event?.preventDefault();
 
-    // Verificar permissão de gestor
-    if (usuario?.tipo === "gestor" || usuario?.role === "gestor") {
-      console.log("🔐 Verificando permissões de GESTOR...");
+    // Verificar permissão de gestor/operador (apenas do seu município)
+    if (usuario?.tipo === "gestor" || usuario?.role === "gestor" || usuario?.tipo === "operador" || usuario?.role === "operador") {
+      console.log("🔐 Verificando permissões de localidade...");
       
       const despesaMunicipio = despesa.municipio || formData?.municipio;
       const despesaUf = despesa.uf || formData?.uf;
@@ -960,30 +960,33 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 valorRecurso: formData?.valorRecurso
               });
 
-              // ✅ VALIDAÇÃO AMPLIADA: Verificar tipo e role
+              // ✅ VALIDAÇÃO AMPLIADA: Verificar tipo e role (Admin, Gestor ou Operador)
               const isAdmin = usuario?.tipo === "admin" || usuario?.role === "admin";
               const isGestor = usuario?.tipo === "gestor" || usuario?.role === "gestor";
+              const isOperador = usuario?.tipo === "operador" || usuario?.role === "operador";
 
               console.log("🔐 Verificação de permissões:", {
                 isAdmin,
                 isGestor,
+                isOperador,
                 tipoOriginal: usuario?.tipo,
                 roleOriginal: usuario?.role
               });
 
-              if (!isAdmin && !isGestor) {
+              if (!isAdmin && !isGestor && !isOperador) {
                 console.error("❌ ACESSO NEGADO - Tipo:", usuario?.tipo, "| Role:", usuario?.role);
-                alert("⚠️ Apenas Administradores e Gestores podem criar despesas executadas.");
+                alert("⚠️ Apenas Administradores, Gestores e Operadores podem criar despesas executadas.");
                 return;
               }
 
-              // ✅ VALIDAÇÃO: Verificar se tem município/UF
-              if (isGestor && (!usuario?.municipio || !usuario?.uf)) {
-                console.error("❌ GESTOR SEM LOCALIZAÇÃO:", {
+              // ✅ VALIDAÇÃO: Verificar se tem município/UF (Gestor ou Operador)
+              if ((isGestor || isOperador) && (!usuario?.municipio || !usuario?.uf)) {
+                console.error("❌ USUÁRIO SEM LOCALIZAÇÃO:", {
+                  tipo: usuario?.tipo,
                   municipio: usuario?.municipio,
                   uf: usuario?.uf
                 });
-                alert("⚠️ Gestor precisa ter município/UF configurados para criar despesas.");
+                alert("⚠️ Você precisa ter município/UF configurados para criar despesas executadas.");
                 return;
               }
 

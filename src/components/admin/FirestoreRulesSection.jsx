@@ -276,7 +276,7 @@ export default function FirestoreRulesSection() {
                 perm: "Executar Despesas",
                 admin: "✅ Total",
                 gestor: "✅ Município",
-                operador: "❌ Bloqueado",
+                operador: "✅ Município",
               },
               {
                 perm: "Ver Todos os Municípios",
