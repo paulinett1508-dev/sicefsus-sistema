@@ -103,18 +103,28 @@ const usePermissions = (usuario) => {
     const localizacao = validateLocation(municipio, uf);
 
     if (localizacao.valido) {
-      return {
+      const permissoesOperador = {
         acessoTotal: false,
         filtroAplicado: true,
         semAcesso: false,
         temAcessoSistema: true, // ✅ OPERADOR TEM ACESSO AO SISTEMA
-        podeGerenciarUsuarios: false, // ✅ MAS NÃO PODE GERENCIAR USUÁRIOS
+        podeGerenciarUsuarios: false, // ❌ OPERADOR NÃO PODE GERENCIAR USUÁRIOS
+        podeGerenciarDespesas: false, // ❌ OPERADOR NÃO PODE GERENCIAR (DELETAR) DESPESAS
+        podeCriarDespesas: true, // ✅ OPERADOR PODE CRIAR DESPESAS
+        podeEditarDespesas: true, // ✅ OPERADOR PODE EDITAR DESPESAS
+        podeDeletarDespesas: false, // ❌ OPERADOR NÃO PODE DELETAR DESPESAS
+        podeExecutarDespesas: false, // ❌ OPERADOR NÃO PODE EXECUTAR DESPESAS
+        podeEditarEmendas: true, // ✅ OPERADOR PODE EDITAR EMENDAS
+        podeDeletarEmendas: false, // ❌ OPERADOR NÃO PODE DELETAR EMENDAS
         motivo: `Operador com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
         aviso: null,
         filtroMunicipio: localizacao.municipio,
         filtroUf: localizacao.uf,
         tipo: "operador_filtrado",
       };
+
+      console.log("✅ usePermissions - Permissões OPERADOR calculadas:", permissoesOperador);
+      return permissoesOperador;
     }
 
     // ✅ OPERADOR SEM LOCALIZAÇÃO VÁLIDA: Aviso mas ainda tem acesso básico

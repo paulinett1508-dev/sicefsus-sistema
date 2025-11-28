@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import "../../styles/adminStyles.css";
 
@@ -257,21 +256,27 @@ export default function FirestoreRulesSection() {
               },
               {
                 perm: "Criar Despesas",
-                admin: "✅",
-                gestor: "✅",
-                operador: "✅",
+                admin: "✅ Total",
+                gestor: "✅ Município",
+                operador: "✅ Município",
               },
               {
                 perm: "Editar Despesas",
-                admin: "✅",
-                gestor: "✅",
-                operador: "✅",
+                admin: "✅ Total",
+                gestor: "✅ Município",
+                operador: "✅ Município",
               },
               {
                 perm: "Excluir Despesas",
-                admin: "✅",
-                gestor: "✅",
-                operador: "❌",
+                admin: "✅ Total",
+                gestor: "✅ Município",
+                operador: "❌ Bloqueado",
+              },
+              {
+                perm: "Executar Despesas",
+                admin: "✅ Total",
+                gestor: "✅ Município",
+                operador: "❌ Bloqueado",
               },
               {
                 perm: "Ver Todos os Municípios",

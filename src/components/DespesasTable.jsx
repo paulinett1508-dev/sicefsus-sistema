@@ -283,8 +283,14 @@ export default function DespesasTable({
   // 🗑️ Ações
   // =====================================================
 
-  // ✅ Excluir despesa
+  // ✅ Excluir despesa (apenas Admin e Gestor)
   async function handleExcluir(despesa) {
+    // ✅ PROTEÇÃO: Verificar permissão antes de excluir
+    if (usuario?.tipo === "operador") {
+      alert("⚠️ Operadores não podem excluir despesas. Apenas Admin e Gestor.");
+      return;
+    }
+
     setExcluindo(despesa.id);
     try {
       await runTransaction(db, async (transaction) => {
