@@ -270,7 +270,7 @@ export default function FirestoreRulesSection() {
                 perm: "Excluir Despesas",
                 admin: "✅ Total",
                 gestor: "✅ Município",
-                operador: "❌ Bloqueado",
+                operador: "✅ Município",
               },
               {
                 perm: "Executar Despesas",

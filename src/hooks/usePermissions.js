@@ -109,10 +109,10 @@ const usePermissions = (usuario) => {
         semAcesso: false,
         temAcessoSistema: true, // ✅ OPERADOR TEM ACESSO AO SISTEMA
         podeGerenciarUsuarios: false, // ❌ OPERADOR NÃO PODE GERENCIAR USUÁRIOS
-        podeGerenciarDespesas: false, // ❌ OPERADOR NÃO PODE GERENCIAR (DELETAR) DESPESAS
+        podeGerenciarDespesas: true, // ✅ OPERADOR PODE GERENCIAR DESPESAS
         podeCriarDespesas: true, // ✅ OPERADOR PODE CRIAR DESPESAS
         podeEditarDespesas: true, // ✅ OPERADOR PODE EDITAR DESPESAS
-        podeDeletarDespesas: false, // ❌ OPERADOR NÃO PODE DELETAR DESPESAS
+        podeDeletarDespesas: true, // ✅ OPERADOR PODE DELETAR DESPESAS
         podeExecutarDespesas: false, // ❌ OPERADOR NÃO PODE EXECUTAR DESPESAS
         podeEditarEmendas: true, // ✅ OPERADOR PODE EDITAR EMENDAS
         podeDeletarEmendas: false, // ❌ OPERADOR NÃO PODE DELETAR EMENDAS
