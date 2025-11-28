@@ -88,7 +88,7 @@ export default function FirestoreRulesSection() {
         </ol>
       </div>
 
-      {/* Verificação de Perfil Gestor */}
+      {/* Verificação de Perfil Gestor/Operador */}
       <div
         style={{
           background: "#fff3cd",
@@ -102,15 +102,16 @@ export default function FirestoreRulesSection() {
           ⚠️ Verificação Importante
         </h4>
         <p style={{ margin: 0, color: "#856404" }}>
-          As rules abaixo já contemplam o perfil <strong>Gestor</strong> com
+          As rules abaixo já contemplam os perfis <strong>Gestor</strong> e <strong>Operador</strong> com
           todas as permissões necessárias:
         </p>
         <ul style={{ margin: "10px 0 0 0", color: "#856404" }}>
-          <li>✅ Função <code>isGestor()</code> implementada</li>
+          <li>✅ Funções <code>isGestor()</code> e <code>isOperador()</code> implementadas</li>
           <li>✅ Permissões de leitura/criação/edição de emendas</li>
-          <li>✅ Permissões de exclusão de emendas (diferente do Operador)</li>
+          <li>✅ Permissões de exclusão de emendas (apenas Gestor - Operador não pode)</li>
           <li>✅ Permissões de leitura/criação/edição de despesas</li>
-          <li>✅ Permissões de exclusão de despesas (diferente do Operador)</li>
+          <li>✅ Permissões de exclusão de despesas (Gestor e Operador podem)</li>
+          <li>✅ Permissões de execução de despesas (transformar planejada em executada)</li>
         </ul>
       </div>
 

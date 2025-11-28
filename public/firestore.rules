@@ -92,18 +92,18 @@ service cloud.firestore {
       allow read, write: if isAdmin();
 
       // Gestor/Operador: Leitura permitida se autenticado
-      // (validação de localização será feita via emendaId)
       allow read: if isAuthenticated() && (
         isGestor() || isOperador()
       );
 
-      // Criar despesa: permitir sem validação de localização
-      // (será validada pela emenda relacionada)
+      // Criar despesa: permitir para Gestor/Operador (sem validação de localização)
+      // A validação de município será feita pelo frontend
       allow create: if isAuthenticated() && (
         isGestor() || isOperador()
       );
 
-      // Atualizar: validar se tem os campos de localização
+      // Atualizar: permitir se for Gestor/Operador
+      // Validar localização se os campos municipio/uf existirem
       allow update: if isAuthenticated() && (
         isGestor() || isOperador()
       ) && (
@@ -111,9 +111,16 @@ service cloud.firestore {
         matchesUserLocation(request.resource.data)
       );
 
-      // ✅ Admin, Gestor E Operador podem excluir DESPESAS
+      // ✅ CORREÇÃO: Permitir delete para Gestor/Operador
+      // Validar localização se os campos municipio/uf existirem no documento
       allow delete: if isAuthenticated() && (
-        isAdmin() || isGestor() || isOperador()
+        isAdmin() || 
+        isGestor() || 
+        isOperador()
+      ) && (
+        isAdmin() ||
+        !resource.data.keys().hasAny(['municipio', 'uf']) ||
+        matchesUserLocation(resource.data)
       );
     }
 
