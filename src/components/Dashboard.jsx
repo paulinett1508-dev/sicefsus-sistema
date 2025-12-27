@@ -240,11 +240,11 @@ const Dashboard = ({ usuario }) => {
         <DashboardTimeline emendas={emendas} />
       </div>
 
-      {/* ========== RANKINGS ========== */}
-      <DashboardRankings emendas={emendas} />
-
-      {/* ========== RANKING DE MUNICÍPIOS (Admin Only) ========== */}
-      <DashboardMunicipios emendas={emendas} userRole={user.tipo} />
+      {/* ========== RANKINGS + MUNICÍPIOS (LADO A LADO) ========== */}
+      <div style={styles.rankingsGrid}>
+        <DashboardRankings emendas={emendas} />
+        <DashboardMunicipios emendas={emendas} userRole={user.tipo} />
+      </div>
 
       {/* ========== CRONOGRAMA WIDGET (EXISTENTE - PRESERVADO) ========== */}
       {emendas.length > 0 && (
@@ -395,11 +395,17 @@ const styles = {
   mainGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-    gap: "16px",
-    marginBottom: "24px",
+    gap: "12px",
+    marginBottom: "16px",
+  },
+  rankingsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+    gap: "12px",
+    marginBottom: "16px",
   },
   cronogramaSection: {
-    marginBottom: "24px",
+    marginBottom: "16px",
   },
   loadingContainer: {
     textAlign: "center",
