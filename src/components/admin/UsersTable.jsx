@@ -11,7 +11,9 @@ const UsersTable = ({
   if (!users || users.length === 0) {
     return (
       <div style={styles.emptyState}>
-        <div style={{ fontSize: "48px", marginBottom: "16px" }}>👥</div>
+        <div style={{ fontSize: "48px", marginBottom: "16px" }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#6c757d" }}>group</span>
+        </div>
         <h3>Nenhum usuário encontrado</h3>
         <p>Ainda não há usuários cadastrados no sistema</p>
       </div>
@@ -23,12 +25,12 @@ const UsersTable = ({
       <table style={styles.usersTable}>
         <thead>
           <tr>
-            <th style={styles.tableHeader}>👤 Nome</th>
-            <th style={styles.tableHeader}>📧 Email</th>
-            <th style={styles.tableHeader}>🏢 Local</th>
-            <th style={styles.tableHeader}>⚡ Tipo</th>
-            <th style={styles.tableHeader}>📊 Status</th>
-            <th style={styles.tableHeader}>🔧 Ações</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Nome</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>mail</span> Email</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_city</span> Local</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Tipo</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>monitoring</span> Status</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>build</span> Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -77,7 +79,9 @@ const UsersTable = ({
                     fontWeight: "bold",
                   }}
                 >
-                  {usuario.tipo === "gestor" ? "🏛️ GESTOR" : usuario.tipo || "N/A"}
+                  {usuario.tipo === "gestor" ? (
+                    <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>account_balance</span> GESTOR</>
+                  ) : usuario.tipo || "N/A"}
                 </span>
               </td>
               <td style={styles.tableCell}>
@@ -100,18 +104,18 @@ const UsersTable = ({
                 <div
                   style={{ display: "flex", gap: "8px", alignItems: "center" }}
                 >
-                  {/* ✏️ EDITAR */}
+                  {/* EDITAR */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("✏️ EDIT clicado:", usuario.nome);
+                      console.log("EDIT clicado:", usuario.nome);
                       onEdit(usuario);
                     }}
                     style={styles.actionButton}
                     title="Editar usuário"
                   >
-                    ✏️
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                   </button>
 
                   {/* 🔄 TOGGLE STATUS */}
@@ -137,17 +141,19 @@ const UsersTable = ({
                         : "Ativar usuário"
                     }
                   >
-                    {usuario.status === "ativo" ? "⏸️" : "▶️"}
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                      {usuario.status === "ativo" ? "pause" : "play_arrow"}
+                    </span>
                   </button>
 
-                  {/* 🗑️ DELETE - SÓ PERMITE SE INATIVO */}
+                  {/* DELETE - SÓ PERMITE SE INATIVO */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      
+
                       if (usuario.status !== "ativo") {
-                        console.log("🗑️ Excluindo usuário inativo:", usuario.nome);
+                        console.log("Excluindo usuário inativo:", usuario.nome);
                         onDelete(usuario);
                       }
                     }}
@@ -158,13 +164,13 @@ const UsersTable = ({
                       cursor: usuario.status === "ativo" ? "not-allowed" : "pointer",
                     }}
                     title={
-                      usuario.status === "ativo" 
-                        ? "Inative o usuário primeiro para excluir" 
+                      usuario.status === "ativo"
+                        ? "Inative o usuário primeiro para excluir"
                         : "Excluir usuário"
                     }
                     disabled={usuario.status === "ativo"}
                   >
-                    🗑️
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                   </button>
                 </div>
               </td>

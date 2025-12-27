@@ -61,18 +61,21 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
     return "#3B82F6";
   };
 
-  const getPosicaoEmoji = (posicao) => {
-    if (posicao === 0) return "🥇";
-    if (posicao === 1) return "🥈";
-    if (posicao === 2) return "🥉";
-    return "📍";
+  const getPosicaoConfig = (posicao) => {
+    if (posicao === 0) return { icon: "workspace_premium", color: "#FFD700" };
+    if (posicao === 1) return { icon: "workspace_premium", color: "#C0C0C0" };
+    if (posicao === 2) return { icon: "workspace_premium", color: "#CD7F32" };
+    return { icon: "location_on", color: "#3B82F6" };
   };
 
   if (ranking.length === 0) {
     return (
       <div style={styles.container}>
         <div style={styles.header}>
-          <h3 style={styles.title}>🗺️ Ranking de Municípios</h3>
+          <h3 style={styles.title}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>map</span>
+            Ranking de Municípios
+          </h3>
         </div>
         <div style={styles.emptyState}>
           <p>Nenhum dado disponível</p>
@@ -85,11 +88,14 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
     <div style={styles.container}>
       <div style={styles.header}>
         <div>
-          <h3 style={styles.title}>🗺️ Ranking de Municípios</h3>
+          <h3 style={styles.title}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>map</span>
+            Ranking de Municípios
+          </h3>
           <span style={styles.subtitle}>Top 10 por valor executado</span>
         </div>
         <div style={styles.headerBadge}>
-          <span style={styles.badgeIcon}>👑</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 12 }}>verified</span>
           <span style={styles.badgeText}>Admin Only</span>
         </div>
       </div>
@@ -104,7 +110,9 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
             }}
           >
             <div style={styles.rankingPosicao}>
-              <span style={styles.rankingEmoji}>{getPosicaoEmoji(index)}</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: getPosicaoConfig(index).color }}>
+                {getPosicaoConfig(index).icon}
+              </span>
               <span style={styles.rankingNumero}>#{index + 1}</span>
             </div>
 

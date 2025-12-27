@@ -65,14 +65,14 @@ const EmendasTable = ({
     const saldo = emenda.saldoDisponivel || emenda.saldo || 0;
 
     if (validade && new Date(validade) < new Date()) {
-      return { text: "Vencida", color: "#dc3545", icon: "🚨" };
+      return { text: "Vencida", color: "#dc3545", icon: "error", iconColor: "#dc3545" };
     } else if (saldo <= 0) {
-      return { text: "Esgotada", color: "#ffc107", icon: "⚠️" };
+      return { text: "Esgotada", color: "#ffc107", icon: "warning", iconColor: "#ffc107" };
     } else if (saldo < (emenda.valorTotal || emenda.valorRecurso || 0) * 0.1) {
       // Menos de 10%
-      return { text: "Saldo Baixo", color: "#fd7e14", icon: "⚡" };
+      return { text: "Saldo Baixo", color: "#fd7e14", icon: "bolt", iconColor: "#fd7e14" };
     } else {
-      return { text: "Ativa", color: "#28a745", icon: "✅" };
+      return { text: "Ativa", color: "#28a745", icon: "check_circle", iconColor: "#28a745" };
     }
   };
 
@@ -157,7 +157,8 @@ const EmendasTable = ({
         </td>
         <td style={styles.td}>
           <span style={{ ...styles.status, backgroundColor: status.color }}>
-            {status.icon} {status.text}
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>{status.icon}</span>
+            {status.text}
           </span>
         </td>
         <td style={styles.td}>
@@ -167,7 +168,7 @@ const EmendasTable = ({
               style={styles.actionButton}
               title="Editar emenda"
             >
-              ✏️
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
             </button>
             {usuario?.role === "admin" && (
               <button
@@ -175,7 +176,7 @@ const EmendasTable = ({
                 style={styles.actionButtonDanger}
                 title="Excluir emenda"
               >
-                🗑️
+                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
               </button>
             )}
           </div>
@@ -192,14 +193,17 @@ const EmendasTable = ({
         </div>
       ) : emendasFiltradas.length === 0 ? (
         <div style={styles.emptyState}>
-          <span style={styles.emptyIcon}>📋</span>
+          <span style={styles.emptyIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: 64, color: "#94A3B8" }}>assignment</span>
+          </span>
           <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
           <p style={styles.emptyMessage}>
             Tente ajustar os filtros para encontrar o que procura.
           </p>
           {emendasFiltradas.length === 0 && onNovaEmenda && (
             <button onClick={onNovaEmenda} style={styles.emptyButton}>
-              ➕ Nova Emenda
+              <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4, verticalAlign: "middle" }}>add</span>
+              Nova Emenda
             </button>
           )}
         </div>

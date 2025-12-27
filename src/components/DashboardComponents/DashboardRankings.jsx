@@ -40,8 +40,15 @@ const DashboardRankings = ({ emendas = [] }) => {
   };
 
   const getMedalha = (posicao) => {
-    const medalhas = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
-    return medalhas[posicao] || "📊";
+    // Retorna ícone e cor baseado na posição
+    const configs = [
+      { icon: "workspace_premium", color: "#FFD700" }, // Ouro
+      { icon: "workspace_premium", color: "#C0C0C0" }, // Prata
+      { icon: "workspace_premium", color: "#CD7F32" }, // Bronze
+      { icon: "format_list_numbered", color: "#6B7280" },
+      { icon: "format_list_numbered", color: "#6B7280" },
+    ];
+    return configs[posicao] || { icon: "analytics", color: "#6B7280" };
   };
 
   const getPercentualColor = (percentual, isTop) => {
@@ -78,7 +85,9 @@ const DashboardRankings = ({ emendas = [] }) => {
             onClick={() => navigate("/emendas")}
           >
             <div style={styles.itemRank}>
-              <span style={styles.itemMedalha}>{getMedalha(index)}</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: getMedalha(index).color }}>
+                {getMedalha(index).icon}
+              </span>
               <span style={styles.itemPosicao}>#{index + 1}</span>
             </div>
 
@@ -145,9 +154,10 @@ const DashboardRankings = ({ emendas = [] }) => {
       <div style={styles.header}>
         <div>
           <h3 style={styles.title}>
-            {visualizacao === "top"
-              ? "🏆 Top Performers"
-              : "⚠️ Precisam Atenção"}
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>
+              {visualizacao === "top" ? "emoji_events" : "warning"}
+            </span>
+            {visualizacao === "top" ? "Top Performers" : "Precisam Atenção"}
           </h3>
           <span style={styles.subtitle}>
             {visualizacao === "top"
@@ -164,7 +174,7 @@ const DashboardRankings = ({ emendas = [] }) => {
             }}
             onClick={() => setVisualizacao("top")}
           >
-            🏆 Top 5
+            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>emoji_events</span> Top 5
           </button>
           <button
             style={{
@@ -173,7 +183,7 @@ const DashboardRankings = ({ emendas = [] }) => {
             }}
             onClick={() => setVisualizacao("bottom")}
           >
-            ⚠️ Bottom 5
+            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>warning</span> Bottom 5
           </button>
         </div>
       </div>

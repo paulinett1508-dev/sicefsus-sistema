@@ -87,7 +87,9 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
     return (
       <div style={styles.container}>
         <div style={styles.headerSuccess}>
-          <div style={styles.headerIcon}>✅</div>
+          <div style={styles.headerIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#10B981" }}>check_circle</span>
+          </div>
           <div>
             <h2 style={styles.titleSuccess}>Sem Alertas Críticos</h2>
             <p style={styles.subtitleSuccess}>
@@ -102,7 +104,9 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.headerIcon}>🚨</div>
+        <div style={styles.headerIcon}>
+          <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#EF4444" }}>error</span>
+        </div>
         <div style={styles.headerContent}>
           <h2 style={styles.title}>Requer Atenção Imediata</h2>
           <p style={styles.subtitle}>
@@ -119,7 +123,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
         {alertas.proximasVencer.length > 0 && (
           <div style={styles.alertaCategoria}>
             <div style={styles.categoriaHeader}>
-              <span style={styles.categoriaIcon}>⚠️</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#F59E0B" }}>warning</span>
               <h3 style={styles.categoriaTitle}>
                 Próximas ao Vencimento ({alertas.proximasVencer.length})
               </h3>
@@ -200,7 +204,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
         {alertas.vencidas.length > 0 && (
           <div style={styles.alertaCategoria}>
             <div style={styles.categoriaHeader}>
-              <span style={styles.categoriaIcon}>🔴</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#EF4444" }}>cancel</span>
               <h3 style={styles.categoriaTitle}>
                 Vencidas ({alertas.vencidas.length})
               </h3>
@@ -260,7 +264,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
         {alertas.semExecucao.length > 0 && (
           <div style={styles.alertaCategoria}>
             <div style={styles.categoriaHeader}>
-              <span style={styles.categoriaIcon}>⏸️</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#6B7280" }}>pause_circle</span>
               <h3 style={styles.categoriaTitle}>
                 Sem Execução ({alertas.semExecucao.length})
               </h3>

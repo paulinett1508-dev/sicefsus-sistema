@@ -5,6 +5,7 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
+import logoSicefsus from "../images/logo-sicefsus.png";
 import {
   doc,
   getDoc,
@@ -235,8 +236,13 @@ export default function Login({ onLoginSuccess }) {
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <div style={styles.header}>
+          <img
+            src={logoSicefsus}
+            alt="SICEFSUS"
+            style={styles.logo}
+          />
           <h2 style={styles.title}>
-            {modoEsqueciSenha ? "🔑 Recuperar Senha" : "🔐 Login SICEFSUS"}
+            {modoEsqueciSenha ? "Recuperar Senha" : "Login SICEFSUS"}
           </h2>
         </div>
 
@@ -314,7 +320,10 @@ export default function Login({ onLoginSuccess }) {
                   Entrando...
                 </span>
               ) : (
-                "🚀 Entrar"
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>login</span>
+                  Entrar
+                </>
               )}
             </button>
           </form>
@@ -366,7 +375,10 @@ export default function Login({ onLoginSuccess }) {
                     Enviando...
                   </span>
                 ) : (
-                  "📧 Enviar Link"
+                  <>
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>mail</span>
+                    Enviar Link
+                  </>
                 )}
               </button>
             </div>
@@ -377,7 +389,9 @@ export default function Login({ onLoginSuccess }) {
         {sucessoReset && (
           <div style={styles.form}>
             <div style={styles.successContainer}>
-              <div style={styles.successIcon}>✅</div>
+              <div style={styles.successIcon}>
+                <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#27ae60" }}>check_circle</span>
+              </div>
               <h3 style={styles.successTitle}>Email Enviado!</h3>
               <p style={styles.successText}>
                 Enviamos um link de recuperação para{" "}
@@ -404,13 +418,17 @@ export default function Login({ onLoginSuccess }) {
 
         {erro && (
           <div style={styles.errorContainer}>
-            <p style={styles.erro}>❌ {erro}</p>
+            <p style={styles.erro}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>error</span>
+              {erro}
+            </p>
           </div>
         )}
 
         <div style={styles.infoContainer}>
           <small style={styles.infoText}>
-            💡 <strong>Dica:</strong> Se você é operador e não consegue fazer
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4, color: "#F59E0B" }}>lightbulb</span>
+            <strong>Dica:</strong> Se você é operador e não consegue fazer
             login, verifique se o administrador já configurou seu município/UF.
           </small>
         </div>
@@ -429,7 +447,7 @@ const styles = {
     right: 0,
     bottom: 0,
     background:
-      "linear-gradient(135deg, rgba(52, 73, 94, 0.8), rgba(44, 62, 80, 0.9))",
+      "linear-gradient(135deg, rgba(26, 58, 74, 0.85), rgba(15, 40, 48, 0.95))",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -444,14 +462,26 @@ const styles = {
     maxWidth: 500,
     width: "90%",
     boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-    border: "2px solid #3498db",
+    border: "2px solid #1A3A4A",
     overflow: "hidden",
   },
   header: {
-    background: "linear-gradient(135deg, #3498db, #2980b9)",
+    background: "linear-gradient(135deg, #1A3A4A, #2A5A6A)",
     color: "white",
     padding: 24,
     textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 12,
+  },
+  logo: {
+    width: 64,
+    height: 64,
+    objectFit: "contain",
+    borderRadius: 8,
+    backgroundColor: "white",
+    padding: 8,
   },
   title: {
     margin: 0,
@@ -523,7 +553,7 @@ const styles = {
   link: {
     background: "none",
     border: "none",
-    color: "#3498db",
+    color: "#1A3A4A",
     padding: "12px 32px",
     cursor: "pointer",
     textDecoration: "underline",
@@ -559,7 +589,7 @@ const styles = {
   forgotPasswordButton: {
     background: "none",
     border: "none",
-    color: "#3498db",
+    color: "#1A3A4A",
     cursor: "pointer",
     textDecoration: "underline",
     fontSize: 14,

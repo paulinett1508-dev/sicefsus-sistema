@@ -130,7 +130,9 @@ export default function ModalExclusaoEmenda({
                 Por favor, solicite a exclusão a um administrador do sistema.
               </p>
               <div className="modal-exclusao-info">
-                <div className="info-icon">💡</div>
+                <div className="info-icon">
+                  <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#F59E0B" }}>lightbulb</span>
+                </div>
                 <div className="info-text">
                   Entre em contato com o administrador responsável pelo seu
                   município para solicitar a exclusão desta emenda.
@@ -176,7 +178,9 @@ export default function ModalExclusaoEmenda({
               )}
 
               <div className="modal-exclusao-warning">
-                <div className="warning-icon">⚠️</div>
+                <div className="warning-icon">
+                  <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#EF4444" }}>warning</span>
+                </div>
                 <div className="warning-text">
                   <strong>Atenção:</strong> Esta ação é irreversível. Todas as
                   despesas associadas a esta emenda também serão excluídas.

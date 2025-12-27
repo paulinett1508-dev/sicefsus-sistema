@@ -29,7 +29,8 @@ const DespesaCardExecutada = ({
       <div style={despesaCardStyles.despesaCardHeader}>
         <span style={despesaCardStyles.despesaNumero}>#{numero}</span>
         <span style={despesaCardStyles.despesaStatusExecutada}>
-          🟢 <strong>EXECUTADA</strong>
+          <span className="material-symbols-outlined" style={{ fontSize: 12, color: "#22c55e", marginRight: 4, verticalAlign: "middle" }}>check_circle</span>
+          <strong>EXECUTADA</strong>
         </span>
       </div>
       <div style={despesaCardStyles.despesaDescricao}>{descricao}</div>

@@ -282,7 +282,7 @@ const Emendas = () => {
       {/* Info Bar */}
       <div style={styles.infoBar}>
         <div style={styles.infoContent}>
-          <span style={styles.flagIcon}>🇧🇷</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#10B981" }}>check_circle</span>
           <span style={styles.infoLabel}>Sistema Ativo</span>
           <span style={styles.infoDivider}>|</span>
           <span style={styles.infoText}>Último acesso: Hoje</span>
@@ -370,7 +370,7 @@ const Emendas = () => {
       {/* Error */}
       {error && (
         <div style={styles.errorContainer}>
-          <span style={styles.errorIcon}>⚠️</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 24, color: "#DC2626" }}>warning</span>
           <div>
             <h3 style={styles.errorTitle}>Erro ao carregar emendas</h3>
             <p style={styles.errorText}>{error}</p>
@@ -384,7 +384,9 @@ const Emendas = () => {
       {/* Table */}
       {totalEmendas === 0 ? (
         <div style={styles.emptyState}>
-          <div style={styles.emptyIcon}>📋</div>
+          <div style={styles.emptyIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#94A3B8" }}>assignment</span>
+          </div>
           <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
           <p style={styles.emptyText}>
             {searchTerm

@@ -66,13 +66,13 @@ const DashboardTimeline = ({ emendas = [] }) => {
   const getPrioridadeIcon = (prioridade) => {
     switch (prioridade) {
       case "alta":
-        return "🔴";
+        return { icon: "circle", color: "#EF4444" };
       case "media":
-        return "🟡";
+        return { icon: "circle", color: "#F59E0B" };
       case "baixa":
-        return "🔵";
+        return { icon: "circle", color: "#3B82F6" };
       default:
-        return "⚪";
+        return { icon: "circle", color: "#9CA3AF" };
     }
   };
 
@@ -93,10 +93,13 @@ const DashboardTimeline = ({ emendas = [] }) => {
     return (
       <div style={styles.container}>
         <div style={styles.header}>
-          <h3 style={styles.title}>📅 Próximos 30 Dias</h3>
+          <h3 style={styles.title}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>calendar_month</span>
+            Próximos 30 Dias
+          </h3>
         </div>
         <div style={styles.emptyState}>
-          <span style={styles.emptyIcon}>✅</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 32, color: "#10B981" }}>check_circle</span>
           <p style={styles.emptyText}>Nenhum evento próximo</p>
         </div>
       </div>
@@ -106,7 +109,10 @@ const DashboardTimeline = ({ emendas = [] }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>📅 Próximos 30 Dias</h3>
+        <h3 style={styles.title}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>calendar_month</span>
+          Próximos 30 Dias
+        </h3>
         <span style={styles.subtitle}>{eventos.length} eventos</span>
       </div>
 
@@ -139,8 +145,8 @@ const DashboardTimeline = ({ emendas = [] }) => {
 
             <div style={styles.eventoContent}>
               <div style={styles.eventoHeader}>
-                <span style={styles.eventoIcon}>
-                  {getPrioridadeIcon(evento.prioridade)}
+                <span className="material-symbols-outlined" style={{ fontSize: 10, color: getPrioridadeIcon(evento.prioridade).color }}>
+                  {getPrioridadeIcon(evento.prioridade).icon}
                 </span>
                 <span style={styles.eventoTitulo}>{evento.titulo}</span>
               </div>

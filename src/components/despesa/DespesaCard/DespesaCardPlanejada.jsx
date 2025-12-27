@@ -21,7 +21,8 @@ const DespesaCardPlanejada = ({ numero, descricao, valor, onClick }) => {
       <div style={despesaCardStyles.despesaCardHeader}>
         <span style={despesaCardStyles.despesaNumero}>#{numero}</span>
         <span style={despesaCardStyles.despesaStatusPlanejada}>
-          🟡 <strong>PLANEJADA</strong>
+          <span className="material-symbols-outlined" style={{ fontSize: 12, color: "#F59E0B", marginRight: 4, verticalAlign: "middle" }}>schedule</span>
+          <strong>PLANEJADA</strong>
         </span>
       </div>
       <div style={despesaCardStyles.despesaDescricao}>{descricao}</div>

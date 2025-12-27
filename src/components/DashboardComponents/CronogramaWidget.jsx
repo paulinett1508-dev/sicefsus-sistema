@@ -108,10 +108,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span
-                style={{ ...cronogramaStyles.metricIcon, color: "#f57c00" }}
-              >
-                ⚠️
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#f57c00" }}>
+                warning
               </span>
             </div>
             <div>
@@ -169,10 +167,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span
-                style={{ ...cronogramaStyles.metricIcon, color: "#d32f2f" }}
-              >
-                ❌
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#d32f2f" }}>
+                cancel
               </span>
             </div>
             <div>
@@ -227,10 +223,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span
-                style={{ ...cronogramaStyles.metricIcon, color: "#388e3c" }}
-              >
-                🚀
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#388e3c" }}>
+                rocket_launch
               </span>
             </div>
             <div>
@@ -289,10 +283,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span
-                style={{ ...cronogramaStyles.metricIcon, color: "#0277bd" }}
-              >
-                ✅
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#0277bd" }}>
+                check_circle
               </span>
             </div>
             <div>

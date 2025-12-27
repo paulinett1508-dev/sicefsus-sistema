@@ -56,8 +56,9 @@ const Dashboard = ({ usuario }) => {
         borderRadius: '12px',
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
       }}>
-        <h2 style={{ color: '#856404', marginBottom: '20px' }}>
-          ⚠️ Cadastro Incompleto
+        <h2 style={{ color: '#856404', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 24 }}>warning</span>
+          Cadastro Incompleto
         </h2>
         <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#856404', marginBottom: '20px' }}>
           Seu usuário <strong>{user.email}</strong> foi criado no sistema de autenticação,
@@ -71,7 +72,10 @@ const Dashboard = ({ usuario }) => {
           marginBottom: '20px',
           textAlign: 'left'
         }}>
-          <h3 style={{ color: '#856404', marginBottom: '12px' }}>🔧 O que precisa ser feito:</h3>
+          <h3 style={{ color: '#856404', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>build</span>
+            O que precisa ser feito:
+          </h3>
           <ol style={{ color: '#856404', lineHeight: '1.8' }}>
             <li>Solicite a um <strong>administrador</strong> que acesse o módulo <strong>Administração</strong></li>
             <li>Peça para ele criar/completar seu cadastro no sistema</li>
@@ -79,8 +83,9 @@ const Dashboard = ({ usuario }) => {
             <li>Aguarde a confirmação de que o cadastro foi concluído</li>
           </ol>
         </div>
-        <p style={{ fontSize: '14px', color: '#856404', fontStyle: 'italic' }}>
-          💡 Após a conclusão do cadastro, faça logout e login novamente para acessar o sistema.
+        <p style={{ fontSize: '14px', color: '#856404', fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>lightbulb</span>
+          Após a conclusão do cadastro, faça logout e login novamente para acessar o sistema.
         </p>
       </div>
     );

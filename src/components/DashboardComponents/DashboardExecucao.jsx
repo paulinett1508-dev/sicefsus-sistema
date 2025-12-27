@@ -56,7 +56,10 @@ const DashboardExecucao = ({ emendas = [] }) => {
     return (
       <div style={styles.container}>
         <div style={styles.header}>
-          <h3 style={styles.title}>💰 Execução por Tipo de Emenda</h3>
+          <h3 style={styles.title}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>payments</span>
+            Execução por Tipo de Emenda
+          </h3>
         </div>
         <div style={styles.emptyState}>
           <p>Nenhum dado disponível</p>
@@ -68,7 +71,10 @@ const DashboardExecucao = ({ emendas = [] }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>💰 Execução por Tipo de Emenda</h3>
+        <h3 style={styles.title}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4 }}>payments</span>
+          Execução por Tipo de Emenda
+        </h3>
         <span style={styles.subtitle}>Distribuição do orçamento</span>
       </div>
 
