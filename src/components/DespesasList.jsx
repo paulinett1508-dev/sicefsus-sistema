@@ -8,11 +8,11 @@ import DespesasFilters from "./DespesasFilters";
 import DespesasTable from "./DespesasTable";
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
-const PRIMARY = "#154360";
-const ACCENT = "#4A90E2";
-const SUCCESS = "#27AE60";
-const WARNING = "#F39C12";
-const ERROR = "#E74C3C";
+const PRIMARY = "#2563EB";
+const ACCENT = "#3B82F6";
+const SUCCESS = "#10B981";
+const WARNING = "#F59E0B";
+const ERROR = "#EF4444";
 const WHITE = "#fff";
 const GRAY = "#f4f6f8";
 
@@ -399,7 +399,7 @@ const styles = {
     width: 48,
     height: 48,
     border: "4px solid #e3e3e3",
-    borderTop: "4px solid #154360",
+    borderTop: "4px solid #2563EB",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 20,

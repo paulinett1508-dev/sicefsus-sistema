@@ -304,7 +304,7 @@ const styles = {
   parlamentarNome: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
 
   emendaId: {
@@ -450,7 +450,7 @@ const styles = {
   emptyTitle: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     margin: "0 0 8px 0",
   },
 

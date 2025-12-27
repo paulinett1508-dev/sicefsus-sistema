@@ -369,7 +369,7 @@ const styles = {
   fieldset: {
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#154360",
+    borderColor: "#2563EB",
     borderRadius: "10px",
     padding: "16px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -382,8 +382,8 @@ const styles = {
     borderRadius: "20px",
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#154360",
-    color: "#154360",
+    borderColor: "#2563EB",
+    color: "#2563EB",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -510,7 +510,7 @@ const styles = {
   metasTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   metasTotal: {
     fontSize: "14px",

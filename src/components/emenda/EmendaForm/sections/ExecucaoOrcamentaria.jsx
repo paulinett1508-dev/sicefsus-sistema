@@ -1214,7 +1214,7 @@ const styles = {
   statValue: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
     fontFamily: "monospace",
   },
   statHint: { fontSize: 11, color: "#adb5bd", marginTop: 4 },
@@ -1309,10 +1309,10 @@ const styles = {
     margin: 0,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
   },
   badge: {
-    backgroundColor: "#154360",
+    backgroundColor: "#2563EB",
     color: "#fff",
     padding: "4px 12px",
     borderRadius: 999,
@@ -1352,7 +1352,7 @@ const styles = {
   },
   table: { width: "100%", borderCollapse: "collapse" },
   thead: {
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#1E293B",
     color: "#fff",
     fontWeight: 600,
     fontSize: 14,
@@ -1464,14 +1464,14 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
-    border: "3px solid #4A90E2",
+    border: "3px solid #3B82F6",
   },
   formularioEdicaoHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "20px 24px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     borderTopLeftRadius: 9,
     borderTopRightRadius: 9,
     position: "sticky",
@@ -1486,7 +1486,7 @@ const styles = {
   },
   btnVoltar: {
     backgroundColor: "#fff",
-    color: "#4A90E2",
+    color: "#3B82F6",
     border: "none",
     padding: "10px 20px",
     borderRadius: 6,
@@ -1504,7 +1504,7 @@ const styles = {
 };
 
 const formStyles = {
-  label: { fontWeight: 600, color: "#154360" },
+  label: { fontWeight: 600, color: "#2563EB" },
   input: {
     border: "1px solid #dee2e6",
     borderRadius: 8,

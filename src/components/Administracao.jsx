@@ -698,12 +698,12 @@ const Administracao = () => {
   );
 };
 
-// 🎨 ESTILOS BÁSICOS
+// 🎨 ESTILOS MODERNOS
 const styles = {
   container: {
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f8f9fa",
+    padding: "16px 32px",
+    fontFamily: "var(--font-family, 'Inter', sans-serif)",
+    backgroundColor: "var(--theme-bg, #F8FAFC)",
     minHeight: "100vh",
   },
 };

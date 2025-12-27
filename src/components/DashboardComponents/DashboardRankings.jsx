@@ -46,13 +46,13 @@ const DashboardRankings = ({ emendas = [] }) => {
 
   const getPercentualColor = (percentual, isTop) => {
     if (isTop) {
-      if (percentual >= 90) return "#27AE60";
+      if (percentual >= 90) return "#10B981";
       if (percentual >= 70) return "#2ECC71";
       return "#3498DB";
     } else {
-      if (percentual < 30) return "#E74C3C";
+      if (percentual < 30) return "#EF4444";
       if (percentual < 50) return "#E67E22";
-      return "#F39C12";
+      return "#F59E0B";
     }
   };
 
@@ -209,7 +209,7 @@ const styles = {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   subtitle: {
     color: "#6c757d",
@@ -236,7 +236,7 @@ const styles = {
   },
   toggleButtonActive: {
     backgroundColor: "white",
-    color: "#154360",
+    color: "#2563EB",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
   lista: {
@@ -284,7 +284,7 @@ const styles = {
   itemNumero: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   itemPercentual: {
     fontSize: "18px",
@@ -316,7 +316,7 @@ const styles = {
     color: "#6c757d",
   },
   itemValorExecutado: {
-    color: "#27AE60",
+    color: "#10B981",
     fontWeight: "600",
   },
   itemValorDivider: {

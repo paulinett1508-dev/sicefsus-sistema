@@ -323,7 +323,7 @@ const DespesaFormClassificacaoFuncional = ({
     if (!situacao) return "#6c757d";
     const situacaoUpper = situacao.toUpperCase();
     if (situacaoUpper.includes("ATIVA") || situacaoUpper.includes("REGULAR"))
-      return "#27AE60";
+      return "#10B981";
     if (
       situacaoUpper.includes("SUSPENSA") ||
       situacaoUpper.includes("PENDENTE")
@@ -529,7 +529,7 @@ const DespesaFormClassificacaoFuncional = ({
               CNPJ <span style={{ color: "#dc3545" }}>*</span>
               {cnpjError && <span style={styles.validationBadge}>⚠️</span>}
               {cnpjEncontrado && (
-                <span style={{ ...styles.validationBadge, color: "#27AE60" }}>
+                <span style={{ ...styles.validationBadge, color: "#10B981" }}>
                   ✓
                 </span>
               )}
@@ -722,23 +722,24 @@ const DespesaFormClassificacaoFuncional = ({
 
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
+    border: "1px solid #E2E8F0",
+    borderRadius: "12px",
     padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
   },
   legend: {
     background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+    padding: "6px 16px",
+    borderRadius: "9999px",
+    border: "1px solid #E2E8F0",
+    color: "#334155",
+    fontWeight: "600",
+    fontSize: "14px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    fontFamily: "'Inter', sans-serif",
   },
   legendIcon: { fontSize: "18px" },
   formRow: {
@@ -772,15 +773,15 @@ const styles = {
     flex: 1,
   },
   btnRefresh: {
-    backgroundColor: "#154360",
+    backgroundColor: "#2563EB",
     color: "white",
     border: "none",
     padding: "12px 16px",
-    borderRadius: "6px",
+    borderRadius: "8px",
     fontSize: "18px",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)",
     height: "46px",
     minWidth: "46px",
     display: "flex",
@@ -878,11 +879,11 @@ const styles = {
     top: "-12px",
     left: "50%",
     transform: "translateX(-50%)",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
     padding: "0 15px",
     fontSize: "13px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     letterSpacing: "0.5px",
     whiteSpace: "nowrap",
   },

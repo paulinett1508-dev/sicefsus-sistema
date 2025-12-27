@@ -768,7 +768,7 @@ const styles = {
     maxHeight: "90vh",
     overflowY: "auto",
     border: "2px solid #3498db",
-    color: "#2c3e50",
+    color: "#1E293B",
     animation: "userFormSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
     transition: "all 0.3s ease",
   },
@@ -812,7 +812,7 @@ const styles = {
   },
 
   fieldset: {
-    border: "2px solid #154360",
+    border: "2px solid #2563EB",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -824,8 +824,8 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
+    border: "2px solid #2563EB",
+    color: "#2563EB",
     fontWeight: "600",
     fontSize: "14px",
     display: "flex",
@@ -850,7 +850,7 @@ const styles = {
   label: {
     display: "block",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     marginBottom: "8px",
     fontSize: "14px",
   },
@@ -858,7 +858,7 @@ const styles = {
   labelRequired: {
     display: "block",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     marginBottom: "8px",
     fontSize: "14px",
   },

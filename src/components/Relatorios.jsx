@@ -22,16 +22,7 @@ function ModalSucesso({ isOpen, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relatorios-modal-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="#27AE60" strokeWidth="2" />
-            <path
-              d="M8 12L11 15L16 9"
-              stroke="#27AE60"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span className="material-symbols-outlined" style={{ fontSize: 64, color: "#10B981" }}>check_circle</span>
         </div>
         <h2 className="relatorios-modal-title">
           Relatório gerado com sucesso!
@@ -197,7 +188,10 @@ export default function Relatorios({ usuario }) {
     <div className="relatorios-container">
       {/* Header */}
       <div className="relatorios-header">
-        <h1 className="relatorios-title">📑 Central de Relatórios</h1>
+        <h1 className="relatorios-title">
+          <span className="material-symbols-outlined" style={{ fontSize: 28, marginRight: 8, verticalAlign: "middle" }}>description</span>
+          Central de Relatórios
+        </h1>
         <p className="relatorios-subtitle">
           Gere relatórios profissionais em PDF com os dados do sistema
         </p>
@@ -211,7 +205,8 @@ export default function Relatorios({ usuario }) {
           {/* Header da Configuração */}
           <div className="relatorios-config-header">
             <button className="relatorios-back-btn" onClick={handleVoltar}>
-              ← Voltar
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
+              Voltar
             </button>
             <h2 className="relatorios-config-title">{selectedReport.titulo}</h2>
           </div>
@@ -240,7 +235,10 @@ export default function Relatorios({ usuario }) {
                   Gerando...
                 </>
               ) : (
-                <>📄 Gerar PDF</>
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>picture_as_pdf</span>
+                  Gerar PDF
+                </>
               )}
             </button>
           </div>

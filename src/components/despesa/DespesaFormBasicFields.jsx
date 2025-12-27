@@ -213,24 +213,25 @@ const DespesaFormBasicFields = ({
 
   const styles = {
     fieldset: {
-      border: "2px solid #154360",
-      borderRadius: "10px",
+      border: "1px solid #E2E8F0",
+      borderRadius: "12px",
       padding: "20px",
       marginBottom: "20px",
-      background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+      backgroundColor: "#ffffff",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
     },
     legend: {
       background: "white",
-      padding: "5px 15px",
-      borderRadius: "20px",
-      border: "2px solid #154360",
-      color: "#154360",
-      fontWeight: "bold",
-      fontSize: "16px",
+      padding: "6px 16px",
+      borderRadius: "9999px",
+      border: "1px solid #E2E8F0",
+      color: "#334155",
+      fontWeight: "600",
+      fontSize: "14px",
       display: "flex",
       alignItems: "center",
       gap: "8px",
+      fontFamily: "'Inter', sans-serif",
     },
     legendIcon: { fontSize: "18px" },
     formGrid: {
@@ -253,7 +254,7 @@ const DespesaFormBasicFields = ({
     },
     label: {
       fontWeight: "600",
-      color: "#2c3e50",
+      color: "#1E293B",
       fontSize: "14px",
       display: "flex",
       alignItems: "center",
@@ -327,7 +328,7 @@ const DespesaFormBasicFields = ({
       boxSizing: "border-box", // ✅ IMPORTANTE!
     },
     emendaText: {
-      color: "#2c3e50",
+      color: "#1E293B",
       fontWeight: "500",
       fontSize: "14px",
     },

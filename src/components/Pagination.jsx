@@ -1,11 +1,12 @@
 // src/components/Pagination.jsx
 import React, { useState } from 'react';
 
-const PRIMARY = '#154360';
-const ACCENT = '#4A90E2';
+const PRIMARY = '#2563EB';
+const ACCENT = '#3B82F6';
 const WHITE = '#fff';
-const GRAY = '#f8f9fa';
-const SUCCESS = '#27AE60';
+const GRAY = '#F8FAFC';
+const SLATE = '#64748B';
+const SUCCESS = '#10B981';
 
 /**
  * Componente de Paginação
@@ -104,7 +105,7 @@ export default function Pagination({
           style={!hasPreviousPage ? styles.disabledButton : currentSizeStyles.button}
           title="Página anterior"
         >
-          ◀
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_left</span>
         </button>
 
         <span style={styles.pageInfo}>
@@ -117,7 +118,7 @@ export default function Pagination({
           style={!hasNextPage ? styles.disabledButton : currentSizeStyles.button}
           title="Próxima página"
         >
-          ▶
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
         </button>
       </div>
     );
@@ -186,7 +187,7 @@ export default function Pagination({
               style={isFirstPage ? styles.disabledButton : currentSizeStyles.button}
               title="Primeira página"
             >
-              ⏮
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>first_page</span>
             </button>
 
             <button
@@ -195,7 +196,7 @@ export default function Pagination({
               style={!hasPreviousPage ? styles.disabledButton : currentSizeStyles.button}
               title="Página anterior"
             >
-              ◀
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_left</span>
             </button>
 
             {/* Números das páginas */}
@@ -222,7 +223,7 @@ export default function Pagination({
               style={!hasNextPage ? styles.disabledButton : currentSizeStyles.button}
               title="Próxima página"
             >
-              ▶
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>chevron_right</span>
             </button>
 
             <button
@@ -231,7 +232,7 @@ export default function Pagination({
               style={isLastPage ? styles.disabledButton : currentSizeStyles.button}
               title="Última página"
             >
-              ⏭
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>last_page</span>
             </button>
           </div>
 
@@ -260,7 +261,7 @@ export default function Pagination({
       {variant === 'detailed' && (
         <div style={styles.detailedInfo}>
           <div style={styles.progressBar}>
-            <div 
+            <div
               style={{
                 ...styles.progressFill,
                 width: `${(currentPage / totalPages) * 100}%`
@@ -277,10 +278,10 @@ export default function Pagination({
 }
 
 // Componente auxiliar para paginação rápida (apenas prev/next)
-export function QuickPagination({ 
-  hasNextPage, 
-  hasPreviousPage, 
-  goToNextPage, 
+export function QuickPagination({
+  hasNextPage,
+  hasPreviousPage,
+  goToNextPage,
   goToPreviousPage,
   currentPage,
   totalPages,
@@ -293,7 +294,8 @@ export function QuickPagination({
         disabled={!hasPreviousPage}
         style={!hasPreviousPage ? styles.disabledButton : styles.quickButton}
       >
-        ← Anterior
+        <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>chevron_left</span>
+        Anterior
       </button>
 
       <span style={styles.quickInfo}>
@@ -305,18 +307,19 @@ export function QuickPagination({
         disabled={!hasNextPage}
         style={!hasNextPage ? styles.disabledButton : styles.quickButton}
       >
-        Próxima →
+        Próxima
+        <span className="material-symbols-outlined" style={{ fontSize: 14, marginLeft: 4 }}>chevron_right</span>
       </button>
     </div>
   );
 }
 
 // Componente para informações de paginação apenas (sem controles)
-export function PaginationInfo({ 
-  startIndex, 
-  endIndex, 
-  totalItems, 
-  currentPage, 
+export function PaginationInfo({
+  startIndex,
+  endIndex,
+  totalItems,
+  currentPage,
   totalPages,
   getSummary,
   className = ''
@@ -340,10 +343,11 @@ const styles = {
     gap: 16,
     alignItems: 'center',
     padding: '16px 0',
-    borderTop: '1px solid #e0e0e0',
+    borderTop: '1px solid #E2E8F0',
     marginTop: 16,
     backgroundColor: WHITE,
     borderRadius: '0 0 8px 8px',
+    fontFamily: "'Inter', sans-serif",
   },
 
   topSection: {
@@ -362,7 +366,7 @@ const styles = {
 
   summaryText: {
     fontSize: 14,
-    color: '#666',
+    color: SLATE,
     fontWeight: '500',
   },
 
@@ -374,18 +378,19 @@ const styles = {
 
   label: {
     fontSize: 14,
-    color: PRIMARY,
+    color: '#334155',
     fontWeight: '500',
     whiteSpace: 'nowrap',
   },
 
   select: {
-    padding: '6px 8px',
-    border: '1px solid #ddd',
-    borderRadius: 4,
+    padding: '6px 12px',
+    border: '1px solid #E2E8F0',
+    borderRadius: 6,
     fontSize: 14,
     backgroundColor: WHITE,
     cursor: 'pointer',
+    color: '#334155',
   },
 
   navigationSection: {
@@ -403,10 +408,10 @@ const styles = {
 
   button: {
     padding: '8px 12px',
-    border: '1px solid #ddd',
+    border: '1px solid #E2E8F0',
     borderRadius: 6,
     backgroundColor: WHITE,
-    color: PRIMARY,
+    color: SLATE,
     cursor: 'pointer',
     fontSize: 14,
     fontWeight: '500',
@@ -415,18 +420,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    ':hover': {
-      backgroundColor: GRAY,
-      borderColor: ACCENT,
-    }
   },
 
   disabledButton: {
     padding: '8px 12px',
-    border: '1px solid #e0e0e0',
+    border: '1px solid #E2E8F0',
     borderRadius: 6,
     backgroundColor: GRAY,
-    color: '#ccc',
+    color: '#CBD5E1',
     cursor: 'not-allowed',
     fontSize: 14,
     minWidth: 40,
@@ -444,20 +445,23 @@ const styles = {
 
   activeButton: {
     padding: '8px 12px',
-    border: `1px solid ${ACCENT}`,
+    border: `1px solid ${PRIMARY}`,
     borderRadius: 6,
-    backgroundColor: ACCENT,
+    backgroundColor: PRIMARY,
     color: WHITE,
     cursor: 'pointer',
     fontSize: 14,
     fontWeight: '600',
     minWidth: 40,
-    boxShadow: `0 2px 4px ${ACCENT}30`,
+    boxShadow: `0 2px 4px rgba(37, 99, 235, 0.2)`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   dots: {
     padding: '8px 4px',
-    color: '#666',
+    color: SLATE,
     fontSize: 14,
     userSelect: 'none',
   },
@@ -472,14 +476,14 @@ const styles = {
   jumpInput: {
     width: 60,
     padding: '6px 8px',
-    border: '1px solid #ddd',
-    borderRadius: 4,
+    border: '1px solid #E2E8F0',
+    borderRadius: 6,
     textAlign: 'center',
     fontSize: 14,
   },
 
   totalPagesText: {
-    color: '#666',
+    color: SLATE,
     fontSize: 14,
   },
 
@@ -496,7 +500,7 @@ const styles = {
   progressBar: {
     width: '100%',
     height: 4,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#E2E8F0',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -509,7 +513,7 @@ const styles = {
 
   progressText: {
     fontSize: 12,
-    color: '#666',
+    color: SLATE,
   },
 
   // Quick pagination
@@ -519,22 +523,25 @@ const styles = {
     justifyContent: 'space-between',
     gap: 16,
     padding: '8px 0',
+    fontFamily: "'Inter', sans-serif",
   },
 
   quickButton: {
     padding: '6px 12px',
-    border: '1px solid #ddd',
-    borderRadius: 4,
+    border: '1px solid #E2E8F0',
+    borderRadius: 6,
     backgroundColor: WHITE,
     color: PRIMARY,
     cursor: 'pointer',
     fontSize: 14,
     transition: 'all 0.2s',
+    display: 'flex',
+    alignItems: 'center',
   },
 
   quickInfo: {
     fontSize: 14,
-    color: '#666',
+    color: SLATE,
     fontWeight: '500',
   },
 
@@ -544,19 +551,20 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '8px 0',
-    borderTop: '1px solid #e0e0e0',
+    borderTop: '1px solid #E2E8F0',
     marginTop: 8,
+    fontFamily: "'Inter', sans-serif",
   },
 
   pageInfo: {
     fontSize: 14,
-    color: '#666',
+    color: SLATE,
     fontWeight: '500',
   },
 
   pageInfoText: {
     fontSize: 12,
-    color: '#999',
+    color: '#94A3B8',
   },
 };
 
@@ -575,7 +583,7 @@ export const paginationCSS = `
 .pagination-input:focus {
   border-color: ${ACCENT};
   outline: none;
-  box-shadow: 0 0 0 2px ${ACCENT}30;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 @media (max-width: 768px) {

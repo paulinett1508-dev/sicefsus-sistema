@@ -247,7 +247,7 @@ const styles = {
 
   userName: {
     fontWeight: "500",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
 
   userEmail: {

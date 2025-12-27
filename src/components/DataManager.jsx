@@ -692,7 +692,7 @@ const DataManager = () => {
 
         .data-header h1 {
           margin: 0;
-          color: #2c3e50;
+          color: #1E293B;
           font-size: 1.8em;
         }
 
@@ -701,7 +701,7 @@ const DataManager = () => {
           align-items: center;
           gap: 8px;
           font-weight: 500;
-          color: #2c3e50;
+          color: #1E293B;
           cursor: pointer;
         }
 
@@ -746,14 +746,14 @@ const DataManager = () => {
 
         .section-card h2 {
           margin: 0 0 25px 0;
-          color: #2c3e50;
+          color: #1E293B;
         }
 
         .export-options h3,
         .import-info h3,
         .backups-list h3,
         .quick-exports h3 {
-          color: #2c3e50;
+          color: #1E293B;
           margin-bottom: 15px;
         }
 
@@ -905,7 +905,7 @@ const DataManager = () => {
         .backups-table th {
           background: #f8f9fa;
           font-weight: 600;
-          color: #2c3e50;
+          color: #1E293B;
         }
 
         .backup-actions-row {

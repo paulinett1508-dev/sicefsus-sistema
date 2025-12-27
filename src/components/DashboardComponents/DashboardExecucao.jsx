@@ -46,10 +46,10 @@ const DashboardExecucao = ({ emendas = [] }) => {
   };
 
   const getBarColor = (percentual) => {
-    if (percentual >= 80) return "#27AE60";
-    if (percentual >= 50) return "#F39C12";
+    if (percentual >= 80) return "#10B981";
+    if (percentual >= 50) return "#F59E0B";
     if (percentual >= 20) return "#E67E22";
-    return "#E74C3C";
+    return "#EF4444";
   };
 
   if (dados.length === 0) {
@@ -134,7 +134,7 @@ const styles = {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   subtitle: {
     color: "#6c757d",
@@ -164,7 +164,7 @@ const styles = {
   barLabel: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   barCount: {
     fontSize: "12px",
@@ -192,7 +192,7 @@ const styles = {
     fontSize: "12px",
   },
   barValue: {
-    color: "#27AE60",
+    color: "#10B981",
     fontWeight: "600",
   },
   barDivider: {

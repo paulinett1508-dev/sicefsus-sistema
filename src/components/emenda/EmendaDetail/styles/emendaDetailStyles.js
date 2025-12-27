@@ -16,7 +16,7 @@ export const emendaDetailStyles = {
     width: "50px",
     height: "50px",
     border: "4px solid #f3f3f3",
-    borderTop: "4px solid #4A90E2",
+    borderTop: "4px solid #3B82F6",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
@@ -45,7 +45,7 @@ export const emendaDetailStyles = {
   errorTitle: {
     fontSize: "24px",
     fontWeight: "600",
-    color: "#E74C3C",
+    color: "#EF4444",
     margin: "0 0 8px 0",
   },
 
@@ -57,7 +57,7 @@ export const emendaDetailStyles = {
 
   retryButton: {
     padding: "10px 20px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -102,7 +102,7 @@ export const emendaDetailStyles = {
   headerTitle: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 8px 0",
   },
 
@@ -147,7 +147,7 @@ export const emendaDetailStyles = {
   // ==================== BUTTONS ====================
   btnPrimary: {
     padding: "10px 20px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -171,7 +171,7 @@ export const emendaDetailStyles = {
 
   btnSuccess: {
     padding: "10px 20px",
-    backgroundColor: "#27AE60",
+    backgroundColor: "#10B981",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -216,7 +216,7 @@ export const emendaDetailStyles = {
   kpiValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
 
   kpiLabel: {
@@ -253,9 +253,9 @@ export const emendaDetailStyles = {
   },
 
   tabActive: {
-    color: "#4A90E2",
+    color: "#3B82F6",
     backgroundColor: "white",
-    borderBottomColor: "#4A90E2",
+    borderBottomColor: "#3B82F6",
   },
 
   tabContent: {
@@ -285,7 +285,7 @@ export const emendaDetailStyles = {
   chartTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 16px 0",
     textAlign: "center",
   },
@@ -307,7 +307,7 @@ export const emendaDetailStyles = {
   detalheTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 12px 0",
   },
 
@@ -346,7 +346,7 @@ export const emendaDetailStyles = {
   acoesTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 12px 0",
   },
 
@@ -385,7 +385,7 @@ export const emendaDetailStyles = {
   despesasTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: 0,
   },
 
@@ -430,7 +430,7 @@ export const emendaDetailStyles = {
   formTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: 0,
   },
 
@@ -507,12 +507,12 @@ export const emendaDetailStyles = {
 
 // ==================== CORES DO TEMA ====================
 export const THEME_COLORS = {
-  PRIMARY: "#154360",
-  ACCENT: "#4A90E2",
-  SUCCESS: "#27AE60",
-  WARNING: "#F39C12",
-  ERROR: "#E74C3C",
-  CHART_COLORS: ["#4A90E2", "#27AE60", "#F5A623", "#D0021B", "#9013FE"],
+  PRIMARY: "#2563EB",
+  ACCENT: "#3B82F6",
+  SUCCESS: "#10B981",
+  WARNING: "#F59E0B",
+  ERROR: "#EF4444",
+  CHART_COLORS: ["#3B82F6", "#10B981", "#F5A623", "#D0021B", "#9013FE"],
 };
 
 // ==================== CSS ANIMATIONS ====================

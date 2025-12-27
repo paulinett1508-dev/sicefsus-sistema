@@ -187,7 +187,7 @@ const styles = {
   title: {
     fontSize: "24px",
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 8px 0",
   },
   breadcrumb: {
@@ -238,7 +238,7 @@ const styles = {
   cardValue: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
     lineHeight: 1.2,
   },
   cardSubtext: {

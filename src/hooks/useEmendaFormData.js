@@ -852,7 +852,7 @@ export const useEmendaFormData = () => {
               </style>
               <div style="text-align: center;">
                 <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-                <h2 style="color: #154360; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
+                <h2 style="color: #2563EB; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
                   Emenda Cadastrada!
                 </h2>
                 <p style="color: #666; margin: 0 0 24px 0; font-size: 15px; line-height: 1.5;">

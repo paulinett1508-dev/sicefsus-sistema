@@ -62,7 +62,7 @@ const styles = {
     transition: 'all 0.3s ease',
   },
   submitButton: {
-    backgroundColor: '#27AE60',
+    backgroundColor: '#10B981',
     color: 'white',
     padding: '12px 32px',
     border: 'none',

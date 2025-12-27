@@ -131,7 +131,7 @@ const styles = {
   filtersTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     margin: 0,
   },
 
@@ -143,8 +143,8 @@ const styles = {
 
   toggleButton: {
     backgroundColor: "transparent",
-    color: "#4A90E2",
-    border: "1px solid #4A90E2",
+    color: "#3B82F6",
+    border: "1px solid #3B82F6",
     padding: "8px 16px",
     borderRadius: "6px",
     fontSize: "12px",

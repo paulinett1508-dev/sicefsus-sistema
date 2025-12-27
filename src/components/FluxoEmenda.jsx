@@ -2,11 +2,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const PRIMARY = "#154360";
-const ACCENT = "#4A90E2";
-const SUCCESS = "#27AE60";
-const WARNING = "#F39C12";
-const ERROR = "#E74C3C";
+const PRIMARY = "#2563EB";
+const ACCENT = "#3B82F6";
+const SUCCESS = "#10B981";
+const WARNING = "#F59E0B";
+const ERROR = "#EF4444";
 const WHITE = "#fff";
 
 export default function FluxoEmenda({ emenda, onClose, onEdit }) {

@@ -468,7 +468,7 @@ const styles = {
     display: "block",
     marginBottom: 8,
     fontWeight: "500",
-    color: "#2c3e50",
+    color: "#1E293B",
     fontSize: "0.9em",
   },
   input: {

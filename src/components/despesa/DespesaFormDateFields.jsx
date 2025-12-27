@@ -302,25 +302,26 @@ const ValidacaoSequenciaDatas = ({
 // ✅ ESTILOS IGUAIS AO CRONOGRAMA + melhorias visuais
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
-    borderRadius: "10px",
+    border: "1px solid #E2E8F0",
+    borderRadius: "12px",
     padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
     marginBottom: "20px",
   },
 
   legend: {
     background: "white",
-    padding: "5px 15px",
-    borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
-    fontWeight: "bold",
-    fontSize: "16px",
+    padding: "6px 16px",
+    borderRadius: "9999px",
+    border: "1px solid #E2E8F0",
+    color: "#334155",
+    fontWeight: "600",
+    fontSize: "14px",
     display: "flex",
     alignItems: "center",
     gap: "8px",
+    fontFamily: "'Inter', sans-serif",
   },
 
   legendIcon: {

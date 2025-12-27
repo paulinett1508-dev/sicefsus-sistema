@@ -277,7 +277,7 @@ const styles = {
   label: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     marginBottom: "4px",
   },
 
@@ -327,7 +327,7 @@ const styles = {
   },
 
   exemploTitle: {
-    color: "#2c3e50",
+    color: "#1E293B",
     marginBottom: "20px",
     fontSize: "18px",
   },

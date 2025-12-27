@@ -157,7 +157,7 @@ const InformacoesComplementares = ({
 
 const styles = {
   fieldset: {
-    border: "2px solid #154360",
+    border: "2px solid #2563EB",
     borderRadius: "10px",
     padding: "0",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -180,8 +180,8 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #154360",
-    color: "#154360",
+    border: "2px solid #2563EB",
+    color: "#2563EB",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -203,7 +203,7 @@ const styles = {
   toggleIcon: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
   },
   toggleText: {
     fontSize: "14px",

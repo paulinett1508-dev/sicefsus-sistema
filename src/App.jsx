@@ -274,74 +274,9 @@ function AppContent() {
 
   return (
     <div style={styles.app}>
-      {/* Barra de Status Global */}
-      {usuario && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "32px",
-            backgroundColor: "#2c3e50",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 20px",
-            fontSize: "12px",
-            zIndex: 9999,
-            gap: "15px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
-          }}
-        >
-          <span style={{ color: "#2ecc71" }}>✅ Operacional</span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            v{version || "2.3.70"}
-          </span>
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            🔐 {usuario.tipo === "admin"
-              ? "Admin"
-              : usuario.tipo === "gestor"
-              ? "Gestor"
-              : "Operador"}
-          </span>
-          {usuario.superAdmin && (
-            <>
-              <span style={{ opacity: 0.5 }}>|</span>
-              <span
-                style={{
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  padding: "2px 8px",
-                  borderRadius: "10px",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                }}
-              >
-                👑 SUPER
-              </span>
-            </>
-          )}
-          <span style={{ opacity: 0.5 }}>|</span>
-          <span style={{ opacity: 0.7, fontSize: "11px" }}>
-            📍 {usuario.tipo === "admin"
-              ? "Acesso Total"
-              : usuario.municipio
-                ? `${usuario.municipio}/${usuario.uf || ""}`
-                : "Sem município"}
-          </span>
-          <div style={{ marginLeft: "auto", display: "flex", gap: "10px" }}>
-            <span style={{ opacity: 0.7, fontSize: "11px" }}>
-              📄 {getCurrentPageName()}
-            </span>
-          </div>
-        </div>
-      )}
+      {/* Barra de Status Global - Removida para novo layout limpo */}
 
-      <div style={{ ...styles.container, marginTop: usuario ? "32px" : 0 }}>
+      <div style={{ ...styles.container, marginTop: 0 }}>
         {/* Sidebar */}
         {usuario && (
           <ProtectedSidebar
@@ -600,10 +535,10 @@ export default App;
 // Estilos
 const styles = {
   app: {
-    fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif",
     minHeight: "100vh",
-    backgroundColor: "#f4f6f8",
-    color: "#212529",
+    backgroundColor: "#F8FAFC",
+    color: "#334155",
     transition: "background-color 0.3s ease, color 0.3s ease",
   },
   container: {
@@ -612,9 +547,10 @@ const styles = {
   },
   content: {
     flex: 1,
-    marginLeft: 220,
+    marginLeft: 256,
     transition: "margin-left 0.2s ease",
     minHeight: "100vh",
+    backgroundColor: "#F8FAFC",
   },
   loadingContainer: {
     display: "flex",
@@ -622,14 +558,14 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "100vh",
-    backgroundColor: "#f4f6f8",
-    color: "#154360",
+    backgroundColor: "#F8FAFC",
+    color: "#2563EB",
   },
   loadingSpinner: {
     width: 50,
     height: 50,
-    border: "4px solid #e2e8f0",
-    borderTop: "4px solid #154360",
+    border: "4px solid #E2E8F0",
+    borderTop: "4px solid #2563EB",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 20,
@@ -705,7 +641,7 @@ const styles = {
     justifyContent: "center",
     minHeight: "60vh",
     textAlign: "center",
-    color: "#154360",
+    color: "#334155",
     padding: 32,
   },
   notFoundTitle: {
@@ -726,14 +662,14 @@ const styles = {
     justifyContent: "center",
     minHeight: "60vh",
     textAlign: "center",
-    color: "#154360",
+    color: "#334155",
     padding: 32,
   },
   unauthorizedTitle: {
     fontSize: 24,
     fontWeight: "600",
     marginBottom: 12,
-    color: "#E74C3C",
+    color: "#EF4444",
   },
   unauthorizedText: {
     fontSize: 16,
@@ -742,15 +678,16 @@ const styles = {
     maxWidth: 400,
   },
   button: {
-    backgroundColor: "#154360",
+    backgroundColor: "#2563EB",
     color: "white",
     border: "none",
     padding: "12px 24px",
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: "pointer",
     fontSize: 16,
     fontWeight: "500",
     transition: "background-color 0.2s",
+    fontFamily: "'Inter', sans-serif",
   },
 };
 

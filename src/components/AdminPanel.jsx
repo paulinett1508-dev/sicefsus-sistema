@@ -334,7 +334,7 @@ const loadLogs = async () => {
                       </div>
                     </td>
                     <td style={{ padding: '12px', fontSize: '13px' }}>
-                      <div style={{ fontWeight: '500', color: '#2c3e50' }}>
+                      <div style={{ fontWeight: '500', color: '#1E293B' }}>
                         {log.userEmail || 'N/A'}
                       </div>
                       <div style={{ 

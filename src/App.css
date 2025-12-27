@@ -4,9 +4,9 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #f4f6f8;
-  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-  color: #222;
+  background: #F8FAFC;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+  color: #334155;
   box-sizing: border-box;
 }
 
@@ -17,12 +17,12 @@ html, body {
 }
 
 a {
-  color: #4A90E2;
+  color: #2563EB;
   text-decoration: none;
   transition: color 0.2s;
 }
 a:hover {
-  color: #154360;
+  color: #1D4ED8;
 }
 
 input, select, button, textarea {
@@ -52,8 +52,8 @@ th, td {
 }
 
 th {
-  background: #f9fbfc;
-  color: #154360;
+  background: #F8FAFC;
+  color: #334155;
   font-weight: 600;
   font-size: 1rem;
 }
@@ -79,8 +79,8 @@ tr:last-child td {
     font-size: 0.98rem;
   }
   th {
-    background: #f4f6f8;
-    color: #154360;
+    background: #F8FAFC;
+    color: #334155;
   }
   tr {
     margin-bottom: 12px;
@@ -172,11 +172,11 @@ tr:last-child td {
 
 .form-emenda h2,
 .form-despesa h2 {
-  color: #154360;
+  color: #334155;
   margin-bottom: 30px;
   font-size: 24px;
   font-weight: 600;
-  border-bottom: 2px solid #4A90E2;
+  border-bottom: 2px solid #2563EB;
   padding-bottom: 10px;
 }
 
@@ -192,13 +192,13 @@ fieldset {
 
 legend {
   font-weight: 600;
-  color: #154360;
+  color: #334155;
   padding: 8px 15px;
-  font-size: 16px;
+  font-size: 14px;
   background: white;
-  border: 2px solid #4A90E2;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.15);
+  border: 1px solid #E2E8F0;
+  border-radius: 9999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin-left: 10px;
 }
 
@@ -222,7 +222,7 @@ legend {
 
 .form-group label {
   font-weight: 600;
-  color: #2c3e50;
+  color: #1E293B;
   font-size: 14px;
   margin-bottom: 6px;
 }
@@ -239,7 +239,7 @@ legend {
 }
 
 .form-control:focus {
-  border-color: #4A90E2;
+  border-color: #3B82F6;
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
   outline: none;
   background: #fafbfc;
@@ -309,8 +309,8 @@ textarea.form-control {
 
 /* Variações de botões */
 .btn-primary {
-  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-  border-color: #4A90E2;
+  background: linear-gradient(135deg, #3B82F6 0%, #357ABD 100%);
+  border-color: #3B82F6;
   color: white;
 }
 

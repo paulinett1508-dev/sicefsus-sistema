@@ -182,7 +182,7 @@ const styles = {
   fieldset: {
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#154360",
+    borderColor: "#2563EB",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -194,8 +194,8 @@ const styles = {
     borderRadius: "20px",
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#154360",
-    color: "#154360",
+    borderColor: "#2563EB",
+    color: "#2563EB",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -274,7 +274,7 @@ const styles = {
   },
   toggleIcon: {
     fontSize: "12px",
-    color: "#154360",
+    color: "#2563EB",
     transition: "transform 0.2s ease",
   },
   toggleText: {

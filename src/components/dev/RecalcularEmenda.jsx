@@ -553,7 +553,7 @@ const styles = {
   title: {
     fontSize: "24px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     marginBottom: "8px",
   },
   subtitle: {
@@ -706,7 +706,7 @@ const styles = {
     marginTop: 0,
     marginBottom: "15px",
     fontSize: "16px",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   tabelaComparacao: {
     width: "100%",

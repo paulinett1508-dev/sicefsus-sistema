@@ -225,7 +225,7 @@ const styles = {
     margin: 0,
     fontSize: "16px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   status: {
     color: "white",
@@ -253,7 +253,7 @@ const styles = {
   valor: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#334155",
   },
   simulacao: {
     backgroundColor: "#e3f2fd",

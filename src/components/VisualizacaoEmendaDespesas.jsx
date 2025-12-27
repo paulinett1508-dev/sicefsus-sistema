@@ -105,12 +105,12 @@ const VisualizacaoEmendaDespesas = ({
   }, []);
 
   // Cores para gráficos
-  const COLORS = ["#4A90E2", "#27AE60", "#F5A623", "#D0021B", "#9013FE"];
-  const PRIMARY = "#154360";
-  const ACCENT = "#4A90E2";
-  const SUCCESS = "#27AE60";
-  const WARNING = "#F39C12";
-  const ERROR = "#E74C3C";
+  const COLORS = ["#3B82F6", "#10B981", "#F5A623", "#D0021B", "#9013FE"];
+  const PRIMARY = "#2563EB";
+  const ACCENT = "#3B82F6";
+  const SUCCESS = "#10B981";
+  const WARNING = "#F59E0B";
+  const ERROR = "#EF4444";
 
   // ✅ Formatação de moeda
   const formatCurrency = (value) => {
@@ -773,7 +773,7 @@ const styles = {
     width: "50px",
     height: "50px",
     border: "4px solid #f3f3f3",
-    borderTop: "4px solid #4A90E2",
+    borderTop: "4px solid #3B82F6",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
@@ -802,7 +802,7 @@ const styles = {
   errorTitle: {
     fontSize: "24px",
     fontWeight: "600",
-    color: "#E74C3C",
+    color: "#EF4444",
     margin: "0 0 8px 0",
   },
 
@@ -814,7 +814,7 @@ const styles = {
 
   retryButton: {
     padding: "10px 20px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -859,7 +859,7 @@ const styles = {
   headerTitle: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 8px 0",
   },
 
@@ -904,7 +904,7 @@ const styles = {
   // Buttons
   btnPrimary: {
     padding: "10px 20px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -928,7 +928,7 @@ const styles = {
 
   btnSuccess: {
     padding: "10px 20px",
-    backgroundColor: "#27AE60",
+    backgroundColor: "#10B981",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -973,7 +973,7 @@ const styles = {
   kpiValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
 
   kpiLabel: {
@@ -1010,9 +1010,9 @@ const styles = {
   },
 
   tabActive: {
-    color: "#4A90E2",
+    color: "#3B82F6",
     backgroundColor: "white",
-    borderBottomColor: "#4A90E2",
+    borderBottomColor: "#3B82F6",
   },
 
   tabContent: {
@@ -1041,7 +1041,7 @@ const styles = {
   chartTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 16px 0",
     textAlign: "center",
   },
@@ -1062,7 +1062,7 @@ const styles = {
   detalheTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 12px 0",
   },
 
@@ -1100,7 +1100,7 @@ const styles = {
   acoesTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: "0 0 12px 0",
   },
 
@@ -1138,7 +1138,7 @@ const styles = {
   despesasTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: 0,
   },
 
@@ -1161,7 +1161,7 @@ const styles = {
   formTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
     margin: 0,
   },
 

@@ -204,7 +204,7 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: "#1E293B",
     display: "flex",
     alignItems: "center",
     gap: "8px",

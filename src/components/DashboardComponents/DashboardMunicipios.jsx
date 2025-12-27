@@ -58,7 +58,7 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
     if (posicao === 0) return "#FFD700"; // Ouro
     if (posicao === 1) return "#C0C0C0"; // Prata
     if (posicao === 2) return "#CD7F32"; // Bronze
-    return "#4A90E2";
+    return "#3B82F6";
   };
 
   const getPosicaoEmoji = (posicao) => {
@@ -149,10 +149,10 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
                       width: `${Math.min(item.percentualExecutado, 100)}%`,
                       backgroundColor:
                         item.percentualExecutado >= 80
-                          ? "#27AE60"
+                          ? "#10B981"
                           : item.percentualExecutado >= 50
-                            ? "#F39C12"
-                            : "#E74C3C",
+                            ? "#F59E0B"
+                            : "#EF4444",
                     }}
                   />
                 </div>
@@ -207,7 +207,7 @@ const styles = {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   subtitle: {
     color: "#6c757d",
@@ -218,7 +218,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#154360",
+    backgroundColor: "#2563EB",
     color: "white",
     padding: "4px 12px",
     borderRadius: "12px",
@@ -276,7 +276,7 @@ const styles = {
   rankingMunicipio: {
     fontSize: "15px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   rankingUf: {
     fontSize: "13px",
@@ -305,7 +305,7 @@ const styles = {
   metricaValor: {
     fontSize: "13px",
     fontWeight: "700",
-    color: "#27AE60",
+    color: "#10B981",
   },
   metricaTotal: {
     fontSize: "13px",
@@ -315,7 +315,7 @@ const styles = {
   metricaQuantidade: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#4A90E2",
+    color: "#3B82F6",
   },
   metricaDivider: {
     color: "#dee2e6",
@@ -367,7 +367,7 @@ const styles = {
   resumoValor: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
   emptyState: {
     textAlign: "center",

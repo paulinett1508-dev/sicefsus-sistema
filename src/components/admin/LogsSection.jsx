@@ -342,7 +342,7 @@ const LogsSection = ({
                       {log.userName && (
                         <div style={{ 
                           fontWeight: "700",
-                          color: "#2c3e50",
+                          color: "#1E293B",
                           fontSize: "14px"
                         }}>
                           {log.userName}

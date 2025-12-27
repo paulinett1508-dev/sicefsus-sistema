@@ -435,7 +435,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
 
         .workflow-actions h3 {
           margin: 0 0 15px 0;
-          color: #2c3e50;
+          color: #1E293B;
         }
 
         .actions-grid {
@@ -508,7 +508,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
 
         .workflow-timeline h3 {
           margin: 0 0 20px 0;
-          color: #2c3e50;
+          color: #1E293B;
         }
 
         .no-history {
@@ -577,7 +577,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
 
         .timeline-header h4 {
           margin: 0;
-          color: #2c3e50;
+          color: #1E293B;
           font-size: 1.1em;
         }
 
@@ -600,7 +600,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
           display: block;
           font-weight: 500;
           margin-bottom: 5px;
-          color: #2c3e50;
+          color: #1E293B;
         }
 
         .comments-section textarea {

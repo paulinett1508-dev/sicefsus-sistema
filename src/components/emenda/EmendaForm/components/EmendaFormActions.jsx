@@ -111,7 +111,7 @@ const EmendaFormActions = ({
         style={styles.submitButton}
         disabled={salvando || loading}
         onMouseEnter={(e) => (e.target.style.backgroundColor = "#219a52")}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = "#27AE60")}
+        onMouseLeave={(e) => (e.target.style.backgroundColor = "#10B981")}
       >
         {salvando || loading
           ? "⏳ Processando..."
@@ -177,7 +177,7 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
   submitButton: {
-    backgroundColor: "#27AE60",
+    backgroundColor: "#10B981",
     color: "white",
     padding: "12px 32px",
     border: "none",

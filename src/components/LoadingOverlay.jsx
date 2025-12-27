@@ -54,7 +54,7 @@ const styles = {
     width: "56px",
     height: "56px",
     border: "5px solid #e0e0e0",
-    borderTopColor: "#27AE60",
+    borderTopColor: "#10B981",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
@@ -62,7 +62,7 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     textAlign: "center",
   },
 };

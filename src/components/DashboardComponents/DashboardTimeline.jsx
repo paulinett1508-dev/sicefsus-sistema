@@ -53,9 +53,9 @@ const DashboardTimeline = ({ emendas = [] }) => {
   const getPrioridadeColor = (prioridade) => {
     switch (prioridade) {
       case "alta":
-        return "#E74C3C";
+        return "#EF4444";
       case "media":
-        return "#F39C12";
+        return "#F59E0B";
       case "baixa":
         return "#3498DB";
       default:
@@ -155,10 +155,10 @@ const DashboardTimeline = ({ emendas = [] }) => {
                         width: `${evento.percentualExecutado}%`,
                         backgroundColor:
                           evento.percentualExecutado >= 80
-                            ? "#27AE60"
+                            ? "#10B981"
                             : evento.percentualExecutado >= 50
-                              ? "#F39C12"
-                              : "#E74C3C",
+                              ? "#F59E0B"
+                              : "#EF4444",
                       }}
                     />
                   </div>
@@ -196,7 +196,7 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   subtitle: {
     color: "#6c757d",
@@ -234,7 +234,7 @@ const styles = {
   eventoDay: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#2c3e50",
+    color: "#1E293B",
     lineHeight: 1,
   },
   eventoMonth: {
@@ -275,7 +275,7 @@ const styles = {
   eventoTitulo: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   eventoDescricao: {
     fontSize: "12px",

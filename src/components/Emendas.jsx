@@ -1,13 +1,11 @@
-// Emendas.jsx - Layout Padronizado com Despesas v2.3
-// ✅ CORRIGIDO: Execução baseada APENAS em despesas reais
-// ✅ REMOVIDO: Metas não são contabilizadas como execução
-// ✅ NOVO: Modal de exclusão melhorado com restrições para operadores
-// 🔧 CORREÇÃO: Versão dinâmica integrada com versionControl.js
-// ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas) - Redundantes
-// 🔧 FIX: Navegação corrigida para /emendas/novo
+// Emendas.jsx - Design Moderno v3.0
+// ✅ Layout baseado no template Tailwind
+// ✅ Stat cards com ícones modernos
+// ✅ Toolbar com filtros e busca
+// ✅ Integração com EmendasTable v3.0
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   collection,
   getDocs,
@@ -18,38 +16,26 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
-import { useVersion } from "../hooks/useVersion";
-import EmendasFilters from "./EmendasFilters";
 import EmendasTable from "./EmendasTable";
 import Toast from "./Toast";
 import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
-// Função auxiliar para parsear valores monetários (ex: R$ 1.000,50 para 1000.50)
+// Função auxiliar para parsear valores monetários
 const parseValorMonetario = (valor) => {
   if (!valor && valor !== 0) return 0;
-
-  // Se já é número, retorna direto
   if (typeof valor === "number") return valor;
-
   const valorString = String(valor);
-
-  // Remove pontos (separador de milhar) e substitui vírgula (decimal) por ponto
   const numero = valorString
-    .replace(/\./g, "") // Remove pontos (separador de milhar)
-    .replace(",", ".") // Substitui vírgula (decimal) por ponto
-    .replace(/[^\d.-]/g, ""); // Remove qualquer outro caractere não numérico
-
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .replace(/[^\d.-]/g, "");
   const valorFloat = parseFloat(numero);
   return isNaN(valorFloat) ? 0 : valorFloat;
 };
 
 const Emendas = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // ✅ CORREÇÃO: Desestruturação correta do contexto
   const { user, loading: userLoading } = useUser();
-  const { formatVersion } = useVersion();
 
   // Estados principais
   const [emendas, setEmendas] = useState([]);
@@ -57,6 +43,9 @@ const Emendas = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Estados do modal de exclusão
   const [modalExclusao, setModalExclusao] = useState({
@@ -65,90 +54,55 @@ const Emendas = () => {
     loading: false,
   });
 
-  // ✅ CORREÇÃO: Acesso correto às propriedades do usuário
   const userRole = user?.tipo || "operador";
   const userMunicipio = user?.municipio;
   const userUf = user?.uf;
   const userEmail = user?.email;
 
-  console.log("📋 Emendas.jsx v2.3 - Dados do usuário:", {
-    email: userEmail,
-    role: userRole,
-    municipio: userMunicipio,
-    uf: userUf,
-    user: user,
-  });
-
-  // ✅ CORREÇÃO: Aguardar carregamento do usuário
+  // Loading do usuário
   if (userLoading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Carregando usuário...</p>
+        <div style={styles.spinner} />
+        <p style={styles.loadingText}>Carregando...</p>
       </div>
     );
   }
 
-  // Validações críticas
+  // Validação do usuário
   if (!user || !userEmail) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
+        <div style={styles.spinner} />
         <p style={styles.loadingText}>Erro ao carregar dados do usuário...</p>
       </div>
     );
   }
 
-  // ✅ FUNÇÃO: Carregar dados com useCallback (prevenir re-renders desnecessários)
+  // Carregar dados
   const carregarDados = useCallback(async () => {
     try {
-      console.log("📊 Carregando emendas e despesas...");
-      console.log("👤 Usuário:", {
-        role: userRole,
-        municipio: userMunicipio,
-        uf: userUf,
-      });
-
       setLoading(true);
       setError(null);
 
       let emendasQuery;
-      if (userRole === "admin") {
-        console.log("🔓 Admin - carregando TODAS as emendas");
-        emendasQuery = collection(db, "emendas");
-      } else {
-        // ✅ GESTOR/OPERADOR: Filtrar por município E UF (query composta)
-        if (userRole === "gestor" || userRole === "operador") {
-          console.log(
-            `🔒 Operador - filtrando por município: ${userMunicipio} e UF: ${userUf}`,
-          );
-          emendasQuery = query(
-            collection(db, "emendas"),
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf)
-          );
-        }
-      }
-
-      // Buscar despesas com os mesmos filtros
       let despesasQuery;
+
       if (userRole === "admin") {
-        console.log("🔓 Admin - carregando TODAS as despesas");
+        emendasQuery = collection(db, "emendas");
         despesasQuery = collection(db, "despesas");
       } else {
-        // ✅ GESTOR/OPERADOR: Filtrar por município E UF (query composta)
-        if (userRole === "gestor" || userRole === "operador") {
-          console.log(
-            `🔒 Operador - filtrando despesas por município: ${userMunicipio} e UF: ${userUf}`,
-          );
-          despesasQuery = query(
-            collection(db, "despesas"),
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf)
-          );
-        }
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", userMunicipio),
+          where("uf", "==", userUf)
+        );
+        despesasQuery = query(
+          collection(db, "despesas"),
+          where("municipio", "==", userMunicipio),
+          where("uf", "==", userUf)
+        );
       }
-
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
         getDocs(emendasQuery),
@@ -165,217 +119,100 @@ const Emendas = () => {
         ...doc.data(),
       }));
 
-      console.log("✅ Emendas encontradas:", emendasData.length);
-      console.log("✅ Despesas encontradas:", despesasData.length);
-
-      // ✅ CALCULAR EXECUÇÃO: Baseado APENAS em despesas reais (não metas)
+      // Calcular execução
       const emendasComExecucao = emendasData.map((emenda) => {
         const despesasEmenda = despesasData.filter(
-          (despesa) => despesa.emendaId === emenda.id,
+          (despesa) => despesa.emendaId === emenda.id
         );
 
-        // ✅ Valor Total - Parsing robusto com fallback
-        // Tenta valorTotal, se não existir tenta valorRecurso, se não existir tenta valor
         const valorTotal = parseValorMonetario(
-          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0,
+          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0
         );
 
-        // 🔍 DEBUG: Verificar qual campo foi usado
-        if (valorTotal === 0) {
-          console.warn(
-            `⚠️ Emenda ${emenda.numero || emenda.id} com valorTotal = 0`,
-            {
-              valorTotal: emenda.valorTotal,
-              valorRecurso: emenda.valorRecurso,
-              valor: emenda.valor,
-              tipoValorTotal: typeof emenda.valorTotal,
-              tipoValorRecurso: typeof emenda.valorRecurso,
-              tipoValor: typeof emenda.valor,
-              emendaCompleta: emenda,
-            },
-          );
-        } else {
-          console.log(
-            `✅ Emenda ${emenda.numero || emenda.id} valorTotal OK:`,
-            {
-              valorParsed: valorTotal,
-              campoUsado: emenda.valorTotal
-                ? "valorTotal"
-                : emenda.valorRecurso
-                  ? "valorRecurso"
-                  : emenda.valor
-                    ? "valor"
-                    : "nenhum",
-            },
-          );
-        }
-
-        // ✅ Total Executado - Soma despesas que NÃO são planejadas
         const valorExecutado = despesasEmenda
-          .filter(d => d.status !== "PLANEJADA")
-          .reduce((acc, despesa) => {
-            const valorDespesa = parseValorMonetario(despesa.valor);
-            return acc + valorDespesa;
-          }, 0);
+          .filter((d) => d.status !== "PLANEJADA")
+          .reduce((acc, despesa) => acc + parseValorMonetario(despesa.valor), 0);
 
-        // ✅ Saldo Disponível
         const saldoDisponivel = valorTotal - valorExecutado;
-
-        // ✅ Percentual Executado (arredondado para 1 casa decimal) - RETORNA NÚMERO
         const percentualExecutado =
           valorTotal > 0
             ? parseFloat(((valorExecutado / valorTotal) * 100).toFixed(1))
             : 0;
 
-        console.log(
-          `💰 Emenda ${emenda.numero} (${emenda.municipio}/${emenda.uf}):`,
-          {
-            valorTotal: valorTotal,
-            valorExecutadoDespesas: valorExecutado,
-            saldoDisponivel: saldoDisponivel,
-            percentualExecutado: percentualExecutado,
-          },
-        );
-
         return {
           ...emenda,
-          valorTotal: valorTotal,
-          valorExecutado: valorExecutado,
-          saldoDisponivel: saldoDisponivel,
-          percentualExecutado: percentualExecutado,
+          valorTotal,
+          valorExecutado,
+          saldoDisponivel,
+          percentualExecutado,
           totalDespesas: despesasEmenda.length,
-          totalMetas: (emenda.acoesServicos || []).length,
-          despesasVinculadas: despesasEmenda,
-          metasVinculadas: emenda.acoesServicos || [],
         };
       });
 
-      console.log(
-        `✅ ${emendasComExecucao.length} emendas processadas para usuário ${userRole}`,
-      );
-
-      // ✅ ORDENAR por data de criação (mais recentes primeiro)
       const emendasOrdenadas = emendasComExecucao.sort((a, b) => {
         const dataA = a.criadoEm?.seconds || 0;
         const dataB = b.criadoEm?.seconds || 0;
-        return dataB - dataA; // Decrescente (mais recentes primeiro)
+        return dataB - dataA;
       });
 
       setEmendas(emendasOrdenadas);
       setEmendasFiltradas(emendasOrdenadas);
     } catch (error) {
-      console.error("❌ Erro ao carregar dados:", error);
+      console.error("Erro ao carregar dados:", error);
       setError(`Erro ao carregar dados: ${error.message}`);
     } finally {
       setLoading(false);
     }
-  }, [userRole, userMunicipio, userUf]); // ✅ ADICIONAR dependências
-  // ✅ EFEITO: Carregar dados na inicialização
+  }, [userRole, userMunicipio, userUf]);
+
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
 
-  // ✅ FUNÇÃO: Recarregar dados
-  const recarregar = useCallback(async () => {
-    console.log("🔄 Recarregando emendas...");
-    await carregarDados();
-  }, [carregarDados]);
-
-  // ✅ HANDLER: Filtros das emendas
-  const handleFiltrosChange = useCallback((emendasFiltradas) => {
-    console.log("🔍 Aplicando filtros:", emendasFiltradas.length);
-    setEmendasFiltradas(emendasFiltradas);
-  }, []);
-
-  // ✅ HANDLERS: Ações das emendas
-  const handleCriar = () => {
-    console.log("➕ Criando nova emenda");
-    navigate("/emendas/novo"); // 🔧 CORREÇÃO: Rota corrigida
-  };
-
-  const handleEditar = (emenda) => {
-    console.log("✏️ Editando emenda:", emenda.id);
-    // ✅ CORREÇÃO: Rota correta sem /editar
-    navigate(`/emendas/${emenda.id}`);
-  };
-
-  // ❌ REMOVIDO: Botões 👁️ (Visualizar) e 💰 (Ver Despesas)
-  // Motivo: Redundante com botão de Editar
-
-  // ✅ NOVO: Handler para abrir modal de exclusão
-  const handleDeletar = (emendaParam) => {
-    console.log("🗑️ handleDeletar recebeu:", emendaParam);
-
-    // Verificar se recebeu um ID string ou um objeto emenda
-    let emendaObj;
-
-    if (typeof emendaParam === "string") {
-      // Se recebeu apenas o ID, buscar a emenda completa
-      emendaObj = emendas.find((e) => e.id === emendaParam);
-      console.log(
-        "🔍 Buscando emenda por ID:",
-        emendaParam,
-        "Encontrada:",
-        emendaObj,
-      );
-    } else if (emendaParam && typeof emendaParam === "object") {
-      // Se recebeu o objeto completo
-      emendaObj = emendaParam;
-    }
-
-    if (!emendaObj || !emendaObj.id) {
-      console.error("❌ Emenda não encontrada ou sem ID:", emendaParam);
-      setToast({
-        show: true,
-        message: "Erro: Emenda não encontrada!",
-        type: "error",
-      });
+  // Filtrar por busca
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setEmendasFiltradas(emendas);
       return;
     }
 
-    console.log(
-      "✅ Abrindo modal de exclusão para emenda:",
-      emendaObj.id,
-      emendaObj,
+    const termo = searchTerm.toLowerCase();
+    const filtradas = emendas.filter(
+      (e) =>
+        (e.numero || "").toLowerCase().includes(termo) ||
+        (e.parlamentar || "").toLowerCase().includes(termo) ||
+        (e.municipio || "").toLowerCase().includes(termo) ||
+        (e.objeto || "").toLowerCase().includes(termo)
     );
-    setModalExclusao({
-      isOpen: true,
-      emenda: emendaObj,
-      loading: false,
-    });
+    setEmendasFiltradas(filtradas);
+    setCurrentPage(1);
+  }, [searchTerm, emendas]);
+
+  // Handlers
+  const handleCriar = () => navigate("/emendas/novo");
+  const handleEditar = (emenda) => navigate(`/emendas/${emenda.id}`);
+
+  const handleDeletar = (emendaParam) => {
+    let emendaObj =
+      typeof emendaParam === "string"
+        ? emendas.find((e) => e.id === emendaParam)
+        : emendaParam;
+
+    if (!emendaObj?.id) {
+      setToast({ show: true, message: "Emenda não encontrada!", type: "error" });
+      return;
+    }
+
+    setModalExclusao({ isOpen: true, emenda: emendaObj, loading: false });
   };
 
-  // ✅ NOVO: Handler para confirmar exclusão
   const handleConfirmarExclusao = async () => {
-    // Validações de segurança
-    if (!modalExclusao.emenda) {
-      console.error("❌ Nenhuma emenda selecionada para exclusão!");
+    if (!modalExclusao.emenda?.id) return;
+
+    if (userRole === "operador") {
       setToast({
         show: true,
-        message: "Erro: Nenhuma emenda selecionada!",
-        type: "error",
-      });
-      return;
-    }
-
-    const emendaId = modalExclusao.emenda?.id;
-
-    if (!emendaId) {
-      console.error("❌ ID da emenda não encontrado!", modalExclusao.emenda);
-      setToast({
-        show: true,
-        message: "Erro: ID da emenda não encontrado!",
-        type: "error",
-      });
-      return;
-    }
-
-    // Se for operador, não deve chegar aqui (o modal já bloqueia)
-    if (userRole === "operador" || userRole === "Operador") {
-      console.error("❌ Operador tentou excluir emenda!");
-      setToast({
-        show: true,
-        message: "Erro: Operadores não podem excluir emendas!",
+        message: "Operadores não podem excluir emendas!",
         type: "error",
       });
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
@@ -383,75 +220,39 @@ const Emendas = () => {
     }
 
     try {
-      console.log("🗑️ Excluindo emenda:", emendaId);
-
-      // Ativar loading no modal
       setModalExclusao((prev) => ({ ...prev, loading: true }));
+      await deleteDoc(doc(db, "emendas", modalExclusao.emenda.id));
 
-      // Excluir emenda do Firebase
-      await deleteDoc(doc(db, "emendas", emendaId));
-
-      console.log("✅ Emenda excluída com sucesso!");
-
-      // Atualizar lista de emendas (remover da lista local)
-      setEmendas((prevEmendas) =>
-        prevEmendas.filter((emenda) => emenda.id !== emendaId),
+      setEmendas((prev) => prev.filter((e) => e.id !== modalExclusao.emenda.id));
+      setEmendasFiltradas((prev) =>
+        prev.filter((e) => e.id !== modalExclusao.emenda.id)
       );
-      setEmendasFiltradas((prevEmendasFiltradas) =>
-        prevEmendasFiltradas.filter((emenda) => emenda.id !== emendaId),
-      );
-
-      // Fechar modal
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
-
-      // Exibir toast de sucesso
-      setToast({
-        show: true,
-        message: "✅ Emenda excluída com sucesso!",
-        type: "success",
-      });
+      setToast({ show: true, message: "Emenda excluída com sucesso!", type: "success" });
     } catch (error) {
-      console.error("❌ Erro ao excluir emenda:", error);
       setModalExclusao((prev) => ({ ...prev, loading: false }));
-      setToast({
-        show: true,
-        message: `Erro ao excluir emenda: ${error.message}`,
-        type: "error",
-      });
+      setToast({ show: true, message: `Erro: ${error.message}`, type: "error" });
     }
   };
 
-  // ✅ NOVO: Handler para cancelar exclusão
-  const handleCancelarExclusao = () => {
-    console.log("❌ Exclusão cancelada pelo usuário");
-    setModalExclusao({ isOpen: false, emenda: null, loading: false });
-  };
-
-  // ✅ CÁLCULOS: Estatísticas das emendas
+  // Estatísticas
   const totalEmendas = emendasFiltradas.length;
   const emendasExecutadas = emendasFiltradas.filter(
-    (emenda) => parseFloat(emenda.percentualExecutado) >= 100,
+    (e) => e.percentualExecutado >= 100
   ).length;
   const emendasAtivas = emendasFiltradas.filter(
-    (emenda) => parseFloat(emenda.percentualExecutado) > 0,
+    (e) => e.percentualExecutado > 0 && e.percentualExecutado < 100
   ).length;
   const valorTotal = emendasFiltradas.reduce(
-    (acc, emenda) => acc + (emenda.valorTotal || 0),
-    0,
+    (acc, e) => acc + (e.valorTotal || 0),
+    0
   );
 
-  console.log("📊 Estatísticas calculadas:", {
-    totalEmendas,
-    emendasExecutadas,
-    emendasAtivas,
-    valorTotal,
-  });
-
-  // ✅ RENDERIZAÇÃO: Loading
+  // Loading
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
+        <div style={styles.spinner} />
         <p style={styles.loadingText}>Carregando emendas...</p>
       </div>
     );
@@ -459,26 +260,7 @@ const Emendas = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header compacto */}
-      <div style={styles.compactHeader}>
-        <span style={styles.statusInfo}>
-          <span style={styles.statusText}>📊 Sistema:</span>
-          <span style={styles.statusValue}>Ativo</span>
-        </span>
-        <span style={styles.statusInfo}>|</span>
-        <span style={styles.statusInfo}>
-          <span style={styles.statusText}>👤 Usuário:</span>
-          <span style={styles.statusValue}>{user?.nome}</span>
-        </span>
-        <span style={styles.statusInfo}>|</span>
-        <span style={styles.statusInfo}>
-          <span style={styles.versionText}>
-            {formatVersion("Emendas.jsx v2.3")}
-          </span>
-        </span>
-      </div>
-
-      {/* Toast de feedback */}
+      {/* Toast */}
       {toast.show && (
         <Toast
           message={toast.message}
@@ -494,294 +276,458 @@ const Emendas = () => {
         loading={modalExclusao.loading}
         userRole={userRole}
         onConfirm={handleConfirmarExclusao}
-        onCancel={handleCancelarExclusao}
+        onCancel={() => setModalExclusao({ isOpen: false, emenda: null, loading: false })}
       />
 
-      {/* Erro de carregamento */}
+      {/* Info Bar */}
+      <div style={styles.infoBar}>
+        <div style={styles.infoContent}>
+          <span style={styles.flagIcon}>🇧🇷</span>
+          <span style={styles.infoLabel}>Sistema Ativo</span>
+          <span style={styles.infoDivider}>|</span>
+          <span style={styles.infoText}>Último acesso: Hoje</span>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div style={styles.statsGrid}>
+        {/* Total de Emendas */}
+        <div style={styles.statCard}>
+          <div style={styles.statContent}>
+            <p style={styles.statLabel}>Total de Emendas</p>
+            <h3 style={styles.statNumber}>{totalEmendas}</h3>
+          </div>
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(37, 99, 235, 0.1)", color: "#2563EB" }}>
+            <span className="material-symbols-outlined">assignment</span>
+          </div>
+        </div>
+
+        {/* Executadas */}
+        <div style={styles.statCard}>
+          <div style={styles.statContent}>
+            <p style={styles.statLabel}>Executadas</p>
+            <h3 style={{ ...styles.statNumber, color: "#6366F1" }}>{emendasExecutadas}</h3>
+          </div>
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(99, 102, 241, 0.1)", color: "#6366F1" }}>
+            <span className="material-symbols-outlined">check_circle</span>
+          </div>
+        </div>
+
+        {/* Emendas Ativas */}
+        <div style={styles.statCard}>
+          <div style={styles.statContent}>
+            <p style={styles.statLabel}>Emendas Ativas</p>
+            <h3 style={{ ...styles.statNumber, color: "#10B981" }}>{emendasAtivas}</h3>
+          </div>
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(16, 185, 129, 0.1)", color: "#10B981" }}>
+            <span className="material-symbols-outlined">play_circle</span>
+          </div>
+        </div>
+
+        {/* Valor Total */}
+        <div style={styles.statCardDark}>
+          <div style={styles.statIconBg}>
+            <span className="material-symbols-outlined icon-xl" style={{ opacity: 0.1 }}>payments</span>
+          </div>
+          <p style={styles.statLabelLight}>Valor Total</p>
+          <h3 style={styles.statNumberLight}>
+            {valorTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+          </h3>
+        </div>
+      </div>
+
+      {/* Toolbar */}
+      <div style={styles.toolbar}>
+        <div style={styles.toolbarLeft}>
+          <button style={styles.filterButton} onClick={() => setShowFilters(!showFilters)}>
+            <span className="material-symbols-outlined icon-sm">tune</span>
+            <span style={styles.filterText}>Filtros Avançados</span>
+            {searchTerm && <span style={styles.filterBadge}>1</span>}
+          </button>
+        </div>
+
+        <div style={styles.toolbarRight}>
+          {/* Search */}
+          <div style={styles.searchWrapper}>
+            <span className="material-symbols-outlined icon-sm" style={styles.searchIcon}>search</span>
+            <input
+              type="text"
+              placeholder="Pesquisa rápida..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={styles.searchInput}
+            />
+          </div>
+
+          {/* Nova Emenda */}
+          <button style={styles.primaryButton} onClick={handleCriar}>
+            <span className="material-symbols-outlined icon-sm">add</span>
+            <span style={styles.buttonText}>Nova Emenda</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Error */}
       {error && (
-        <div
-          style={{
-            ...styles.emptyContainer,
-            backgroundColor: "#ffebee",
-            border: "2px solid #f44336",
-          }}
-        >
-          <div style={styles.emptyIcon}>⚠️</div>
-          <h3>Erro ao carregar emendas</h3>
-          <p style={styles.emptyText}>{error}</p>
-          <button style={styles.retryButton} onClick={recarregar}>
-            🔄 Tentar Novamente
+        <div style={styles.errorContainer}>
+          <span style={styles.errorIcon}>⚠️</span>
+          <div>
+            <h3 style={styles.errorTitle}>Erro ao carregar emendas</h3>
+            <p style={styles.errorText}>{error}</p>
+          </div>
+          <button style={styles.retryButton} onClick={carregarDados}>
+            Tentar Novamente
           </button>
         </div>
       )}
 
-      {/* Cards de estatísticas */}
-      <div style={styles.statsContainer}>
-        <div style={styles.statCard}>
-          <h3 style={styles.statNumber}>{totalEmendas}</h3>
-          <p style={styles.statLabel}>TOTAL DE EMENDAS</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statNumber}>{emendasExecutadas}</h3>
-          <p style={styles.statLabel}>EMENDAS EXECUTADAS</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statNumber}>{emendasAtivas}</h3>
-          <p style={styles.statLabel}>EMENDAS ATIVAS</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statNumber}>
-            {valorTotal.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-          </h3>
-          <p style={styles.statLabel}>VALOR TOTAL</p>
-        </div>
-      </div>
-
-      {/* Botões de ação */}
-      <div style={styles.actionContainer}>
-        <button style={styles.primaryButton} onClick={handleCriar}>
-          ➕ Nova Emenda
-        </button>
-        <button
-          style={styles.refreshButton}
-          onClick={recarregar}
-          disabled={loading}
-        >
-          🔄 {loading ? "Atualizando..." : "Atualizar"}
-        </button>
-      </div>
-
-      {/* Componente de filtros */}
-      <EmendasFilters
-        emendas={emendas}
-        onFilterChange={handleFiltrosChange}
-        totalEmendas={totalEmendas}
-      />
-
-      {/* Estado vazio com filtros */}
+      {/* Table */}
       {totalEmendas === 0 ? (
-        <div style={styles.emptyContainer}>
+        <div style={styles.emptyState}>
           <div style={styles.emptyIcon}>📋</div>
-          <h3>Nenhuma emenda encontrada</h3>
+          <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
           <p style={styles.emptyText}>
-            Ajuste os filtros de pesquisa ou cadastre uma nova emenda.
+            {searchTerm
+              ? "Ajuste sua pesquisa para encontrar resultados."
+              : "Clique em 'Nova Emenda' para começar."}
           </p>
         </div>
       ) : (
-        /* Tabela de emendas */
         <EmendasTable
           emendas={emendasFiltradas}
-          totalEmendas={emendas.length}
-          loading={false}
           onEdit={handleEditar}
           onDelete={handleDeletar}
-          userRole={userRole}
+          currentPage={currentPage}
+          itemsPerPage={10}
+          onPageChange={setCurrentPage}
         />
       )}
+
+      {/* Footer */}
+      <div style={styles.footer}>
+        © 2025 SICEFSUS - Sistema Integrado de Controle de Emendas.
+      </div>
     </div>
   );
 };
 
-// ✅ ESTILOS: Idênticos ao Despesas.jsx
 const styles = {
   container: {
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
+    padding: "16px 32px",
+    backgroundColor: "var(--theme-bg, #F8FAFC)",
     minHeight: "100vh",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-family, 'Inter', sans-serif)",
   },
-
-  compactHeader: {
-    display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    background: "linear-gradient(135deg, #154360, #4A90E2)",
-    color: "white",
-    padding: "8px 20px",
-    borderRadius: "8px",
-    marginBottom: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    fontSize: "14px",
-    gap: "8px",
-  },
-
-  statusInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    fontSize: "14px",
-    fontFamily: "Arial, sans-serif",
-  },
-
-  statusText: {
-    fontWeight: "normal",
-  },
-
-  statusValue: {
-    fontWeight: "500",
-  },
-
-  versionText: {
-    fontWeight: "normal",
-  },
-
   loadingContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     minHeight: "400px",
-    gap: "20px",
+    gap: "16px",
   },
-
   spinner: {
-    width: "50px",
-    height: "50px",
-    border: "5px solid #f3f3f3",
-    borderTop: "5px solid #154360",
+    width: "40px",
+    height: "40px",
+    border: "3px solid var(--gray-200, #E2E8F0)",
+    borderTop: "3px solid var(--primary, #2563EB)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-
   loadingText: {
-    color: "#154360",
-    fontSize: "18px",
-    fontWeight: "500",
-  },
-
-  statsContainer: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px",
-    marginBottom: "30px",
-  },
-
-  statCard: {
-    backgroundColor: "white",
-    padding: "25px",
-    borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    textAlign: "center",
-    border: "2px solid #dee2e6",
-    transition: "transform 0.2s, box-shadow 0.2s",
-    cursor: "default",
-  },
-
-  statNumber: {
-    fontSize: "32px",
-    fontWeight: "bold",
-    color: "#154360",
-    margin: "0 0 10px 0",
-  },
-
-  statLabel: {
+    color: "var(--gray-500, #64748B)",
     fontSize: "14px",
-    color: "#666",
+  },
+  // Info Bar
+  infoBar: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "24px",
+    padding: "8px 16px",
+    backgroundColor: "var(--theme-surface, #ffffff)",
+    borderRadius: "8px",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+    width: "fit-content",
+  },
+  infoContent: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "14px",
+    color: "var(--gray-500, #64748B)",
+  },
+  flagIcon: {
+    fontSize: "16px",
+  },
+  infoLabel: {
+    fontWeight: "500",
+    color: "var(--gray-700, #334155)",
+  },
+  infoDivider: {
+    color: "var(--gray-300, #CBD5E1)",
+  },
+  infoText: {
+    color: "var(--gray-500, #64748B)",
+  },
+  // Stats Grid
+  statsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: "16px",
+    marginBottom: "32px",
+  },
+  statCard: {
+    backgroundColor: "var(--theme-surface, #ffffff)",
+    borderRadius: "12px",
+    padding: "20px",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    transition: "border-color 0.2s ease",
+  },
+  statCardDark: {
+    background: "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)",
+    borderRadius: "12px",
+    padding: "20px",
+    border: "1px solid #334155",
+    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+    position: "relative",
+    overflow: "hidden",
+  },
+  statIconBg: {
+    position: "absolute",
+    top: "0",
+    right: "0",
+    padding: "12px",
+    color: "#ffffff",
+  },
+  statContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+  statLabel: {
+    fontSize: "12px",
     fontWeight: "600",
     textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    margin: "0",
+    letterSpacing: "0.05em",
+    color: "var(--gray-400, #94A3B8)",
+    margin: 0,
   },
-
-  actionContainer: {
+  statLabelLight: {
+    fontSize: "12px",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    color: "#94A3B8",
+    margin: 0,
+    position: "relative",
+    zIndex: 1,
+  },
+  statNumber: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "var(--gray-800, #1E293B)",
+    margin: 0,
+  },
+  statNumberLight: {
+    fontSize: "28px",
+    fontWeight: "700",
+    color: "#ffffff",
+    margin: 0,
+    position: "relative",
+    zIndex: 1,
+  },
+  statIcon: {
+    padding: "8px",
+    borderRadius: "8px",
     display: "flex",
-    gap: "15px",
-    marginBottom: "20px",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  // Toolbar
+  toolbar: {
+    backgroundColor: "var(--theme-surface, #ffffff)",
+    borderRadius: "12px",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
+    padding: "16px",
+    marginBottom: "24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "16px",
     flexWrap: "wrap",
   },
-
+  toolbarLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  toolbarRight: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  filterButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 12px",
+    backgroundColor: "transparent",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    borderRadius: "8px",
+    cursor: "pointer",
+    color: "var(--primary, #2563EB)",
+    fontWeight: "600",
+    fontSize: "14px",
+    transition: "all 0.15s ease",
+    boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+  },
+  filterText: {
+    color: "var(--gray-700, #334155)",
+  },
+  filterBadge: {
+    backgroundColor: "rgba(37, 99, 235, 0.1)",
+    color: "var(--primary, #2563EB)",
+    fontSize: "10px",
+    fontWeight: "700",
+    padding: "2px 6px",
+    borderRadius: "9999px",
+  },
+  searchWrapper: {
+    position: "relative",
+    flex: 1,
+    maxWidth: "256px",
+  },
+  searchIcon: {
+    position: "absolute",
+    left: "12px",
+    top: "50%",
+    transform: "translateY(-50%)",
+    color: "var(--gray-400, #94A3B8)",
+  },
+  searchInput: {
+    width: "100%",
+    height: "36px",
+    padding: "0 12px 0 40px",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    borderRadius: "8px",
+    backgroundColor: "var(--gray-50, #F8FAFC)",
+    fontSize: "14px",
+    color: "var(--gray-900, #0F172A)",
+    outline: "none",
+    transition: "all 0.15s ease",
+  },
   primaryButton: {
-    backgroundColor: "#154360",
-    color: "white",
-    padding: "12px 24px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 16px",
+    backgroundColor: "var(--primary, #2563EB)",
     border: "none",
     borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "600",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 6px rgba(21, 67, 96, 0.3)",
+    transition: "all 0.15s ease",
+    boxShadow: "0 1px 2px rgba(37, 99, 235, 0.2)",
   },
-
-  refreshButton: {
-    backgroundColor: "#6c757d",
-    color: "white",
-    padding: "12px 24px",
+  buttonText: {
+    display: "inline",
+  },
+  // Error
+  errorContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: "16px",
+    padding: "16px",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    border: "1px solid rgba(239, 68, 68, 0.2)",
+    borderRadius: "12px",
+    marginBottom: "24px",
+  },
+  errorIcon: {
+    fontSize: "24px",
+  },
+  errorTitle: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#DC2626",
+    margin: 0,
+  },
+  errorText: {
+    fontSize: "13px",
+    color: "#DC2626",
+    margin: "4px 0 0 0",
+  },
+  retryButton: {
+    marginLeft: "auto",
+    padding: "8px 16px",
+    backgroundColor: "#DC2626",
+    color: "#ffffff",
     border: "none",
     borderRadius: "8px",
-    fontSize: "16px",
-    fontWeight: "600",
+    fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 6px rgba(108, 117, 125, 0.3)",
   },
-
-  emptyContainer: {
+  // Empty State
+  emptyState: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     padding: "60px 20px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface, #ffffff)",
     borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    marginTop: "20px",
-    border: "2px dashed #dee2e6",
+    border: "1px solid var(--theme-border, #E2E8F0)",
   },
-
   emptyIcon: {
-    fontSize: "64px",
-    marginBottom: "20px",
+    fontSize: "48px",
+    marginBottom: "16px",
   },
-
-  emptyText: {
-    color: "#666",
-    fontSize: "16px",
-    marginTop: "10px",
-  },
-
-  retryButton: {
-    marginTop: "20px",
-    backgroundColor: "#154360",
-    color: "white",
-    padding: "12px 24px",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "16px",
+  emptyTitle: {
+    fontSize: "18px",
     fontWeight: "600",
-    cursor: "pointer",
-    transition: "all 0.3s ease",
+    color: "var(--gray-700, #334155)",
+    marginBottom: "8px",
+  },
+  emptyText: {
+    fontSize: "14px",
+    color: "var(--gray-500, #64748B)",
+    textAlign: "center",
+  },
+  // Footer
+  footer: {
+    marginTop: "32px",
+    textAlign: "center",
+    fontSize: "10px",
+    color: "var(--gray-400, #94A3B8)",
+    paddingBottom: "16px",
   },
 };
 
-// ✅ Adicionar keyframes para animação do spinner
-const style = document.createElement("style");
-style.textContent = `
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+// Adicionar keyframes para spinner
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  if (!document.getElementById("emendas-keyframes")) {
+    style.id = "emendas-keyframes";
+    document.head.appendChild(style);
   }
-
-  ${Object.keys(styles)
-    .map((key) => {
-      if (key === "primaryButton" || key === "refreshButton") {
-        return `
-          .${key}:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-          }
-          .${key}:active {
-            transform: translateY(0);
-          }
-        `;
-      }
-      return "";
-    })
-    .join("")}
-`;
-document.head.appendChild(style);
+}
 
 export default Emendas;

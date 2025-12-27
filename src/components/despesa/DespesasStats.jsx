@@ -57,33 +57,35 @@ const styles = {
   statsContainer: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "15px",
+    gap: "16px",
     marginBottom: "20px",
   },
 
   statCard: {
     backgroundColor: "white",
     padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    borderRadius: "12px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    border: "1px solid #E2E8F0",
     textAlign: "center",
     transition: "transform 0.2s, box-shadow 0.2s",
     cursor: "default",
+    fontFamily: "'Inter', sans-serif",
   },
 
   statNumber: {
     fontSize: "24px",
-    fontWeight: "bold",
-    color: "#154360",
-    margin: "0 0 10px 0",
+    fontWeight: "700",
+    color: "#2563EB",
+    margin: "0 0 8px 0",
   },
 
   statLabel: {
     fontSize: "11px",
-    fontWeight: "bold",
-    color: "#666",
+    fontWeight: "600",
+    color: "#64748B",
     textTransform: "uppercase",
-    letterSpacing: "1px",
+    letterSpacing: "0.05em",
     margin: 0,
   },
 };

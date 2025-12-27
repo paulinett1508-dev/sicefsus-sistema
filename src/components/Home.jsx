@@ -1,12 +1,12 @@
 import React from "react";
 import Logo from "../images/logo-sicefsus.png";
 
-const PRIMARY = "#154360"; // Azul petróleo principal
-const SECONDARY = "#1A5276"; // Tom complementar
-const ACCENT = "#4A90E2"; // Azul claro para detalhes
+const PRIMARY = "#2563EB"; // Azul principal
+const SECONDARY = "#1E40AF"; // Azul escuro
+const ACCENT = "#3B82F6"; // Azul claro para detalhes
 const WHITE = "#fff";
-const GRAY = "#f4f6f8";
-const TEXT = "#222";
+const GRAY = "#F8FAFC";
+const TEXT = "#334155";
 
 export default function Home({ onLoginClick }) {
   return (

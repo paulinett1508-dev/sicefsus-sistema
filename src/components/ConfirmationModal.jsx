@@ -140,7 +140,7 @@ const styles = {
   title: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     margin: 0,
   },
 

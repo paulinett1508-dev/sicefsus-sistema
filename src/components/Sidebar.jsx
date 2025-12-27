@@ -1,25 +1,28 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom"; // ✅ ADICIONADO: Para detectar rota atual
+import { useLocation } from "react-router-dom";
 import GlobalSearch from "./GlobalSearch";
 
+// Menu principal
 const menuItems = [
-  { label: "Dashboard", icon: "📊", path: "/dashboard" },
-  { label: "Emendas", icon: "📄", path: "/emendas" },
-  { label: "Relatórios", icon: "📈", path: "/relatorios" },
+  { label: "Dashboard", icon: "dashboard", path: "/dashboard" },
+  { label: "Emendas", icon: "description", path: "/emendas" },
+  { label: "Relatórios", icon: "analytics", path: "/relatorios" },
 ];
 
-const adminItems = [{ label: "Usuários", icon: "👥", path: "/administracao" }];
+// Menu admin
+const adminItems = [{ label: "Usuários", icon: "group", path: "/administracao" }];
 
-const bottomItems = [{ label: "Sobre", icon: "ℹ️", path: "/sobre" }];
+// Menu de configurações
+const configItems = [{ label: "Sistema", icon: "settings", path: "/sobre" }];
 
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
-  const location = useLocation(); // ✅ ADICIONADO: Hook para detectar rota
+  const location = useLocation();
 
   const isAdmin = usuario?.tipo === "admin";
-  const isSuperAdmin = isAdmin && usuario?.superAdmin === true; // 👑 NOVO
+  const isSuperAdmin = isAdmin && usuario?.superAdmin === true;
 
-  // ✅ ADICIONADO: Detectar se está em processo de criação/edição
+  // Detectar se está em formulário
   const isCreatingEmenda =
     location.pathname.includes("/emendas") &&
     (location.search.includes("nova") ||
@@ -32,38 +35,38 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
 
   const isInFormMode = isCreatingEmenda || isEditingEmenda;
 
-  // ✅ FUNÇÃO PARA OBTER NOME DE EXIBIÇÃO CORRETO (mantida)
+  // Obter nome de exibição
   const getDisplayName = (usuario) => {
-    // Primeiro: tentar campo 'nome' (padrão do sistema)
-    if (usuario?.nome && usuario.nome.trim()) {
-      return usuario.nome;
-    }
-
-    // Segundo: tentar campo 'name' (alternativo)
-    if (usuario?.name && usuario.name.trim()) {
-      return usuario.name;
-    }
-
-    // Terceiro: tentar displayName do Firebase
-    if (usuario?.displayName && usuario.displayName.trim()) {
-      return usuario.displayName;
-    }
-
-    // Quarto: extrair nome do email
+    if (usuario?.nome && usuario.nome.trim()) return usuario.nome;
+    if (usuario?.name && usuario.name.trim()) return usuario.name;
+    if (usuario?.displayName && usuario.displayName.trim()) return usuario.displayName;
     if (usuario?.email) {
       const nameFromEmail = usuario.email.split("@")[0];
-      // Capitalizar primeira letra e limpar caracteres especiais
       return nameFromEmail
         .replace(/[._-]/g, " ")
         .split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
-        )
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(" ");
     }
-
-    // Fallback final
     return "Usuário";
+  };
+
+  // Obter iniciais do nome
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Obter role formatada
+  const getRoleLabel = () => {
+    if (isSuperAdmin) return "Super Admin";
+    if (isAdmin) return "Administrador";
+    if (usuario?.tipo === "gestor") return "Gestor";
+    return "Operador";
   };
 
   const handleSearchNavigate = (path) => {
@@ -74,37 +77,21 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
     console.log("Resultado selecionado:", result);
   };
 
-  // ✅ ALTERAÇÃO: Navegação protegida para Emendas
+  // Navegação protegida para Emendas
   const handleEmendasClick = () => {
-    console.log(`🔍 Tentativa de navegação para Emendas:`, {
-      currentPath: location.pathname,
-      isInFormMode,
-      isCreatingEmenda,
-      isEditingEmenda,
-    });
-
-    // Se está no processo de criação/edição
     if (isInFormMode) {
       const confirmMessage = isCreatingEmenda
         ? "Você está criando uma emenda. Deseja cancelar e voltar à listagem? Todas as alterações serão perdidas."
         : "Você está editando uma emenda. Deseja cancelar e voltar à listagem? Todas as alterações serão perdidas.";
 
       if (window.confirm(confirmMessage)) {
-        console.log("✅ Usuário confirmou navegação - saindo do formulário");
         onNavigate("/emendas");
-      } else {
-        console.log(
-          "❌ Usuário cancelou navegação - permanecendo no formulário",
-        );
       }
     } else {
-      // Navegação normal
-      console.log("✅ Navegação normal para Emendas");
       onNavigate("/emendas");
     }
   };
 
-  // ✅ ALTERAÇÃO: Navegação inteligente genérica com proteção
   const handleItemClick = (item) => {
     if (item.path === "/emendas") {
       handleEmendasClick();
@@ -113,80 +100,27 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
     }
   };
 
+  const displayName = getDisplayName(usuario);
+  const initials = getInitials(displayName);
+
   return (
-    <div
-      style={{
-        width: collapsed ? 64 : 220,
-        background: "var(--primary)",
-        color: "var(--white)",
-        minHeight: "100vh",
-        transition:
-          "width 0.2s ease, background-color 0.3s ease, color 0.3s ease",
-        boxShadow: "2px 0 8px var(--theme-shadow)",
-        position: "fixed",
-        zIndex: 100,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "space-between",
-          padding: "16px 20px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          flexShrink: 0,
-        }}
-      >
-        {!collapsed && (
-          <span
-            onClick={() => onNavigate("/dashboard")}
-            style={{
-              fontWeight: "bold",
-              fontSize: 20,
-              color: "var(--white)",
-              cursor: "pointer",
-              transition: "opacity 0.2s ease",
-            }}
-            onMouseOver={(e) => (e.target.style.opacity = "0.8")}
-            onMouseOut={(e) => (e.target.style.opacity = "1")}
-            title="Ir para Dashboard"
-          >
-            SICEFSUS
-          </span>
-        )}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--white)",
-            fontSize: 20,
-            cursor: "pointer",
-            padding: 4,
-            borderRadius: 4,
-            transition: "background-color 0.2s ease",
-          }}
-          title={collapsed ? "Expandir" : "Recolher"}
-          onMouseOver={(e) =>
-            (e.target.style.backgroundColor = "rgba(255,255,255,0.1)")
-          }
-          onMouseOut={(e) => (e.target.style.backgroundColor = "transparent")}
+    <aside style={styles.sidebar(collapsed)}>
+      {/* Header com Logo */}
+      <div style={styles.header}>
+        <div
+          style={styles.logoContainer}
+          onClick={() => onNavigate("/dashboard")}
         >
-          {collapsed ? "»" : "«"}
-        </button>
+          <span className="material-symbols-outlined" style={styles.logoIcon}>
+            token
+          </span>
+          {!collapsed && <span style={styles.logoText}>SICEFSUS</span>}
+        </div>
       </div>
 
-      {/* Busca Global */}
+      {/* Busca */}
       {!collapsed && (
-        <div
-          style={{
-            padding: "16px 12px",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
+        <div style={styles.searchContainer}>
           <GlobalSearch
             onNavigate={handleSearchNavigate}
             onResultSelect={handleSearchResultSelect}
@@ -195,389 +129,329 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
         </div>
       )}
 
-      {/* ✅ ADICIONADO: Aviso de proteção se está em modo formulário */}
+      {/* Aviso de formulário ativo */}
       {isInFormMode && !collapsed && (
-        <div
-          style={{
-            padding: "10px 12px",
-            backgroundColor: "rgba(255, 193, 7, 0.2)",
-            borderLeft: "4px solid #ffc107",
-            margin: "8px 12px",
-            borderRadius: "4px",
-            fontSize: "11px",
-            lineHeight: "1.4",
-            color: "#fff3cd",
-          }}
-        >
-          ⚠️ <strong>Formulário ativo:</strong> Confirme antes de navegar para
-          não perder alterações.
+        <div style={styles.formWarning}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>warning</span>
+          <span>Formulário ativo - confirme antes de navegar</span>
         </div>
       )}
 
-      {/* Menu Principal */}
-      <nav style={{ marginTop: collapsed ? 24 : 0, flex: 1 }}>
-        {menuItems.map((item) => (
-          <div
-            key={item.path}
-            onClick={() => handleItemClick(item)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: collapsed ? "12px 0" : "12px 24px",
-              cursor: "pointer",
-              background:
-                activePath === item.path ? "var(--accent)" : "transparent",
-              color:
-                activePath === item.path ? "var(--white)" : "var(--gray-200)",
-              fontWeight: activePath === item.path ? "bold" : "normal",
-              fontSize: 16,
-              transition: "all 0.2s ease",
-              justifyContent: collapsed ? "center" : "flex-start",
-            }}
-            onMouseOver={(e) => {
-              if (activePath !== item.path) {
-                e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
-                e.target.style.color = "var(--white)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (activePath !== item.path) {
-                e.target.style.backgroundColor = "transparent";
-                e.target.style.color = "var(--gray-200)";
-              }
-            }}
-            title={collapsed ? item.label : ""}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                marginRight: collapsed ? 0 : 12,
-                filter: activePath === item.path ? "brightness(1.2)" : "none",
-              }}
-            >
-              {item.icon}
-            </span>
-            {!collapsed && item.label}
-          </div>
-        ))}
-
-        {/* Menu Admin */}
-        {isAdmin &&
-          adminItems.map((item) => (
-            <div
+      {/* Navegação Principal */}
+      <nav style={styles.nav}>
+        <div style={styles.navSection}>
+          {menuItems.map((item) => (
+            <NavItem
               key={item.path}
-              onClick={() => onNavigate(item.path)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: collapsed ? "12px 0" : "12px 24px",
-                cursor: "pointer",
-                background:
-                  activePath === item.path ? "var(--accent)" : "transparent",
-                color:
-                  activePath === item.path ? "var(--white)" : "var(--gray-200)",
-                fontWeight: activePath === item.path ? "bold" : "normal",
-                fontSize: 16,
-                transition: "all 0.2s ease",
-                justifyContent: collapsed ? "center" : "flex-start",
-                marginTop: 8,
-                borderTop: collapsed
-                  ? "none"
-                  : "1px solid rgba(255,255,255,0.1)",
-                paddingTop: collapsed ? 12 : 20,
-              }}
-              onMouseOver={(e) => {
-                if (activePath !== item.path) {
-                  e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
-                  e.target.style.color = "var(--white)";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (activePath !== item.path) {
-                  e.target.style.backgroundColor = "transparent";
-                  e.target.style.color = "var(--gray-200)";
-                }
-              }}
-              title={collapsed ? item.label : ""}
-            >
-              <span
-                style={{
-                  fontSize: 20,
-                  marginRight: collapsed ? 0 : 12,
-                  filter: activePath === item.path ? "brightness(1.2)" : "none",
-                }}
-              >
-                {item.icon}
-              </span>
-              {!collapsed && item.label}
-            </div>
+              item={item}
+              isActive={activePath === item.path}
+              collapsed={collapsed}
+              onClick={() => handleItemClick(item)}
+            />
           ))}
+        </div>
 
-        {/* 👑 FERRAMENTAS DEV - APENAS SUPERADMIN */}
-        {isSuperAdmin && (
-          <div
-            onClick={() => onNavigate("/ferramentas-dev")}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: collapsed ? "12px 0" : "12px 24px",
-              cursor: "pointer",
-              background:
-                activePath === "/ferramentas-dev"
-                  ? "var(--accent)"
-                  : "transparent",
-              color:
-                activePath === "/ferramentas-dev"
-                  ? "var(--white)"
-                  : "var(--gray-200)",
-              fontWeight: activePath === "/ferramentas-dev" ? "bold" : "normal",
-              fontSize: 16,
-              transition: "all 0.2s ease",
-              justifyContent: collapsed ? "center" : "flex-start",
-              marginTop: 4,
-            }}
-            onMouseOver={(e) => {
-              if (activePath !== "/ferramentas-dev") {
-                e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
-                e.target.style.color = "var(--white)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (activePath !== "/ferramentas-dev") {
-                e.target.style.backgroundColor = "transparent";
-                e.target.style.color = "var(--gray-200)";
-              }
-            }}
-            title={collapsed ? "Ferramentas Dev" : ""}
-          >
-            <span
-              style={{
-                fontSize: 20,
-                marginRight: collapsed ? 0 : 12,
-                filter:
-                  activePath === "/ferramentas-dev"
-                    ? "brightness(1.2)"
-                    : "none",
-              }}
-            >
-              🔧
-            </span>
-            {!collapsed && (
-              <span
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  flex: 1,
-                }}
-              >
-                Ferramentas Dev
-                <span
-                  style={{
-                    fontSize: 10,
-                    backgroundColor: "#ffc107",
-                    color: "#1a1a2e",
-                    padding: "2px 6px",
-                    borderRadius: 10,
-                    fontWeight: "bold",
-                    marginLeft: "auto",
-                  }}
-                >
-                  👑
-                </span>
-              </span>
-            )}
+        {/* Admin Items */}
+        {isAdmin && (
+          <div style={styles.navSection}>
+            {adminItems.map((item) => (
+              <NavItem
+                key={item.path}
+                item={item}
+                isActive={activePath === item.path}
+                collapsed={collapsed}
+                onClick={() => onNavigate(item.path)}
+              />
+            ))}
           </div>
         )}
 
-        {/* Espaçador flexível */}
-        <div style={{ flex: 1 }}></div>
+        {/* Ferramentas Dev - SuperAdmin */}
+        {isSuperAdmin && (
+          <NavItem
+            item={{ label: "Ferramentas Dev", icon: "build", path: "/ferramentas-dev" }}
+            isActive={activePath === "/ferramentas-dev"}
+            collapsed={collapsed}
+            onClick={() => onNavigate("/ferramentas-dev")}
+            badge="DEV"
+          />
+        )}
 
-        {/* Menu Inferior - Sobre */}
-        {isAdmin &&
-          bottomItems.map((item) => (
-            <div
-              key={item.path}
-              onClick={() => handleItemClick(item)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: collapsed ? "12px 0" : "12px 24px",
-                cursor: "pointer",
-                background:
-                  activePath === item.path ? "var(--accent)" : "transparent",
-                color:
-                  activePath === item.path ? "var(--white)" : "var(--gray-200)",
-                fontWeight: activePath === item.path ? "bold" : "normal",
-                fontSize: 16,
-                transition: "all 0.2s ease",
-                justifyContent: collapsed ? "center" : "flex-start",
-                borderTop: collapsed
-                  ? "none"
-                  : "1px solid rgba(255,255,255,0.1)",
-                marginBottom: 8,
-              }}
-              onMouseOver={(e) => {
-                if (activePath !== item.path) {
-                  e.target.style.backgroundColor = "rgba(255,255,255,0.1)";
-                  e.target.style.color = "var(--white)";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (activePath !== item.path) {
-                  e.target.style.backgroundColor = "transparent";
-                  e.target.style.color = "var(--gray-200)";
-                }
-              }}
-              title={collapsed ? item.label : ""}
-            >
-              <span
-                style={{
-                  fontSize: 20,
-                  marginRight: collapsed ? 0 : 12,
-                  filter: activePath === item.path ? "brightness(1.2)" : "none",
-                }}
-              >
-                {item.icon}
-              </span>
-              {!collapsed && item.label}
-            </div>
-          ))}
+        {/* Seção Configurações */}
+        {isAdmin && (
+          <div style={styles.configSection}>
+            {!collapsed && (
+              <div style={styles.sectionTitle}>Configurações</div>
+            )}
+            {configItems.map((item) => (
+              <NavItem
+                key={item.path}
+                item={item}
+                isActive={activePath === item.path}
+                collapsed={collapsed}
+                onClick={() => onNavigate(item.path)}
+              />
+            ))}
+          </div>
+        )}
       </nav>
 
-      {/* Footer com informações do usuário (mantido original) */}
-      <div
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-          padding: collapsed ? "12px 0" : "16px 20px",
-          flexShrink: 0,
-          backgroundColor: "rgba(0,0,0,0.1)",
-        }}
-      >
-        {!collapsed && usuario && (
-          <div
-            style={{
-              marginBottom: 12,
-              fontSize: 12,
-              display: "flex",
-              flexDirection: "column",
-              gap: 4,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: "500",
-                color: "var(--white)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {/* ✅ CORREÇÃO PRINCIPAL: Usar função que busca nome correto */}
-              {getDisplayName(usuario)}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "10px",
-                  color: "white",
-                  backgroundColor: isAdmin
-                    ? "#dc3545"
-                    : usuario?.tipo === "gestor"
-                    ? "#ffc107"
-                    : "#28a745",
-                  padding: "3px 8px",
-                  borderRadius: "10px",
-                  textTransform: "uppercase",
-                  fontWeight: "bold",
-                  marginLeft: "8px",
-                }}
-                title={
-                  isAdmin
-                    ? "Administrador"
-                    : usuario?.tipo === "gestor"
-                    ? "Gestor"
-                    : "Operador"
-                }
-              >
-                {isAdmin ? "ADMIN" : usuario?.tipo === "gestor" ? "GESTOR" : "OPERADOR"}
-              </span>
-              {/* 👑 Badge SuperAdmin */}
-              {isSuperAdmin && (
-                <span
-                  style={{
-                    backgroundColor: "#ffc107",
-                    color: "#1a1a2e",
-                    borderRadius: "6px",
-                    padding: "3px 8px",
-                    fontWeight: "bold",
-                    fontSize: 9,
-                    letterSpacing: 0.5,
-                    textTransform: "uppercase",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.4)",
-                  }}
-                  title="Super Administrador"
-                >
-                  👑 SUPER
-                </span>
-              )}
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "var(--success-light)",
-                  opacity: 0.9,
-                  fontWeight: 500,
-                }}
-              >
-                • Online
-              </span>
-            </div>
+      {/* Footer com Usuário */}
+      <div style={styles.footer}>
+        <div style={styles.userSection}>
+          <div style={styles.avatar}>
+            {initials}
           </div>
+          {!collapsed && (
+            <div style={styles.userInfo}>
+              <p style={styles.userName}>{displayName}</p>
+              <p style={styles.userRole}>{getRoleLabel()}</p>
+            </div>
+          )}
+          {!collapsed && (
+            <button
+              onClick={onLogout}
+              style={styles.logoutBtn}
+              title="Sair"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
+            </button>
+          )}
+        </div>
+        {collapsed && (
+          <button
+            onClick={onLogout}
+            style={styles.logoutBtnCollapsed}
+            title="Sair"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
+          </button>
         )}
-
-        <button
-          onClick={onLogout}
-          style={{
-            background: "rgba(255,255,255,0.1)",
-            color: "var(--white)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: 6,
-            padding: collapsed ? "8px" : "10px 16px",
-            cursor: "pointer",
-            width: "100%",
-            fontSize: collapsed ? 16 : 14,
-            fontWeight: "500",
-            transition: "all 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: collapsed ? 0 : 8,
-          }}
-          onMouseOver={(e) => {
-            e.target.style.background = "rgba(255,255,255,0.2)";
-            e.target.style.borderColor = "rgba(255,255,255,0.4)";
-            e.target.style.transform = "translateY(-1px)";
-            e.target.style.boxShadow = "0 2px 8px rgba(0,0,0,0.2)";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = "rgba(255,255,255,0.1)";
-            e.target.style.borderColor = "rgba(255,255,255,0.2)";
-            e.target.style.transform = "translateY(0)";
-            e.target.style.boxShadow = "none";
-          }}
-          title={collapsed ? "Sair" : ""}
-        >
-          <span style={{ fontSize: 16 }}>🚪</span>
-          {!collapsed && "Sair"}
-        </button>
       </div>
+    </aside>
+  );
+}
+
+// Componente de Item de Navegação
+function NavItem({ item, isActive, collapsed, onClick, badge }) {
+  const [hovered, setHovered] = useState(false);
+
+  const itemStyle = {
+    display: "flex",
+    alignItems: "center",
+    padding: collapsed ? "10px 0" : "10px 12px",
+    margin: collapsed ? "4px 8px" : "2px 12px",
+    cursor: "pointer",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: isActive ? "500" : "400",
+    transition: "all 0.15s ease",
+    justifyContent: collapsed ? "center" : "flex-start",
+    backgroundColor: isActive
+      ? "rgba(37, 99, 235, 0.08)"
+      : hovered
+        ? "rgba(241, 245, 249, 1)"
+        : "transparent",
+    color: isActive ? "#2563EB" : hovered ? "#2563EB" : "#64748B",
+  };
+
+  const iconStyle = {
+    fontSize: isActive ? 22 : 20,
+    marginRight: collapsed ? 0 : 12,
+    fontVariationSettings: isActive ? "'FILL' 1, 'wght' 400" : "'FILL' 0, 'wght' 300",
+  };
+
+  return (
+    <div
+      style={itemStyle}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={collapsed ? item.label : ""}
+    >
+      <span className="material-symbols-outlined" style={iconStyle}>
+        {item.icon}
+      </span>
+      {!collapsed && (
+        <span style={{ flex: 1 }}>{item.label}</span>
+      )}
+      {!collapsed && badge && (
+        <span style={styles.badge}>{badge}</span>
+      )}
     </div>
   );
 }
+
+// Estilos
+const styles = {
+  sidebar: (collapsed) => ({
+    width: collapsed ? 80 : 256,
+    flexShrink: 0,
+    backgroundColor: "#ffffff",
+    borderRight: "1px solid #E2E8F0",
+    display: "flex",
+    flexDirection: "column",
+    transition: "width 0.3s ease",
+    position: "fixed",
+    top: 0,
+    left: 0,
+    height: "100vh",
+    zIndex: 100,
+    fontFamily: "'Inter', sans-serif",
+  }),
+
+  header: {
+    height: 64,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderBottom: "1px solid #F1F5F9",
+    padding: "0 16px",
+  },
+
+  logoContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    cursor: "pointer",
+    color: "#2563EB",
+  },
+
+  logoIcon: {
+    fontSize: 32,
+    fontVariationSettings: "'FILL' 0, 'wght' 400",
+  },
+
+  logoText: {
+    fontWeight: 700,
+    fontSize: 20,
+    letterSpacing: "-0.5px",
+  },
+
+  searchContainer: {
+    padding: "16px 16px 8px",
+  },
+
+  formWarning: {
+    margin: "8px 12px",
+    padding: "10px 12px",
+    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    border: "1px solid rgba(245, 158, 11, 0.3)",
+    borderRadius: "8px",
+    fontSize: "11px",
+    color: "#B45309",
+    display: "flex",
+    alignItems: "center",
+  },
+
+  nav: {
+    flex: 1,
+    overflowY: "auto",
+    padding: "8px 0",
+  },
+
+  navSection: {
+    marginBottom: 8,
+  },
+
+  configSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTop: "1px solid #F1F5F9",
+  },
+
+  sectionTitle: {
+    padding: "0 24px",
+    fontSize: "11px",
+    fontWeight: 600,
+    color: "#94A3B8",
+    textTransform: "uppercase",
+    letterSpacing: "0.05em",
+    marginBottom: 8,
+  },
+
+  badge: {
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    color: "#B45309",
+    fontSize: "9px",
+    fontWeight: 700,
+    padding: "2px 6px",
+    borderRadius: "4px",
+    textTransform: "uppercase",
+  },
+
+  footer: {
+    borderTop: "1px solid #E2E8F0",
+    padding: "16px",
+  },
+
+  userSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #3B82F6, #6366F1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#ffffff",
+    fontWeight: 700,
+    fontSize: 12,
+    flexShrink: 0,
+    boxShadow: "0 2px 4px rgba(99, 102, 241, 0.3)",
+  },
+
+  userInfo: {
+    flex: 1,
+    overflow: "hidden",
+  },
+
+  userName: {
+    margin: 0,
+    fontSize: "14px",
+    fontWeight: 500,
+    color: "#334155",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+
+  userRole: {
+    margin: 0,
+    fontSize: "12px",
+    color: "#64748B",
+  },
+
+  logoutBtn: {
+    background: "transparent",
+    border: "none",
+    padding: 8,
+    cursor: "pointer",
+    color: "#94A3B8",
+    borderRadius: "6px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.15s ease",
+  },
+
+  logoutBtnCollapsed: {
+    background: "transparent",
+    border: "none",
+    padding: 8,
+    cursor: "pointer",
+    color: "#94A3B8",
+    borderRadius: "6px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: 8,
+    transition: "all 0.15s ease",
+  },
+};

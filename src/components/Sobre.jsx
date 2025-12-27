@@ -218,7 +218,7 @@ const Sobre = () => {
           margin: 0 auto;
           padding: 16px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          color: #2c3e50;
+          color: #1E293B;
           line-height: 1.5;
         }
 
@@ -260,7 +260,7 @@ const Sobre = () => {
           font-size: 2.25rem;
           font-weight: 700;
           margin: 0 0 6px 0;
-          color: #154360;
+          color: #2563EB;
           letter-spacing: -0.025em;
         }
 
@@ -280,7 +280,7 @@ const Sobre = () => {
 
         .version-badge {
           background: #f0f7ff;
-          color: #154360;
+          color: #2563EB;
           padding: 4px 12px;
           border-radius: 20px;
           font-size: 0.8rem;
@@ -323,7 +323,7 @@ const Sobre = () => {
           font-size: 1.1rem;
           font-weight: 600;
           margin: 0 0 12px 0;
-          color: #154360;
+          color: #2563EB;
         }
 
         .about-card p {
@@ -375,7 +375,7 @@ const Sobre = () => {
           font-size: 1.1rem;
           font-weight: 600;
           margin: 0 0 16px 0;
-          color: #154360;
+          color: #2563EB;
         }
 
         .features-grid {
@@ -396,7 +396,7 @@ const Sobre = () => {
         }
 
         .feature-card:hover {
-          border-color: #154360;
+          border-color: #2563EB;
           transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(21, 67, 96, 0.15);
         }
@@ -411,7 +411,7 @@ const Sobre = () => {
           font-size: 0.9rem;
           font-weight: 600;
           margin: 0 0 4px 0;
-          color: #154360;
+          color: #2563EB;
         }
 
         .feature-content p {
@@ -434,7 +434,7 @@ const Sobre = () => {
           font-size: 1.1rem;
           font-weight: 600;
           margin: 0 0 16px 0;
-          color: #154360;
+          color: #2563EB;
         }
 
         .support-unified {
@@ -467,7 +467,7 @@ const Sobre = () => {
           font-size: 1rem;
           font-weight: 600;
           margin: 0 0 4px 0;
-          color: #154360;
+          color: #2563EB;
         }
 
         .company-details p {

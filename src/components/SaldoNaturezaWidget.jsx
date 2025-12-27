@@ -293,7 +293,7 @@ const styles = {
   container: {
     backgroundColor: "white",
     borderRadius: "12px",
-    border: "2px solid #154360",
+    border: "2px solid #2563EB",
     padding: "20px",
     marginBottom: "20px",
     boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
@@ -327,7 +327,7 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   headerSubtitle: {
     margin: "4px 0 0 0",
@@ -356,7 +356,7 @@ const styles = {
   totalValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
     marginTop: "4px",
   },
   lista: {
@@ -387,7 +387,7 @@ const styles = {
   naturezaNome: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#154360",
+    color: "#2563EB",
   },
   valoresGrid: {
     display: "grid",
@@ -409,7 +409,7 @@ const styles = {
   valorNumero: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
   progressContainer: {
     marginTop: "8px",
@@ -470,7 +470,7 @@ const styles = {
   resumoValor: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
   resumoDivider: {
     fontSize: "20px",

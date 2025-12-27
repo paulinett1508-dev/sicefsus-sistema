@@ -52,8 +52,8 @@ const styles = {
     outline: "none",
   },
   tabActive: {
-    color: "#154360",
-    borderBottomColor: "#154360",
+    color: "#2563EB",
+    borderBottomColor: "#2563EB",
     backgroundColor: "#f0f9ff",
   },
   tabInactive: {

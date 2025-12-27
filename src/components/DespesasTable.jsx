@@ -10,12 +10,12 @@ import { db } from "../firebase/firebaseConfig";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
 import { NATUREZAS_DESPESA } from "../config/constants"; // mapeia código → rótulo (fallback seguro abaixo)
 
-const PRIMARY = "#154360";
-const ACCENT = "#4A90E2";
+const PRIMARY = "#2563EB";
+const ACCENT = "#3B82F6";
 const WHITE = "#fff";
-const ERROR = "#E74C3C";
-const SUCCESS = "#27AE60";
-const WARNING = "#F39C12";
+const ERROR = "#EF4444";
+const SUCCESS = "#10B981";
+const WARNING = "#F59E0B";
 
 // 🔧 HELPER: Parse seguro de valor monetário
 const parseValorMonetario = (valor) => {
@@ -813,7 +813,7 @@ const styles = {
     width: 40,
     height: 40,
     border: "4px solid #f3f3f3",
-    borderTop: "4px solid #154360",
+    borderTop: "4px solid #2563EB",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 20px",
@@ -899,7 +899,7 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#1E293B",
     color: "white",
   },
 
@@ -916,7 +916,7 @@ const styles = {
     letterSpacing: "0.5px",
     position: "sticky",
     top: 0,
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#1E293B",
     zIndex: 10,
   },
 

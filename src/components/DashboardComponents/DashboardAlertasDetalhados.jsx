@@ -148,7 +148,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                       style={{
                         ...styles.itemBadge,
                         backgroundColor:
-                          diasRestantes <= 7 ? "#E74C3C" : "#F39C12",
+                          diasRestantes <= 7 ? "#EF4444" : "#F59E0B",
                       }}
                     >
                       {diasRestantes} {diasRestantes === 1 ? "dia" : "dias"}
@@ -162,8 +162,8 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                           ...styles.metricValue,
                           color:
                             emenda.percentualExecutado >= 50
-                              ? "#27AE60"
-                              : "#E74C3C",
+                              ? "#10B981"
+                              : "#EF4444",
                         }}
                       >
                         {emenda.percentualExecutado.toFixed(1)}%
@@ -184,8 +184,8 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                           width: `${Math.min(emenda.percentualExecutado, 100)}%`,
                           backgroundColor:
                             emenda.percentualExecutado >= 50
-                              ? "#27AE60"
-                              : "#E74C3C",
+                              ? "#10B981"
+                              : "#EF4444",
                         }}
                       />
                     </div>
@@ -228,7 +228,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     <div
                       style={{
                         ...styles.itemBadge,
-                        backgroundColor: "#E74C3C",
+                        backgroundColor: "#EF4444",
                       }}
                     >
                       Vencida há {diasVencidos} {diasVencidos === 1 ? "dia" : "dias"}
@@ -238,14 +238,14 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     <div style={styles.metricItem}>
                       <span style={styles.metricLabel}>Execução:</span>
                       <span
-                        style={{ ...styles.metricValue, color: "#E74C3C" }}
+                        style={{ ...styles.metricValue, color: "#EF4444" }}
                       >
                         {emenda.percentualExecutado.toFixed(1)}%
                       </span>
                     </div>
                     <div style={styles.metricItem}>
                       <span style={styles.metricLabel}>Não executado:</span>
-                      <span style={{ ...styles.metricValue, color: "#E74C3C" }}>
+                      <span style={{ ...styles.metricValue, color: "#EF4444" }}>
                         {formatCurrency(emenda.saldoDisponivel)}
                       </span>
                     </div>
@@ -308,7 +308,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     </div>
                     <div style={styles.metricItem}>
                       <span style={styles.metricLabel}>Despesas:</span>
-                      <span style={{ ...styles.metricValue, color: "#E74C3C" }}>
+                      <span style={{ ...styles.metricValue, color: "#EF4444" }}>
                         0
                       </span>
                     </div>
@@ -329,7 +329,7 @@ const styles = {
     borderRadius: "12px",
     padding: "24px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-    border: "2px solid #E74C3C",
+    border: "2px solid #EF4444",
     marginBottom: "24px",
   },
   header: {
@@ -356,13 +356,13 @@ const styles = {
     margin: "0 0 4px 0",
     fontSize: "24px",
     fontWeight: "700",
-    color: "#E74C3C",
+    color: "#EF4444",
   },
   titleSuccess: {
     margin: "0 0 4px 0",
     fontSize: "24px",
     fontWeight: "700",
-    color: "#27AE60",
+    color: "#10B981",
   },
   subtitle: {
     margin: 0,
@@ -375,7 +375,7 @@ const styles = {
     color: "#6c757d",
   },
   verDetalhesButton: {
-    backgroundColor: "#154360",
+    backgroundColor: "#2563EB",
     color: "white",
     border: "none",
     padding: "10px 20px",
@@ -407,7 +407,7 @@ const styles = {
     margin: 0,
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   alertaItem: {
     backgroundColor: "#f8f9fa",
@@ -433,7 +433,7 @@ const styles = {
   itemNumero: {
     fontSize: "14px",
     fontWeight: "700",
-    color: "#154360",
+    color: "#2563EB",
   },
   itemParlamentar: {
     fontSize: "13px",
@@ -469,7 +469,7 @@ const styles = {
   metricValue: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   progressContainer: {
     marginTop: "4px",

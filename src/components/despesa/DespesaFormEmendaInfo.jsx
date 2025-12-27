@@ -246,7 +246,7 @@ const styles = {
   progressLabel: {
     fontSize: "12px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
   progressPercentage: {
     fontSize: "12px",
@@ -349,7 +349,7 @@ const styles = {
   },
   detailValue: {
     fontSize: "12px",
-    color: "#2c3e50",
+    color: "#1E293B",
     fontWeight: "600",
     wordBreak: "break-word",
   },

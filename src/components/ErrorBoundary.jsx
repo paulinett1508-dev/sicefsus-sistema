@@ -126,7 +126,7 @@ const styles = {
     marginBottom: '20px'
   },
   errorTitle: {
-    color: '#E74C3C',
+    color: '#EF4444',
     fontSize: '24px',
     fontWeight: '600',
     marginBottom: '12px'

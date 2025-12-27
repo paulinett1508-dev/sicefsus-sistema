@@ -69,7 +69,7 @@ const styles = {
   statsTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2c3e50",
+    color: "#1E293B",
     margin: "0 0 16px 0",
   },
 
@@ -93,7 +93,7 @@ const styles = {
   statValue: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#2c3e50",
+    color: "#1E293B",
   },
 
   statLabel: {

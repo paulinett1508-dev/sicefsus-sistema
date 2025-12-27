@@ -2,11 +2,11 @@
 // ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 
 export const COLORS = {
-  PRIMARY: "#154360",
-  ACCENT: "#4A90E2",
-  SUCCESS: "#27AE60",
-  WARNING: "#F39C12",
-  ERROR: "#E74C3C",
+  PRIMARY: "#2563EB",
+  ACCENT: "#3B82F6",
+  SUCCESS: "#10B981",
+  WARNING: "#F59E0B",
+  ERROR: "#EF4444",
   WHITE: "#fff",
   GRAY: "#f8f9fa",
 };

@@ -515,7 +515,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "24px 28px",
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#3B82F6",
     borderBottom: "3px solid #357ABD",
   },
   title: {
@@ -604,7 +604,7 @@ const styles = {
     margin: 0,
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: "#1E293B",
     paddingBottom: 12,
     borderBottom: "2px solid #e9ecef",
   },

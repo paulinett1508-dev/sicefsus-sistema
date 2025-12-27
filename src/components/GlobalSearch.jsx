@@ -12,10 +12,15 @@ import { useToast } from "./Toast";
 // and then access user.tipo, user.uf, user.municipio.
 // For the purpose of this edit, we'll assume these variables are accessible within the function.
 
-const PRIMARY = "#154360";
-const ACCENT = "#4A90E2";
-const WHITE = "#fff";
-const GRAY = "#f8f9fa";
+const PRIMARY = "#2563EB";
+const ACCENT = "#3B82F6";
+const WHITE = "#ffffff";
+const GRAY = "#F8FAFC";
+const SLATE_50 = "#F8FAFC";
+const SLATE_200 = "#E2E8F0";
+const SLATE_400 = "#94A3B8";
+const SLATE_500 = "#64748B";
+const SLATE_700 = "#334155";
 
 function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, userUf, userMunicipio }) { // Added user props for context
   const [searchTerm, setSearchTerm] = useState("");
@@ -395,7 +400,7 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
     <div ref={searchRef} style={containerStyle}>
       <div style={styles.searchBox}>
         <div style={styles.inputContainer}>
-          <span style={styles.searchIcon}>🔍</span>
+          <span className="material-symbols-outlined" style={styles.searchIcon}>search</span>
           <input
             ref={inputRef}
             type="text"
@@ -414,10 +419,14 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
               style={styles.clearButton}
               title="Limpar busca"
             >
-              ✕
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
             </button>
           )}
-          {loading && <div style={styles.loadingIndicator}>⏳</div>}
+          {loading && (
+            <div style={styles.loadingIndicator}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, animation: "spin 1s linear infinite" }}>progress_activity</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -447,7 +456,9 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
                   <div style={styles.resultHeader}>
                     <div style={styles.resultTypeContainer}>
                       <span style={styles.resultType}>
-                        {result.type === "emenda" ? "📄" : "💰"}
+                        <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
+                          {result.type === "emenda" ? "description" : "payments"}
+                        </span>
                         {result.type === "emenda" ? "Emenda" : "Despesa"}
                       </span>
                       <span style={styles.relevanceScore}>
@@ -502,7 +513,7 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
             </>
           ) : searchTerm.length >= 2 ? (
             <div style={styles.noResults}>
-              <div style={styles.noResultsIcon}>🔍</div>
+              <span className="material-symbols-outlined" style={styles.noResultsIcon}>search_off</span>
               <div style={styles.noResultsText}>
                 Nenhum resultado para "{searchTerm}"
               </div>
@@ -526,7 +537,6 @@ const styles = {
   compactContainer: {
     position: "relative",
     width: "100%",
-    maxWidth: 250,
   },
   searchBox: {
     position: "relative",
@@ -538,48 +548,55 @@ const styles = {
   },
   input: {
     width: "100%",
-    padding: "12px 16px 12px 40px",
-    border: `2px solid transparent`,
-    borderRadius: 20,
+    padding: "10px 16px 10px 38px",
+    border: `1px solid ${SLATE_200}`,
+    borderRadius: 8,
     fontSize: 14,
-    background: GRAY,
-    transition: "all 0.2s",
+    background: SLATE_50,
+    transition: "all 0.15s ease",
     outline: "none",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    color: SLATE_700,
+    fontFamily: "'Inter', sans-serif",
   },
   compactInput: {
     width: "100%",
-    padding: "8px 12px 8px 32px",
-    border: `1px solid #ddd`,
-    borderRadius: 15,
+    padding: "8px 12px 8px 36px",
+    border: "none",
+    borderRadius: 8,
     fontSize: 13,
-    background: WHITE,
-    transition: "all 0.2s",
+    background: SLATE_50,
+    transition: "all 0.15s ease",
     outline: "none",
+    color: SLATE_700,
+    fontFamily: "'Inter', sans-serif",
   },
   searchIcon: {
     position: "absolute",
     left: 12,
-    fontSize: 16,
-    color: "#666",
+    fontSize: 18,
+    color: SLATE_400,
     zIndex: 1,
     pointerEvents: "none",
   },
   clearButton: {
     position: "absolute",
-    right: 36,
+    right: 32,
     background: "none",
     border: "none",
-    color: "#666",
+    color: SLATE_400,
     cursor: "pointer",
-    fontSize: 14,
     padding: 4,
     borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingIndicator: {
     position: "absolute",
     right: 12,
-    fontSize: 14,
+    color: PRIMARY,
+    display: "flex",
+    alignItems: "center",
   },
   resultsContainer: {
     position: "absolute",
@@ -588,39 +605,42 @@ const styles = {
     right: 0,
     background: WHITE,
     borderRadius: 12,
-    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-    border: "1px solid #e0e0e0",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+    border: `1px solid ${SLATE_200}`,
     maxHeight: 400,
     overflowY: "auto",
     zIndex: 1000,
   },
   resultsHeader: {
-    padding: "12px 16px",
-    borderBottom: "1px solid #f0f0f0",
-    fontSize: 12,
-    color: "#666",
+    padding: "10px 16px",
+    borderBottom: `1px solid ${SLATE_200}`,
+    fontSize: 11,
+    color: SLATE_500,
     fontWeight: "500",
-    background: "#fafafa",
+    background: SLATE_50,
     display: "flex",
     justifyContent: "space-between",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
   },
   searchTime: {
-    color: "#999",
+    color: SLATE_400,
+    textTransform: "lowercase",
   },
   resultItem: {
     padding: "12px 16px",
-    borderBottom: "1px solid #f0f0f0",
+    borderBottom: `1px solid ${SLATE_50}`,
     cursor: "pointer",
-    transition: "background-color 0.2s",
+    transition: "background-color 0.15s ease",
   },
   selectedResult: {
-    backgroundColor: "#e8f4fd",
+    backgroundColor: "rgba(37, 99, 235, 0.05)",
   },
   resultHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   resultTypeContainer: {
     display: "flex",
@@ -630,66 +650,71 @@ const styles = {
     justifyContent: "space-between",
   },
   resultType: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     color: PRIMARY,
     textTransform: "uppercase",
+    display: "flex",
+    alignItems: "center",
   },
   relevanceScore: {
-    fontSize: 11,
-    color: "#999",
-    background: "#f0f0f0",
+    fontSize: 10,
+    color: SLATE_400,
+    background: SLATE_50,
     padding: "2px 6px",
     borderRadius: 4,
+    fontWeight: 500,
   },
   resultContent: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   primaryText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
-    color: "#333",
-    marginBottom: 4,
-    lineHeight: 1.3,
+    color: SLATE_700,
+    marginBottom: 2,
+    lineHeight: 1.4,
   },
   secondaryText: {
     fontSize: 12,
-    color: "#666",
-    lineHeight: 1.3,
+    color: SLATE_500,
+    lineHeight: 1.4,
   },
   highlights: {
     display: "flex",
     flexWrap: "wrap",
-    gap: 6,
+    gap: 4,
   },
   highlight: {
-    fontSize: 11,
-    color: ACCENT,
-    background: "#e8f4fd",
+    fontSize: 10,
+    color: PRIMARY,
+    background: "rgba(37, 99, 235, 0.08)",
     padding: "2px 6px",
     borderRadius: 4,
   },
   exactHighlight: {
-    background: "#d4edda",
-    color: "#155724",
+    background: "rgba(16, 185, 129, 0.1)",
+    color: "#059669",
     fontWeight: "600",
   },
   noResults: {
     padding: 32,
     textAlign: "center",
-    color: "#666",
+    color: SLATE_500,
   },
   noResultsIcon: {
-    fontSize: 24,
-    marginBottom: 8,
+    fontSize: 40,
+    marginBottom: 12,
+    color: SLATE_400,
   },
   noResultsText: {
     fontSize: 14,
     marginBottom: 4,
+    color: SLATE_700,
   },
   noResultsHint: {
     fontSize: 12,
-    color: "#999",
+    color: SLATE_400,
   },
 };
 

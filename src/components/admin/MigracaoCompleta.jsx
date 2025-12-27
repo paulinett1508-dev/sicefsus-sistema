@@ -407,7 +407,7 @@ const styles = {
   },
   title: {
     margin: "0 0 20px 0",
-    color: "#154360",
+    color: "#2563EB",
     fontSize: "24px",
   },
   infoBox: {
@@ -489,7 +489,7 @@ const styles = {
   resultadoTitle: {
     margin: "0 0 20px 0",
     fontSize: "20px",
-    color: "#154360",
+    color: "#2563EB",
   },
   resultadoSection: {
     marginBottom: "20px",
@@ -516,7 +516,7 @@ const styles = {
     textAlign: "right",
     fontSize: "16px",
     fontWeight: "bold",
-    color: "#154360",
+    color: "#2563EB",
   },
   successMessage: {
     marginTop: "16px",

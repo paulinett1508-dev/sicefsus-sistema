@@ -105,7 +105,7 @@ const Dashboard = ({ usuario }) => {
     return (
       <div style={styles.container}>
         <div style={styles.configPendente}>
-          <div style={styles.configIcon}>⚙️</div>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--warning)", marginBottom: 24 }}>settings</span>
           <h2 style={styles.configTitle}>Configuração Pendente</h2>
           <p style={styles.configMessage}>
             Seu usuário ainda não foi configurado pelo administrador.
@@ -177,7 +177,7 @@ const Dashboard = ({ usuario }) => {
       <div style={styles.header}>
         <div>
           <div style={styles.headerTop}>
-            <h1 style={styles.title}>👋 Bem-vindo, {user.nome || "Usuário"}</h1>
+            <h1 style={styles.title}>Bem-vindo, {user.nome || "Usuário"}</h1>
             <div style={styles.badges}>
               {/* Badge do Tipo de Usuário */}
               <span
@@ -185,23 +185,30 @@ const Dashboard = ({ usuario }) => {
                   ...styles.badge,
                   backgroundColor:
                     user.tipo === "admin"
-                      ? "#dc3545"
+                      ? "#EF4444"
                       : user.tipo === "gestor"
-                      ? "#ffc107"
-                      : "#28a745",
-                  fontSize: "12px",
-                  padding: "6px 12px",
+                      ? "#F59E0B"
+                      : "#10B981",
+                  fontSize: "11px",
+                  padding: "4px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
                 }}
               >
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                  {user.tipo === "admin" ? "shield_person" : user.tipo === "gestor" ? "account_balance" : "person"}
+                </span>
                 {user.tipo === "admin"
-                  ? "👑 Admin"
+                  ? "Admin"
                   : user.tipo === "gestor"
-                  ? "🏛️ Gestor"
-                  : "👤 Operador"}
+                  ? "Gestor"
+                  : "Operador"}
               </span>
               {!permissions.acessoTotal && (
-                <span style={{ ...styles.badge, backgroundColor: "#3498DB" }}>
-                  📍 {user.municipio}/{user.uf}
+                <span style={{ ...styles.badge, backgroundColor: "#2563EB", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
+                  {user.municipio}/{user.uf}
                 </span>
               )}
             </div>
@@ -216,7 +223,8 @@ const Dashboard = ({ usuario }) => {
           </p>
         </div>
         <button onClick={recarregar} style={styles.refreshButton}>
-          🔄 Atualizar
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>refresh</span>
+          Atualizar
         </button>
       </div>
 
@@ -241,7 +249,10 @@ const Dashboard = ({ usuario }) => {
       {/* ========== CRONOGRAMA WIDGET (EXISTENTE - PRESERVADO) ========== */}
       {emendas.length > 0 && (
         <div style={styles.cronogramaSection}>
-          <h2 style={styles.sectionTitle}>📅 Acompanhamento de Prazos</h2>
+          <h2 style={styles.sectionTitle}>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>calendar_month</span>
+            Acompanhamento de Prazos
+          </h2>
           <CronogramaWidget emendas={emendas} />
         </div>
       )}
@@ -270,11 +281,13 @@ const LoadingState = ({ message }) => (
 
 const ErrorState = ({ title, message, onRetry }) => (
   <div style={styles.errorContainer}>
-    <h2>{title}</h2>
-    <p>{message}</p>
+    <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#EF4444", marginBottom: 16 }}>error</span>
+    <h2 style={{ color: "#DC2626", marginBottom: 8 }}>{title}</h2>
+    <p style={{ color: "#DC2626" }}>{message}</p>
     {onRetry && (
       <button onClick={onRetry} style={styles.retryButton}>
-        🔄 Tentar Novamente
+        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span>
+        Tentar Novamente
       </button>
     )}
   </div>
@@ -282,9 +295,9 @@ const ErrorState = ({ title, message, onRetry }) => (
 
 const EmptyState = ({ isAdmin, municipio }) => (
   <div style={styles.emptyState}>
-    <div style={styles.emptyIcon}>📊</div>
-    <h3>Sem dados para exibir</h3>
-    <p>
+    <span className="material-symbols-outlined" style={{ fontSize: 64, color: "var(--gray-300)", marginBottom: 16 }}>analytics</span>
+    <h3 style={{ color: "var(--gray-700)", marginBottom: 8 }}>Sem dados para exibir</h3>
+    <p style={{ color: "var(--gray-500)", fontSize: 14 }}>
       {isAdmin
         ? "Não há emendas cadastradas no sistema."
         : `Não há dados para o município ${municipio}.`}
@@ -301,25 +314,25 @@ const formatCurrency = (value) => {
   });
 };
 
-// ==================== ESTILOS ====================
+// ==================== ESTILOS MODERNOS ====================
 
 const styles = {
   container: {
-    padding: "24px",
-    backgroundColor: "#f8f9fa",
+    padding: "16px 32px",
+    backgroundColor: "var(--theme-bg, #F8FAFC)",
     minHeight: "100vh",
-    fontFamily:
-      "'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif",
+    fontFamily: "var(--font-family, 'Inter', sans-serif)",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "24px",
-    padding: "24px",
-    backgroundColor: "white",
+    padding: "20px 24px",
+    backgroundColor: "var(--theme-surface, #ffffff)",
     borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
+    border: "1px solid var(--theme-border, #E2E8F0)",
     flexWrap: "wrap",
     gap: "16px",
   },
@@ -330,9 +343,9 @@ const styles = {
     flexWrap: "wrap",
   },
   title: {
-    fontSize: "28px",
+    fontSize: "24px",
     fontWeight: "700",
-    color: "#154360",
+    color: "var(--gray-800, #1E293B)",
     margin: 0,
   },
   badges: {
@@ -342,34 +355,40 @@ const styles = {
   },
   badge: {
     padding: "4px 12px",
-    borderRadius: "12px",
-    fontSize: "13px",
+    borderRadius: "9999px",
+    fontSize: "12px",
     fontWeight: "600",
     color: "white",
   },
   subtitle: {
-    fontSize: "14px",
-    color: "#666",
-    marginTop: "8px",
+    fontSize: "13px",
+    color: "var(--gray-500, #64748B)",
+    marginTop: "6px",
     marginBottom: 0,
     textTransform: "capitalize",
   },
   refreshButton: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: "var(--primary, #2563EB)",
     color: "white",
     border: "none",
-    padding: "10px 20px",
+    padding: "8px 16px",
     borderRadius: "8px",
     fontSize: "14px",
-    fontWeight: "600",
+    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.2s",
+    transition: "all 0.15s ease",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
   sectionTitle: {
-    fontSize: "20px",
+    fontSize: "16px",
     fontWeight: "600",
-    color: "#154360",
+    color: "var(--gray-700, #334155)",
     marginBottom: "16px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
   mainGrid: {
     display: "grid",
@@ -383,86 +402,96 @@ const styles = {
   loadingContainer: {
     textAlign: "center",
     padding: "60px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "16px",
   },
   spinner: {
-    width: "48px",
-    height: "48px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #4A90E2",
+    width: "40px",
+    height: "40px",
+    border: "3px solid var(--gray-200, #E2E8F0)",
+    borderTop: "3px solid var(--primary, #2563EB)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "0 auto 24px",
   },
   loadingText: {
-    fontSize: "16px",
-    color: "#666",
+    fontSize: "14px",
+    color: "var(--gray-500, #64748B)",
   },
   errorContainer: {
     textAlign: "center",
     padding: "60px",
-    backgroundColor: "#fee",
-    borderRadius: "8px",
+    backgroundColor: "rgba(239, 68, 68, 0.05)",
+    borderRadius: "12px",
+    border: "1px solid rgba(239, 68, 68, 0.2)",
   },
   retryButton: {
-    backgroundColor: "#E74C3C",
+    backgroundColor: "var(--error, #EF4444)",
     color: "white",
     border: "none",
-    padding: "10px 24px",
-    borderRadius: "6px",
+    padding: "10px 20px",
+    borderRadius: "8px",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "600",
+    fontWeight: "500",
     marginTop: "16px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
   },
   emptyState: {
     textAlign: "center",
     padding: "60px",
-    backgroundColor: "white",
-    borderRadius: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+    backgroundColor: "var(--theme-surface, #ffffff)",
+    borderRadius: "12px",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
   },
   emptyIcon: {
-    fontSize: "64px",
+    fontSize: "48px",
     marginBottom: "16px",
     opacity: 0.3,
   },
   configPendente: {
     textAlign: "center",
     padding: "60px 24px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface, #ffffff)",
     borderRadius: "12px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
+    border: "1px solid var(--theme-border, #E2E8F0)",
     maxWidth: "600px",
     margin: "0 auto",
   },
   configIcon: {
-    fontSize: "64px",
+    fontSize: "48px",
     marginBottom: "24px",
   },
   configTitle: {
-    fontSize: "24px",
+    fontSize: "20px",
     fontWeight: "600",
-    color: "#154360",
+    color: "var(--gray-800, #1E293B)",
     marginBottom: "12px",
   },
   configMessage: {
-    fontSize: "16px",
-    color: "#666",
+    fontSize: "14px",
+    color: "var(--gray-600, #475569)",
     marginBottom: "8px",
   },
   configSubmessage: {
-    fontSize: "14px",
-    color: "#999",
+    fontSize: "13px",
+    color: "var(--gray-500, #64748B)",
     marginBottom: "24px",
   },
   configInfo: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--gray-50, #F8FAFC)",
     padding: "20px",
     borderRadius: "8px",
     textAlign: "left",
-    fontSize: "14px",
-    color: "#666",
+    fontSize: "13px",
+    color: "var(--gray-600, #475569)",
     lineHeight: "1.8",
+    border: "1px solid var(--theme-border, #E2E8F0)",
   },
 };
 

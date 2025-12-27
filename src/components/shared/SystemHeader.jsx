@@ -6,43 +6,64 @@ import { useVersion } from "../../hooks/useVersion";
 const SystemHeader = ({
   usuario,
   loading = false,
-  modulo = "Sistema", // "Despesas", "Emendas", "Relatórios", "Usuários"
-  dadosTexto = "dados", // Texto customizado para dados
-  dadosContador = 0, // Número de itens
-  children, // Banners específicos abaixo do header
+  modulo = "Sistema",
+  dadosTexto = "dados",
+  dadosContador = 0,
+  children,
 }) => {
   const { formatVersion } = useVersion();
   const userRole = usuario?.tipo || "operador";
   const userMunicipio = usuario?.municipio;
-  const userUf = usuario?.uf;
+
+  const getRoleBadge = () => {
+    if (userRole === "admin") {
+      return { label: "Admin", color: "#EF4444", bg: "rgba(239, 68, 68, 0.1)" };
+    }
+    if (userRole === "gestor") {
+      return { label: "Gestor", color: "#F59E0B", bg: "rgba(245, 158, 11, 0.1)" };
+    }
+    return { label: "Operador", color: "#10B981", bg: "rgba(16, 185, 129, 0.1)" };
+  };
+
+  const badge = getRoleBadge();
 
   return (
     <>
       {/* Header principal com informações do sistema */}
-      <div style={styles.compactHeader}>
-        <div style={styles.statusInfo}>
-          <span style={styles.statusText}>Status:</span>
-          <span style={styles.statusValue}>✅ Operacional</span>
-          <span style={styles.divider}>|</span>
+      <div style={styles.header}>
+        <div style={styles.leftSection}>
+          <div style={styles.statusBadge}>
+            <span style={styles.statusDot}></span>
+            <span style={styles.statusText}>Operacional</span>
+            <span style={styles.versionText}>{formatVersion()}</span>
+          </div>
+        </div>
 
-          <span style={styles.versionText}>Versão:</span>
-          <span style={styles.versionValue}>{formatVersion()}</span>
-          <span style={styles.divider}>|</span>
+        <div style={styles.rightSection}>
+          {/* Dados */}
+          <div style={styles.infoItem}>
+            <span className="material-symbols-outlined" style={styles.infoIcon}>database</span>
+            <span style={styles.infoValue}>
+              {loading ? "..." : dadosContador}
+            </span>
+            <span style={styles.infoLabel}>{dadosTexto}</span>
+          </div>
 
-          <span style={styles.statusText}>Usuário:</span>
-          <span style={styles.versionValue}>
-            {userRole === "admin"
-              ? "👑 Admin"
-              : userRole === "gestor"
-              ? `🏛️ Gestor - ${userMunicipio || "Município não cadastrado"}`
-              : `👤 Operador - ${userMunicipio || "Município não cadastrado"}`}
-          </span>
-          <span style={styles.divider}>|</span>
+          {/* Município (se não for admin) */}
+          {userRole !== "admin" && userMunicipio && (
+            <div style={styles.infoItem}>
+              <span className="material-symbols-outlined" style={styles.infoIcon}>location_on</span>
+              <span style={styles.infoValue}>{userMunicipio}</span>
+            </div>
+          )}
 
-          <span style={styles.statusText}>Dados:</span>
-          <span style={styles.versionValue}>
-            {loading ? "Carregando..." : `${dadosContador} ${dadosTexto}`}
-          </span>
+          {/* Role Badge */}
+          <div style={{ ...styles.roleBadge, backgroundColor: badge.bg, color: badge.color }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+              {userRole === "admin" ? "shield_person" : userRole === "gestor" ? "account_balance" : "person"}
+            </span>
+            {badge.label}
+          </div>
         </div>
       </div>
 
@@ -53,47 +74,90 @@ const SystemHeader = ({
 };
 
 const styles = {
-  compactHeader: {
+  header: {
     display: "flex",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     alignItems: "center",
-    background: "linear-gradient(135deg, #154360, #4A90E2)",
-    color: "white",
-    padding: "8px 20px",
-    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    padding: "12px 20px",
+    borderRadius: "12px",
     marginBottom: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    fontSize: "14px",
-    gap: "8px",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+    border: "1px solid #E2E8F0",
+    fontFamily: "'Inter', sans-serif",
   },
 
-  statusInfo: {
+  leftSection: {
     display: "flex",
     alignItems: "center",
-    gap: "8px",
-    fontSize: "14px",
-    fontFamily: "Arial, sans-serif",
+    gap: 12,
+  },
+
+  rightSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+  },
+
+  statusBadge: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "6px 12px",
+    backgroundColor: "rgba(16, 185, 129, 0.08)",
+    borderRadius: "9999px",
+    border: "1px solid rgba(16, 185, 129, 0.2)",
+  },
+
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    backgroundColor: "#10B981",
   },
 
   statusText: {
-    fontWeight: "normal",
-  },
-
-  statusValue: {
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: 500,
+    color: "#059669",
   },
 
   versionText: {
-    fontWeight: "normal",
+    fontSize: 11,
+    color: "#64748B",
+    marginLeft: 4,
   },
 
-  versionValue: {
-    fontWeight: "500",
+  infoItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 13,
+    color: "#64748B",
   },
 
-  divider: {
-    opacity: 0.7,
-    margin: "0 4px",
+  infoIcon: {
+    fontSize: 16,
+    color: "#94A3B8",
+  },
+
+  infoValue: {
+    fontWeight: 600,
+    color: "#334155",
+  },
+
+  infoLabel: {
+    fontWeight: 400,
+  },
+
+  roleBadge: {
+    display: "flex",
+    alignItems: "center",
+    gap: 4,
+    padding: "4px 10px",
+    borderRadius: "9999px",
+    fontSize: 11,
+    fontWeight: 600,
   },
 };
 

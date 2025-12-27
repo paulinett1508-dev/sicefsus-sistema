@@ -222,14 +222,16 @@ const Despesas = ({ usuario }) => {
       {/* Botões de ação */}
       <div style={styles.actionContainer}>
         <button style={styles.primaryButton} onClick={handleCriar}>
-          ➕ Nova Despesa
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>add</span>
+          Nova Despesa
         </button>
         <button
           style={styles.refreshButton}
           onClick={recarregar}
           disabled={loading}
         >
-          🔄 {loading ? "Atualizando..." : "Atualizar"}
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>refresh</span>
+          {loading ? "Atualizando..." : "Atualizar"}
         </button>
       </div>
 
@@ -249,63 +251,72 @@ const Despesas = ({ usuario }) => {
   );
 };
 
-// ✅ ESTILOS SIMPLIFICADOS
+// ✅ ESTILOS MODERNOS
 const styles = {
   container: {
-    padding: "20px",
-    backgroundColor: "#f8f9fa",
+    padding: "16px 32px",
+    backgroundColor: "var(--theme-bg, #F8FAFC)",
     minHeight: "100vh",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-family, 'Inter', sans-serif)",
   },
 
   actionContainer: {
     marginBottom: "20px",
     display: "flex",
-    gap: "10px",
+    gap: "8px",
   },
 
   primaryButton: {
-    backgroundColor: "#28a745",
+    backgroundColor: "var(--success, #10B981)",
     color: "white",
     border: "none",
-    padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
+    padding: "8px 16px",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    transition: "all 0.15s ease",
+    boxShadow: "0 1px 2px rgba(16, 185, 129, 0.2)",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
 
   refreshButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "var(--primary, #2563EB)",
     color: "white",
     border: "none",
-    padding: "12px 24px",
-    borderRadius: "5px",
-    fontSize: "16px",
-    fontWeight: "bold",
+    padding: "8px 16px",
+    borderRadius: "8px",
+    fontSize: "14px",
+    fontWeight: "500",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    transition: "all 0.15s ease",
+    boxShadow: "0 1px 2px rgba(37, 99, 235, 0.2)",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
 
   operadorBanner: {
-    backgroundColor: "#f8f9fa",
-    borderLeft: "4px solid #0066cc",
-    padding: "10px 16px",
+    backgroundColor: "var(--theme-surface, #ffffff)",
+    borderLeft: "4px solid var(--primary, #2563EB)",
+    padding: "12px 16px",
     marginBottom: "20px",
-    fontSize: "14px",
-    color: "#495057",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-    borderRadius: "0 4px 4px 0",
+    fontSize: "13px",
+    color: "var(--gray-600, #475569)",
+    boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+    borderRadius: "0 8px 8px 0",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    borderLeftWidth: "4px",
+    borderLeftColor: "var(--primary, #2563EB)",
   },
 
   errorMessage: {
-    backgroundColor: "#fff3cd",
-    border: "1px solid #ffeaa7",
-    borderRadius: "8px",
-    padding: "20px",
+    backgroundColor: "rgba(239, 68, 68, 0.05)",
+    border: "1px solid rgba(239, 68, 68, 0.2)",
+    borderRadius: "12px",
+    padding: "24px",
     textAlign: "center",
     margin: "20px 0",
   },

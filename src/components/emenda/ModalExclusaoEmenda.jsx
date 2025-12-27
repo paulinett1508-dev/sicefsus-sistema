@@ -35,12 +35,12 @@ export default function ModalExclusaoEmenda({
                   cx="12"
                   cy="12"
                   r="10"
-                  stroke="#E74C3C"
+                  stroke="#EF4444"
                   strokeWidth="2"
                 />
                 <path
                   d="M12 8V12M12 16H12.01"
-                  stroke="#E74C3C"
+                  stroke="#EF4444"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -85,12 +85,12 @@ export default function ModalExclusaoEmenda({
                   cx="12"
                   cy="12"
                   r="10"
-                  stroke="#F39C12"
+                  stroke="#F59E0B"
                   strokeWidth="2"
                 />
                 <path
                   d="M12 8V12M12 16H12.01"
-                  stroke="#F39C12"
+                  stroke="#F59E0B"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -102,12 +102,12 @@ export default function ModalExclusaoEmenda({
                   cx="12"
                   cy="12"
                   r="10"
-                  stroke="#E74C3C"
+                  stroke="#EF4444"
                   strokeWidth="2"
                 />
                 <path
                   d="M8 12L16 12"
-                  stroke="#E74C3C"
+                  stroke="#EF4444"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
