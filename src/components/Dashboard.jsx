@@ -250,7 +250,7 @@ const Dashboard = ({ usuario }) => {
       {emendas.length > 0 && (
         <div style={styles.cronogramaSection}>
           <h2 style={styles.sectionTitle}>
-            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>calendar_month</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>calendar_month</span>
             Acompanhamento de Prazos
           </h2>
           <CronogramaWidget emendas={emendas} />
@@ -318,23 +318,25 @@ const formatCurrency = (value) => {
 
 const styles = {
   container: {
-    padding: "16px 32px",
-    backgroundColor: "var(--theme-bg, #F8FAFC)",
-    minHeight: "100vh",
+    padding: "16px 24px",
+    backgroundColor: "var(--theme-bg)",
+    minHeight: "calc(100vh - 32px)", // Desconta o header de status
     fontFamily: "var(--font-family, 'Inter', sans-serif)",
+    transition: "background-color 0.3s ease",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "24px",
-    padding: "20px 24px",
-    backgroundColor: "var(--theme-surface, #ffffff)",
-    borderRadius: "12px",
-    boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
-    border: "1px solid var(--theme-border, #E2E8F0)",
+    marginBottom: "20px",
+    padding: "16px 20px",
+    backgroundColor: "var(--theme-surface)",
+    borderRadius: "10px",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
     flexWrap: "wrap",
     gap: "16px",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   headerTop: {
     display: "flex",
@@ -345,7 +347,7 @@ const styles = {
   title: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "var(--gray-800, #1E293B)",
+    color: "var(--theme-text)",
     margin: 0,
   },
   badges: {
@@ -362,7 +364,7 @@ const styles = {
   },
   subtitle: {
     fontSize: "13px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
     marginTop: "6px",
     marginBottom: 0,
     textTransform: "capitalize",
@@ -382,13 +384,13 @@ const styles = {
     gap: "8px",
   },
   sectionTitle: {
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "600",
-    color: "var(--gray-700, #334155)",
-    marginBottom: "16px",
+    color: "var(--theme-text)",
+    marginBottom: "12px",
     display: "flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "6px",
   },
   mainGrid: {
     display: "grid",
@@ -417,7 +419,7 @@ const styles = {
   },
   loadingText: {
     fontSize: "14px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
   },
   errorContainer: {
     textAlign: "center",
@@ -470,28 +472,28 @@ const styles = {
   configTitle: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "var(--gray-800, #1E293B)",
+    color: "var(--theme-text)",
     marginBottom: "12px",
   },
   configMessage: {
     fontSize: "14px",
-    color: "var(--gray-600, #475569)",
+    color: "var(--theme-text-secondary)",
     marginBottom: "8px",
   },
   configSubmessage: {
     fontSize: "13px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     marginBottom: "24px",
   },
   configInfo: {
-    backgroundColor: "var(--gray-50, #F8FAFC)",
+    backgroundColor: "var(--theme-surface-hover)",
     padding: "20px",
     borderRadius: "8px",
     textAlign: "left",
     fontSize: "13px",
-    color: "var(--gray-600, #475569)",
+    color: "var(--theme-text-secondary)",
     lineHeight: "1.8",
-    border: "1px solid var(--theme-border, #E2E8F0)",
+    border: "1px solid var(--theme-border)",
   },
 };
 

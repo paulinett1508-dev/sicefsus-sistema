@@ -5,14 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* === CORES PRINCIPAIS (Nova Paleta) === */
-  --primary: #2563EB;
-  --primary-light: #3B82F6;
-  --primary-dark: #1D4ED8;
+  /* === CORES PRINCIPAIS (Azul-Petróleo da Logo) === */
+  --primary: #1A3A4A;
+  --primary-light: #2A5A6A;
+  --primary-dark: #0F2830;
 
-  --accent: #2563EB;
-  --accent-light: #60A5FA;
-  --accent-dark: #1D4ED8;
+  --accent: #1A3A4A;
+  --accent-light: #2A5A6A;
+  --accent-dark: #0F2830;
 
   --secondary: #64748B;
   --secondary-light: #94A3B8;
@@ -49,7 +49,7 @@
   --gray-800: #1E293B;
   --gray-900: #0F172A;
 
-  /* === TEMA FIXO (LIGHT) === */
+  /* === TEMA LIGHT (Padrão) === */
   --theme-bg: #F8FAFC;
   --theme-surface: #ffffff;
   --theme-surface-secondary: #F1F5F9;
@@ -60,6 +60,9 @@
   --theme-border-light: #F1F5F9;
   --theme-shadow: rgba(0, 0, 0, 0.08);
   --theme-shadow-light: rgba(0, 0, 0, 0.03);
+  --theme-sidebar-bg: #ffffff;
+  --theme-input-bg: #ffffff;
+  --theme-surface-hover: #F1F5F9;
 
   /* === SOMBRAS (Mais Suaves) === */
   --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -140,6 +143,39 @@
   --form-focus-color: var(--accent);
   --card-bg: var(--theme-surface);
   --body-bg: var(--theme-bg);
+}
+
+/* === TEMA DARK === */
+[data-theme="dark"] {
+  --theme-bg: #0F172A;
+  --theme-surface: #1E293B;
+  --theme-surface-secondary: #334155;
+  --theme-surface-hover: #2D3B4F;
+  --theme-text: #F1F5F9;
+  --theme-text-secondary: #CBD5E1;
+  --theme-text-muted: #94A3B8;
+  --theme-border: #334155;
+  --theme-border-light: #475569;
+  --theme-shadow: rgba(0, 0, 0, 0.3);
+  --theme-shadow-light: rgba(0, 0, 0, 0.2);
+  --theme-sidebar-bg: #1E293B;
+  --theme-input-bg: #0F172A;
+
+  /* Cores primárias ajustadas para dark */
+  --primary: #3B82F6;
+  --primary-light: #60A5FA;
+  --primary-dark: #2563EB;
+
+  /* Cores que precisam de ajuste no dark */
+  --gray-50: #1E293B;
+  --gray-100: #334155;
+  --gray-200: #475569;
+
+  /* Ajustes de sombra para dark */
+  --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
 
 /* === ESTILOS GLOBAIS === */
@@ -331,7 +367,7 @@ body {
 
 .form-control:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(26, 58, 74, 0.15);
   outline: none;
 }
 
@@ -682,9 +718,9 @@ button:focus-visible {
 }
 
 .badge-blue {
-  background-color: rgba(37, 99, 235, 0.1);
+  background-color: rgba(26, 58, 74, 0.1);
   color: var(--primary);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(26, 58, 74, 0.2);
 }
 
 .badge-green {
@@ -794,7 +830,7 @@ button:focus-visible {
 
 /* Sidebar link ativo */
 .nav-link-active {
-  background-color: rgba(37, 99, 235, 0.05);
+  background-color: rgba(26, 58, 74, 0.08);
   color: var(--primary);
 }
 
