@@ -17,6 +17,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { db, auth } from "../../../../firebase/firebaseConfig"; // Import auth para obter o usuário atual
+import { useTheme } from "../../../../context/ThemeContext";
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
@@ -281,10 +282,80 @@ const DespesaPlanejadaForm = ({
 const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isDark } = useTheme();
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 20,
+      padding: 20,
+      backgroundColor: isDark ? "var(--theme-bg)" : "#f8f9fa",
+    },
+    statCard: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      padding: 18,
+      borderRadius: 12,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      textAlign: "center",
+      border: isDark ? "1px solid var(--theme-border)" : "none",
+    },
+    statLabel: {
+      fontSize: 13,
+      fontWeight: 600,
+      color: isDark ? "var(--theme-text-secondary)" : "#6c757d",
+      marginBottom: 8,
+    },
+    statusFinanceiroWrapper: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      borderRadius: 12,
+      padding: 16,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      border: isDark ? "1px solid var(--theme-border)" : "none",
+    },
+    secao: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      borderRadius: 12,
+      padding: 16,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      border: isDark ? "1px solid var(--theme-border)" : "none",
+    },
+    secaoHeader: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 20,
+      paddingBottom: 12,
+      borderBottom: isDark ? "2px solid var(--theme-border)" : "2px solid #e9ecef",
+    },
+    statusFinanceiroTitulo: {
+      margin: "0 0 12px 0",
+      fontSize: 13,
+      fontWeight: 700,
+      color: isDark ? "var(--theme-text)" : "#334155",
+      marginBottom: 10,
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    miniCardLabel: {
+      fontSize: 10,
+      fontWeight: 600,
+      color: isDark ? "var(--theme-text-secondary)" : "#475569",
+      textTransform: "uppercase",
+      letterSpacing: "0.3px",
+    },
+    miniCardValue: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: isDark ? "var(--theme-text)" : "#0f172a",
+      fontFamily: "monospace",
+    },
+  };
 
   // 🆕 Estados para edição/visualização/execução de despesa
   const [despesaEmEdicao, setDespesaEmEdicao] = useState(null);
@@ -708,33 +779,33 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
   return (
-    <div style={styles.container}>
+    <div style={dynamicStyles.container}>
       {toast.show && <Toast message={toast.message} type={toast.type} />}
 
       {/* Estatísticas principais */}
       <div style={styles.statsWrapper}>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span> Valor da Emenda</div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span> Valor da Emenda</div>
           <div style={styles.statValue}>
             {formatCurrency(stats.valorEmenda)}
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#f39c12" }}>schedule</span> Total Planejado</div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#f39c12" }}>schedule</span> Total Planejado</div>
           <div style={{ ...styles.statValue, color: "#f39c12" }}>
             {formatCurrency(stats.totalPlanejado)}
           </div>
           <div style={styles.statHint}>não consome saldo</div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
           <div style={{ ...styles.statValue, color: "#27ae60" }}>
             {formatCurrency(stats.totalExecutado)}
           </div>
           <div style={styles.statHint}>consome saldo</div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span> Saldo Disponível</div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span> Saldo Disponível</div>
           <div
             style={{
               ...styles.statValue,
@@ -749,8 +820,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             {formatCurrency(stats.saldoDisponivel)}
           </div>
         </div>
-        <div style={styles.statCard}>
-          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> Percentual Executado</div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> Percentual Executado</div>
           <div style={styles.statValue}>
             {stats.percentualExecutado.toFixed(1)}%
           </div>
@@ -758,14 +829,14 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       </div>
 
       {/* 🆕 Mini-cards de status financeiro */}
-      <div style={styles.statusFinanceiroWrapper}>
-        <h4 style={styles.statusFinanceiroTitulo}>Status Financeiro</h4>
+      <div style={dynamicStyles.statusFinanceiroWrapper}>
+        <h4 style={dynamicStyles.statusFinanceiroTitulo}>Status Financeiro</h4>
         <div style={styles.statusMiniGrid}>
           <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span></div>
             <div style={styles.miniCardContent}>
-              <div style={styles.miniCardLabel}>Pago</div>
-              <div style={styles.miniCardValue}>
+              <div style={dynamicStyles.miniCardLabel}>Pago</div>
+              <div style={dynamicStyles.miniCardValue}>
                 {formatCurrency(stats.totalPago)}
               </div>
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>check_circle</span> Concluído</div>
@@ -774,8 +845,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit_note</span></div>
             <div style={styles.miniCardContent}>
-              <div style={styles.miniCardLabel}>Liquidado</div>
-              <div style={styles.miniCardValue}>
+              <div style={dynamicStyles.miniCardLabel}>Liquidado</div>
+              <div style={dynamicStyles.miniCardValue}>
                 {formatCurrency(stats.totalLiquidado)}
               </div>
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando pagamento</div>
@@ -784,8 +855,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>assignment</span></div>
             <div style={styles.miniCardContent}>
-              <div style={styles.miniCardLabel}>Empenhado</div>
-              <div style={styles.miniCardValue}>
+              <div style={dynamicStyles.miniCardLabel}>Empenhado</div>
+              <div style={dynamicStyles.miniCardValue}>
                 {formatCurrency(stats.totalEmpenhado)}
               </div>
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando liquidação</div>
@@ -794,8 +865,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>schedule</span></div>
             <div style={styles.miniCardContent}>
-              <div style={styles.miniCardLabel}>Pendente</div>
-              <div style={styles.miniCardValue}>
+              <div style={dynamicStyles.miniCardLabel}>Pendente</div>
+              <div style={dynamicStyles.miniCardValue}>
                 {formatCurrency(stats.totalPendente)}
               </div>
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando empenho</div>
@@ -807,8 +878,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
       {/* Seção: Despesas Planejadas */}
-      <div style={styles.secao}>
-        <div style={styles.secaoHeader}>
+      <div style={dynamicStyles.secao}>
+        <div style={dynamicStyles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>
             <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle", color: "#f39c12" }}>schedule</span>
             Planejar Despesas{" "}
@@ -925,8 +996,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       </div>
 
       {/* Seção: Despesas Executadas */}
-      <div style={styles.secao}>
-        <div style={styles.secaoHeader}>
+      <div style={dynamicStyles.secao}>
+        <div style={dynamicStyles.secaoHeader}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <h3 style={styles.secaoTitulo}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>payments</span> Despesas Executadas</h3>
             <span style={styles.badge}>

@@ -1,5 +1,6 @@
 // src/components/admin/UsersTable.jsx - VERSÃO CORRIGIDA COMPLETA
 import React from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 const UsersTable = ({
   users,
@@ -8,56 +9,98 @@ const UsersTable = ({
   onToggleStatus,
   loading,
 }) => {
+  const { isDark } = useTheme();
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    container: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "white",
+      borderRadius: "8px",
+      overflow: "hidden",
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
+      border: isDark ? "1px solid var(--theme-border)" : "none",
+    },
+    tableHeader: {
+      padding: "12px",
+      textAlign: "left",
+      fontWeight: "bold",
+      fontSize: "12px",
+      color: isDark ? "var(--theme-text-secondary)" : "#495057",
+      textTransform: "uppercase",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+      borderBottom: isDark ? "2px solid var(--theme-border)" : "2px solid #e9ecef",
+    },
+    rowEven: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#ffffff",
+      borderBottom: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
+    },
+    rowOdd: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+      borderBottom: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
+    },
+    subdued: {
+      color: isDark ? "var(--theme-text-muted)" : "#666",
+    },
+    muted: {
+      color: isDark ? "var(--theme-text-muted)" : "#999",
+      fontStyle: "italic",
+    },
+    emptyState: {
+      textAlign: "center",
+      padding: "40px",
+      color: isDark ? "var(--theme-text-muted)" : "#6c757d",
+      backgroundColor: isDark ? "var(--theme-surface)" : "transparent",
+      borderRadius: "8px",
+    },
+  };
+
   if (!users || users.length === 0) {
     return (
-      <div style={styles.emptyState}>
+      <div style={dynamicStyles.emptyState}>
         <div style={{ fontSize: "48px", marginBottom: "16px" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#6c757d" }}>group</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: isDark ? "var(--theme-text-muted)" : "#6c757d" }}>group</span>
         </div>
-        <h3>Nenhum usuário encontrado</h3>
+        <h3 style={{ color: isDark ? "var(--theme-text)" : "inherit" }}>Nenhum usuário encontrado</h3>
         <p>Ainda não há usuários cadastrados no sistema</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.usersTableContainer}>
+    <div style={dynamicStyles.container}>
       <table style={styles.usersTable}>
         <thead>
           <tr>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Nome</th>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>mail</span> Email</th>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_city</span> Local</th>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Tipo</th>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>monitoring</span> Status</th>
-            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>build</span> Ações</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Nome</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>mail</span> Email</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_city</span> Local</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Tipo</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>monitoring</span> Status</th>
+            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>build</span> Ações</th>
           </tr>
         </thead>
         <tbody>
           {users.map((usuario, index) => (
             <tr
               key={usuario.id}
-              style={{
-                backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8f9fa",
-                borderBottom: "1px solid #e9ecef",
-              }}
+              style={index % 2 === 0 ? dynamicStyles.rowEven : dynamicStyles.rowOdd}
             >
-              <td style={styles.tableCell}>
+              <td style={{ ...styles.tableCell, color: isDark ? "var(--theme-text)" : "inherit" }}>
                 <div style={{ fontWeight: "500" }}>{usuario.nome || "N/A"}</div>
               </td>
-              <td style={styles.tableCell}>
+              <td style={{ ...styles.tableCell, color: isDark ? "var(--theme-text)" : "inherit" }}>
                 <div style={{ fontSize: "13px" }}>{usuario.email || "N/A"}</div>
               </td>
               <td style={styles.tableCell}>
                 {usuario.municipio && usuario.uf ? (
                   <div>
-                    <div style={{ fontWeight: "500" }}>{usuario.municipio}</div>
-                    <div style={{ fontSize: "11px", color: "#666" }}>
+                    <div style={{ fontWeight: "500", color: isDark ? "var(--theme-text)" : "inherit" }}>{usuario.municipio}</div>
+                    <div style={{ fontSize: "11px", ...dynamicStyles.subdued }}>
                       {usuario.uf}
                     </div>
                   </div>
                 ) : (
-                  <span style={{ color: "#999", fontStyle: "italic" }}>
+                  <span style={dynamicStyles.muted}>
                     N/A
                   </span>
                 )}

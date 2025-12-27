@@ -6,6 +6,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { useSearchParams, useParams, useLocation } from "react-router-dom";
 import { db } from "../../../firebase/firebaseConfig";
 import { UserContext } from "../../../context/UserContext";
+import { useTheme } from "../../../context/ThemeContext";
 
 import { useEmendaFormData } from "../../../hooks/useEmendaFormData";
 import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation";
@@ -25,6 +26,54 @@ export default function EmendaForm() {
   const [activeTab, setActiveTab] = useState("dadosBasicos");
   const { user } = useContext(UserContext);
   const [searchParams] = useSearchParams();
+  const { isDark } = useTheme();
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    container: {
+      padding: 16,
+      backgroundColor: isDark ? "var(--theme-bg)" : "#f8f9fa",
+    },
+    form: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      borderRadius: 8,
+      padding: 24,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      border: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
+    },
+    actionsInline: {
+      marginTop: 16,
+      paddingTop: 12,
+      borderTop: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
+    },
+    loadingContainer: {
+      textAlign: "center",
+      padding: "40px 20px",
+      backgroundColor: isDark ? "var(--theme-surface)" : "white",
+      borderRadius: 8,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      margin: "20px 0",
+      color: isDark ? "var(--theme-text)" : "inherit",
+    },
+    spinner: {
+      width: 50,
+      height: 50,
+      border: isDark ? "4px solid var(--theme-border)" : "4px solid #f3f3f3",
+      borderTop: "4px solid #007bff",
+      borderRadius: "50%",
+      animation: "spin 1s linear infinite",
+      margin: "0 auto 20px",
+    },
+    errorContainer: {
+      textAlign: "center",
+      padding: "40px 20px",
+      backgroundColor: isDark ? "var(--theme-surface)" : "white",
+      borderRadius: 8,
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+      margin: "20px 0",
+      color: isDark ? "var(--theme-text)" : "inherit",
+    },
+  };
 
   const {
     formData,
@@ -99,9 +148,9 @@ export default function EmendaForm() {
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loadingContainer}>
-          <div style={styles.spinner}></div>
+      <div style={dynamicStyles.container}>
+        <div style={dynamicStyles.loadingContainer}>
+          <div style={dynamicStyles.spinner}></div>
           <h3>
             {isEdicao
               ? "Carregando dados da emenda..."
@@ -114,8 +163,8 @@ export default function EmendaForm() {
 
   if (error) {
     return (
-      <div style={styles.container}>
-        <div style={styles.errorContainer}>
+      <div style={dynamicStyles.container}>
+        <div style={dynamicStyles.errorContainer}>
           <div style={styles.errorIcon}>
             <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#EF4444" }}>warning</span>
           </div>
@@ -187,7 +236,7 @@ export default function EmendaForm() {
   };
 
   return (
-    <div style={styles.container}>
+    <div style={dynamicStyles.container}>
       <EmendaFormHeaderRich
         modo={isEdicao ? "editar" : "criar"}
         formData={formData}
@@ -195,7 +244,7 @@ export default function EmendaForm() {
         despesas={despesas}
       />
 
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmit} style={dynamicStyles.form}>
         <TabNavigation
           tabs={tabs}
           activeTab={activeTab}
@@ -205,7 +254,7 @@ export default function EmendaForm() {
         <div style={styles.tabContent}>{renderTabContent()}</div>
 
         {/* AÇÕES: sempre inline, logo após o conteúdo */}
-        <div style={styles.actionsInline}>
+        <div style={dynamicStyles.actionsInline}>
           <EmendaFormActions
             modo={isEdicao ? "editar" : "criar"}
             onCancel={handleCancel}

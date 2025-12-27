@@ -22,8 +22,7 @@ const menuItems = [
 // Menu admin
 const adminItems = [{ label: "Usuários", icon: "group", path: "/administracao" }];
 
-// Menu de configurações
-const configItems = [{ label: "Sistema", icon: "settings", path: "/sobre" }];
+// Item "Sobre" - movido para o footer
 
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -191,27 +190,26 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
           />
         )}
 
-        {/* Seção Configurações */}
-        {isAdmin && (
-          <div style={styles.configSection}>
-            {!collapsed && (
-              <div style={styles.sectionTitle}>Configurações</div>
-            )}
-            {configItems.map((item) => (
-              <NavItem
-                key={item.path}
-                item={item}
-                isActive={activePath === item.path}
-                collapsed={collapsed}
-                onClick={() => onNavigate(item.path)}
-              />
-            ))}
-          </div>
-        )}
-      </nav>
+        </nav>
 
       {/* Footer com Usuário */}
       <div style={styles.footer}>
+        {/* Link "Sobre" discreto no topo do footer */}
+        <div
+          style={{
+            ...styles.sobreLink,
+            justifyContent: collapsed ? "center" : "flex-start",
+            padding: collapsed ? "8px 0" : "8px 12px",
+          }}
+          onClick={() => onNavigate("/sobre")}
+          title="Sobre o sistema"
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: collapsed ? 0 : 8 }}>info</span>
+          {!collapsed && <span>Sobre</span>}
+        </div>
+
+        <div style={styles.footerDivider} />
+
         <div style={styles.userSection}>
           <div style={styles.avatar}>
             {initials}
@@ -381,22 +379,6 @@ const styles = {
     marginBottom: 8,
   },
 
-  configSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTop: "1px solid var(--theme-border-light)",
-  },
-
-  sectionTitle: {
-    padding: "0 24px",
-    fontSize: "11px",
-    fontWeight: 600,
-    color: "var(--theme-text-muted)",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-    marginBottom: 8,
-  },
-
   badge: {
     backgroundColor: "rgba(245, 158, 11, 0.15)",
     color: "#B45309",
@@ -409,7 +391,24 @@ const styles = {
 
   footer: {
     borderTop: "1px solid var(--theme-border)",
-    padding: "16px",
+    padding: "12px 16px",
+  },
+
+  sobreLink: {
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    borderRadius: "8px",
+    fontSize: "13px",
+    color: "var(--theme-text-secondary)",
+    transition: "all 0.15s ease",
+    marginBottom: 8,
+  },
+
+  footerDivider: {
+    height: 1,
+    backgroundColor: "var(--theme-border-light)",
+    margin: "8px 0",
   },
 
   userSection: {
