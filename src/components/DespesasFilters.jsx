@@ -119,7 +119,7 @@ const DespesasFilters = ({
     <div style={styles.container}>
       {/* ✅ HEADER */}
       <div style={styles.header}>
-        <h3 style={styles.title}>🔍 Filtros de Pesquisa</h3>
+        <h3 style={styles.title}><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>search</span> Filtros de Pesquisa</h3>
         <div style={styles.resultsBadge}>
           {totalDespesas} {totalDespesas === 1 ? "pagamento" : "pagamentos"}
         </div>
@@ -129,7 +129,7 @@ const DespesasFilters = ({
       <div style={styles.filtersGrid}>
         {/* Busca Geral */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>🔎 Busca Geral</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>search</span> Busca Geral</label>
           <input
             type="text"
             placeholder="Fornecedor, nº empenho, nº nota..."
@@ -142,7 +142,7 @@ const DespesasFilters = ({
         {/* Filtro por Emenda - DESTACADO */}
         <div style={styles.filterGroup}>
           <label style={styles.filterLabel}>
-            ⭐ Emenda
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>star</span> Emenda
             <span style={styles.highlightBadge}>Principal</span>
           </label>
           <select
@@ -161,7 +161,7 @@ const DespesasFilters = ({
 
         {/* Status do Pagamento */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>📌 Status</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>push_pin</span> Status</label>
           <select
             value={filtros.status}
             onChange={(e) => handleFiltroChange("status", e.target.value)}
@@ -178,7 +178,7 @@ const DespesasFilters = ({
 
         {/* Data Início */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>📅 Data Início</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>calendar_today</span> Data Início</label>
           <input
             type="date"
             value={filtros.dataInicio}
@@ -189,7 +189,7 @@ const DespesasFilters = ({
 
         {/* Data Fim */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>📅 Data Fim</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>calendar_today</span> Data Fim</label>
           <input
             type="date"
             value={filtros.dataFim}
@@ -205,7 +205,7 @@ const DespesasFilters = ({
           style={styles.buttonFilter}
           disabled={contarFiltrosAtivos() === 0}
         >
-          🔍 {contarFiltrosAtivos()} Filtro
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>search</span> {contarFiltrosAtivos()} Filtro
           {contarFiltrosAtivos() !== 1 ? "s" : ""} Ativo
           {contarFiltrosAtivos() !== 1 ? "s" : ""}
         </button>
@@ -215,14 +215,14 @@ const DespesasFilters = ({
           style={styles.buttonClear}
           disabled={contarFiltrosAtivos() === 0}
         >
-          🗑️ Limpar Filtros
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>delete</span> Limpar Filtros
         </button>
       </div>
 
       {/* ✅ DICA VISUAL */}
       {filtros.emendaId && (
         <div style={styles.hint}>
-          💡 <strong>Dica:</strong> Visualizando pagamentos da emenda
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>lightbulb</span> <strong>Dica:</strong> Visualizando pagamentos da emenda
           selecionada
         </div>
       )}

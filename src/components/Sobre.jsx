@@ -36,7 +36,7 @@ const Sobre = () => {
                 <span className="version-badge">
                   {loading ? "..." : `v${version}`}
                 </span>
-                <span className="status-badge">✅ Ativo</span>
+                <span className="status-badge"><span className="material-symbols-outlined" style={{ fontSize: 12, verticalAlign: "middle", marginRight: 4 }}>check_circle</span> Ativo</span>
               </div>
             </div>
           </div>
@@ -47,7 +47,7 @@ const Sobre = () => {
           {/* Sobre + Sistema Info - Side by Side */}
           <div className="intro-section">
             <div className="about-card">
-              <h2>📋 Sobre o Sistema</h2>
+              <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>description</span> Sobre o Sistema</h2>
               <p>
                 Sistema completo para gestão e controle de emendas parlamentares
                 destinadas ao SUS, desenvolvido para facilitar o acompanhamento,
@@ -56,7 +56,7 @@ const Sobre = () => {
             </div>
 
             <div className="system-info-card">
-              <h2>📊 Informações do Sistema</h2>
+              <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>analytics</span> Informações do Sistema</h2>
               <div className="info-grid">
                 <div className="info-item">
                   <span className="info-label">Versão</span>
@@ -80,10 +80,10 @@ const Sobre = () => {
 
           {/* Funcionalidades Compactas */}
           <div className="features-section">
-            <h2>🎯 Funcionalidades Principais</h2>
+            <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>target</span> Funcionalidades Principais</h2>
             <div className="features-grid">
               <div className="feature-card">
-                <div className="feature-icon">📊</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>analytics</span></div>
                 <div className="feature-content">
                   <h3>Dashboard Executivo</h3>
                   <p>
@@ -94,7 +94,7 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon">📄</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>article</span></div>
                 <div className="feature-content">
                   <h3>Gestão de Emendas</h3>
                   <p>
@@ -104,7 +104,7 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon">💰</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>payments</span></div>
                 <div className="feature-content">
                   <h3>Controle de Despesas</h3>
                   <p>
@@ -115,7 +115,7 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon">📈</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>trending_up</span></div>
                 <div className="feature-content">
                   <h3>Relatórios Gerenciais</h3>
                   <p>Relatórios detalhados com gráficos e filtros avançados</p>
@@ -123,7 +123,7 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon">🔍</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>search</span></div>
                 <div className="feature-content">
                   <h3>Busca Global</h3>
                   <p>
@@ -133,7 +133,7 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon">🔒</div>
+                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>lock</span></div>
                 <div className="feature-content">
                   <h3>Controle de Acesso</h3>
                   <p>
@@ -147,7 +147,7 @@ const Sobre = () => {
 
           {/* Suporte Técnico - Reorganizado */}
           <div className="support-section">
-            <h2>💥 Suporte Técnico</h2>
+            <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>support_agent</span> Suporte Técnico</h2>
             <div className="support-unified">
               <div className="support-header">
                 <img
@@ -169,7 +169,7 @@ const Sobre = () => {
               <div className="contact-methods">
                 <div className="contact-item">
                   <div className="contact-header">
-                    <span className="contact-icon">📱</span>
+                    <span className="contact-icon"><span className="material-symbols-outlined" style={{ fontSize: 16 }}>smartphone</span></span>
                     <span className="contact-type">WhatsApp</span>
                   </div>
                   <a
@@ -184,7 +184,7 @@ const Sobre = () => {
 
                 <div className="contact-item">
                   <div className="contact-header">
-                    <span className="contact-icon">📧</span>
+                    <span className="contact-icon"><span className="material-symbols-outlined" style={{ fontSize: 16 }}>alternate_email</span></span>
                     <span className="contact-type">Instagram</span>
                   </div>
                   <a
