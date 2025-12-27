@@ -1,0 +1,31 @@
+{
+    "projectType": "react-firebase",
+    "language": "pt-BR",
+    "codeStyle": {
+      "preserveExisting": true,
+      "minimalChanges": true,
+      "completeFiles": true
+    },
+    "rules": [
+      "Sempre use validadores de src/utils/validators.js",
+      "Sempre use formatters para valores monetários",
+      "Nunca reescreva código funcional",
+      "Mudanças cirúrgicas - preserve o que funciona",
+      "Forneça arquivos completos para substituição",
+      "Teste como Admin E Operador"
+    ],
+    "ignorePaths": [
+      "node_modules",
+      "dist",
+      ".git",
+      "backups"
+    ],
+    "mcpServers": {
+      "firebase": {
+        "command": "node",
+        "args": ["/home/runner/workspace/firebase-mcp-server/dist/index.js"],
+        "env": {},
+        "disabled": false
+      }
+    }
+  }

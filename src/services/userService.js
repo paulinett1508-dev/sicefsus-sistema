@@ -129,7 +129,7 @@ export const createUserDirect = async (userData, navigate, showToast) => {
 
   try {
     const senhaTemporaria = Math.random().toString(36).slice(-8);
-    console.log(`🔑 Senha temporária gerada: ${senhaTemporaria}`);
+    // Senha temporaria gerada - nao logar em producao por seguranca
 
     // 🚨 CORREÇÃO CRÍTICA: Usar instância secundária para não deslogar admin
     console.log("🔄 Criando usuário em instância secundária...");

@@ -346,19 +346,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         where("emendaId", "==", emendaId)
       );
 
-      // 🔍 LOG DETALHADO DE PERMISSÕES GESTOR
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const token = await currentUser.getIdTokenResult();
-        console.log("🔑 Token de autenticação:", {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          claims: token.claims,
-          tipo: token.claims.tipo,
-          municipio: token.claims.municipio,
-          uf: token.claims.uf
-        });
-      }
+      // Verificacao de autenticacao (sem log de dados sensiveis)
 
       console.log('🔍 Query de despesas:', {
         emendaId,
