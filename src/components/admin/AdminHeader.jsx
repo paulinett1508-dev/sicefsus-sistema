@@ -12,8 +12,8 @@ const AdminHeader = ({
       <div style={styles.headerLeft}>
         <h1 style={styles.title}>
           {activeTab === "users"
-            ? "👥 Administração de Usuários"
-            : "📋 Logs de Auditoria"}
+            ? <><span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>group</span> Administração de Usuários</>
+            : <><span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>assignment</span> Logs de Auditoria</>}
         </h1>
         <p style={styles.subtitle}>
           {activeTab === "users"
@@ -29,7 +29,7 @@ const AdminHeader = ({
             style={styles.primaryButton}
             disabled={loading}
           >
-            <span style={styles.buttonIcon}>👤</span>
+            <span style={styles.buttonIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>person_add</span></span>
             Novo Usuário
           </button>
         )}
@@ -39,7 +39,7 @@ const AdminHeader = ({
             style={{ ...styles.primaryButton, backgroundColor: "#28a745" }}
             disabled={loading}
           >
-            <span style={styles.buttonIcon}>🔄</span>
+            <span style={styles.buttonIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span></span>
             Atualizar Logs
           </button>
         )}

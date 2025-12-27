@@ -136,17 +136,17 @@ const LogsSection = ({
       case "DELETE_EMENDA":
       case "DELETE_DESPESA":
       case "DELETE_USER":
-        return "🗑️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>delete</span>;
       case "CREATE_EMENDA":
       case "CREATE_DESPESA":
       case "CREATE_USER":
-        return "➕";
+        return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>add</span>;
       case "UPDATE_EMENDA":
       case "UPDATE_DESPESA":
       case "UPDATE_USER":
-        return "✏️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>edit</span>;
       default:
-        return "⚡";
+        return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>bolt</span>;
     }
   };
 
@@ -155,7 +155,7 @@ const LogsSection = ({
       {/* Cabeçalho da seção com botão */}
       <div style={styles.sectionHeader}>
         <h3 style={styles.sectionTitle}>
-          📋 Logs de Auditoria do Sistema ({logs.length})
+          <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>assignment</span> Logs de Auditoria do Sistema ({logs.length})
         </h3>
         <button
           onClick={onAtualizarLogs}
@@ -163,7 +163,7 @@ const LogsSection = ({
           disabled={loading}
           title="Atualizar logs de auditoria"
         >
-          🔄 Atualizar Logs
+          <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>refresh</span> Atualizar Logs
         </button>
       </div>
 
@@ -171,7 +171,7 @@ const LogsSection = ({
       <div style={styles.filtersContainer}>
         <div style={styles.filtersGrid}>
           <div>
-            <label style={styles.filterLabel}>👤 Usuário</label>
+            <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>person</span> Usuário</label>
             <input
               type="text"
               placeholder="Filtrar por email..."
@@ -184,7 +184,7 @@ const LogsSection = ({
           </div>
 
           <div>
-            <label style={styles.filterLabel}>⚡ Ação</label>
+            <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Ação</label>
             <select
               value={logFilters.acao}
               onChange={(e) =>
@@ -209,7 +209,7 @@ const LogsSection = ({
           </div>
 
           <div>
-            <label style={styles.filterLabel}>📅 Data Início</label>
+            <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Data Início</label>
             <input
               type="date"
               value={logFilters.dataInicio}
@@ -221,7 +221,7 @@ const LogsSection = ({
           </div>
 
           <div>
-            <label style={styles.filterLabel}>📅 Data Fim</label>
+            <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Data Fim</label>
             <input
               type="date"
               value={logFilters.dataFim}
@@ -242,7 +242,7 @@ const LogsSection = ({
         </div>
       ) : getFilteredLogs().length === 0 ? (
         <div style={styles.emptyLogs}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📋</div>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}><span className="material-symbols-outlined" style={{ fontSize: 48 }}>assignment</span></div>
           <h3>Nenhum log encontrado</h3>
           <p>
             {logFilters.usuario ||
@@ -258,13 +258,13 @@ const LogsSection = ({
           <table style={styles.logsTable}>
             <thead>
               <tr>
-                <th style={styles.tableHeader}>📅 Data/Hora</th>
-                <th style={styles.tableHeader}>👤 Usuário (Nome + Email)</th>
-                <th style={styles.tableHeader}>⚡ Ação</th>
-                <th style={styles.tableHeader}>📋 Recurso</th>
-                <th style={styles.tableHeader}>📝 Dados ANTES</th>
-                <th style={styles.tableHeader}>✏️ Dados DEPOIS</th>
-                <th style={styles.tableHeader}>✅ Status</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Data/Hora</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Usuário (Nome + Email)</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Ação</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>assignment</span> Recurso</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>edit_note</span> Dados ANTES</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>edit</span> Dados DEPOIS</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>check_circle</span> Status</th>
               </tr>
             </thead>
             <tbody>
@@ -355,7 +355,7 @@ const LogsSection = ({
                         color: "#495057",
                         fontSize: "12px"
                       }}>
-                        📧 {log.userEmail || "Sistema"}
+                        <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>mail</span> {log.userEmail || "Sistema"}
                       </div>
                       
                       {/* Badge do perfil */}
@@ -373,7 +373,7 @@ const LogsSection = ({
                             display: "inline-block"
                           }}
                         >
-                          {log.userRole === "admin" ? "👑 ADMIN" : "👤 OPERADOR"}
+                          {log.userRole === "admin" ? <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>workspace_premium</span> ADMIN</> : <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>person</span> OPERADOR</>}
                         </span>
                       </div>
                     </div>
@@ -407,7 +407,7 @@ const LogsSection = ({
                     {log.dataBefore ? (
                       <details style={styles.detailsExpand}>
                         <summary style={styles.detailsSummary}>
-                          Ver dados anteriores 🔍
+                          Ver dados anteriores <span className="material-symbols-outlined" style={{ fontSize: 12, marginLeft: 4, verticalAlign: "middle" }}>search</span>
                         </summary>
                         <pre style={styles.jsonPre}>
                           {JSON.stringify(log.dataBefore, null, 2)}
@@ -425,7 +425,7 @@ const LogsSection = ({
                     {log.dataAfter ? (
                       <details style={styles.detailsExpand}>
                         <summary style={styles.detailsSummary}>
-                          Ver dados atualizados 🔍
+                          Ver dados atualizados <span className="material-symbols-outlined" style={{ fontSize: 12, marginLeft: 4, verticalAlign: "middle" }}>search</span>
                         </summary>
                         <pre style={styles.jsonPre}>
                           {JSON.stringify(log.dataAfter, null, 2)}
@@ -450,7 +450,7 @@ const LogsSection = ({
                         fontSize: '20px',
                         filter: log.success !== false ? 'none' : 'grayscale(100%)'
                       }}>
-                        {log.success !== false ? '✅' : '❌'}
+                        {log.success !== false ? <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#28a745" }}>check_circle</span> : <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#dc3545" }}>cancel</span>}
                       </span>
                       {log.errorMessage && (
                         <span style={{
