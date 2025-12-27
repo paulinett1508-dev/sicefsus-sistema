@@ -194,7 +194,10 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
           <div style={styles.formContent}>
             {/* Seção 1: Informações Básicas */}
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>📋 Informações Básicas</h3>
+              <h3 style={styles.sectionTitle}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>description</span>
+                Informações Básicas
+              </h3>
               <div style={styles.grid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Data da Despesa *</label>
@@ -256,7 +259,10 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
 
             {/* Seção 2: Classificação */}
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>🏷️ Classificação</h3>
+              <h3 style={styles.sectionTitle}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>label</span>
+                Classificação
+              </h3>
               <div style={styles.grid}>
                 <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
                   <label style={styles.label}>
@@ -274,7 +280,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
                     <option value="">Selecione a natureza planejada...</option>
                     {acoesServicos.length === 0 && (
                       <option value="" disabled>
-                        ⚠️ Nenhuma natureza planejada ainda
+                        Nenhuma natureza planejada ainda
                       </option>
                     )}
                     {acoesServicos.map((acao) => {
@@ -296,8 +302,8 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
                   )}
                   {acoesServicos.length === 0 && (
                     <span style={styles.warningText}>
-                      💡 Primeiro planeje as naturezas de despesa na aba
-                      "Planejamento"
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>lightbulb</span>
+                      Primeiro planeje as naturezas de despesa na aba "Planejamento"
                     </span>
                   )}
                 </div>
@@ -318,7 +324,10 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
 
             {/* Seção 3: Fornecedor */}
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>🏢 Fornecedor</h3>
+              <h3 style={styles.sectionTitle}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>business</span>
+                Fornecedor
+              </h3>
               <div style={styles.grid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>CNPJ *</label>

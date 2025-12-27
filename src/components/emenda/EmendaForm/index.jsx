@@ -116,12 +116,15 @@ export default function EmendaForm() {
     return (
       <div style={styles.container}>
         <div style={styles.errorContainer}>
-          <div style={styles.errorIcon}>⚠️</div>
+          <div style={styles.errorIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#EF4444" }}>warning</span>
+          </div>
           <h3>Erro no Formulário</h3>
           <p>{error}</p>
           <div style={styles.errorActions}>
             <button onClick={() => setError(null)} style={styles.retryButton}>
-              🔄 Tentar Novamente
+              <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4, verticalAlign: "middle" }}>refresh</span>
+              Tentar Novamente
             </button>
             <button onClick={handleSimpleBack} style={styles.backButton}>
               ← Voltar para Lista
@@ -133,8 +136,8 @@ export default function EmendaForm() {
   }
 
   const tabs = [
-    { id: "dadosBasicos", label: "Dados Básicos", icon: "📋" },
-    { id: "execucao", label: "Execução Orçamentária", icon: "💰" },
+    { id: "dadosBasicos", label: "Dados Básicos", icon: "description" },
+    { id: "execucao", label: "Execução Orçamentária", icon: "payments" },
   ];
 
   const renderTabContent = () => {

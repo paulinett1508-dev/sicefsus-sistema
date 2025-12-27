@@ -113,11 +113,22 @@ const EmendaFormActions = ({
         onMouseEnter={(e) => (e.target.style.backgroundColor = "#219a52")}
         onMouseLeave={(e) => (e.target.style.backgroundColor = "#10B981")}
       >
-        {salvando || loading
-          ? "⏳ Processando..."
-          : modo === "editar"
-            ? "💾 Atualizar Emenda"
-            : "✅ Cadastrar Emenda"}
+        {salvando || loading ? (
+          <>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>hourglass_empty</span>
+            Processando...
+          </>
+        ) : modo === "editar" ? (
+          <>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>save</span>
+            Atualizar Emenda
+          </>
+        ) : (
+          <>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>check_circle</span>
+            Cadastrar Emenda
+          </>
+        )}
       </button>
 
       {/* ✅ DEBUG INFO para desenvolvimento */}

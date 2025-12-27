@@ -45,7 +45,10 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
       <div style={styles.headerTop}>
         <div style={styles.titleSection}>
           <h2 style={styles.title}>
-            {modo === "editar" ? "✏️ Editando Emenda" : "➕ Nova Emenda"}
+            <span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>
+              {modo === "editar" ? "edit" : "add_circle"}
+            </span>
+            {modo === "editar" ? "Editando Emenda" : "Nova Emenda"}
           </h2>
           <div style={styles.breadcrumb}>
             {formData?.numero && (
@@ -76,7 +79,9 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
         <div style={styles.infoCards}>
           {/* Card: Valor Total */}
           <div style={styles.card}>
-            <div style={styles.cardIcon}>💰</div>
+            <div style={styles.cardIcon}>
+              <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#2563EB" }}>payments</span>
+            </div>
             <div style={styles.cardContent}>
               <div style={styles.cardLabel}>Valor da Emenda</div>
               <div style={styles.cardValue}>{formatarMoeda(valorRecurso)}</div>
@@ -87,7 +92,9 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
           {activeTab === "planejamento" && (
             <>
               <div style={styles.card}>
-                <div style={styles.cardIcon}>🎯</div>
+                <div style={styles.cardIcon}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#16a34a" }}>target</span>
+                </div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardLabel}>Total Planejado</div>
                   <div style={styles.cardValue}>
@@ -102,7 +109,9 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
 
               <div style={styles.card}>
                 <div style={styles.cardIcon}>
-                  {saldoPlanejamento >= 0 ? "✅" : "⚠️"}
+                  <span className="material-symbols-outlined" style={{ fontSize: 28, color: saldoPlanejamento >= 0 ? "#16a34a" : "#dc2626" }}>
+                    {saldoPlanejamento >= 0 ? "check_circle" : "warning"}
+                  </span>
                 </div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardLabel}>Saldo para Planejar</div>
@@ -126,7 +135,9 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
           {activeTab === "despesas" && (
             <>
               <div style={styles.card}>
-                <div style={styles.cardIcon}>📤</div>
+                <div style={styles.cardIcon}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#f97316" }}>upload</span>
+                </div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardLabel}>Total Executado</div>
                   <div style={{ ...styles.cardValue, color: "#f97316" }}>
@@ -140,7 +151,9 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
               </div>
 
               <div style={styles.card}>
-                <div style={styles.cardIcon}>💵</div>
+                <div style={styles.cardIcon}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 28, color: "#16a34a" }}>account_balance_wallet</span>
+                </div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardLabel}>Saldo Disponível</div>
                   <div

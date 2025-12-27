@@ -18,7 +18,7 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
               ...(activeTab === tab.id ? styles.tabActive : styles.tabInactive),
             }}
           >
-            <span style={styles.tabIcon}>{tab.icon}</span>
+            <span className="material-symbols-outlined" style={styles.tabIcon}>{tab.icon}</span>
             <span style={styles.tabLabel}>{tab.label}</span>
           </button>
         ))}

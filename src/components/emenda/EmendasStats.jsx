@@ -16,7 +16,10 @@ const EmendasStats = ({ estatisticasGerais, loading }) => {
 
   return (
     <div style={styles.statsSection}>
-      <h3 style={styles.statsTitle}>📊 Resumo Financeiro</h3>
+      <h3 style={styles.statsTitle}>
+        <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>analytics</span>
+        Resumo Financeiro
+      </h3>
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
           <span style={styles.statValue}>

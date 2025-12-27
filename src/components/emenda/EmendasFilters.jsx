@@ -24,14 +24,21 @@ const EmendasFilters = ({
       {/* Seção de Filtros */}
       <div style={styles.filtersSection}>
         <div style={styles.filtersHeader}>
-          <h3 style={styles.filtersTitle}>🔍 Filtros de Pesquisa</h3>
+          <h3 style={styles.filtersTitle}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>search</span>
+            Filtros de Pesquisa
+          </h3>
           <div style={styles.filtersButtons}>
             <button onClick={onToggleFiltros} style={styles.toggleButton}>
-              {showFiltros ? "🔼 Ocultar Filtros" : "🔽 Mostrar Filtros"}
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
+                {showFiltros ? "expand_less" : "expand_more"}
+              </span>
+              {showFiltros ? "Ocultar Filtros" : "Mostrar Filtros"}
             </button>
             {showFiltros && (
               <button onClick={onLimparFiltros} style={styles.clearButton}>
-                🗑️ Limpar Filtros
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>delete</span>
+                Limpar Filtros
               </button>
             )}
           </div>

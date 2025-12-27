@@ -11,22 +11,25 @@ const EmendaFormHeader = ({
   showSuccessMessage = false,
   successMessage = "",
 }) => {
-  // ✅ CONFIGURAÇÃO DO MODO - SEM ID DA EMENDA
+  // CONFIGURAÇÃO DO MODO - SEM ID DA EMENDA
   const configuracao = {
     criar: {
-      titulo: "📝 Criar Emenda",
+      titulo: "Criar Emenda",
+      tituloIcon: "edit_note",
       subtitulo: "Preencha os dados para criar uma nova emenda",
       cor: "#d4edda",
       corTexto: "#155724",
     },
     editar: {
-      titulo: "✏️ Editar Emenda",
+      titulo: "Editar Emenda",
+      tituloIcon: "edit",
       subtitulo: `Parlamentar: ${parlamentar || "Não informado"}`,
       cor: "#d4edda",
       corTexto: "#155724",
     },
     visualizar: {
-      titulo: "👁️ Visualizar Emenda",
+      titulo: "Visualizar Emenda",
+      tituloIcon: "visibility",
       subtitulo: `Parlamentar: ${parlamentar || "Não informado"}`,
       cor: "#e7f3ff",
       corTexto: "#004085",
@@ -45,14 +48,17 @@ const EmendaFormHeader = ({
           color: config.corTexto,
         }}
       >
-        <h2 style={styles.headerTitle}>{config.titulo}</h2>
+        <h2 style={styles.headerTitle}>
+          <span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>{config.tituloIcon}</span>
+          {config.titulo}
+        </h2>
         <p style={styles.headerSubtitle}>{config.subtitulo}</p>
       </div>
 
       {/* Mensagem de Sucesso */}
       {showSuccessMessage && (
         <div style={styles.successMessage}>
-          <span style={styles.successIcon}>✅</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#155724" }}>check_circle</span>
           <span style={styles.successText}>
             {successMessage ||
               `${modo === "criar" ? "Emenda criada" : "Emenda atualizada"} com sucesso!`}
