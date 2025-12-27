@@ -421,3 +421,57 @@ EXECUTAR:
 - Despesas EXECUTADA tem 33+ campos obrigatorios
 - CNPJ usa lookup automatico (ReceitaWS/BrasilAPI)
 - Valores em BRL: sempre usar formatters
+
+---
+
+## Comandos Claude Disponiveis
+
+Comandos customizados em `.claude/commands/`:
+
+| Comando | Funcao |
+|---------|--------|
+| `@estrutura.md` | Gera mapa completo do projeto |
+| `@audit.md` | Auditoria completa do sistema |
+| `@fix.md` | Corrige problemas identificados |
+| `@review.md` | Review de codigo |
+| `@check-bugs.md` | Busca bugs potenciais |
+| `@check-env.md` | Verifica variaveis de ambiente |
+| `@firebase-check.md` | Status do Firebase |
+
+---
+
+## Firebase MCP Server
+
+Servidor MCP para operacoes diretas no Firestore.
+
+**Localizacao:** `firebase-mcp-server/`
+
+**Verificar config:** `bash firebase-mcp-server/check-config.sh`
+
+**Ambientes:**
+- DEV: Desenvolvimento/testes
+- PROD: Producao
+
+---
+
+## Historico de Sessao (27/12/2025)
+
+### Tarefas Realizadas
+1. Mapeamento completo da estrutura do projeto
+2. Auditoria de seguranca
+3. Correcoes de seguranca:
+   - Removido log de senha temporaria em `userService.js`
+   - Removido log de token em `ExecucaoOrcamentaria.jsx`
+   - Deletado arquivo duplicado `SaldoNaturezaWidget (copy).jsx`
+4. Configuracao do Firebase MCP Server
+5. Criacao de comandos Claude customizados
+
+### Issues Conhecidas
+- 6-8 componentes potencialmente orfaos (debug/test)
+- Alguns formularios nao usam `validators.js`
+- ~21% dos useEffects tem cleanup
+
+### Proximos Passos Sugeridos
+- Revisar componentes orfaos
+- Adicionar validadores nos formularios faltantes
+- Verificar useEffects que precisam de cleanup
