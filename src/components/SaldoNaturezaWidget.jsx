@@ -134,7 +134,7 @@ const SaldoNaturezaWidget = ({
   if (!emenda.acoesServicos || emenda.acoesServicos.length === 0) {
     return (
       <div style={styles.emptyState}>
-        <span style={styles.emptyIcon}>📋</span>
+        <span style={styles.emptyIcon}><span className="material-symbols-outlined" style={{ fontSize: 48 }}>description</span></span>
         <p style={styles.emptyText}>
           Nenhum planejamento de despesas cadastrado nesta emenda
         </p>
@@ -163,7 +163,7 @@ const SaldoNaturezaWidget = ({
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
-          <span style={styles.headerIcon}>💰</span>
+          <span style={styles.headerIcon}><span className="material-symbols-outlined" style={{ fontSize: 32 }}>payments</span></span>
           <div>
             <h3 style={styles.headerTitle}>Saldo por Natureza de Despesa</h3>
             <p style={styles.headerSubtitle}>Planejamento vs Execução</p>
@@ -240,7 +240,7 @@ const SaldoNaturezaWidget = ({
             {/* Alerta se saldo crítico */}
             {item.saldo < 0 && (
               <div style={styles.alertaNegativo}>
-                ⚠️ Execução excedeu o planejado em{" "}
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Execução excedeu o planejado em{" "}
                 {formatCurrency(Math.abs(item.saldo))}
               </div>
             )}

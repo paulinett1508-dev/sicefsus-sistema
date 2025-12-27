@@ -365,7 +365,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
 
             {/* Seção 4: Documento Fiscal */}
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>📄 Documento Fiscal</h3>
+              <h3 style={styles.sectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>article</span> Documento Fiscal</h3>
               <div style={styles.grid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Nº Documento *</label>

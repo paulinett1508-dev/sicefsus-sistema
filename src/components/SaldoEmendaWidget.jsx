@@ -58,11 +58,11 @@ const SaldoEmendaWidget = ({
   // ✅ Determinar status do saldo
   const getStatusSaldo = () => {
     if (saldoAposNovaDesp < 0) {
-      return { cor: "#dc3545", texto: "Saldo Insuficiente", icon: "⚠️" };
+      return { cor: "#dc3545", texto: "Saldo Insuficiente", icon: <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>warning</span> };
     } else if (saldoAposNovaDesp < valorTotal * 0.1) {
-      return { cor: "#fd7e14", texto: "Saldo Baixo", icon: "⚡" };
+      return { cor: "#fd7e14", texto: "Saldo Baixo", icon: <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>bolt</span> };
     } else {
-      return { cor: "#28a745", texto: "Saldo OK", icon: "✅" };
+      return { cor: "#28a745", texto: "Saldo OK", icon: <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>check_circle</span> };
     }
   };
 
@@ -80,7 +80,7 @@ const SaldoEmendaWidget = ({
   if (error) {
     return (
       <div style={{ ...styles.widget, ...styles.error }}>
-        <span>❌ {error}</span>
+        <span><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>cancel</span> {error}</span>
       </div>
     );
   }
@@ -88,7 +88,7 @@ const SaldoEmendaWidget = ({
   if (!emenda) {
     return (
       <div style={{ ...styles.widget, ...styles.warning }}>
-        <span>⚠️ Selecione uma emenda para ver o saldo</span>
+        <span><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Selecione uma emenda para ver o saldo</span>
       </div>
     );
   }
@@ -117,7 +117,7 @@ const SaldoEmendaWidget = ({
     <div style={styles.widget}>
       <div style={styles.header}>
         <h4 style={styles.title}>
-          💰 Saldo da Emenda {emenda.numero || emenda.numeroEmenda}
+          <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>payments</span> Saldo da Emenda {emenda.numero || emenda.numeroEmenda}
         </h4>
         <span style={{ ...styles.status, backgroundColor: status.cor }}>
           {status.icon} {status.texto}
@@ -151,7 +151,7 @@ const SaldoEmendaWidget = ({
       {valorDespesaAtual > 0 && (
         <div style={styles.simulacao}>
           <div style={styles.simulacaoHeader}>
-            📊 Simulação com Nova Despesa
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>analytics</span> Simulação com Nova Despesa
           </div>
           <div style={styles.simulacaoContent}>
             <span style={styles.simulacaoLabel}>

@@ -27,7 +27,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
     return (
       <div style={styles.modalOverlay}>
         <div style={styles.errorContainer}>
-          <h3 style={styles.errorTitle}>❌ Erro</h3>
+          <h3 style={styles.errorTitle}><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 6, verticalAlign: "middle" }}>cancel</span> Erro</h3>
           <p style={styles.errorMessage}>Dados da emenda não encontrados.</p>
           <button onClick={handleClose} style={styles.errorButton}>
             Fechar
@@ -101,7 +101,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
         <div style={styles.modalHeader}>
           <div style={styles.headerContent}>
             <h2 style={styles.modalTitle}>
-              📋 Emenda {emenda?.numero || "S/N"}
+              <span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>description</span> Emenda {emenda?.numero || "S/N"}
             </h2>
             <div style={styles.statusContainer}>
               <span
@@ -110,7 +110,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
                   backgroundColor: isAtiva ? SUCCESS : ERROR,
                 }}
               >
-                {isAtiva ? "✅ ATIVA" : "❌ ESGOTADA"}
+                {isAtiva ? <><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>check_circle</span> ATIVA</> : <><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>cancel</span> ESGOTADA</>}
               </span>
               {isProximaVencimento() && (
                 <span
@@ -119,7 +119,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
                     backgroundColor: WARNING,
                   }}
                 >
-                  ⚠️ PRÓX. VENCIMENTO
+                  <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>warning</span> PRÓX. VENCIMENTO
                 </span>
               )}
               {isVencida() && (
@@ -129,13 +129,13 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
                     backgroundColor: ERROR,
                   }}
                 >
-                  ⏰ VENCIDA
+                  <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>schedule</span> VENCIDA
                 </span>
               )}
             </div>
           </div>
           <button onClick={handleClose} style={styles.closeButton}>
-            ✖️
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
           </button>
         </div>
 
@@ -199,7 +199,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
 
           {/* Seção: Identificação */}
           <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>📋 Identificação</h3>
+            <h3 style={styles.detailSectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>description</span> Identificação</h3>
             <div style={styles.detailGrid}>
               <div style={styles.detailItem}>
                 <span style={styles.detailLabel}>Número:</span>
@@ -239,7 +239,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
 
           {/* Seção: Localização */}
           <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>📍 Localização</h3>
+            <h3 style={styles.detailSectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>location_on</span> Localização</h3>
             <div style={styles.detailGrid}>
               <div style={styles.detailItem}>
                 <span style={styles.detailLabel}>Município:</span>
@@ -262,7 +262,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
 
           {/* Seção: Proposta */}
           <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>📄 Detalhes da Proposta</h3>
+            <h3 style={styles.detailSectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>article</span> Detalhes da Proposta</h3>
             <div style={styles.detailItem}>
               <span style={styles.detailLabel}>Objeto da Proposta:</span>
               <div style={styles.detailTextArea}>
@@ -285,7 +285,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
 
           {/* Seção: Cronograma */}
           <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>📅 Cronograma</h3>
+            <h3 style={styles.detailSectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>calendar_today</span> Cronograma</h3>
             <div style={styles.cronogramaGrid}>
               <div style={styles.cronogramaItem}>
                 <span style={styles.cronogramaLabel}>Data da OB</span>
@@ -325,7 +325,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
 
           {/* Seção: Metadados */}
           <div style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>📊 Informações do Sistema</h3>
+            <h3 style={styles.detailSectionTitle}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>analytics</span> Informações do Sistema</h3>
             <div style={styles.detailGrid}>
               <div style={styles.detailItem}>
                 <span style={styles.detailLabel}>Criado em:</span>
@@ -350,7 +350,7 @@ export default function FluxoEmenda({ emenda, onClose, onEdit }) {
         {/* Footer do Modal */}
         <div style={styles.modalFooter}>
           <button onClick={handleEditClick} style={styles.editButton}>
-            ✏️ Editar Emenda
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>edit</span> Editar Emenda
           </button>
           <button onClick={handleClose} style={styles.closeModalButton}>
             Fechar
