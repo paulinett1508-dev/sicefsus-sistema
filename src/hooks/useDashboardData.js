@@ -5,7 +5,7 @@
 // ✅ CORREÇÃO: parseValorMonetario para cálculos monetários
 // ✅ NOVO: Cache com TTL para otimização de performance
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "../utils/formatters";
@@ -44,6 +44,15 @@ const useDashboardData = (user, permissions) => {
   const [despesas, setDespesas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup para evitar setState após desmontagem
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // 🔧 ADMIN: Carrega todos os dados (PRESERVADO - funciona 100%)
   const carregarDadosAdmin = async () => {
@@ -150,6 +159,7 @@ const useDashboardData = (user, permissions) => {
   // 🎯 Função principal de carregamento
   const carregarDados = async () => {
     try {
+      if (!isMountedRef.current) return;
       setLoading(true);
       setError(null);
 
@@ -157,10 +167,11 @@ const useDashboardData = (user, permissions) => {
 
       // ✅ PERFORMANCE: Verificar cache antes de buscar do Firestore
       if (isCacheValid(cacheKey)) {
-        console.log("⚡ Dados carregados do cache (válido por mais", 
-          Math.round((CACHE_TTL - (Date.now() - dashboardCache.timestamp)) / 1000), 
+        console.log("⚡ Dados carregados do cache (válido por mais",
+          Math.round((CACHE_TTL - (Date.now() - dashboardCache.timestamp)) / 1000),
           "segundos)");
         const cachedData = getCache();
+        if (!isMountedRef.current) return;
         setEmendas(cachedData.emendas);
         setDespesas(cachedData.despesas);
         setLoading(false);
@@ -188,6 +199,9 @@ const useDashboardData = (user, permissions) => {
           : "Configuração de permissões inválida";
         throw new Error(mensagem);
       }
+
+      // Verificar se componente ainda está montado após operações async
+      if (!isMountedRef.current) return;
 
       // ✅ CORREÇÃO: Calcular execução individual de cada emenda COM parseValorMonetario
       const emendasComExecucao = resultado.emendasData.map((emenda) => {
@@ -230,9 +244,13 @@ const useDashboardData = (user, permissions) => {
       console.log("💾 Dados salvos no cache (válido por 5 minutos)");
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
-      setError(error.message);
+      if (isMountedRef.current) {
+        setError(error.message);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

@@ -325,12 +325,13 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "12px",
     padding: "24px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    boxShadow: "var(--shadow-sm)",
     border: "2px solid #EF4444",
     marginBottom: "24px",
+    transition: "background-color 0.3s ease",
   },
   header: {
     display: "flex",
@@ -338,7 +339,7 @@ const styles = {
     gap: "16px",
     marginBottom: "24px",
     paddingBottom: "16px",
-    borderBottom: "2px solid #f1f3f4",
+    borderBottom: "2px solid var(--theme-border-light)",
     flexWrap: "wrap",
   },
   headerSuccess: {
@@ -367,15 +368,15 @@ const styles = {
   subtitle: {
     margin: 0,
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
   subtitleSuccess: {
     margin: 0,
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
   verDetalhesButton: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "var(--primary, #1A3A4A)",
     color: "white",
     border: "none",
     padding: "10px 20px",
@@ -407,13 +408,13 @@ const styles = {
     margin: 0,
     fontSize: "16px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   alertaItem: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     padding: "16px",
     borderRadius: "8px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
@@ -433,16 +434,16 @@ const styles = {
   itemNumero: {
     fontSize: "14px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--primary, #1A3A4A)",
   },
   itemParlamentar: {
     fontSize: "13px",
     fontWeight: "500",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
   itemLocal: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   itemBadge: {
     padding: "6px 12px",
@@ -464,19 +465,19 @@ const styles = {
   },
   metricLabel: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   metricValue: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   progressContainer: {
     marginTop: "4px",
   },
   progressBar: {
     height: "6px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "3px",
     overflow: "hidden",
   },

@@ -113,7 +113,7 @@ const DashboardTimeline = ({ emendas = [] }) => {
       <div style={styles.timeline}>
         {eventos.map((evento, index) => (
           <div
-            key={index}
+            key={`${evento.emendaId}-${evento.diasRestantes}`}
             style={styles.eventoItem}
             onClick={() => navigate("/emendas")}
           >
@@ -177,29 +177,30 @@ const DashboardTimeline = ({ emendas = [] }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e9ecef",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
     marginBottom: "16px",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "20px",
-    borderBottom: "1px solid #f1f3f4",
+    borderBottom: "1px solid var(--theme-border-light)",
     paddingBottom: "12px",
   },
   title: {
     margin: 0,
     fontSize: "18px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   subtitle: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
     fontWeight: "400",
   },
@@ -214,9 +215,9 @@ const styles = {
     display: "flex",
     gap: "12px",
     padding: "12px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
@@ -227,19 +228,19 @@ const styles = {
     justifyContent: "center",
     minWidth: "50px",
     padding: "8px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "6px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
   },
   eventoDay: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     lineHeight: 1,
   },
   eventoMonth: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     textTransform: "uppercase",
     marginTop: "2px",
   },
@@ -275,11 +276,11 @@ const styles = {
   eventoTitulo: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   eventoDescricao: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
   eventoProgress: {
     display: "flex",
@@ -290,7 +291,7 @@ const styles = {
   progressBar: {
     flex: 1,
     height: "4px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "2px",
     overflow: "hidden",
   },
@@ -301,7 +302,7 @@ const styles = {
   progressText: {
     fontSize: "11px",
     fontWeight: "600",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     minWidth: "30px",
     textAlign: "right",
   },
@@ -317,7 +318,7 @@ const styles = {
     fontSize: "48px",
   },
   emptyText: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontStyle: "italic",
     margin: 0,
   },

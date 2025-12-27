@@ -360,8 +360,8 @@ const DespesaFormClassificacaoFuncional = ({
               disabled={modoVisualizacao}
             >
               <option value="">Selecione...</option>
-              {NATUREZAS_DESPESA.map((nat, index) => (
-                <option key={index} value={nat}>
+              {NATUREZAS_DESPESA.map((nat) => (
+                <option key={nat} value={nat}>
                   {nat}
                 </option>
               ))}
@@ -409,8 +409,8 @@ const DespesaFormClassificacaoFuncional = ({
               disabled={modoVisualizacao}
             >
               <option value="">Selecione...</option>
-              {ELEMENTOS_DESPESA.map((el, index) => (
-                <option key={index} value={el}>
+              {ELEMENTOS_DESPESA.map((el) => (
+                <option key={el} value={el}>
                   {el}
                 </option>
               ))}

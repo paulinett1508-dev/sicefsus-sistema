@@ -179,9 +179,9 @@ const SaldoNaturezaWidget = ({
 
       {/* Lista de Naturezas */}
       <div style={compacto ? styles.listaCompacta : styles.lista}>
-        {saldoPorNatureza.map((item, index) => (
+        {saldoPorNatureza.map((item) => (
           <div
-            key={index}
+            key={item.natureza}
             style={{
               ...styles.naturezaCard,
               borderLeft: `4px solid ${getCorStatus(item.percentualExecutado)}`,

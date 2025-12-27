@@ -97,7 +97,7 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
       <div style={styles.rankingLista}>
         {ranking.map((item, index) => (
           <div
-            key={index}
+            key={`${item.municipio}-${item.uf}`}
             style={{
               ...styles.rankingItem,
               borderLeft: `4px solid ${getPosicaoColor(index)}`,
@@ -186,19 +186,20 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e9ecef",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
     marginBottom: "16px",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "20px",
-    borderBottom: "1px solid #f1f3f4",
+    borderBottom: "1px solid var(--theme-border-light)",
     paddingBottom: "12px",
     flexWrap: "wrap",
     gap: "12px",
@@ -207,10 +208,10 @@ const styles = {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   subtitle: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
     fontWeight: "400",
   },
@@ -218,7 +219,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    backgroundColor: "#2563EB",
+    backgroundColor: "var(--primary, #1A3A4A)",
     color: "white",
     padding: "4px 12px",
     borderRadius: "12px",
@@ -241,9 +242,9 @@ const styles = {
     display: "flex",
     gap: "12px",
     padding: "12px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
     transition: "all 0.2s ease",
   },
   rankingPosicao: {
@@ -258,7 +259,7 @@ const styles = {
   },
   rankingNumero: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontWeight: "600",
     marginTop: "2px",
   },
@@ -276,13 +277,13 @@ const styles = {
   rankingMunicipio: {
     fontSize: "15px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--primary, #1A3A4A)",
   },
   rankingUf: {
     fontSize: "13px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontWeight: "500",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     padding: "2px 8px",
     borderRadius: "10px",
   },
@@ -299,7 +300,7 @@ const styles = {
   },
   metricaLabel: {
     fontSize: "10px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     textTransform: "uppercase",
   },
   metricaValor: {
@@ -310,7 +311,7 @@ const styles = {
   metricaTotal: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
   metricaQuantidade: {
     fontSize: "13px",
@@ -318,7 +319,7 @@ const styles = {
     color: "#3B82F6",
   },
   metricaDivider: {
-    color: "#dee2e6",
+    color: "var(--theme-border)",
     fontSize: "12px",
   },
   rankingProgress: {
@@ -329,7 +330,7 @@ const styles = {
   progressBar: {
     flex: 1,
     height: "8px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "4px",
     overflow: "hidden",
   },
@@ -340,7 +341,7 @@ const styles = {
   progressText: {
     fontSize: "12px",
     fontWeight: "700",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     minWidth: "40px",
     textAlign: "right",
   },
@@ -348,9 +349,9 @@ const styles = {
     display: "flex",
     justifyContent: "space-around",
     padding: "16px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     borderRadius: "8px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
   },
   resumoItem: {
     display: "flex",
@@ -360,19 +361,19 @@ const styles = {
   },
   resumoLabel: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontWeight: "500",
     textTransform: "uppercase",
   },
   resumoValor: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--primary, #1A3A4A)",
   },
   emptyState: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontStyle: "italic",
   },
 };

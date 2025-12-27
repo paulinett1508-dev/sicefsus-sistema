@@ -73,8 +73,8 @@ const DashboardExecucao = ({ emendas = [] }) => {
       </div>
 
       <div style={styles.barsContainer}>
-        {dados.map((item, index) => (
-          <div key={index} style={styles.barItem}>
+        {dados.map((item) => (
+          <div key={item.tipo} style={styles.barItem}>
             <div style={styles.barHeader}>
               <div style={styles.barInfo}>
                 <span style={styles.barLabel}>{item.tipo}</span>
@@ -118,26 +118,27 @@ const DashboardExecucao = ({ emendas = [] }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e9ecef",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
     marginBottom: "16px",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   header: {
     marginBottom: "20px",
-    borderBottom: "1px solid #f1f3f4",
+    borderBottom: "1px solid var(--theme-border-light)",
     paddingBottom: "12px",
   },
   title: {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   subtitle: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
     fontWeight: "400",
   },
@@ -164,11 +165,11 @@ const styles = {
   barLabel: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   barCount: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   barPercentage: {
     fontSize: "16px",
@@ -176,7 +177,7 @@ const styles = {
   },
   barTrack: {
     height: "12px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "6px",
     overflow: "hidden",
   },
@@ -196,16 +197,16 @@ const styles = {
     fontWeight: "600",
   },
   barDivider: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   barTotal: {
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     fontWeight: "600",
   },
   emptyState: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontStyle: "italic",
   },
 };

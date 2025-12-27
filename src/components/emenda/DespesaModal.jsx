@@ -277,11 +277,11 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
                         ⚠️ Nenhuma natureza planejada ainda
                       </option>
                     )}
-                    {acoesServicos.map((acao, index) => {
+                    {acoesServicos.map((acao) => {
                       const saldo = calcularSaldoDisponivel(acao);
                       return (
                         <option
-                          key={index}
+                          key={acao.estrategia}
                           value={acao.estrategia}
                           disabled={saldo <= 0}
                         >

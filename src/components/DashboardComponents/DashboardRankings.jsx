@@ -188,19 +188,20 @@ const DashboardRankings = ({ emendas = [] }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.06)",
-    border: "1px solid #e9ecef",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
     marginBottom: "16px",
+    transition: "background-color 0.3s ease, border-color 0.3s ease",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "20px",
-    borderBottom: "1px solid #f1f3f4",
+    borderBottom: "1px solid var(--theme-border-light)",
     paddingBottom: "12px",
     flexWrap: "wrap",
     gap: "12px",
@@ -209,17 +210,17 @@ const styles = {
     margin: "0 0 3px 0",
     fontSize: "18px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   subtitle: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
     fontWeight: "400",
   },
   toggleContainer: {
     display: "flex",
     gap: "8px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     padding: "4px",
     borderRadius: "6px",
   },
@@ -230,13 +231,13 @@ const styles = {
     borderRadius: "4px",
     fontSize: "13px",
     fontWeight: "600",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
   toggleButtonActive: {
-    backgroundColor: "white",
-    color: "#2563EB",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--primary, #1A3A4A)",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   },
   lista: {
@@ -248,9 +249,9 @@ const styles = {
     display: "flex",
     gap: "12px",
     padding: "12px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-hover)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
     cursor: "pointer",
     transition: "all 0.2s ease",
   },
@@ -266,7 +267,7 @@ const styles = {
   },
   itemPosicao: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontWeight: "600",
     marginTop: "2px",
   },
@@ -284,7 +285,7 @@ const styles = {
   itemNumero: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--primary, #1A3A4A)",
   },
   itemPercentual: {
     fontSize: "18px",
@@ -295,16 +296,16 @@ const styles = {
     alignItems: "center",
     gap: "6px",
     fontSize: "13px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
   itemParlamentar: {
     fontWeight: "500",
   },
   itemDivider: {
-    color: "#dee2e6",
+    color: "var(--theme-border)",
   },
   itemLocal: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   itemValores: {
     display: "flex",
@@ -313,17 +314,17 @@ const styles = {
     fontSize: "12px",
   },
   itemValorLabel: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   itemValorExecutado: {
     color: "#10B981",
     fontWeight: "600",
   },
   itemValorDivider: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
   itemValorTotal: {
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     fontWeight: "600",
   },
   itemProgress: {
@@ -331,7 +332,7 @@ const styles = {
   },
   progressBar: {
     height: "6px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "3px",
     overflow: "hidden",
   },
@@ -344,7 +345,7 @@ const styles = {
     padding: "40px",
   },
   emptyText: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontStyle: "italic",
     margin: 0,
   },

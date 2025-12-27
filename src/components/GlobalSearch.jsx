@@ -34,7 +34,16 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
   const searchRef = useRef(null);
   const resultsRef = useRef(null);
   const inputRef = useRef(null);
+  const isMountedRef = useRef(true);
   const toast = useToast();
+
+  // Cleanup para evitar setState após desmontagem
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Carregar todos os dados na inicialização
   useEffect(() => {
@@ -78,11 +87,14 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
     }
 
     try {
+      if (!isMountedRef.current) return;
       setLoading(true);
       const startTime = Date.now();
 
       // Fetching despesas remains the same
       const despesasSnapshot = await getDocs(query(collection(db, "despesas"), orderBy("data", "desc")));
+      if (!isMountedRef.current) return;
+
       const despesas = despesasSnapshot.docs.map((doc) => ({
         id: doc.id,
         type: "despesa",
@@ -106,6 +118,7 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
       }
 
       const emendasSnapshot = await getDocs(emendasQuery);
+      if (!isMountedRef.current) return;
 
       const emendas = emendasSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -116,6 +129,7 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
       setAllData({ emendas, despesas });
       setLastSearchTime(Date.now() - startTime);
     } catch (error) {
+      if (!isMountedRef.current) return;
       console.error("Erro ao carregar dados:", error);
       // Only show toast if it's a permission error that needs user attention
       if (error.code === 'permission-denied') {
@@ -124,7 +138,9 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
         toast.error("Erro ao carregar dados para busca");
       }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -495,9 +511,9 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
 
                   {result.highlights.length > 0 && (
                     <div style={styles.highlights}>
-                      {result.highlights.slice(0, 2).map((highlight, i) => (
+                      {result.highlights.slice(0, 2).map((highlight) => (
                         <span
-                          key={i}
+                          key={`${highlight.field}-${highlight.value}`}
                           style={{
                             ...styles.highlight,
                             ...(highlight.exact ? styles.exactHighlight : {}),
