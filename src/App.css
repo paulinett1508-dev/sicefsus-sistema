@@ -17,12 +17,12 @@ html, body {
 }
 
 a {
-  color: #2563EB;
+  color: #1A3A4A;
   text-decoration: none;
   transition: color 0.2s;
 }
 a:hover {
-  color: #1D4ED8;
+  color: #0F2830;
 }
 
 input, select, button, textarea {
@@ -172,11 +172,11 @@ tr:last-child td {
 
 .form-emenda h2,
 .form-despesa h2 {
-  color: #334155;
+  color: #1A3A4A;
   margin-bottom: 30px;
   font-size: 24px;
   font-weight: 600;
-  border-bottom: 2px solid #2563EB;
+  border-bottom: 2px solid #1A3A4A;
   padding-bottom: 10px;
 }
 
@@ -239,8 +239,8 @@ legend {
 }
 
 .form-control:focus {
-  border-color: #3B82F6;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  border-color: #1A3A4A;
+  box-shadow: 0 0 0 3px rgba(26, 58, 74, 0.15);
   outline: none;
   background: #fafbfc;
 }
@@ -309,14 +309,14 @@ textarea.form-control {
 
 /* Variações de botões */
 .btn-primary {
-  background: linear-gradient(135deg, #3B82F6 0%, #357ABD 100%);
-  border-color: #3B82F6;
+  background: linear-gradient(135deg, #1A3A4A 0%, #2A5A6A 100%);
+  border-color: #1A3A4A;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #357ABD 0%, #2E6DA4 100%);
-  border-color: #357ABD;
+  background: linear-gradient(135deg, #0F2830 0%, #1A3A4A 100%);
+  border-color: #0F2830;
 }
 
 .btn-secondary {

@@ -218,13 +218,13 @@ const UserForm = ({
             fontWeight: "600",
           }}
         >
-          <span style={styles.legendIcon}>📍</span>
+          <span style={styles.legendIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>location_on</span></span>
           Localização de Acesso (OBRIGATÓRIO PARA OPERADORES E GESTORES)
           <span
             style={styles.infoIcon}
             title="Operadores e Gestores só podem visualizar e gerenciar emendas do município cadastrado"
           >
-            ℹ️
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>info</span>
           </span>
         </legend>
 
@@ -237,7 +237,7 @@ const UserForm = ({
               borderColor: "rgba(76, 175, 80, 0.3)",
             }}
           >
-            <div style={styles.operatorBannerIcon}>🔄</div>
+            <div style={styles.operatorBannerIcon}><span className="material-symbols-outlined" style={{ fontSize: 20 }}>sync</span></div>
             <div style={styles.operatorBannerContent}>
               <strong>Tipo alterado para Operador:</strong>
               <br />
@@ -249,7 +249,7 @@ const UserForm = ({
         {/* 🆕 Banner informativo para operadores criando usuário */}
         {currentUser?.tipo === "operador" && !editingUser && (
           <div style={styles.operatorBanner}>
-            <div style={styles.operatorBannerIcon}>📍</div>
+            <div style={styles.operatorBannerIcon}><span className="material-symbols-outlined" style={{ fontSize: 20 }}>location_on</span></div>
             <div style={styles.operatorBannerContent}>
               <strong>Pré-preenchimento automático:</strong>
               <br />
@@ -286,7 +286,7 @@ const UserForm = ({
             />
 
             <small style={{ ...styles.helpText, color: "var(--success)" }}>
-              ✅ Selecione o estado e município para o operador/gestor
+              <span className="material-symbols-outlined" style={{ fontSize: 12, verticalAlign: "middle", marginRight: 4 }}>check_circle</span> Selecione o estado e município para o operador/gestor
             </small>
           </div>
         ) : null}
@@ -310,7 +310,7 @@ const UserForm = ({
                 gap: "8px",
               }}
             >
-              ✅ <strong>Configuração de Acesso:</strong>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>check_circle</span> <strong>Configuração de Acesso:</strong>
               {tipoAlteradoDuranteEdicao && (
                 <span style={{ fontSize: "12px", color: "var(--warning)" }}>
                   (Modificado)
@@ -327,12 +327,12 @@ const UserForm = ({
                 fontSize: "0.9em",
               }}
             >
-              📍 <strong>Localização:</strong> {formData.municipio} /{" "}
+              <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>location_on</span> <strong>Localização:</strong> {formData.municipio} /{" "}
               {formData.uf}
               <br />
-              🔍 <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
+              <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>search</span> <strong>Acesso:</strong> Apenas emendas de {formData.municipio}
               <br />
-              👤 <strong>Permissões:</strong> {formData.role === "gestor" 
+              <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>person</span> <strong>Permissões:</strong> {formData.role === "gestor" 
                 ? "Visualizar, criar, editar e deletar emendas/despesas"
                 : "Visualizar, criar despesas"}
             </div>
@@ -360,7 +360,7 @@ const UserForm = ({
         {/* ✅ HEADER MINIMALISTA */}
         <div style={styles.header}>
           <h2 style={styles.headerTitle}>
-            {editingUser ? "✏️ Editar Usuário" : "👤 Novo Usuário"}
+            {editingUser ? <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>edit</span> Editar Usuário</> : <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>person_add</span> Novo Usuário</>}
           </h2>
           <button
             style={styles.closeButton}
@@ -382,10 +382,10 @@ const UserForm = ({
               onClick={() => setShowSecurityPolicy(!showSecurityPolicy)}
             >
               <span style={styles.securityToggleIcon}>
-                {showSecurityPolicy ? "🔽" : "▶️"}
+                {showSecurityPolicy ? <span className="material-symbols-outlined" style={{ fontSize: 12 }}>expand_more</span> : <span className="material-symbols-outlined" style={{ fontSize: 12 }}>chevron_right</span>}
               </span>
               <span style={styles.securityToggleText}>
-                🔒 Política de Segurança SICEFSUS
+                <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>lock</span> Política de Segurança SICEFSUS
               </span>
               <span style={styles.securityBadge}>LGPD</span>
             </button>
@@ -404,7 +404,7 @@ const UserForm = ({
                             "linear-gradient(135deg, #2196f322 0%, #2196f344 100%)",
                         }}
                       >
-                        <span style={{ fontSize: "24px" }}>🔐</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 24 }}>enhanced_encryption</span>
                       </div>
                       <div style={securityStyles.cardContent}>
                         <h5 style={securityStyles.cardTitle}>
@@ -425,7 +425,7 @@ const UserForm = ({
                             "linear-gradient(135deg, #4caf5022 0%, #4caf5044 100%)",
                         }}
                       >
-                        <span style={{ fontSize: "24px" }}>📧</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 24 }}>mail</span>
                       </div>
                       <div style={securityStyles.cardContent}>
                         <h5 style={securityStyles.cardTitle}>
@@ -446,7 +446,7 @@ const UserForm = ({
                             "linear-gradient(135deg, #ff980022 0%, #ff980044 100%)",
                         }}
                       >
-                        <span style={{ fontSize: "24px" }}>🔄</span>
+                        <span className="material-symbols-outlined" style={{ fontSize: 24 }}>sync</span>
                       </div>
                       <div style={securityStyles.cardContent}>
                         <h5 style={securityStyles.cardTitle}>
@@ -462,7 +462,7 @@ const UserForm = ({
 
                   <div style={securityStyles.footer}>
                     <div style={securityStyles.footerIcon}>
-                      <span>🛡️</span>
+                      <span className="material-symbols-outlined" style={{ fontSize: 20 }}>shield</span>
                     </div>
                     <div style={securityStyles.footerContent}>
                       <strong style={securityStyles.footerTitle}>
@@ -486,7 +486,7 @@ const UserForm = ({
           {/* ✅ SEÇÃO DADOS PESSOAIS */}
           <fieldset style={styles.fieldset}>
             <legend style={styles.legend}>
-              <span style={styles.legendIcon}>👤</span>
+              <span style={styles.legendIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>person</span></span>
               Dados Pessoais
             </legend>
 
@@ -512,7 +512,7 @@ const UserForm = ({
                       style={styles.infoIcon}
                       title="Email não pode ser alterado após criação"
                     >
-                      ℹ️
+                      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>info</span>
                     </span>
                     Email não pode ser alterado após criação
                   </small>
@@ -572,7 +572,7 @@ const UserForm = ({
           {/* ✅ SEÇÃO CONFIGURAÇÕES DE ACESSO */}
           <fieldset style={styles.fieldset}>
             <legend style={styles.legend}>
-              <span style={styles.legendIcon}>🔐</span>
+              <span style={styles.legendIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>lock</span></span>
               Configurações de Acesso
             </legend>
 
@@ -593,16 +593,16 @@ const UserForm = ({
                   }
                   required
                 >
-                  <option value="user">👤 Operador</option>
-                  <option value="gestor">🏛️ Gestor</option>
-                  <option value="admin">👑 Administrador</option>
+                  <option value="user">Operador</option>
+                  <option value="gestor">Gestor</option>
+                  <option value="admin">Administrador</option>
                 </select>
                 <small style={styles.helpText}>
                   {formData.role === "admin"
-                    ? "🌐 Acesso total ao sistema (todos os municípios)"
+                    ? "Acesso total ao sistema (todos os municípios)"
                     : formData.role === "gestor"
-                    ? "🏛️ Gerencia emendas/despesas do município (pode deletar)"
-                    : "📍 Acesso restrito ao município cadastrado"}
+                    ? "Gerencia emendas/despesas do município (pode deletar)"
+                    : "Acesso restrito ao município cadastrado"}
                 </small>
               </div>
 
@@ -619,8 +619,8 @@ const UserForm = ({
                   disabled={saving}
                   required
                 >
-                  <option value="ativo">✅ Ativo</option>
-                  <option value="inativo">⏸️ Inativo</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="inativo">Inativo</option>
                 </select>
                 <small style={styles.helpText}>
                   {formData.status === "ativo"
@@ -651,7 +651,7 @@ const UserForm = ({
                   fontWeight: "600",
                 }}
               >
-                <span style={styles.legendIcon}>👑</span>
+                <span style={styles.legendIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>admin_panel_settings</span></span>
                 Configuração de Administrador
               </legend>
 
@@ -672,7 +672,7 @@ const UserForm = ({
                     marginBottom: "8px",
                   }}
                 >
-                  👑 <strong>Privilégios de Administrador:</strong>
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>admin_panel_settings</span> <strong>Privilégios de Administrador:</strong>
                 </div>
                 <div
                   style={{
@@ -683,21 +683,21 @@ const UserForm = ({
                     lineHeight: "1.4",
                   }}
                 >
-                  🌐 <strong>Acesso:</strong> Todos os municípios e UFs
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>public</span> <strong>Acesso:</strong> Todos os municípios e UFs
                   <br />
-                  📋 <strong>Emendas:</strong> Criar, editar, excluir todas as
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>description</span> <strong>Emendas:</strong> Criar, editar, excluir todas as
                   emendas
                   <br />
-                  💰 <strong>Despesas:</strong> Gerenciar despesas de qualquer
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>payments</span> <strong>Despesas:</strong> Gerenciar despesas de qualquer
                   emenda
                   <br />
-                  👥 <strong>Usuários:</strong> Gerenciar todos os usuários do
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>group</span> <strong>Usuários:</strong> Gerenciar todos os usuários do
                   sistema
                   <br />
-                  📊 <strong>Relatórios:</strong> Acesso a relatórios
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>analytics</span> <strong>Relatórios:</strong> Acesso a relatórios
                   consolidados
                   <br />
-                  ⚙️ <strong>Sistema:</strong> Configurações administrativas
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>settings</span> <strong>Sistema:</strong> Configurações administrativas
                 </div>
               </div>
             </fieldset>
@@ -711,7 +711,7 @@ const UserForm = ({
               onClick={onCancel}
               disabled={saving}
             >
-              ❌ Cancelar
+              <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>close</span> Cancelar
             </button>
 
             <button
@@ -731,7 +731,7 @@ const UserForm = ({
                   {editingUser ? "Atualizando..." : "Criando..."}
                 </span>
               ) : (
-                <span>{editingUser ? "💾 Atualizar" : "✅ Criar"} Usuário</span>
+                <span>{editingUser ? <><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>save</span> Atualizar</> : <><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>check_circle</span> Criar</>} Usuário</span>
               )}
             </button>
           </div>

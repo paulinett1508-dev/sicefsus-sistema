@@ -7,7 +7,25 @@
       "Bash(git commit:*)",
       "Bash(git config:*)",
       "Bash(bash:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(git push:*)",
+      "Bash(node -e:*)",
+      "Bash(ls:*)",
+      "Bash(xargs sed:*)",
+      "Bash(find:*)",
+      "Skill(firebase-check)",
+      "Bash(npm run build:*)",
+      "mcp__ide__getDiagnostics",
+      "Skill(check-bugs)",
+      "Bash(src/components/DashboardComponents/DashboardTimeline.jsx )",
+      "Bash(src/components/DashboardComponents/DashboardExecucao.jsx )",
+      "Bash(src/components/DashboardComponents/DashboardRankings.jsx )",
+      "Bash(src/components/DashboardComponents/DashboardAlertasDetalhados.jsx )",
+      "Bash(src/components/SaldoNaturezaWidget.jsx )",
+      "Bash(src/components/GlobalSearch.jsx )",
+      "Bash(src/components/despesa/DespesaFormClassificacaoFuncional.jsx )",
+      "Bash(src/components/emenda/DespesaModal.jsx )",
+      "Bash(src/hooks/useDashboardData.js)"
     ]
   }
 }

@@ -16,13 +16,13 @@ const ConfirmationModal = ({
   const getIconByType = () => {
     switch (type) {
       case "danger":
-        return "🚨";
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#dc3545" }}>error</span>;
       case "info":
-        return "ℹ️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#007bff" }}>info</span>;
       case "save":
-        return "💾";
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#28a745" }}>save</span>;
       default:
-        return "⚠️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#ffc107" }}>warning</span>;
     }
   };
 

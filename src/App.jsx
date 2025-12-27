@@ -29,10 +29,13 @@ import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 // import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
 import { useUser, UserProvider } from "./context/UserContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { checkVersion } from "./utils/versionControl";
 import { useVersion } from "./hooks/useVersion";
 import ErrorBoundary from "./components/ErrorBoundary";
 import UpdateNotification from "./components/UpdateNotification";
+import SystemStatusBar from "./components/SystemStatusBar";
+import ThemeToggleButton from "./components/ThemeToggleButton";
 
 console.log("🔥 PROD Firebase Check:", {
   mode: import.meta.env.MODE,
@@ -289,6 +292,9 @@ function AppContent() {
 
         {/* Conteúdo principal */}
         <div style={styles.content}>
+          {/* Header compacto de status */}
+          {usuario && <SystemStatusBar />}
+
           {authError && (
             <div style={styles.authErrorContainer}>
               <div style={styles.authError}>
@@ -504,6 +510,9 @@ function AppContent() {
               />
             </Routes>
           </ErrorBoundary>
+
+          {/* Botão flutuante de toggle de tema */}
+          {usuario && <ThemeToggleButton />}
         </div>
       </div>
     </div>
@@ -517,16 +526,18 @@ function App() {
   }
 
   return (
-    <UserProvider>
-      <ToastProvider>
-        <Router>
-          <NavigationProtectionProvider>
-            <AppContent />
-            <UpdateNotification />
-          </NavigationProtectionProvider>
-        </Router>
-      </ToastProvider>
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <ToastProvider>
+          <Router>
+            <NavigationProtectionProvider>
+              <AppContent />
+              <UpdateNotification />
+            </NavigationProtectionProvider>
+          </Router>
+        </ToastProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }
 
@@ -537,8 +548,8 @@ const styles = {
   app: {
     fontFamily: "'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif",
     minHeight: "100vh",
-    backgroundColor: "#F8FAFC",
-    color: "#334155",
+    backgroundColor: "var(--theme-bg)",
+    color: "var(--theme-text)",
     transition: "background-color 0.3s ease, color 0.3s ease",
   },
   container: {
@@ -548,9 +559,9 @@ const styles = {
   content: {
     flex: 1,
     marginLeft: 256,
-    transition: "margin-left 0.2s ease",
+    transition: "margin-left 0.2s ease, background-color 0.3s ease",
     minHeight: "100vh",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "var(--theme-bg)",
   },
   loadingContainer: {
     display: "flex",

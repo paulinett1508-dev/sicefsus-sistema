@@ -108,13 +108,13 @@ const Toast = ({ toast, onHide }) => {
   const getIcon = () => {
     switch (toast.type) {
       case "success":
-        return "✅";
+        return <span className="material-symbols-outlined" style={{ fontSize: 16 }}>check_circle</span>;
       case "error":
-        return "❌";
+        return <span className="material-symbols-outlined" style={{ fontSize: 16 }}>cancel</span>;
       case "warning":
-        return "⚠️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 16 }}>warning</span>;
       default:
-        return "ℹ️";
+        return <span className="material-symbols-outlined" style={{ fontSize: 16 }}>info</span>;
     }
   };
 

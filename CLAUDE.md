@@ -5,6 +5,15 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Stack:** React + Firebase (Firestore + Auth)
 - **Deploy:** Replit
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
+- **Design System:** v2.0 (Inter font, Tailwind-based colors)
+
+## Ultima Atualizacao - 27/12/2025
+
+**Transformacao Visual Aplicada:**
+- Paleta de cores atualizada para estilo moderno (Tailwind)
+- Fonte Inter adicionada
+- Novas classes CSS utilitarias
+- Ver `DESIGN_SYSTEM.md` para detalhes completos
 
 ## Arquivos Criticos (LEIA ANTES DE MODIFICAR)
 

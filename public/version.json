@@ -1,14 +1,15 @@
 {
-  "version": "2.3.78",
-  "buildDate": "2025-10-22T17:12:25.051Z",
-  "buildDateBR": "22/10/2025 às 17:12",
+  "version": "2.3.70",
+  "buildDate": "2025-12-27T20:46:31.251Z",
+  "buildDateBR": "27/12/2025 às 20:46",
   "environment": "production",
   "changes": [
-    "🎯 Sistema de versionamento simplificado",
-    "🔄 Incremento manual antes do Republish",
-    "✅ Logo agora redireciona para Dashboard",
-    "🧹 Limpeza de arquivos desnecessários"
+    "🚀 Sistema de versionamento centralizado implementado",
+    "✅ Fonte única da verdade em versionControl.js",
+    "🔧 Sincronização automática com package.json",
+    "📊 Funções de incremento de versão automático",
+    "🎯 Interface consistente para todos os componentes"
   ],
   "date": "22/10/2025",
-  "timestamp": "22/10/2025 às 17:06"
+  "timestamp": "22/10/2025 às 19:03"
 }

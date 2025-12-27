@@ -1,6 +1,16 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import GlobalSearch from "./GlobalSearch";
+import logoSicefsus from "../images/logo-sicefsus.png";
+import { useVersion } from "../hooks/useVersion";
+
+// Detectar ambiente
+const getEnvironment = () => {
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || "";
+  if (projectId.includes("prod")) return { label: "PROD", color: "#dc2626" };
+  if (projectId.includes("60dbd")) return { label: "DEV", color: "#16a34a" };
+  return { label: "TEST", color: "#ea580c" };
+};
 
 // Menu principal
 const menuItems = [
@@ -18,6 +28,8 @@ const configItems = [{ label: "Sistema", icon: "settings", path: "/sobre" }];
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { version } = useVersion();
+  const env = getEnvironment();
 
   const isAdmin = usuario?.tipo === "admin";
   const isSuperAdmin = isAdmin && usuario?.superAdmin === true;
@@ -111,9 +123,11 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
           style={styles.logoContainer}
           onClick={() => onNavigate("/dashboard")}
         >
-          <span className="material-symbols-outlined" style={styles.logoIcon}>
-            token
-          </span>
+          <img
+            src={logoSicefsus}
+            alt="SICEFSUS"
+            style={collapsed ? styles.logoImageCollapsed : styles.logoImage}
+          />
           {!collapsed && <span style={styles.logoText}>SICEFSUS</span>}
         </div>
       </div>
@@ -227,6 +241,12 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
           </button>
         )}
+
+        {/* Indicador discreto: Ambiente + Versão */}
+        <div style={styles.envIndicator(collapsed)}>
+          <span style={{ ...styles.envBadge, backgroundColor: env.color }}>{env.label}</span>
+          {!collapsed && <span style={styles.versionText}>v{version}</span>}
+        </div>
       </div>
     </aside>
   );
@@ -248,11 +268,11 @@ function NavItem({ item, isActive, collapsed, onClick, badge }) {
     transition: "all 0.15s ease",
     justifyContent: collapsed ? "center" : "flex-start",
     backgroundColor: isActive
-      ? "rgba(37, 99, 235, 0.08)"
+      ? "rgba(26, 58, 74, 0.08)"
       : hovered
         ? "rgba(241, 245, 249, 1)"
         : "transparent",
-    color: isActive ? "#2563EB" : hovered ? "#2563EB" : "#64748B",
+    color: isActive ? "#1A3A4A" : hovered ? "#1A3A4A" : "#64748B",
   };
 
   const iconStyle = {
@@ -287,11 +307,11 @@ const styles = {
   sidebar: (collapsed) => ({
     width: collapsed ? 80 : 256,
     flexShrink: 0,
-    backgroundColor: "#ffffff",
-    borderRight: "1px solid #E2E8F0",
+    backgroundColor: "var(--theme-sidebar-bg, var(--theme-surface))",
+    borderRight: "1px solid var(--theme-border)",
     display: "flex",
     flexDirection: "column",
-    transition: "width 0.3s ease",
+    transition: "width 0.3s ease, background-color 0.3s ease",
     position: "fixed",
     top: 0,
     left: 0,
@@ -305,7 +325,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    borderBottom: "1px solid #F1F5F9",
+    borderBottom: "1px solid var(--theme-border-light)",
     padding: "0 16px",
   },
 
@@ -314,12 +334,19 @@ const styles = {
     alignItems: "center",
     gap: 8,
     cursor: "pointer",
-    color: "#2563EB",
+    color: "#1A3A4A",
   },
 
-  logoIcon: {
-    fontSize: 32,
-    fontVariationSettings: "'FILL' 0, 'wght' 400",
+  logoImage: {
+    width: 36,
+    height: 36,
+    objectFit: "contain",
+  },
+
+  logoImageCollapsed: {
+    width: 32,
+    height: 32,
+    objectFit: "contain",
   },
 
   logoText: {
@@ -357,14 +384,14 @@ const styles = {
   configSection: {
     marginTop: 16,
     paddingTop: 16,
-    borderTop: "1px solid #F1F5F9",
+    borderTop: "1px solid var(--theme-border-light)",
   },
 
   sectionTitle: {
     padding: "0 24px",
     fontSize: "11px",
     fontWeight: 600,
-    color: "#94A3B8",
+    color: "var(--theme-text-muted)",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
     marginBottom: 8,
@@ -381,7 +408,7 @@ const styles = {
   },
 
   footer: {
-    borderTop: "1px solid #E2E8F0",
+    borderTop: "1px solid var(--theme-border)",
     padding: "16px",
   },
 
@@ -395,7 +422,7 @@ const styles = {
     width: 36,
     height: 36,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #3B82F6, #6366F1)",
+    background: "linear-gradient(135deg, #1A3A4A, #2A5A6A)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -403,7 +430,7 @@ const styles = {
     fontWeight: 700,
     fontSize: 12,
     flexShrink: 0,
-    boxShadow: "0 2px 4px rgba(99, 102, 241, 0.3)",
+    boxShadow: "0 2px 4px rgba(26, 58, 74, 0.3)",
   },
 
   userInfo: {
@@ -415,7 +442,7 @@ const styles = {
     margin: 0,
     fontSize: "14px",
     fontWeight: 500,
-    color: "#334155",
+    color: "var(--theme-text)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -424,7 +451,7 @@ const styles = {
   userRole: {
     margin: 0,
     fontSize: "12px",
-    color: "#64748B",
+    color: "var(--theme-text-secondary)",
   },
 
   logoutBtn: {
@@ -432,7 +459,7 @@ const styles = {
     border: "none",
     padding: 8,
     cursor: "pointer",
-    color: "#94A3B8",
+    color: "var(--theme-text-muted)",
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
@@ -445,7 +472,7 @@ const styles = {
     border: "none",
     padding: 8,
     cursor: "pointer",
-    color: "#94A3B8",
+    color: "var(--theme-text-muted)",
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
@@ -453,5 +480,30 @@ const styles = {
     width: "100%",
     marginTop: 8,
     transition: "all 0.15s ease",
+  },
+
+  envIndicator: (collapsed) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: collapsed ? "center" : "flex-start",
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTop: "1px solid var(--theme-border-light)",
+  }),
+
+  envBadge: {
+    fontSize: "9px",
+    fontWeight: 700,
+    color: "#fff",
+    padding: "2px 5px",
+    borderRadius: "3px",
+    letterSpacing: "0.5px",
+  },
+
+  versionText: {
+    fontSize: "10px",
+    color: "var(--theme-text-muted)",
+    fontFamily: "monospace",
   },
 };
