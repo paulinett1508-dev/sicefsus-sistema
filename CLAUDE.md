@@ -13,7 +13,13 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - Paleta de cores atualizada para estilo moderno (Tailwind)
 - Fonte Inter adicionada
 - Novas classes CSS utilitarias
+- Emojis substituidos por Material Symbols Outlined icons
 - Ver `DESIGN_SYSTEM.md` para detalhes completos
+
+**Icones - Material Symbols:**
+- Usar `<span className="material-symbols-outlined">icon_name</span>`
+- Tamanhos comuns: 12-16px (inline), 18-24px (titulos), 48px (empty states)
+- Sempre incluir `verticalAlign: "middle"` para alinhamento
 
 ## Arquivos Criticos (LEIA ANTES DE MODIFICAR)
 
@@ -45,7 +51,7 @@ src/
 │   ├── Dashboard.jsx                # Dashboard principal
 │   ├── Login.jsx                    # Tela de login
 │   ├── Emendas.jsx                  # Lista de emendas
-│   ├── Despesas.jsx                 # Lista de despesas (obsoleto)
+│   ├── Sobre.jsx                    # Pagina Sobre o sistema
 │   ├── Relatorios.jsx               # Modulo de relatorios
 │   ├── Sidebar.jsx                  # Menu lateral
 │   ├── Administracao.jsx            # Painel administrativo
@@ -474,13 +480,49 @@ Servidor MCP para operacoes diretas no Firestore.
    - Deletado arquivo duplicado `SaldoNaturezaWidget (copy).jsx`
 4. Configuracao do Firebase MCP Server
 5. Criacao de comandos Claude customizados
+6. **Substituicao de emojis por Material Symbols icons:**
+   - Componentes principais: Toast, ConfirmationModal, UserForm
+   - Tabelas: EmendasTable, DespesasTable, UsersTable
+   - Filtros: EmendasFilters, DespesasFilters
+   - Widgets: SaldoEmendaWidget, SaldoNaturezaWidget, FluxoEmenda
+   - Formularios: EmendaForm, DespesaForm components
+   - Paginas: Sobre, Dashboard, Emendas, Login
+   - Admin: AdminHeader, LogsSection, EmendaDetail components
+
+### Padrao de Icones Material Symbols
+```jsx
+// Inline com texto
+<span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>icon_name</span>
+
+// Em titulos
+<span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>icon_name</span>
+
+// Empty states
+<span className="material-symbols-outlined" style={{ fontSize: 48 }}>icon_name</span>
+```
+
+### Icones Comuns Utilizados
+| Emoji | Material Symbol |
+|-------|-----------------|
+| check/success | `check_circle` |
+| error/cancel | `cancel` |
+| warning | `warning` |
+| info | `info` |
+| edit | `edit` |
+| delete | `delete` |
+| search | `search` |
+| payments/money | `payments` |
+| description/document | `description` |
+| analytics/chart | `analytics` |
+| location | `location_on` |
+| calendar | `calendar_today` |
+| person | `person` |
+| settings | `settings` |
 
 ### Issues Conhecidas
-- 6-8 componentes potencialmente orfaos (debug/test)
-- Alguns formularios nao usam `validators.js`
+- Alguns componentes de debug ainda tem emojis (baixa prioridade)
 - ~21% dos useEffects tem cleanup
 
 ### Proximos Passos Sugeridos
-- Revisar componentes orfaos
-- Adicionar validadores nos formularios faltantes
 - Verificar useEffects que precisam de cleanup
+- Completar substituicao de emojis em componentes dev/debug
