@@ -4,12 +4,60 @@
 import React, { useCallback } from "react";
 import CNPJInput from "../../../CNPJInput";
 import { PROGRAMAS_SAUDE, OBJETOS_EMENDA } from "../../../../config/constants";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const DadosBasicos = React.memo(
   ({ formData = {}, onChange, fieldErrors = {}, onClearError }) => {
+    const { isDark } = useTheme();
+
     if (process.env.NODE_ENV === "development") {
       console.log("📋 DadosBasicos renderizado");
     }
+
+    // Estilos dinâmicos baseados no tema
+    const dynamicStyles = {
+      fieldset: {
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+        borderRadius: "10px",
+        padding: "20px",
+        background: isDark
+          ? "var(--theme-surface)"
+          : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+        boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
+      },
+      legend: {
+        background: isDark ? "var(--theme-surface-secondary)" : "white",
+        padding: "5px 15px",
+        borderRadius: "20px",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+        color: isDark ? "var(--theme-text)" : "#2563EB",
+        fontWeight: "bold",
+        fontSize: "16px",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+      },
+      label: {
+        fontWeight: "bold",
+        color: isDark ? "var(--theme-text)" : "#333",
+        fontSize: "14px",
+      },
+      input: {
+        padding: "12px",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderColor: isDark ? "var(--theme-border)" : "#dee2e6",
+        borderRadius: "6px",
+        fontSize: "14px",
+        transition: "border-color 0.3s ease",
+        backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
+        color: isDark ? "var(--theme-text)" : "inherit",
+      },
+    };
 
     const formatarMoeda = useCallback((valor) => {
       const numero = valor.replace(/\D/g, "");
@@ -48,16 +96,16 @@ const DadosBasicos = React.memo(
     );
 
     return (
-      <fieldset style={styles.fieldset}>
-        <legend style={styles.legend}>
-          <span style={styles.legendIcon}>💰</span>
+      <fieldset style={dynamicStyles.fieldset}>
+        <legend style={dynamicStyles.legend}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span>
           Dados Básicos
         </legend>
 
         <div style={styles.formGrid}>
           {/* Programa - ✅ ATUALIZADO COM CONSTANTES */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Programa <span style={styles.required}>*</span>
             </label>
             <select
@@ -65,7 +113,7 @@ const DadosBasicos = React.memo(
               value={formData.programa || ""}
               onChange={handleInputChange}
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...(fieldErrors.programa && styles.inputError),
               }}
               required
@@ -84,7 +132,7 @@ const DadosBasicos = React.memo(
 
           {/* Objeto da Proposta */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Objeto da Proposta <span style={styles.required}>*</span>
             </label>
             <input
@@ -93,7 +141,7 @@ const DadosBasicos = React.memo(
               value={formData.objeto || ""}
               onChange={handleInputChange}
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...(fieldErrors.objeto && styles.inputError),
               }}
               required
@@ -105,7 +153,7 @@ const DadosBasicos = React.memo(
 
           {/* Parlamentar/Autor */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Parlamentar/Autor <span style={styles.required}>*</span>
             </label>
             <input
@@ -115,7 +163,7 @@ const DadosBasicos = React.memo(
               onChange={handleInputChange}
               placeholder="Nome do parlamentar"
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...(fieldErrors.autor && styles.inputError),
               }}
               required
@@ -127,7 +175,7 @@ const DadosBasicos = React.memo(
 
           {/* Número da Emenda */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Número da Emenda <span style={styles.required}>*</span>
             </label>
             <input
@@ -137,7 +185,7 @@ const DadosBasicos = React.memo(
               onChange={handleInputChange}
               placeholder="Ex: 30460003"
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...(fieldErrors.numero && styles.inputError),
               }}
               required
@@ -149,7 +197,7 @@ const DadosBasicos = React.memo(
 
           {/* Objeto da Emenda - ✅ ATUALIZADO COM CONSTANTES */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Objeto da Emenda <span style={styles.required}>*</span>
             </label>
             <select
@@ -161,7 +209,7 @@ const DadosBasicos = React.memo(
                 onChange({ target: { name: "objetoEmenda", value: e.target.value } });
               }}
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...(fieldErrors.tipo && styles.inputError),
               }}
               required
@@ -180,27 +228,27 @@ const DadosBasicos = React.memo(
 
           {/* Nº da Proposta */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Nº da Proposta</label>
+            <label style={dynamicStyles.label}>Nº da Proposta</label>
             <input
               type="text"
               name="numeroProposta"
               value={formData.numeroProposta || ""}
               onChange={handleInputChange}
               placeholder="Ex: 36000660361202500"
-              style={styles.input}
+              style={dynamicStyles.input}
             />
           </div>
 
           {/* Funcional */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Funcional</label>
+            <label style={dynamicStyles.label}>Funcional</label>
             <input
               type="text"
               name="funcional"
               value={formData.funcional || ""}
               onChange={handleInputChange}
               placeholder="Ex: 10301311928590021"
-              style={styles.input}
+              style={dynamicStyles.input}
             />
           </div>
 
@@ -237,7 +285,7 @@ const DadosBasicos = React.memo(
               showValidation={true}
               style={styles.formGroup}
               inputStyle={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 padding: "12px",
                 fontSize: "14px",
                 borderWidth: "2px",
@@ -253,7 +301,7 @@ const DadosBasicos = React.memo(
 
           {/* Valor do Recurso */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>
+            <label style={dynamicStyles.label}>
               Valor do Recurso <span style={styles.required}>*</span>
             </label>
             <input
@@ -262,7 +310,7 @@ const DadosBasicos = React.memo(
               value={formData.valor || ""}
               onChange={handleInputChange}
               style={{
-                ...styles.input,
+                ...dynamicStyles.input,
                 ...styles.inputMoney,
                 ...(fieldErrors.valor && styles.inputError),
               }}
