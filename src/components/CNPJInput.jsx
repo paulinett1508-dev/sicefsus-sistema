@@ -168,11 +168,11 @@ const CNPJInput = ({
         {showValidation && digits.length > 0 && (
           <div style={styles.validationIcon}>
             {showSuccess ? (
-              <span style={styles.successIcon}>✅</span>
+              <span style={styles.successIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>check_circle</span></span>
             ) : hasError ? (
-              <span style={styles.errorIcon}>❌</span>
+              <span style={styles.errorIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>cancel</span></span>
             ) : (
-              <span style={styles.pendingIcon}>⚪</span>
+              <span style={styles.pendingIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>radio_button_unchecked</span></span>
             )}
           </div>
         )}
@@ -182,12 +182,12 @@ const CNPJInput = ({
         <div style={styles.errorMessage}>
           {digits.length < 14 && digits.length > 0
             ? `CNPJ incompleto (${digits.length}/14 dígitos)`
-            : `🚀 RADICAL: ${digits} = ${isValid ? "VÁLIDO" : "INVÁLIDO"}`}
+            : `CNPJ: ${digits} = ${isValid ? "VÁLIDO" : "INVÁLIDO"}`}
         </div>
       )}
 
       {showValidation && showSuccess && (
-        <div style={styles.successMessage}>🚀 CNPJ válido confirmado!</div>
+        <div style={styles.successMessage}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>check_circle</span> CNPJ válido confirmado!</div>
       )}
     </div>
   );

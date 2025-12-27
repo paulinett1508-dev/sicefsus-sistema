@@ -171,7 +171,7 @@ const EmendasTable = ({
   if (!emendas || emendas.length === 0) {
     return (
       <div style={styles.emptyState}>
-        <div style={styles.emptyIcon}>📋</div>
+        <div style={styles.emptyIcon}><span className="material-symbols-outlined" style={{ fontSize: 48 }}>description</span></div>
         <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
         <p style={styles.emptyText}>As emendas cadastradas aparecerão aqui.</p>
       </div>

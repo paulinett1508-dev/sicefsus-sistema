@@ -94,7 +94,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
     <div style={styles.container}>
       {/* ✅ HEADER IGUAL DESPESAS */}
       <div style={styles.header}>
-        <h3 style={styles.title}>🔍 Filtros de Pesquisa</h3>
+        <h3 style={styles.title}><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>search</span> Filtros de Pesquisa</h3>
         <div style={styles.resultsBadge}>
           {totalEmendas} emendas encontradas
         </div>
@@ -104,7 +104,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
       <div style={styles.filtersGrid}>
         {/* Parlamentar */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>👤 Parlamentar</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>person</span> Parlamentar</label>
           <input
             type="text"
             placeholder="Digite o nome do parlamentar..."
@@ -116,7 +116,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
 
         {/* Número da Emenda */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>🔢 Número da Emenda</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>numbers</span> Número da Emenda</label>
           <input
             type="text"
             placeholder="Ex: E2025001"
@@ -128,7 +128,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
 
         {/* Município/UF - PLACEHOLDER REMOVIDO */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>🏙️ Município/UF</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>location_city</span> Município/UF</label>
           <input
             type="text"
             value={filtros.municipioUf}
@@ -139,7 +139,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
 
         {/* Tipo */}
         <div style={styles.filterGroup}>
-          <label style={styles.filterLabel}>📋 Tipo de Emenda</label>
+          <label style={styles.filterLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>description</span> Tipo de Emenda</label>
           <select
             value={filtros.tipo}
             onChange={(e) => handleFiltroChange("tipo", e.target.value)}
@@ -166,7 +166,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
           style={styles.buttonFilter}
           disabled={contarFiltrosAtivos() === 0}
         >
-          🔍 {contarFiltrosAtivos()} Filtro
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>search</span> {contarFiltrosAtivos()} Filtro
           {contarFiltrosAtivos() !== 1 ? "s" : ""} Ativo
           {contarFiltrosAtivos() !== 1 ? "s" : ""}
         </button>
@@ -176,7 +176,7 @@ const EmendasFilters = ({ emendas = [], onFilterChange, totalEmendas = 0 }) => {
           style={styles.buttonClear}
           disabled={contarFiltrosAtivos() === 0}
         >
-          🗑️ Limpar Filtros
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>delete</span> Limpar Filtros
         </button>
       </div>
     </div>

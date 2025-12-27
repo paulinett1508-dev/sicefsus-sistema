@@ -100,11 +100,11 @@ const MunicipioSelector = ({
         ))}
       </select>
 
-      {error && <div style={styles.errorMessage}>⚠️ {error}</div>}
+      {error && <div style={styles.errorMessage}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>warning</span> {error}</div>}
 
       {municipios.length > 0 && (
         <div style={styles.info}>
-          📊 {municipios.length} municípios disponíveis em {uf}
+          <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>analytics</span> {municipios.length} municípios disponíveis em {uf}
         </div>
       )}
     </div>

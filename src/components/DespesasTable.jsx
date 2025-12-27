@@ -548,7 +548,7 @@ export default function DespesasTable({
           </div>
         ) : despesas.length === 0 ? (
           <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>💰</div>
+            <div style={styles.emptyIcon}><span className="material-symbols-outlined" style={{ fontSize: 48 }}>payments</span></div>
             <h3 style={styles.emptyTitle}>Nenhuma despesa cadastrada</h3>
             <p style={styles.emptyText}>
               Clique em "Nova Despesa" para adicionar registros

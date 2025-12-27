@@ -43,7 +43,7 @@ export default function UsersTable({
     }
 
     if (!user.municipio && !user.uf) {
-      return <span style={styles.notConfigured}>⚠️ Não configurado</span>;
+      return <span style={styles.notConfigured}><span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>warning</span> Não configurado</span>;
     }
 
     return (
