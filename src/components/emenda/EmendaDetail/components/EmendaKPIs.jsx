@@ -9,7 +9,7 @@ const EmendaKPIs = ({ metricas, formatCurrency }) => {
     <div style={emendaDetailStyles.kpiSection}>
       <div style={emendaDetailStyles.kpiGrid}>
         <div style={emendaDetailStyles.kpiCard}>
-          <div style={emendaDetailStyles.kpiIcon}>💰</div>
+          <div style={emendaDetailStyles.kpiIcon}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>payments</span></div>
           <div style={emendaDetailStyles.kpiContent}>
             <div style={emendaDetailStyles.kpiValue}>
               {formatCurrency(metricas.valorTotal)}
@@ -19,7 +19,7 @@ const EmendaKPIs = ({ metricas, formatCurrency }) => {
         </div>
 
         <div style={emendaDetailStyles.kpiCard}>
-          <div style={emendaDetailStyles.kpiIcon}>📊</div>
+          <div style={emendaDetailStyles.kpiIcon}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>analytics</span></div>
           <div style={emendaDetailStyles.kpiContent}>
             <div style={{ ...emendaDetailStyles.kpiValue, color: SUCCESS }}>
               {formatCurrency(metricas.valorExecutado)}
@@ -29,7 +29,7 @@ const EmendaKPIs = ({ metricas, formatCurrency }) => {
         </div>
 
         <div style={emendaDetailStyles.kpiCard}>
-          <div style={emendaDetailStyles.kpiIcon}>💳</div>
+          <div style={emendaDetailStyles.kpiIcon}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>account_balance_wallet</span></div>
           <div style={emendaDetailStyles.kpiContent}>
             <div
               style={{
@@ -44,7 +44,7 @@ const EmendaKPIs = ({ metricas, formatCurrency }) => {
         </div>
 
         <div style={emendaDetailStyles.kpiCard}>
-          <div style={emendaDetailStyles.kpiIcon}>📈</div>
+          <div style={emendaDetailStyles.kpiIcon}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>trending_up</span></div>
           <div style={emendaDetailStyles.kpiContent}>
             <div style={{ ...emendaDetailStyles.kpiValue, color: PRIMARY }}>
               {metricas.percentualExecutado?.toFixed(1)}%
@@ -54,7 +54,7 @@ const EmendaKPIs = ({ metricas, formatCurrency }) => {
         </div>
 
         <div style={emendaDetailStyles.kpiCard}>
-          <div style={emendaDetailStyles.kpiIcon}>💸</div>
+          <div style={emendaDetailStyles.kpiIcon}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>receipt_long</span></div>
           <div style={emendaDetailStyles.kpiContent}>
             <div style={emendaDetailStyles.kpiValue}>
               {metricas.totalDespesas}

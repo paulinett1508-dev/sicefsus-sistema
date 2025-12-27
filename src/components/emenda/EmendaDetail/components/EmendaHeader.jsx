@@ -21,10 +21,10 @@ const EmendaHeader = ({
           </p>
           <div style={emendaDetailStyles.headerMeta}>
             <span style={emendaDetailStyles.metaItem}>
-              📍 {emenda.municipio}, {emenda.uf}
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_on</span> {emenda.municipio}, {emenda.uf}
             </span>
             <span style={emendaDetailStyles.metaItem}>
-              📅 Validade: {formatDate(emenda.validade || emenda.dataValidada)}
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Validade: {formatDate(emenda.validade || emenda.dataValidada)}
             </span>
             <span
               style={{
@@ -44,7 +44,7 @@ const EmendaHeader = ({
             onClick={() => onEditarEmenda(emenda)}
             style={emendaDetailStyles.btnPrimary}
           >
-            ✏️ Editar Emenda
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>edit</span> Editar Emenda
           </button>
         </div>
       </div>

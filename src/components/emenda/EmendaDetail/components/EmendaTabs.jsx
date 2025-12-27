@@ -4,9 +4,9 @@ import { emendaDetailStyles } from "../styles/emendaDetailStyles";
 
 const EmendaTabs = ({ abaAtiva, setAbaAtiva, totalDespesas }) => {
   const tabs = [
-    { id: "visao-geral", label: "📊 Visão Geral" },
-    { id: "despesas", label: `💸 Despesas (${totalDespesas})` },
-    { id: "nova-despesa", label: "➕ Nova Despesa" },
+    { id: "visao-geral", label: "Visão Geral", icon: "analytics" },
+    { id: "despesas", label: `Despesas (${totalDespesas})`, icon: "receipt_long" },
+    { id: "nova-despesa", label: "Nova Despesa", icon: "add_circle" },
   ];
 
   return (
@@ -20,6 +20,7 @@ const EmendaTabs = ({ abaAtiva, setAbaAtiva, totalDespesas }) => {
           }}
           onClick={() => setAbaAtiva(tab.id)}
         >
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>{tab.icon}</span>
           {tab.label}
         </button>
       ))}
