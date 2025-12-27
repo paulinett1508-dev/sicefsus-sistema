@@ -31,10 +31,10 @@ const DespesaFormActions = ({
           disabled={loading}
         >
           {loading
-            ? "⏳ Salvando..."
+            ? <><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>hourglass_empty</span> Salvando...</>
             : configModo.modo === "criar"
-              ? "✅ Criar Despesa"
-              : "✅ Atualizar Despesa"}
+              ? <><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>check_circle</span> Criar Despesa</>
+              : <><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>check_circle</span> Atualizar Despesa</>}
         </button>
       )}
     </div>

@@ -55,10 +55,10 @@ const DespesaFormEmendaInfo = ({
   };
 
   const getSaldoIcon = () => {
-    if (percentualDisponivel >= 15) return "✅"; // Saldo OK
-    if (percentualDisponivel >= 5) return "⚠️"; // Atenção
-    if (percentualDisponivel > 0) return "🚨"; // Crítico
-    return "❌"; // Sem saldo
+    if (percentualDisponivel >= 15) return <span className="material-symbols-outlined" style={{ fontSize: 20 }}>check_circle</span>; // Saldo OK
+    if (percentualDisponivel >= 5) return <span className="material-symbols-outlined" style={{ fontSize: 20 }}>warning</span>; // Atenção
+    if (percentualDisponivel > 0) return <span className="material-symbols-outlined" style={{ fontSize: 20 }}>error</span>; // Crítico
+    return <span className="material-symbols-outlined" style={{ fontSize: 20 }}>cancel</span>; // Sem saldo
   };
 
   // 📊 STATUS DA EMENDA
@@ -86,7 +86,7 @@ const DespesaFormEmendaInfo = ({
       {/* 📋 HEADER COM STATUS */}
       <div style={styles.header}>
         <div style={styles.titleRow}>
-          <h3 style={styles.title}>📋 Dados da Emenda Selecionada</h3>
+          <h3 style={styles.title}><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>description</span> Dados da Emenda Selecionada</h3>
           <span
             style={{
               ...styles.statusBadge,
@@ -155,22 +155,22 @@ const DespesaFormEmendaInfo = ({
       {/* 🔍 INFORMAÇÕES DETALHADAS */}
       <div style={styles.detailsGrid}>
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>👤 Parlamentar</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>person</span> Parlamentar</span>
           <strong style={styles.detailValue}>{parlamentar}</strong>
         </div>
 
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>🔢 Número</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>tag</span> Número</span>
           <strong style={styles.detailValue}>{numero}</strong>
         </div>
 
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>📄 Tipo</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>article</span> Tipo</span>
           <strong style={styles.detailValue}>{tipo}</strong>
         </div>
 
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>📍 Município</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>location_on</span> Município</span>
           <strong style={styles.detailValue}>
             {municipio}
             {uf ? `/${uf}` : ""}
@@ -178,14 +178,14 @@ const DespesaFormEmendaInfo = ({
         </div>
 
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>💵 Valor Total</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>payments</span> Valor Total</span>
           <strong style={styles.detailValue}>
             {formatMoeda(valorRecurso)}
           </strong>
         </div>
 
         <div style={styles.detailCard}>
-          <span style={styles.detailLabel}>🎯 Programa</span>
+          <span style={styles.detailLabel}><span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>target</span> Programa</span>
           <strong style={styles.detailValue}>{programa}</strong>
         </div>
       </div>

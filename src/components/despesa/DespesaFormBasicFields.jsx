@@ -491,7 +491,7 @@ const DespesaFormBasicFields = ({
     <>
       <fieldset style={styles.fieldset}>
         <legend style={styles.legend}>
-          <span style={styles.legendIcon}>📋</span>
+          <span style={styles.legendIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>description</span></span>
           Dados Básicos da Despesa
         </legend>
         <div style={styles.formGrid}>
@@ -500,7 +500,7 @@ const DespesaFormBasicFields = ({
             {/* EMENDA VINCULADA (READ-ONLY) - 60% */}
             <div style={styles.formGroup}>
               <label style={styles.label}>
-                📌 Emenda Vinculada
+                <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4, verticalAlign: "middle" }}>push_pin</span> Emenda Vinculada
                 <span style={styles.requiredMark}>*</span>
               </label>
               <div style={styles.emendaInfoBox}>
@@ -514,7 +514,7 @@ const DespesaFormBasicFields = ({
             {/* VALOR DA DESPESA (EDITÁVEL) - 40% */}
             <div style={styles.formGroup}>
               <label style={styles.label}>
-                💰 Valor da Despesa
+                <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4, verticalAlign: "middle" }}>payments</span> Valor da Despesa
                 <span style={styles.requiredMark}>*</span>
               </label>
               <input
@@ -535,7 +535,7 @@ const DespesaFormBasicFields = ({
               />
               {valorExcedeSaldo && (
                 <span style={styles.errorText}>
-                  ⚠️ Valor excede o saldo disponível (
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Valor excede o saldo disponível (
                   {formatarValorMonetario(saldoDisponivel)})
                 </span>
               )}
@@ -547,7 +547,7 @@ const DespesaFormBasicFields = ({
 
           {/* ✅ DISCRIMINAÇÃO - LARGURA TOTAL */}
           <div style={styles.formGroupFull}>
-            <label style={styles.label}>📝 Discriminação da Despesa</label>
+            <label style={styles.label}><span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 4, verticalAlign: "middle" }}>edit_note</span> Discriminação da Despesa</label>
             <div style={styles.inputWrapper}>
               <input
                 type="text"
@@ -592,7 +592,7 @@ const DespesaFormBasicFields = ({
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
             <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>⚠️ Confirmar Alteração de Valor</h3>
+              <h3 style={styles.modalTitle}><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>warning</span> Confirmar Alteração de Valor</h3>
             </div>
             <div style={styles.modalBody}>
               <p style={styles.modalText}>
@@ -614,7 +614,7 @@ const DespesaFormBasicFields = ({
                 </div>
               </div>
               <p style={styles.modalWarning}>
-                ⚠️ Esta alteração pode impactar o planejamento orçamentário da
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Esta alteração pode impactar o planejamento orçamentário da
                 emenda.
               </p>
             </div>
@@ -623,13 +623,13 @@ const DespesaFormBasicFields = ({
                 onClick={cancelarAlteracaoValor}
                 style={styles.btnCancelar}
               >
-                ❌ Cancelar
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>close</span> Cancelar
               </button>
               <button
                 onClick={confirmarAlteracaoValor}
                 style={styles.btnConfirmar}
               >
-                ✅ Confirmar Alteração
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>check</span> Confirmar Alteração
               </button>
             </div>
           </div>

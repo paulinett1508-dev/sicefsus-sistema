@@ -24,10 +24,10 @@ const DespesaFormHeader = ({
       >
         <h2 style={styles.headerTitle}>
           {configModo.modo === "criar"
-            ? "💰 Criar Despesa"
+            ? <><span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>payments</span> Criar Despesa</>
             : configModo.modo === "editar"
-              ? "📋 Informações da Despesa"
-              : "📋 Informações da Despesa"}
+              ? <><span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>
+              : <><span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>}
         </h2>
         <p style={styles.headerSubtitle}>
           {titulo ||
@@ -42,7 +42,7 @@ const DespesaFormHeader = ({
 
       {showSuccessMessage && (
         <div style={styles.successMessage}>
-          <span style={styles.successIcon}>✅</span>
+          <span style={styles.successIcon}><span className="material-symbols-outlined" style={{ fontSize: 20, color: "#155724" }}>check_circle</span></span>
           <span style={styles.successText}>
             {configModo.modo === "criar"
               ? "Despesa criada"

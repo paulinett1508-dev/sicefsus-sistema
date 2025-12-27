@@ -31,19 +31,19 @@ export default function DespesasBanner({
 
           <span style={styles.separator}>•</span>
           <span style={styles.info}>
-            📍 {emenda.municipio}/{emenda.uf}
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_on</span> {emenda.municipio}/{emenda.uf}
           </span>
 
           <span style={styles.separator}>•</span>
           <span style={styles.info}>
-            💰 R${" "}
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span> R${" "}
             {(emenda.valor || 0).toLocaleString("pt-BR", {
               minimumFractionDigits: 2,
             })}
           </span>
 
           <span style={styles.separator}>•</span>
-          <span style={styles.info}>📊 {quantidadeDespesas} despesa(s)</span>
+          <span style={styles.info}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> {quantidadeDespesas} despesa(s)</span>
         </div>
       </div>
 

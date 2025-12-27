@@ -208,7 +208,7 @@ const DespesaPlanejadaForm = ({
                   {n}
                 </option>
               ))}
-              <option value="__customizado__">✏️ Digitar outra...</option>
+              <option value="__customizado__">Digitar outra...</option>
             </select>
           ) : (
             <div style={formStyles.inputCustomizadoWrapper}>
@@ -228,7 +228,8 @@ const DespesaPlanejadaForm = ({
                 }}
                 style={formStyles.btnVoltarSelect}
               >
-                ↩️ Voltar
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>undo</span>
+                Voltar
               </button>
             </div>
           )}
@@ -630,7 +631,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       console.log("✅ Despesa removida com sucesso");
       
       showToast({
-        message: "🗑️ Despesa planejada removida",
+        message: "Despesa planejada removida",
         type: "success",
       });
       
@@ -642,7 +643,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     } catch (e) {
       console.error("❌ Erro ao remover despesa:", e);
       showToast({
-        message: "❌ Erro ao remover despesa: " + e.message,
+        message: "Erro ao remover despesa: " + e.message,
         type: "error",
       });
       setModalExclusaoPlanejada({ isVisible: false, despesa: null });
@@ -692,7 +693,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         backgroundColor: '#f5f5f5',
         borderRadius: '12px'
       }}>
-        <div style={{ fontSize: '64px', color: '#ccc', marginBottom: '16px' }}>💾</div>
+        <div style={{ fontSize: '64px', color: '#ccc', marginBottom: '16px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 64 }}>save</span>
+        </div>
         <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#666', marginBottom: '8px' }}>
           Salve a emenda primeiro
         </h3>
@@ -711,27 +714,27 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       {/* Estatísticas principais */}
       <div style={styles.statsWrapper}>
         <div style={styles.statCard}>
-          <div style={styles.statLabel}>💰 Valor da Emenda</div>
+          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span> Valor da Emenda</div>
           <div style={styles.statValue}>
             {formatCurrency(stats.valorEmenda)}
           </div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statLabel}>🟡 Total Planejado</div>
+          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#f39c12" }}>schedule</span> Total Planejado</div>
           <div style={{ ...styles.statValue, color: "#f39c12" }}>
             {formatCurrency(stats.totalPlanejado)}
           </div>
           <div style={styles.statHint}>não consome saldo</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statLabel}>🟢 Total Executado</div>
+          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
           <div style={{ ...styles.statValue, color: "#27ae60" }}>
             {formatCurrency(stats.totalExecutado)}
           </div>
           <div style={styles.statHint}>consome saldo</div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statLabel}>💵 Saldo Disponível</div>
+          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span> Saldo Disponível</div>
           <div
             style={{
               ...styles.statValue,
@@ -747,7 +750,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
         </div>
         <div style={styles.statCard}>
-          <div style={styles.statLabel}>📊 Percentual Executado</div>
+          <div style={styles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> Percentual Executado</div>
           <div style={styles.statValue}>
             {stats.percentualExecutado.toFixed(1)}%
           </div>
@@ -759,43 +762,43 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         <h4 style={styles.statusFinanceiroTitulo}>Status Financeiro</h4>
         <div style={styles.statusMiniGrid}>
           <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
-            <div style={styles.miniCardIcon}>💵</div>
+            <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span></div>
             <div style={styles.miniCardContent}>
               <div style={styles.miniCardLabel}>Pago</div>
               <div style={styles.miniCardValue}>
                 {formatCurrency(stats.totalPago)}
               </div>
-              <div style={styles.miniCardHint}>✅ Concluído</div>
+              <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>check_circle</span> Concluído</div>
             </div>
           </div>
           <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
-            <div style={styles.miniCardIcon}>📝</div>
+            <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit_note</span></div>
             <div style={styles.miniCardContent}>
               <div style={styles.miniCardLabel}>Liquidado</div>
               <div style={styles.miniCardValue}>
                 {formatCurrency(stats.totalLiquidado)}
               </div>
-              <div style={styles.miniCardHint}>⏳ Aguardando pagamento</div>
+              <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando pagamento</div>
             </div>
           </div>
           <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
-            <div style={styles.miniCardIcon}>📋</div>
+            <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>assignment</span></div>
             <div style={styles.miniCardContent}>
               <div style={styles.miniCardLabel}>Empenhado</div>
               <div style={styles.miniCardValue}>
                 {formatCurrency(stats.totalEmpenhado)}
               </div>
-              <div style={styles.miniCardHint}>⏳ Aguardando liquidação</div>
+              <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando liquidação</div>
             </div>
           </div>
           <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
-            <div style={styles.miniCardIcon}>⏰</div>
+            <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>schedule</span></div>
             <div style={styles.miniCardContent}>
               <div style={styles.miniCardLabel}>Pendente</div>
               <div style={styles.miniCardValue}>
                 {formatCurrency(stats.totalPendente)}
               </div>
-              <div style={styles.miniCardHint}>⏳ Aguardando empenho</div>
+              <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando empenho</div>
             </div>
           </div>
         </div>
@@ -807,12 +810,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <h3 style={styles.secaoTitulo}>
-            🟡 Planejar Despesas{" "}
+            <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle", color: "#f39c12" }}>schedule</span>
+            Planejar Despesas{" "}
             <span
               style={styles.infoIcon}
               title="Despesas planejadas não consomem o saldo da emenda"
             >
-              ℹ️
+              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>info</span>
             </span>
           </h3>
           <span style={styles.badge}>
@@ -839,7 +843,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             {despesasPlanejadas.length === 0 ? (
               <div style={styles.emptyState}>
                 <div>
-                  <div style={styles.emptyEmoji}>🎯</div>
+                  <div style={styles.emptyEmoji}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>target</span></div>
                   <h3 style={styles.emptyTitle}>Nenhuma despesa planejada</h3>
                   <p style={styles.emptyText}>
                     Use o formulário acima para adicionar despesas planejadas.
@@ -884,8 +888,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                           <div style={styles.despesaAcoes}>
                             <button
                               onClick={(e) => {
-                                console.log("🖱️ CLIQUE NO BOTÃO EXECUTAR");
-                                console.log("📋 Despesa a executar:", despesa);
+                                console.log("CLIQUE NO BOTÃO EXECUTAR");
+                                console.log("Despesa a executar:", despesa);
                                 e.stopPropagation();
                                 e.preventDefault();
                                 handleExecutarDespesa(despesa);
@@ -894,7 +898,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                               title="Executar despesa"
                               type="button"
                             >
-                              ▶️
+                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>play_arrow</span>
                             </button>
                             <button
                               onClick={(e) => {
@@ -906,7 +910,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                               title="Remover despesa"
                               type="button"
                             >
-                              🗑️
+                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>delete</span>
                             </button>
                           </div>
                         </td>
@@ -924,7 +928,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       <div style={styles.secao}>
         <div style={styles.secaoHeader}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <h3 style={styles.secaoTitulo}>💸 Despesas Executadas</h3>
+            <h3 style={styles.secaoTitulo}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>payments</span> Despesas Executadas</h3>
             <span style={styles.badge}>
               {despesasExecutadas.length}{" "}
               {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
@@ -1001,7 +1005,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             style={styles.btnNovaDespesa}
             title="Criar despesa executada"
           >
-            ➕ Nova Despesa
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>add</span> Nova Despesa
           </button>
         </div>
 
@@ -1042,11 +1046,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             <div style={styles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
-                  {modoVisualizacao === "editar" && "📋 Informações da Despesa"}
-                  {modoVisualizacao === "visualizar" && "📋 Informações da Despesa"}
-                  {modoVisualizacao === "executar" && "▶️ Executar Despesa Planejada"}
-                  {modoVisualizacao === "criar" && "➕ Nova Despesa"}
-                  {modoVisualizacao === "criar-executada" && "➕ Nova Despesa Executada"}
+                  {modoVisualizacao === "editar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>}
+                  {modoVisualizacao === "visualizar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>}
+                  {modoVisualizacao === "executar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>play_arrow</span> Executar Despesa Planejada</>}
+                  {modoVisualizacao === "criar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>add_circle</span> Nova Despesa</>}
+                  {modoVisualizacao === "criar-executada" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>add_circle</span> Nova Despesa Executada</>}
                 </h2>
                 <button
                   onClick={() => {
@@ -1101,30 +1105,30 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                           showToast({
                             message:
                               modoVisualizacao === "executar"
-                                ? "✅ Despesa executada com sucesso!"
+                                ? "Despesa executada com sucesso!"
                                 : modoVisualizacao === "criar-executada"
-                                  ? "✅ Despesa criada com sucesso!"
+                                  ? "Despesa criada com sucesso!"
                                   : modoVisualizacao === "criar"
-                                    ? "✅ Despesa criada com sucesso!"
-                                    : "✅ Despesa atualizada com sucesso!",
+                                    ? "Despesa criada com sucesso!"
+                                    : "Despesa atualizada com sucesso!",
                             type: "success",
                           });
                         }}
                         onSave={() => {
                           console.log(
-                            "📞 DespesaForm.onSave chamado - Modo:",
+                            "DespesaForm.onSave chamado - Modo:",
                             modoVisualizacao,
                           );
-                          handleFecharFormulario(true); // ✅ Passa true = foi salvo com sucesso
+                          handleFecharFormulario(true);
                           showToast({
                             message:
                               modoVisualizacao === "executar"
-                                ? "✅ Despesa executada com sucesso!"
+                                ? "Despesa executada com sucesso!"
                                 : modoVisualizacao === "criar-executada"
-                                  ? "✅ Despesa criada com sucesso!"
+                                  ? "Despesa criada com sucesso!"
                                   : modoVisualizacao === "criar"
-                                    ? "✅ Despesa criada com sucesso!"
-                                    : "✅ Despesa atualizada com sucesso!",
+                                    ? "Despesa criada com sucesso!"
+                                    : "Despesa atualizada com sucesso!",
                             type: "success",
                           });
                         }}
@@ -1158,7 +1162,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             <div style={{ textAlign: 'left' }}>
               <p><strong>Estratégia:</strong> {modalExclusaoPlanejada.despesa.estrategia || modalExclusaoPlanejada.despesa.naturezaDespesa}</p>
               <p><strong>Valor:</strong> {formatCurrency(modalExclusaoPlanejada.despesa.valor)}</p>
-              <p style={{ marginTop: 16, color: '#856404' }}>⚠️ Esta ação não pode ser desfeita.</p>
+              <p style={{ marginTop: 16, color: '#856404' }}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Esta ação não pode ser desfeita.</p>
             </div>
           ) : null
         }
