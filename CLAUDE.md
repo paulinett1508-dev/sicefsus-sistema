@@ -14,7 +14,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - Fonte Inter adicionada
 - Novas classes CSS utilitarias
 - Emojis substituidos por Material Symbols Outlined icons
-- Ver `DESIGN_SYSTEM.md` para detalhes completos
+- Ver [.claude/docs/DESIGN_SYSTEM.md](.claude/docs/DESIGN_SYSTEM.md) para detalhes completos
 
 **Icones - Material Symbols:**
 - Usar `<span className="material-symbols-outlined">icon_name</span>`

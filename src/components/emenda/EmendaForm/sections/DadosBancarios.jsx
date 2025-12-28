@@ -3,6 +3,7 @@
 // Banco, agência, conta
 
 import React, { useState } from "react";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const DadosBancarios = ({
   formData = {},
@@ -11,6 +12,44 @@ const DadosBancarios = ({
   onClearError,
   disabled = false,
 }) => {
+  const { isDark } = useTheme();
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    fieldset: {
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      background: isDark ? "var(--theme-surface)" : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
+    },
+    legend: {
+      background: isDark ? "var(--theme-surface-secondary)" : "white",
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      color: isDark ? "var(--theme-text)" : "#2563EB",
+    },
+    label: {
+      color: isDark ? "var(--theme-text)" : "#333",
+    },
+    input: {
+      borderColor: isDark ? "var(--theme-border)" : "#dee2e6",
+      backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
+      color: isDark ? "var(--theme-text)" : "inherit",
+    },
+    collapsibleSection: {
+      borderColor: isDark ? "var(--theme-border)" : "#dee2e6",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+    },
+    toggleButton: {
+      color: isDark ? "var(--theme-text-secondary)" : "#495057",
+    },
+    bankCodesContent: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "white",
+      borderTopColor: isDark ? "var(--theme-border)" : "#dee2e6",
+    },
+    bankItem: {
+      color: isDark ? "var(--theme-text-muted)" : "#6c757d",
+    },
+  };
+
   // ✅ DEBUG: Verificar props recebidas
   React.useEffect(() => {
     console.log('📋 DadosBancarios - Props recebidas:', {
@@ -51,22 +90,23 @@ const DadosBancarios = ({
   ];
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>🏦</span>
+    <fieldset style={{ ...styles.fieldset, ...dynamicStyles.fieldset }}>
+      <legend style={{ ...styles.legend, ...dynamicStyles.legend }}>
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>account_balance</span>
         Dados Bancários
       </legend>
 
       <div style={styles.formGrid}>
         {/* Banco */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
             Banco <span style={styles.required}>*</span>
             <span
-              style={styles.infoIcon}
+              className="material-symbols-outlined"
+              style={{ fontSize: 14, color: "#0066cc", cursor: "help" }}
               title="Código de 3 dígitos do banco (ex: 001 - Banco do Brasil)"
             >
-              ℹ️
+              info
             </span>
           </label>
           <input
@@ -76,6 +116,7 @@ const DadosBancarios = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.banco && styles.inputError),
             }}
             disabled={disabled}
@@ -90,13 +131,14 @@ const DadosBancarios = ({
 
         {/* Agência */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
             Agência <span style={styles.required}>*</span>
             <span
-              style={styles.infoIcon}
+              className="material-symbols-outlined"
+              style={{ fontSize: 14, color: "#0066cc", cursor: "help" }}
               title="Número da agência (sem dígito verificador)"
             >
-              ℹ️
+              info
             </span>
           </label>
           <input
@@ -106,6 +148,7 @@ const DadosBancarios = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.agencia && styles.inputError),
             }}
             disabled={disabled}
@@ -120,13 +163,14 @@ const DadosBancarios = ({
 
         {/* Conta */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
             Conta <span style={styles.required}>*</span>
             <span
-              style={styles.infoIcon}
+              className="material-symbols-outlined"
+              style={{ fontSize: 14, color: "#0066cc", cursor: "help" }}
               title="Número da conta (com dígito verificador se houver)"
             >
-              ℹ️
+              info
             </span>
           </label>
           <input
@@ -136,6 +180,7 @@ const DadosBancarios = ({
             onChange={handleInputChange}
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.conta && styles.inputError),
             }}
             disabled={disabled}
@@ -150,22 +195,24 @@ const DadosBancarios = ({
       </div>
 
       {/* Seção colapsível de códigos bancários */}
-      <div style={styles.collapsibleSection}>
+      <div style={{ ...styles.collapsibleSection, ...dynamicStyles.collapsibleSection }}>
         <button
           type="button"
           onClick={() => setShowBankCodes(!showBankCodes)}
-          style={styles.toggleButton}
+          style={{ ...styles.toggleButton, ...dynamicStyles.toggleButton }}
           disabled={disabled}
         >
-          <span style={styles.toggleIcon}>{showBankCodes ? "▼" : "▶"}</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--theme-primary)", transition: "transform 0.2s ease" }}>
+            {showBankCodes ? "expand_more" : "chevron_right"}
+          </span>
           <span style={styles.toggleText}>Códigos de Bancos Mais Comuns</span>
         </button>
 
         {showBankCodes && (
-          <div style={styles.bankCodesContent}>
+          <div style={{ ...styles.bankCodesContent, ...dynamicStyles.bankCodesContent }}>
             <div style={styles.bankList}>
               {bancosComuns.map((banco) => (
-                <div key={banco.codigo} style={styles.bankItem}>
+                <div key={banco.codigo} style={{ ...styles.bankItem, ...dynamicStyles.bankItem }}>
                   <strong>{banco.codigo}</strong> - {banco.nome}
                 </div>
               ))}

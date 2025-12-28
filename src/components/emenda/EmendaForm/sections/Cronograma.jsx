@@ -1,5 +1,6 @@
 // src/components/emenda/EmendaForm/sections/Cronograma.jsx - SIMPLIFICADO
 import React from "react";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const Cronograma = ({
   formData = {},
@@ -8,6 +9,40 @@ const Cronograma = ({
   onClearError,
   disabled = false,
 }) => {
+  const { isDark } = useTheme();
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    sectionContainer: {
+      border: isDark ? "1px solid var(--theme-border)" : "1px solid #e0e0e0",
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fdfdfd",
+    },
+    sectionHeader: {
+      borderBottom: isDark ? "2px solid var(--theme-primary)" : "2px solid #007bff",
+    },
+    sectionTitle: {
+      color: isDark ? "var(--theme-text)" : "#333",
+    },
+    label: {
+      color: isDark ? "var(--theme-text)" : "#333",
+    },
+    input: {
+      border: isDark ? "1px solid var(--theme-border)" : "1px solid #ced4da",
+      backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
+      color: isDark ? "var(--theme-text)" : "inherit",
+    },
+    helperText: {
+      color: isDark ? "var(--theme-text-muted)" : "#6c757d",
+    },
+    validationSummary: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+      border: isDark ? "1px solid var(--theme-border)" : "1px solid #dee2e6",
+    },
+    validationHeader: {
+      color: isDark ? "var(--theme-text-secondary)" : "#495057",
+    },
+  };
+
   // ✅ DEBUG: Verificar props recebidas
   React.useEffect(() => {
     console.log('📋 Cronograma - Props recebidas:', {
@@ -26,16 +61,22 @@ const Cronograma = ({
   };
 
   return (
-    <div style={styles.sectionContainer}>
-      <div style={styles.sectionHeader}>
-        <h3 style={styles.sectionTitle}>📅 Cronograma</h3>
+    <div style={{ ...styles.sectionContainer, ...dynamicStyles.sectionContainer }}>
+      <div style={{ ...styles.sectionHeader, ...dynamicStyles.sectionHeader }}>
+        <h3 style={{ ...styles.sectionTitle, ...dynamicStyles.sectionTitle }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>calendar_month</span>
+          Cronograma
+        </h3>
       </div>
 
       {/* GRID DE DATAS */}
       <div style={styles.dateGrid}>
         {/* DATA DE APROVAÇÃO - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>🏛️ Data de Aprovação *</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>account_balance</span>
+            Data de Aprovação *
+          </label>
           <input
             type="date"
             name="dataAprovacao"
@@ -44,24 +85,27 @@ const Cronograma = ({
             required
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.dataAprovacao ? styles.inputError : {}),
-              borderColor: fieldErrors.dataAprovacao ? "#dc3545" : "#ced4da",
             }}
           />
           {fieldErrors.dataAprovacao && (
             <div style={styles.errorText}>
-              <span style={styles.errorIcon}>🚨</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#dc3545" }}>error</span>
               {fieldErrors.dataAprovacao}
             </div>
           )}
-          <div style={styles.helperText}>
-            📋 Aprovação pelo Congresso Nacional
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>
+            Aprovação pelo Congresso Nacional
           </div>
         </div>
 
         {/* DATA OB - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>📄 Data OB *</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>receipt_long</span>
+            Data OB *
+          </label>
           <input
             type="date"
             name="dataOb"
@@ -70,24 +114,27 @@ const Cronograma = ({
             required
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.dataOb ? styles.inputError : {}),
-              borderColor: fieldErrors.dataOb ? "#dc3545" : "#ced4da",
             }}
           />
           {fieldErrors.dataOb && (
             <div style={styles.errorText}>
-              <span style={styles.errorIcon}>🚨</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#dc3545" }}>error</span>
               {fieldErrors.dataOb}
             </div>
           )}
-          <div style={styles.helperText}>
-            📄 Ordem Bancária (após aprovação)
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>
+            Ordem Bancária (após aprovação)
           </div>
         </div>
 
         {/* INÍCIO DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>🚀 Início da Execução *</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>play_arrow</span>
+            Início da Execução *
+          </label>
           <input
             type="date"
             name="inicioExecucao"
@@ -96,22 +143,25 @@ const Cronograma = ({
             required
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.inicioExecucao ? styles.inputError : {}),
-              borderColor: fieldErrors.inicioExecucao ? "#dc3545" : "#ced4da",
             }}
           />
           {fieldErrors.inicioExecucao && (
             <div style={styles.errorText}>
-              <span style={styles.errorIcon}>🚨</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#dc3545" }}>error</span>
               {fieldErrors.inicioExecucao}
             </div>
           )}
-          <div style={styles.helperText}>🚀 Início das ações executivas</div>
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>Início das ações executivas</div>
         </div>
 
         {/* FINAL DA EXECUÇÃO - AGORA OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>🏁 Final da Execução *</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>flag</span>
+            Final da Execução *
+          </label>
           <input
             type="date"
             name="finalExecucao"
@@ -120,22 +170,25 @@ const Cronograma = ({
             required
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.finalExecucao ? styles.inputError : {}),
-              borderColor: fieldErrors.finalExecucao ? "#dc3545" : "#ced4da",
             }}
           />
           {fieldErrors.finalExecucao && (
             <div style={styles.errorText}>
-              <span style={styles.errorIcon}>🚨</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#dc3545" }}>error</span>
               {fieldErrors.finalExecucao}
             </div>
           )}
-          <div style={styles.helperText}>🏁 Conclusão das ações</div>
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>Conclusão das ações</div>
         </div>
 
         {/* DATA DE VALIDADE - OBRIGATÓRIA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>⏰ Data de Validade *</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>schedule</span>
+            Data de Validade *
+          </label>
           <input
             type="date"
             name="dataValidade"
@@ -144,22 +197,25 @@ const Cronograma = ({
             required
             style={{
               ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.dataValidade ? styles.inputError : {}),
-              borderColor: fieldErrors.dataValidade ? "#dc3545" : "#ced4da",
             }}
           />
           {fieldErrors.dataValidade && (
             <div style={styles.errorText}>
-              <span style={styles.errorIcon}>🚨</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#dc3545" }}>error</span>
               {fieldErrors.dataValidade}
             </div>
           )}
-          <div style={styles.helperText}>⏰ Prazo legal final</div>
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>Prazo legal final</div>
         </div>
 
         {/* DATA DA ÚLTIMA ATUALIZAÇÃO - AUTOMÁTICA */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>📄 Data de Última Atualização</label>
+          <label style={{ ...styles.label, ...dynamicStyles.label }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>update</span>
+            Data de Última Atualização
+          </label>
           <input
             type="date"
             name="dataUltimaAtualizacao"
@@ -168,13 +224,14 @@ const Cronograma = ({
             disabled
             style={{
               ...styles.input,
-              backgroundColor: "#f8f9fa",
-              color: "#6c757d",
+              backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+              color: isDark ? "var(--theme-text-muted)" : "#6c757d",
               cursor: "not-allowed",
             }}
           />
-          <div style={styles.helperText}>
-            ✅ Atualizada automaticamente pelo sistema
+          <div style={{ ...styles.helperText, ...dynamicStyles.helperText }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, verticalAlign: "middle" }}>check_circle</span>
+            Atualizada automaticamente pelo sistema
           </div>
         </div>
       </div>
@@ -182,7 +239,7 @@ const Cronograma = ({
       {/* ERRO GERAL DE CRONOGRAMA */}
       {fieldErrors.cronogramaGeral && (
         <div style={styles.globalError}>
-          <div style={styles.errorIcon}>🚨</div>
+          <span className="material-symbols-outlined" style={{ fontSize: 24, color: "#dc3545" }}>error</span>
           <div>
             <strong>Erro na Sequência Cronológica:</strong>
             <br />
@@ -192,9 +249,10 @@ const Cronograma = ({
       )}
 
       {/* VALIDAÇÃO VISUAL DAS DATAS */}
-      <div style={styles.validationSummary}>
-        <div style={styles.validationHeader}>
-          📊 Status das Datas Obrigatórias:
+      <div style={{ ...styles.validationSummary, ...dynamicStyles.validationSummary }}>
+        <div style={{ ...styles.validationHeader, ...dynamicStyles.validationHeader, display: "flex", alignItems: "center", gap: 6 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>checklist</span>
+          Status das Datas Obrigatórias:
         </div>
         <div style={styles.validationGrid}>
           <div
@@ -205,7 +263,9 @@ const Cronograma = ({
                 : styles.validationInvalid),
             }}
           >
-            {formData.dataAprovacao ? "✅" : "❌"} Aprovação
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>
+              {formData.dataAprovacao ? "check_circle" : "cancel"}
+            </span> Aprovação
           </div>
           <div
             style={{
@@ -215,7 +275,9 @@ const Cronograma = ({
                 : styles.validationInvalid),
             }}
           >
-            {formData.dataOb ? "✅" : "❌"} OB
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>
+              {formData.dataOb ? "check_circle" : "cancel"}
+            </span> OB
           </div>
           <div
             style={{
@@ -225,7 +287,9 @@ const Cronograma = ({
                 : styles.validationInvalid),
             }}
           >
-            {formData.inicioExecucao ? "✅" : "❌"} Início
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>
+              {formData.inicioExecucao ? "check_circle" : "cancel"}
+            </span> Início
           </div>
           <div
             style={{
@@ -235,7 +299,9 @@ const Cronograma = ({
                 : styles.validationInvalid),
             }}
           >
-            {formData.finalExecucao ? "✅" : "❌"} Final
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>
+              {formData.finalExecucao ? "check_circle" : "cancel"}
+            </span> Final
           </div>
           <div
             style={{
@@ -245,7 +311,9 @@ const Cronograma = ({
                 : styles.validationInvalid),
             }}
           >
-            {formData.dataValidade ? "✅" : "❌"} Validade
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle" }}>
+              {formData.dataValidade ? "check_circle" : "cancel"}
+            </span> Validade
           </div>
         </div>
       </div>

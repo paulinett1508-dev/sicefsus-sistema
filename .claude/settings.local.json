@@ -25,7 +25,8 @@
       "Bash(src/components/GlobalSearch.jsx )",
       "Bash(src/components/despesa/DespesaFormClassificacaoFuncional.jsx )",
       "Bash(src/components/emenda/DespesaModal.jsx )",
-      "Bash(src/hooks/useDashboardData.js)"
+      "Bash(src/hooks/useDashboardData.js)",
+      "Bash(claude account)"
     ]
   }
 }

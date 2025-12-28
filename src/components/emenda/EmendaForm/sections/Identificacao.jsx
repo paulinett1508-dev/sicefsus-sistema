@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../../../../context/UserContext";
+import { useTheme } from "../../../../context/ThemeContext";
 import { carregarMunicipios as carregarMunicipiosCache } from "../../../../utils/municipiosCache";
 
 const Identificacao = ({
@@ -15,7 +16,51 @@ const Identificacao = ({
   const [municipios, setMunicipios] = useState([]);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
   const { user } = useContext(UserContext);
+  const { isDark } = useTheme();
   const isAdmin = user?.tipo === "admin";
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    fieldset: {
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      borderRadius: "10px",
+      padding: "20px",
+      background: isDark ? "var(--theme-surface)" : "white",
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
+    },
+    legend: {
+      background: isDark ? "var(--theme-surface-secondary)" : "white",
+      padding: "5px 15px",
+      borderRadius: "20px",
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      color: isDark ? "var(--theme-text)" : "#2563EB",
+      fontWeight: "bold",
+      fontSize: "16px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    label: {
+      fontWeight: "bold",
+      color: isDark ? "var(--theme-text)" : "#333",
+      fontSize: "14px",
+    },
+    input: {
+      padding: "12px",
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: isDark ? "var(--theme-border)" : "#dee2e6",
+      borderRadius: "6px",
+      fontSize: "14px",
+      transition: "border-color 0.3s ease",
+      backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
+      color: isDark ? "var(--theme-text)" : "inherit",
+    },
+  };
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
 
@@ -170,16 +215,16 @@ const Identificacao = ({
   };
 
   return (
-    <fieldset style={styles.fieldset}>
-      <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📍</span>
+    <fieldset style={dynamicStyles.fieldset}>
+      <legend style={dynamicStyles.legend}>
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>location_on</span>
         Localização
       </legend>
 
       <div style={styles.formGrid}>
         {/* UF */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
+          <label style={dynamicStyles.label}>
             UF <span style={styles.required}>*</span>
           </label>
           <select
@@ -188,7 +233,7 @@ const Identificacao = ({
             onChange={handleUfChange}
             disabled={disabled || isBloqueadoLocalizacao}
             style={{
-              ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.uf && styles.inputError),
               ...(isBloqueadoLocalizacao && styles.inputDisabled),
             }}
@@ -208,7 +253,7 @@ const Identificacao = ({
 
         {/* Município */}
         <div style={styles.formGroup}>
-          <label style={styles.label}>
+          <label style={dynamicStyles.label}>
             Município <span style={styles.required}>*</span>
           </label>
           <select
@@ -217,7 +262,7 @@ const Identificacao = ({
             onChange={handleChange}
             disabled={disabled || !formData?.uf || loadingMunicipios || isBloqueadoLocalizacao}
             style={{
-              ...styles.input,
+              ...dynamicStyles.input,
               ...(fieldErrors.municipio && styles.inputError),
               ...(loadingMunicipios && styles.inputLoading),
               ...(isBloqueadoLocalizacao && styles.inputDisabled),
@@ -244,8 +289,9 @@ const Identificacao = ({
         </div>
       </div>
       {isBloqueadoLocalizacao && (
-            <small style={{ ...styles.helpText, color: "var(--warning)" }}>
-              🔒 {isOperador
+            <small style={{ ...styles.helpText, color: "var(--warning)", display: "flex", alignItems: "center", gap: 4 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>lock</span>
+              {isOperador
                 ? "Município e UF definidos automaticamente pelo seu perfil (não editável)"
                 : "Município e UF já definidos (não podem ser alterados)"}
             </small>

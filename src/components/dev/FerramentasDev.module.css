@@ -6,6 +6,11 @@
   padding: 20px;
 }
 
+/* Dark mode support */
+:global([data-theme="dark"]) .container {
+  background: var(--theme-bg);
+}
+
 .header {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   border-radius: 12px;
@@ -64,6 +69,11 @@
   gap: 4px;
 }
 
+:global([data-theme="dark"]) .tabsContainer {
+  background: var(--theme-surface);
+  box-shadow: var(--shadow);
+}
+
 .tabButton {
   background: transparent;
   border: none;
@@ -79,9 +89,18 @@
   color: #64748b;
 }
 
+:global([data-theme="dark"]) .tabButton {
+  color: var(--theme-text-secondary);
+}
+
 .tabButton:hover {
   background: rgba(37, 99, 235, 0.1);
   color: #2563eb;
+}
+
+:global([data-theme="dark"]) .tabButton:hover {
+  background: rgba(37, 99, 235, 0.2);
+  color: var(--theme-primary);
 }
 
 .tabButtonActive {
@@ -107,4 +126,10 @@
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   min-height: 400px;
+}
+
+:global([data-theme="dark"]) .content {
+  background: var(--theme-surface);
+  box-shadow: var(--shadow);
+  color: var(--theme-text);
 }
