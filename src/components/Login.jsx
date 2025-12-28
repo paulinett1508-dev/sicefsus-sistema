@@ -6,6 +6,7 @@ import {
 import { auth, db } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
 import logoSicefsus from "../images/logo-sicefsus.png";
+import { useTheme } from "../context/ThemeContext";
 import {
   doc,
   getDoc,
@@ -18,6 +19,7 @@ import {
 } from "firebase/firestore";
 
 export default function Login({ onLoginSuccess }) {
+  const { isDark } = useTheme();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -232,6 +234,8 @@ export default function Login({ onLoginSuccess }) {
     }
   };
 
+  const styles = getStyles(isDark);
+
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
@@ -439,15 +443,16 @@ export default function Login({ onLoginSuccess }) {
   );
 }
 
-const styles = {
+const getStyles = (isDark) => ({
   overlay: {
     position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background:
-      "linear-gradient(135deg, rgba(26, 58, 74, 0.85), rgba(15, 40, 48, 0.95))",
+    background: isDark
+      ? "linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(0, 0, 0, 0.98))"
+      : "linear-gradient(135deg, rgba(26, 58, 74, 0.85), rgba(15, 40, 48, 0.95))",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -455,14 +460,14 @@ const styles = {
     backdropFilter: "blur(10px)",
   },
   modal: {
-    background: "#fff",
+    background: isDark ? "var(--theme-surface)" : "#fff",
     borderRadius: 16,
     padding: 0,
     minWidth: 400,
     maxWidth: 500,
     width: "90%",
-    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
-    border: "2px solid #1A3A4A",
+    boxShadow: isDark ? "0 20px 60px rgba(0,0,0,0.8)" : "0 20px 40px rgba(0,0,0,0.3)",
+    border: `2px solid ${isDark ? "var(--theme-border)" : "#1A3A4A"}`,
     overflow: "hidden",
   },
   header: {
@@ -498,17 +503,19 @@ const styles = {
     display: "block",
     marginBottom: 8,
     fontWeight: "500",
-    color: "#1E293B",
+    color: isDark ? "var(--theme-text)" : "#1E293B",
     fontSize: "0.9em",
   },
   input: {
     width: "100%",
     padding: 12,
     borderRadius: 8,
-    border: "2px solid #e1e8ed",
+    border: `2px solid ${isDark ? "var(--theme-border)" : "#e1e8ed"}`,
     fontSize: 13,
     transition: "border-color 0.3s ease",
     boxSizing: "border-box",
+    backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
+    color: isDark ? "var(--theme-text)" : "inherit",
   },
   checkboxContainer: {
     display: "flex",
@@ -518,7 +525,7 @@ const styles = {
   },
   checkboxLabel: {
     fontSize: 14,
-    color: "#666",
+    color: isDark ? "var(--theme-text-secondary)" : "#666",
     cursor: "pointer",
   },
   button: {
@@ -553,7 +560,7 @@ const styles = {
   link: {
     background: "none",
     border: "none",
-    color: "#1A3A4A",
+    color: isDark ? "var(--primary-light)" : "#1A3A4A",
     padding: "12px 32px",
     cursor: "pointer",
     textDecoration: "underline",
@@ -564,11 +571,11 @@ const styles = {
     padding: "0 32px 16px",
   },
   erro: {
-    color: "#e74c3c",
+    color: isDark ? "#ff6b6b" : "#e74c3c",
     margin: 0,
     padding: 12,
-    backgroundColor: "#fdf2f2",
-    border: "1px solid #fecaca",
+    backgroundColor: isDark ? "rgba(220, 53, 69, 0.1)" : "#fdf2f2",
+    border: `1px solid ${isDark ? "rgba(220, 53, 69, 0.3)" : "#fecaca"}`,
     borderRadius: 8,
     fontSize: 14,
   },
@@ -576,7 +583,7 @@ const styles = {
     padding: "0 32px 32px",
   },
   infoText: {
-    color: "#666",
+    color: isDark ? "var(--theme-text-secondary)" : "#666",
     fontSize: 14,
     lineHeight: "1.4",
   },
@@ -589,7 +596,7 @@ const styles = {
   forgotPasswordButton: {
     background: "none",
     border: "none",
-    color: "#1A3A4A",
+    color: isDark ? "var(--primary-light)" : "#1A3A4A",
     cursor: "pointer",
     textDecoration: "underline",
     fontSize: 14,
@@ -631,11 +638,11 @@ const styles = {
   },
 
   successText: {
-    color: "#666",
+    color: isDark ? "var(--theme-text-secondary)" : "#666",
     marginBottom: 12,
     lineHeight: 1.4,
   },
-};
+});
 
 // ✅ CSS ANIMATIONS
 if (!document.getElementById("login-animations")) {
