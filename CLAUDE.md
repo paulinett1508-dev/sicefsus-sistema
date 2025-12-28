@@ -445,13 +445,19 @@ Comandos customizados em `.claude/commands/`:
 
 | Comando | Funcao |
 |---------|--------|
-| `@estrutura.md` | Gera mapa completo do projeto |
-| `@audit.md` | Auditoria completa do sistema |
-| `@fix.md` | Corrige problemas identificados |
-| `@review.md` | Review de codigo |
-| `@check-bugs.md` | Busca bugs potenciais |
-| `@check-env.md` | Verifica variaveis de ambiente |
-| `@firebase-check.md` | Status do Firebase |
+| `@mapear-arquitetura-completa.md` | Gera mapa completo do projeto (componentes, hooks, fluxos) |
+| `@auditoria-sistema-completa.md` | Auditoria geral (estrutura, Firebase, seguranca, consistencia) |
+| `@auditoria-design-ui-ux.md` | Auditoria visual (CSS, icones, responsividade, acessibilidade) |
+| `@auditoria-queries-firebase.md` | Auditoria Firebase (queries, listeners, escritas, regras) |
+| `@resolver-problema-guiado.md` | Corrige problemas de forma estruturada (diagnostico + solucao) |
+| `@revisar-codigo-qualidade.md` | Code review (limpeza, performance, duplicacao) |
+| `@detector-bugs-async-react.md` | Busca bugs potenciais (hooks, async/await, race conditions) |
+| `@verificar-ambientes-dev-prod.md` | Verifica configuracao de ambientes (.env dev/prod) |
+| `@buscar-valores-hardcoded.md` | Identifica valores hardcoded (URLs, credenciais, textos) |
+| `@gerenciar-ambiente-firebase.md` | Gerencia ambientes Firebase (verificar, listar, comparar) |
+| `@corrigir-claims-usuarios-firebase.md` | Atualiza custom claims no Firebase Auth |
+| `@gerar-documentacao-handover.md` | Gera documentacao completa do sistema |
+| `@migrar-acoes-para-despesas.md` | Migra acoesServicos para colecao despesas (PLANEJADA) |
 
 ---
 
