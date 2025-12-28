@@ -458,6 +458,7 @@ Comandos customizados em `.claude/commands/`:
 | `@corrigir-claims-usuarios-firebase.md` | Atualiza custom claims no Firebase Auth |
 | `@gerar-documentacao-handover.md` | Gera documentacao completa do sistema |
 | `@migrar-acoes-para-despesas.md` | Migra acoesServicos para colecao despesas (PLANEJADA) |
+| `@tarefas-pendentes-dark-mode.md` | Tarefas pendentes P1/P2 de dark mode (proxima sessao) |
 
 ---
 
