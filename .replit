@@ -5,7 +5,7 @@ entrypoint = "index.html"
 
 [nix]
 channel = "stable-24_05"
-packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano", "tree"]
+packages = ["firebase-tools", "zip", "lsof", "psmisc", "nano", "tree", "openssh"]
 
 [unitTest]
 language = "nodejs"
@@ -76,6 +76,11 @@ exposeLocalhost = true
 [[ports]]
 localPort = 61614
 externalPort = 8008
+exposeLocalhost = true
+
+[[ports]]
+localPort = 61619
+externalPort = 8099
 exposeLocalhost = true
 
 [workflows]

@@ -15,7 +15,7 @@ export const BACKUP_DIR = './backups';
 
 export const ENVIRONMENT_INDICATORS = {
   dev: '🟢 DEV',
-  prod: '🔴 PROD'
+  prod: '� PROD'
 } as const;
 
 export const WARNING_MESSAGES = {

@@ -1,5 +1,5 @@
 // src/utils/pdfHelpers.js
-import logoSicefsus from "../images/logo-sicefsus.png";
+import logoSicefsus from "../images/logo-sicefsus-ver-modoclaro.png";
 
 export const formatCurrency = (value) =>
   new Intl.NumberFormat("pt-BR", {

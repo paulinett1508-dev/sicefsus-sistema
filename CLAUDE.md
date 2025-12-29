@@ -533,3 +533,48 @@ Servidor MCP para operacoes diretas no Firestore.
 ### Proximos Passos Sugeridos
 - Verificar useEffects que precisam de cleanup
 - Completar substituicao de emojis em componentes dev/debug
+
+---
+
+## Comandos e Skills do Claude Code
+
+### Organizacao (atualizado 29/12/2025)
+
+O projeto usa dois tipos de automacao para o Claude Code:
+
+#### Commands (`.claude/commands/`)
+**Tarefas deterministicas e scripts** - acoes concretas que voce dispara manualmente.
+
+| Comando | Descricao |
+|---------|-----------|
+| `corrigir-claims-usuarios-firebase` | Roda `node scripts/fix-auth-claims.cjs` para atualizar claims |
+| `gerar-documentacao-handover` | Roda `node scripts/generateHandover.cjs` |
+| `gerenciar-ambiente-firebase` | Verificar/comparar ambientes dev/prod |
+| `migrar-acoes-para-despesas` | Migrar acoesServicos para despesas |
+| `tarefas-pendentes-dark-mode` | Checklist de tarefas dark mode |
+| `verificar-ambientes-dev-prod` | Verificar configuracao de ambientes |
+
+#### Skills (`.claude/skills/`)
+**Competencias e playbooks** - heuristicas que o agente pode usar automaticamente.
+
+| Skill | Quando Usar |
+|-------|-------------|
+| `auditoria-design-ui-ux` | Avaliar aspectos visuais, acessibilidade, design system |
+| `auditoria-firebase` | Analisar queries, listeners, regras de seguranca |
+| `auditoria-sistema` | Analise holistica: estrutura, codigo morto, consistencia |
+| `code-review` | Revisar codigo para qualidade e boas praticas |
+| `detectar-hardcodes` | Encontrar valores hardcoded que devem ser configuraveis |
+| `detector-bugs-react-async` | Identificar bugs em hooks, async/await, Firebase |
+| `mapear-arquitetura` | Documentar estrutura, dependencias, fluxos de dados |
+| `resolver-problema` | Diagnosticar e corrigir bugs de forma sistematica |
+
+### Quando Usar Cada Um
+
+```
+COMMAND: quando voce quer executar uma acao especifica
+         Ex: "rode o comando de handover", "/gerar-documentacao-handover"
+
+SKILL: quando voce precisa de analise ou raciocinio
+       Ex: "revise esse codigo", "encontre bugs nesse componente"
+       O agente vai usar a skill automaticamente se relevante
+```

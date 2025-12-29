@@ -333,7 +333,7 @@ Retorna:
   - Documentos: ${devCount}
   - Campos: ${devFields.join(', ') || 'nenhum'}
 
-🔴 PROD:
+� PROD:
   - Documentos: ${prodCount}
   - Campos: ${prodFields.join(', ') || 'nenhum'}
 

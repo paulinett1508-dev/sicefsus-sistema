@@ -1,83 +1,157 @@
-# 📚 Guia de Comandos Claude - SICEFSUS
+# 📚 Guia de Comandos e Skills Claude - SICEFSUS
 
-Este projeto possui **11 comandos customizados** do Claude para análise, auditoria e manutenção do código.
-
----
-
-## 🎯 Como Usar os Comandos
-
-No Claude Code, digite `@` seguido do nome do arquivo na pasta `.claude/commands/`.
-
-**Exemplo:**
-```
-@estrutura
-```
-
-Ou mencione o comando diretamente:
-```
-Faça uma auditoria do sistema
-```
+Este projeto usa **Commands** (tarefas) e **Skills** (competências) para o Claude Code.
 
 ---
 
-## 📋 Lista Completa de Comandos
+## 🎯 Commands vs Skills
 
-### 1️⃣ **@estrutura** - Mapeamento de Estrutura
-**Arquivo:** `estrutura.md`
+### Commands (`.claude/commands/`)
+**Tarefas determinísticas** - você dispara manualmente com `/comando`
 
-**O que faz:**
-Gera um mapa completo do projeto mostrando:
-- ✅ Árvore de arquivos (src/ com 3 níveis)
-- ✅ Dependências entre componentes (quem importa quem)
-- ✅ Fluxo de dados (Login → Dashboard, CRUD de Emendas/Despesas)
-- ✅ Todos os hooks customizados e onde são usados
+```
+/corrigir-claims-usuarios-firebase
+/gerar-documentacao-handover
+```
 
-**Quando usar:**
-- Entendendo o projeto pela primeira vez
-- Documentando a arquitetura
-- Onboarding de novos desenvolvedores
+### Skills (`.claude/skills/`)
+**Competências do agente** - ele usa automaticamente quando relevante
 
-**Resultado:** Documento markdown estruturado
-
----
-
-### 2️⃣ **@audit** - Auditoria Completa do Sistema
-**Arquivo:** `audit.md`
-
-**O que faz:**
-Análise completa em 4 áreas:
-
-**1. Estrutura**
-- Lista todos os arquivos em `src/`
-- Identifica componentes órfãos (não utilizados)
-- Verifica imports não utilizados
-
-**2. Consistência**
-- Hooks seguem padrão `use*`
-- Validadores estão sendo usados nos forms
-- Formatters aplicados em valores monetários
-
-**3. Firebase**
-- Todas as coleções referenciadas
-- Queries sem tratamento de erro
-- Listeners sem cleanup
-
-**4. Segurança**
-- `console.log` com dados sensíveis
-- `.env` no `.gitignore`
-- Permissões nos componentes
-
-**Quando usar:**
-- Antes de fazer deploy
-- Revisões periódicas de código
-- Após mudanças grandes
-
-**Resultado:** Relatório detalhado em markdown
+```
+"Revise esse código" → usa skill code-review
+"Encontre bugs"      → usa skill detector-bugs-react-async
+```
 
 ---
 
-### 3️⃣ **@fix** - Correção de Problemas
-**Arquivo:** `fix.md`
+## 📋 Commands Disponíveis (6)
+
+### /corrigir-claims-usuarios-firebase
+Executa `node scripts/fix-auth-claims.cjs` para atualizar custom claims no Firebase Auth.
+- ⚠️ Requer credenciais de produção
+- ⚠️ Rodar em janela de manutenção
+
+### /gerar-documentacao-handover
+Executa `node scripts/generateHandover.cjs` para gerar documentação completa.
+- Cria `HANDOVER_SICEFSUS.md` na raiz
+- Lista componentes, hooks, serviços
+
+### /gerenciar-ambiente-firebase
+Verificar/comparar ambientes dev e prod.
+- Qual banco está configurado?
+- Comparar estrutura de dados
+- Queries seguras (read-only)
+
+### /migrar-acoes-para-despesas
+Migrar `acoesServicos` das emendas para documentos na coleção `despesas`.
+- ⚠️ Fazer backup antes
+- ⚠️ Testar em DEV primeiro
+
+### /tarefas-pendentes-dark-mode
+Checklist de tarefas pendentes para dark mode.
+- Lista arquivos com cores hardcoded
+- Template de correção
+
+### /verificar-ambientes-dev-prod
+Verificar configuração de ambientes Firebase.
+- Diferenças .env.development vs .env.production
+- Segurança de variáveis
+
+---
+
+## 🧠 Skills Disponíveis (8)
+
+### auditoria-design-ui-ux
+Avaliar aspectos visuais, acessibilidade e aderência ao design system.
+- Cores, tipografia, espaçamentos
+- HTML semântico e ARIA
+- Ícones e responsividade
+
+### auditoria-firebase
+Analisar interações com Firebase.
+- Queries (performance, índices)
+- Escritas (validação, campos calculados)
+- Listeners (memory leaks, cleanup)
+- Regras de segurança
+
+### auditoria-sistema
+Análise holística do projeto.
+- Estrutura de arquivos
+- Código morto e imports não usados
+- Consistência de padrões
+- Segurança básica
+
+### code-review
+Revisar código para qualidade.
+- Checklist de boas práticas
+- Complexidade e duplicação
+- Sugestões priorizadas
+
+### detectar-hardcodes
+Encontrar valores hardcoded.
+- URLs, credenciais (🔴 crítico)
+- Valores de negócio (🟡 importante)
+- Textos e configurações (🟢 menor)
+
+### detector-bugs-react-async
+Identificar bugs comuns em React.
+- useEffect sem deps / deps faltando
+- setState em componente desmontado
+- Promises sem catch
+- Race conditions
+- onSnapshot sem unsubscribe
+
+### mapear-arquitetura
+Documentar estrutura do projeto.
+- Árvore de arquivos
+- Grafo de dependências
+- Fluxos de dados críticos
+
+### resolver-problema
+Diagnosticar e corrigir bugs.
+- Processo: entender → investigar → causa raiz → solução → validar
+- Template estruturado de resposta
+
+---
+
+## 💡 Exemplos de Uso
+
+```
+# Usando um command
+/gerar-documentacao-handover
+
+# Pedindo análise (skill é usada automaticamente)
+"Revise o código do Dashboard.jsx"
+"Encontre memory leaks nos hooks"
+"Faça auditoria de Firebase no projeto"
+"Por que esse bug está acontecendo?"
+```
+
+---
+
+## 📂 Estrutura de Pastas
+
+```
+.claude/
+├── commands/           # Tarefas (você dispara)
+│   ├── corrigir-claims-usuarios-firebase.md
+│   ├── gerar-documentacao-handover.md
+│   ├── gerenciar-ambiente-firebase.md
+│   ├── migrar-acoes-para-despesas.md
+│   ├── tarefas-pendentes-dark-mode.md
+│   └── verificar-ambientes-dev-prod.md
+├── skills/             # Competências (agente usa)
+│   ├── auditoria-design-ui-ux.md
+│   ├── auditoria-firebase.md
+│   ├── auditoria-sistema.md
+│   ├── code-review.md
+│   ├── detectar-hardcodes.md
+│   ├── detector-bugs-react-async.md
+│   ├── mapear-arquitetura.md
+│   └── resolver-problema.md
+├── docs/               # Documentação
+└── reports/            # Relatórios gerados
+```
 
 **O que faz:**
 Processo estruturado de correção em 4 etapas:
