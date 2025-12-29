@@ -437,7 +437,7 @@ const styles = {
     animation: "spin 1s linear infinite",
   },
   loadingText: {
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
     fontSize: "14px",
   },
   // Info Bar
@@ -458,20 +458,20 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     fontSize: "14px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
   },
   flagIcon: {
     fontSize: "16px",
   },
   infoLabel: {
     fontWeight: "500",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
   },
   infoDivider: {
-    color: "var(--gray-300, #CBD5E1)",
+    color: "var(--theme-text-muted)",
   },
   infoText: {
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
   },
   // Stats Grid
   statsGrid: {
@@ -517,7 +517,7 @@ const styles = {
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    color: "var(--gray-400, #94A3B8)",
+    color: "var(--theme-text-secondary)",
     margin: 0,
   },
   statLabelLight: {
@@ -533,7 +533,7 @@ const styles = {
   statNumber: {
     fontSize: "28px",
     fontWeight: "700",
-    color: "var(--gray-800, #1E293B)",
+    color: "var(--theme-text)",
     margin: 0,
   },
   statNumberLight: {
@@ -593,7 +593,7 @@ const styles = {
     boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
   },
   filterText: {
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
   },
   filterBadge: {
     backgroundColor: "rgba(37, 99, 235, 0.1)",
@@ -613,17 +613,17 @@ const styles = {
     left: "12px",
     top: "50%",
     transform: "translateY(-50%)",
-    color: "var(--gray-400, #94A3B8)",
+    color: "var(--theme-text-muted)",
   },
   searchInput: {
     width: "100%",
     height: "36px",
     padding: "0 12px 0 40px",
-    border: "1px solid var(--theme-border, #E2E8F0)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "8px",
-    backgroundColor: "var(--gray-50, #F8FAFC)",
+    backgroundColor: "var(--theme-surface-secondary)",
     fontSize: "14px",
-    color: "var(--gray-900, #0F172A)",
+    color: "var(--theme-text)",
     outline: "none",
     transition: "all 0.15s ease",
   },
@@ -699,12 +699,12 @@ const styles = {
   emptyTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
     marginBottom: "8px",
   },
   emptyText: {
     fontSize: "14px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-secondary)",
     textAlign: "center",
   },
   // Footer
@@ -712,7 +712,7 @@ const styles = {
     marginTop: "32px",
     textAlign: "center",
     fontSize: "10px",
-    color: "var(--gray-400, #94A3B8)",
+    color: "var(--theme-text-muted)",
     paddingBottom: "16px",
   },
 };

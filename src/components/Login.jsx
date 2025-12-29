@@ -473,8 +473,8 @@ const getStyles = (isDark) => ({
     overflow: "hidden",
   },
   header: {
-    background: "linear-gradient(135deg, #1A3A4A, #2A5A6A)",
-    color: "white",
+    background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
+    color: "var(--white)",
     padding: 24,
     textAlign: "center",
     display: "flex",
@@ -533,8 +533,8 @@ const getStyles = (isDark) => ({
   button: {
     width: "100%",
     padding: 14,
-    background: "linear-gradient(135deg, #27ae60, #2ecc71)",
-    color: "#fff",
+    background: "linear-gradient(135deg, var(--success), var(--success-light))",
+    color: "var(--white)",
     border: "none",
     borderRadius: 8,
     fontSize: 16,
@@ -613,8 +613,8 @@ const getStyles = (isDark) => ({
   cancelButton: {
     flex: 1,
     padding: 14,
-    background: "#95a5a6",
-    color: "#fff",
+    background: "var(--secondary)",
+    color: "var(--white)",
     border: "none",
     borderRadius: 8,
     fontSize: 16,

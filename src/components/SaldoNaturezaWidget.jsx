@@ -203,14 +203,14 @@ const SaldoNaturezaWidget = ({
 
               <div style={styles.valorItem}>
                 <span style={styles.valorLabel}>Executado</span>
-                <span style={{ ...styles.valorNumero, color: "#dc3545" }}>
+                <span style={{ ...styles.valorNumero, color: "var(--error)" }}>
                   {formatCurrency(item.executado)}
                 </span>
               </div>
 
               <div style={styles.valorItem}>
                 <span style={styles.valorLabel}>Saldo</span>
-                <span style={{ ...styles.valorNumero, color: "#28a745" }}>
+                <span style={{ ...styles.valorNumero, color: "var(--success)" }}>
                   {formatCurrency(item.saldo)}
                 </span>
               </div>

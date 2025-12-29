@@ -409,7 +409,7 @@ const styles = {
     fontSize: 16,
     fontWeight: "500",
     margin: 0,
-    color: "#666",
+    color: "var(--theme-text-secondary)",
   },
 
   errorContainer: {
@@ -439,7 +439,7 @@ const styles = {
 
   errorMessage: {
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     margin: "0 0 24px 0",
   },
 
@@ -478,7 +478,7 @@ const styles = {
   },
 
   emptyText: {
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     fontSize: 16,
     margin: "0 0 32px 0",
     lineHeight: 1.5,
@@ -502,13 +502,13 @@ const styles = {
     alignItems: "flex-start",
     gap: "12px",
     padding: "16px 20px",
-    backgroundColor: "#e3f2fd",
-    border: "2px solid #90caf9",
+    backgroundColor: "rgba(14, 165, 233, 0.1)",
+    border: "2px solid var(--info)",
     borderRadius: 12,
-    margin: "0 0 24px 0", // ✅ CORRIGIDO: Margem inferior apenas
+    margin: "0 0 24px 0",
     fontSize: 14,
-    color: "#1565c0",
-    boxShadow: "0 4px 12px rgba(33, 150, 243, 0.15)",
+    color: "var(--info)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   filtroIcon: {
@@ -549,19 +549,19 @@ const styles = {
     alignItems: "center",
     gap: "16px",
     padding: "16px",
-    backgroundColor: "#f0fdf4",
-    border: "3px solid #22c55e",
-    borderLeft: "8px solid #22c55e",
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    border: "3px solid var(--success)",
+    borderLeft: "8px solid var(--success)",
     borderRadius: "8px",
     transition: "all 0.2s ease",
-    boxShadow: "0 2px 4px rgba(34, 197, 94, 0.1)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   despesaStatusExecutada: {
     fontSize: "14px",
     fontWeight: "800",
-    color: "#166534",
-    backgroundColor: "#dcfce7",
+    color: "var(--success)",
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
     padding: "8px 16px",
     borderRadius: "6px",
     whiteSpace: "nowrap",
@@ -583,13 +583,13 @@ const styles = {
   despesaNumero: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     minWidth: "32px",
   },
 
   despesaDescricao: {
     fontSize: "14px",
-    color: "#495057",
+    color: "var(--theme-text)",
     flex: 1,
     fontWeight: "500",
   },
@@ -597,7 +597,7 @@ const styles = {
   despesaValor: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#16a34a",
+    color: "var(--success)",
     minWidth: "120px",
     textAlign: "right",
   },
@@ -607,7 +607,7 @@ const styles = {
     gap: "16px",
     paddingLeft: "48px",
     fontSize: "12px",
-    color: "#6b7280",
+    color: "var(--theme-text-muted)",
   },
 
   despesaInfo: {
@@ -622,8 +622,8 @@ const styles = {
   },
 
   btnVisualizar: {
-    backgroundColor: "#3b82f6",
-    color: "white",
+    backgroundColor: "var(--info)",
+    color: "var(--white)",
     border: "none",
     padding: "8px 12px",
     borderRadius: "6px",
@@ -633,8 +633,8 @@ const styles = {
   },
 
   btnEditar: {
-    backgroundColor: "#f59e0b",
-    color: "white",
+    backgroundColor: "var(--warning)",
+    color: "var(--white)",
     border: "none",
     padding: "8px 12px",
     borderRadius: "6px",
@@ -644,8 +644,8 @@ const styles = {
   },
 
   btnRemover: {
-    backgroundColor: "#dc3545",
-    color: "white",
+    backgroundColor: "var(--error)",
+    color: "var(--white)",
     border: "none",
     padding: "8px 12px",
     borderRadius: "6px",

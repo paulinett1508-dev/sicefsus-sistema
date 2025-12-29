@@ -14,46 +14,43 @@ export const COLORS = {
 export const TIPOS_RELATORIOS = [
   {
     id: "execucao-orcamentaria",
-    titulo: "Relatório de Execução Orçamentária",
-    descricao:
-      "Demonstrativo completo da execução financeira das emendas parlamentares",
-    icone: "📊",
+    titulo: "Execução Orçamentária",
+    descricao: "Demonstrativo da execução financeira das emendas",
+    icone: "analytics",
     cor: COLORS.PRIMARY,
-    campos: ["periodo", "parlamentar", "emenda", "status"], // ✅ Adicionado emenda
+    campos: ["periodo", "parlamentar", "emenda", "status"],
   },
   {
     id: "prestacao-contas",
-    titulo: "Relatório de Prestação de Contas",
-    descricao:
-      "Documento oficial para prestação de contas aos órgãos fiscalizadores",
-    icone: "📋",
+    titulo: "Prestação de Contas",
+    descricao: "Documento para prestação de contas aos órgãos fiscalizadores",
+    icone: "assignment",
     cor: COLORS.ACCENT,
-    campos: ["periodo", "municipio", "emenda"], // ✅ Adicionado emenda
+    campos: ["periodo", "municipio", "emenda"],
   },
   {
     id: "analitico-parlamentar",
-    titulo: "Relatório Analítico por Parlamentar",
-    descricao: "Análise detalhada das emendas por autor, com execução e saldos",
-    icone: "👥",
+    titulo: "Analítico por Parlamentar",
+    descricao: "Análise das emendas por autor, com execução e saldos",
+    icone: "groups",
     cor: COLORS.SUCCESS,
-    campos: ["parlamentar", "periodo", "emenda"], // ✅ Adicionado emenda
+    campos: ["parlamentar", "periodo", "emenda"],
   },
   {
     id: "despesas-detalhado",
-    titulo: "Relatório de Despesas Detalhado",
-    descricao:
-      "Listagem completa de todas as despesas realizadas com filtros avançados",
-    icone: "💰",
+    titulo: "Despesas Detalhado",
+    descricao: "Listagem de despesas realizadas com filtros avançados",
+    icone: "payments",
     cor: COLORS.WARNING,
-    campos: ["periodo", "municipio", "parlamentar", "emenda", "fornecedor"], // ✅ Adicionados parlamentar e emenda
+    campos: ["periodo", "municipio", "parlamentar", "emenda", "fornecedor"],
   },
   {
     id: "consolidado-mensal",
-    titulo: "Relatório Consolidado Mensal",
-    descricao: "Resumo executivo mensal com principais indicadores e gráficos",
-    icone: "📈",
+    titulo: "Consolidado Mensal",
+    descricao: "Resumo mensal com principais indicadores",
+    icone: "trending_up",
     cor: COLORS.ERROR,
-    campos: ["mes", "ano", "parlamentar"], // ✅ Adicionado parlamentar
+    campos: ["mes", "ano", "parlamentar"],
   },
 ];
 

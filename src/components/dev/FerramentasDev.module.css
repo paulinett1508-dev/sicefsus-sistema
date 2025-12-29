@@ -2,13 +2,8 @@
 
 .container {
   min-height: 100vh;
-  background: #f8f9fa;
-  padding: 20px;
-}
-
-/* Dark mode support */
-:global([data-theme="dark"]) .container {
   background: var(--theme-bg);
+  padding: 20px;
 }
 
 .header {
@@ -59,19 +54,14 @@
 }
 
 .tabsContainer {
-  background: white;
+  background: var(--theme-surface);
   border-radius: 12px;
   padding: 8px;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-}
-
-:global([data-theme="dark"]) .tabsContainer {
-  background: var(--theme-surface);
-  box-shadow: var(--shadow);
 }
 
 .tabButton {
@@ -86,30 +76,21 @@
   transition: all 0.2s;
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
-}
-
-:global([data-theme="dark"]) .tabButton {
   color: var(--theme-text-secondary);
 }
 
 .tabButton:hover {
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563eb;
-}
-
-:global([data-theme="dark"]) .tabButton:hover {
-  background: rgba(37, 99, 235, 0.2);
-  color: var(--theme-primary);
+  background: var(--theme-hover);
+  color: var(--primary);
 }
 
 .tabButtonActive {
-  background: #2563eb;
-  color: white;
+  background: var(--primary);
+  color: var(--white);
 }
 
 .tabButtonActive:hover {
-  background: #1d4ed8;
+  background: var(--primary-dark);
 }
 
 .tabIcon {
@@ -121,15 +102,10 @@
 }
 
 .content {
-  background: white;
+  background: var(--theme-surface);
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   min-height: 400px;
-}
-
-:global([data-theme="dark"]) .content {
-  background: var(--theme-surface);
-  box-shadow: var(--shadow);
   color: var(--theme-text);
 }

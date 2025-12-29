@@ -195,9 +195,9 @@ const Sobre = () => {
 
       <style>{`
         .sobre-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 24px;
+          min-height: 100vh;
+          background: var(--theme-bg);
+          padding: 20px;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           color: var(--theme-text);
           line-height: 1.5;
@@ -205,20 +205,15 @@ const Sobre = () => {
 
         /* Header */
         .sobre-header {
-          background: var(--theme-surface, #ffffff);
-          border: 1px solid var(--theme-border, #E2E8F0);
+          background: var(--theme-surface);
+          border: 1px solid var(--theme-border);
           border-radius: 12px;
-          padding: 24px;
-          margin-bottom: 12px;
+          padding: 20px 24px;
+          margin-bottom: 16px;
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-        }
-
-        [data-theme="dark"] .sobre-header {
-          background: #1E293B;
-          border-color: #334155;
         }
 
         .header-logo-title {
@@ -281,15 +276,9 @@ const Sobre = () => {
           border: 1px solid rgba(26, 58, 74, 0.2);
         }
 
-        [data-theme="dark"] .version-badge {
-          background: rgba(59, 130, 246, 0.2);
-          border-color: rgba(59, 130, 246, 0.3);
-          color: var(--primary-light);
-        }
-
         .status-badge {
           background: rgba(16, 185, 129, 0.1);
-          color: #10b981;
+          color: var(--success);
           padding: 6px 14px;
           border-radius: 20px;
           font-size: 0.875rem;
@@ -299,35 +288,25 @@ const Sobre = () => {
           align-items: center;
         }
 
-        [data-theme="dark"] .status-badge {
-          background: rgba(16, 185, 129, 0.2);
-          border-color: rgba(16, 185, 129, 0.3);
-        }
-
         /* Content Grid */
         .sobre-content {
           display: grid;
-          gap: 12px;
+          gap: 16px;
         }
 
         /* Intro Section */
         .intro-section {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 12px;
+          gap: 16px;
         }
 
         /* Cards */
         .sobre-card {
-          background: var(--theme-surface, #ffffff);
-          border: 1px solid var(--theme-border, #E2E8F0);
+          background: var(--theme-surface);
+          border: 1px solid var(--theme-border);
           border-radius: 10px;
           padding: 16px 20px;
-        }
-
-        [data-theme="dark"] .sobre-card {
-          background: #1E293B;
-          border-color: #334155;
         }
 
         .sobre-card h2 {
@@ -380,7 +359,7 @@ const Sobre = () => {
         }
 
         .info-value.ambiente {
-          color: #10b981;
+          color: var(--success);
           display: flex;
           align-items: center;
           gap: 6px;
@@ -390,45 +369,36 @@ const Sobre = () => {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #10b981;
+          background: var(--success);
         }
 
         /* Features Grid */
         .features-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 10px;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 12px;
         }
 
         .feature-card {
           display: flex;
           align-items: flex-start;
-          gap: 10px;
-          padding: 10px;
+          gap: 12px;
+          padding: 12px;
           background: var(--theme-surface-secondary);
-          border: 1px solid transparent;
+          border: 1px solid var(--theme-border-light);
           border-radius: 8px;
-        }
-
-        [data-theme="dark"] .feature-card {
-          background: #334155;
         }
 
         .feature-icon {
           flex-shrink: 0;
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          background: rgba(26, 58, 74, 0.1);
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background: var(--theme-hover);
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--primary);
-        }
-
-        [data-theme="dark"] .feature-icon {
-          background: rgba(59, 130, 246, 0.2);
-          color: var(--primary-light);
         }
 
         .feature-icon .material-symbols-outlined {
@@ -453,16 +423,11 @@ const Sobre = () => {
         .support-box {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 12px;
-          background: rgba(26, 58, 74, 0.05);
-          border: 1px solid rgba(26, 58, 74, 0.15);
+          gap: 16px;
+          padding: 16px;
+          background: var(--theme-surface-secondary);
+          border: 1px solid var(--theme-border-light);
           border-radius: 8px;
-        }
-
-        [data-theme="dark"] .support-box {
-          background: rgba(59, 130, 246, 0.1);
-          border-color: rgba(59, 130, 246, 0.2);
         }
 
         .company-logo {
@@ -490,15 +455,16 @@ const Sobre = () => {
         .whatsapp-link {
           display: inline-flex;
           align-items: center;
-          font-size: 0.8rem;
+          font-size: 0.85rem;
           font-weight: 500;
-          color: #10b981;
+          color: var(--success);
           text-decoration: none;
           transition: color 0.2s ease;
         }
 
         .whatsapp-link:hover {
-          color: #059669;
+          color: var(--success-dark);
+          text-decoration: underline;
         }
 
         /* Responsive */

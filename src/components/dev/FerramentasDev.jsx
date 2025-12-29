@@ -48,39 +48,39 @@ const FerramentasDev = () => {
   const abas = [
     {
       id: "diagnostico",
-      icone: "🔍",
+      icone: "troubleshoot",
       label: "Diagnóstico & Recálculo",
       componente: DiagnosticoTab,
     },
     {
       id: "manutencao",
-      icone: "🔧",
+      icone: "build",
       label: "Manutenção & Monitoramento",
       componente: ManutencaoTab
     },
-    { id: "backup", icone: "📥", label: "Backup", componente: BackupTab },
+    { id: "backup", icone: "backup", label: "Backup", componente: BackupTab },
     {
-      id: "analytics", // Adicionado ID para Analytics
-      icone: "📊", // Ícone para Analytics
-      label: "Analytics", // Label para Analytics
-      componente: AnalyticsTab, // Componente para Analytics
+      id: "analytics",
+      icone: "analytics",
+      label: "Analytics",
+      componente: AnalyticsTab,
     },
-    { id: "usuarios", icone: "👥", label: "Usuários", componente: UsuariosTab },
+    { id: "usuarios", icone: "group", label: "Usuários", componente: UsuariosTab },
     {
       id: "iam",
-      icone: "🔐",
+      icone: "admin_panel_settings",
       label: "IAM",
       componente: IAMTab,
     },
     {
       id: "config",
-      icone: "⚙️",
+      icone: "settings",
       label: "Configurações",
       componente: ConfigTab,
     },
     {
       id: "rules",
-      icone: "📜",
+      icone: "description",
       label: "Firestore Rules",
       componente: () => {
         const FirestoreRulesSection = React.lazy(() => import("../admin/FirestoreRulesSection"));
@@ -103,12 +103,18 @@ const FerramentasDev = () => {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1 className={styles.title}>🔧 Ferramentas de Desenvolvimento</h1>
-          <span className={styles.badge}>👑 SUPER</span>
+          <h1 className={styles.title}>
+            <span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>build</span>
+            Ferramentas de Desenvolvimento
+          </h1>
+          <span className={styles.badge}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>verified_user</span>
+            SUPER
+          </span>
         </div>
         <div className={styles.alertaBanner}>
-          ⚠️ Área restrita para SuperAdministradores. Todas as ações são
-          registradas.
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>warning</span>
+          Área restrita para SuperAdministradores. Todas as ações são registradas.
         </div>
       </div>
 
@@ -123,7 +129,7 @@ const FerramentasDev = () => {
               console.log(`🛠️ FerramentasDev - Navigated to tab: ${aba.label} (${aba.id})`);
             }}
           >
-            <span className={styles.tabIcon}>{aba.icone}</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{aba.icone}</span>
             <span className={styles.tabLabel}>{aba.label}</span>
           </button>
         ))}
@@ -141,8 +147,8 @@ const FerramentasDev = () => {
             padding: '40px',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px', opacity: 0.3 }}>🔧</div>
-            <p style={{ fontSize: '15px', color: '#94a3b8' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 64, marginBottom: 16, opacity: 0.3, color: 'var(--theme-text-muted)' }}>build</span>
+            <p style={{ fontSize: '15px', color: 'var(--theme-text-secondary)' }}>
               Selecione uma ferramenta acima para começar
             </p>
           </div>

@@ -868,7 +868,7 @@ const styles = {
     fontWeight: "600",
     padding: "4px 10px",
     borderRadius: "4px",
-    color: "white",
+    color: "var(--white)",
   },
 
   emendaStatsHeader: {
@@ -1005,7 +1005,7 @@ const styles = {
     fontWeight: "600",
     padding: "4px 8px",
     borderRadius: "4px",
-    color: "white",
+    color: "var(--white)",
     display: "inline-block",
     whiteSpace: "nowrap",
   },
@@ -1015,7 +1015,7 @@ const styles = {
     fontWeight: "600",
     padding: "4px 8px",
     borderRadius: "4px",
-    color: "white",
+    color: "var(--white)",
     display: "inline-block",
     whiteSpace: "nowrap",
     textTransform: "capitalize",

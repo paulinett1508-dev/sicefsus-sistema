@@ -10,17 +10,21 @@ export default function RelatoriosCards({ onSelectReport }) {
         <div
           key={tipo.id}
           className="relatorios-card"
-          style={{ borderTop: `4px solid ${tipo.cor}` }}
+          style={{ borderLeft: `4px solid ${tipo.cor}` }}
           onClick={() => onSelectReport(tipo)}
         >
-          <div className="relatorios-card-icon">{tipo.icone}</div>
-          <h3 className="relatorios-card-title">{tipo.titulo}</h3>
-          <p className="relatorios-card-description">{tipo.descricao}</p>
+          <div className="relatorios-card-icon" style={{ color: tipo.cor }}>
+            <span className="material-symbols-outlined">{tipo.icone}</span>
+          </div>
+          <div className="relatorios-card-content">
+            <h3 className="relatorios-card-title">{tipo.titulo}</h3>
+            <p className="relatorios-card-description">{tipo.descricao}</p>
+          </div>
           <button
             className="relatorios-select-btn"
             style={{ backgroundColor: tipo.cor }}
           >
-            Selecionar
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>arrow_forward</span>
           </button>
         </div>
       ))}

@@ -760,15 +760,15 @@ const styles = {
   },
 
   modal: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "12px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow-lg)",
     maxWidth: "900px",
     width: "100%",
     maxHeight: "90vh",
     overflowY: "auto",
-    border: "2px solid #3498db",
-    color: "#1E293B",
+    border: "2px solid var(--primary)",
+    color: "var(--theme-text)",
     animation: "userFormSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
     transition: "all 0.3s ease",
   },
@@ -812,20 +812,20 @@ const styles = {
   },
 
   fieldset: {
-    border: "2px solid #2563EB",
+    border: "2px solid var(--primary)",
     borderRadius: "10px",
     padding: "20px",
-    background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    background: "var(--theme-surface)",
+    boxShadow: "var(--shadow-sm)",
     marginBottom: "24px",
   },
 
   legend: {
-    background: "white",
+    background: "var(--theme-surface)",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #2563EB",
-    color: "#2563EB",
+    border: "2px solid var(--primary)",
+    color: "var(--primary)",
     fontWeight: "600",
     fontSize: "14px",
     display: "flex",
@@ -850,7 +850,7 @@ const styles = {
   label: {
     display: "block",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     marginBottom: "8px",
     fontSize: "14px",
   },
@@ -858,7 +858,7 @@ const styles = {
   labelRequired: {
     display: "block",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     marginBottom: "8px",
     fontSize: "14px",
   },
@@ -871,11 +871,12 @@ const styles = {
   input: {
     width: "100%",
     padding: "12px",
-    border: "2px solid #bdc3c7",
+    border: "2px solid var(--theme-border)",
     borderRadius: "8px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     marginBottom: "4px",
     boxSizing: "border-box",
   },
@@ -883,11 +884,12 @@ const styles = {
   select: {
     width: "100%",
     padding: "12px",
-    border: "2px solid #bdc3c7",
+    border: "2px solid var(--theme-border)",
     borderRadius: "8px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     appearance: "none",
     WebkitAppearance: "none",
     MozAppearance: "none",
@@ -901,14 +903,14 @@ const styles = {
 
   helpText: {
     fontSize: "12px",
-    color: "#7f8c8d",
+    color: "var(--theme-text-secondary)",
     fontStyle: "italic",
     marginBottom: "8px",
   },
 
   emendaInfo: {
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "8px",
     padding: "16px",
   },
@@ -919,7 +921,7 @@ const styles = {
     gap: "12px",
     marginTop: "24px",
     paddingTop: "20px",
-    borderTop: "1px solid #e9ecef",
+    borderTop: "1px solid var(--theme-border)",
   },
 
   cancelButtonStyle: {
@@ -990,14 +992,14 @@ const styles = {
     margin: "0 24px 20px 24px",
     borderRadius: "12px",
     overflow: "hidden",
-    backgroundColor: "white",
-    border: "1px solid #e9ecef",
+    backgroundColor: "var(--theme-surface)",
+    border: "1px solid var(--theme-border)",
   },
 
   securityToggleButton: {
     width: "100%",
     padding: "16px 20px",
-    background: "linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)",
+    background: "var(--theme-surface-secondary)",
     border: "none",
     cursor: "pointer",
     display: "flex",
@@ -1006,7 +1008,7 @@ const styles = {
     transition: "all 0.3s ease",
     fontSize: "16px",
     fontWeight: "600",
-    color: "#1a237e",
+    color: "var(--primary)",
   },
 
   securityToggleIcon: {
@@ -1031,7 +1033,7 @@ const styles = {
   },
 
   securityPolicyContent: {
-    borderTop: "1px solid #e9ecef",
+    borderTop: "1px solid var(--theme-border)",
     animation: "slideDown 0.3s ease-out",
     overflow: "hidden",
   },
@@ -1040,9 +1042,9 @@ const styles = {
 // ✅ ESTILOS DA SEÇÃO DE SEGURANÇA
 const securityStyles = {
   container: {
-    background: "linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)",
+    background: "var(--theme-surface)",
     padding: "32px",
-    boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.06)",
+    boxShadow: "inset 0 2px 4px var(--theme-shadow)",
     position: "relative",
     overflow: "hidden",
   },
@@ -1069,13 +1071,13 @@ const securityStyles = {
   },
 
   card: {
-    background: "white",
+    background: "var(--theme-surface-secondary)",
     borderRadius: "16px",
     padding: "24px",
     display: "flex",
     gap: "16px",
     alignItems: "flex-start",
-    border: "1px solid rgba(0, 0, 0, 0.08)",
+    border: "1px solid var(--theme-border-light)",
     position: "relative",
     overflow: "hidden",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -1098,26 +1100,26 @@ const securityStyles = {
   cardTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#263238",
+    color: "var(--theme-text)",
     margin: "0 0 8px 0",
     letterSpacing: "-0.3px",
   },
 
   cardText: {
     fontSize: "14px",
-    color: "#607d8b",
+    color: "var(--theme-text-secondary)",
     margin: "0",
     lineHeight: "1.6",
   },
 
   footer: {
-    background: "linear-gradient(135deg, #e8f5e9 0%, #e3f2fd 100%)",
+    background: "var(--theme-surface-secondary)",
     borderRadius: "12px",
     padding: "20px",
     display: "flex",
     alignItems: "flex-start",
     gap: "16px",
-    border: "1px solid rgba(76, 175, 80, 0.2)",
+    border: "1px solid var(--success)",
     position: "relative",
     zIndex: 1,
   },
@@ -1140,14 +1142,14 @@ const securityStyles = {
 
   footerTitle: {
     fontSize: "16px",
-    color: "#1b5e20",
+    color: "var(--success)",
     display: "block",
     marginBottom: "4px",
   },
 
   footerText: {
     fontSize: "14px",
-    color: "#37474f",
+    color: "var(--theme-text-secondary)",
     margin: "0",
     lineHeight: "1.6",
   },

@@ -499,7 +499,7 @@ const styles = {
   envBadge: {
     fontSize: "9px",
     fontWeight: 700,
-    color: "#fff",
+    color: "var(--white)",
     padding: "2px 5px",
     borderRadius: "3px",
     letterSpacing: "0.5px",

@@ -461,7 +461,7 @@ const styles = {
     borderCollapse: "collapse",
   },
   thead: {
-    backgroundColor: "rgba(248, 250, 252, 0.8)",
+    backgroundColor: "var(--theme-surface-secondary)",
   },
   th: {
     padding: "10px 12px",
@@ -521,7 +521,7 @@ const styles = {
   checkIcon: {
     width: "10px",
     height: "10px",
-    color: "#ffffff",
+    color: "var(--white)",
   },
   // Emenda cell
   emendaCell: {
@@ -575,7 +575,7 @@ const styles = {
     fontSize: "10px",
     fontWeight: "700",
     letterSpacing: "0.05em",
-    color: "#6366F1",
+    color: "var(--info)",
     textTransform: "uppercase",
   },
   objetoDescricao: {
@@ -712,9 +712,9 @@ const styles = {
     justifyContent: "center",
   },
   paginationBtnActive: {
-    backgroundColor: "var(--primary, #2563EB)",
-    borderColor: "var(--primary, #2563EB)",
-    color: "#ffffff",
+    backgroundColor: "var(--primary)",
+    borderColor: "var(--primary)",
+    color: "var(--white)",
   },
   // Empty state
   emptyState: {

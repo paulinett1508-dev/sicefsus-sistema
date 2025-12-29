@@ -166,9 +166,9 @@ const EmendasList = ({
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow-md)",
     overflow: "hidden",
   },
 
@@ -184,8 +184,8 @@ const styles = {
   loadingSpinner: {
     width: 40,
     height: 40,
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #007bff",
+    border: "4px solid var(--theme-border)",
+    borderTop: "4px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 16,
@@ -208,19 +208,19 @@ const styles = {
   errorTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#dc3545",
+    color: "var(--error)",
     margin: "0 0 8px 0",
   },
 
   errorMessage: {
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     margin: "0 0 24px 0",
   },
 
   retryButton: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 20px",
     borderRadius: "6px",

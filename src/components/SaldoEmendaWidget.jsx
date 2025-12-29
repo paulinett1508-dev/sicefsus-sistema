@@ -137,7 +137,7 @@ const SaldoEmendaWidget = ({
 
         <div style={styles.item}>
           <span style={styles.label}>Saldo Atual:</span>
-          <span style={{ ...styles.valor, color: "#28a745" }}>
+          <span style={{ ...styles.valor, color: "var(--success)" }}>
             {formatCurrency(saldoAtual)}
           </span>
         </div>

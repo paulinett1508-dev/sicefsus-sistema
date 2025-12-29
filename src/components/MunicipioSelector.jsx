@@ -277,64 +277,65 @@ const styles = {
   label: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     marginBottom: "4px",
   },
 
   select: {
     padding: "12px",
-    border: "2px solid #e1e5e9",
+    border: "2px solid var(--theme-border)",
     borderRadius: "8px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     transition: "all 0.2s ease",
     cursor: "pointer",
   },
 
   selectLoading: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     cursor: "wait",
   },
 
   selectError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
+    borderColor: "var(--error)",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
   },
 
   selectDisabled: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     cursor: "not-allowed",
     opacity: 0.6,
   },
 
   errorMessage: {
-    color: "#dc3545",
+    color: "var(--error)",
     fontSize: "12px",
     marginTop: "4px",
   },
 
   info: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "12px",
     marginTop: "4px",
   },
 
   exemploContainer: {
     padding: "24px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "12px",
     marginTop: "20px",
   },
 
   exemploTitle: {
-    color: "#1E293B",
+    color: "var(--theme-text)",
     marginBottom: "20px",
     fontSize: "18px",
   },
 
   salvarButton: {
-    backgroundColor: "#28a745",
-    color: "white",
+    backgroundColor: "var(--success)",
+    color: "var(--white)",
     border: "none",
     padding: "12px 24px",
     borderRadius: "8px",
@@ -346,11 +347,11 @@ const styles = {
   },
 
   preview: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     padding: "16px",
     borderRadius: "8px",
     marginTop: "16px",
-    border: "1px solid #e1e5e9",
+    border: "1px solid var(--theme-border)",
   },
 };
 
