@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import logoSicefsus from "../images/logo-sicefsus.png";
+import logoSicefsusLight from "../images/logo-sicefsus-ver-modoclaro.png";
+import logoSicefsusDark from "../images/logo-sicefsus-ver-mododark.png";
 import logoAraujoInfo from "../images/logoaraujoinfo.png";
 import { useVersion } from "../hooks/useVersion";
 
@@ -16,29 +17,32 @@ const Sobre = () => {
   return (
     <>
       <div className="sobre-container">
-        {/* Header Clean - Sem Banner */}
+        {/* Header com Logo */}
         <div className="sobre-header">
-          <div className="header-content">
+          <div className="header-logo-title">
             <img
-              src={logoSicefsus}
+              src={logoSicefsusLight}
               alt="SICEFSUS Logo"
-              className="sobre-logo"
-              onError={(e) => {
-                e.target.src = "/logo-sigem.png";
-              }}
+              className="sobre-logo sobre-logo-light"
             />
-            <div className="header-info">
-              <h1>SICEFSUS</h1>
-              <p className="sobre-subtitle">
-                Sistema de Controle de Emendas e Fiscalização do SUS
-              </p>
-              <div className="version-info">
-                <span className="version-badge">
-                  {loading ? "..." : `v${version}`}
-                </span>
-                <span className="status-badge"><span className="material-symbols-outlined" style={{ fontSize: 12, verticalAlign: "middle", marginRight: 4 }}>check_circle</span> Ativo</span>
-              </div>
-            </div>
+            <img
+              src={logoSicefsusDark}
+              alt="SICEFSUS Logo"
+              className="sobre-logo sobre-logo-dark"
+            />
+            <span className="header-title">SICEFSUS</span>
+          </div>
+          <p className="sobre-subtitle">
+            Sistema de Controle de Emendas e Fiscalização do SUS
+          </p>
+          <div className="version-info">
+            <span className="version-badge">
+              {loading ? "..." : `v${version}`}
+            </span>
+            <span className="status-badge">
+              <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>check_circle</span>
+              Ativo
+            </span>
           </div>
         </div>
 
@@ -46,8 +50,11 @@ const Sobre = () => {
         <div className="sobre-content">
           {/* Sobre + Sistema Info - Side by Side */}
           <div className="intro-section">
-            <div className="about-card">
-              <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>description</span> Sobre o Sistema</h2>
+            <div className="sobre-card">
+              <h2>
+                <span className="material-symbols-outlined" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 8 }}>description</span>
+                Sobre o Sistema
+              </h2>
               <p>
                 Sistema completo para gestão e controle de emendas parlamentares
                 destinadas ao SUS, desenvolvido para facilitar o acompanhamento,
@@ -55,12 +62,15 @@ const Sobre = () => {
               </p>
             </div>
 
-            <div className="system-info-card">
-              <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>analytics</span> Informações do Sistema</h2>
+            <div className="sobre-card">
+              <h2>
+                <span className="material-symbols-outlined" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 8 }}>analytics</span>
+                Informações do Sistema
+              </h2>
               <div className="info-grid">
                 <div className="info-item">
                   <span className="info-label">Versão</span>
-                  <span className="info-value">
+                  <span className="info-value mono">
                     {loading ? "..." : `v${version}`}
                   </span>
                 </div>
@@ -70,52 +80,58 @@ const Sobre = () => {
                     {new Date().toLocaleDateString("pt-BR")}
                   </span>
                 </div>
-                <div className="info-item">
+                <div className="info-item no-border">
                   <span className="info-label">Ambiente</span>
-                  <span className="info-value">Produção</span>
+                  <span className="info-value ambiente">
+                    <span className="status-dot"></span>
+                    Produção
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Funcionalidades Compactas */}
-          <div className="features-section">
-            <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>target</span> Funcionalidades Principais</h2>
+          {/* Funcionalidades */}
+          <div className="sobre-card">
+            <h2>
+              <span className="material-symbols-outlined" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 8 }}>stars</span>
+              Funcionalidades Principais
+            </h2>
             <div className="features-grid">
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>analytics</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">dashboard</span>
+                </div>
                 <div className="feature-content">
                   <h3>Dashboard Executivo</h3>
-                  <p>
-                    KPIs importantes, gráficos interativos e alertas de
-                    vencimento
-                  </p>
+                  <p>KPIs importantes, gráficos interativos e alertas de vencimento</p>
                 </div>
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>article</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">assignment</span>
+                </div>
                 <div className="feature-content">
                   <h3>Gestão de Emendas</h3>
-                  <p>
-                    Cadastro completo, acompanhamento e controle de documentos
-                  </p>
+                  <p>Cadastro completo, acompanhamento e controle de documentos</p>
                 </div>
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>payments</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">attach_money</span>
+                </div>
                 <div className="feature-content">
                   <h3>Controle de Despesas</h3>
-                  <p>
-                    Lançamento de despesas, notas fiscais e acompanhamento
-                    financeiro
-                  </p>
+                  <p>Lançamento de despesas, notas fiscais e acompanhamento financeiro</p>
                 </div>
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>trending_up</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">trending_up</span>
+                </div>
                 <div className="feature-content">
                   <h3>Relatórios Gerenciais</h3>
                   <p>Relatórios detalhados com gráficos e filtros avançados</p>
@@ -123,91 +139,56 @@ const Sobre = () => {
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>search</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">search</span>
+                </div>
                 <div className="feature-content">
                   <h3>Busca Global</h3>
-                  <p>
-                    Busca inteligente em todos os módulos com filtros avançados
-                  </p>
+                  <p>Busca inteligente em todos os módulos com filtros avançados</p>
                 </div>
               </div>
 
               <div className="feature-card">
-                <div className="feature-icon"><span className="material-symbols-outlined" style={{ fontSize: 24 }}>lock</span></div>
+                <div className="feature-icon">
+                  <span className="material-symbols-outlined">lock</span>
+                </div>
                 <div className="feature-content">
                   <h3>Controle de Acesso</h3>
-                  <p>
-                    Autenticação e autorização com diferentes níveis de
-                    permissão
-                  </p>
+                  <p>Autenticação e autorização com diferentes níveis de permissão</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Suporte Técnico - Reorganizado */}
-          <div className="support-section">
-            <h2><span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>support_agent</span> Suporte Técnico</h2>
-            <div className="support-unified">
-              <div className="support-header">
-                <img
-                  src={logoAraujoInfo}
-                  alt="Araujo Informática Logo"
-                  className="company-logo"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
-                <div className="company-details">
-                  <h3>Araujo Informática e Soluções Cloud</h3>
-                  <p>
-                    Especialistas em soluções tecnológicas para o setor público
-                  </p>
-                </div>
-              </div>
-
-              <div className="contact-methods">
-                <div className="contact-item">
-                  <div className="contact-header">
-                    <span className="contact-icon"><span className="material-symbols-outlined" style={{ fontSize: 16 }}>smartphone</span></span>
-                    <span className="contact-type">WhatsApp</span>
-                  </div>
-                  <a
-                    href="https://wa.me/5589944452244"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="contact-link whatsapp"
-                  >
-                    +55 89 9444-5244
-                  </a>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-header">
-                    <span className="contact-icon"><span className="material-symbols-outlined" style={{ fontSize: 16 }}>alternate_email</span></span>
-                    <span className="contact-type">Instagram</span>
-                  </div>
-                  <a
-                    href="https://instagram.com/araujoinformatica.flo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="contact-link instagram"
-                  >
-                    @araujoinformatica.flo
-                  </a>
-                </div>
+          {/* Suporte Técnico */}
+          <div className="sobre-card">
+            <h2>
+              <span className="material-symbols-outlined" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 8 }}>headset_mic</span>
+              Suporte Técnico
+            </h2>
+            <div className="support-box">
+              <img
+                src={logoAraujoInfo}
+                alt="Araujo Informática Logo"
+                className="company-logo"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+              />
+              <div className="company-details">
+                <h3>Araujo Informática e Soluções Cloud</h3>
+                <p>Especialistas em soluções tecnológicas para o setor público</p>
+                <a
+                  href="https://wa.me/5589944452244"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-link"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 6 }}>phone</span>
+                  +55 89 9444-5244
+                </a>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Footer Limpo */}
-        <div className="sobre-footer">
-          <div className="footer-content">
-            <span>
-              © 2025 SICEFSUS - Sistema de Controle de Emendas e Fiscalização
-              do SUS
-            </span>
           </div>
         </div>
       </div>
@@ -216,360 +197,326 @@ const Sobre = () => {
         .sobre-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 16px;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          color: #1E293B;
+          padding: 24px;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          color: var(--theme-text);
           line-height: 1.5;
         }
 
-        /* Header Clean - Sem Banner Azul */
+        /* Header */
         .sobre-header {
-          background: white;
-          border: 1px solid #e5e7eb;
+          background: var(--theme-surface, #ffffff);
+          border: 1px solid var(--theme-border, #E2E8F0);
           border-radius: 12px;
           padding: 24px;
-          margin-bottom: 24px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-          display: flex; /* Changed from original */
-          flex-direction: column; /* Changed from original */
-          align-items: center; /* Changed from original */
+          margin-bottom: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
         }
 
-        .header-content {
+        [data-theme="dark"] .sobre-header {
+          background: #1E293B;
+          border-color: #334155;
+        }
+
+        .header-logo-title {
           display: flex;
-          align-items: flex-start;
-          gap: 20px;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin-bottom: 8px;
         }
 
         .sobre-logo {
-          width: 64px;
-          height: 64px;
-          border-radius: 12px;
-          border: 2px solid #e5e7eb;
-          flex-shrink: 0;
+          width: 48px;
+          height: 48px;
           object-fit: contain;
-          background: white;
-          padding: 4px;
         }
 
-        .header-info {
-          flex: 1;
+        .sobre-logo-light {
+          display: block;
         }
 
-        .header-info h1 {
-          font-size: 2.25rem;
+        .sobre-logo-dark {
+          display: none;
+        }
+
+        [data-theme="dark"] .sobre-logo-light {
+          display: none;
+        }
+
+        [data-theme="dark"] .sobre-logo-dark {
+          display: block;
+        }
+
+        .header-title {
+          font-size: 2rem;
           font-weight: 700;
-          margin: 0 0 6px 0;
-          color: #2563EB;
-          letter-spacing: -0.025em;
+          color: var(--primary);
+          letter-spacing: -0.02em;
         }
 
         .sobre-subtitle {
-          font-size: 1rem;
+          font-size: 0.9rem;
           margin: 0 0 12px 0;
           font-weight: 400;
-          color: #64748b;
-          line-height: 1.5;
+          color: var(--theme-text-secondary);
         }
 
         .version-info {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
         }
 
         .version-badge {
-          background: #f0f7ff;
-          color: #2563EB;
-          padding: 4px 12px;
+          background: rgba(26, 58, 74, 0.1);
+          color: var(--primary);
+          padding: 6px 14px;
           border-radius: 20px;
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 600;
-          border: 1px solid #b8deff;
+          border: 1px solid rgba(26, 58, 74, 0.2);
+        }
+
+        [data-theme="dark"] .version-badge {
+          background: rgba(59, 130, 246, 0.2);
+          border-color: rgba(59, 130, 246, 0.3);
+          color: var(--primary-light);
         }
 
         .status-badge {
-          background: #ecfdf5;
-          color: #059669;
-          padding: 4px 12px;
+          background: rgba(16, 185, 129, 0.1);
+          color: #10b981;
+          padding: 6px 14px;
           border-radius: 20px;
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 600;
-          border: 1px solid #a7f3d0;
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          display: flex;
+          align-items: center;
+        }
+
+        [data-theme="dark"] .status-badge {
+          background: rgba(16, 185, 129, 0.2);
+          border-color: rgba(16, 185, 129, 0.3);
         }
 
         /* Content Grid */
         .sobre-content {
           display: grid;
-          gap: 20px;
+          gap: 12px;
         }
 
         /* Intro Section */
         .intro-section {
           display: grid;
-          grid-template-columns: 2fr 1fr;
-          gap: 20px;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
         }
 
-        .about-card, .system-info-card {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        /* Cards */
+        .sobre-card {
+          background: var(--theme-surface, #ffffff);
+          border: 1px solid var(--theme-border, #E2E8F0);
+          border-radius: 10px;
+          padding: 16px 20px;
         }
 
-        .about-card h2, .system-info-card h2 {
-          font-size: 1.1rem;
+        [data-theme="dark"] .sobre-card {
+          background: #1E293B;
+          border-color: #334155;
+        }
+
+        .sobre-card h2 {
+          font-size: 1rem;
           font-weight: 600;
           margin: 0 0 12px 0;
-          color: #2563EB;
+          color: var(--primary);
+          display: flex;
+          align-items: center;
         }
 
-        .about-card p {
-          font-size: 0.9rem;
+        .sobre-card > p {
+          font-size: 0.85rem;
           margin: 0;
-          color: #4b5563;
+          color: var(--theme-text-secondary);
           line-height: 1.6;
         }
 
+        /* Info Grid */
         .info-grid {
           display: grid;
-          gap: 8px;
+          gap: 0;
         }
 
         .info-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 8px 0;
-          border-bottom: 1px solid #f3f4f6;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--theme-border-light);
         }
 
-        .info-item:last-child {
+        .info-item.no-border {
           border-bottom: none;
         }
 
         .info-label {
-          font-size: 0.8rem;
-          color: #6b7280;
-          font-weight: 500;
+          font-size: 0.875rem;
+          color: var(--theme-text-secondary);
         }
 
         .info-value {
-          font-size: 0.8rem;
+          font-size: 0.875rem;
           font-weight: 600;
-          color: #1f2937;
+          color: var(--theme-text);
         }
 
-        /* Features Section */
-        .features-section {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        .info-value.mono {
+          font-family: monospace;
         }
 
-        .features-section h2 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin: 0 0 16px 0;
-          color: #2563EB;
+        .info-value.ambiente {
+          color: #10b981;
+          display: flex;
+          align-items: center;
+          gap: 6px;
         }
 
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #10b981;
+        }
+
+        /* Features Grid */
         .features-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 12px;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 10px;
         }
 
         .feature-card {
           display: flex;
           align-items: flex-start;
-          gap: 12px;
-          padding: 16px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          gap: 10px;
+          padding: 10px;
+          background: var(--theme-surface-secondary);
+          border: 1px solid transparent;
           border-radius: 8px;
-          transition: all 0.2s ease;
         }
 
-        .feature-card:hover {
-          border-color: #2563EB;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(21, 67, 96, 0.15);
+        [data-theme="dark"] .feature-card {
+          background: #334155;
         }
 
         .feature-icon {
-          font-size: 1.25rem;
           flex-shrink: 0;
-          margin-top: 2px;
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          background: rgba(26, 58, 74, 0.1);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--primary);
+        }
+
+        [data-theme="dark"] .feature-icon {
+          background: rgba(59, 130, 246, 0.2);
+          color: var(--primary-light);
+        }
+
+        .feature-icon .material-symbols-outlined {
+          font-size: 18px;
         }
 
         .feature-content h3 {
-          font-size: 0.9rem;
+          font-size: 0.8rem;
           font-weight: 600;
-          margin: 0 0 4px 0;
-          color: #2563EB;
+          margin: 0 0 2px 0;
+          color: var(--theme-text);
         }
 
         .feature-content p {
-          font-size: 0.8rem;
+          font-size: 0.75rem;
           margin: 0;
-          color: #64748b;
-          line-height: 1.5;
+          color: var(--theme-text-secondary);
+          line-height: 1.4;
         }
 
-        /* Support Section - Reorganizado */
-        .support-section {
-          background: white;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 20px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        .support-section h2 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          margin: 0 0 16px 0;
-          color: #2563EB;
-        }
-
-        .support-unified {
-          display: grid;
-          gap: 20px;
-        }
-
-        .support-header {
+        /* Support Box */
+        .support-box {
           display: flex;
           align-items: center;
-          gap: 16px;
-          padding: 16px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          gap: 12px;
+          padding: 12px;
+          background: rgba(26, 58, 74, 0.05);
+          border: 1px solid rgba(26, 58, 74, 0.15);
           border-radius: 8px;
+        }
+
+        [data-theme="dark"] .support-box {
+          background: rgba(59, 130, 246, 0.1);
+          border-color: rgba(59, 130, 246, 0.2);
         }
 
         .company-logo {
-          width: 50px;
-          height: 50px;
+          width: 40px;
+          height: 40px;
           object-fit: contain;
-          border-radius: 8px;
-          background: white;
-          padding: 4px;
-          border: 1px solid #e5e7eb;
+          border-radius: 50%;
+          background: var(--theme-surface);
           flex-shrink: 0;
         }
 
         .company-details h3 {
-          font-size: 1rem;
+          font-size: 0.95rem;
           font-weight: 600;
-          margin: 0 0 4px 0;
-          color: #2563EB;
+          margin: 0 0 2px 0;
+          color: var(--primary);
         }
 
         .company-details p {
-          font-size: 0.85rem;
-          margin: 0;
-          color: #64748b;
-        }
-
-        .contact-methods {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 12px;
-        }
-
-        .contact-item {
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 16px;
-          display: grid;
-          gap: 8px;
-        }
-
-        .contact-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .contact-icon {
-          font-size: 1rem;
-        }
-
-        .contact-type {
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #374151;
-        }
-
-        .contact-link {
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-decoration: none;
-          padding: 8px 12px;
-          border-radius: 6px;
-          transition: all 0.2s ease;
-          text-align: center;
-          border: 1px solid transparent;
-        }
-
-        .contact-link.whatsapp {
-          color: #059669;
-          background: #ecfdf5;
-          border-color: #a7f3d0;
-        }
-
-        .contact-link.whatsapp:hover {
-          background: #059669;
-          color: white;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
-        }
-
-        .contact-link.instagram {
-          color: #e11d48;
-          background: #fdf2f8;
-          border-color: #fbbf24;
-        }
-
-        .contact-link.instagram:hover {
-          background: linear-gradient(45deg, #f09433, #e6683c);
-          color: white;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
-        }
-
-        /* Footer Limpo */
-        .sobre-footer {
-          margin-top: 24px;
-          padding: 16px;
-          background: #f8fafc;
-          border: 1px solid #e5e7eb;
-          border-radius: 12px;
-          text-align: center;
-        }
-
-        .footer-content {
           font-size: 0.8rem;
-          color: #64748b;
+          margin: 0 0 8px 0;
+          color: var(--theme-text-secondary);
+        }
+
+        .whatsapp-link {
+          display: inline-flex;
+          align-items: center;
+          font-size: 0.8rem;
+          font-weight: 500;
+          color: #10b981;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+
+        .whatsapp-link:hover {
+          color: #059669;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
           .sobre-container {
-            padding: 12px;
+            padding: 16px;
+          }
+
+          .sobre-header {
+            padding: 24px 16px;
           }
 
           .header-content {
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 12px;
+          }
+
+          .header-title {
+            font-size: 1.75rem;
           }
 
           .intro-section {
@@ -580,35 +527,9 @@ const Sobre = () => {
             grid-template-columns: 1fr;
           }
 
-          .support-header {
+          .support-box {
             flex-direction: column;
             text-align: center;
-          }
-
-          .contact-methods {
-            grid-template-columns: 1fr;
-          }
-
-          .footer-content {
-            font-size: 0.7rem;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .header-info h1 {
-            font-size: 1.75rem;
-          }
-
-          .sobre-subtitle {
-            font-size: 0.85rem;
-          }
-
-          .version-info {
-            justify-content: center;
-          }
-
-          .feature-card {
-            padding: 12px;
           }
         }
       `}</style>

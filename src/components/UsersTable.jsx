@@ -209,9 +209,9 @@ export default function UsersTable({
 const styles = {
   tableWrapper: {
     overflowX: "auto",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   table: {
@@ -221,8 +221,8 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "#34495e",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
   },
 
   headerCell: {
@@ -235,23 +235,24 @@ const styles = {
   },
 
   bodyRow: {
-    borderBottom: "1px solid #e9ecef",
+    borderBottom: "1px solid var(--theme-border)",
     transition: "background-color 0.2s ease",
   },
 
   bodyCell: {
     padding: "12px 16px",
     verticalAlign: "middle",
-    borderRight: "1px solid #f8f9fa",
+    borderRight: "1px solid var(--theme-border-light)",
+    color: "var(--theme-text)",
   },
 
   userName: {
     fontWeight: "500",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
 
   userEmail: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
   },
 
@@ -259,8 +260,8 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     gap: "4px",
-    backgroundColor: "#ffeaa7",
-    color: "#e17055",
+    backgroundColor: "rgba(245, 158, 11, 0.2)",
+    color: "var(--warning-dark)",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
@@ -271,8 +272,8 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     gap: "4px",
-    backgroundColor: "#a8e6cf",
-    color: "#00b894",
+    backgroundColor: "rgba(16, 185, 129, 0.2)",
+    color: "var(--success)",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
@@ -281,8 +282,8 @@ const styles = {
 
   statusActive: {
     display: "inline-block",
-    backgroundColor: "#d4edda",
-    color: "#155724",
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
+    color: "var(--success)",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
@@ -293,19 +294,19 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     gap: "4px",
-    backgroundColor: "#f8f9fa",
-    color: "#495057",
+    backgroundColor: "var(--theme-surface-secondary)",
+    color: "var(--theme-text-secondary)",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
     fontWeight: "500",
-    border: "1px solid #dee2e6"
+    border: "1px solid var(--theme-border)"
   },
 
   statusBlocked: {
     display: "inline-block",
-    backgroundColor: "#fff3cd",
-    color: "#856404",
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    color: "var(--warning-dark)",
     padding: "4px 8px",
     borderRadius: "12px",
     fontSize: "12px",
@@ -313,33 +314,33 @@ const styles = {
   },
 
   department: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "13px",
   },
 
   // ✅ ESTILO ESPECIAL PARA ADMIN (SEM LOCALIZAÇÃO)
   adminLocation: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "16px",
     fontWeight: "500",
   },
 
   location: {
-    color: "#495057",
+    color: "var(--theme-text)",
     fontSize: "13px",
-    backgroundColor: "#e3f2fd",
+    backgroundColor: "rgba(14, 165, 233, 0.15)",
     padding: "2px 6px",
     borderRadius: "4px",
   },
 
   notConfigured: {
-    color: "#dc3545",
+    color: "var(--error)",
     fontSize: "12px",
     fontWeight: "500",
   },
 
   lastAccess: {
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
     fontSize: "12px",
   },
 
@@ -360,36 +361,36 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     transition: "all 0.2s ease",
-    backgroundColor: "#f8f9fa",
-    color: "#495057",
-    border: "1px solid #dee2e6",
+    backgroundColor: "var(--theme-surface-secondary)",
+    color: "var(--theme-text-secondary)",
+    border: "1px solid var(--theme-border)",
   },
 
   // ✅ BOTÃO DESATIVAR (LARANJA)
   deactivateButton: {
-    backgroundColor: "#fff3cd",
-    color: "#856404",
-    borderColor: "#ffeaa7",
+    backgroundColor: "rgba(245, 158, 11, 0.15)",
+    color: "var(--warning-dark)",
+    borderColor: "var(--warning)",
   },
 
   // ✅ BOTÃO ATIVAR (VERDE)
   activateButton: {
-    backgroundColor: "#d4edda",
-    color: "#155724",
-    borderColor: "#c3e6cb",
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
+    color: "var(--success)",
+    borderColor: "var(--success-light)",
   },
 
   // ✅ BOTÃO EXCLUIR (VERMELHO)
   deleteButton: {
-    backgroundColor: "#f8d7da",
-    color: "#721c24",
-    borderColor: "#f1aeb5",
+    backgroundColor: "rgba(239, 68, 68, 0.15)",
+    color: "var(--error)",
+    borderColor: "var(--error-light)",
   },
 
   emptyState: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 };
 
@@ -399,7 +400,7 @@ if (!document.getElementById("usertable-styles")) {
   styleSheet.id = "usertable-styles";
   styleSheet.innerHTML = `
     .users-table tbody tr:hover {
-      background-color: #f8f9fa !important;
+      background-color: var(--theme-surface-hover) !important;
     }
 
     .action-button:hover {

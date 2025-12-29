@@ -200,8 +200,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
                   <span
                     style={{
                       ...cronogramaStyles.diasBadge,
-                      backgroundColor: "#d32f2f",
-                      color: "white",
+                      backgroundColor: "var(--error)",
+                      color: "var(--white)",
                     }}
                   >
                     -{Math.abs(emenda.diasRestantes)}d
@@ -223,7 +223,7 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#388e3c" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--success)" }}>
                 rocket_launch
               </span>
             </div>
@@ -283,7 +283,7 @@ const CronogramaWidget = ({ emendas = [] }) => {
         >
           <div style={cronogramaStyles.metricHeader}>
             <div style={cronogramaStyles.iconContainer}>
-              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#0277bd" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "var(--info)" }}>
                 check_circle
               </span>
             </div>
@@ -316,8 +316,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
                   <span
                     style={{
                       ...cronogramaStyles.diasBadge,
-                      backgroundColor: "#388e3c",
-                      color: "white",
+                      backgroundColor: "var(--success)",
+                      color: "var(--white)",
                     }}
                   >
                     100%
@@ -343,8 +343,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
                 cronogramaData.proximasVencer.length +
                   cronogramaData.vencidas.length >
                 0
-                  ? "#d32f2f"
-                  : "#388e3c",
+                  ? "var(--error)"
+                  : "var(--success)",
             }}
           >
             {cronogramaData.proximasVencer.length +
@@ -353,7 +353,7 @@ const CronogramaWidget = ({ emendas = [] }) => {
           <span style={cronogramaStyles.summaryLabel}>Atenção</span>
         </div>
         <div style={cronogramaStyles.summaryItem}>
-          <span style={{ ...cronogramaStyles.summaryValue, color: "#0277bd" }}>
+          <span style={{ ...cronogramaStyles.summaryValue, color: "var(--info)" }}>
             {cronogramaData.emAndamento.length}
           </span>
           <span style={cronogramaStyles.summaryLabel}>Ativas</span>

@@ -5,7 +5,8 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../firebase/firebaseConfig";
 import EnvironmentIndicator from "./EnvironmentIndicator";
-import logoSicefsus from "../images/logo-sicefsus.png";
+import logoSicefsusLight from "../images/logo-sicefsus-ver-modoclaro.png";
+import logoSicefsusDark from "../images/logo-sicefsus-ver-mododark.png";
 import { useTheme } from "../context/ThemeContext";
 import {
   doc,
@@ -20,6 +21,7 @@ import {
 
 export default function Login({ onLoginSuccess }) {
   const { isDark } = useTheme();
+  const logoSicefsus = isDark ? logoSicefsusDark : logoSicefsusLight;
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -394,7 +396,7 @@ export default function Login({ onLoginSuccess }) {
           <div style={styles.form}>
             <div style={styles.successContainer}>
               <div style={styles.successIcon}>
-                <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#27ae60" }}>check_circle</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--success)" }}>check_circle</span>
               </div>
               <h3 style={styles.successTitle}>Email Enviado!</h3>
               <p style={styles.successText}>
@@ -431,7 +433,7 @@ export default function Login({ onLoginSuccess }) {
 
         <div style={styles.infoContainer}>
           <small style={styles.infoText}>
-            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4, color: "#F59E0B" }}>lightbulb</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4, color: "var(--warning)" }}>lightbulb</span>
             <strong>Dica:</strong> Se você é operador e não consegue fazer
             login, verifique se o administrador já configurou seu município/UF.
           </small>
@@ -485,7 +487,7 @@ const getStyles = (isDark) => ({
     height: 64,
     objectFit: "contain",
     borderRadius: 8,
-    backgroundColor: "white",
+    backgroundColor: "var(--white)",
     padding: 8,
   },
   title: {
@@ -632,7 +634,7 @@ const getStyles = (isDark) => ({
   },
 
   successTitle: {
-    color: "#27ae60",
+    color: "var(--success)",
     marginBottom: 16,
     fontSize: "1.2em",
   },

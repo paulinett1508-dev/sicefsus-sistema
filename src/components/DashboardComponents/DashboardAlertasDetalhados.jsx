@@ -204,7 +204,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
         {alertas.vencidas.length > 0 && (
           <div style={styles.alertaCategoria}>
             <div style={styles.categoriaHeader}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#EF4444" }}>cancel</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--error)" }}>cancel</span>
               <h3 style={styles.categoriaTitle}>
                 Vencidas ({alertas.vencidas.length})
               </h3>
@@ -232,7 +232,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     <div
                       style={{
                         ...styles.itemBadge,
-                        backgroundColor: "#EF4444",
+                        backgroundColor: "var(--error)",
                       }}
                     >
                       Vencida há {diasVencidos} {diasVencidos === 1 ? "dia" : "dias"}
@@ -242,7 +242,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     <div style={styles.metricItem}>
                       <span style={styles.metricLabel}>Execução:</span>
                       <span
-                        style={{ ...styles.metricValue, color: "#EF4444" }}
+                        style={{ ...styles.metricValue, color: "var(--error)" }}
                       >
                         {emenda.percentualExecutado.toFixed(1)}%
                       </span>
@@ -264,7 +264,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
         {alertas.semExecucao.length > 0 && (
           <div style={styles.alertaCategoria}>
             <div style={styles.categoriaHeader}>
-              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "#6B7280" }}>pause_circle</span>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--secondary)" }}>pause_circle</span>
               <h3 style={styles.categoriaTitle}>
                 Sem Execução ({alertas.semExecucao.length})
               </h3>
@@ -295,7 +295,7 @@ const DashboardAlertasDetalhados = ({ emendas = [], onVerDetalhes }) => {
                     <div
                       style={{
                         ...styles.itemBadge,
-                        backgroundColor: "#6c757d",
+                        backgroundColor: "var(--secondary)",
                       }}
                     >
                       {diasDesdeRegistro} dias sem execução
@@ -333,7 +333,7 @@ const styles = {
     borderRadius: "10px",
     padding: "14px",
     boxShadow: "var(--shadow-sm)",
-    border: "2px solid #EF4444",
+    border: "2px solid var(--error)",
     marginBottom: "16px",
     transition: "background-color 0.3s ease",
   },
@@ -361,13 +361,13 @@ const styles = {
     margin: "0 0 2px 0",
     fontSize: "16px",
     fontWeight: "700",
-    color: "#EF4444",
+    color: "var(--error)",
   },
   titleSuccess: {
     margin: "0 0 2px 0",
     fontSize: "16px",
     fontWeight: "700",
-    color: "#10B981",
+    color: "var(--success)",
   },
   subtitle: {
     margin: 0,

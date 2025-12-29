@@ -2,6 +2,7 @@
 // ✅ CORRIGIDO: Inputs controlados com || ''
 
 import React from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 const DespesaFormEmpenhoFields = ({
   formData,
@@ -78,18 +79,18 @@ const DespesaFormEmpenhoFields = ({
 
 const styles = {
   fieldset: {
-    border: "1px solid #E2E8F0",
+    border: "1px solid var(--theme-border, #E2E8F0)",
     borderRadius: "12px",
     padding: "20px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "var(--theme-surface, #ffffff)",
     boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
   },
   legend: {
-    background: "white",
+    background: "var(--theme-surface, white)",
     padding: "6px 16px",
     borderRadius: "9999px",
-    border: "1px solid #E2E8F0",
-    color: "#334155",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    color: "var(--theme-text, #334155)",
     fontWeight: "600",
     fontSize: "14px",
     display: "flex",
@@ -112,7 +113,7 @@ const styles = {
   },
   label: {
     fontWeight: "bold",
-    color: "#333",
+    color: "var(--theme-text, #333)",
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
@@ -120,7 +121,7 @@ const styles = {
   },
   labelRequired: {
     fontWeight: "bold",
-    color: "#333",
+    color: "var(--theme-text, #333)",
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
@@ -128,11 +129,12 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    border: "2px solid var(--theme-border, #dee2e6)",
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-input-bg, white)",
+    color: "var(--theme-text, inherit)",
     boxSizing: "border-box",
   },
   inputError: {
@@ -141,7 +143,8 @@ const styles = {
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-input-bg, white)",
+    color: "var(--theme-text, inherit)",
     boxSizing: "border-box",
   },
   errorText: {

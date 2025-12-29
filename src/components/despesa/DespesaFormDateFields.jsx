@@ -2,6 +2,7 @@
 // ✅ LAYOUT MELHORADO: Igual ao Cronograma + Validação em tempo real
 
 import React from "react";
+import { useTheme } from "../../context/ThemeContext";
 import {
   validarDatasDespesaEmenda,
   formatarPeriodoVigenciaEmenda,
@@ -302,20 +303,20 @@ const ValidacaoSequenciaDatas = ({
 // ✅ ESTILOS IGUAIS AO CRONOGRAMA + melhorias visuais
 const styles = {
   fieldset: {
-    border: "1px solid #E2E8F0",
+    border: "1px solid var(--theme-border, #E2E8F0)",
     borderRadius: "12px",
     padding: "20px",
-    backgroundColor: "#ffffff",
+    backgroundColor: "var(--theme-surface, #ffffff)",
     boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
     marginBottom: "20px",
   },
 
   legend: {
-    background: "white",
+    background: "var(--theme-surface, white)",
     padding: "6px 16px",
     borderRadius: "9999px",
-    border: "1px solid #E2E8F0",
-    color: "#334155",
+    border: "1px solid var(--theme-border, #E2E8F0)",
+    color: "var(--theme-text, #334155)",
     fontWeight: "600",
     fontSize: "14px",
     display: "flex",
@@ -362,17 +363,18 @@ const styles = {
 
   labelRequired: {
     fontWeight: "bold",
-    color: "#333",
+    color: "var(--theme-text, #333)",
     fontSize: "14px",
   },
 
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    border: "2px solid var(--theme-border, #dee2e6)",
     borderRadius: "6px",
     fontSize: "14px",
     transition: "all 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-input-bg, white)",
+    color: "var(--theme-text, inherit)",
     boxSizing: "border-box",
   },
 
@@ -432,7 +434,7 @@ const styles = {
   sequenceContent: {
     fontSize: "13px",
     lineHeight: "1.4",
-    color: "#333",
+    color: "var(--theme-text, #333)",
   },
 };
 

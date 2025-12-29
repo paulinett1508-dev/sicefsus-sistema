@@ -7,6 +7,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase/firebaseConfig";
+import { useTheme } from "../context/ThemeContext";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
 import { NATUREZAS_DESPESA } from "../config/constants"; // mapeia código → rótulo (fallback seguro abaixo)
 
@@ -43,6 +44,7 @@ export default function DespesasTable({
   ocultarBotoesAgrupamento = false, // Nova prop para ocultar botões de agrupamento
 }) {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const [excluindo, setExcluindo] = useState(null);
   const [confirmExclusao, setConfirmExclusao] = useState(null);
   const [modoVisualizacao, setModoVisualizacao] = useState("detalhado");
@@ -754,7 +756,7 @@ export default function DespesasTable({
 // ========================================
 const styles = {
   container: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     borderRadius: 12,
     boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
     overflow: "hidden",
@@ -769,8 +771,8 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "16px 24px",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "1px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
+    borderBottom: "1px solid var(--theme-border, #e9ecef)",
     gap: 16,
     flexWrap: "wrap",
   },
@@ -778,17 +780,17 @@ const styles = {
   toggleGroup: {
     display: "flex",
     gap: 8,
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     borderRadius: 8,
     padding: 4,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
   },
 
   toggleButton: {
     padding: "8px 16px",
     border: "none",
     backgroundColor: "transparent",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: 13,
     fontWeight: "500",
     borderRadius: 6,
@@ -806,14 +808,14 @@ const styles = {
   loadingContainer: {
     padding: "60px 20px",
     textAlign: "center",
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
   },
 
   loadingSpinner: {
     width: 40,
     height: 40,
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #2563EB",
+    border: "4px solid var(--theme-border)",
+    borderTop: "4px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 20px",
@@ -827,10 +829,10 @@ const styles = {
   },
 
   emendaGroup: {
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
   },
 
   emendaHeader: {
@@ -838,8 +840,8 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "16px 24px",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
+    borderBottom: "2px solid var(--theme-border, #e9ecef)",
   },
 
   emendaInfoHeader: {
@@ -857,7 +859,7 @@ const styles = {
 
   parlamentarText: {
     fontSize: 14,
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
 
@@ -878,7 +880,7 @@ const styles = {
 
   statLabel: {
     fontSize: 12,
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
 
@@ -899,8 +901,8 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "#1E293B",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
   },
 
   th: {
@@ -909,36 +911,36 @@ const styles = {
     color: WHITE,
     fontWeight: "600",
     fontSize: 14,
-    borderBottom: "2px solid #34495e",
+    borderBottom: "2px solid var(--primary-dark)",
     borderRight: "1px solid rgba(255,255,255,0.1)",
     whiteSpace: "nowrap",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     position: "sticky",
     top: 0,
-    backgroundColor: "#1E293B",
+    backgroundColor: "var(--primary)",
     zIndex: 10,
   },
 
   evenRow: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "var(--theme-surface-secondary)",
   },
 
   oddRow: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
   },
 
   td: {
     padding: "10px 8px",
-    borderBottom: "1px solid #eee",
+    borderBottom: "1px solid var(--theme-border, #eee)",
     fontSize: 12,
-    color: "#333",
+    color: "var(--theme-text, #333)",
     verticalAlign: "middle",
   },
 
   tdValue: {
     padding: "10px 8px",
-    borderBottom: "1px solid #eee",
+    borderBottom: "1px solid var(--theme-border)",
     fontSize: 12,
     color: SUCCESS,
     fontWeight: "600",
@@ -948,9 +950,9 @@ const styles = {
 
   tdActions: {
     padding: "10px 8px",
-    borderBottom: "1px solid #eee",
+    borderBottom: "1px solid var(--theme-border, #eee)",
     fontSize: 12,
-    color: "#333",
+    color: "var(--theme-text, #333)",
     textAlign: "center",
     whiteSpace: "nowrap",
   },
@@ -969,7 +971,7 @@ const styles = {
     maxWidth: 150,
     fontWeight: "500",
     fontSize: 12,
-    color: "#495057",
+    color: "var(--theme-text)",
   },
 
   numeroCell: {
@@ -977,7 +979,7 @@ const styles = {
     fontSize: 11,
     fontWeight: "600",
     color: PRIMARY,
-    backgroundColor: "#e3f2fd",
+    backgroundColor: "rgba(14, 165, 233, 0.15)",
     padding: "2px 6px",
     borderRadius: "3px",
     display: "inline-block",
@@ -986,7 +988,7 @@ const styles = {
   dataCell: {
     fontFamily: "monospace",
     fontSize: 11,
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     fontWeight: "500",
   },
 
@@ -1063,8 +1065,8 @@ const styles = {
     display: "flex",
     justifyContent: "flex-start",
     padding: "16px 24px",
-    borderTop: "2px solid #f0f0f0",
-    backgroundColor: "#f8f9fa",
+    borderTop: "2px solid var(--theme-border)",
+    backgroundColor: "var(--theme-surface-secondary)",
     flexWrap: "wrap",
     gap: 24,
   },
@@ -1078,7 +1080,7 @@ const styles = {
 
   summaryLabel: {
     fontSize: 12,
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
@@ -1093,7 +1095,7 @@ const styles = {
   emptyState: {
     textAlign: "center",
     padding: "80px 20px",
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
   },
 
   emptyIcon: {
@@ -1106,13 +1108,13 @@ const styles = {
     fontSize: 20,
     fontWeight: "600",
     marginBottom: 12,
-    color: "#999",
+    color: "var(--theme-text-muted)",
   },
 
   emptyText: {
     fontSize: 14,
     margin: 0,
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
   },
 
   modalOverlay: {
@@ -1129,7 +1131,7 @@ const styles = {
   },
 
   modalContent: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     borderRadius: 12,
     maxWidth: 500,
     width: "90%",
@@ -1143,7 +1145,7 @@ const styles = {
     alignItems: "center",
     gap: 12,
     padding: "24px 24px 20px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom: "1px solid var(--theme-border, #e5e7eb)",
   },
 
   modalIcon: {
@@ -1154,7 +1156,7 @@ const styles = {
     margin: 0,
     fontSize: "1.5rem",
     fontWeight: "600",
-    color: "#1f2937",
+    color: "var(--theme-text, #1f2937)",
   },
 
   modalBody: {
@@ -1162,8 +1164,8 @@ const styles = {
   },
 
   despesaCard: {
-    background: "#f9fafb",
-    border: "1px solid #e5e7eb",
+    background: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
     borderRadius: 8,
     padding: 16,
     marginBottom: 20,
@@ -1178,13 +1180,13 @@ const styles = {
 
   label: {
     fontWeight: "500",
-    color: "#6b7280",
+    color: "var(--theme-text-secondary)",
     fontSize: 14,
   },
 
   value: {
     fontWeight: "500",
-    color: "#1f2937",
+    color: "var(--theme-text)",
     textAlign: "right",
   },
 
@@ -1195,8 +1197,8 @@ const styles = {
   },
 
   warningMessage: {
-    background: "#fef3c7",
-    border: "1px solid #fcd34d",
+    background: "rgba(245, 158, 11, 0.15)",
+    border: "1px solid var(--warning)",
     borderRadius: 8,
     padding: "12px 16px",
   },
@@ -1205,14 +1207,15 @@ const styles = {
     display: "flex",
     gap: 12,
     padding: "20px 24px",
-    borderTop: "1px solid #e5e7eb",
-    background: "#f9fafb",
+    borderTop: "1px solid var(--theme-border)",
+    background: "var(--theme-surface-secondary)",
   },
 
   cancelButton: {
     padding: "10px 20px",
-    border: "1px solid #d1d5db",
-    background: WHITE,
+    border: "1px solid var(--theme-border)",
+    background: "var(--theme-surface)",
+    color: "var(--theme-text)",
     borderRadius: 8,
     cursor: "pointer",
     fontSize: 14,

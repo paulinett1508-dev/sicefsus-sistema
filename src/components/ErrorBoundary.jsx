@@ -108,31 +108,32 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'var(--theme-bg)',
     padding: '20px',
-    fontFamily: 'Arial, sans-serif'
+    fontFamily: 'var(--font-family)'
   },
   errorCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-surface)',
     borderRadius: '12px',
     padding: '40px',
     textAlign: 'center',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+    boxShadow: 'var(--shadow-lg)',
     maxWidth: '600px',
-    width: '100%'
+    width: '100%',
+    border: '1px solid var(--theme-border)'
   },
   errorIcon: {
     fontSize: '64px',
     marginBottom: '20px'
   },
   errorTitle: {
-    color: '#EF4444',
+    color: 'var(--error)',
     fontSize: '24px',
     fontWeight: '600',
     marginBottom: '12px'
   },
   errorMessage: {
-    color: '#666',
+    color: 'var(--theme-text-secondary)',
     fontSize: '16px',
     marginBottom: '24px',
     lineHeight: '1.5'
@@ -141,18 +142,19 @@ const styles = {
     textAlign: 'left',
     marginBottom: '20px',
     padding: '15px',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: 'var(--theme-surface-secondary)',
     borderRadius: '6px',
-    border: '1px solid #dee2e6'
+    border: '1px solid var(--theme-border)'
   },
   errorSummary: {
     cursor: 'pointer',
     fontWeight: 'bold',
-    marginBottom: '10px'
+    marginBottom: '10px',
+    color: 'var(--theme-text)'
   },
   errorStack: {
     fontSize: '12px',
-    color: '#e74c3c',
+    color: 'var(--error)',
     overflow: 'auto',
     maxHeight: '200px'
   },
@@ -162,8 +164,8 @@ const styles = {
     justifyContent: 'center'
   },
   reloadButton: {
-    backgroundColor: '#007bff',
-    color: 'white',
+    backgroundColor: 'var(--primary)',
+    color: 'var(--white)',
     border: 'none',
     padding: '12px 24px',
     borderRadius: '6px',
@@ -172,8 +174,8 @@ const styles = {
     fontWeight: 'bold'
   },
   retryButton: {
-    backgroundColor: '#28a745',
-    color: 'white',
+    backgroundColor: 'var(--success)',
+    color: 'var(--white)',
     border: 'none',
     padding: '12px 24px',
     borderRadius: '6px',

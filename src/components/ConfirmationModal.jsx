@@ -16,26 +16,26 @@ const ConfirmationModal = ({
   const getIconByType = () => {
     switch (type) {
       case "danger":
-        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#dc3545" }}>error</span>;
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--error)" }}>error</span>;
       case "info":
-        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#007bff" }}>info</span>;
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--info)" }}>info</span>;
       case "save":
-        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#28a745" }}>save</span>;
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--success)" }}>save</span>;
       default:
-        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "#ffc107" }}>warning</span>;
+        return <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--warning)" }}>warning</span>;
     }
   };
 
   const getColorByType = () => {
     switch (type) {
       case "danger":
-        return "#dc3545";
+        return "var(--error)";
       case "info":
-        return "#007bff";
+        return "var(--info)";
       case "save":
-        return "#28a745";
+        return "var(--success)";
       default:
-        return "#ffc107";
+        return "var(--warning)";
     }
   };
 
@@ -115,13 +115,13 @@ const styles = {
   },
 
   modal: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "12px",
     maxWidth: "450px",
     width: "90%",
     boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
     animation: "slideIn 0.3s ease-out",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   header: {
@@ -140,7 +140,7 @@ const styles = {
   title: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     margin: 0,
   },
 
@@ -151,7 +151,7 @@ const styles = {
 
   message: {
     fontSize: "16px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     lineHeight: 1.5,
     margin: 0,
   },
@@ -165,10 +165,10 @@ const styles = {
   cancelButton: {
     flex: 1,
     padding: "12px 20px",
-    border: "1px solid #6c757d",
+    border: "1px solid var(--theme-border)",
     borderRadius: "6px",
-    backgroundColor: "white",
-    color: "#6c757d",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text-secondary)",
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",
@@ -180,7 +180,7 @@ const styles = {
     padding: "12px 20px",
     border: "none",
     borderRadius: "6px",
-    color: "white",
+    color: "var(--white)",
     fontSize: "14px",
     fontWeight: "500",
     cursor: "pointer",

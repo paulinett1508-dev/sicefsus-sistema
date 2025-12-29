@@ -1,12 +1,5 @@
 import React from "react";
-import Logo from "../images/logo-sicefsus.png";
-
-const PRIMARY = "#2563EB"; // Azul principal
-const SECONDARY = "#1E40AF"; // Azul escuro
-const ACCENT = "#3B82F6"; // Azul claro para detalhes
-const WHITE = "#fff";
-const GRAY = "#F8FAFC";
-const TEXT = "#334155";
+import Logo from "../images/logo-sicefsus-ver-modoclaro.png";
 
 export default function Home({ onLoginClick }) {
   return (
@@ -20,8 +13,8 @@ export default function Home({ onLoginClick }) {
         <button
           style={styles.button}
           onClick={onLoginClick}
-          onMouseOver={(e) => (e.currentTarget.style.background = ACCENT)}
-          onMouseOut={(e) => (e.currentTarget.style.background = PRIMARY)}
+          onMouseOver={(e) => (e.currentTarget.style.background = "var(--primary-light)")}
+          onMouseOut={(e) => (e.currentTarget.style.background = "var(--primary)")}
         >
           Entrar / Login
         </button>
@@ -36,17 +29,17 @@ export default function Home({ onLoginClick }) {
 const styles = {
   container: {
     minHeight: "100vh",
-    background: `linear-gradient(135deg, ${PRIMARY} 0%, ${SECONDARY} 100%)`,
+    background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
+    fontFamily: "'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif",
   },
   card: {
-    background: WHITE,
+    background: "var(--theme-surface)",
     borderRadius: 20,
-    boxShadow: "0 8px 32px rgba(20, 67, 96, 0.18)",
+    boxShadow: "var(--shadow-lg)",
     padding: "48px 32px 40px 32px",
     maxWidth: 400,
     width: "90%",
@@ -62,27 +55,27 @@ const styles = {
     objectFit: "contain",
     marginBottom: 12,
     borderRadius: 16,
-    boxShadow: "0 2px 8px rgba(20, 67, 96, 0.10)",
-    background: GRAY,
+    boxShadow: "var(--shadow-sm)",
+    background: "var(--theme-surface-secondary)",
     padding: 8,
   },
   title: {
     fontSize: 32,
-    color: PRIMARY,
+    color: "var(--primary)",
     fontWeight: 700,
     margin: 0,
     letterSpacing: 1,
   },
   subtitle: {
     fontSize: 16,
-    color: SECONDARY,
+    color: "var(--theme-text-secondary)",
     margin: "8px 0 24px 0",
     fontWeight: 400,
     lineHeight: 1.5,
   },
   button: {
-    background: PRIMARY,
-    color: WHITE,
+    background: "var(--primary)",
+    color: "var(--white)",
     border: "none",
     borderRadius: 8,
     padding: "14px 0",
@@ -90,14 +83,14 @@ const styles = {
     fontSize: 18,
     fontWeight: 600,
     cursor: "pointer",
-    boxShadow: "0 2px 8px rgba(20, 67, 96, 0.10)",
+    boxShadow: "var(--shadow-sm)",
     transition: "background 0.2s",
     marginTop: 8,
     letterSpacing: 1,
   },
   footer: {
     marginTop: 40,
-    color: WHITE,
+    color: "var(--white)",
     fontSize: 14,
     opacity: 0.85,
     textAlign: "center",

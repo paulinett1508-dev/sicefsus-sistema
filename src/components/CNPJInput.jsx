@@ -201,11 +201,11 @@ const styles = {
     display: "block",
     marginBottom: "8px",
     fontSize: "14px",
-    fontWeight: "bold", // ✅ ALINHAMENTO: weight igual aos outros labels
-    color: "#333", // ✅ ALINHAMENTO: cor igual aos outros labels
+    fontWeight: "bold",
+    color: "var(--theme-text)",
   },
   required: {
-    color: "#dc3545", // ✅ ALINHAMENTO: cor de obrigatório padrão do sistema
+    color: "var(--error)",
   },
   inputWrapper: {
     position: "relative",
@@ -214,26 +214,27 @@ const styles = {
   },
   input: {
     width: "100%",
-    padding: "12px", // ✅ CORREÇÃO: padding uniforme como UF/Município
+    padding: "12px",
     fontSize: "14px",
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#dee2e6",
+    borderColor: "var(--theme-border)",
     borderRadius: "6px",
     outline: "none",
     transition: "all 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     boxSizing: "border-box",
   },
 
   inputError: {
-    borderColor: "#dc3545", // ← Agora sem conflito!
-    backgroundColor: "#fef2f2",
-    boxShadow: "0 0 0 2px rgba(220, 53, 69, 0.25)",
+    borderColor: "var(--error)",
+    backgroundColor: "var(--theme-surface)",
+    boxShadow: "0 0 0 2px rgba(239, 68, 68, 0.25)",
   },
   inputSuccess: {
-    borderColor: "#28a745", // ← Agora sem conflito!
-    backgroundColor: "#f8fff9",
+    borderColor: "var(--success)",
+    backgroundColor: "var(--theme-surface)",
   },
 
   validationIcon: {
@@ -245,25 +246,25 @@ const styles = {
     pointerEvents: "none",
   },
   successIcon: {
-    color: "#27ae60",
+    color: "var(--success)",
   },
   errorIcon: {
-    color: "#e74c3c",
+    color: "var(--error)",
   },
   pendingIcon: {
-    color: "#95a5a6",
+    color: "var(--theme-text-muted)",
     opacity: 0.7,
   },
   errorMessage: {
     marginTop: "4px",
     fontSize: "12px",
-    color: "#dc3545", // ✅ ALINHAMENTO: cor de erro padrão
+    color: "var(--error)",
     fontWeight: "500",
   },
   successMessage: {
     marginTop: "4px",
     fontSize: "12px",
-    color: "#28a745", // ✅ ALINHAMENTO: cor de sucesso padrão
+    color: "var(--success)",
     fontWeight: "500",
   },
 };

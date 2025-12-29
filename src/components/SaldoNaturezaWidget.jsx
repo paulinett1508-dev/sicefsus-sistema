@@ -259,7 +259,7 @@ const SaldoNaturezaWidget = ({
         <div style={styles.resumoDivider}>→</div>
         <div style={styles.resumoItem}>
           <span style={styles.resumoLabel}>Total Executado</span>
-          <span style={{ ...styles.resumoValor, color: "#dc3545" }}>
+          <span style={{ ...styles.resumoValor, color: "var(--error)" }}>
             {formatCurrency(totalExecutado)}
           </span>
         </div>
@@ -269,7 +269,7 @@ const SaldoNaturezaWidget = ({
           <span
             style={{
               ...styles.resumoValor,
-              color: "#28a745",
+              color: "var(--success)",
               fontSize: "20px",
               fontWeight: "700",
             }}
@@ -291,17 +291,17 @@ const SaldoNaturezaWidget = ({
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "12px",
-    border: "2px solid #2563EB",
+    border: "2px solid var(--primary)",
     padding: "20px",
     marginBottom: "20px",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
   },
   containerCompacto: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     padding: "16px",
     marginBottom: "16px",
   },
@@ -311,7 +311,7 @@ const styles = {
     alignItems: "center",
     marginBottom: "20px",
     paddingBottom: "16px",
-    borderBottom: "2px solid #e9ecef",
+    borderBottom: "2px solid var(--theme-border)",
     flexWrap: "wrap",
     gap: "16px",
   },
@@ -327,36 +327,36 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   headerSubtitle: {
     margin: "4px 0 0 0",
     fontSize: "13px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
   headerRight: {
     display: "flex",
     gap: "12px",
   },
   totalCard: {
-    backgroundColor: "#f0f9ff",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "12px 20px",
     borderRadius: "8px",
-    border: "2px solid #3498db",
+    border: "2px solid var(--info)",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
   },
   totalLabel: {
     fontSize: "11px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     fontWeight: "600",
     textTransform: "uppercase",
   },
   totalValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--primary)",
     marginTop: "4px",
   },
   lista: {
@@ -372,10 +372,10 @@ const styles = {
     marginBottom: "16px",
   },
   naturezaCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
     padding: "16px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     transition: "all 0.2s ease",
   },
   naturezaHeader: {
@@ -387,7 +387,7 @@ const styles = {
   naturezaNome: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   valoresGrid: {
     display: "grid",
@@ -402,21 +402,21 @@ const styles = {
   },
   valorLabel: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
     textTransform: "uppercase",
   },
   valorNumero: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   progressContainer: {
     marginTop: "8px",
   },
   progressBar: {
     height: "8px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "4px",
     overflow: "hidden",
     marginBottom: "8px",
@@ -431,27 +431,27 @@ const styles = {
   },
   progressLabel: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
   alertaNegativo: {
-    backgroundColor: "#fee",
-    color: "#dc3545",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    color: "var(--error)",
     padding: "8px 12px",
     borderRadius: "6px",
     fontSize: "12px",
     fontWeight: "600",
     marginTop: "12px",
-    border: "1px solid #dc3545",
+    border: "1px solid var(--error)",
   },
   resumoGeral: {
     display: "flex",
     justifyContent: "space-around",
     alignItems: "center",
     padding: "16px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     flexWrap: "wrap",
     gap: "16px",
   },
@@ -463,26 +463,26 @@ const styles = {
   },
   resumoLabel: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "600",
     textTransform: "uppercase",
   },
   resumoValor: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   resumoDivider: {
     fontSize: "20px",
-    color: "#dee2e6",
+    color: "var(--theme-border)",
     fontWeight: "300",
   },
   emptyState: {
     textAlign: "center",
     padding: "40px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
-    border: "1px dashed #dee2e6",
+    border: "1px dashed var(--theme-border)",
   },
   emptyIcon: {
     fontSize: "48px",
@@ -490,7 +490,7 @@ const styles = {
     marginBottom: "12px",
   },
   emptyText: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "14px",
     margin: 0,
   },

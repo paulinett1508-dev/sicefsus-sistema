@@ -5,6 +5,7 @@
 // ✅ Lógica de input corrigida
 
 import React, { useState, useEffect } from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 const parseValorMonetario = (valor) => {
   if (typeof valor === "number") return valor;
@@ -213,19 +214,19 @@ const DespesaFormBasicFields = ({
 
   const styles = {
     fieldset: {
-      border: "1px solid #E2E8F0",
+      border: "1px solid var(--theme-border, #E2E8F0)",
       borderRadius: "12px",
       padding: "20px",
       marginBottom: "20px",
-      backgroundColor: "#ffffff",
+      backgroundColor: "var(--theme-surface, #ffffff)",
       boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
     },
     legend: {
-      background: "white",
+      background: "var(--theme-surface, white)",
       padding: "6px 16px",
       borderRadius: "9999px",
-      border: "1px solid #E2E8F0",
-      color: "#334155",
+      border: "1px solid var(--theme-border, #E2E8F0)",
+      color: "var(--theme-text, #334155)",
       fontWeight: "600",
       fontSize: "14px",
       display: "flex",
@@ -254,7 +255,7 @@ const DespesaFormBasicFields = ({
     },
     label: {
       fontWeight: "600",
-      color: "#1E293B",
+      color: "var(--theme-text, #1E293B)",
       fontSize: "14px",
       display: "flex",
       alignItems: "center",
@@ -265,12 +266,13 @@ const DespesaFormBasicFields = ({
       padding: "14px 16px",
       height: "54px",
       width: "100%",
-      border: "2px solid #bdc3c7",
+      border: "2px solid var(--theme-border, #bdc3c7)",
       borderRadius: "8px",
       fontSize: "15px",
       transition: "all 0.3s ease",
       fontFamily: "inherit",
-      backgroundColor: "white",
+      backgroundColor: "var(--theme-input-bg, white)",
+      color: "var(--theme-text, inherit)",
       boxSizing: "border-box",
     },
     inputError: {
@@ -328,7 +330,7 @@ const DespesaFormBasicFields = ({
       boxSizing: "border-box", // ✅ IMPORTANTE!
     },
     emendaText: {
-      color: "#1E293B",
+      color: "var(--theme-text, #1E293B)",
       fontWeight: "500",
       fontSize: "14px",
     },
@@ -381,7 +383,7 @@ const DespesaFormBasicFields = ({
       backdropFilter: "blur(4px)",
     },
     modalContent: {
-      backgroundColor: "white",
+      backgroundColor: "var(--theme-surface, white)",
       borderRadius: "12px",
       width: "90%",
       maxWidth: "500px",
@@ -406,7 +408,7 @@ const DespesaFormBasicFields = ({
     },
     modalText: {
       fontSize: "15px",
-      color: "#333",
+      color: "var(--theme-text, #333)",
       marginBottom: "20px",
       textAlign: "center",
     },

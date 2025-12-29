@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import GlobalSearch from "./GlobalSearch";
-import logoSicefsus from "../images/logo-sicefsus.png";
+import logoSicefsusLight from "../images/logo-sicefsus-ver-modoclaro.png";
+import logoSicefsusDark from "../images/logo-sicefsus-ver-mododark.png";
 import { useVersion } from "../hooks/useVersion";
+import { useTheme } from "../context/ThemeContext";
 
 // Detectar ambiente
 const getEnvironment = () => {
@@ -28,7 +30,9 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { version } = useVersion();
+  const { isDark } = useTheme();
   const env = getEnvironment();
+  const logoSicefsus = isDark ? logoSicefsusDark : logoSicefsusLight;
 
   const isAdmin = usuario?.tipo === "admin";
   const isSuperAdmin = isAdmin && usuario?.superAdmin === true;
@@ -266,11 +270,12 @@ function NavItem({ item, isActive, collapsed, onClick, badge }) {
     transition: "all 0.15s ease",
     justifyContent: collapsed ? "center" : "flex-start",
     backgroundColor: isActive
-      ? "rgba(26, 58, 74, 0.08)"
+      ? "var(--theme-sidebar-item-active-bg)"
       : hovered
-        ? "rgba(241, 245, 249, 1)"
+        ? "var(--theme-sidebar-item-hover-bg)"
         : "transparent",
-    color: isActive ? "#1A3A4A" : hovered ? "#1A3A4A" : "#64748B",
+    color: "var(--theme-text)",
+    opacity: isActive ? 1 : hovered ? 1 : 0.85,
   };
 
   const iconStyle = {
@@ -332,7 +337,7 @@ const styles = {
     alignItems: "center",
     gap: 8,
     cursor: "pointer",
-    color: "#1A3A4A",
+    color: "var(--theme-text)",
   },
 
   logoImage: {
@@ -364,7 +369,7 @@ const styles = {
     border: "1px solid rgba(245, 158, 11, 0.3)",
     borderRadius: "8px",
     fontSize: "11px",
-    color: "#B45309",
+    color: "var(--warning-dark)",
     display: "flex",
     alignItems: "center",
   },
@@ -381,7 +386,7 @@ const styles = {
 
   badge: {
     backgroundColor: "rgba(245, 158, 11, 0.15)",
-    color: "#B45309",
+    color: "var(--warning-dark)",
     fontSize: "9px",
     fontWeight: 700,
     padding: "2px 6px",
@@ -421,15 +426,15 @@ const styles = {
     width: 36,
     height: 36,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #1A3A4A, #2A5A6A)",
+    background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "#ffffff",
+    color: "var(--white)",
     fontWeight: 700,
     fontSize: 12,
     flexShrink: 0,
-    boxShadow: "0 2px 4px rgba(26, 58, 74, 0.3)",
+    boxShadow: "var(--shadow-sm)",
   },
 
   userInfo: {

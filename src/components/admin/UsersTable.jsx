@@ -202,7 +202,7 @@ const UsersTable = ({
                     }}
                     style={{
                       ...styles.actionButton,
-                      backgroundColor: usuario.status === "ativo" ? "#6c757d" : "#dc3545",
+                      backgroundColor: usuario.status === "ativo" ? "var(--secondary)" : "var(--error)",
                       opacity: usuario.status === "ativo" ? 0.5 : 1,
                       cursor: usuario.status === "ativo" ? "not-allowed" : "pointer",
                     }}
@@ -227,10 +227,11 @@ const UsersTable = ({
 
 const styles = {
   usersTableContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     overflow: "hidden",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
   usersTable: {
     width: "100%",
@@ -241,35 +242,36 @@ const styles = {
     textAlign: "left",
     fontWeight: "bold",
     fontSize: "12px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary)",
+    borderBottom: "2px solid var(--theme-border)",
   },
   tableCell: {
     padding: "12px",
     fontSize: "13px",
     verticalAlign: "top",
+    color: "var(--theme-text)",
   },
   actionButton: {
-    backgroundColor: "#28a745",
-    color: "white",
+    backgroundColor: "var(--success)",
+    color: "var(--white)",
     border: "none",
-    padding: "6px 8px", // ✅ Aumentei padding
+    padding: "6px 8px",
     borderRadius: "4px",
     cursor: "pointer",
-    fontSize: "14px", // ✅ Aumentei fonte
+    fontSize: "14px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minWidth: "32px", // ✅ Largura mínima
-    minHeight: "32px", // ✅ Altura mínima
-    transition: "all 0.2s ease", // ✅ Transição suave
+    minWidth: "32px",
+    minHeight: "32px",
+    transition: "all 0.2s ease",
   },
   emptyState: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 };
 

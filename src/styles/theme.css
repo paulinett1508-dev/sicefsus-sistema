@@ -61,6 +61,8 @@
   --theme-shadow: rgba(0, 0, 0, 0.08);
   --theme-shadow-light: rgba(0, 0, 0, 0.03);
   --theme-sidebar-bg: #ffffff;
+  --theme-sidebar-item-hover-bg: rgba(241, 245, 249, 1);
+  --theme-sidebar-item-active-bg: rgba(26, 58, 74, 0.08);
   --theme-input-bg: #ffffff;
   --theme-surface-hover: #F1F5F9;
 
@@ -159,6 +161,8 @@
   --theme-shadow: rgba(0, 0, 0, 0.3);
   --theme-shadow-light: rgba(0, 0, 0, 0.2);
   --theme-sidebar-bg: #1E293B;
+  --theme-sidebar-item-hover-bg: rgba(255, 255, 255, 0.08);
+  --theme-sidebar-item-active-bg: rgba(255, 255, 255, 0.12);
   --theme-input-bg: #0F172A;
 
   /* Cores primárias ajustadas para dark */

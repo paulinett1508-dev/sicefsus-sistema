@@ -152,10 +152,11 @@ const UsersSection = ({
 
 const styles = {
   tableContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
 
   sectionHeader: {
@@ -169,7 +170,7 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold",
     margin: 0,
-    color: "#333",
+    color: "var(--theme-text)",
   },
 
   buttonGroup: {
@@ -179,8 +180,8 @@ const styles = {
   },
 
   exportButton: {
-    backgroundColor: "#28a745",
-    color: "white",
+    backgroundColor: "var(--success)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 16px",
     borderRadius: "6px",
@@ -194,8 +195,8 @@ const styles = {
   },
 
   newUserButton: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 16px",
     borderRadius: "6px",
@@ -215,21 +216,24 @@ const styles = {
   searchInput: {
     width: "100%",
     padding: "10px 15px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "5px",
     fontSize: "14px",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
   },
 
   loading: {
     textAlign: "center",
     padding: "40px",
+    color: "var(--theme-text-secondary)",
   },
 
   spinner: {
     width: "40px",
     height: "40px",
-    border: "3px solid #f3f3f3",
-    borderTop: "3px solid #007bff",
+    border: "3px solid var(--theme-border)",
+    borderTop: "3px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 16px",

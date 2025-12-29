@@ -233,11 +233,12 @@ const DespesasFilters = ({
 // ✅ ESTILOS PADRONIZADOS
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
     marginBottom: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
 
   header: {
@@ -251,15 +252,15 @@ const styles = {
     margin: 0,
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     display: "flex",
     alignItems: "center",
     gap: "8px",
   },
 
   resultsBadge: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
     padding: "6px 12px",
     borderRadius: "20px",
     fontSize: "12px",
@@ -281,7 +282,7 @@ const styles = {
   filterLabel: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     marginBottom: "6px",
     display: "flex",
     alignItems: "center",
@@ -290,8 +291,8 @@ const styles = {
 
   highlightBadge: {
     fontSize: "10px",
-    backgroundColor: "#ffc107",
-    color: "#000",
+    backgroundColor: "var(--warning)",
+    color: "var(--gray-900)",
     padding: "2px 6px",
     borderRadius: "10px",
     fontWeight: "bold",
@@ -299,28 +300,31 @@ const styles = {
 
   filterInput: {
     padding: "10px 12px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "14px",
     transition: "border-color 0.2s",
-    backgroundColor: "#fafbfc",
+    backgroundColor: "var(--theme-surface-secondary)",
+    color: "var(--theme-text)",
   },
 
   filterSelect: {
     padding: "10px 12px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     cursor: "pointer",
   },
 
   filterSelectHighlight: {
     padding: "10px 12px",
-    border: "2px solid #ffc107",
+    border: "2px solid var(--warning)",
     borderRadius: "4px",
     fontSize: "14px",
-    backgroundColor: "#fffbf0",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
     cursor: "pointer",
     fontWeight: "500",
   },
@@ -332,8 +336,8 @@ const styles = {
   },
 
   buttonFilter: {
-    backgroundColor: "#007bff",
-    color: "white",
+    backgroundColor: "var(--primary)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 20px",
     borderRadius: "4px",
@@ -344,8 +348,8 @@ const styles = {
   },
 
   buttonClear: {
-    backgroundColor: "#6c757d",
-    color: "white",
+    backgroundColor: "var(--secondary)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 20px",
     borderRadius: "4px",
@@ -358,11 +362,11 @@ const styles = {
   hint: {
     marginTop: "16px",
     padding: "12px",
-    backgroundColor: "#e7f3ff",
-    border: "1px solid #b3d9ff",
+    backgroundColor: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "13px",
-    color: "#004085",
+    color: "var(--info)",
   },
 };
 

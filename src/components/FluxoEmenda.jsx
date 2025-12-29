@@ -1,6 +1,7 @@
 // src/components/FluxoEmenda.jsx - CORRIGIDO com fallback para onClose
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
 
 const PRIMARY = "#2563EB";
 const ACCENT = "#3B82F6";
@@ -11,6 +12,7 @@ const WHITE = "#fff";
 
 export default function FluxoEmenda({ emenda, onClose, onEdit }) {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   // ✅ CORREÇÃO: Fallback para onClose
   const handleClose = () => {
@@ -377,7 +379,7 @@ const styles = {
   },
 
   modalContainer: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     borderRadius: 12,
     maxWidth: "95vw",
     maxHeight: "95vh",
@@ -393,8 +395,8 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "flex-start",
     padding: "20px 24px",
-    borderBottom: "2px solid #f0f0f0",
-    backgroundColor: "#f8f9fa",
+    borderBottom: "2px solid var(--theme-border, #f0f0f0)",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
     borderRadius: "12px 12px 0 0",
   },
 
@@ -430,7 +432,7 @@ const styles = {
     border: "none",
     fontSize: 20,
     cursor: "pointer",
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     padding: 8,
     borderRadius: 4,
     marginLeft: 16,
@@ -445,9 +447,9 @@ const styles = {
   overviewSection: {
     marginBottom: 32,
     padding: 20,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
     borderRadius: 8,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
   },
 
   metricas: {
@@ -460,9 +462,9 @@ const styles = {
   metricaCard: {
     textAlign: "center",
     padding: 16,
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     borderRadius: 8,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
   },
 
   metricaValor: {
@@ -475,7 +477,7 @@ const styles = {
 
   metricaLabel: {
     fontSize: 12,
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     margin: 0,
     textTransform: "uppercase",
     fontWeight: "500",
@@ -495,7 +497,7 @@ const styles = {
   progressBar: {
     width: "100%",
     height: 8,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "var(--theme-border)",
     borderRadius: 4,
     overflow: "hidden",
   },
@@ -508,9 +510,9 @@ const styles = {
   detailSection: {
     marginBottom: 32,
     padding: 20,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
     borderRadius: 8,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
   },
 
   detailSectionTitle: {
@@ -519,7 +521,7 @@ const styles = {
     fontWeight: "600",
     marginBottom: 16,
     paddingBottom: 8,
-    borderBottom: "2px solid #e9ecef",
+    borderBottom: "2px solid var(--theme-border, #e9ecef)",
   },
 
   detailGrid: {
@@ -537,7 +539,7 @@ const styles = {
   detailLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
@@ -545,20 +547,20 @@ const styles = {
   detailValue: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
-    backgroundColor: WHITE,
+    color: "var(--theme-text, #333)",
+    backgroundColor: "var(--theme-surface, #fff)",
     padding: "8px 12px",
     borderRadius: 4,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
   },
 
   detailTextArea: {
     fontSize: 14,
-    color: "#333",
-    backgroundColor: WHITE,
+    color: "var(--theme-text, #333)",
+    backgroundColor: "var(--theme-surface, #fff)",
     padding: "12px",
     borderRadius: 4,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
     lineHeight: 1.5,
     minHeight: 60,
   },
@@ -570,10 +572,10 @@ const styles = {
   },
 
   cronogramaItem: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     padding: 16,
     borderRadius: 8,
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border, #e9ecef)",
     textAlign: "center",
   },
 
@@ -581,7 +583,7 @@ const styles = {
     display: "block",
     fontSize: 12,
     fontWeight: "600",
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     textTransform: "uppercase",
     marginBottom: 8,
   },
@@ -598,8 +600,8 @@ const styles = {
     justifyContent: "flex-end",
     gap: 12,
     padding: "20px 24px",
-    borderTop: "1px solid #f0f0f0",
-    backgroundColor: "#f8f9fa",
+    borderTop: "1px solid var(--theme-border, #f0f0f0)",
+    backgroundColor: "var(--theme-surface-secondary, #f8f9fa)",
     borderRadius: "0 0 12px 12px",
   },
 
@@ -618,7 +620,7 @@ const styles = {
   },
 
   closeModalButton: {
-    backgroundColor: "#6B7280",
+    backgroundColor: "var(--secondary)",
     color: WHITE,
     border: "none",
     padding: "12px 24px",
@@ -630,7 +632,7 @@ const styles = {
 
   // ✅ CORREÇÃO: Estilos para tela de erro
   errorContainer: {
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface, #fff)",
     padding: 40,
     borderRadius: 12,
     textAlign: "center",
@@ -647,7 +649,7 @@ const styles = {
   },
 
   errorMessage: {
-    color: "#666",
+    color: "var(--theme-text-secondary, #666)",
     fontSize: 16,
     marginBottom: 24,
     lineHeight: 1.5,

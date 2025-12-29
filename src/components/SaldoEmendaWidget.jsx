@@ -182,38 +182,38 @@ const SaldoEmendaWidget = ({
 // ✅ Estilos do componente
 const styles = {
   widget: {
-    backgroundColor: "#f8f9fa",
-    border: "2px solid #dee2e6",
+    backgroundColor: "var(--theme-surface-secondary)",
+    border: "2px solid var(--theme-border)",
     borderRadius: "8px",
     padding: "16px",
     marginBottom: "20px",
-    fontFamily: "Arial, sans-serif",
+    fontFamily: "var(--font-family)",
   },
   loading: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     gap: "8px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     padding: "20px",
   },
   spinner: {
     width: "20px",
     height: "20px",
-    border: "2px solid #e3e3e3",
-    borderTop: "2px solid #007bff",
+    border: "2px solid var(--theme-border)",
+    borderTop: "2px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
   error: {
-    backgroundColor: "#f8d7da",
-    borderColor: "#f5c6cb",
-    color: "#721c24",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
+    borderColor: "var(--error-light)",
+    color: "var(--error)",
   },
   warning: {
-    backgroundColor: "#fff3cd",
-    borderColor: "#ffeaa7",
-    color: "#856404",
+    backgroundColor: "rgba(245, 158, 11, 0.1)",
+    borderColor: "var(--warning)",
+    color: "var(--warning-dark)",
   },
   header: {
     display: "flex",
@@ -225,10 +225,10 @@ const styles = {
     margin: 0,
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   status: {
-    color: "white",
+    color: "var(--white)",
     fontSize: "12px",
     fontWeight: "600",
     padding: "4px 8px",
@@ -247,17 +247,17 @@ const styles = {
   },
   label: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
   valor: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#334155",
+    color: "var(--theme-text)",
   },
   simulacao: {
-    backgroundColor: "#e3f2fd",
-    border: "1px solid #bbdefb",
+    backgroundColor: "rgba(14, 165, 233, 0.1)",
+    border: "1px solid var(--info-light)",
     borderRadius: "6px",
     padding: "12px",
     marginBottom: "16px",
@@ -265,7 +265,7 @@ const styles = {
   simulacaoHeader: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#1976d2",
+    color: "var(--info)",
     marginBottom: "8px",
   },
   simulacaoContent: {
@@ -275,15 +275,15 @@ const styles = {
   },
   simulacaoLabel: {
     fontSize: "13px",
-    color: "#1976d2",
+    color: "var(--info)",
   },
   info: {
-    backgroundColor: "white",
-    border: "1px solid #e9ecef",
+    backgroundColor: "var(--theme-surface)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     padding: "8px",
     fontSize: "12px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
   infoRow: {
     marginBottom: "4px",
@@ -300,7 +300,7 @@ const styles = {
   },
   compactoLabel: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
   compactoValor: {
@@ -309,7 +309,7 @@ const styles = {
   },
   compactoApos: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 };
 

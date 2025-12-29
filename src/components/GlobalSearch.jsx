@@ -12,15 +12,7 @@ import { useToast } from "./Toast";
 // and then access user.tipo, user.uf, user.municipio.
 // For the purpose of this edit, we'll assume these variables are accessible within the function.
 
-const PRIMARY = "#2563EB";
-const ACCENT = "#3B82F6";
-const WHITE = "#ffffff";
-const GRAY = "#F8FAFC";
-const SLATE_50 = "#F8FAFC";
-const SLATE_200 = "#E2E8F0";
-const SLATE_400 = "#94A3B8";
-const SLATE_500 = "#64748B";
-const SLATE_700 = "#334155";
+// Cores agora usam CSS variables para suporte a dark mode
 
 function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, userUf, userMunicipio }) { // Added user props for context
   const [searchTerm, setSearchTerm] = useState("");
@@ -565,13 +557,13 @@ const styles = {
   input: {
     width: "100%",
     padding: "10px 16px 10px 38px",
-    border: `1px solid ${SLATE_200}`,
+    border: "1px solid var(--theme-border)",
     borderRadius: 8,
     fontSize: 14,
-    background: SLATE_50,
+    background: "var(--theme-surface-secondary)",
     transition: "all 0.15s ease",
     outline: "none",
-    color: SLATE_700,
+    color: "var(--theme-text)",
     fontFamily: "'Inter', sans-serif",
   },
   compactInput: {
@@ -580,17 +572,17 @@ const styles = {
     border: "none",
     borderRadius: 8,
     fontSize: 13,
-    background: SLATE_50,
+    background: "var(--theme-surface-secondary)",
     transition: "all 0.15s ease",
     outline: "none",
-    color: SLATE_700,
+    color: "var(--theme-text)",
     fontFamily: "'Inter', sans-serif",
   },
   searchIcon: {
     position: "absolute",
     left: 12,
     fontSize: 18,
-    color: SLATE_400,
+    color: "var(--theme-text-muted)",
     zIndex: 1,
     pointerEvents: "none",
   },
@@ -599,7 +591,7 @@ const styles = {
     right: 32,
     background: "none",
     border: "none",
-    color: SLATE_400,
+    color: "var(--theme-text-muted)",
     cursor: "pointer",
     padding: 4,
     borderRadius: 4,
@@ -610,7 +602,7 @@ const styles = {
   loadingIndicator: {
     position: "absolute",
     right: 12,
-    color: PRIMARY,
+    color: "var(--primary)",
     display: "flex",
     alignItems: "center",
   },
@@ -619,38 +611,38 @@ const styles = {
     top: "calc(100% + 8px)",
     left: 0,
     right: 0,
-    background: WHITE,
+    background: "var(--theme-surface)",
     borderRadius: 12,
-    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-    border: `1px solid ${SLATE_200}`,
+    boxShadow: "var(--shadow-lg)",
+    border: "1px solid var(--theme-border)",
     maxHeight: 400,
     overflowY: "auto",
     zIndex: 1000,
   },
   resultsHeader: {
     padding: "10px 16px",
-    borderBottom: `1px solid ${SLATE_200}`,
+    borderBottom: "1px solid var(--theme-border)",
     fontSize: 11,
-    color: SLATE_500,
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
-    background: SLATE_50,
+    background: "var(--theme-surface-secondary)",
     display: "flex",
     justifyContent: "space-between",
     textTransform: "uppercase",
     letterSpacing: "0.03em",
   },
   searchTime: {
-    color: SLATE_400,
+    color: "var(--theme-text-muted)",
     textTransform: "lowercase",
   },
   resultItem: {
     padding: "12px 16px",
-    borderBottom: `1px solid ${SLATE_50}`,
+    borderBottom: "1px solid var(--theme-border-light)",
     cursor: "pointer",
     transition: "background-color 0.15s ease",
   },
   selectedResult: {
-    backgroundColor: "rgba(37, 99, 235, 0.05)",
+    backgroundColor: "var(--theme-surface-hover)",
   },
   resultHeader: {
     display: "flex",
@@ -668,15 +660,15 @@ const styles = {
   resultType: {
     fontSize: 11,
     fontWeight: "600",
-    color: PRIMARY,
+    color: "var(--primary)",
     textTransform: "uppercase",
     display: "flex",
     alignItems: "center",
   },
   relevanceScore: {
     fontSize: 10,
-    color: SLATE_400,
-    background: SLATE_50,
+    color: "var(--theme-text-muted)",
+    background: "var(--theme-surface-secondary)",
     padding: "2px 6px",
     borderRadius: 4,
     fontWeight: 500,
@@ -687,13 +679,13 @@ const styles = {
   primaryText: {
     fontSize: 13,
     fontWeight: "500",
-    color: SLATE_700,
+    color: "var(--theme-text)",
     marginBottom: 2,
     lineHeight: 1.4,
   },
   secondaryText: {
     fontSize: 12,
-    color: SLATE_500,
+    color: "var(--theme-text-secondary)",
     lineHeight: 1.4,
   },
   highlights: {
@@ -703,34 +695,34 @@ const styles = {
   },
   highlight: {
     fontSize: 10,
-    color: PRIMARY,
-    background: "rgba(37, 99, 235, 0.08)",
+    color: "var(--primary)",
+    background: "rgba(26, 58, 74, 0.08)",
     padding: "2px 6px",
     borderRadius: 4,
   },
   exactHighlight: {
     background: "rgba(16, 185, 129, 0.1)",
-    color: "#059669",
+    color: "var(--success)",
     fontWeight: "600",
   },
   noResults: {
     padding: 32,
     textAlign: "center",
-    color: SLATE_500,
+    color: "var(--theme-text-secondary)",
   },
   noResultsIcon: {
     fontSize: 40,
     marginBottom: 12,
-    color: SLATE_400,
+    color: "var(--theme-text-muted)",
   },
   noResultsText: {
     fontSize: 14,
     marginBottom: 4,
-    color: SLATE_700,
+    color: "var(--theme-text)",
   },
   noResultsHint: {
     fontSize: 12,
-    color: SLATE_400,
+    color: "var(--theme-text-muted)",
   },
 };
 
