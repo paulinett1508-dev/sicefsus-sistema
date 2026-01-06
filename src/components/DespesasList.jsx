@@ -123,7 +123,7 @@ const DespesasList = ({
 
   // ✅ Handler para excluir simplificado
   const handleDelete = async (despesaId) => {
-    if (!confirm("❌ Tem certeza que deseja excluir esta despesa?")) {
+    if (!confirm("Tem certeza que deseja excluir esta despesa?")) {
       return;
     }
 
@@ -181,12 +181,15 @@ const DespesasList = ({
   if (error) {
     return (
       <div style={styles.errorContainer}>
-        <div style={styles.errorIcon}>❌</div>
+        <div style={styles.errorIcon}>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--danger)" }}>error</span>
+        </div>
         <h3 style={styles.errorTitle}>Erro ao carregar dados</h3>
         <p style={styles.errorMessage}>{error}</p>
         {onRecarregar && (
           <button onClick={onRecarregar} style={styles.retryButton}>
-            🔄 Tentar novamente
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>refresh</span>
+            Tentar novamente
           </button>
         )}
       </div>
@@ -198,7 +201,9 @@ const DespesasList = ({
     return (
       <div style={styles.container}>
         <div style={styles.emptyContainer}>
-          <div style={styles.emptyIcon}>💰</div>
+          <div style={styles.emptyIcon}>
+            <span className="material-symbols-outlined" style={{ fontSize: 64, color: "var(--theme-text-secondary)", opacity: 0.5 }}>payments</span>
+          </div>
           <h2 style={styles.emptyTitle}>Nenhuma despesa registrada</h2>
           <p style={styles.emptyText}>
             Clique em "Nova Despesa" para começar a registrar suas despesas
@@ -206,7 +211,8 @@ const DespesasList = ({
           </p>
           {onNovaDespesa && (
             <button onClick={onNovaDespesa} style={styles.emptyButton}>
-              ➕ Nova Despesa
+              <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>add</span>
+              Nova Despesa
             </button>
           )}
         </div>
@@ -236,7 +242,8 @@ const DespesasList = ({
                     styles.despesaStatusExecutada
                   }
                 >
-                  {despesa.status || "✅ EXECUTADA"}
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>check_circle</span>
+                  {despesa.status || "EXECUTADA"}
                 </div>
                 <div
                   style={
@@ -289,14 +296,15 @@ const DespesasList = ({
                         estilosCustomizados?.despesaInfo || styles.despesaInfo
                       }
                     >
-                      📄 Empenho: {despesa.numeroEmpenho || "N/A"}
+                      <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>description</span>
+                      Empenho: {despesa.numeroEmpenho || "N/A"}
                     </span>
                     <span
                       style={
                         estilosCustomizados?.despesaInfo || styles.despesaInfo
                       }
                     >
-                      📅{" "}
+                      <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span>
                       {despesa.dataPagamento
                         ? new Date(despesa.dataPagamento).toLocaleDateString(
                             "pt-BR",
@@ -309,7 +317,8 @@ const DespesasList = ({
                           estilosCustomizados?.despesaInfo || styles.despesaInfo
                         }
                       >
-                        🏛️ {emendaRelacionada.numero || "N/A"}
+                        <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>account_balance</span>
+                        {emendaRelacionada.numero || "N/A"}
                       </span>
                     )}
                   </div>
@@ -319,7 +328,7 @@ const DespesasList = ({
                     type="button"
                     onClick={() => {
                       console.log(
-                        "👁️ Visualizar clicado (DespesasList Cards):",
+                        "Visualizar clicado (DespesasList Cards):",
                         despesa.id,
                       );
                       handleView(despesa);
@@ -329,13 +338,13 @@ const DespesasList = ({
                     }
                     title="Visualizar despesa"
                   >
-                    👁️
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>visibility</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       console.log(
-                        "✏️ Editar clicado (DespesasList Cards):",
+                        "Editar clicado (DespesasList Cards):",
                         despesa.id,
                       );
                       handleEdit(despesa);
@@ -343,7 +352,7 @@ const DespesasList = ({
                     style={estilosCustomizados?.btnEditar || styles.btnEditar}
                     title="Editar despesa"
                   >
-                    ✏️
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                   </button>
                   <button
                     type="button"
@@ -351,7 +360,7 @@ const DespesasList = ({
                     style={estilosCustomizados?.btnRemover || styles.btnRemover}
                     title="Remover despesa"
                   >
-                    🗑️
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
                   </button>
                 </div>
               </div>
@@ -392,14 +401,14 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     minHeight: "400px",
-    color: PRIMARY,
+    color: "var(--primary)",
   },
 
   loadingSpinner: {
     width: 48,
     height: 48,
-    border: "4px solid #e3e3e3",
-    borderTop: "4px solid #2563EB",
+    border: "4px solid var(--theme-border)",
+    borderTop: "4px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     marginBottom: 20,
@@ -419,10 +428,11 @@ const styles = {
     justifyContent: "center",
     padding: "60px 24px",
     textAlign: "center",
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
     borderRadius: 12,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    margin: "32px 0", // ✅ CORRIGIDO: Margem vertical apenas
+    boxShadow: "var(--shadow)",
+    margin: "32px 0",
+    border: "1px solid var(--theme-border)",
   },
 
   errorIcon: {
@@ -458,10 +468,11 @@ const styles = {
   emptyContainer: {
     textAlign: "center",
     padding: "80px 32px",
-    backgroundColor: WHITE,
+    backgroundColor: "var(--theme-surface)",
     borderRadius: 12,
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    margin: "0", // ✅ CORRIGIDO: Sem margem extra
+    boxShadow: "var(--shadow)",
+    margin: "0",
+    border: "1px solid var(--theme-border)",
   },
 
   emptyIcon: {
@@ -471,7 +482,7 @@ const styles = {
   },
 
   emptyTitle: {
-    color: PRIMARY,
+    color: "var(--primary)",
     fontSize: 28,
     fontWeight: "700",
     marginBottom: 16,

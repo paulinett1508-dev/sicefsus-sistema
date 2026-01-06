@@ -35,6 +35,39 @@ const formatCurrency = (valor) =>
     currency: "BRL",
   });
 
+// Estilos do formulário com suporte a dark mode
+const getFormStyles = (isDark) => ({
+  label: {
+    fontWeight: 600,
+    color: isDark ? "var(--theme-text)" : "#2563EB"
+  },
+  input: {
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
+    borderRadius: 8,
+    padding: "10px 12px",
+    outline: "none",
+    backgroundColor: isDark ? "var(--theme-input-bg)" : "#fff",
+    color: isDark ? "var(--theme-text)" : "inherit",
+  },
+  select: {
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
+    borderRadius: 8,
+    padding: "10px 12px",
+    outline: "none",
+    backgroundColor: isDark ? "var(--theme-input-bg)" : "#fff",
+    color: isDark ? "var(--theme-text)" : "inherit",
+  },
+  inputCustomizadoWrapper: { display: "flex", gap: 8 },
+  btnVoltarSelect: {
+    backgroundColor: "#6c757d",
+    color: "#fff",
+    border: "none",
+    padding: "10px 12px",
+    borderRadius: 8,
+    cursor: "pointer",
+  },
+});
+
 // ===== Formulário inline (PLANEJADA) =====
 const DespesaPlanejadaForm = ({
   emendaId,
@@ -61,6 +94,9 @@ const DespesaPlanejadaForm = ({
       marginBottom: 12,
     },
   };
+
+  // Obter estilos do formulário baseado no tema
+  const formStyles = getFormStyles(isDark);
 
   const saldoDisponivel = valorEmenda - totalExecutado;
 
@@ -1738,32 +1774,6 @@ const styles = {
     padding: 24,
     overflowY: "auto",
     flex: 1,
-  },
-};
-
-const formStyles = {
-  label: { fontWeight: 600, color: "#2563EB" },
-  input: {
-    border: "1px solid #dee2e6",
-    borderRadius: 8,
-    padding: "10px 12px",
-    outline: "none",
-  },
-  select: {
-    border: "1px solid #dee2e6",
-    borderRadius: 8,
-    padding: "10px 12px",
-    outline: "none",
-    background: "#fff",
-  },
-  inputCustomizadoWrapper: { display: "flex", gap: 8 },
-  btnVoltarSelect: {
-    backgroundColor: "#6c757d",
-    color: "#fff",
-    border: "none",
-    padding: "10px 12px",
-    borderRadius: 8,
-    cursor: "pointer",
   },
 };
 

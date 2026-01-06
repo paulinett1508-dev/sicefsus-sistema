@@ -443,7 +443,7 @@ export default function DespesasTable({
             title="Editar despesa"
             disabled={excluindo === despesa.id}
           >
-            ✏️
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
           </button>
           <button
             type="button"
@@ -456,7 +456,11 @@ export default function DespesasTable({
             title="Excluir despesa"
             disabled={excluindo === despesa.id}
           >
-            {excluindo === despesa.id ? "⏳" : "🗑️"}
+            {excluindo === despesa.id ? (
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>hourglass_empty</span>
+            ) : (
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+            )}
           </button>
         </div>
       </td>
@@ -485,7 +489,8 @@ export default function DespesasTable({
                     : {}),
                 }}
               >
-                📁 Agrupado por Emenda
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, verticalAlign: "middle" }}>folder</span>
+                Agrupado por Emenda
               </button>
               <button
                 type="button"
@@ -501,7 +506,8 @@ export default function DespesasTable({
                     : {}),
                 }}
               >
-                📄 Lista Completa
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, verticalAlign: "middle" }}>list</span>
+                Lista Completa
               </button>
             </div>
           )}
@@ -522,7 +528,8 @@ export default function DespesasTable({
                   : {}),
               }}
             >
-              📊 Resumido
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, verticalAlign: "middle" }}>bar_chart</span>
+              Resumido
             </button>
             <button
               type="button"
@@ -538,7 +545,8 @@ export default function DespesasTable({
                   : {}),
               }}
             >
-              📋 Detalhado
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 6, verticalAlign: "middle" }}>view_list</span>
+              Detalhado
             </button>
           </div>
         </div>
@@ -721,8 +729,9 @@ export default function DespesasTable({
                 </div>
               </div>
               <div style={styles.warningMessage}>
-                <p style={{ margin: 0, fontSize: 14 }}>
-                  ⚠️ Esta ação não pode ser desfeita. O saldo da emenda será
+                <p style={{ margin: 0, fontSize: 14, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: "var(--warning)" }}>warning</span>
+                  Esta ação não pode ser desfeita. O saldo da emenda será
                   restaurado.
                 </p>
               </div>
@@ -800,8 +809,8 @@ const styles = {
   },
 
   toggleButtonActive: {
-    backgroundColor: PRIMARY,
-    color: WHITE,
+    backgroundColor: "var(--primary)",
+    color: "#fff",
     fontWeight: "600",
   },
 
@@ -853,7 +862,7 @@ const styles = {
   emendaNumero: {
     fontSize: 16,
     fontWeight: "700",
-    color: PRIMARY,
+    color: "var(--theme-text)",
     margin: 0,
   },
 
@@ -901,24 +910,24 @@ const styles = {
   },
 
   headerRow: {
-    backgroundColor: "var(--primary)",
-    color: "var(--white)",
+    backgroundColor: "#1E293B",
+    color: "#fff",
   },
 
   th: {
     padding: "12px 8px",
     textAlign: "left",
-    color: WHITE,
+    color: "#fff",
     fontWeight: "600",
     fontSize: 14,
-    borderBottom: "2px solid var(--primary-dark)",
+    borderBottom: "2px solid #34495e",
     borderRight: "1px solid rgba(255,255,255,0.1)",
     whiteSpace: "nowrap",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
     position: "sticky",
     top: 0,
-    backgroundColor: "var(--primary)",
+    backgroundColor: "#1E293B",
     zIndex: 10,
   },
 
@@ -964,7 +973,7 @@ const styles = {
     whiteSpace: "nowrap",
     fontWeight: "500",
     fontSize: 11,
-    color: ACCENT,
+    color: "var(--theme-text)",
   },
 
   fornecedorCell: {
@@ -978,8 +987,8 @@ const styles = {
     fontFamily: "monospace",
     fontSize: 11,
     fontWeight: "600",
-    color: PRIMARY,
-    backgroundColor: "rgba(14, 165, 233, 0.15)",
+    color: "var(--theme-text)",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "2px 6px",
     borderRadius: "3px",
     display: "inline-block",
@@ -1035,7 +1044,7 @@ const styles = {
     fontSize: 14,
     padding: 4,
     borderRadius: 3,
-    color: ACCENT,
+    color: "var(--info)",
     transition: "all 0.2s",
   },
 
@@ -1046,7 +1055,7 @@ const styles = {
     fontSize: 14,
     padding: 4,
     borderRadius: 3,
-    color: WARNING,
+    color: "var(--warning)",
     transition: "all 0.2s",
   },
 
@@ -1057,7 +1066,7 @@ const styles = {
     fontSize: 14,
     padding: 4,
     borderRadius: 3,
-    color: ERROR,
+    color: "var(--danger)",
     transition: "all 0.2s",
   },
 
@@ -1089,7 +1098,7 @@ const styles = {
   summaryValue: {
     fontSize: 18,
     fontWeight: "700",
-    color: PRIMARY,
+    color: "var(--primary)",
   },
 
   emptyState: {
@@ -1227,8 +1236,8 @@ const styles = {
     flex: 1,
     padding: "10px 20px",
     border: "none",
-    background: ERROR,
-    color: WHITE,
+    background: "var(--danger)",
+    color: "#fff",
     borderRadius: 8,
     fontWeight: "500",
     cursor: "pointer",
