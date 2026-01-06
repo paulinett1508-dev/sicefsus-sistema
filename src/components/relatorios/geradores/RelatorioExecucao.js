@@ -5,7 +5,6 @@ import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import {
   addKPICards,
   addSectionTitle,
-  getModernTableStyles,
   createManualTable,
 } from "../../../utils/pdfHelpers";
 
@@ -24,7 +23,7 @@ export class RelatorioExecucao extends BaseRelatorio {
     // HEADER
     this.addHeader("Execução Orçamentária", subtitulo);
 
-    let yPosition = 55;
+    let yPosition = 58;
 
     // Métricas
     const totalEmendas = this.emendas.length;
@@ -83,25 +82,37 @@ export class RelatorioExecucao extends BaseRelatorio {
     });
 
     // Usar autoTable com estilos modernos
-    const headers = ["Emenda", "Parlamentar", "Total", "Executado", "Saldo", "%"];
+    const headers = ["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"];
 
     try {
       if (this.doc.autoTable) {
-        const modernStyles = getModernTableStyles();
-
         this.doc.autoTable({
           startY: yPosition,
           head: [headers],
           body: tabelaEmendas,
-          ...modernStyles,
-          columnStyles: {
-            0: { cellWidth: 22 },
-            1: { cellWidth: 'auto' },
-            2: { halign: "right", cellWidth: 32 },
-            3: { halign: "right", cellWidth: 32 },
-            4: { halign: "right", cellWidth: 32 },
-            5: { halign: "center", cellWidth: 14 },
+          theme: 'striped',
+          headStyles: {
+            fillColor: PDF_COLORS.SLATE_100,
+            textColor: PDF_COLORS.SLATE_700,
+            fontStyle: 'bold',
+            fontSize: 9,
           },
+          styles: {
+            fontSize: 9,
+            cellPadding: 3,
+            textColor: PDF_COLORS.SLATE_700,
+            overflow: 'linebreak',
+          },
+          alternateRowStyles: {
+            fillColor: PDF_COLORS.SLATE_50,
+          },
+          columnStyles: {
+            2: { halign: "right" },
+            3: { halign: "right" },
+            4: { halign: "right" },
+            5: { halign: "center" },
+          },
+          margin: { left: 15, right: 15 },
           didDrawPage: (data) => {
             if (data.pageNumber > 1) {
               // Header compacto para continuação

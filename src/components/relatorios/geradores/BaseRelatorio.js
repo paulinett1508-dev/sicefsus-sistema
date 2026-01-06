@@ -31,7 +31,13 @@ export class BaseRelatorio {
   }
 
   addHeader(titulo, subtitulo = null) {
-    addHeader(this.doc, titulo, this.logoBase64, subtitulo);
+    // Extrair informações do usuário para o cabeçalho
+    const opcoes = {
+      municipio: this.usuario?.municipio,
+      uf: this.usuario?.uf,
+      usuario: this.usuario?.nome || this.usuario?.email,
+    };
+    addHeader(this.doc, titulo, this.logoBase64, subtitulo, opcoes);
   }
 
   addFooter() {

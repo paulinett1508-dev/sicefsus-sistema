@@ -20,7 +20,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
     // HEADER
     this.addHeader("Prestação de Contas", subtitulo);
 
-    let yPosition = 55;
+    let yPosition = 58;
 
     // Agrupar despesas por emenda
     const execucaoPorEmenda = {};

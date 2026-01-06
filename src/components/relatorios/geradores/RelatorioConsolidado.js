@@ -21,7 +21,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
     // HEADER
     this.addHeader("Relatório Consolidado", `${nomeMes} ${ano}`);
 
-    let yPosition = 55;
+    let yPosition = 58;
 
     // Métricas
     const totalEmendas = this.emendas.length;

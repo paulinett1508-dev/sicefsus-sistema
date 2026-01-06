@@ -50,13 +50,14 @@ export const getLogoBase64 = async () => {
 };
 
 // Adicionar cabeçalho moderno aos PDFs - Design Clean
-export const addHeader = (doc, titulo, logoBase64, subtitulo = null) => {
+export const addHeader = (doc, titulo, logoBase64, subtitulo = null, opcoes = {}) => {
   const pageWidth = doc.internal.pageSize.width;
   const margins = { left: 15, right: 15 };
+  const { municipio, uf, usuario } = opcoes;
 
   // Fundo branco (clean)
   doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, pageWidth, 50, "F");
+  doc.rect(0, 0, pageWidth, 55, "F");
 
   // Linha accent no topo (fina e elegante)
   doc.setFillColor(...PDF_COLORS.ACCENT);
@@ -81,17 +82,36 @@ export const addHeader = (doc, titulo, logoBase64, subtitulo = null) => {
   doc.setTextColor(...PDF_COLORS.SLATE_500);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Sistema de Controle de Execuções Financeiras", textX, 21);
+  doc.text("Sistema de Controle de Execuções Financeiras do SUS", textX, 21);
 
-  // Data de geração (direita)
+  // Data e hora de geração (direita, superior)
   doc.setTextColor(...PDF_COLORS.SLATE_400);
   doc.setFontSize(8);
-  const dataGeracao = new Date().toLocaleDateString("pt-BR", {
+  const dataHoraGeracao = new Date().toLocaleString("pt-BR", {
     day: "2-digit",
-    month: "short",
-    year: "numeric"
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
   });
-  doc.text(dataGeracao, pageWidth - margins.right, 15, { align: "right" });
+  doc.text(`Gerado em: ${dataHoraGeracao}`, pageWidth - margins.right, 12, { align: "right" });
+
+  // Município/UF (direita, abaixo da data)
+  if (municipio || uf) {
+    doc.setTextColor(...PDF_COLORS.SLATE_500);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    const localidade = [municipio, uf].filter(Boolean).join(" - ");
+    doc.text(localidade, pageWidth - margins.right, 20, { align: "right" });
+  }
+
+  // Usuário (direita, abaixo do município)
+  if (usuario) {
+    doc.setTextColor(...PDF_COLORS.SLATE_400);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Por: ${usuario}`, pageWidth - margins.right, 26, { align: "right" });
+  }
 
   // Título do relatório
   doc.setTextColor(...PDF_COLORS.SLATE_900);

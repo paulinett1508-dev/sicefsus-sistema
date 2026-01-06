@@ -23,7 +23,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     // HEADER
     this.addHeader("Analítico por Parlamentar", subtitulo);
 
-    let yPosition = 55;
+    let yPosition = 58;
 
     // Agrupar por parlamentar
     const porParlamentar = {};

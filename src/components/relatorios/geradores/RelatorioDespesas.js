@@ -35,7 +35,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     // HEADER MODERNO
     this.addHeader("Relatório de Despesas", subtitulo);
 
-    let yPosition = 55;
+    let yPosition = 58;
 
     // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
