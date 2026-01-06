@@ -37,19 +37,23 @@ export class RelatorioAnalitico extends BaseRelatorio {
       }
 
       const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id,
+        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
       );
-      const executado = despesasEmenda.reduce(
-        (sum, d) => sum + (d.valor || 0),
-        0,
-      );
+      const executado = despesasEmenda.reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
+
+      const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
 
       porParlamentar[autor].emendas.push({
         ...emenda,
+        valorTotal: valorTotalNormalizado,
         valorExecutado: executado,
         quantidadeDespesas: despesasEmenda.length,
       });
-      porParlamentar[autor].valorTotal += emenda.valorTotal || 0;
+      porParlamentar[autor].valorTotal += valorTotalNormalizado;
       porParlamentar[autor].valorExecutado += executado;
       porParlamentar[autor].quantidadeDespesas += despesasEmenda.length;
     });

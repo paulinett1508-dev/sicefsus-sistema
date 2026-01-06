@@ -49,13 +49,19 @@ export class RelatorioPrestacao extends BaseRelatorio {
     const execucaoPorEmenda = {};
     this.emendas.forEach((emenda) => {
       const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id,
+        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
       );
       if (despesasEmenda.length > 0) {
+        const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+        const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
+        
         execucaoPorEmenda[emenda.id] = {
-          emenda,
+          emenda: { ...emenda, valorTotal: valorTotalNormalizado },
           despesas: despesasEmenda,
-          total: despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0),
+          total: despesasEmenda.reduce((sum, d) => {
+            const valor = parseFloat(d.valor || 0);
+            return sum + (isNaN(valor) ? 0 : valor);
+          }, 0),
         };
       }
     });
@@ -155,10 +161,10 @@ export class RelatorioPrestacao extends BaseRelatorio {
       (sum, item) => sum + item.total,
       0,
     );
-    const totalEmendas = this.emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || 0),
-      0,
-    );
+    const totalEmendas = this.emendas.reduce((sum, e) => {
+      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
 
     this.doc.setFontSize(11);
     this.doc.setFont("helvetica", "normal");

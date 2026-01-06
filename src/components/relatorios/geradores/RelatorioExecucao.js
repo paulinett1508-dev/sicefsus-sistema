@@ -19,14 +19,16 @@ export class RelatorioExecucao extends BaseRelatorio {
     yPosition += 10;
 
     const totalEmendas = this.emendas.length;
-    const valorTotal = this.emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || 0),
-      0,
-    );
-    const valorExecutado = this.despesas.reduce(
-      (sum, d) => sum + (d.valor || 0),
-      0,
-    );
+    const valorTotal = this.emendas.reduce((sum, e) => {
+      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+    const valorExecutado = this.despesas
+      .filter(d => d.status !== "PLANEJADA")
+      .reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
     const saldoDisponivel = valorTotal - valorExecutado;
     const percentualExecutado =
       valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
@@ -86,23 +88,27 @@ export class RelatorioExecucao extends BaseRelatorio {
       "% Exec.",
     ];
     const tabelaEmendas = this.emendas.map((emenda) => {
+      const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
+      
       const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id,
+        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
       );
-      const valorExecutadoEmenda = despesasEmenda.reduce(
-        (sum, d) => sum + (d.valor || 0),
-        0,
-      );
-      const saldoEmenda = (emenda.valorTotal || 0) - valorExecutadoEmenda;
+      const valorExecutadoEmenda = despesasEmenda.reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
+      
+      const saldoEmenda = valorTotalNormalizado - valorExecutadoEmenda;
       const percentualEmenda =
-        emenda.valorTotal > 0
-          ? (valorExecutadoEmenda / emenda.valorTotal) * 100
+        valorTotalNormalizado > 0
+          ? (valorExecutadoEmenda / valorTotalNormalizado) * 100
           : 0;
 
       return [
         emenda.numero || "-",
         emenda.autor || "-",
-        this.formatCurrency(emenda.valorTotal || 0),
+        this.formatCurrency(valorTotalNormalizado),
         this.formatCurrency(valorExecutadoEmenda),
         this.formatCurrency(saldoEmenda),
         `${percentualEmenda.toFixed(1)}%`,

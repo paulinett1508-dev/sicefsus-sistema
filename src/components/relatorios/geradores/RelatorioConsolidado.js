@@ -32,14 +32,16 @@ export class RelatorioConsolidado extends BaseRelatorio {
     yPosition += 15;
 
     const totalEmendas = this.emendas.length;
-    const valorTotal = this.emendas.reduce(
-      (sum, e) => sum + (e.valorTotal || 0),
-      0,
-    );
-    const valorExecutado = this.despesas.reduce(
-      (sum, d) => sum + (d.valor || 0),
-      0,
-    );
+    const valorTotal = this.emendas.reduce((sum, e) => {
+      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+    const valorExecutado = this.despesas
+      .filter(d => d.status !== "PLANEJADA")
+      .reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
     const saldoDisponivel = valorTotal - valorExecutado;
     const percentualGeral =
       valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
@@ -173,16 +175,19 @@ export class RelatorioConsolidado extends BaseRelatorio {
         };
       }
 
+      const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
+
       porTipo[tipo].quantidade++;
-      porTipo[tipo].valorTotal += emenda.valorTotal || 0;
+      porTipo[tipo].valorTotal += valorTotalNormalizado;
 
       const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id,
+        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
       );
-      porTipo[tipo].valorExecutado += despesasEmenda.reduce(
-        (sum, d) => sum + (d.valor || 0),
-        0,
-      );
+      porTipo[tipo].valorExecutado += despesasEmenda.reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
     });
 
     const dadosTipo = Object.entries(porTipo).map(([tipo, dados]) => [
@@ -253,14 +258,17 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     const emendasComExecucao = this.emendas
       .map((emenda) => {
+        const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+        const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
+        
         const despesasEmenda = this.despesas.filter(
-          (d) => d.emendaId === emenda.id,
+          (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
         );
-        const executado = despesasEmenda.reduce(
-          (sum, d) => sum + (d.valor || 0),
-          0,
-        );
-        return { ...emenda, executado };
+        const executado = despesasEmenda.reduce((sum, d) => {
+          const valor = parseFloat(d.valor || 0);
+          return sum + (isNaN(valor) ? 0 : valor);
+        }, 0);
+        return { ...emenda, valorTotal: valorTotalNormalizado, executado };
       })
       .sort((a, b) => b.executado - a.executado)
       .slice(0, 5);
@@ -269,7 +277,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       (index + 1).toString(),
       emenda.numero || "-",
       emenda.autor || "-",
-      this.formatCurrency(emenda.valorTotal || 0),
+      this.formatCurrency(emenda.valorTotal),
       this.formatCurrency(emenda.executado),
       `${emenda.valorTotal > 0 ? ((emenda.executado / emenda.valorTotal) * 100).toFixed(1) : 0}%`,
     ]);

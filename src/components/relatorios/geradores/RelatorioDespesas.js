@@ -22,12 +22,11 @@ export class RelatorioDespesas extends BaseRelatorio {
     this.doc.text("RESUMO DAS DESPESAS", 20, yPosition);
     yPosition += 10;
 
-    const totalDespesas = this.despesas.length;
-    const valorTotal = this.despesas.reduce(
-      (sum, d) => sum + (parseFloat(d.valor) || 0),
-      0,
-    );
-    const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
+    // Filtrar apenas despesas executadas (não PLANEJADA)
+    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
+    
+    const totalDespesas = despesasExecutadas.length;
+    const valorTotal = despesasExecutadas.reduce((sum, d) => {\n      const valor = parseFloat(d.valor || 0);\n      return sum + (isNaN(valor) ? 0 : valor);\n    }, 0);\n    const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
 
     // Box de resumo
     this.doc.setFillColor(...PDF_COLORS.CARD_BG);
@@ -96,7 +95,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     // Agrupar por fornecedor
     const porFornecedor = {};
-    this.despesas.forEach((despesa) => {
+    despesasExecutadas.forEach((despesa) => {
       const fornecedor = despesa.fornecedor || "Não informado";
       if (!porFornecedor[fornecedor]) {
         porFornecedor[fornecedor] = {
@@ -107,7 +106,8 @@ export class RelatorioDespesas extends BaseRelatorio {
       }
 
       porFornecedor[fornecedor].quantidade++;
-      porFornecedor[fornecedor].valorTotal += parseFloat(despesa.valor) || 0;
+      const valor = parseFloat(despesa.valor || 0);
+      porFornecedor[fornecedor].valorTotal += isNaN(valor) ? 0 : valor;
 
       // ✅ CORRIGIDO: Buscar data correta
       const dataCompra = new Date(
@@ -223,7 +223,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     yPosition += 10;
 
     // ✅ CORRIGIDO: Ordenar por data correta
-    const despesasOrdenadas = [...this.despesas].sort((a, b) => {
+    const despesasOrdenadas = [...despesasExecutadas].sort((a, b) => {
       const dataA = new Date(a.dataEmpenho || a.criadaEm || 0);
       const dataB = new Date(b.dataEmpenho || b.criadaEm || 0);
       return dataB - dataA;
