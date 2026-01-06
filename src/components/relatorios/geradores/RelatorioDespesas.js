@@ -154,23 +154,22 @@ export class RelatorioDespesas extends BaseRelatorio {
           theme: "striped",
           headStyles: {
             fillColor: PDF_COLORS.TABLE_HEADER,
-            fontSize: 10,
-            cellPadding: 3,
+            fontSize: 9,
           },
           styles: {
-            fontSize: 9,
-            cellPadding: 3,
-            overflow: 'ellipsize',
+            fontSize: 8,
+            cellPadding: 2,
+            overflow: 'linebreak',
           },
           columnStyles: {
-            0: { halign: "center", cellWidth: 12 },
-            1: { cellWidth: 55, overflow: 'ellipsize' },
-            2: { halign: "center", cellWidth: 12 },
-            3: { halign: "right", cellWidth: 32 },
-            4: { halign: "right", cellWidth: 28 },
-            5: { halign: "center", cellWidth: 25 },
+            0: { halign: "center" },
+            1: { cellWidth: 'auto' },
+            2: { halign: "center" },
+            3: { halign: "right" },
+            4: { halign: "right" },
+            5: { halign: "center" },
           },
-          margin: { left: 20, right: 20 },
+          margin: { left: 14, right: 14 },
         });
 
         yPosition = this.doc.lastAutoTable.finalY + 20;
@@ -276,24 +275,23 @@ export class RelatorioDespesas extends BaseRelatorio {
           theme: "grid",
           headStyles: {
             fillColor: PDF_COLORS.TABLE_HEADER,
-            fontSize: 9,
-            cellPadding: 3,
+            fontSize: 8,
           },
           styles: {
-            fontSize: 9,
-            cellPadding: 3,
-            overflow: 'ellipsize',
+            fontSize: 7,
+            cellPadding: 2,
+            overflow: 'linebreak',
           },
           columnStyles: {
-            0: { cellWidth: 18 },
-            1: { cellWidth: 18 },
-            2: { cellWidth: 50 },
-            3: { cellWidth: 45 },
-            4: { cellWidth: 28 },
-            5: { cellWidth: 18 },
-            6: { halign: "right", cellWidth: 22 },
+            0: { cellWidth: 'auto' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 'auto' },
+            4: { cellWidth: 'auto' },
+            5: { cellWidth: 'auto' },
+            6: { halign: "right", cellWidth: 'auto' },
           },
-          margin: { left: 15, right: 15 },
+          margin: { left: 14, right: 14 },
           didDrawPage: (data) => {
             this.addFooter();
             if (data.pageNumber > 1) {

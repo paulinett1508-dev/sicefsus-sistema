@@ -162,23 +162,22 @@ export class RelatorioAnalitico extends BaseRelatorio {
               theme: "grid",
               headStyles: {
                 fillColor: PDF_COLORS.STATUS_ALTO,
-                fontSize: 9,
-                cellPadding: 3,
+                fontSize: 8,
               },
               styles: {
-                fontSize: 9,
-                cellPadding: 3,
+                fontSize: 7,
+                cellPadding: 2,
               },
               columnStyles: {
-                0: { cellWidth: 25 },
-                1: { cellWidth: 35 },
-                2: { cellWidth: 40 },
-                3: { halign: "right", cellWidth: 30 },
-                4: { halign: "right", cellWidth: 30 },
-                5: { halign: "center", cellWidth: 15 },
-                6: { halign: "center", cellWidth: 15 },
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { halign: "right" },
+                4: { halign: "right" },
+                5: { halign: "center" },
+                6: { halign: "center" },
               },
-              margin: { left: 20, right: 20 },
+              margin: { left: 14, right: 14 },
             });
 
             yPosition = this.doc.lastAutoTable.finalY + 20;

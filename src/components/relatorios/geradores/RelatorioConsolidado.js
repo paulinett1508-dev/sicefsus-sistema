@@ -203,17 +203,17 @@ export class RelatorioConsolidado extends BaseRelatorio {
           theme: "grid",
           headStyles: {
             fillColor: PDF_COLORS.TABLE_HEADER_BLUE,
-            fontSize: 10,
+            fontSize: 9,
           },
-          styles: { fontSize: 9 },
+          styles: { fontSize: 8, cellPadding: 2 },
           columnStyles: {
-            0: { cellWidth: 60 },
-            1: { halign: "center", cellWidth: 20 },
-            2: { halign: "right", cellWidth: 40 },
-            3: { halign: "right", cellWidth: 40 },
-            4: { halign: "center", cellWidth: 20 },
+            0: { cellWidth: 'auto' },
+            1: { halign: "center" },
+            2: { halign: "right" },
+            3: { halign: "right" },
+            4: { halign: "center" },
           },
-          margin: { left: 20, right: 20 },
+          margin: { left: 14, right: 14 },
         });
         yPosition = this.doc.lastAutoTable.finalY + 20;
       } else {
@@ -286,18 +286,18 @@ export class RelatorioConsolidado extends BaseRelatorio {
           theme: "striped",
           headStyles: {
             fillColor: PDF_COLORS.TABLE_HEADER_RED,
-            fontSize: 10,
+            fontSize: 9,
           },
-          styles: { fontSize: 9 },
+          styles: { fontSize: 8, cellPadding: 2 },
           columnStyles: {
-            0: { halign: "center", cellWidth: 10 },
-            1: { cellWidth: 25 },
-            2: { cellWidth: 50 },
-            3: { halign: "right", cellWidth: 35 },
-            4: { halign: "right", cellWidth: 35 },
-            5: { halign: "center", cellWidth: 20 },
+            0: { halign: "center" },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { halign: "right" },
+            4: { halign: "right" },
+            5: { halign: "center" },
           },
-          margin: { left: 20, right: 20 },
+          margin: { left: 14, right: 14 },
         });
         yPosition = this.doc.lastAutoTable.finalY + 20;
       } else {
