@@ -126,20 +126,20 @@ const useDashboardData = (user, permissions) => {
         `✅ OPERADOR/GESTOR encontrou: ${emendasData.length} emendas para ${userMunicipio}/${userUf}`,
       );
 
-      // Carregar despesas das emendas encontradas
+      // ✅ CORREÇÃO: Carregar despesas pelo emendaId (não por município)
+      // Despesas são vinculadas às emendas, não têm município próprio
       let despesasData = [];
       if (emendasData.length > 0) {
         const emendasIds = emendasData.map((e) => e.id);
-        const batchSize = 10;
+        const batchSize = 10; // Firestore limita "in" a 10 valores
 
         for (let i = 0; i < emendasIds.length; i += batchSize) {
           const batch = emendasIds.slice(i, i + batchSize);
           const despesasRef = collection(db, "despesas");
-          // ✅ CARREGAR DESPESAS COM FILTRO COMPOSTO (município + UF)
+          // ✅ FILTRAR DESPESAS PELO emendaId (vinculadas às emendas do município)
           const despesasQuery = query(
             despesasRef,
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf)
+            where("emendaId", "in", batch)
           );
           const despesasSnapshot = await getDocs(despesasQuery);
           despesasSnapshot.forEach((doc) => {
@@ -148,7 +148,7 @@ const useDashboardData = (user, permissions) => {
         }
       }
 
-      console.log(`✅ OPERADOR/GESTOR carregou: ${despesasData.length} despesas`);
+      console.log(`✅ OPERADOR/GESTOR carregou: ${despesasData.length} despesas (via emendaId)`);
       return { emendasData, despesasData };
     } catch (error) {
       console.error("❌ Erro operador/gestor:", error);

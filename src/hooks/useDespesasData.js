@@ -75,10 +75,10 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
         return;
       }
 
-      // 🎯 CASO 3: Operador/Gestor - filtrar por município + UF via query Firestore
-      // ✅ CORREÇÃO P2: Usar query Firestore (consistente com useDashboardData)
+      // 🎯 CASO 3: Operador/Gestor - filtrar por município + UF
+      // ✅ CORREÇÃO: Despesas são filtradas pelo emendaId (não têm município próprio)
       if (userMunicipio && userUf) {
-        // Query com filtro composto (município + UF) diretamente no Firestore
+        // 1. Buscar emendas do município/UF do usuário
         const emendasQuery = query(
           collection(db, "emendas"),
           where("municipio", "==", userMunicipio),
@@ -92,18 +92,23 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
 
         setEmendas(emendasData);
 
-        // Carregar despesas com filtro por município + UF
+        // 2. Buscar despesas pelo emendaId (vinculadas às emendas do município)
         if (emendasData.length > 0) {
-          const despesasQuery = query(
-            collection(db, "despesas"),
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf)
-          );
-          const despesasSnapshot = await getDocs(despesasQuery);
-          const despesasData = despesasSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+          const emendasIds = emendasData.map((e) => e.id);
+          const despesasData = [];
+          const batchSize = 10; // Firestore limita "in" a 10 valores
+
+          for (let i = 0; i < emendasIds.length; i += batchSize) {
+            const batch = emendasIds.slice(i, i + batchSize);
+            const despesasQuery = query(
+              collection(db, "despesas"),
+              where("emendaId", "in", batch)
+            );
+            const despesasSnapshot = await getDocs(despesasQuery);
+            despesasSnapshot.docs.forEach((doc) => {
+              despesasData.push({ id: doc.id, ...doc.data() });
+            });
+          }
 
           setDespesas(despesasData);
         }
