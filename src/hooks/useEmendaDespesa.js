@@ -106,8 +106,9 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     (emendaData, despesasData) => {
       if (!emendaData) return metricas;
 
+      // ✅ CORREÇÃO P1: Ordem padronizada de fallback
       const valorTotal = parseValorMonetario(
-        emendaData.valorTotal || emendaData.valorRecurso || 0,
+        emendaData.valor || emendaData.valorRecurso || emendaData.valorTotal || 0,
       );
 
       // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
@@ -343,8 +344,9 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     if (!emendas.length) return null;
 
     const totalEmendas = emendas.length;
+    // ✅ CORREÇÃO P1: Ordem padronizada de fallback
     const valorTotalGeral = emendas.reduce(
-      (sum, e) => sum + parseValorMonetario(e.valorTotal || e.valor || 0), // Usar parseValorMonetario
+      (sum, e) => sum + parseValorMonetario(e.valor || e.valorRecurso || e.valorTotal || 0),
       0,
     );
     const valorExecutadoGeral = emendas.reduce(

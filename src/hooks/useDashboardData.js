@@ -210,8 +210,8 @@ const useDashboardData = (user, permissions) => {
           (despesa) => despesa.emendaId === emenda.id && despesa.status !== "PLANEJADA",
         );
 
-        // ✅ CORREÇÃO: Usar parseValorMonetario para valores
-        const valorTotal = parseValorMonetario(emenda.valorRecurso || emenda.valor || 0);
+        // ✅ CORREÇÃO P1: Ordem padronizada de fallback
+        const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
 
         // ✅ CORREÇÃO: Usar parseValorMonetario no reduce (já filtrado acima)
         const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
@@ -259,9 +259,9 @@ const useDashboardData = (user, permissions) => {
     const totalEmendas = emendas.length;
     const totalDespesas = despesas.length;
 
-    // ✅ CORREÇÃO: Usar parseValorMonetario
+    // ✅ CORREÇÃO P1: Ordem padronizada de fallback
     const valorTotalEmendas = emendas.reduce((total, emenda) => {
-      const valor = parseValorMonetario(emenda.valor || emenda.valorRecurso || 0);
+      const valor = parseValorMonetario(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
       return total + valor;
     }, 0);
 

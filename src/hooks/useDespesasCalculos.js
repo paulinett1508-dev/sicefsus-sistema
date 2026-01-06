@@ -25,9 +25,8 @@ export function useDespesasCalculos(despesas, emendas) {
         return soma + parseValorMonetario(despesa.valor);
       }, 0);
 
-      const valorTotal = parseValorMonetario(emenda.valor) ||
-                        parseValorMonetario(emenda.valorRecurso) ||
-                        parseValorMonetario(emenda.valorTotal) || 0;
+      // ✅ CORREÇÃO P1: Ordem padronizada de fallback
+      const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
 
       const saldoDisponivel = valorTotal - valorExecutado;
       const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
@@ -74,8 +73,9 @@ export function useDespesasCalculos(despesas, emendas) {
       return soma + parseValorMonetario(d.valor);
     }, 0);
 
+    // ✅ CORREÇÃO P1: Ordem padronizada de fallback
     const valorTotalEmendas = emendas.reduce((soma, e) => {
-      return soma + parseValorMonetario(e.valor);
+      return soma + parseValorMonetario(e.valor || e.valorRecurso || e.valorTotal || 0);
     }, 0);
 
     return {

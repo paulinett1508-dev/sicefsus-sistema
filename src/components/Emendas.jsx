@@ -125,8 +125,9 @@ const Emendas = () => {
           (despesa) => despesa.emendaId === emenda.id
         );
 
+        // ✅ CORREÇÃO P1: Ordem padronizada de fallback
         const valorTotal = parseValorMonetario(
-          emenda.valorTotal || emenda.valorRecurso || emenda.valor || 0
+          emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0
         );
 
         const valorExecutado = despesasEmenda

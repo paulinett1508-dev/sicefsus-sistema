@@ -1,6 +1,7 @@
 // src/utils/emendaCalculos.js
 // ✅ Função de recálculo automático de valores da emenda
 // Chamada automaticamente após criar/editar/deletar despesas
+// ✅ CORREÇÃO P1: Usar parseValorMonetario centralizado de formatters.js
 
 import {
   doc,
@@ -12,31 +13,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-
-/**
- * ✅ Parse monetário robusto para formato BR
- * Converte valores como "1.000,50" ou 1000.5 para número
- */
-const parseValorMonetario = (valor) => {
-  // Se já é número, retorna direto
-  if (typeof valor === "number") return valor;
-
-  // Se não é string, converte
-  if (typeof valor !== "string") {
-    valor = String(valor);
-  }
-
-  // Remove "R$", espaços e caracteres especiais
-  // Remove TODOS os pontos (separador de milhar)
-  // Converte vírgula em ponto (separador decimal)
-  const valorLimpo = valor
-    .replace(/[R$\s]/g, "") // Remove R$ e espaços
-    .replace(/\./g, "") // Remove pontos (milhar)
-    .replace(",", "."); // Converte vírgula em ponto
-
-  const valorFloat = parseFloat(valorLimpo);
-  return isNaN(valorFloat) ? 0 : valorFloat;
-};
+import { parseValorMonetario } from "./formatters";
 
 /**
  * ✅ FUNÇÃO PRINCIPAL: Recalcular e salvar valores da emenda
@@ -75,9 +52,9 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
     const despesas = todasDespesas.filter(d => d.status !== "PLANEJADA");
 
-    // 3️⃣ Calcular valor total (com fallback)
+    // 3️⃣ CORREÇÃO P1: Ordem padronizada de fallback
     const valorTotal = parseValorMonetario(
-      emenda.valor || emenda.valorTotal || emenda.valorRecurso || 0,
+      emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0,
     );
 
     // 4️⃣ Calcular valor executado (soma de todas as despesas)

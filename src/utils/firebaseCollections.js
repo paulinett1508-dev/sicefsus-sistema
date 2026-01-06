@@ -2,6 +2,9 @@
 // ✅ BUG CORRIGIDO: parseValorMonetario para strings formatadas "200.000,00"
 // ✅ Sincronizado com os campos mostrados nas imagens
 // ✅ ATUALIZADO 08/11/2025: Correção crítica na função calcularValorTotalAcoesServicos
+// ✅ CORREÇÃO P1: Usar parseValorMonetario centralizado de formatters.js
+
+import { parseValorMonetario } from "./formatters";
 
 export const COLLECTIONS = {
   USERS: "usuarios",
@@ -137,21 +140,7 @@ export const META_SCHEMA = {
   detalhamento: "",
 };
 
-// ✅ FUNÇÃO AUXILIAR: Parse de valores monetários (strings formatadas)
-function parseValorMonetario(valor) {
-  if (typeof valor === "number") return valor;
-  if (!valor) return 0;
-
-  // Remove R$, espaços, pontos (milhar) e troca vírgula por ponto
-  const valorLimpo = String(valor)
-    .replace(/R\$/g, "")
-    .replace(/\s/g, "")
-    .replace(/\./g, "") // Remove pontos (separador de milhar)
-    .replace(",", "."); // Troca vírgula por ponto (decimal)
-
-  const numero = parseFloat(valorLimpo);
-  return isNaN(numero) ? 0 : numero;
-}
+// ✅ CORREÇÃO P1: parseValorMonetario agora é importado de formatters.js
 
 // Função para validar estrutura de documento
 export function validateDocumentStructure(doc, schema) {

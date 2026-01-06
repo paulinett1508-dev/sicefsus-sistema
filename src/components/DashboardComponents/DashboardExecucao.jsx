@@ -12,8 +12,8 @@ const DashboardExecucao = ({ emendas = [] }) => {
 
     emendas.forEach((emenda) => {
       const tipo = emenda.tipo || emenda.tipoEmenda || "Não informado";
-      // ✅ CORREÇÃO P0: Usar parseValorMonetario para valores formatados BR
-      const valorTotal = parseValorMonetario(emenda.valorRecurso || emenda.valor || 0);
+      // ✅ CORREÇÃO P1: Ordem padronizada de fallback
+      const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
       const valorExecutado = parseValorMonetario(emenda.valorExecutado || 0);
 
       if (!tipos[tipo]) {

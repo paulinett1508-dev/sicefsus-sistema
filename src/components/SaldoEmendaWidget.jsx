@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { parseValorMonetario } from "../utils/formatters";
 
 const SaldoEmendaWidget = ({ 
   emendaId, 
@@ -48,9 +49,9 @@ const SaldoEmendaWidget = ({
     }).format(value || 0);
   };
 
-  // ✅ Calcular valores
-  const valorTotal = emenda?.valorTotal || emenda?.valorRecurso || 0;
-  const valorExecutado = emenda?.valorExecutado || 0;
+  // ✅ CORREÇÃO P1: Ordem padronizada de fallback com parseValorMonetario
+  const valorTotal = parseValorMonetario(emenda?.valor || emenda?.valorRecurso || emenda?.valorTotal || 0);
+  const valorExecutado = parseValorMonetario(emenda?.valorExecutado || 0);
   const saldoAtual = valorTotal - valorExecutado;
   const saldoAposNovaDesp = saldoAtual - valorDespesaAtual;
   const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;

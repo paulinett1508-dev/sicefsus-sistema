@@ -1,21 +1,8 @@
 import React, { useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
-import { formatarMoeda } from "../../utils/formatters";
-
-// ✅ FUNÇÃO CRÍTICA: Parse monetário correto para formato BR
-const parseValorMonetario = (valor) => {
-  if (typeof valor === "number") return valor;
-  if (typeof valor !== "string") valor = String(valor);
-
-  const valorLimpo = valor
-    .replace(/[R$\s]/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
-
-  const valorFloat = parseFloat(valorLimpo);
-  return isNaN(valorFloat) ? 0 : valorFloat;
-};
+// ✅ CORREÇÃO P1: Usar parseValorMonetario centralizado
+import { formatarMoeda, parseValorMonetario } from "../../utils/formatters";
 
 function DiagnosticoSistema() {
   const [loading, setLoading] = useState(false);
