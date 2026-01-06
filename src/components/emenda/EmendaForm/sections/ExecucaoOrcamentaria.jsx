@@ -44,11 +44,23 @@ const DespesaPlanejadaForm = ({
   usuario,
   emendaInfo, // 🆕 Receber info da emenda
 }) => {
+  const { isDark } = useTheme();
   const [modoCustomizado, setModoCustomizado] = useState(false);
   const [despesaCustomizada, setDespesaCustomizada] = useState("");
   const [estrategia, setEstrategia] = useState("");
   const [valor, setValor] = useState("");
   const [salvando, setSalvando] = useState(false);
+
+  // Estilos dinâmicos para o formulário
+  const formDynamicStyles = {
+    cardFormInline: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 12,
+    },
+  };
 
   const saldoDisponivel = valorEmenda - totalExecutado;
 
@@ -192,7 +204,7 @@ const DespesaPlanejadaForm = ({
   };
 
   return (
-    <div style={styles.cardFormInline}>
+    <div style={formDynamicStyles.cardFormInline}>
       <div style={styles.formInline}>
         <div style={styles.formGroup}>
           <label style={formStyles.label}>Natureza de Despesa</label>
@@ -354,6 +366,122 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       fontWeight: 700,
       color: isDark ? "var(--theme-text)" : "#0f172a",
       fontFamily: "monospace",
+    },
+    // Tabela
+    tabelaWrapper: {
+      overflowX: "auto",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#e9ecef"}`,
+      borderRadius: 8,
+    },
+    thead: {
+      backgroundColor: isDark ? "#1E293B" : "#1E293B",
+      color: "#fff",
+      fontWeight: 600,
+      fontSize: 14,
+      borderBottom: "2px solid #34495e",
+      whiteSpace: "nowrap",
+      textTransform: "uppercase",
+      letterSpacing: "0.5px",
+    },
+    trEven: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f9f9f9"
+    },
+    trOdd: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff"
+    },
+    td: {
+      padding: "10px 8px",
+      borderBottom: `1px solid ${isDark ? "var(--theme-border)" : "#eee"}`,
+      fontSize: 12,
+      color: isDark ? "var(--theme-text)" : "#333",
+      verticalAlign: "middle",
+    },
+    // Cards de status financeiro
+    miniCardPago: {
+      backgroundColor: isDark ? "rgba(16, 185, 129, 0.15)" : "#f0fdf4",
+      borderColor: isDark ? "#059669" : "#86efac",
+    },
+    miniCardLiquidado: {
+      backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "#ecfdf5",
+      borderColor: isDark ? "#10b981" : "#6ee7b7",
+    },
+    miniCardEmpenhado: {
+      backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "#eff6ff",
+      borderColor: isDark ? "#3b82f6" : "#93c5fd",
+    },
+    miniCardPendente: {
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : "#fef3c7",
+      borderColor: isDark ? "#f59e0b" : "#fcd34d",
+    },
+    // Formulário inline
+    cardFormInline: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+      borderRadius: 12,
+      padding: 12,
+      marginBottom: 12,
+    },
+    // Empty state
+    emptyState: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 16,
+      padding: 20,
+      border: `1px dashed ${isDark ? "var(--theme-border)" : "#cbd5e1"}`,
+      borderRadius: 12,
+      background: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
+      marginTop: 8,
+      marginBottom: 12,
+    },
+    emptyTitle: {
+      margin: 0,
+      fontSize: 16,
+      fontWeight: 700,
+      color: isDark ? "var(--theme-text)" : "#0f172a"
+    },
+    emptyText: {
+      margin: "6px 0 0 0",
+      fontSize: 13,
+      color: isDark ? "var(--theme-text-secondary)" : "#475569"
+    },
+    // Modal de edição
+    formularioEdicaoModal: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      borderRadius: 12,
+      width: "100%",
+      maxWidth: 1400,
+      maxHeight: "95vh",
+      display: "flex",
+      flexDirection: "column",
+      boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+      border: "3px solid #3B82F6",
+    },
+    // Botões
+    btn: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      color: isDark ? "var(--theme-text)" : "#0f172a",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+      padding: "8px 12px",
+      borderRadius: 8,
+      fontSize: 13,
+      fontWeight: 600,
+      cursor: "pointer",
+    },
+    btnVoltar: {
+      backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+      color: "#3B82F6",
+      border: "none",
+      padding: "10px 20px",
+      borderRadius: 6,
+      fontSize: 14,
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     },
   };
 
@@ -832,7 +960,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       <div style={dynamicStyles.statusFinanceiroWrapper}>
         <h4 style={dynamicStyles.statusFinanceiroTitulo}>Status Financeiro</h4>
         <div style={styles.statusMiniGrid}>
-          <div style={{ ...styles.miniCard, ...styles.miniCardPago }}>
+          <div style={{ ...styles.miniCard, ...dynamicStyles.miniCardPago }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span></div>
             <div style={styles.miniCardContent}>
               <div style={dynamicStyles.miniCardLabel}>Pago</div>
@@ -842,7 +970,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>check_circle</span> Concluído</div>
             </div>
           </div>
-          <div style={{ ...styles.miniCard, ...styles.miniCardLiquidado }}>
+          <div style={{ ...styles.miniCard, ...dynamicStyles.miniCardLiquidado }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit_note</span></div>
             <div style={styles.miniCardContent}>
               <div style={dynamicStyles.miniCardLabel}>Liquidado</div>
@@ -852,7 +980,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando pagamento</div>
             </div>
           </div>
-          <div style={{ ...styles.miniCard, ...styles.miniCardEmpenhado }}>
+          <div style={{ ...styles.miniCard, ...dynamicStyles.miniCardEmpenhado }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>assignment</span></div>
             <div style={styles.miniCardContent}>
               <div style={dynamicStyles.miniCardLabel}>Empenhado</div>
@@ -862,7 +990,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               <div style={styles.miniCardHint}><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>hourglass_empty</span> Aguardando liquidação</div>
             </div>
           </div>
-          <div style={{ ...styles.miniCard, ...styles.miniCardPendente }}>
+          <div style={{ ...styles.miniCard, ...dynamicStyles.miniCardPendente }}>
             <div style={styles.miniCardIcon}><span className="material-symbols-outlined" style={{ fontSize: 18 }}>schedule</span></div>
             <div style={styles.miniCardContent}>
               <div style={dynamicStyles.miniCardLabel}>Pendente</div>
@@ -912,19 +1040,19 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             />
 
             {despesasPlanejadas.length === 0 ? (
-              <div style={styles.emptyState}>
+              <div style={dynamicStyles.emptyState}>
                 <div>
                   <div style={styles.emptyEmoji}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>target</span></div>
-                  <h3 style={styles.emptyTitle}>Nenhuma despesa planejada</h3>
-                  <p style={styles.emptyText}>
+                  <h3 style={dynamicStyles.emptyTitle}>Nenhuma despesa planejada</h3>
+                  <p style={dynamicStyles.emptyText}>
                     Use o formulário acima para adicionar despesas planejadas.
                   </p>
                 </div>
               </div>
             ) : (
-              <div style={styles.tabelaWrapper}>
+              <div style={dynamicStyles.tabelaWrapper}>
                 <table style={styles.table}>
-                  <thead style={styles.thead}>
+                  <thead style={dynamicStyles.thead}>
                     <tr>
                       <th style={{ padding: "12px 8px", textAlign: "left" }}>
                         NATUREZA DA DESPESA
@@ -947,15 +1075,15 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     {despesasPlanejadas.map((despesa, idx) => (
                       <tr
                         key={despesa.id}
-                        style={idx % 2 === 0 ? styles.trEven : styles.trOdd}
+                        style={idx % 2 === 0 ? dynamicStyles.trEven : dynamicStyles.trOdd}
                       >
-                        <td style={styles.td}>
+                        <td style={dynamicStyles.td}>
                           {despesa.estrategia || despesa.naturezaDespesa}
                         </td>
                         <td style={styles.tdValorPlanejado}>
                           {formatCurrency(despesa.valor)}
                         </td>
-                        <td style={styles.td}>
+                        <td style={dynamicStyles.td}>
                           <div style={styles.despesaAcoes}>
                             <button
                               onClick={(e) => {
@@ -1114,7 +1242,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               }
             }}
           >
-            <div style={styles.formularioEdicaoModal}>
+            <div style={dynamicStyles.formularioEdicaoModal}>
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
                   {modoVisualizacao === "editar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>}
@@ -1131,7 +1259,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                     );
                     handleFecharFormulario();
                   }}
-                  style={styles.btnVoltar}
+                  style={dynamicStyles.btnVoltar}
                 >
                   ← Voltar
                 </button>
