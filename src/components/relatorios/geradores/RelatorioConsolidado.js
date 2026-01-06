@@ -1,6 +1,6 @@
 // src/components/relatorios/geradores/RelatorioConsolidado.js
 import { BaseRelatorio } from "./BaseRelatorio";
-import { COLORS } from "../../../utils/relatoriosConstants";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioConsolidado extends BaseRelatorio {
@@ -20,9 +20,9 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     this.doc.setFontSize(16);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(21, 67, 96);
+    this.doc.setTextColor(...PDF_COLORS.HEADER_BG);
     this.doc.text(`${nomeMes.toUpperCase()} / ${ano}`, 20, yPosition);
-    this.doc.setTextColor(0, 0, 0);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_PRIMARY);
     yPosition += 20;
 
     // Indicadores Principais
@@ -50,26 +50,26 @@ export class RelatorioConsolidado extends BaseRelatorio {
     const cardGap = 10;
 
     // Card 1 - Total de Emendas
-    this.doc.setFillColor(245, 247, 250);
+    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
     this.doc.roundedRect(20, yPosition, cardWidth, cardHeight, 3, 3, "F");
-    this.doc.setDrawColor(21, 67, 96);
+    this.doc.setDrawColor(...PDF_COLORS.HEADER_BG);
     this.doc.setLineWidth(1);
     this.doc.roundedRect(20, yPosition, cardWidth, cardHeight, 3, 3, "S");
 
     this.doc.setFontSize(24);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(21, 67, 96);
+    this.doc.setTextColor(...PDF_COLORS.HEADER_BG);
     this.doc.text(totalEmendas.toString(), 62.5, yPosition + 20, {
       align: "center",
     });
 
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "normal");
-    this.doc.setTextColor(100, 100, 100);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_MUTED);
     this.doc.text("EMENDAS ATIVAS", 62.5, yPosition + 32, { align: "center" });
 
     // Card 2 - Percentual de Execução
-    this.doc.setFillColor(245, 247, 250);
+    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
     this.doc.roundedRect(
       20 + cardWidth + cardGap,
       yPosition,
@@ -79,7 +79,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       3,
       "F",
     );
-    this.doc.setDrawColor(39, 174, 96);
+    this.doc.setDrawColor(...PDF_COLORS.STATUS_ALTO);
     this.doc.setLineWidth(1);
     this.doc.roundedRect(
       20 + cardWidth + cardGap,
@@ -93,7 +93,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     this.doc.setFontSize(24);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(39, 174, 96);
+    this.doc.setTextColor(...PDF_COLORS.STATUS_ALTO);
     this.doc.text(
       `${percentualGeral.toFixed(1)}%`,
       62.5 + cardWidth + cardGap,
@@ -103,13 +103,13 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "normal");
-    this.doc.setTextColor(100, 100, 100);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_MUTED);
     this.doc.text("EXECUÇÃO", 62.5 + cardWidth + cardGap, yPosition + 32, {
       align: "center",
     });
 
     yPosition += cardHeight + 20;
-    this.doc.setTextColor(0, 0, 0);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_PRIMARY);
 
     // Resumo Financeiro
     this.doc.setFontSize(16);
@@ -118,7 +118,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
     yPosition += 12;
 
     // Box de resumo financeiro
-    this.doc.setFillColor(248, 249, 250);
+    this.doc.setFillColor(...PDF_COLORS.BOX_BG);
     this.doc.rect(20, yPosition, this.pageWidth - 40, 50, "F");
 
     this.doc.setFontSize(11);
@@ -202,7 +202,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
           body: dadosTipo,
           theme: "grid",
           headStyles: {
-            fillColor: [74, 144, 226],
+            fillColor: PDF_COLORS.TABLE_HEADER_BLUE,
             fontSize: 10,
           },
           styles: { fontSize: 9 },
@@ -285,7 +285,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
           body: tabelaTop5,
           theme: "striped",
           headStyles: {
-            fillColor: [231, 76, 60],
+            fillColor: PDF_COLORS.TABLE_HEADER_RED,
             fontSize: 10,
           },
           styles: { fontSize: 9 },
@@ -372,7 +372,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
     }
 
     // Box de tendência
-    this.doc.setFillColor(245, 247, 250);
+    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
     this.doc.rect(20, yPosition, this.pageWidth - 40, 40, "F");
 
     this.doc.setFontSize(10);
@@ -393,7 +393,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "italic");
-    this.doc.setTextColor(100, 100, 100);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_MUTED);
     this.doc.text(
       "* Este relatório foi gerado automaticamente pelo sistema SICEFSUS",
       20,

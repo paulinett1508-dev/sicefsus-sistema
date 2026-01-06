@@ -1,6 +1,7 @@
 // src/components/relatorios/geradores/RelatorioDespesas.js
 // ✅ CORRIGIDO 04/11/2025: Usando campos corretos do Firebase
 import { BaseRelatorio } from "./BaseRelatorio";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioDespesas extends BaseRelatorio {
@@ -29,7 +30,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
 
     // Box de resumo
-    this.doc.setFillColor(245, 247, 250);
+    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
     this.doc.roundedRect(20, yPosition, this.pageWidth - 40, 35, 3, 3, "F");
 
     this.doc.setFontSize(11);
@@ -152,17 +153,22 @@ export class RelatorioDespesas extends BaseRelatorio {
           body: tabelaFornecedores,
           theme: "striped",
           headStyles: {
-            fillColor: [243, 156, 18],
+            fillColor: PDF_COLORS.TABLE_HEADER,
             fontSize: 10,
+            cellPadding: 3,
           },
-          styles: { fontSize: 9 },
+          styles: {
+            fontSize: 9,
+            cellPadding: 3,
+            overflow: 'ellipsize',
+          },
           columnStyles: {
-            0: { halign: "center", cellWidth: 15 },
-            1: { cellWidth: 60 },
-            2: { halign: "center", cellWidth: 15 },
-            3: { halign: "right", cellWidth: 35 },
-            4: { halign: "right", cellWidth: 30 },
-            5: { halign: "center", cellWidth: 30 },
+            0: { halign: "center", cellWidth: 12 },
+            1: { cellWidth: 55, overflow: 'ellipsize' },
+            2: { halign: "center", cellWidth: 12 },
+            3: { halign: "right", cellWidth: 32 },
+            4: { halign: "right", cellWidth: 28 },
+            5: { halign: "center", cellWidth: 25 },
           },
           margin: { left: 20, right: 20 },
         });
@@ -229,15 +235,15 @@ export class RelatorioDespesas extends BaseRelatorio {
       const emenda = this.emendas.find((e) => e.id === despesa.emendaId);
       const data = despesa.dataEmpenho || despesa.criadaEm;
 
+      // Truncamento melhorado - colunas mais largas permitem mais texto
+      const discriminacao = despesa.discriminacao || despesa.descricao || "-";
+      const fornecedor = despesa.fornecedor || "-";
+
       return [
         data ? this.formatDate(data) : "-",
         emenda?.numero || emenda?.numeroEmenda || "-",
-        (despesa.discriminacao || despesa.descricao || "-").substring(0, 40) +
-          ((despesa.discriminacao || despesa.descricao || "").length > 40
-            ? "..."
-            : ""),
-        (despesa.fornecedor || "-").substring(0, 30) +
-          ((despesa.fornecedor || "").length > 30 ? "..." : ""),
+        discriminacao.length > 50 ? discriminacao.substring(0, 47) + "..." : discriminacao,
+        fornecedor.length > 40 ? fornecedor.substring(0, 37) + "..." : fornecedor,
         despesa.cnpjFornecedor || "-",
         despesa.numeroNota || despesa.numeroEmpenho || "-",
         this.formatCurrency(parseFloat(despesa.valor) || 0),
@@ -262,31 +268,32 @@ export class RelatorioDespesas extends BaseRelatorio {
               "Discriminação",
               "Fornecedor",
               "CNPJ",
-              "Documento",
+              "Doc.",
               "Valor",
             ],
           ],
           body: tabelaDespesas,
           theme: "grid",
           headStyles: {
-            fillColor: [243, 156, 18],
+            fillColor: PDF_COLORS.TABLE_HEADER,
             fontSize: 9,
             cellPadding: 3,
           },
           styles: {
-            fontSize: 8,
-            cellPadding: 2,
+            fontSize: 9,
+            cellPadding: 3,
+            overflow: 'ellipsize',
           },
           columnStyles: {
-            0: { cellWidth: 20 },
-            1: { cellWidth: 20 },
-            2: { cellWidth: 45 },
-            3: { cellWidth: 40 },
-            4: { cellWidth: 25 },
-            5: { cellWidth: 20 },
-            6: { halign: "right", cellWidth: 20 },
+            0: { cellWidth: 18 },
+            1: { cellWidth: 18 },
+            2: { cellWidth: 50 },
+            3: { cellWidth: 45 },
+            4: { cellWidth: 28 },
+            5: { cellWidth: 18 },
+            6: { halign: "right", cellWidth: 22 },
           },
-          margin: { left: 20, right: 20 },
+          margin: { left: 15, right: 15 },
           didDrawPage: (data) => {
             this.addFooter();
             if (data.pageNumber > 1) {

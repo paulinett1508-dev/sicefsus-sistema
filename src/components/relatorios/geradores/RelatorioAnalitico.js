@@ -1,5 +1,6 @@
 // src/components/relatorios/geradores/RelatorioAnalitico.js
 import { BaseRelatorio } from "./BaseRelatorio";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioAnalitico extends BaseRelatorio {
@@ -67,7 +68,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
       }
 
       // Cabeçalho do parlamentar
-      this.doc.setFillColor(245, 247, 250);
+      this.doc.setFillColor(...PDF_COLORS.CARD_BG);
       this.doc.rect(20, yPosition - 5, this.pageWidth - 40, 25, "F");
 
       this.doc.setFontSize(14);
@@ -85,7 +86,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
 
       // Box de estatísticas
       const statsY = yPosition;
-      this.doc.setDrawColor(200, 200, 200);
+      this.doc.setDrawColor(...PDF_COLORS.TABLE_BORDER);
       this.doc.setLineWidth(0.5);
       this.doc.rect(20, statsY, this.pageWidth - 40, 35, "S");
 
@@ -114,10 +115,10 @@ export class RelatorioAnalitico extends BaseRelatorio {
       this.doc.setFont("helvetica", "bold");
       const percentualColor =
         percentual >= 80
-          ? [39, 174, 96]
+          ? PDF_COLORS.STATUS_ALTO
           : percentual >= 50
-            ? [243, 156, 18]
-            : [231, 76, 60];
+            ? PDF_COLORS.STATUS_MEDIO
+            : PDF_COLORS.STATUS_BAIXO;
       this.doc.setTextColor(...percentualColor);
       this.doc.setFontSize(16);
       this.doc.text(
@@ -125,7 +126,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
         this.pageWidth - 50,
         statsY + 20,
       );
-      this.doc.setTextColor(0, 0, 0);
+      this.doc.setTextColor(...PDF_COLORS.TEXT_PRIMARY);
 
       yPosition = statsY + 45;
 
@@ -160,13 +161,13 @@ export class RelatorioAnalitico extends BaseRelatorio {
               body: tabelaEmendas,
               theme: "grid",
               headStyles: {
-                fillColor: [39, 174, 96],
+                fillColor: PDF_COLORS.STATUS_ALTO,
                 fontSize: 9,
                 cellPadding: 3,
               },
               styles: {
-                fontSize: 8,
-                cellPadding: 2,
+                fontSize: 9,
+                cellPadding: 3,
               },
               columnStyles: {
                 0: { cellWidth: 25 },
@@ -246,7 +247,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     const percentualGeral =
       totalGeral > 0 ? (executadoGeral / totalGeral) * 100 : 0;
 
-    this.doc.setFillColor(245, 247, 250);
+    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
     this.doc.rect(20, yPosition, this.pageWidth - 40, 40, "F");
 
     this.doc.setFontSize(12);

@@ -123,17 +123,35 @@ export const gerarNomeArquivo = (tipoRelatorio) => {
   return `SICEFSUS_${tipoRelatorio}_${data}.pdf`;
 };
 
+// Função auxiliar para truncar texto com ellipsis
+const truncateText = (text, maxLength) => {
+  const str = String(text || "");
+  if (str.length <= maxLength) return str;
+  return str.substring(0, maxLength - 3) + "...";
+};
+
 // Função auxiliar para criar tabelas manualmente (caso autoTable não funcione)
 export const createManualTable = (doc, headers, data, startY, options = {}) => {
   const pageWidth = doc.internal.pageSize.width;
   const margins = options.margins || { left: 20, right: 20 };
-  const cellPadding = options.cellPadding || 5;
+  const cellPadding = options.cellPadding || 3;
   const rowHeight = options.rowHeight || 10;
-  const fontSize = options.fontSize || 10;
+  const fontSize = options.fontSize || 9;
 
   let y = startY;
   const tableWidth = pageWidth - margins.left - margins.right;
-  const columnWidth = tableWidth / headers.length;
+
+  // Permitir larguras de coluna customizadas
+  const columnWidths = options.columnWidths || headers.map(() => tableWidth / headers.length);
+
+  // Calcular posições X das colunas
+  const getColumnX = (colIndex) => {
+    let x = margins.left;
+    for (let i = 0; i < colIndex; i++) {
+      x += columnWidths[i];
+    }
+    return x;
+  };
 
   // Desenhar cabeçalho
   doc.setFillColor(21, 67, 96);
@@ -144,8 +162,11 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
   doc.setFont("helvetica", "bold");
 
   headers.forEach((header, i) => {
-    const x = margins.left + i * columnWidth + cellPadding;
-    doc.text(header, x, y + rowHeight - 3);
+    const x = getColumnX(i) + cellPadding;
+    const maxWidth = columnWidths[i] - (cellPadding * 2);
+    // Calcular máximo de caracteres baseado na largura
+    const maxChars = Math.floor(maxWidth / (fontSize * 0.5));
+    doc.text(truncateText(header, maxChars), x, y + rowHeight - 3);
   });
 
   y += rowHeight;
@@ -157,17 +178,20 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
   data.forEach((row, rowIndex) => {
     // Alternar cor de fundo
     if (rowIndex % 2 === 0) {
-      doc.setFillColor(245, 245, 245);
+      doc.setFillColor(240, 240, 240);
       doc.rect(margins.left, y, tableWidth, rowHeight, "F");
     }
 
     // Desenhar células
     row.forEach((cell, i) => {
-      const x = margins.left + i * columnWidth + cellPadding;
-      doc.text(String(cell), x, y + rowHeight - 3);
+      const x = getColumnX(i) + cellPadding;
+      const maxWidth = columnWidths[i] - (cellPadding * 2);
+      // Calcular máximo de caracteres baseado na largura da coluna
+      const maxChars = Math.floor(maxWidth / (fontSize * 0.5));
+      doc.text(truncateText(cell, maxChars), x, y + rowHeight - 3);
     });
 
-    // Desenhar linha
+    // Desenhar linha separadora
     doc.setDrawColor(200, 200, 200);
     doc.line(
       margins.left,

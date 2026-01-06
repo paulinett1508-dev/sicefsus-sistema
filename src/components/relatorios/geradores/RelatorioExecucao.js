@@ -1,5 +1,6 @@
 // src/components/relatorios/geradores/RelatorioExecucao.js
 import { BaseRelatorio } from "./BaseRelatorio";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioExecucao extends BaseRelatorio {
@@ -116,7 +117,7 @@ export class RelatorioExecucao extends BaseRelatorio {
           head: [headers],
           body: tabelaEmendas,
           theme: "striped",
-          headStyles: { fillColor: [21, 67, 96] },
+          headStyles: { fillColor: PDF_COLORS.HEADER_BG },
           styles: { fontSize: 10 },
           columnStyles: {
             2: { halign: "right" },

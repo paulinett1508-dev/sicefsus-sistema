@@ -1,5 +1,6 @@
 // src/components/relatorios/geradores/RelatorioPrestacao.js
 import { BaseRelatorio } from "./BaseRelatorio";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { createManualTable } from "../../../utils/pdfHelpers";
 
 export class RelatorioPrestacao extends BaseRelatorio {
@@ -105,7 +106,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
             head: [["Data", "Descrição", "Fornecedor", "Documento", "Valor"]],
             body: tabelaDespesas,
             theme: "plain",
-            headStyles: { fillColor: [74, 144, 226], fontSize: 9 },
+            headStyles: { fillColor: PDF_COLORS.TABLE_HEADER_BLUE, fontSize: 9 },
             styles: { fontSize: 9 },
             columnStyles: {
               4: { halign: "right" },
@@ -185,11 +186,11 @@ export class RelatorioPrestacao extends BaseRelatorio {
     yPosition = 240;
 
     // Box de assinatura mais elaborado
-    this.doc.setDrawColor(200, 200, 200);
+    this.doc.setDrawColor(...PDF_COLORS.TABLE_BORDER);
     this.doc.setLineWidth(0.5);
     this.doc.line(20, yPosition, 90, yPosition);
     this.doc.setFontSize(10);
-    this.doc.setTextColor(100, 100, 100);
+    this.doc.setTextColor(...PDF_COLORS.TEXT_MUTED);
     this.doc.text("Responsável pela Prestação de Contas", 55, yPosition + 5, {
       align: "center",
     });
