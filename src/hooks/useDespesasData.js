@@ -3,6 +3,7 @@
 // ✅ Isolamento de lógica de fetching
 // ✅ Cache e otimização
 // ✅ Tratamento de erros centralizado
+// ✅ CORREÇÃO P2: Filtro geográfico via query Firestore (consistente com useDashboardData)
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -22,19 +23,8 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
   const [error, setError] = useState(null);
 
   const userRole = usuario?.tipo || "operador";
-  const userMunicipio = usuario?.municipio;
-  const userUf = usuario?.uf;
-
-  // 🔧 Normalizar texto para comparação
-  const normalizarTexto = useCallback((texto) => {
-    if (!texto) return "";
-    return texto
-      .toString()
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }, []);
+  const userMunicipio = usuario?.municipio?.trim();
+  const userUf = usuario?.uf?.trim();
 
   // 📥 Carregar dados
   const carregarDados = useCallback(async () => {
@@ -85,38 +75,35 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
         return;
       }
 
-      // 🎯 CASO 3: Operador - filtrar por município
+      // 🎯 CASO 3: Operador/Gestor - filtrar por município + UF via query Firestore
+      // ✅ CORREÇÃO P2: Usar query Firestore (consistente com useDashboardData)
       if (userMunicipio && userUf) {
-        const emendasSnapshot = await getDocs(collection(db, "emendas"));
-        const todasEmendas = emendasSnapshot.docs.map((doc) => ({
+        // Query com filtro composto (município + UF) diretamente no Firestore
+        const emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", userMunicipio),
+          where("uf", "==", userUf)
+        );
+        const emendasSnapshot = await getDocs(emendasQuery);
+        const emendasData = emendasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        const emendasFiltradas = todasEmendas.filter(
-          (emenda) =>
-            normalizarTexto(emenda.municipio) ===
-            normalizarTexto(userMunicipio),
-        );
+        setEmendas(emendasData);
 
-        setEmendas(emendasFiltradas);
-
-        // Carregar despesas dessas emendas (em lotes de 10)
-        if (emendasFiltradas.length > 0) {
-          const emendasIds = emendasFiltradas.map((e) => e.id);
-          const despesasData = [];
-
-          for (let i = 0; i < emendasIds.length; i += 10) {
-            const batch = emendasIds.slice(i, i + 10);
-            const despesasQuery = query(
-              collection(db, "despesas"),
-              where("emendaId", "in", batch),
-            );
-            const snapshot = await getDocs(despesasQuery);
-            snapshot.docs.forEach((doc) => {
-              despesasData.push({ id: doc.id, ...doc.data() });
-            });
-          }
+        // Carregar despesas com filtro por município + UF
+        if (emendasData.length > 0) {
+          const despesasQuery = query(
+            collection(db, "despesas"),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf)
+          );
+          const despesasSnapshot = await getDocs(despesasQuery);
+          const despesasData = despesasSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
           setDespesas(despesasData);
         }
@@ -132,7 +119,7 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
     } finally {
       setLoading(false);
     }
-  }, [emendaIdFiltro, userRole, userMunicipio, userUf, normalizarTexto]);
+  }, [emendaIdFiltro, userRole, userMunicipio, userUf]);
 
   // 🔄 Auto-carregar na montagem
   useEffect(() => {
