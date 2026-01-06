@@ -57,6 +57,14 @@ const DadosBasicos = React.memo(
         backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
         color: isDark ? "var(--theme-text)" : "inherit",
       },
+      inputMoney: {
+        fontWeight: "600",
+        color: isDark ? "#34d399" : "#059669",
+        textAlign: "right",
+        fontSize: "16px",
+        backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "#f0fdf4",
+        borderColor: isDark ? "#059669" : "#22c55e",
+      },
     };
 
     const formatarMoeda = useCallback((valor) => {
@@ -311,7 +319,7 @@ const DadosBasicos = React.memo(
               onChange={handleInputChange}
               style={{
                 ...dynamicStyles.input,
-                ...styles.inputMoney,
+                ...dynamicStyles.inputMoney,
                 ...(fieldErrors.valor && styles.inputError),
               }}
               required
@@ -382,14 +390,6 @@ const styles = {
     fontSize: "14px",
     transition: "border-color 0.3s ease",
     backgroundColor: "white",
-  },
-  inputMoney: {
-    fontWeight: "600",
-    color: "#059669",
-    textAlign: "right",
-    fontSize: "16px",
-    backgroundColor: "#f0fdf4",
-    borderColor: "#22c55e",
   },
   inputValid: {
     borderColor: "#28a745",
