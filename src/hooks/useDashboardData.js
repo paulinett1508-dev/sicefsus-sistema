@@ -205,15 +205,15 @@ const useDashboardData = (user, permissions) => {
 
       // ✅ CORREÇÃO: Calcular execução individual de cada emenda COM parseValorMonetario
       const emendasComExecucao = resultado.emendasData.map((emenda) => {
-        // Calcular despesas desta emenda
+        // ✅ CORREÇÃO P0: Filtrar APENAS despesas EXECUTADAS (excluir PLANEJADA)
         const despesasEmenda = resultado.despesasData.filter(
-          (despesa) => despesa.emendaId === emenda.id,
+          (despesa) => despesa.emendaId === emenda.id && despesa.status !== "PLANEJADA",
         );
 
         // ✅ CORREÇÃO: Usar parseValorMonetario para valores
         const valorTotal = parseValorMonetario(emenda.valorRecurso || emenda.valor || 0);
 
-        // ✅ CORREÇÃO: Usar parseValorMonetario no reduce
+        // ✅ CORREÇÃO: Usar parseValorMonetario no reduce (já filtrado acima)
         const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
           return sum + parseValorMonetario(despesa.valor);
         }, 0);

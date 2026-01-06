@@ -2,8 +2,10 @@
 // 🎯 Hook responsável por cálculos de saldo e estatísticas
 // ✅ Performance otimizada com useMemo
 // ✅ Cálculos isolados da lógica de negócio
+// ✅ CORREÇÃO P0: Usar parseValorMonetario para parsing correto de valores BR
 
 import { useMemo } from "react";
+import { parseValorMonetario } from "../utils/formatters";
 
 export function useDespesasCalculos(despesas, emendas) {
 
@@ -18,13 +20,14 @@ export function useDespesasCalculos(despesas, emendas) {
         d => d.emendaId === emendaId && d.status !== "PLANEJADA"
       );
 
+      // ✅ CORREÇÃO P0: Usar parseValorMonetario para valores formatados BR
       const valorExecutado = despesasDaEmenda.reduce((soma, despesa) => {
-        return soma + (Number(despesa.valor) || 0);
+        return soma + parseValorMonetario(despesa.valor);
       }, 0);
 
-      const valorTotal = Number(emenda.valor) || 
-                        Number(emenda.valorRecurso) || 
-                        Number(emenda.valorTotal) || 0;
+      const valorTotal = parseValorMonetario(emenda.valor) ||
+                        parseValorMonetario(emenda.valorRecurso) ||
+                        parseValorMonetario(emenda.valorTotal) || 0;
 
       const saldoDisponivel = valorTotal - valorExecutado;
       const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
@@ -66,12 +69,13 @@ export function useDespesasCalculos(despesas, emendas) {
     const totalDespesas = despesas.length;
     const emendasUnicas = new Set(despesas.map(d => d.emendaId)).size;
 
+    // ✅ CORREÇÃO P0: Usar parseValorMonetario para valores formatados BR
     const valorTotalDespesas = despesas.reduce((soma, d) => {
-      return soma + (Number(d.valor) || 0);
+      return soma + parseValorMonetario(d.valor);
     }, 0);
 
     const valorTotalEmendas = emendas.reduce((soma, e) => {
-      return soma + (Number(e.valor) || 0);
+      return soma + parseValorMonetario(e.valor);
     }, 0);
 
     return {

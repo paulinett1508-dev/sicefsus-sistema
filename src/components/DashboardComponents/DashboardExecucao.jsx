@@ -1,7 +1,9 @@
 // src/components/DashboardComponents/DashboardExecucao.jsx
 // 📊 Gráfico de Execução por Tipo de Emenda
+// ✅ CORREÇÃO P0: Usar parseValorMonetario para parsing correto de valores BR
 
 import React from "react";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const DashboardExecucao = ({ emendas = [] }) => {
   // Agrupar emendas por tipo e calcular execução
@@ -10,8 +12,9 @@ const DashboardExecucao = ({ emendas = [] }) => {
 
     emendas.forEach((emenda) => {
       const tipo = emenda.tipo || emenda.tipoEmenda || "Não informado";
-      const valorTotal = parseFloat(emenda.valorRecurso || emenda.valor || 0);
-      const valorExecutado = parseFloat(emenda.valorExecutado || 0);
+      // ✅ CORREÇÃO P0: Usar parseValorMonetario para valores formatados BR
+      const valorTotal = parseValorMonetario(emenda.valorRecurso || emenda.valor || 0);
+      const valorExecutado = parseValorMonetario(emenda.valorExecutado || 0);
 
       if (!tipos[tipo]) {
         tipos[tipo] = {
