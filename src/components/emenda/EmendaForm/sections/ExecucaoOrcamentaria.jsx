@@ -330,6 +330,34 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
       border: isDark ? "1px solid var(--theme-border)" : "none",
     },
+    // Padrão fieldset/legend igual a Dados Básicos
+    fieldset: {
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      borderRadius: "10px",
+      padding: "20px",
+      background: isDark
+        ? "var(--theme-surface)"
+        : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
+      marginBottom: 20,
+    },
+    legend: {
+      background: isDark ? "var(--theme-surface-secondary)" : "white",
+      padding: "5px 15px",
+      borderRadius: "20px",
+      borderWidth: "2px",
+      borderStyle: "solid",
+      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      color: isDark ? "var(--theme-text)" : "#2563EB",
+      fontWeight: "bold",
+      fontSize: "16px",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+    // Manter secao para compatibilidade
     secao: {
       backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
       borderRadius: 12,
@@ -1006,23 +1034,22 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
       {/* Seção: Despesas Planejadas */}
-      <div style={dynamicStyles.secao}>
-        <div style={dynamicStyles.secaoHeader}>
-          <h3 style={styles.secaoTitulo}>
-            <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle", color: "#f39c12" }}>schedule</span>
-            Planejar Despesas{" "}
-            <span
-              style={styles.infoIcon}
-              title="Despesas planejadas não consomem o saldo da emenda"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>info</span>
-            </span>
-          </h3>
-          <span style={styles.badge}>
-            {despesasPlanejadas.length}{" "}
-            {despesasPlanejadas.length === 1 ? "despesa" : "despesas"}
+      <fieldset style={dynamicStyles.fieldset}>
+        <legend style={dynamicStyles.legend}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>schedule</span>
+          Planejar Despesas
+          <span style={{
+            marginLeft: 8,
+            backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
+            color: isDark ? "var(--theme-text)" : "#fff",
+            padding: "2px 10px",
+            borderRadius: 12,
+            fontSize: 12,
+            fontWeight: 600
+          }}>
+            {despesasPlanejadas.length}
           </span>
-        </div>
+        </legend>
 
         {temEmendaSalva && (
           <>
@@ -1121,18 +1148,26 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             )}
           </>
         )}
-      </div>
+      </fieldset>
 
       {/* Seção: Despesas Executadas */}
-      <div style={dynamicStyles.secao}>
-        <div style={dynamicStyles.secaoHeader}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <h3 style={styles.secaoTitulo}><span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>payments</span> Despesas Executadas</h3>
-            <span style={styles.badge}>
-              {despesasExecutadas.length}{" "}
-              {despesasExecutadas.length === 1 ? "despesa" : "despesas"}
-            </span>
-          </div>
+      <fieldset style={dynamicStyles.fieldset}>
+        <legend style={dynamicStyles.legend}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span>
+          Despesas Executadas
+          <span style={{
+            marginLeft: 8,
+            backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
+            color: isDark ? "var(--theme-text)" : "#fff",
+            padding: "2px 10px",
+            borderRadius: 12,
+            fontSize: 12,
+            fontWeight: 600
+          }}>
+            {despesasExecutadas.length}
+          </span>
+        </legend>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
           <button
             onClick={() => {
               console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
@@ -1218,7 +1253,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           ocultarBotaoNovo={true}
           exibirModoCards={true}
         />
-      </div>
+      </fieldset>
 
       {/* FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
       {modoVisualizacao && despesaEmEdicao &&

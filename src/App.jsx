@@ -140,7 +140,7 @@ function ProtectedRouteWrapper({ children, usuario }) {
 }
 
 // Sidebar com proteção
-function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
+function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout, onToggleCollapse }) {
   const { canNavigate } = useNavigationProtection();
 
   const handleNavigate = (path) => {
@@ -161,6 +161,7 @@ function ProtectedSidebar({ onNavigate, activePath, usuario, onLogout }) {
       activePath={activePath}
       usuario={usuario}
       onLogout={handleLogout}
+      onToggleCollapse={onToggleCollapse}
       isBlocked={false}
     />
   );
@@ -179,6 +180,7 @@ function LoadingSpinner() {
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false);
   const [authError, setAuthError] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { user: usuario, loading } = useUser();
   const { version } = useVersion();
   const navigate = useNavigate();
@@ -287,11 +289,15 @@ function AppContent() {
             activePath={location.pathname}
             usuario={usuario}
             onLogout={handleLogout}
+            onToggleCollapse={setSidebarCollapsed}
           />
         )}
 
         {/* Conteúdo principal */}
-        <div style={styles.content}>
+        <div style={{
+          ...styles.content,
+          marginLeft: sidebarCollapsed ? 80 : 256,
+        }}>
           {/* Header compacto de status */}
           {usuario && <SystemStatusBar />}
 
@@ -559,7 +565,7 @@ const styles = {
   content: {
     flex: 1,
     marginLeft: 256,
-    transition: "margin-left 0.2s ease, background-color 0.3s ease",
+    transition: "margin-left 0.3s ease, background-color 0.3s ease",
     minHeight: "100vh",
     backgroundColor: "var(--theme-bg)",
   },

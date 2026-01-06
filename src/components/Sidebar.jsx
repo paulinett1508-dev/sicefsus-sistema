@@ -26,7 +26,7 @@ const adminItems = [{ label: "Usuários", icon: "group", path: "/administracao" 
 
 // Item "Sobre" - movido para o footer
 
-export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
+export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onToggleCollapse }) {
   const [collapsed, setCollapsed] = useState(false);
   const [infoExpanded, setInfoExpanded] = useState(false);
   const [toggleHovered, setToggleHovered] = useState(false);
@@ -35,6 +35,15 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const { isDark } = useTheme();
   const env = getEnvironment();
   const logoSicefsus = isDark ? logoSicefsusDark : logoSicefsusLight;
+
+  // Notificar o pai quando o collapsed muda
+  const handleToggle = () => {
+    const newCollapsed = !collapsed;
+    setCollapsed(newCollapsed);
+    if (onToggleCollapse) {
+      onToggleCollapse(newCollapsed);
+    }
+  };
 
   const isAdmin = usuario?.tipo === "admin";
   const isSuperAdmin = isAdmin && usuario?.superAdmin === true;
@@ -142,7 +151,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             ...styles.toggleButton,
             ...(toggleHovered ? styles.toggleButtonHover : {}),
           }}
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleToggle}
           onMouseEnter={() => setToggleHovered(true)}
           onMouseLeave={() => setToggleHovered(false)}
           title={collapsed ? "Expandir menu" : "Retrair menu"}
