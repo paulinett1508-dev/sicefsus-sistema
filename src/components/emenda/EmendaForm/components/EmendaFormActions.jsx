@@ -4,6 +4,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useEmendaFormNavigation } from "../../../../hooks/useEmendaFormNavigation";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const EmendaFormActions = ({
   modo = "criar",
@@ -17,8 +18,36 @@ const EmendaFormActions = ({
   salvando = false,
 }) => {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const { navegarParaListaEmendas } =
     useEmendaFormNavigation(hasUnsavedChanges);
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    buttonContainer: {
+      display: "flex",
+      gap: "12px",
+      justifyContent: "flex-end",
+      alignItems: "center",
+      marginTop: "24px",
+      paddingTop: "24px",
+      borderTop: `1px solid ${isDark ? "var(--theme-border)" : "#e0e0e0"}`,
+      flexWrap: "wrap",
+      minHeight: "60px",
+    },
+    debugInfo: {
+      width: "100%",
+      padding: "8px 12px",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
+      borderRadius: "4px",
+      marginTop: "12px",
+      fontSize: "12px",
+      color: isDark ? "var(--theme-text)" : "#495057",
+      fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+      lineHeight: "1.4",
+    },
+  };
 
   console.log("🔧 EmendaFormActions - Estado:", {
     modo,
@@ -73,7 +102,7 @@ const EmendaFormActions = ({
   }
 
   return (
-    <div style={styles.buttonContainer}>
+    <div style={dynamicStyles.buttonContainer}>
       {/* ✅ LÓGICA MANTIDA: Baseada no estado de modificações */}
 
       {/* FORMULÁRIO VAZIO: Mostrar [← Voltar] */}
@@ -133,7 +162,7 @@ const EmendaFormActions = ({
 
       {/* ✅ DEBUG INFO para desenvolvimento */}
       {process.env.NODE_ENV === "development" && (
-        <div style={styles.debugInfo}>
+        <div style={dynamicStyles.debugInfo}>
           <small>
             <strong>DEBUG:</strong> Modo: {modo} | Modificado:{" "}
             <span style={{ color: hasUnsavedChanges ? "red" : "green" }}>
@@ -148,19 +177,8 @@ const EmendaFormActions = ({
   );
 };
 
-// ✅ ESTILOS MELHORADOS
+// ✅ ESTILOS ESTÁTICOS (cores dos botões mantidas pois são semânticas)
 const styles = {
-  buttonContainer: {
-    display: "flex",
-    gap: "12px",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginTop: "24px",
-    paddingTop: "24px",
-    borderTop: "1px solid #e0e0e0",
-    flexWrap: "wrap",
-    minHeight: "60px",
-  },
   backButton: {
     backgroundColor: "#6c757d",
     color: "white",
@@ -199,18 +217,6 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 4px 12px rgba(39, 174, 96, 0.3)",
     minWidth: "180px",
-  },
-  debugInfo: {
-    width: "100%",
-    padding: "8px 12px",
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #dee2e6",
-    borderRadius: "4px",
-    marginTop: "12px",
-    fontSize: "12px",
-    color: "#495057",
-    fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-    lineHeight: "1.4",
   },
 };
 

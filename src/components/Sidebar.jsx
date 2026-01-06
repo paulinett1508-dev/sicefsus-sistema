@@ -29,6 +29,7 @@ const adminItems = [{ label: "Usuários", icon: "group", path: "/administracao" 
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
   const [infoExpanded, setInfoExpanded] = useState(false);
+  const [toggleHovered, setToggleHovered] = useState(false);
   const location = useLocation();
   const { version } = useVersion();
   const { isDark } = useTheme();
@@ -134,6 +135,22 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
           />
           {!collapsed && <span style={styles.logoText}>SICEFSUS</span>}
         </div>
+        
+        {/* Botão Toggle Sidebar */}
+        <button
+          style={{
+            ...styles.toggleButton,
+            ...(toggleHovered ? styles.toggleButtonHover : {}),
+          }}
+          onClick={() => setCollapsed(!collapsed)}
+          onMouseEnter={() => setToggleHovered(true)}
+          onMouseLeave={() => setToggleHovered(false)}
+          title={collapsed ? "Expandir menu" : "Retrair menu"}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+            {collapsed ? 'chevron_right' : 'chevron_left'}
+          </span>
+        </button>
       </div>
 
       {/* Busca */}
@@ -379,9 +396,10 @@ const styles = {
     height: 64,
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
     borderBottom: "1px solid var(--theme-border-light)",
     padding: "0 16px",
+    position: "relative",
   },
 
   logoContainer: {
@@ -390,6 +408,27 @@ const styles = {
     gap: 8,
     cursor: "pointer",
     color: "var(--theme-text)",
+  },
+
+  toggleButton: {
+    width: 32,
+    height: 32,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    border: "1px solid var(--theme-border)",
+    borderRadius: "6px",
+    cursor: "pointer",
+    color: "var(--theme-text-secondary)",
+    transition: "all 0.15s ease",
+    flexShrink: 0,
+  },
+
+  toggleButtonHover: {
+    backgroundColor: "var(--theme-sidebar-item-hover-bg)",
+    borderColor: "var(--primary)",
+    color: "var(--primary)",
   },
 
   logoImage: {

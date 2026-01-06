@@ -1,12 +1,31 @@
 // src/components/emenda/EmendaForm/components/TabNavigation.jsx
-// Componente de navegação por abas
-// ✅ NÃO PRECISA DE ALTERAÇÃO - Já funciona perfeitamente com as novas abas
+// Componente de navegação por abas com suporte a dark mode
 
 import React from "react";
+import { useTheme } from "../../../../context/ThemeContext";
 
 const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
+  const { isDark } = useTheme();
+
+  // Estilos dinâmicos baseados no tema
+  const dynamicStyles = {
+    container: {
+      marginBottom: "24px",
+      borderBottom: `2px solid ${isDark ? "var(--theme-border)" : "#e9ecef"}`,
+    },
+    tabActive: {
+      color: "var(--primary)",
+      borderBottomColor: "var(--primary)",
+      backgroundColor: isDark ? "rgba(37, 99, 235, 0.1)" : "#f0f9ff",
+    },
+    tabInactive: {
+      color: isDark ? "var(--theme-text-secondary)" : "#6b7280",
+      borderBottomColor: "transparent",
+    },
+  };
+
   return (
-    <div style={styles.container}>
+    <div style={dynamicStyles.container}>
       <div style={styles.tabsWrapper}>
         {tabs.map((tab) => (
           <button
@@ -15,7 +34,7 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
             onClick={() => onTabChange(tab.id)}
             style={{
               ...styles.tab,
-              ...(activeTab === tab.id ? styles.tabActive : styles.tabInactive),
+              ...(activeTab === tab.id ? dynamicStyles.tabActive : dynamicStyles.tabInactive),
             }}
           >
             <span className="material-symbols-outlined" style={styles.tabIcon}>{tab.icon}</span>
@@ -28,10 +47,6 @@ const TabNavigation = ({ tabs, activeTab, onTabChange }) => {
 };
 
 const styles = {
-  container: {
-    marginBottom: "24px",
-    borderBottom: "2px solid #e9ecef",
-  },
   tabsWrapper: {
     display: "flex",
     gap: "8px",
@@ -50,15 +65,6 @@ const styles = {
     fontWeight: "600",
     transition: "all 0.2s ease",
     outline: "none",
-  },
-  tabActive: {
-    color: "#2563EB",
-    borderBottomColor: "#2563EB",
-    backgroundColor: "#f0f9ff",
-  },
-  tabInactive: {
-    color: "#6b7280",
-    borderBottomColor: "transparent",
   },
   tabIcon: {
     fontSize: "18px",

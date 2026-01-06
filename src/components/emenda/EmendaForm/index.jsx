@@ -298,72 +298,9 @@ export default function EmendaForm() {
   );
 }
 
+// Estilos estáticos (cores dinâmicas estão em dynamicStyles dentro do componente)
 const styles = {
-  container: { padding: 16, backgroundColor: "#f8f9fa" },
-  form: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 24,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    border: "1px solid #e9ecef",
-  },
   tabContent: { marginTop: 16 },
-
-  // ações sempre inline
-  actionsInline: {
-    marginTop: 16,
-    paddingTop: 12,
-    borderTop: "1px solid #e9ecef",
-  },
-
-  // estados auxiliares
-  loadingContainer: {
-    textAlign: "center",
-    padding: "40px 20px",
-    backgroundColor: "white",
-    borderRadius: 8,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    margin: "20px 0",
-  },
-  spinner: {
-    width: 50,
-    height: 50,
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #007bff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    margin: "0 auto 20px",
-  },
-  errorContainer: {
-    textAlign: "center",
-    padding: "40px 20px",
-    backgroundColor: "white",
-    borderRadius: 8,
-    boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
-    margin: "20px 0",
-  },
-  errorIcon: { fontSize: 48, marginBottom: 16 },
-  errorActions: { display: "flex", gap: 12, justifyContent: "center" },
-  retryButton: {
-    backgroundColor: "#28a745",
-    color: "white",
-    border: "none",
-    padding: "10px 16px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: 500,
-  },
-  backButton: {
-    backgroundColor: "#6c757d",
-    color: "white",
-    border: "none",
-    padding: "10px 16px",
-    borderRadius: 6,
-    cursor: "pointer",
-    fontSize: 14,
-    fontWeight: 500,
-  },
 };
 
 if (
