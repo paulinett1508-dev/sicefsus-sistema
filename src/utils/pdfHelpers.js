@@ -211,9 +211,9 @@ export const addKPICards = (doc, kpis, startY) => {
   const availableWidth = pageWidth - margins.left - margins.right;
 
   const cardCount = Math.min(kpis.length, 4);
-  const cardGap = 8;
+  const cardGap = 6;
   const cardWidth = (availableWidth - (cardGap * (cardCount - 1))) / cardCount;
-  const cardHeight = 32;
+  const cardHeight = 24; // Menor e mais elegante
 
   kpis.slice(0, 4).forEach((kpi, index) => {
     const x = margins.left + (index * (cardWidth + cardGap));
@@ -221,25 +221,25 @@ export const addKPICards = (doc, kpis, startY) => {
 
     // Card background
     doc.setFillColor(...PDF_COLORS.SLATE_50);
-    doc.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "F");
+    doc.roundedRect(x, y, cardWidth, cardHeight, 1.5, 1.5, "F");
 
     // Borda fina
     doc.setDrawColor(...PDF_COLORS.SLATE_200);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "S");
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, cardWidth, cardHeight, 1.5, 1.5, "S");
 
-    // Valor principal (grande)
+    // Valor principal (menor)
     doc.setTextColor(...PDF_COLORS.SLATE_900);
-    doc.setFontSize(16);
+    doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     const valueText = String(kpi.value);
-    doc.text(valueText, x + cardWidth / 2, y + 14, { align: "center" });
+    doc.text(valueText, x + cardWidth / 2, y + 10, { align: "center" });
 
     // Label (pequeno)
     doc.setTextColor(...PDF_COLORS.SLATE_500);
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-    doc.text(kpi.label, x + cardWidth / 2, y + 22, { align: "center" });
+    doc.text(kpi.label, x + cardWidth / 2, y + 16, { align: "center" });
 
     // Sublabel ou trend (opcional)
     if (kpi.sublabel || kpi.trend) {
@@ -251,12 +251,12 @@ export const addKPICards = (doc, kpis, startY) => {
           : PDF_COLORS.SLATE_400;
 
       doc.setTextColor(...trendColor);
-      doc.setFontSize(7);
-      doc.text(trendText, x + cardWidth / 2, y + 28, { align: "center" });
+      doc.setFontSize(6);
+      doc.text(trendText, x + cardWidth / 2, y + 21, { align: "center" });
     }
   });
 
-  return startY + cardHeight + 10;
+  return startY + cardHeight + 8;
 };
 
 // ==========================================
@@ -330,52 +330,96 @@ const truncateText = (text, maxLength) => {
 export const createManualTable = (doc, headers, data, startY, options = {}) => {
   const pageWidth = doc.internal.pageSize.width;
   const margins = options.margins || { left: 15, right: 15 };
-  const cellPadding = options.cellPadding || 3;
-  const rowHeight = options.rowHeight || 8;
-  const fontSize = options.fontSize || 9;
+  const cellPadding = 2;
+  const fontSize = 7; // Fonte pequena e profissional
+  const lineHeight = 3.5; // Altura de cada linha de texto
 
   let y = startY;
   const tableWidth = pageWidth - margins.left - margins.right;
 
-  // Larguras de coluna
-  const columnWidths = options.columnWidths || headers.map(() => tableWidth / headers.length);
+  // Larguras de coluna otimizadas
+  let columnWidths = options.columnWidths;
+  if (!columnWidths) {
+    columnWidths = headers.map((header) => {
+      const h = header.toLowerCase();
+      if (h === '%' || h.includes('%')) return 12;
+      if (h.includes('data')) return 20;
+      if (h.includes('valor') || h.includes('saldo') || h.includes('exec') || h.includes('total')) return 28;
+      if (h.includes('emenda') || h.includes('número')) return 22;
+      return 40; // Parlamentar, descrições
+    });
+    
+    const totalWidth = columnWidths.reduce((a, b) => a + b, 0);
+    const scale = tableWidth / totalWidth;
+    columnWidths = columnWidths.map(w => w * scale);
+  }
 
   const getColumnX = (colIndex) => {
     let x = margins.left;
-    for (let i = 0; i < colIndex; i++) {
-      x += columnWidths[i];
-    }
+    for (let i = 0; i < colIndex; i++) x += columnWidths[i];
     return x;
   };
 
-  // HEADER - Fundo claro (não colorido!)
-  doc.setFillColor(...PDF_COLORS.SLATE_100);
-  doc.rect(margins.left, y, tableWidth, rowHeight, "F");
+  // Função para quebrar texto em múltiplas linhas
+  const wrapText = (text, maxWidth) => {
+    const str = String(text || "-");
+    doc.setFontSize(fontSize);
+    const words = str.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = doc.getTextWidth(testLine);
+      
+      if (testWidth > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  };
 
-  // Texto do header - escuro
+  // Calcular altura de cada linha de dados
+  const calculateRowHeight = (row) => {
+    let maxLines = 1;
+    row.forEach((cell, i) => {
+      const maxWidth = columnWidths[i] - (cellPadding * 2);
+      const lines = wrapText(cell, maxWidth);
+      if (lines.length > maxLines) maxLines = lines.length;
+    });
+    return Math.max(8, maxLines * lineHeight + 4);
+  };
+
+  // HEADER
+  const headerHeight = 8;
+  doc.setFillColor(...PDF_COLORS.SLATE_100);
+  doc.rect(margins.left, y, tableWidth, headerHeight, "F");
+  
   doc.setTextColor(...PDF_COLORS.SLATE_700);
-  doc.setFontSize(fontSize - 1);
+  doc.setFontSize(fontSize);
   doc.setFont("helvetica", "bold");
 
   headers.forEach((header, i) => {
     const x = getColumnX(i) + cellPadding;
-    const maxWidth = columnWidths[i] - (cellPadding * 2);
-    const maxChars = Math.floor(maxWidth / (fontSize * 0.45));
-    doc.text(truncateText(header, maxChars), x, y + rowHeight - 2.5);
+    doc.text(header, x, y + 5.5);
   });
 
-  // Linha abaixo do header
   doc.setDrawColor(...PDF_COLORS.SLATE_300);
-  doc.setLineWidth(0.5);
-  doc.line(margins.left, y + rowHeight, margins.left + tableWidth, y + rowHeight);
-
-  y += rowHeight;
+  doc.setLineWidth(0.3);
+  doc.line(margins.left, y + headerHeight, margins.left + tableWidth, y + headerHeight);
+  y += headerHeight;
 
   // DADOS
   doc.setFont("helvetica", "normal");
 
   data.forEach((row, rowIndex) => {
-    // Alternância muito sutil
+    const rowHeight = calculateRowHeight(row);
+    
+    // Fundo alternado
     if (rowIndex % 2 === 0) {
       doc.setFillColor(...PDF_COLORS.SLATE_50);
       doc.rect(margins.left, y, tableWidth, rowHeight, "F");
@@ -385,24 +429,30 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
     row.forEach((cell, i) => {
       const x = getColumnX(i) + cellPadding;
       const maxWidth = columnWidths[i] - (cellPadding * 2);
-      const maxChars = Math.floor(maxWidth / (fontSize * 0.45));
-
-      // Números alinhados à direita
-      const isNumber = /^R?\$?\s*[\d.,]+%?$/.test(String(cell).trim());
+      const lines = wrapText(cell, maxWidth);
+      
+      const isNumber = /^R?\$?\s*-?[\d.,]+%?$/.test(String(cell).trim());
       doc.setTextColor(...PDF_COLORS.SLATE_700);
-      doc.setFontSize(fontSize - 1);
+      doc.setFontSize(fontSize);
 
-      if (isNumber && i === row.length - 1) {
+      // Alinhar valores monetários à direita
+      if (isNumber) {
         doc.setFont("helvetica", "bold");
-        doc.text(truncateText(cell, maxChars), getColumnX(i) + columnWidths[i] - cellPadding, y + rowHeight - 2.5, { align: "right" });
+        const textX = getColumnX(i) + columnWidths[i] - cellPadding;
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, textX, y + 4 + (lineIndex * lineHeight), { align: "right" });
+        });
       } else {
-        doc.text(truncateText(cell, maxChars), x, y + rowHeight - 2.5);
+        doc.setFont("helvetica", "normal");
+        lines.forEach((line, lineIndex) => {
+          doc.text(line, x, y + 4 + (lineIndex * lineHeight));
+        });
       }
     });
 
-    // Linha separadora fina
+    // Linha separadora
     doc.setDrawColor(...PDF_COLORS.SLATE_200);
-    doc.setLineWidth(0.2);
+    doc.setLineWidth(0.15);
     doc.line(margins.left, y + rowHeight, margins.left + tableWidth, y + rowHeight);
 
     y += rowHeight;
@@ -420,15 +470,17 @@ export const getModernTableStyles = () => ({
     fillColor: PDF_COLORS.SLATE_100,
     textColor: PDF_COLORS.SLATE_700,
     fontStyle: 'bold',
-    fontSize: 8,
-    cellPadding: 3,
+    fontSize: 7,
+    cellPadding: 2,
   },
   styles: {
-    fontSize: 8,
-    cellPadding: 2.5,
+    fontSize: 7,
+    cellPadding: 2,
     textColor: PDF_COLORS.SLATE_700,
     lineColor: PDF_COLORS.SLATE_200,
-    lineWidth: 0.2,
+    lineWidth: 0.15,
+    overflow: 'linebreak', // Quebra de linha automática
+    cellWidth: 'wrap',
   },
   alternateRowStyles: {
     fillColor: PDF_COLORS.SLATE_50,

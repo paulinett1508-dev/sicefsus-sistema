@@ -49,7 +49,7 @@ export const PDF_COLORS = {
   STATUS_ALTO: [16, 185, 129],     // Emerald 500
   STATUS_MEDIO: [245, 158, 11],    // Amber 500
   STATUS_BAIXO: [239, 68, 68],     // Red 500
-  ACCENT: [16, 185, 129],          // Emerald 500
+  ACCENT: [20, 67, 96],            // Azul marinho escuro (cor padrão do sistema)
   WHITE: [255, 255, 255],
 };
 

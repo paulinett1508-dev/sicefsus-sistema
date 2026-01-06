@@ -1,5 +1,4 @@
 // src/components/relatorios/geradores/RelatorioPrestacao.js
-// Design Moderno - Clean, Compacto, Elegante
 import { BaseRelatorio } from "./BaseRelatorio";
 import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import {
@@ -12,200 +11,201 @@ export class RelatorioPrestacao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    // Período para subtítulo
-    const periodo = `${filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início"} a ${filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual"}`;
-    const municipio = filtros.municipio || this.usuario?.municipio || "Todos";
-    const subtitulo = `${municipio} • ${periodo}`;
+    const mes = filtros.mes || new Date().getMonth() + 1;
+    const ano = filtros.ano || new Date().getFullYear();
+    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
 
-    // HEADER
-    this.addHeader("Prestação de Contas", subtitulo);
+    this.addHeader("Prestacao de Contas", `${nomeMes} ${ano}`);
 
     let yPosition = 58;
 
-    // Agrupar despesas por emenda
-    const execucaoPorEmenda = {};
-    this.emendas.forEach((emenda) => {
-      const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
-      );
-      if (despesasEmenda.length > 0) {
-        const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
-        const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
-
-        execucaoPorEmenda[emenda.id] = {
-          emenda: { ...emenda, valorTotal: valorTotalNormalizado },
-          despesas: despesasEmenda,
-          total: despesasEmenda.reduce((sum, d) => {
-            const valor = parseFloat(d.valor || 0);
-            return sum + (isNaN(valor) ? 0 : valor);
-          }, 0),
-        };
-      }
-    });
-
-    // Métricas
-    const totalGeral = Object.values(execucaoPorEmenda).reduce(
-      (sum, item) => sum + item.total,
-      0,
-    );
-    const totalEmendas = this.emendas.reduce((sum, e) => {
+    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
+    
+    const valorTotal = this.emendas.reduce((sum, e) => {
       const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
       return sum + (isNaN(valor) ? 0 : valor);
     }, 0);
-    const emendasComExecucao = Object.keys(execucaoPorEmenda).length;
-    const percentualGeral = totalEmendas > 0 ? (totalGeral / totalEmendas) * 100 : 0;
+    
+    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
+      const valor = parseFloat(d.valor || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+    
+    const saldoDisponivel = valorTotal - valorExecutado;
+    const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
-    // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
-      { label: "Emendas com Execução", value: emendasComExecucao.toString() },
-      { label: "Valor Total", value: this.formatCurrency(totalEmendas) },
-      { label: "Executado", value: this.formatCurrency(totalGeral), trend: `${percentualGeral.toFixed(1)}%` },
-      { label: "Saldo", value: this.formatCurrency(totalEmendas - totalGeral) },
+      { label: "Recurso Total", value: this.formatCurrency(valorTotal) },
+      { label: "Utilizado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
+      { label: "Saldo Disponivel", value: this.formatCurrency(saldoDisponivel) },
+      { label: "Despesas", value: despesasExecutadas.length.toString() },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
 
-    // EXECUÇÃO FINANCEIRA
-    yPosition = addSectionTitle(this.doc, "Execução Financeira por Emenda", yPosition);
+    yPosition = addSectionTitle(this.doc, "Resumo da Prestacao de Contas", yPosition);
+    
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+    
+    const emendasComExecucao = this.emendas.filter(e => {
+      const desp = despesasExecutadas.filter(d => d.emendaId === e.id);
+      return desp.length > 0;
+    }).length;
+    
+    const emendas100 = this.emendas.filter(e => {
+      const valorEmenda = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
+      const exec = despesasExecutadas.filter(d => d.emendaId === e.id)
+        .reduce((sum, d) => sum + parseFloat(d.valor || 0), 0);
+      return valorEmenda > 0 && exec >= valorEmenda;
+    }).length;
+    
+    const resumoItems = [
+      `Periodo de Referencia: ${nomeMes} de ${ano}`,
+      `Emendas com Execucao: ${emendasComExecucao} de ${this.emendas.length}`,
+      `Emendas 100% Executadas: ${emendas100}`,
+      `Percentual Geral: ${percentualGeral.toFixed(1)}%`,
+      `Saldo a Executar: ${this.formatCurrency(saldoDisponivel)}`,
+    ];
+    
+    resumoItems.forEach((item, i) => {
+      this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
+    });
+    yPosition += (resumoItems.length * 4) + 6;
 
-    // Gerar detalhamento por emenda
-    Object.values(execucaoPorEmenda).forEach(({ emenda, despesas, total }) => {
-      // Verificar se precisa nova página
-      yPosition = this.checkNewPage(yPosition, 60);
-      if (yPosition < 30) {
-        this.doc.addPage();
-        this.pageNum++;
-        // Header compacto
-        this.doc.setFillColor(...PDF_COLORS.ACCENT);
-        this.doc.rect(0, 0, this.pageWidth, 1.5, "F");
-        this.doc.setTextColor(...PDF_COLORS.SLATE_700);
-        this.doc.setFontSize(9);
-        this.doc.setFont("helvetica", "bold");
-        this.doc.text("Prestação de Contas", 15, 10);
-        yPosition = 20;
-      }
+    yPosition = addSectionTitle(this.doc, "Demonstrativo por Emenda", yPosition);
 
-      // Card da emenda
-      const cardHeight = 18;
-      this.doc.setFillColor(...PDF_COLORS.SLATE_50);
-      this.doc.roundedRect(15, yPosition, this.pageWidth - 30, cardHeight, 2, 2, "F");
-      this.doc.setDrawColor(...PDF_COLORS.SLATE_200);
-      this.doc.setLineWidth(0.3);
-      this.doc.roundedRect(15, yPosition, this.pageWidth - 30, cardHeight, 2, 2, "S");
+    const demonstrativo = this.emendas.map((emenda) => {
+      const valorEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
+      const executado = despesasEmenda.reduce((sum, d) => {
+        const valor = parseFloat(d.valor || 0);
+        return sum + (isNaN(valor) ? 0 : valor);
+      }, 0);
+      const saldo = valorEmenda - executado;
+      const percentual = valorEmenda > 0 ? (executado / valorEmenda) * 100 : 0;
 
-      // Info da emenda
-      this.doc.setTextColor(...PDF_COLORS.SLATE_900);
-      this.doc.setFontSize(10);
-      this.doc.setFont("helvetica", "bold");
-      const titulo = `${emenda.numero || "-"} • ${(emenda.autor || "-").substring(0, 30)}`;
-      this.doc.text(titulo, 20, yPosition + 7);
+      return {
+        numero: emenda.numero || "-",
+        parlamentar: emenda.autor || "-",
+        valorTotal: isNaN(valorEmenda) ? 0 : valorEmenda,
+        executado,
+        saldo,
+        percentual,
+      };
+    }).sort((a, b) => b.executado - a.executado);
 
-      // Valores
-      this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-      this.doc.setFontSize(8);
-      this.doc.setFont("helvetica", "normal");
-      const percentual = emenda.valorTotal > 0 ? (total / emenda.valorTotal) * 100 : 0;
-      this.doc.text(`Valor: ${this.formatCurrency(emenda.valorTotal)} • Executado: ${this.formatCurrency(total)} (${percentual.toFixed(0)}%)`, 20, yPosition + 13);
+    const tabelaDemonstrativo = demonstrativo.map((d) => [
+      d.numero,
+      d.parlamentar.length > 20 ? d.parlamentar.substring(0, 17) + "..." : d.parlamentar,
+      this.formatCurrency(d.valorTotal),
+      this.formatCurrency(d.executado),
+      this.formatCurrency(d.saldo),
+      `${d.percentual.toFixed(0)}%`,
+    ]);
 
-      yPosition += cardHeight + 4;
-
-      // Tabela de despesas da emenda
-      const tabelaDespesas = despesas.map((d) => [
-        this.formatDate(d.dataEmpenho || d.data || d.criadaEm),
-        (d.discriminacao || d.descricao || "-").substring(0, 35),
-        (d.fornecedor || "-").substring(0, 25),
-        d.numeroEmpenho || d.numeroDocumento || "-",
-        this.formatCurrency(parseFloat(d.valor) || 0),
-      ]);
-
+    if (tabelaDemonstrativo.length > 0) {
       try {
         if (this.doc.autoTable) {
           const modernStyles = getModernTableStyles();
-
           this.doc.autoTable({
             startY: yPosition,
-            head: [["Data", "Descrição", "Fornecedor", "Empenho", "Valor"]],
-            body: tabelaDespesas,
+            head: [["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"]],
+            body: tabelaDemonstrativo,
             ...modernStyles,
             columnStyles: {
-              0: { cellWidth: 22 },
-              1: { cellWidth: 'auto' },
-              2: { cellWidth: 'auto' },
-              3: { cellWidth: 25 },
-              4: { halign: "right", cellWidth: 28, fontStyle: 'bold' },
+              0: { cellWidth: 22, halign: "left" },
+              1: { cellWidth: 'auto', halign: "left" },
+              2: { cellWidth: 28, halign: "right" },
+              3: { cellWidth: 28, halign: "right" },
+              4: { cellWidth: 28, halign: "right" },
+              5: { cellWidth: 16, halign: "center" },
             },
-            margin: { left: 15, right: 15 },
           });
-
           yPosition = this.doc.lastAutoTable.finalY + 10;
         }
       } catch (error) {
         console.warn("Erro ao criar tabela:", error);
-        yPosition += 10;
       }
-    });
-
-    // RESUMO FINAL
-    yPosition = this.checkNewPage(yPosition, 70);
-    if (yPosition < 30) {
-      this.doc.addPage();
-      this.pageNum++;
-      yPosition = 20;
     }
 
-    yPosition = addSectionTitle(this.doc, "Resumo Final", yPosition);
+    yPosition = this.checkNewPage(yPosition, 50);
+    yPosition = addSectionTitle(this.doc, "Despesas Executadas", yPosition);
 
-    // Card de resumo
-    const resumoHeight = 35;
-    this.doc.setFillColor(...PDF_COLORS.SLATE_100);
-    this.doc.roundedRect(15, yPosition, this.pageWidth - 30, resumoHeight, 2, 2, "F");
+    const despesasOrdenadas = [...despesasExecutadas]
+      .sort((a, b) => {
+        const dataA = a.data ? new Date(a.data).getTime() : 0;
+        const dataB = b.data ? new Date(b.data).getTime() : 0;
+        return dataB - dataA;
+      });
 
-    const col1X = 25;
-    const col2X = this.pageWidth / 2 + 10;
+    const tabelaDespesas = despesasOrdenadas.map((d) => {
+      const emenda = this.emendas.find(e => e.id === d.emendaId);
+      return [
+        d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "-",
+        emenda?.numero || "-",
+        d.descricao?.length > 25 ? d.descricao.substring(0, 22) + "..." : (d.descricao || "-"),
+        d.fornecedor?.length > 18 ? d.fornecedor.substring(0, 15) + "..." : (d.fornecedor || "-"),
+        this.formatCurrency(parseFloat(d.valor || 0)),
+      ];
+    });
 
-    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-    this.doc.setFontSize(8);
+    if (tabelaDespesas.length > 0) {
+      try {
+        if (this.doc.autoTable) {
+          const modernStyles = getModernTableStyles();
+          this.doc.autoTable({
+            startY: yPosition,
+            head: [["Data", "Emenda", "Descricao", "Fornecedor", "Valor"]],
+            body: tabelaDespesas,
+            ...modernStyles,
+            columnStyles: {
+              0: { cellWidth: 20, halign: "center" },
+              1: { cellWidth: 22, halign: "left" },
+              2: { cellWidth: 'auto', halign: "left" },
+              3: { cellWidth: 38, halign: "left" },
+              4: { cellWidth: 28, halign: "right" },
+            },
+          });
+          yPosition = this.doc.lastAutoTable.finalY + 10;
+        }
+      } catch (error) {
+        console.warn("Erro ao criar tabela:", error);
+      }
+    }
+
+    yPosition = this.checkNewPage(yPosition, 40);
+    yPosition = addSectionTitle(this.doc, "Totalizadores", yPosition);
+    
+    this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
-    this.doc.text("Total de Emendas", col1X, yPosition + 8);
-    this.doc.text("Valor Total", col2X, yPosition + 8);
-
-    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
-    this.doc.setFontSize(12);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text(this.emendas.length.toString(), col1X, yPosition + 16);
-    this.doc.text(this.formatCurrency(totalEmendas), col2X, yPosition + 16);
-
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-    this.doc.setFontSize(8);
+    
+    const totais = [
+      `Total de Recursos Recebidos: ${this.formatCurrency(valorTotal)}`,
+      `Total de Despesas Realizadas: ${this.formatCurrency(valorExecutado)}`,
+      `Saldo em Caixa: ${this.formatCurrency(saldoDisponivel)}`,
+      `Percentual de Utilizacao: ${percentualGeral.toFixed(1)}%`,
+    ];
+    
+    totais.forEach((item, i) => {
+      this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
+    });
+
+    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
-    this.doc.text("Total Executado", col1X, yPosition + 24);
-    this.doc.text("Saldo Remanescente", col2X, yPosition + 24);
+    
+    const assinaturaY = this.pageHeight - 45;
+    this.doc.text("_____________________________________", 105, assinaturaY, { align: "center" });
+    this.doc.text("Responsavel pela Prestacao de Contas", 105, assinaturaY + 5, { align: "center" });
+    this.doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 105, assinaturaY + 10, { align: "center" });
 
-    this.doc.setTextColor(...PDF_COLORS.EMERALD_500);
-    this.doc.setFontSize(12);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text(this.formatCurrency(totalGeral), col1X, yPosition + 32);
-    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
-    this.doc.text(this.formatCurrency(totalEmendas - totalGeral), col2X, yPosition + 32);
-
-    yPosition += resumoHeight + 15;
-
-    // Área de assinatura
-    yPosition = Math.max(yPosition, 220);
-
-    this.doc.setDrawColor(...PDF_COLORS.SLATE_300);
-    this.doc.setLineWidth(0.5);
-
-    // Assinatura 1
-    this.doc.line(20, yPosition, 90, yPosition);
-    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-    this.doc.setFontSize(8);
-    this.doc.setFont("helvetica", "normal");
-    this.doc.text("Responsável pela Prestação", 55, yPosition + 5, { align: "center" });
-
-    // Assinatura 2
-    this.doc.line(120, yPosition, 190, yPosition);
-    this.doc.text("Gestor Municipal de Saúde", 155, yPosition + 5, { align: "center" });
+    this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+    this.doc.setFontSize(6);
+    this.doc.setFont("helvetica", "italic");
+    this.doc.text("* Documento gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
     this.addFooter();
   }

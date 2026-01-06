@@ -5,42 +5,45 @@ import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import {
   addKPICards,
   addSectionTitle,
-  createManualTable,
+  getModernTableStyles,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioExecucao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    // Período para subtítulo
+    // Periodo para subtitulo
     let subtitulo = null;
     if (filtros.dataInicio || filtros.dataFim) {
-      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início";
+      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Inicio";
       const fim = filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual";
-      subtitulo = `Período: ${inicio} a ${fim}`;
+      subtitulo = `Periodo: ${inicio} a ${fim}`;
     }
 
     // HEADER
-    this.addHeader("Execução Orçamentária", subtitulo);
+    this.addHeader("Execucao Orcamentaria", subtitulo);
 
     let yPosition = 58;
 
-    // Métricas
+    // Calcular metricas
     const totalEmendas = this.emendas.length;
+    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
+    const totalDespesas = despesasExecutadas.length;
+    
     const valorTotal = this.emendas.reduce((sum, e) => {
       const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
       return sum + (isNaN(valor) ? 0 : valor);
     }, 0);
-    const valorExecutado = this.despesas
-      .filter(d => d.status !== "PLANEJADA")
-      .reduce((sum, d) => {
-        const valor = parseFloat(d.valor || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
-      }, 0);
+    
+    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
+      const valor = parseFloat(d.valor || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+    
     const saldoDisponivel = valorTotal - valorExecutado;
     const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
-    // KPI CARDS (valores completos, sem abreviação)
+    // KPI CARDS
     const kpis = [
       { label: "Total Emendas", value: totalEmendas.toString() },
       { label: "Valor Total", value: this.formatCurrency(valorTotal) },
@@ -50,95 +53,136 @@ export class RelatorioExecucao extends BaseRelatorio {
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
 
+    // RESUMO GERAL
+    yPosition = addSectionTitle(this.doc, "Resumo Geral", yPosition);
+    
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+    
+    const resumoItems = [
+      `Total de Emendas Cadastradas: ${totalEmendas}`,
+      `Total de Despesas Executadas: ${totalDespesas}`,
+      `Valor Total Alocado: ${this.formatCurrency(valorTotal)}`,
+      `Valor Executado: ${this.formatCurrency(valorExecutado)} (${percentualExecutado.toFixed(1)}%)`,
+      `Saldo Disponivel: ${this.formatCurrency(saldoDisponivel)}`,
+    ];
+    
+    resumoItems.forEach((item, i) => {
+      this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
+    });
+    yPosition += (resumoItems.length * 4) + 6;
+
     // DETALHAMENTO POR EMENDA
     yPosition = addSectionTitle(this.doc, "Detalhamento por Emenda", yPosition);
 
-    // Preparar dados para a tabela
-    const tabelaEmendas = this.emendas.map((emenda) => {
-      const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
-      const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
-
-      const despesasEmenda = this.despesas.filter(
-        (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
-      );
-      const valorExecutadoEmenda = despesasEmenda.reduce((sum, d) => {
+    const emendasComExecucao = this.emendas.map((emenda) => {
+      const valorEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
+      const valorExec = despesasEmenda.reduce((sum, d) => {
         const valor = parseFloat(d.valor || 0);
         return sum + (isNaN(valor) ? 0 : valor);
       }, 0);
+      const saldo = valorEmenda - valorExec;
+      const percentual = valorEmenda > 0 ? (valorExec / valorEmenda) * 100 : 0;
 
-      const saldoEmenda = valorTotalNormalizado - valorExecutadoEmenda;
-      const percentualEmenda = valorTotalNormalizado > 0
-        ? (valorExecutadoEmenda / valorTotalNormalizado) * 100
-        : 0;
+      return {
+        numero: emenda.numero || "-",
+        tipo: emenda.tipo || "-",
+        parlamentar: emenda.autor || "-",
+        valorTotal: isNaN(valorEmenda) ? 0 : valorEmenda,
+        valorExecutado: valorExec,
+        saldo,
+        percentual,
+      };
+    }).sort((a, b) => b.percentual - a.percentual);
 
-      return [
-        emenda.numero || "-",
-        (emenda.autor || "-").substring(0, 25),
-        this.formatCurrency(valorTotalNormalizado),
-        this.formatCurrency(valorExecutadoEmenda),
-        this.formatCurrency(saldoEmenda),
-        `${percentualEmenda.toFixed(0)}%`,
-      ];
-    });
+    const tabelaEmendas = emendasComExecucao.map((e) => [
+      e.numero,
+      e.tipo.length > 12 ? e.tipo.substring(0, 10) + ".." : e.tipo,
+      e.parlamentar.length > 18 ? e.parlamentar.substring(0, 15) + "..." : e.parlamentar,
+      this.formatCurrency(e.valorTotal),
+      this.formatCurrency(e.valorExecutado),
+      this.formatCurrency(e.saldo),
+      `${e.percentual.toFixed(0)}%`,
+    ]);
 
-    // Usar autoTable com estilos modernos
-    const headers = ["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"];
+    if (tabelaEmendas.length > 0) {
+      try {
+        if (this.doc.autoTable) {
+          const modernStyles = getModernTableStyles();
+          this.doc.autoTable({
+            startY: yPosition,
+            head: [["Emenda", "Tipo", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
+            body: tabelaEmendas,
+            ...modernStyles,
+            columnStyles: {
+              0: { cellWidth: 22, halign: "left" },
+              1: { cellWidth: 24, halign: "left" },
+              2: { cellWidth: 'auto', halign: "left" },
+              3: { cellWidth: 26, halign: "right" },
+              4: { cellWidth: 26, halign: "right" },
+              5: { cellWidth: 26, halign: "right" },
+              6: { cellWidth: 14, halign: "center" },
+            },
+          });
+          yPosition = this.doc.lastAutoTable.finalY + 10;
+        }
+      } catch (error) {
+        console.warn("Erro ao criar tabela de emendas:", error);
+      }
+    }
+
+    // ANALISE POR STATUS DE EXECUCAO
+    yPosition = this.checkNewPage(yPosition, 50);
+    yPosition = addSectionTitle(this.doc, "Analise por Status de Execucao", yPosition);
+
+    const statusExecucao = {
+      "100% executado": emendasComExecucao.filter(e => e.percentual >= 100).length,
+      "50-99%": emendasComExecucao.filter(e => e.percentual >= 50 && e.percentual < 100).length,
+      "1-49%": emendasComExecucao.filter(e => e.percentual > 0 && e.percentual < 50).length,
+      "Sem execucao": emendasComExecucao.filter(e => e.percentual === 0).length,
+    };
+
+    const valorPorStatus = {
+      "100% executado": emendasComExecucao.filter(e => e.percentual >= 100).reduce((sum, e) => sum + e.valorExecutado, 0),
+      "50-99%": emendasComExecucao.filter(e => e.percentual >= 50 && e.percentual < 100).reduce((sum, e) => sum + e.valorExecutado, 0),
+      "1-49%": emendasComExecucao.filter(e => e.percentual > 0 && e.percentual < 50).reduce((sum, e) => sum + e.valorExecutado, 0),
+      "Sem execucao": 0,
+    };
+
+    const tabelaStatus = Object.entries(statusExecucao).map(([status, qtd]) => [
+      status,
+      this.formatCurrency(valorPorStatus[status]),
+      `${totalEmendas > 0 ? ((qtd / totalEmendas) * 100).toFixed(0) : 0}%`,
+    ]);
 
     try {
       if (this.doc.autoTable) {
+        const modernStyles = getModernTableStyles();
         this.doc.autoTable({
           startY: yPosition,
-          head: [headers],
-          body: tabelaEmendas,
-          theme: 'striped',
-          headStyles: {
-            fillColor: PDF_COLORS.SLATE_100,
-            textColor: PDF_COLORS.SLATE_700,
-            fontStyle: 'bold',
-            fontSize: 9,
-          },
-          styles: {
-            fontSize: 9,
-            cellPadding: 3,
-            textColor: PDF_COLORS.SLATE_700,
-            overflow: 'linebreak',
-          },
-          alternateRowStyles: {
-            fillColor: PDF_COLORS.SLATE_50,
-          },
+          head: [["Status", "Valor Executado", "% Emendas"]],
+          body: tabelaStatus,
+          ...modernStyles,
           columnStyles: {
-            2: { halign: "right" },
-            3: { halign: "right" },
-            4: { halign: "right" },
-            5: { halign: "center" },
-          },
-          margin: { left: 15, right: 15 },
-          didDrawPage: (data) => {
-            if (data.pageNumber > 1) {
-              // Header compacto para continuação
-              this.doc.setFillColor(...PDF_COLORS.ACCENT);
-              this.doc.rect(0, 0, this.pageWidth, 1.5, "F");
-              this.doc.setTextColor(...PDF_COLORS.SLATE_700);
-              this.doc.setFontSize(9);
-              this.doc.setFont("helvetica", "bold");
-              this.doc.text("Execução Orçamentária", 15, 10);
-              this.doc.setTextColor(...PDF_COLORS.SLATE_400);
-              this.doc.setFontSize(8);
-              this.doc.text("(continuação)", 55, 10);
-            }
-            this.addFooter();
+            0: { cellWidth: 'auto', halign: "left" },
+            1: { cellWidth: 30, halign: "right" },
+            2: { cellWidth: 30, halign: "center" },
           },
         });
-      } else {
-        // Fallback: tabela manual
-        createManualTable(this.doc, headers, tabelaEmendas, yPosition);
+        yPosition = this.doc.lastAutoTable.finalY + 10;
       }
     } catch (error) {
-      console.warn("Erro ao criar tabela automática, usando tabela manual:", error);
-      createManualTable(this.doc, headers, tabelaEmendas, yPosition);
+      console.warn("Erro ao criar tabela de status:", error);
     }
 
-    // Rodapé
+    // Nota de rodape
+    this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+    this.doc.setFontSize(6);
+    this.doc.setFont("helvetica", "italic");
+    this.doc.text("* Valores atualizados. Relatorio gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+
     this.addFooter();
   }
 }

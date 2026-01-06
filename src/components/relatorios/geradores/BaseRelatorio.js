@@ -1,6 +1,6 @@
 // src/components/relatorios/geradores/BaseRelatorio.js
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import "jspdf-autotable";
 import {
   addHeader,
   addFooter,
