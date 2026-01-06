@@ -28,6 +28,7 @@ const adminItems = [{ label: "Usuários", icon: "group", path: "/administracao" 
 
 export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [infoExpanded, setInfoExpanded] = useState(false);
   const location = useLocation();
   const { version } = useVersion();
   const { isDark } = useTheme();
@@ -143,6 +144,57 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout }) {
             onResultSelect={handleSearchResultSelect}
             compact={true}
           />
+        </div>
+      )}
+
+      {/* Painel de Informações Expansível - Apenas Super Admin */}
+      {!collapsed && isSuperAdmin && (
+        <div style={styles.infoPanel(infoExpanded)}>
+          <div 
+            style={styles.infoPanelHeader} 
+            onClick={() => setInfoExpanded(!infoExpanded)}
+          >
+            <div style={styles.infoPanelTitle}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>info</span>
+              <span>Stack do Sistema</span>
+            </div>
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+              {infoExpanded ? 'expand_less' : 'expand_more'}
+            </span>
+          </div>
+          
+          {infoExpanded && (
+            <div style={styles.infoPanelContent}>
+              <div style={styles.techItem}>
+                <span className="material-symbols-outlined" style={styles.techIcon}>code</span>
+                <div>
+                  <div style={styles.techLabel}>Frontend</div>
+                  <div style={styles.techValue}>React + Vite</div>
+                </div>
+              </div>
+              <div style={styles.techItem}>
+                <span className="material-symbols-outlined" style={styles.techIcon}>storage</span>
+                <div>
+                  <div style={styles.techLabel}>Backend</div>
+                  <div style={styles.techValue}>Firebase/Firestore</div>
+                </div>
+              </div>
+              <div style={styles.techItem}>
+                <span className="material-symbols-outlined" style={styles.techIcon}>cloud</span>
+                <div>
+                  <div style={styles.techLabel}>Hospedagem</div>
+                  <div style={styles.techValue}>Replit</div>
+                </div>
+              </div>
+              <div style={styles.techItem}>
+                <span className="material-symbols-outlined" style={styles.techIcon}>router</span>
+                <div>
+                  <div style={styles.techLabel}>Roteamento</div>
+                  <div style={styles.techValue}>React Router</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -360,6 +412,75 @@ const styles = {
 
   searchContainer: {
     padding: "16px 16px 8px",
+  },
+
+  infoPanel: (expanded) => ({
+    margin: "8px 12px",
+    backgroundColor: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
+    borderRadius: "8px",
+    overflow: "hidden",
+    transition: "all 0.3s ease",
+    boxShadow: expanded ? "var(--shadow-sm)" : "none",
+  }),
+
+  infoPanelHeader: {
+    padding: "10px 12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    cursor: "pointer",
+    transition: "background-color 0.15s ease",
+    "&:hover": {
+      backgroundColor: "var(--theme-sidebar-item-hover-bg)",
+    },
+  },
+
+  infoPanelTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: "13px",
+    fontWeight: 600,
+    color: "var(--theme-text)",
+  },
+
+  infoPanelContent: {
+    padding: "8px 12px 12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    borderTop: "1px solid var(--theme-border-light)",
+    animation: "slideDown 0.3s ease",
+  },
+
+  techItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "6px 8px",
+    backgroundColor: "var(--theme-bg)",
+    borderRadius: "6px",
+  },
+
+  techIcon: {
+    fontSize: 18,
+    color: "var(--primary)",
+    opacity: 0.8,
+  },
+
+  techLabel: {
+    fontSize: "10px",
+    fontWeight: 600,
+    color: "var(--theme-text-secondary)",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+
+  techValue: {
+    fontSize: "12px",
+    fontWeight: 500,
+    color: "var(--theme-text)",
   },
 
   formWarning: {

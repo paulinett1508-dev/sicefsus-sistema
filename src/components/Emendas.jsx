@@ -17,6 +17,7 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import EmendasTable from "./EmendasTable";
+import EmendasFilters from "./EmendasFilters";
 import Toast from "./Toast";
 import ModalExclusaoEmenda from "./emenda/ModalExclusaoEmenda";
 
@@ -340,10 +341,17 @@ const Emendas = () => {
       {/* Toolbar */}
       <div style={styles.toolbar}>
         <div style={styles.toolbarLeft}>
-          <button style={styles.filterButton} onClick={() => setShowFilters(!showFilters)}>
+          <button 
+            style={{
+              ...styles.filterButton,
+              ...(showFilters ? styles.filterButtonActive : {})
+            }} 
+            onClick={() => setShowFilters(!showFilters)}
+          >
             <span className="material-symbols-outlined icon-sm">tune</span>
             <span style={styles.filterText}>Filtros Avançados</span>
-            {searchTerm && <span style={styles.filterBadge}>1</span>}
+            {showFilters && <span className="material-symbols-outlined icon-xs" style={{ fontSize: 16 }}>expand_less</span>}
+            {!showFilters && <span className="material-symbols-outlined icon-xs" style={{ fontSize: 16 }}>expand_more</span>}
           </button>
         </div>
 
@@ -367,6 +375,15 @@ const Emendas = () => {
           </button>
         </div>
       </div>
+
+      {/* Filtros Avançados */}
+      {showFilters && (
+        <EmendasFilters
+          emendas={emendas}
+          onFilterChange={setEmendasFiltradas}
+          totalEmendas={emendasFiltradas.length}
+        />
+      )}
 
       {/* Error */}
       {error && (
@@ -592,6 +609,10 @@ const styles = {
     fontSize: "14px",
     transition: "all 0.15s ease",
     boxShadow: "var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05))",
+  },
+  filterButtonActive: {
+    backgroundColor: "rgba(37, 99, 235, 0.08)",
+    borderColor: "var(--primary, #2563EB)",
   },
   filterText: {
     color: "var(--theme-text)",

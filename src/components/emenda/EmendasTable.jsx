@@ -65,14 +65,14 @@ const EmendasTable = ({
     const saldo = emenda.saldoDisponivel || emenda.saldo || 0;
 
     if (validade && new Date(validade) < new Date()) {
-      return { text: "Vencida", color: "#dc3545", icon: "error", iconColor: "#dc3545" };
+      return { text: "Vencida", color: "var(--danger-600)", icon: "error", iconColor: "var(--danger-600)" };
     } else if (saldo <= 0) {
-      return { text: "Esgotada", color: "#ffc107", icon: "warning", iconColor: "#ffc107" };
+      return { text: "Esgotada", color: "var(--warning-600)", icon: "warning", iconColor: "var(--warning-600)" };
     } else if (saldo < (emenda.valorTotal || emenda.valorRecurso || 0) * 0.1) {
       // Menos de 10%
-      return { text: "Saldo Baixo", color: "#fd7e14", icon: "bolt", iconColor: "#fd7e14" };
+      return { text: "Saldo Baixo", color: "var(--warning-500)", icon: "bolt", iconColor: "var(--warning-500)" };
     } else {
-      return { text: "Ativa", color: "#28a745", icon: "check_circle", iconColor: "#28a745" };
+      return { text: "Ativa", color: "var(--success-600)", icon: "check_circle", iconColor: "var(--success-600)" };
     }
   };
 
@@ -121,7 +121,7 @@ const EmendasTable = ({
         </td>
         <td style={styles.td}>
           <div style={styles.executadoInfo}>
-            <strong style={{ ...styles.valorExecutado, color: "#007bff" }}>
+            <strong style={{ ...styles.valorExecutado, color: "var(--primary-600)" }}>
               {formatCurrency(emenda.valorExecutado || 0)}
             </strong>
             <small style={styles.percentualExecutado}>
@@ -135,8 +135,8 @@ const EmendasTable = ({
               ...styles.saldo,
               color:
                 (emenda.saldoDisponivel || emenda.saldo || 0) > 0
-                  ? "#28a745"
-                  : "#dc3545",
+                  ? "var(--success-600)"
+                  : "var(--danger-600)",
             }}
           >
             {formatCurrency(emenda.saldoDisponivel || emenda.saldo)}
@@ -194,7 +194,7 @@ const EmendasTable = ({
       ) : emendasFiltradas.length === 0 ? (
         <div style={styles.emptyState}>
           <span style={styles.emptyIcon}>
-            <span className="material-symbols-outlined" style={{ fontSize: 64, color: "#94A3B8" }}>assignment</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 64, color: "var(--theme-text-muted)" }}>assignment</span>
           </span>
           <h3 style={styles.emptyTitle}>Nenhuma emenda encontrada</h3>
           <p style={styles.emptyMessage}>
@@ -248,7 +248,7 @@ const styles = {
     alignItems: "center",
     minHeight: "400px",
     fontSize: "18px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 
   tableWrapper: {
@@ -262,20 +262,20 @@ const styles = {
   },
 
   tableHeader: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
   },
 
   th: {
     padding: "16px 12px",
     textAlign: "left",
     fontWeight: "600",
-    color: "#495057",
-    borderBottom: "2px solid #e9ecef",
+    color: "var(--theme-text-secondary)",
+    borderBottom: "2px solid var(--theme-border)",
     whiteSpace: "nowrap",
   },
 
   tableRow: {
-    borderBottom: "1px solid #e9ecef",
+    borderBottom: "1px solid var(--theme-border)",
     transition: "background-color 0.2s ease",
   },
 
@@ -285,7 +285,7 @@ const styles = {
   },
 
   numeroEmenda: {
-    color: "#007bff",
+    color: "var(--primary-600)",
     fontSize: "14px",
     fontWeight: "600",
     display: "block",
@@ -294,7 +294,7 @@ const styles = {
 
   emendaData: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "400",
     display: "block",
   },
@@ -308,22 +308,22 @@ const styles = {
   parlamentarNome: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
 
   emendaId: {
     fontSize: "13px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontFamily: "monospace",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "2px 6px",
     borderRadius: "4px",
   },
 
   tipo: {
     fontSize: "13px",
-    color: "#495057",
-    backgroundColor: "#e9ecef",
+    color: "var(--theme-text-secondary)",
+    backgroundColor: "var(--theme-border)",
     padding: "4px 8px",
     borderRadius: "4px",
   },
@@ -336,12 +336,12 @@ const styles = {
 
   uf: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "600",
   },
 
   valor: {
-    color: "#007bff",
+    color: "var(--primary-600)",
     fontSize: "14px",
   },
 
@@ -358,7 +358,7 @@ const styles = {
 
   percentualExecutado: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
 
@@ -377,17 +377,17 @@ const styles = {
   despesasCount: {
     fontSize: "16px",
     fontWeight: "700",
-    color: "#28a745",
+    color: "var(--success-600)",
   },
 
   despesasLabel: {
     fontSize: "11px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 
   data: {
     fontSize: "13px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
 
   status: {
@@ -423,8 +423,8 @@ const styles = {
 
   actionButtonDanger: {
     background: "none",
-    border: "1px solid #dc3545",
-    color: "#dc3545",
+    border: "1px solid var(--danger-600)",
+    color: "var(--danger-600)",
     padding: "6px 10px",
     borderRadius: "4px",
     cursor: "pointer",
@@ -454,20 +454,20 @@ const styles = {
   emptyTitle: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     margin: "0 0 8px 0",
   },
 
   emptyMessage: {
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     maxWidth: "400px",
     lineHeight: 1.5,
     margin: "0 0 24px 0",
   },
 
   emptyButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "var(--primary-600)",
     color: "white",
     border: "none",
     padding: "12px 24px",
@@ -481,10 +481,10 @@ const styles = {
   footer: {
     padding: "16px 12px",
     textAlign: "right",
-    borderTop: "1px solid #e9ecef",
-    backgroundColor: "#f8f9fa",
+    borderTop: "1px solid var(--theme-border)",
+    backgroundColor: "var(--theme-surface-secondary)",
     fontSize: "14px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
 };
 

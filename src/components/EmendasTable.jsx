@@ -470,7 +470,7 @@ const styles = {
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: "0.05em",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     borderBottom: "1px solid var(--theme-border, #E2E8F0)",
     cursor: "pointer",
     userSelect: "none",
@@ -531,7 +531,7 @@ const styles = {
   emendaNumero: {
     fontSize: "12px",
     fontWeight: "700",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
   },
   emendaData: {
     fontSize: "10px",
@@ -553,13 +553,13 @@ const styles = {
     justifyContent: "center",
     fontSize: "9px",
     fontWeight: "700",
-    color: "var(--gray-600, #475569)",
+    color: "var(--theme-text)",
     flexShrink: 0,
   },
   parlamentarNome: {
     fontSize: "12px",
     fontWeight: "500",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -580,7 +580,7 @@ const styles = {
   },
   objetoDescricao: {
     fontSize: "11px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -593,21 +593,21 @@ const styles = {
   },
   municipioNome: {
     fontSize: "12px",
-    color: "var(--gray-600, #475569)",
+    color: "var(--theme-text)",
   },
   ufBadge: {
     fontSize: "9px",
     padding: "1px 4px",
     borderRadius: "4px",
     backgroundColor: "var(--gray-100, #F1F5F9)",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     fontWeight: "500",
   },
   // Valor
   valorTexto: {
     fontSize: "12px",
     fontWeight: "500",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
     fontFamily: "monospace",
   },
   // Execução
@@ -634,7 +634,7 @@ const styles = {
   progressText: {
     fontSize: "10px",
     fontWeight: "500",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     width: "24px",
     textAlign: "right",
   },
@@ -686,12 +686,12 @@ const styles = {
   },
   paginationText: {
     fontSize: "12px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
     margin: 0,
   },
   paginationBold: {
     fontWeight: "700",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
   },
   paginationButtons: {
     display: "flex",
@@ -702,7 +702,7 @@ const styles = {
     borderRadius: "4px",
     border: "1px solid var(--theme-border, #E2E8F0)",
     backgroundColor: "transparent",
-    color: "var(--gray-600, #475569)",
+    color: "var(--theme-text)",
     fontSize: "12px",
     fontWeight: "500",
     cursor: "pointer",
@@ -734,12 +734,12 @@ const styles = {
   emptyTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "var(--gray-700, #334155)",
+    color: "var(--theme-text)",
     marginBottom: "8px",
   },
   emptyText: {
     fontSize: "14px",
-    color: "var(--gray-500, #64748B)",
+    color: "var(--theme-text-muted)",
   },
 };
 

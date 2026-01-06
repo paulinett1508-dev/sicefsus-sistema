@@ -71,7 +71,15 @@
       "Bash(src/components/EmendasTable.jsx )",
       "Bash(src/components/MunicipioSelector.jsx )",
       "Bash(.claude/commands/pendencias-dark-mode-p1-p2.md )",
-      "Bash(public/version.json)"
+      "Bash(public/version.json)",
+      "Bash(curl:*)",
+      "Bash(cat:*)",
+      "Bash(npx eslint:*)",
+      "Bash(mcp__ide__getDiagnostics)",
+      "Bash(node scripts/check-dashboard-values.cjs:*)",
+      "Bash(node ../scripts/check-dashboard-values.cjs:*)",
+      "Bash(node:*)",
+      "Bash(git restore:*)"
     ]
   }
 }

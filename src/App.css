@@ -128,6 +128,19 @@ tr:last-child td {
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+    transform: translateY(0);
+  }
+}
+
 .toast-close-button:hover {
   opacity: 1 !important;
   background-color: rgba(0,0,0,0.1);

@@ -581,9 +581,10 @@ const styles = {
   select: {
     padding: '8px 12px',
     borderRadius: '6px',
-    border: '1px solid #d1d5db',
+    border: '1px solid var(--theme-border)',
     fontSize: '14px',
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-input-bg)',
+    color: 'var(--theme-text)',
     cursor: 'pointer'
   },
   refreshBtn: {
@@ -608,9 +609,9 @@ const styles = {
     alignItems: 'center',
     gap: '16px',
     padding: '20px',
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-surface)',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid var(--theme-border)',
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
   },
   summaryIcon: {
@@ -627,10 +628,10 @@ const styles = {
     marginTop: '4px'
   },
   chartSection: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-surface)',
     padding: '24px',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid var(--theme-border)',
     marginBottom: '24px'
   },
   chartTitle: {
@@ -676,10 +677,10 @@ const styles = {
     gap: '20px'
   },
   metricCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-surface)',
     padding: '20px',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb'
+    border: '1px solid var(--theme-border)'
   },
   metricTitle: {
     fontSize: '15px',

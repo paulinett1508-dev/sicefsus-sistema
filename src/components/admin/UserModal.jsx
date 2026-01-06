@@ -40,7 +40,7 @@ const styles = {
     zIndex: 1000,
   },
   modalContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     maxWidth: "600px",
     width: "90%",
