@@ -6,7 +6,7 @@ import {
   addKPICards,
   addSectionTitle,
   getModernTableStyles,
-  formatCurrencyCompact,
+  createManualTable,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioExecucao extends BaseRelatorio {
@@ -41,12 +41,12 @@ export class RelatorioExecucao extends BaseRelatorio {
     const saldoDisponivel = valorTotal - valorExecutado;
     const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
-    // KPI CARDS
+    // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
       { label: "Total Emendas", value: totalEmendas.toString() },
-      { label: "Valor Total", value: formatCurrencyCompact(valorTotal) },
-      { label: "Executado", value: formatCurrencyCompact(valorExecutado), trend: `${percentualExecutado.toFixed(1)}%` },
-      { label: "Saldo", value: formatCurrencyCompact(saldoDisponivel) },
+      { label: "Valor Total", value: this.formatCurrency(valorTotal) },
+      { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualExecutado.toFixed(1)}%` },
+      { label: "Saldo", value: this.formatCurrency(saldoDisponivel) },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
@@ -83,22 +83,24 @@ export class RelatorioExecucao extends BaseRelatorio {
     });
 
     // Usar autoTable com estilos modernos
+    const headers = ["Emenda", "Parlamentar", "Total", "Executado", "Saldo", "%"];
+
     try {
       if (this.doc.autoTable) {
         const modernStyles = getModernTableStyles();
 
         this.doc.autoTable({
           startY: yPosition,
-          head: [["Emenda", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
+          head: [headers],
           body: tabelaEmendas,
           ...modernStyles,
           columnStyles: {
             0: { cellWidth: 22 },
             1: { cellWidth: 'auto' },
-            2: { halign: "right", cellWidth: 30 },
-            3: { halign: "right", cellWidth: 30 },
-            4: { halign: "right", cellWidth: 30 },
-            5: { halign: "center", cellWidth: 16 },
+            2: { halign: "right", cellWidth: 32 },
+            3: { halign: "right", cellWidth: 32 },
+            4: { halign: "right", cellWidth: 32 },
+            5: { halign: "center", cellWidth: 14 },
           },
           didDrawPage: (data) => {
             if (data.pageNumber > 1) {
@@ -116,9 +118,13 @@ export class RelatorioExecucao extends BaseRelatorio {
             this.addFooter();
           },
         });
+      } else {
+        // Fallback: tabela manual
+        createManualTable(this.doc, headers, tabelaEmendas, yPosition);
       }
     } catch (error) {
-      console.warn("Erro ao criar tabela:", error);
+      console.warn("Erro ao criar tabela automática, usando tabela manual:", error);
+      createManualTable(this.doc, headers, tabelaEmendas, yPosition);
     }
 
     // Rodapé

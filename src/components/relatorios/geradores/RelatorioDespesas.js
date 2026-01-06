@@ -7,7 +7,6 @@ import {
   addSectionTitle,
   addMiniTable,
   getModernTableStyles,
-  formatCurrencyCompact,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioDespesas extends BaseRelatorio {
@@ -38,7 +37,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     let yPosition = 55;
 
-    // KPI CARDS
+    // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
       {
         label: "Despesas Executadas",
@@ -46,11 +45,11 @@ export class RelatorioDespesas extends BaseRelatorio {
       },
       {
         label: "Valor Total",
-        value: formatCurrencyCompact(valorTotal),
+        value: this.formatCurrency(valorTotal),
       },
       {
         label: "Ticket Médio",
-        value: formatCurrencyCompact(ticketMedio),
+        value: this.formatCurrency(ticketMedio),
       },
       {
         label: "Fornecedores",

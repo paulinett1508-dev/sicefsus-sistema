@@ -6,7 +6,6 @@ import {
   addKPICards,
   addSectionTitle,
   getModernTableStyles,
-  formatCurrencyCompact,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioAnalitico extends BaseRelatorio {
@@ -67,10 +66,11 @@ export class RelatorioAnalitico extends BaseRelatorio {
     const executadoGeral = Object.values(porParlamentar).reduce((sum, p) => sum + p.valorExecutado, 0);
     const percentualGeral = totalGeral > 0 ? (executadoGeral / totalGeral) * 100 : 0;
 
+    // KPIs (valores completos, sem abreviação)
     const kpis = [
       { label: "Parlamentares", value: totalParlamentares.toString() },
       { label: "Total Emendas", value: this.emendas.length.toString() },
-      { label: "Valor Total", value: formatCurrencyCompact(totalGeral) },
+      { label: "Valor Total", value: this.formatCurrency(totalGeral) },
       { label: "Execução", value: `${percentualGeral.toFixed(1)}%` },
     ];
 

@@ -7,7 +7,6 @@ import {
   addSectionTitle,
   addMiniTable,
   getModernTableStyles,
-  formatCurrencyCompact,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioConsolidado extends BaseRelatorio {
@@ -39,12 +38,12 @@ export class RelatorioConsolidado extends BaseRelatorio {
     const saldoDisponivel = valorTotal - valorExecutado;
     const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
-    // KPI CARDS
+    // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
       { label: "Emendas Ativas", value: totalEmendas.toString() },
-      { label: "Valor Total", value: formatCurrencyCompact(valorTotal) },
-      { label: "Executado", value: formatCurrencyCompact(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
-      { label: "Saldo", value: formatCurrencyCompact(saldoDisponivel) },
+      { label: "Valor Total", value: this.formatCurrency(valorTotal) },
+      { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
+      { label: "Saldo", value: this.formatCurrency(saldoDisponivel) },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);

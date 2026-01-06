@@ -6,7 +6,6 @@ import {
   addKPICards,
   addSectionTitle,
   getModernTableStyles,
-  formatCurrencyCompact,
 } from "../../../utils/pdfHelpers";
 
 export class RelatorioPrestacao extends BaseRelatorio {
@@ -56,12 +55,12 @@ export class RelatorioPrestacao extends BaseRelatorio {
     const emendasComExecucao = Object.keys(execucaoPorEmenda).length;
     const percentualGeral = totalEmendas > 0 ? (totalGeral / totalEmendas) * 100 : 0;
 
-    // KPI CARDS
+    // KPI CARDS (valores completos, sem abreviação)
     const kpis = [
       { label: "Emendas com Execução", value: emendasComExecucao.toString() },
-      { label: "Valor Total", value: formatCurrencyCompact(totalEmendas) },
-      { label: "Executado", value: formatCurrencyCompact(totalGeral), trend: `${percentualGeral.toFixed(1)}%` },
-      { label: "Saldo", value: formatCurrencyCompact(totalEmendas - totalGeral) },
+      { label: "Valor Total", value: this.formatCurrency(totalEmendas) },
+      { label: "Executado", value: this.formatCurrency(totalGeral), trend: `${percentualGeral.toFixed(1)}%` },
+      { label: "Saldo", value: this.formatCurrency(totalEmendas - totalGeral) },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
