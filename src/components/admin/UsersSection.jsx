@@ -20,7 +20,7 @@ const UsersSection = ({
     tableContainer: {
       backgroundColor: isDark ? "var(--theme-surface)" : "white",
       borderRadius: "8px",
-      padding: "20px",
+      padding: "12px 16px",
       boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
       border: isDark ? "1px solid var(--theme-border)" : "none",
     },
@@ -32,10 +32,10 @@ const UsersSection = ({
     },
     searchInput: {
       width: "100%",
-      padding: "10px 15px",
+      padding: "8px 12px",
       border: isDark ? "1px solid var(--theme-border)" : "1px solid #ced4da",
       borderRadius: "5px",
-      fontSize: "14px",
+      fontSize: "13px",
       backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
       color: isDark ? "var(--theme-text)" : "#333",
     },
@@ -99,24 +99,23 @@ const UsersSection = ({
       {/* Cabeçalho da seção com botões */}
       <div style={styles.sectionHeader}>
         <h3 style={dynamicStyles.sectionTitle}>
-          📋 Lista de Usuários ({users?.length || 0})
+          <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>group</span>
+          Lista de Usuários ({users?.length || 0})
         </h3>
         <div style={styles.buttonGroup}>
           <button
             onClick={exportarUsuarios}
             style={styles.exportButton}
-            onMouseOver={(e) => e.target.style.backgroundColor = "#218838"}
-            onMouseOut={(e) => e.target.style.backgroundColor = "#28a745"}
           >
-            📥 Exportar CSV
+            <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>download</span>
+            Exportar CSV
           </button>
           <button
             onClick={handleNovoUsuario}
             style={styles.newUserButton}
-            onMouseOver={(e) => e.target.style.backgroundColor = "#0056b3"}
-            onMouseOut={(e) => e.target.style.backgroundColor = "#007bff"}
           >
-            ➕ Novo Usuário
+            <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>person_add</span>
+            Novo Usuário
           </button>
         </div>
       </div>
@@ -163,7 +162,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
+    marginBottom: "10px",
   },
 
   sectionTitle: {
@@ -210,15 +209,15 @@ const styles = {
   },
 
   searchContainer: {
-    marginBottom: "20px",
+    marginBottom: "12px",
   },
 
   searchInput: {
     width: "100%",
-    padding: "10px 15px",
+    padding: "8px 12px",
     border: "1px solid var(--theme-border)",
     borderRadius: "5px",
-    fontSize: "14px",
+    fontSize: "13px",
     backgroundColor: "var(--theme-surface)",
     color: "var(--theme-text)",
   },

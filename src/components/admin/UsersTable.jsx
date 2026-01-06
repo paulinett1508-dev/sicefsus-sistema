@@ -21,10 +21,10 @@ const UsersTable = ({
       border: isDark ? "1px solid var(--theme-border)" : "none",
     },
     tableHeader: {
-      padding: "12px",
+      padding: "8px 10px",
       textAlign: "left",
       fontWeight: "bold",
-      fontSize: "12px",
+      fontSize: "11px",
       color: isDark ? "var(--theme-text-secondary)" : "#495057",
       textTransform: "uppercase",
       backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
@@ -109,22 +109,26 @@ const UsersTable = ({
                 <span
                   style={{
                     fontSize: "10px",
-                    color: "white",
+                    color: usuario.tipo === "gestor" ? "#92400e" : "white",
                     backgroundColor:
-                      usuario.tipo === "admin" 
-                        ? "#dc3545" 
+                      usuario.tipo === "admin"
+                        ? "var(--error, #dc3545)"
                         : usuario.tipo === "gestor"
-                        ? "#ffc107"
-                        : "#28a745",
-                    padding: "4px 8px",
-                    borderRadius: "12px",
+                        ? "#fde68a"
+                        : "var(--success, #28a745)",
+                    padding: "3px 8px",
+                    borderRadius: "10px",
                     textTransform: "uppercase",
-                    fontWeight: "bold",
+                    fontWeight: "600",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
                   }}
                 >
-                  {usuario.tipo === "gestor" ? (
-                    <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>account_balance</span> GESTOR</>
-                  ) : usuario.tipo || "N/A"}
+                  <span className="material-symbols-outlined" style={{ fontSize: 10 }}>
+                    {usuario.tipo === "admin" ? "shield" : usuario.tipo === "gestor" ? "account_balance" : "person"}
+                  </span>
+                  {usuario.tipo?.toUpperCase() || "N/A"}
                 </span>
               </td>
               <td style={styles.tableCell}>
@@ -133,19 +137,25 @@ const UsersTable = ({
                     fontSize: "10px",
                     color: "white",
                     backgroundColor:
-                      usuario.status === "ativo" ? "#28a745" : "#dc3545",
-                    padding: "4px 8px",
-                    borderRadius: "12px",
+                      usuario.status === "ativo" ? "var(--success, #28a745)" : "var(--error, #dc3545)",
+                    padding: "3px 8px",
+                    borderRadius: "10px",
                     textTransform: "uppercase",
-                    fontWeight: "bold",
+                    fontWeight: "600",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
                   }}
                 >
+                  <span className="material-symbols-outlined" style={{ fontSize: 10 }}>
+                    {usuario.status === "ativo" ? "check_circle" : "cancel"}
+                  </span>
                   {usuario.status || "inativo"}
                 </span>
               </td>
               <td style={styles.tableCell}>
                 <div
-                  style={{ display: "flex", gap: "8px", alignItems: "center" }}
+                  style={{ display: "flex", gap: "4px", alignItems: "center" }}
                 >
                   {/* EDITAR */}
                   <button
@@ -161,22 +171,17 @@ const UsersTable = ({
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
                   </button>
 
-                  {/* 🔄 TOGGLE STATUS */}
+                  {/* Toggle Status */}
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log(
-                        "🔄 TOGGLE clicado:",
-                        usuario.nome,
-                        usuario.status,
-                      );
                       onToggleStatus(usuario);
                     }}
                     style={{
                       ...styles.actionButton,
                       backgroundColor:
-                        usuario.status === "ativo" ? "#ffc107" : "#28a745",
+                        usuario.status === "ativo" ? "var(--warning, #f59e0b)" : "var(--success, #28a745)",
                     }}
                     title={
                       usuario.status === "ativo"
@@ -248,24 +253,24 @@ const styles = {
     borderBottom: "2px solid var(--theme-border)",
   },
   tableCell: {
-    padding: "12px",
-    fontSize: "13px",
-    verticalAlign: "top",
+    padding: "6px 10px",
+    fontSize: "12px",
+    verticalAlign: "middle",
     color: "var(--theme-text)",
   },
   actionButton: {
     backgroundColor: "var(--success)",
     color: "var(--white)",
     border: "none",
-    padding: "6px 8px",
+    padding: "4px 6px",
     borderRadius: "4px",
     cursor: "pointer",
-    fontSize: "14px",
+    fontSize: "12px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    minWidth: "32px",
-    minHeight: "32px",
+    minWidth: "28px",
+    minHeight: "28px",
     transition: "all 0.2s ease",
   },
   emptyState: {
