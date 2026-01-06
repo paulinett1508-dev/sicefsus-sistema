@@ -1,11 +1,21 @@
 // src/utils/pdfHelpers.js
+// Design System Moderno para PDFs - Clean, Compacto, Elegante
 import logoSicefsus from "../images/logo-sicefsus-ver-modoclaro.png";
+import { PDF_COLORS } from "./relatoriosConstants";
 
 export const formatCurrency = (value) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(value || 0);
+
+// Formatar valor compacto (K, M)
+export const formatCurrencyCompact = (value) => {
+  const num = parseFloat(value) || 0;
+  if (num >= 1000000) return `R$ ${(num / 1000000).toFixed(1)}M`;
+  if (num >= 1000) return `R$ ${(num / 1000).toFixed(0)}K`;
+  return formatCurrency(num);
+};
 
 export const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -39,81 +49,122 @@ export const getLogoBase64 = async () => {
   }
 };
 
-// Adicionar cabeçalho padrão aos PDFs
-export const addHeader = (doc, titulo, logoBase64) => {
+// Adicionar cabeçalho moderno aos PDFs - Design Clean
+export const addHeader = (doc, titulo, logoBase64, subtitulo = null) => {
   const pageWidth = doc.internal.pageSize.width;
-  const margins = { left: 20, right: 20 };
+  const margins = { left: 15, right: 15 };
 
-  // Fundo do cabeçalho
-  doc.setFillColor(21, 67, 96);
-  doc.rect(0, 0, pageWidth, 40, "F");
+  // Fundo branco (clean)
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, pageWidth, 50, "F");
 
-  // Adicionar logo se disponível
+  // Linha accent no topo (fina e elegante)
+  doc.setFillColor(...PDF_COLORS.ACCENT);
+  doc.rect(0, 0, pageWidth, 2, "F");
+
+  // Logo
   if (logoBase64) {
     try {
-      doc.addImage(logoBase64, "PNG", margins.left, 8, 30, 24);
+      doc.addImage(logoBase64, "PNG", margins.left, 8, 25, 20);
     } catch (e) {
       console.warn("Erro ao adicionar logo:", e);
     }
   }
 
-  // Texto do cabeçalho
-  const textX = logoBase64 ? 55 : margins.left;
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
-  doc.setFont("helvetica", "bold");
-  doc.text("SICEFSUS", textX, 20);
-
+  // Nome do sistema
+  const textX = logoBase64 ? 45 : margins.left;
+  doc.setTextColor(...PDF_COLORS.SLATE_900);
   doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("SICEFSUS", textX, 15);
+
+  doc.setTextColor(...PDF_COLORS.SLATE_500);
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Sistema de Controle de Execuções Financeiras do SUS", textX, 30);
+  doc.text("Sistema de Controle de Execuções Financeiras", textX, 21);
+
+  // Data de geração (direita)
+  doc.setTextColor(...PDF_COLORS.SLATE_400);
+  doc.setFontSize(8);
+  const dataGeracao = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+  doc.text(dataGeracao, pageWidth - margins.right, 15, { align: "right" });
 
   // Título do relatório
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(...PDF_COLORS.SLATE_900);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(titulo, pageWidth / 2, 55, { align: "center" });
+  doc.text(titulo.toUpperCase(), margins.left, 38);
+
+  // Linha decorativa abaixo do título
+  doc.setDrawColor(...PDF_COLORS.SLATE_200);
+  doc.setLineWidth(0.5);
+  doc.line(margins.left, 42, margins.left + 60, 42);
+
+  // Subtítulo (período, filtros)
+  if (subtitulo) {
+    doc.setTextColor(...PDF_COLORS.SLATE_500);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(subtitulo, margins.left, 48);
+  }
 };
 
-// Adicionar rodapé padrão aos PDFs
-export const addFooter = (doc, pageNum, usuario) => {
+// Header para continuação de páginas
+export const addHeaderContinuacao = (doc, titulo) => {
+  const pageWidth = doc.internal.pageSize.width;
+  const margins = { left: 15, right: 15 };
+
+  // Linha accent no topo
+  doc.setFillColor(...PDF_COLORS.ACCENT);
+  doc.rect(0, 0, pageWidth, 1.5, "F");
+
+  // Título compacto
+  doc.setTextColor(...PDF_COLORS.SLATE_700);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text(titulo, margins.left, 12);
+
+  // Indicador de continuação
+  doc.setTextColor(...PDF_COLORS.SLATE_400);
+  doc.setFontSize(8);
+  doc.text("(continuação)", margins.left + doc.getTextWidth(titulo) + 3, 12);
+};
+
+// Adicionar rodapé moderno aos PDFs
+export const addFooter = (doc, pageNum, usuario, totalPages = null) => {
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
-  const margins = { left: 20, right: 20 };
+  const margins = { left: 15, right: 15 };
 
-  // Linha separadora
-  doc.setDrawColor(200, 200, 200);
-  doc.line(
-    margins.left,
-    pageHeight - 20,
-    pageWidth - margins.right,
-    pageHeight - 20,
-  );
+  // Linha separadora fina
+  doc.setDrawColor(...PDF_COLORS.SLATE_200);
+  doc.setLineWidth(0.3);
+  doc.line(margins.left, pageHeight - 15, pageWidth - margins.right, pageHeight - 15);
 
-  doc.setFontSize(10);
-  doc.setTextColor(100, 100, 100);
+  doc.setFontSize(8);
+  doc.setTextColor(...PDF_COLORS.SLATE_400);
 
-  // Data de geração
-  doc.text(
-    `Gerado em: ${new Date().toLocaleString("pt-BR")}`,
-    margins.left,
-    pageHeight - 10,
-  );
+  // Data e hora de geração
+  const dataHora = new Date().toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  doc.text(`Gerado: ${dataHora}`, margins.left, pageHeight - 8);
 
   // Número da página
-  doc.text(`Página ${pageNum}`, pageWidth - margins.right, pageHeight - 10, {
-    align: "right",
-  });
+  const pageText = totalPages ? `${pageNum} / ${totalPages}` : `${pageNum}`;
+  doc.text(pageText, pageWidth - margins.right, pageHeight - 8, { align: "right" });
 
-  // Usuário que gerou
+  // Usuário (centro)
   if (usuario?.nome || usuario?.email) {
-    doc.setFontSize(9);
-    doc.text(
-      `Por: ${usuario.nome || usuario.email}`,
-      pageWidth / 2,
-      pageHeight - 10,
-      { align: "center" },
-    );
+    doc.text(usuario.nome || usuario.email, pageWidth / 2, pageHeight - 8, { align: "center" });
   }
 };
 
@@ -123,6 +174,131 @@ export const gerarNomeArquivo = (tipoRelatorio) => {
   return `SICEFSUS_${tipoRelatorio}_${data}.pdf`;
 };
 
+// ==========================================
+// KPI CARDS - Design Moderno
+// ==========================================
+
+/**
+ * Adiciona cards de KPIs ao PDF
+ * @param {jsPDF} doc - Documento PDF
+ * @param {Array} kpis - Array de objetos { label, value, sublabel?, trend? }
+ * @param {number} startY - Posição Y inicial
+ * @returns {number} Nova posição Y após os cards
+ */
+export const addKPICards = (doc, kpis, startY) => {
+  const pageWidth = doc.internal.pageSize.width;
+  const margins = { left: 15, right: 15 };
+  const availableWidth = pageWidth - margins.left - margins.right;
+
+  const cardCount = Math.min(kpis.length, 4);
+  const cardGap = 8;
+  const cardWidth = (availableWidth - (cardGap * (cardCount - 1))) / cardCount;
+  const cardHeight = 32;
+
+  kpis.slice(0, 4).forEach((kpi, index) => {
+    const x = margins.left + (index * (cardWidth + cardGap));
+    const y = startY;
+
+    // Card background
+    doc.setFillColor(...PDF_COLORS.SLATE_50);
+    doc.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "F");
+
+    // Borda fina
+    doc.setDrawColor(...PDF_COLORS.SLATE_200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "S");
+
+    // Valor principal (grande)
+    doc.setTextColor(...PDF_COLORS.SLATE_900);
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    const valueText = String(kpi.value);
+    doc.text(valueText, x + cardWidth / 2, y + 14, { align: "center" });
+
+    // Label (pequeno)
+    doc.setTextColor(...PDF_COLORS.SLATE_500);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(kpi.label, x + cardWidth / 2, y + 22, { align: "center" });
+
+    // Sublabel ou trend (opcional)
+    if (kpi.sublabel || kpi.trend) {
+      const trendText = kpi.trend || kpi.sublabel;
+      const trendColor = kpi.trend?.startsWith('+') || kpi.trend?.startsWith('▲')
+        ? PDF_COLORS.EMERALD_500
+        : kpi.trend?.startsWith('-') || kpi.trend?.startsWith('▼')
+          ? PDF_COLORS.RED_500
+          : PDF_COLORS.SLATE_400;
+
+      doc.setTextColor(...trendColor);
+      doc.setFontSize(7);
+      doc.text(trendText, x + cardWidth / 2, y + 28, { align: "center" });
+    }
+  });
+
+  return startY + cardHeight + 10;
+};
+
+// ==========================================
+// SECTION TITLE - Título de Seção Elegante
+// ==========================================
+
+export const addSectionTitle = (doc, title, startY) => {
+  const margins = { left: 15 };
+
+  doc.setTextColor(...PDF_COLORS.SLATE_700);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text(title.toUpperCase(), margins.left, startY);
+
+  // Linha decorativa
+  doc.setDrawColor(...PDF_COLORS.SLATE_300);
+  doc.setLineWidth(0.3);
+  doc.line(margins.left, startY + 2, margins.left + 40, startY + 2);
+
+  return startY + 8;
+};
+
+// ==========================================
+// MINI TABLE - Tabela compacta para rankings
+// ==========================================
+
+export const addMiniTable = (doc, data, startY, options = {}) => {
+  const pageWidth = doc.internal.pageSize.width;
+  const margins = { left: 15, right: 15 };
+  const rowHeight = 7;
+  let y = startY;
+
+  data.forEach((row, index) => {
+    // Linha alternada sutil
+    if (index % 2 === 0) {
+      doc.setFillColor(...PDF_COLORS.SLATE_50);
+      doc.rect(margins.left, y - 4, pageWidth - margins.left - margins.right, rowHeight, "F");
+    }
+
+    // Número/Rank
+    doc.setTextColor(...PDF_COLORS.SLATE_400);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${index + 1}.`, margins.left, y);
+
+    // Nome/Label
+    doc.setTextColor(...PDF_COLORS.SLATE_700);
+    doc.setFontSize(9);
+    const label = row.label.length > 35 ? row.label.substring(0, 32) + "..." : row.label;
+    doc.text(label, margins.left + 8, y);
+
+    // Valor (direita)
+    doc.setTextColor(...PDF_COLORS.SLATE_900);
+    doc.setFont("helvetica", "bold");
+    doc.text(row.value, pageWidth - margins.right, y, { align: "right" });
+
+    y += rowHeight;
+  });
+
+  return y + 5;
+};
+
 // Função auxiliar para truncar texto com ellipsis
 const truncateText = (text, maxLength) => {
   const str = String(text || "");
@@ -130,21 +306,20 @@ const truncateText = (text, maxLength) => {
   return str.substring(0, maxLength - 3) + "...";
 };
 
-// Função auxiliar para criar tabelas manualmente (caso autoTable não funcione)
+// Função auxiliar para criar tabelas manualmente - Design Moderno
 export const createManualTable = (doc, headers, data, startY, options = {}) => {
   const pageWidth = doc.internal.pageSize.width;
-  const margins = options.margins || { left: 20, right: 20 };
+  const margins = options.margins || { left: 15, right: 15 };
   const cellPadding = options.cellPadding || 3;
-  const rowHeight = options.rowHeight || 10;
+  const rowHeight = options.rowHeight || 8;
   const fontSize = options.fontSize || 9;
 
   let y = startY;
   const tableWidth = pageWidth - margins.left - margins.right;
 
-  // Permitir larguras de coluna customizadas
+  // Larguras de coluna
   const columnWidths = options.columnWidths || headers.map(() => tableWidth / headers.length);
 
-  // Calcular posições X das colunas
   const getColumnX = (colIndex) => {
     let x = margins.left;
     for (let i = 0; i < colIndex; i++) {
@@ -153,55 +328,90 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
     return x;
   };
 
-  // Desenhar cabeçalho
-  doc.setFillColor(21, 67, 96);
+  // HEADER - Fundo claro (não colorido!)
+  doc.setFillColor(...PDF_COLORS.SLATE_100);
   doc.rect(margins.left, y, tableWidth, rowHeight, "F");
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(fontSize);
+  // Texto do header - escuro
+  doc.setTextColor(...PDF_COLORS.SLATE_700);
+  doc.setFontSize(fontSize - 1);
   doc.setFont("helvetica", "bold");
 
   headers.forEach((header, i) => {
     const x = getColumnX(i) + cellPadding;
     const maxWidth = columnWidths[i] - (cellPadding * 2);
-    // Calcular máximo de caracteres baseado na largura
-    const maxChars = Math.floor(maxWidth / (fontSize * 0.5));
-    doc.text(truncateText(header, maxChars), x, y + rowHeight - 3);
+    const maxChars = Math.floor(maxWidth / (fontSize * 0.45));
+    doc.text(truncateText(header, maxChars), x, y + rowHeight - 2.5);
   });
+
+  // Linha abaixo do header
+  doc.setDrawColor(...PDF_COLORS.SLATE_300);
+  doc.setLineWidth(0.5);
+  doc.line(margins.left, y + rowHeight, margins.left + tableWidth, y + rowHeight);
 
   y += rowHeight;
 
-  // Desenhar dados
-  doc.setTextColor(0, 0, 0);
+  // DADOS
   doc.setFont("helvetica", "normal");
 
   data.forEach((row, rowIndex) => {
-    // Alternar cor de fundo
+    // Alternância muito sutil
     if (rowIndex % 2 === 0) {
-      doc.setFillColor(240, 240, 240);
+      doc.setFillColor(...PDF_COLORS.SLATE_50);
       doc.rect(margins.left, y, tableWidth, rowHeight, "F");
     }
 
-    // Desenhar células
+    // Células
     row.forEach((cell, i) => {
       const x = getColumnX(i) + cellPadding;
       const maxWidth = columnWidths[i] - (cellPadding * 2);
-      // Calcular máximo de caracteres baseado na largura da coluna
-      const maxChars = Math.floor(maxWidth / (fontSize * 0.5));
-      doc.text(truncateText(cell, maxChars), x, y + rowHeight - 3);
+      const maxChars = Math.floor(maxWidth / (fontSize * 0.45));
+
+      // Números alinhados à direita
+      const isNumber = /^R?\$?\s*[\d.,]+%?$/.test(String(cell).trim());
+      doc.setTextColor(...PDF_COLORS.SLATE_700);
+      doc.setFontSize(fontSize - 1);
+
+      if (isNumber && i === row.length - 1) {
+        doc.setFont("helvetica", "bold");
+        doc.text(truncateText(cell, maxChars), getColumnX(i) + columnWidths[i] - cellPadding, y + rowHeight - 2.5, { align: "right" });
+      } else {
+        doc.text(truncateText(cell, maxChars), x, y + rowHeight - 2.5);
+      }
     });
 
-    // Desenhar linha separadora
-    doc.setDrawColor(200, 200, 200);
-    doc.line(
-      margins.left,
-      y + rowHeight,
-      margins.left + tableWidth,
-      y + rowHeight,
-    );
+    // Linha separadora fina
+    doc.setDrawColor(...PDF_COLORS.SLATE_200);
+    doc.setLineWidth(0.2);
+    doc.line(margins.left, y + rowHeight, margins.left + tableWidth, y + rowHeight);
 
     y += rowHeight;
   });
 
   return y;
 };
+
+// ==========================================
+// ESTILOS MODERNOS PARA AUTOTABLE
+// ==========================================
+
+export const getModernTableStyles = () => ({
+  headStyles: {
+    fillColor: PDF_COLORS.SLATE_100,
+    textColor: PDF_COLORS.SLATE_700,
+    fontStyle: 'bold',
+    fontSize: 8,
+    cellPadding: 3,
+  },
+  styles: {
+    fontSize: 8,
+    cellPadding: 2.5,
+    textColor: PDF_COLORS.SLATE_700,
+    lineColor: PDF_COLORS.SLATE_200,
+    lineWidth: 0.2,
+  },
+  alternateRowStyles: {
+    fillColor: PDF_COLORS.SLATE_50,
+  },
+  margin: { left: 15, right: 15 },
+});

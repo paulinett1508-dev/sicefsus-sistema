@@ -1,23 +1,32 @@
 // src/components/relatorios/geradores/RelatorioExecucao.js
+// Design Moderno - Clean, Compacto, Elegante
 import { BaseRelatorio } from "./BaseRelatorio";
 import { PDF_COLORS } from "../../../utils/relatoriosConstants";
-import { createManualTable } from "../../../utils/pdfHelpers";
+import {
+  addKPICards,
+  addSectionTitle,
+  getModernTableStyles,
+  formatCurrencyCompact,
+} from "../../../utils/pdfHelpers";
 
 export class RelatorioExecucao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    this.addHeader("Relatório de Execução Orçamentária");
+    // Período para subtítulo
+    let subtitulo = null;
+    if (filtros.dataInicio || filtros.dataFim) {
+      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início";
+      const fim = filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual";
+      subtitulo = `Período: ${inicio} a ${fim}`;
+    }
 
-    let yPosition = 70;
-    const lineHeight = 7;
+    // HEADER
+    this.addHeader("Execução Orçamentária", subtitulo);
 
-    // Resumo Executivo
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("RESUMO EXECUTIVO", 20, yPosition);
-    yPosition += 10;
+    let yPosition = 55;
 
+    // Métricas
     const totalEmendas = this.emendas.length;
     const valorTotal = this.emendas.reduce((sum, e) => {
       const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
@@ -30,67 +39,26 @@ export class RelatorioExecucao extends BaseRelatorio {
         return sum + (isNaN(valor) ? 0 : valor);
       }, 0);
     const saldoDisponivel = valorTotal - valorExecutado;
-    const percentualExecutado =
-      valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 
-    this.doc.setFontSize(11);
-    this.doc.setFont("helvetica", "normal");
-    this.doc.text(`Total de Emendas: ${totalEmendas}`, 20, yPosition);
-    yPosition += lineHeight;
-    this.doc.text(
-      `Valor Total: ${this.formatCurrency(valorTotal)}`,
-      20,
-      yPosition,
-    );
-    yPosition += lineHeight;
-    this.doc.text(
-      `Valor Executado: ${this.formatCurrency(valorExecutado)}`,
-      20,
-      yPosition,
-    );
-    yPosition += lineHeight;
-    this.doc.text(
-      `Saldo Disponível: ${this.formatCurrency(saldoDisponivel)}`,
-      20,
-      yPosition,
-    );
-    yPosition += lineHeight;
-    this.doc.text(
-      `Percentual Executado: ${percentualExecutado.toFixed(2)}%`,
-      20,
-      yPosition,
-    );
-    yPosition += 15;
+    // KPI CARDS
+    const kpis = [
+      { label: "Total Emendas", value: totalEmendas.toString() },
+      { label: "Valor Total", value: formatCurrencyCompact(valorTotal) },
+      { label: "Executado", value: formatCurrencyCompact(valorExecutado), trend: `${percentualExecutado.toFixed(1)}%` },
+      { label: "Saldo", value: formatCurrencyCompact(saldoDisponivel) },
+    ];
 
-    // Período do relatório
-    if (filtros.dataInicio || filtros.dataFim) {
-      this.doc.text(
-        `Período: ${filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início"} a ${filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual"}`,
-        20,
-        yPosition,
-      );
-      yPosition += 15;
-    }
+    yPosition = addKPICards(this.doc, kpis, yPosition);
 
-    // Tabela de Emendas
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("DETALHAMENTO POR EMENDA", 20, yPosition);
-    yPosition += 10;
+    // DETALHAMENTO POR EMENDA
+    yPosition = addSectionTitle(this.doc, "Detalhamento por Emenda", yPosition);
 
     // Preparar dados para a tabela
-    const headers = [
-      "Nº Emenda",
-      "Parlamentar",
-      "Valor Total",
-      "Executado",
-      "Saldo",
-      "% Exec.",
-    ];
     const tabelaEmendas = this.emendas.map((emenda) => {
       const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
       const valorTotalNormalizado = isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
-      
+
       const despesasEmenda = this.despesas.filter(
         (d) => d.emendaId === emenda.id && d.status !== "PLANEJADA",
       );
@@ -98,61 +66,62 @@ export class RelatorioExecucao extends BaseRelatorio {
         const valor = parseFloat(d.valor || 0);
         return sum + (isNaN(valor) ? 0 : valor);
       }, 0);
-      
+
       const saldoEmenda = valorTotalNormalizado - valorExecutadoEmenda;
-      const percentualEmenda =
-        valorTotalNormalizado > 0
-          ? (valorExecutadoEmenda / valorTotalNormalizado) * 100
-          : 0;
+      const percentualEmenda = valorTotalNormalizado > 0
+        ? (valorExecutadoEmenda / valorTotalNormalizado) * 100
+        : 0;
 
       return [
         emenda.numero || "-",
-        emenda.autor || "-",
+        (emenda.autor || "-").substring(0, 25),
         this.formatCurrency(valorTotalNormalizado),
         this.formatCurrency(valorExecutadoEmenda),
         this.formatCurrency(saldoEmenda),
-        `${percentualEmenda.toFixed(1)}%`,
+        `${percentualEmenda.toFixed(0)}%`,
       ];
     });
 
-    // Tentar usar autoTable se disponível, senão usar tabela manual
+    // Usar autoTable com estilos modernos
     try {
       if (this.doc.autoTable) {
+        const modernStyles = getModernTableStyles();
+
         this.doc.autoTable({
           startY: yPosition,
-          head: [headers],
+          head: [["Emenda", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
           body: tabelaEmendas,
-          theme: "striped",
-          headStyles: { fillColor: PDF_COLORS.HEADER_BG },
-          styles: { fontSize: 10 },
+          ...modernStyles,
           columnStyles: {
-            2: { halign: "right" },
-            3: { halign: "right" },
-            4: { halign: "right" },
-            5: { halign: "center" },
+            0: { cellWidth: 22 },
+            1: { cellWidth: 'auto' },
+            2: { halign: "right", cellWidth: 30 },
+            3: { halign: "right", cellWidth: 30 },
+            4: { halign: "right", cellWidth: 30 },
+            5: { halign: "center", cellWidth: 16 },
           },
           didDrawPage: (data) => {
-            this.addFooter();
             if (data.pageNumber > 1) {
-              this.pageNum++;
-              this.addHeader(
-                "Relatório de Execução Orçamentária (continuação)",
-              );
+              // Header compacto para continuação
+              this.doc.setFillColor(...PDF_COLORS.ACCENT);
+              this.doc.rect(0, 0, this.pageWidth, 1.5, "F");
+              this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+              this.doc.setFontSize(9);
+              this.doc.setFont("helvetica", "bold");
+              this.doc.text("Execução Orçamentária", 15, 10);
+              this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+              this.doc.setFontSize(8);
+              this.doc.text("(continuação)", 55, 10);
             }
+            this.addFooter();
           },
         });
-      } else {
-        // Usar tabela manual se autoTable não estiver disponível
-        createManualTable(this.doc, headers, tabelaEmendas, yPosition);
       }
     } catch (error) {
-      console.warn(
-        "Erro ao criar tabela automática, usando tabela manual:",
-        error,
-      );
-      createManualTable(this.doc, headers, tabelaEmendas, yPosition);
+      console.warn("Erro ao criar tabela:", error);
     }
 
+    // Rodapé
     this.addFooter();
   }
 }

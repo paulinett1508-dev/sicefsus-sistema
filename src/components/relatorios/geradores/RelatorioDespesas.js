@@ -1,361 +1,177 @@
 // src/components/relatorios/geradores/RelatorioDespesas.js
-// ✅ CORRIGIDO 04/11/2025: Usando campos corretos do Firebase
+// Design Moderno - Clean, Compacto, Elegante
 import { BaseRelatorio } from "./BaseRelatorio";
 import { PDF_COLORS } from "../../../utils/relatoriosConstants";
-import { createManualTable } from "../../../utils/pdfHelpers";
+import {
+  addKPICards,
+  addSectionTitle,
+  addMiniTable,
+  getModernTableStyles,
+  formatCurrencyCompact,
+} from "../../../utils/pdfHelpers";
 
 export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    console.log("📊 Gerando Relatório de Despesas...");
-    console.log("Emendas recebidas:", this.emendas.length);
-    console.log("Despesas recebidas:", this.despesas.length);
-
-    this.addHeader("Relatório de Despesas Detalhado");
-
-    let yPosition = 70;
-
-    // Resumo
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("RESUMO DAS DESPESAS", 20, yPosition);
-    yPosition += 10;
-
-    // Filtrar apenas despesas executadas (não PLANEJADA)
+    // Filtrar apenas despesas executadas
     const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    
+
+    // Calcular métricas
     const totalDespesas = despesasExecutadas.length;
-    const valorTotal = despesasExecutadas.reduce((sum, d) => {\n      const valor = parseFloat(d.valor || 0);\n      return sum + (isNaN(valor) ? 0 : valor);\n    }, 0);\n    const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
+    const valorTotal = despesasExecutadas.reduce((sum, d) => {
+      const valor = parseFloat(d.valor || 0);
+      return sum + (isNaN(valor) ? 0 : valor);
+    }, 0);
+    const ticketMedio = totalDespesas > 0 ? valorTotal / totalDespesas : 0;
 
-    // Box de resumo
-    this.doc.setFillColor(...PDF_COLORS.CARD_BG);
-    this.doc.roundedRect(20, yPosition, this.pageWidth - 40, 35, 3, 3, "F");
-
-    this.doc.setFontSize(11);
-    this.doc.setFont("helvetica", "normal");
-    this.doc.text(`Total de Despesas: ${totalDespesas}`, 25, yPosition + 10);
-    this.doc.text(
-      `Valor Total: ${this.formatCurrency(valorTotal)}`,
-      25,
-      yPosition + 20,
-    );
-    this.doc.text(
-      `Ticket Médio: ${this.formatCurrency(ticketMedio)}`,
-      25,
-      yPosition + 30,
-    );
-
-    // Análise por período (se houver filtro de data)
+    // Período para subtítulo
+    let subtitulo = null;
     if (filtros.dataInicio || filtros.dataFim) {
-      this.doc.text(
-        `Período: ${filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início"} a ${filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual"}`,
-        this.pageWidth / 2,
-        yPosition + 10,
-      );
+      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Início";
+      const fim = filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual";
+      subtitulo = `Período: ${inicio} a ${fim}`;
     }
 
-    yPosition += 45;
+    // HEADER MODERNO
+    this.addHeader("Relatório de Despesas", subtitulo);
 
-    // Filtros aplicados
+    let yPosition = 55;
+
+    // KPI CARDS
+    const kpis = [
+      {
+        label: "Despesas Executadas",
+        value: totalDespesas.toString(),
+      },
+      {
+        label: "Valor Total",
+        value: formatCurrencyCompact(valorTotal),
+      },
+      {
+        label: "Ticket Médio",
+        value: formatCurrencyCompact(ticketMedio),
+      },
+      {
+        label: "Fornecedores",
+        value: new Set(despesasExecutadas.map(d => d.fornecedor)).size.toString(),
+      },
+    ];
+
+    yPosition = addKPICards(this.doc, kpis, yPosition);
+
+    // FILTROS APLICADOS (se houver)
     const filtrosAtivos = [];
-    if (filtros.municipio)
-      filtrosAtivos.push(`Município: ${filtros.municipio}`);
-    if (filtros.fornecedor)
-      filtrosAtivos.push(`Fornecedor: ${filtros.fornecedor}`);
-    if (filtros.parlamentar)
-      filtrosAtivos.push(`Parlamentar: ${filtros.parlamentar}`);
-    if (filtros.emenda) {
-      const emenda = this.emendas.find((e) => e.id === filtros.emenda);
-      if (emenda) {
-        filtrosAtivos.push(`Emenda: ${emenda.numero || emenda.numeroEmenda}`);
-      }
-    }
+    if (filtros.municipio) filtrosAtivos.push(filtros.municipio);
+    if (filtros.fornecedor) filtrosAtivos.push(filtros.fornecedor);
+    if (filtros.parlamentar) filtrosAtivos.push(filtros.parlamentar);
 
     if (filtrosAtivos.length > 0) {
-      this.doc.setFontSize(12);
-      this.doc.setFont("helvetica", "bold");
-      this.doc.text("FILTROS APLICADOS", 20, yPosition);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+      this.doc.setFontSize(8);
+      this.doc.text(`Filtros: ${filtrosAtivos.join(" • ")}`, 15, yPosition);
       yPosition += 8;
-
-      this.doc.setFontSize(10);
-      this.doc.setFont("helvetica", "normal");
-      filtrosAtivos.forEach((filtro) => {
-        this.doc.text(`• ${filtro}`, 25, yPosition);
-        yPosition += 6;
-      });
-      yPosition += 10;
     }
 
-    // Análise por Fornecedor
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("ANÁLISE POR FORNECEDOR", 20, yPosition);
-    yPosition += 10;
+    // TOP FORNECEDORES
+    yPosition = addSectionTitle(this.doc, "Top 10 Fornecedores", yPosition);
 
     // Agrupar por fornecedor
     const porFornecedor = {};
     despesasExecutadas.forEach((despesa) => {
       const fornecedor = despesa.fornecedor || "Não informado";
       if (!porFornecedor[fornecedor]) {
-        porFornecedor[fornecedor] = {
-          quantidade: 0,
-          valorTotal: 0,
-          ultimaCompra: null,
-        };
+        porFornecedor[fornecedor] = { quantidade: 0, valorTotal: 0 };
       }
-
       porFornecedor[fornecedor].quantidade++;
       const valor = parseFloat(despesa.valor || 0);
       porFornecedor[fornecedor].valorTotal += isNaN(valor) ? 0 : valor;
-
-      // ✅ CORRIGIDO: Buscar data correta
-      const dataCompra = new Date(
-        despesa.dataEmpenho || despesa.criadaEm || Date.now(),
-      );
-      if (
-        !porFornecedor[fornecedor].ultimaCompra ||
-        dataCompra > porFornecedor[fornecedor].ultimaCompra
-      ) {
-        porFornecedor[fornecedor].ultimaCompra = dataCompra;
-      }
     });
 
-    // Top 10 fornecedores
     const topFornecedores = Object.entries(porFornecedor)
       .sort(([, a], [, b]) => b.valorTotal - a.valorTotal)
-      .slice(0, 10);
+      .slice(0, 10)
+      .map(([nome, dados]) => ({
+        label: nome,
+        value: this.formatCurrency(dados.valorTotal),
+      }));
 
-    const tabelaFornecedores = topFornecedores.map(([nome, dados], index) => [
-      `${index + 1}º`,
-      nome,
-      dados.quantidade.toString(),
-      this.formatCurrency(dados.valorTotal),
-      this.formatCurrency(dados.valorTotal / dados.quantidade),
-      this.formatDate(dados.ultimaCompra),
-    ]);
-
-    // Tentar usar autoTable se disponível, senão usar tabela manual
-    try {
-      if (this.doc.autoTable) {
-        this.doc.autoTable({
-          startY: yPosition,
-          head: [
-            [
-              "Rank",
-              "Fornecedor",
-              "Qtd",
-              "Valor Total",
-              "Ticket Médio",
-              "Última Compra",
-            ],
-          ],
-          body: tabelaFornecedores,
-          theme: "striped",
-          headStyles: {
-            fillColor: PDF_COLORS.TABLE_HEADER,
-            fontSize: 9,
-          },
-          styles: {
-            fontSize: 8,
-            cellPadding: 2,
-            overflow: 'linebreak',
-          },
-          columnStyles: {
-            0: { halign: "center" },
-            1: { cellWidth: 'auto' },
-            2: { halign: "center" },
-            3: { halign: "right" },
-            4: { halign: "right" },
-            5: { halign: "center" },
-          },
-          margin: { left: 14, right: 14 },
-        });
-
-        yPosition = this.doc.lastAutoTable.finalY + 20;
-      } else {
-        yPosition =
-          createManualTable(
-            this.doc,
-            [
-              "Rank",
-              "Fornecedor",
-              "Qtd",
-              "Valor Total",
-              "Ticket Médio",
-              "Última Compra",
-            ],
-            tabelaFornecedores,
-            yPosition,
-          ) + 20;
-      }
-    } catch (error) {
-      console.warn(
-        "Erro ao criar tabela automática, usando tabela manual:",
-        error,
-      );
-      yPosition =
-        createManualTable(
-          this.doc,
-          [
-            "Rank",
-            "Fornecedor",
-            "Qtd",
-            "Valor Total",
-            "Ticket Médio",
-            "Última Compra",
-          ],
-          tabelaFornecedores,
-          yPosition,
-        ) + 20;
+    if (topFornecedores.length > 0) {
+      yPosition = addMiniTable(this.doc, topFornecedores, yPosition);
     }
 
-    // Tabela detalhada de despesas
+    // TABELA DETALHADA
     yPosition = this.checkNewPage(yPosition, 60);
-    if (yPosition === 70) {
-      this.addHeader("Relatório de Despesas Detalhado (continuação)");
+    if (yPosition < 30) {
+      this.doc.addPage();
       this.pageNum++;
+      yPosition = 20;
     }
 
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("LISTAGEM DETALHADA DE DESPESAS", 20, yPosition);
-    yPosition += 10;
+    yPosition = addSectionTitle(this.doc, "Listagem Detalhada", yPosition);
 
-    // ✅ CORRIGIDO: Ordenar por data correta
+    // Ordenar por data
     const despesasOrdenadas = [...despesasExecutadas].sort((a, b) => {
       const dataA = new Date(a.dataEmpenho || a.criadaEm || 0);
       const dataB = new Date(b.dataEmpenho || b.criadaEm || 0);
       return dataB - dataA;
     });
 
-    // ✅ CORRIGIDO: Mapear com campos corretos
+    // Preparar dados da tabela
     const tabelaDespesas = despesasOrdenadas.map((despesa) => {
       const emenda = this.emendas.find((e) => e.id === despesa.emendaId);
       const data = despesa.dataEmpenho || despesa.criadaEm;
-
-      // Truncamento melhorado - colunas mais largas permitem mais texto
       const discriminacao = despesa.discriminacao || despesa.descricao || "-";
       const fornecedor = despesa.fornecedor || "-";
 
       return [
         data ? this.formatDate(data) : "-",
         emenda?.numero || emenda?.numeroEmenda || "-",
-        discriminacao.length > 50 ? discriminacao.substring(0, 47) + "..." : discriminacao,
-        fornecedor.length > 40 ? fornecedor.substring(0, 37) + "..." : fornecedor,
-        despesa.cnpjFornecedor || "-",
-        despesa.numeroNota || despesa.numeroEmpenho || "-",
+        discriminacao.length > 40 ? discriminacao.substring(0, 37) + "..." : discriminacao,
+        fornecedor.length > 30 ? fornecedor.substring(0, 27) + "..." : fornecedor,
         this.formatCurrency(parseFloat(despesa.valor) || 0),
       ];
     });
 
-    console.log(
-      "📋 Tabela de despesas preparada:",
-      tabelaDespesas.length,
-      "linhas",
-    );
-
-    // Adicionar tabela com paginação automática
+    // Usar autoTable com estilos modernos
     try {
       if (this.doc.autoTable) {
+        const modernStyles = getModernTableStyles();
+
         this.doc.autoTable({
           startY: yPosition,
-          head: [
-            [
-              "Data",
-              "Emenda",
-              "Discriminação",
-              "Fornecedor",
-              "CNPJ",
-              "Doc.",
-              "Valor",
-            ],
-          ],
+          head: [["Data", "Emenda", "Discriminação", "Fornecedor", "Valor"]],
           body: tabelaDespesas,
-          theme: "grid",
-          headStyles: {
-            fillColor: PDF_COLORS.TABLE_HEADER,
-            fontSize: 8,
-          },
-          styles: {
-            fontSize: 7,
-            cellPadding: 2,
-            overflow: 'linebreak',
-          },
+          ...modernStyles,
           columnStyles: {
-            0: { cellWidth: 'auto' },
-            1: { cellWidth: 'auto' },
+            0: { cellWidth: 22 },
+            1: { cellWidth: 22 },
             2: { cellWidth: 'auto' },
             3: { cellWidth: 'auto' },
-            4: { cellWidth: 'auto' },
-            5: { cellWidth: 'auto' },
-            6: { halign: "right", cellWidth: 'auto' },
+            4: { halign: "right", cellWidth: 28, fontStyle: 'bold' },
           },
-          margin: { left: 14, right: 14 },
           didDrawPage: (data) => {
-            this.addFooter();
             if (data.pageNumber > 1) {
-              this.pageNum++;
-              this.addHeader("Relatório de Despesas Detalhado (continuação)");
+              // Header compacto para continuação
+              this.doc.setFillColor(...PDF_COLORS.ACCENT);
+              this.doc.rect(0, 0, this.pageWidth, 1.5, "F");
+              this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+              this.doc.setFontSize(9);
+              this.doc.setFont("helvetica", "bold");
+              this.doc.text("Relatório de Despesas", 15, 10);
+              this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+              this.doc.setFontSize(8);
+              this.doc.text("(continuação)", 60, 10);
             }
+            this.addFooter();
           },
         });
-
-        console.log("✅ Tabela criada com sucesso!");
-      } else {
-        // Tabela manual simplificada - sem paginação automática
-        createManualTable(
-          this.doc,
-          [
-            "Data",
-            "Emenda",
-            "Discriminação",
-            "Fornecedor",
-            "CNPJ",
-            "Documento",
-            "Valor",
-          ],
-          tabelaDespesas.slice(0, 20), // Limitar para evitar overflow
-          yPosition,
-        );
-
-        if (tabelaDespesas.length > 20) {
-          this.doc.setFontSize(10);
-          this.doc.setFont("helvetica", "italic");
-          this.doc.text(
-            `Mostrando 20 de ${tabelaDespesas.length} despesas. Para ver todas, exporte para Excel.`,
-            20,
-            this.pageHeight - 40,
-          );
-        }
-
-        console.log("✅ Tabela manual criada!");
       }
     } catch (error) {
-      console.error("❌ Erro ao criar tabela:", error);
-      console.warn(
-        "Erro ao criar tabela automática, usando tabela manual:",
-        error,
-      );
-      createManualTable(
-        this.doc,
-        [
-          "Data",
-          "Emenda",
-          "Discriminação",
-          "Fornecedor",
-          "CNPJ",
-          "Documento",
-          "Valor",
-        ],
-        tabelaDespesas.slice(0, 20),
-        yPosition,
-      );
+      console.warn("Erro ao criar tabela:", error);
     }
 
-    // Adicionar rodapé na última página
+    // Rodapé
     this.addFooter();
-
-    console.log("✅ Relatório de Despesas gerado com sucesso!");
   }
 }

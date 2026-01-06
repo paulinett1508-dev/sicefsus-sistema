@@ -30,8 +30,8 @@ export class BaseRelatorio {
     this.logoBase64 = await getLogoBase64();
   }
 
-  addHeader(titulo) {
-    addHeader(this.doc, titulo, this.logoBase64);
+  addHeader(titulo, subtitulo = null) {
+    addHeader(this.doc, titulo, this.logoBase64, subtitulo);
   }
 
   addFooter() {

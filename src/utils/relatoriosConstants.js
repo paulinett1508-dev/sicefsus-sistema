@@ -11,33 +11,46 @@ export const COLORS = {
   GRAY: "#f8f9fa",
 };
 
-// Cores RGB para uso em PDF (jsPDF)
+// Cores RGB para uso em PDF (jsPDF) - Design System Moderno
 export const PDF_COLORS = {
-  // Cores de cabeçalho
-  HEADER_BG: [21, 67, 96],        // Azul escuro
-  HEADER_TEXT: [255, 255, 255],   // Branco
+  // Base - Slate (tons neutros sofisticados)
+  SLATE_900: [15, 23, 42],         // Títulos principais
+  SLATE_700: [51, 65, 85],         // Subtítulos, texto importante
+  SLATE_500: [100, 116, 139],      // Texto secundário
+  SLATE_400: [148, 163, 184],      // Texto muted
+  SLATE_300: [203, 213, 225],      // Bordas, linhas
+  SLATE_200: [226, 232, 240],      // Bordas sutis
+  SLATE_100: [241, 245, 249],      // Background alternado
+  SLATE_50: [248, 250, 252],       // Background cards
 
-  // Cores de tabela
-  TABLE_HEADER: [243, 156, 18],   // Laranja
-  TABLE_HEADER_BLUE: [74, 144, 226], // Azul para tabelas alternativas
-  TABLE_HEADER_RED: [231, 76, 60],   // Vermelho para destaques
-  TABLE_ROW_EVEN: [240, 240, 240], // Cinza claro
+  // Accent - Emerald (destaque elegante)
+  EMERALD_500: [16, 185, 129],     // Valores positivos, sucesso
+  EMERALD_100: [209, 250, 229],    // Background sucesso
+
+  // Warning - Amber
+  AMBER_500: [245, 158, 11],       // Alertas, pendências
+
+  // Danger - Red
+  RED_500: [239, 68, 68],          // Valores negativos, crítico
+
+  // Aliases para compatibilidade
+  HEADER_BG: [15, 23, 42],         // Slate 900
+  HEADER_TEXT: [255, 255, 255],    // Branco
+  TABLE_HEADER: [241, 245, 249],   // Slate 100 (fundo claro!)
+  TABLE_HEADER_TEXT: [51, 65, 85], // Slate 700
+  TABLE_ROW_EVEN: [248, 250, 252], // Slate 50
   TABLE_ROW_ODD: [255, 255, 255],  // Branco
-  TABLE_BORDER: [200, 200, 200],   // Cinza
-
-  // Cores de texto
-  TEXT_PRIMARY: [0, 0, 0],         // Preto
-  TEXT_SECONDARY: [80, 80, 80],    // Cinza escuro
-  TEXT_MUTED: [100, 100, 100],     // Cinza médio
-
-  // Cores de fundo
-  CARD_BG: [245, 247, 250],        // Fundo de cards
-  BOX_BG: [248, 249, 250],         // Fundo de boxes
-
-  // Cores de status/indicadores
-  STATUS_ALTO: [39, 174, 96],      // Verde
-  STATUS_MEDIO: [243, 156, 18],    // Laranja
-  STATUS_BAIXO: [231, 76, 60],     // Vermelho
+  TABLE_BORDER: [226, 232, 240],   // Slate 200
+  TEXT_PRIMARY: [15, 23, 42],      // Slate 900
+  TEXT_SECONDARY: [100, 116, 139], // Slate 500
+  TEXT_MUTED: [148, 163, 184],     // Slate 400
+  CARD_BG: [248, 250, 252],        // Slate 50
+  BOX_BG: [241, 245, 249],         // Slate 100
+  STATUS_ALTO: [16, 185, 129],     // Emerald 500
+  STATUS_MEDIO: [245, 158, 11],    // Amber 500
+  STATUS_BAIXO: [239, 68, 68],     // Red 500
+  ACCENT: [16, 185, 129],          // Emerald 500
+  WHITE: [255, 255, 255],
 };
 
 export const TIPOS_RELATORIOS = [
