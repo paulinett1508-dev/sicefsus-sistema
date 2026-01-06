@@ -304,7 +304,7 @@ const LogsSection = ({
                     <div
                       style={{
                         fontSize: "11px",
-                        color: "#666",
+                        color: "var(--theme-text-secondary)",
                         marginTop: "2px",
                       }}
                     >
@@ -340,19 +340,19 @@ const LogsSection = ({
                     }}>
                       {/* Nome do usuário em destaque (se disponível) */}
                       {log.userName && (
-                        <div style={{ 
+                        <div style={{
                           fontWeight: "700",
-                          color: "#1E293B",
+                          color: "var(--theme-text)",
                           fontSize: "14px"
                         }}>
                           {log.userName}
                         </div>
                       )}
-                      
+
                       {/* Email */}
-                      <div style={{ 
+                      <div style={{
                         fontWeight: log.userName ? "400" : "600",
-                        color: "#495057",
+                        color: "var(--theme-text-secondary)",
                         fontSize: "12px"
                       }}>
                         <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 2, verticalAlign: "middle" }}>mail</span> {log.userEmail || "Sistema"}
@@ -398,7 +398,7 @@ const LogsSection = ({
                     <div style={{ fontWeight: "500" }}>
                       {log.resourceType || "N/A"}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#666" }}>
+                    <div style={{ fontSize: "11px", color: "var(--theme-text-secondary)" }}>
                       ID: {(log.resourceId || "N/A").substring(0, 8)}...
                     </div>
                   </td>
@@ -414,7 +414,7 @@ const LogsSection = ({
                         </pre>
                       </details>
                     ) : (
-                      <span style={{ color: "#999", fontSize: "11px" }}>
+                      <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
                         {log.action?.includes('CREATE') ? '(Criação - sem dados anteriores)' : 'N/A'}
                       </span>
                     )}
@@ -432,7 +432,7 @@ const LogsSection = ({
                         </pre>
                       </details>
                     ) : (
-                      <span style={{ color: "#999", fontSize: "11px" }}>
+                      <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
                         {log.action?.includes('DELETE') ? '(Exclusão - sem dados finais)' : 'N/A'}
                       </span>
                     )}
@@ -455,8 +455,8 @@ const LogsSection = ({
                       {log.errorMessage && (
                         <span style={{
                           fontSize: '10px',
-                          color: '#dc3545',
-                          backgroundColor: '#f8d7da',
+                          color: 'var(--danger-600)',
+                          backgroundColor: 'var(--danger-50)',
                           padding: '2px 6px',
                           borderRadius: '4px',
                           maxWidth: '120px',
@@ -479,10 +479,10 @@ const LogsSection = ({
 
 const styles = {
   tableContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 4px var(--theme-shadow)",
   },
 
   sectionHeader: {
@@ -496,11 +496,11 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold",
     margin: 0,
-    color: "#333",
+    color: "var(--theme-text)",
   },
 
   refreshButton: {
-    backgroundColor: "#6c757d",
+    backgroundColor: "var(--theme-text-secondary)",
     color: "white",
     border: "none",
     padding: "10px 16px",
@@ -517,7 +517,7 @@ const styles = {
   filtersContainer: {
     marginBottom: "20px",
     padding: "16px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
   },
   filtersGrid: {
@@ -528,7 +528,7 @@ const styles = {
   filterLabel: {
     fontSize: "12px",
     fontWeight: "bold",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     display: "block",
     marginBottom: "4px",
   },
@@ -555,13 +555,13 @@ const styles = {
   emptyLogs: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
   logsTableContainer: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     overflow: "hidden",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 4px var(--theme-shadow)",
   },
   logsTable: {
     width: "100%",
@@ -572,10 +572,10 @@ const styles = {
     textAlign: "left",
     fontWeight: "bold",
     fontSize: "12px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary)",
+    borderBottom: "2px solid var(--theme-border)",
   },
   tableCell: {
     padding: "12px",
@@ -586,23 +586,23 @@ const styles = {
   // Estilos para expansão de dados
   detailsExpand: {
     cursor: "pointer",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "4px",
     padding: "4px 8px",
-    border: "1px solid #dee2e6"
+    border: "1px solid var(--theme-border)"
   },
   detailsSummary: {
     fontSize: "11px",
     fontWeight: "600",
-    color: "#007bff",
+    color: "var(--primary-600)",
     userSelect: "none",
     listStyle: "none",
     padding: "4px 0"
   },
   jsonPre: {
     fontSize: "10px",
-    backgroundColor: "#282c34",
-    color: "#61dafb",
+    backgroundColor: "var(--theme-surface-secondary)",
+    color: "var(--primary-500)",
     padding: "8px",
     borderRadius: "4px",
     overflow: "auto",

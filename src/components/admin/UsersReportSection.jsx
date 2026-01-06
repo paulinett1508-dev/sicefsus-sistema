@@ -170,10 +170,10 @@ const UsersReportSection = ({ users, loading }) => {
                       <div>
                         {user.municipio}
                         <br />
-                        <small style={{ color: "#666" }}>{user.uf}</small>
+                        <small style={{ color: "var(--theme-text-secondary)" }}>{user.uf}</small>
                       </div>
                     ) : (
-                      <span style={{ color: "#999" }}>N/A</span>
+                      <span style={{ color: "var(--theme-text-muted)" }}>N/A</span>
                     )}
                   </td>
                   <td style={styles.td}>
@@ -231,10 +231,10 @@ const UsersReportSection = ({ users, loading }) => {
 
 const styles = {
   container: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "20px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 4px var(--theme-shadow)",
   },
 
   statsGrid: {
@@ -245,7 +245,7 @@ const styles = {
   },
 
   statCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "16px",
     borderRadius: "8px",
     display: "flex",
@@ -264,12 +264,12 @@ const styles = {
   statValue: {
     fontSize: "24px",
     fontWeight: "bold",
-    color: "#333",
+    color: "var(--theme-text)",
   },
 
   statLabel: {
     fontSize: "12px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
   },
 
@@ -289,10 +289,10 @@ const styles = {
 
   select: {
     padding: "10px 15px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "5px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
   },
 
   tableContainer: {
@@ -310,16 +310,16 @@ const styles = {
     textAlign: "left",
     fontWeight: "bold",
     fontSize: "12px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
-    backgroundColor: "#f8f9fa",
-    borderBottom: "2px solid #e9ecef",
+    backgroundColor: "var(--theme-surface-secondary)",
+    borderBottom: "2px solid var(--theme-border)",
   },
 
   td: {
     padding: "12px",
     fontSize: "13px",
-    borderBottom: "1px solid #e9ecef",
+    borderBottom: "1px solid var(--theme-border)",
   },
 
   badge: {
@@ -335,16 +335,16 @@ const styles = {
   emptyMessage: {
     textAlign: "center",
     padding: "40px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontStyle: "italic",
   },
 
   summary: {
     fontSize: "14px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     textAlign: "center",
     paddingTop: "12px",
-    borderTop: "1px solid #e9ecef",
+    borderTop: "1px solid var(--theme-border)",
   },
 
   loading: {

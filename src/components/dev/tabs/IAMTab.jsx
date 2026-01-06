@@ -246,7 +246,7 @@ const styles = {
   },
   compareButton: {
     padding: "12px 24px",
-    backgroundColor: "#667eea",
+    backgroundColor: "var(--primary-600)",
     color: "white",
     border: "none",
     borderRadius: "8px",
@@ -261,28 +261,28 @@ const styles = {
     fontSize: "18px",
     fontWeight: "bold",
     marginBottom: "15px",
-    color: "#333",
+    color: "var(--theme-text)",
   },
   successCard: {
     padding: "15px",
-    backgroundColor: "#d4edda",
-    border: "1px solid #c3e6cb",
+    backgroundColor: "var(--success-50)",
+    border: "1px solid var(--success-200)",
     borderRadius: "8px",
     marginBottom: "10px",
   },
   successText: {
-    color: "#155724",
+    color: "var(--success-700)",
     margin: 0,
   },
   warningCard: {
     padding: "15px",
-    backgroundColor: "#fff3cd",
-    border: "1px solid #ffc107",
+    backgroundColor: "var(--warning-50)",
+    border: "1px solid var(--warning-400)",
     borderRadius: "8px",
     marginBottom: "10px",
   },
   warningText: {
-    color: "#856404",
+    color: "var(--warning-700)",
     margin: "0 0 10px 0",
   },
   comparisonGrid: {
@@ -292,16 +292,16 @@ const styles = {
     marginTop: "20px",
   },
   column: {
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     borderRadius: "8px",
     overflow: "hidden",
   },
   columnTitle: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "15px",
     margin: 0,
     textAlign: "center",
-    borderBottom: "1px solid #dee2e6",
+    borderBottom: "1px solid var(--theme-border)",
   },
   card: {
     padding: "20px",
@@ -311,13 +311,13 @@ const styles = {
     fontWeight: "600",
     marginTop: "15px",
     marginBottom: "10px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
   },
   emailText: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     wordBreak: "break-all",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "8px",
     borderRadius: "4px",
   },
@@ -327,7 +327,7 @@ const styles = {
     paddingLeft: "20px",
   },
   userCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     padding: "12px",
     borderRadius: "6px",
     marginBottom: "10px",
@@ -336,12 +336,12 @@ const styles = {
   linksSection: {
     marginTop: "30px",
     padding: "20px",
-    backgroundColor: "#e7f3ff",
+    backgroundColor: "var(--primary-50)",
     borderRadius: "8px",
   },
   linksTitle: {
     margin: "0 0 15px 0",
-    color: "#1976d2",
+    color: "var(--primary-600)",
   },
   linksGrid: {
     display: "grid",
@@ -351,12 +351,12 @@ const styles = {
   link: {
     display: "block",
     padding: "10px",
-    backgroundColor: "white",
-    color: "#1976d2",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--primary-600)",
     textDecoration: "none",
     borderRadius: "6px",
     textAlign: "center",
-    border: "1px solid #2196F3",
+    border: "1px solid var(--primary-400)",
   },
 };
 

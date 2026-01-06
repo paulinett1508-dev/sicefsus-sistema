@@ -72,8 +72,8 @@ const styles = {
   tabsContainer: {
     display: "flex",
     marginBottom: "24px",
-    borderBottom: "2px solid #e9ecef",
-    backgroundColor: "white",
+    borderBottom: "2px solid var(--theme-border)",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px 8px 0 0",
     padding: "0 24px",
   },
@@ -83,7 +83,7 @@ const styles = {
     border: "none",
     fontSize: "16px",
     fontWeight: "500",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     cursor: "pointer",
     borderBottomWidth: "3px",
     borderBottomStyle: "solid",
@@ -91,9 +91,9 @@ const styles = {
     transition: "all 0.2s ease",
   },
   tabButtonActive: {
-    color: "#007bff",
-    borderBottomColor: "#007bff",
-    backgroundColor: "rgba(0, 123, 255, 0.1)",
+    color: "var(--primary-600)",
+    borderBottomColor: "var(--primary-600)",
+    backgroundColor: "rgba(var(--primary-rgb, 37, 99, 235), 0.1)",
   },
 };
 

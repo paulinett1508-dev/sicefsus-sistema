@@ -171,19 +171,19 @@ function UsuariosTab() {
       <div style={{
         marginTop: '32px',
         padding: '20px',
-        backgroundColor: '#f7fafc',
+        backgroundColor: 'var(--theme-surface-secondary)',
         borderRadius: '8px',
         textAlign: 'center',
       }}>
         <h4 style={{ margin: '0 0 12px 0' }}>🔧 Gerenciar Usuários</h4>
-        <p style={{ margin: '0 0 16px 0', color: '#666' }}>
+        <p style={{ margin: '0 0 16px 0', color: 'var(--theme-text-secondary)' }}>
           Para criar, editar ou excluir usuários, acesse o módulo de Administração
         </p>
         <button
           onClick={() => navigate('/administracao')}
           style={{
             padding: '10px 20px',
-            backgroundColor: '#667eea',
+            backgroundColor: 'var(--primary-600)',
             color: 'white',
             border: 'none',
             borderRadius: '6px',
@@ -201,10 +201,10 @@ function UsuariosTab() {
 
 const styles = {
   statCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'var(--theme-surface)',
     padding: '20px',
     borderRadius: '8px',
-    border: '2px solid #e2e8f0',
+    border: '2px solid var(--theme-border)',
     textAlign: 'center',
   },
   statIcon: {
@@ -214,24 +214,24 @@ const styles = {
   statValue: {
     fontSize: '32px',
     fontWeight: 'bold',
-    color: '#2d3748',
+    color: 'var(--theme-text)',
     marginBottom: '4px',
   },
   statLabel: {
     fontSize: '13px',
-    color: '#718096',
+    color: 'var(--theme-text-secondary)',
     fontWeight: '500',
     marginBottom: '8px',
   },
   expandIcon: {
     fontSize: '12px',
-    color: '#a0aec0',
+    color: 'var(--theme-text-muted)',
     marginTop: '8px',
   },
   usuariosList: {
     marginTop: '16px',
     paddingTop: '16px',
-    borderTop: '1px solid #e2e8f0',
+    borderTop: '1px solid var(--theme-border)',
     maxHeight: '300px',
     overflowY: 'auto',
     textAlign: 'left',
@@ -242,7 +242,7 @@ const styles = {
     alignItems: 'center',
     padding: '12px',
     marginBottom: '8px',
-    backgroundColor: '#f7fafc',
+    backgroundColor: 'var(--theme-surface-secondary)',
     borderRadius: '6px',
     fontSize: '13px',
   },
@@ -253,11 +253,11 @@ const styles = {
   },
   usuarioNome: {
     fontWeight: '600',
-    color: '#2d3748',
+    color: 'var(--theme-text)',
   },
   usuarioEmail: {
     fontSize: '12px',
-    color: '#718096',
+    color: 'var(--theme-text-secondary)',
   },
   usuarioMeta: {
     display: 'flex',

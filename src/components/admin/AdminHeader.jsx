@@ -36,7 +36,7 @@ const AdminHeader = ({
         {activeTab === "logs" && (
           <button
             onClick={onAtualizarLogs}
-            style={{ ...styles.primaryButton, backgroundColor: "#28a745" }}
+            style={{ ...styles.primaryButton, backgroundColor: "var(--success-600)" }}
             disabled={loading}
           >
             <span style={styles.buttonIcon}><span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span></span>
@@ -62,7 +62,7 @@ const styles = {
   },
   subtitle: {
     fontSize: "14px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     margin: "0",
   },
   headerActions: {
@@ -72,7 +72,7 @@ const styles = {
     flexWrap: "wrap",
   },
   primaryButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "var(--primary-600)",
     color: "white",
     border: "none",
     padding: "10px 20px",
