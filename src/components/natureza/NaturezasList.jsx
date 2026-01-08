@@ -33,6 +33,7 @@ const NaturezasList = ({
   onCriarNatureza,
   onEditarNatureza,
   onExcluirNatureza,
+  onRegularizarNatureza,
   onNovaDespesa,
   onEditarDespesa,
   onVisualizarDespesa,
@@ -109,6 +110,10 @@ const NaturezasList = ({
         [naturezaId]: expandido,
       }));
 
+      // Nao precisa carregar despesas para naturezas virtuais (ja tem despesasVinculadas)
+      const natureza = naturezas.find(n => n.id === naturezaId);
+      if (natureza?.isVirtual) return;
+
       // Carregar despesas se expandindo e ainda nao carregadas
       if (expandido && !despesasPorNatureza[naturezaId] && onCarregarDespesas) {
         setCarregandoDespesas((prev) => ({ ...prev, [naturezaId]: true }));
@@ -120,7 +125,7 @@ const NaturezasList = ({
         setCarregandoDespesas((prev) => ({ ...prev, [naturezaId]: false }));
       }
     },
-    [despesasPorNatureza, onCarregarDespesas]
+    [naturezas, despesasPorNatureza, onCarregarDespesas]
   );
 
   // Estilos - Design compacto e profissional
@@ -356,13 +361,18 @@ const NaturezasList = ({
             <NaturezaCard
               key={natureza.id}
               natureza={natureza}
-              despesas={despesasPorNatureza[natureza.id] || []}
+              despesas={
+                natureza.isVirtual
+                  ? natureza.despesasVinculadas || []
+                  : despesasPorNatureza[natureza.id] || []
+              }
               carregandoDespesas={carregandoDespesas[natureza.id] || false}
               expandido={naturezasExpandidas[natureza.id] || false}
               onExpandir={handleExpandir}
               onNovaDespesa={onNovaDespesa}
               onEditarNatureza={handleEditarNatureza}
               onExcluirNatureza={(n) => setNaturezaParaExcluir(n)}
+              onRegularizarNatureza={onRegularizarNatureza}
               onEditarDespesa={onEditarDespesa}
               onVisualizarDespesa={onVisualizarDespesa}
             />

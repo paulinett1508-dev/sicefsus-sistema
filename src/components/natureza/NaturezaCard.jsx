@@ -25,6 +25,7 @@ const NaturezaCard = ({
   onNovaDespesa,
   onEditarNatureza,
   onExcluirNatureza,
+  onRegularizarNatureza,
   onEditarDespesa,
   onVisualizarDespesa,
   carregandoDespesas = false,
@@ -33,10 +34,15 @@ const NaturezaCard = ({
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
   const [expandidoLocal, setExpandidoLocal] = useState(expandido);
+  const [valorRegularizacao, setValorRegularizacao] = useState("");
+  const [mostrarFormRegularizacao, setMostrarFormRegularizacao] = useState(false);
 
   useEffect(() => {
     setExpandidoLocal(expandido);
   }, [expandido]);
+
+  // Natureza virtual precisa de regularizacao
+  const isVirtual = natureza.isVirtual || false;
 
   // Calculos
   const valorAlocado = parseValorMonetario(natureza.valorAlocado || 0);
@@ -59,13 +65,39 @@ const NaturezaCard = ({
     }
   };
 
+  // Handler para regularizar
+  const handleRegularizar = async () => {
+    const valor = parseValorMonetario(valorRegularizacao) || valorExecutado;
+    if (valor < valorExecutado) {
+      alert(`O valor alocado deve ser pelo menos R$ ${valorExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })} (total executado)`);
+      return;
+    }
+    await onRegularizarNatureza?.(natureza, valor);
+    setMostrarFormRegularizacao(false);
+    setValorRegularizacao("");
+  };
+
   // Estilos - Design compacto e profissional
   const styles = {
     card: {
       backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
       borderRadius: "var(--border-radius-md, 8px)",
-      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      border: isVirtual
+        ? `2px dashed ${isDark ? "#f59e0b" : "#f59e0b"}`
+        : `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
       overflow: "hidden",
+      position: "relative",
+    },
+    virtualBadge: {
+      position: "absolute",
+      top: 0,
+      right: 0,
+      backgroundColor: "#f59e0b",
+      color: "#fff",
+      padding: "2px 8px",
+      fontSize: "10px",
+      fontWeight: 600,
+      borderBottomLeftRadius: "6px",
     },
     header: {
       display: "flex",
@@ -284,6 +316,16 @@ const NaturezaCard = ({
 
   return (
     <div style={styles.card}>
+      {/* Badge para natureza virtual */}
+      {isVirtual && (
+        <div style={styles.virtualBadge}>
+          <span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>
+            schedule
+          </span>
+          Pendente
+        </div>
+      )}
+
       {/* Header - sempre visivel */}
       <div
         style={styles.header}
@@ -302,77 +344,179 @@ const NaturezaCard = ({
           <div style={styles.titulo}>
             <span style={styles.codigo}>{natureza.codigo}</span>
             {natureza.descricao?.replace(`${natureza.codigo} - `, "")}
+            {isVirtual && (
+              <span style={{ fontSize: 11, color: "#f59e0b", marginLeft: 4 }}>
+                ({despesas.length} despesas)
+              </span>
+            )}
           </div>
         </div>
 
         <div style={styles.metricas}>
-          <div style={styles.metrica}>
-            <span style={styles.metricaLabel}>Alocado</span>
-            <span style={styles.metricaValor}>
-              R$ {valorAlocado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </span>
-          </div>
+          {isVirtual ? (
+            <>
+              <div style={styles.metrica}>
+                <span style={styles.metricaLabel}>Executado</span>
+                <span style={{ ...styles.metricaValor, color: "#8b5cf6" }}>
+                  R$ {valorExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div style={styles.metrica}>
+                <span style={styles.metricaLabel}>Alocado</span>
+                <span style={{ ...styles.metricaValor, color: "#f59e0b" }}>
+                  R$ 0,00
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={styles.metrica}>
+                <span style={styles.metricaLabel}>Alocado</span>
+                <span style={styles.metricaValor}>
+                  R$ {valorAlocado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
 
-          <div style={styles.metrica}>
-            <span style={styles.metricaLabel}>Saldo</span>
-            <span style={{ ...styles.metricaValor, color: getStatusColor() }}>
-              R$ {saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </span>
-          </div>
+              <div style={styles.metrica}>
+                <span style={styles.metricaLabel}>Saldo</span>
+                <span style={{ ...styles.metricaValor, color: getStatusColor() }}>
+                  R$ {saldoDisponivel.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
 
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <div style={styles.progressBar}>
-              <div
-                style={{
-                  ...styles.progressFill,
-                  width: `${Math.min(percentualExecutado, 100)}%`,
-                }}
-              />
-            </div>
-            <span style={styles.percentual}>
-              {percentualExecutado.toFixed(0)}%
-            </span>
-          </div>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={styles.progressBar}>
+                  <div
+                    style={{
+                      ...styles.progressFill,
+                      width: `${Math.min(percentualExecutado, 100)}%`,
+                    }}
+                  />
+                </div>
+                <span style={styles.percentual}>
+                  {percentualExecutado.toFixed(0)}%
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Body - expansivel */}
       <div style={styles.body}>
-        {/* Acoes */}
-        <div style={styles.acoes}>
-          <button
-            style={{ ...styles.btnAcao, ...styles.btnPrimario }}
-            onClick={() => onNovaDespesa?.(natureza)}
-            disabled={saldoDisponivel <= 0}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-              add
-            </span>
-            Nova Despesa
-          </button>
+        {/* Acoes para natureza virtual */}
+        {isVirtual ? (
+          <div>
+            {/* Banner de regularizacao */}
+            <div style={{
+              padding: "12px",
+              backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
+              borderRadius: 8,
+              marginBottom: 12,
+              border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: mostrarFormRegularizacao ? 12 : 0 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f59e0b" }}>info</span>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? "#fcd34d" : "#92400e" }}>
+                    Natureza detectada automaticamente
+                  </span>
+                  <p style={{ fontSize: 12, color: isDark ? "#fcd34d" : "#b45309", margin: "4px 0 0 0" }}>
+                    Esta natureza foi criada a partir de {despesas.length} despesas existentes.
+                    Defina o valor a ser alocado para regularizar.
+                  </p>
+                </div>
+              </div>
 
-          <button
-            style={{ ...styles.btnAcao, ...styles.btnSecundario }}
-            onClick={() => onEditarNatureza?.(natureza)}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-              edit
-            </span>
-            Editar
-          </button>
-
-          {despesas.length === 0 && (
+              {mostrarFormRegularizacao ? (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 8, marginTop: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 11, fontWeight: 500, color: isDark ? "#fcd34d" : "#92400e", display: "block", marginBottom: 4 }}>
+                      Valor a Alocar (mínimo R$ {valorExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })})
+                    </label>
+                    <input
+                      type="text"
+                      value={valorRegularizacao}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/[^\d,]/g, "");
+                        setValorRegularizacao(v);
+                      }}
+                      placeholder={valorExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                      style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        fontSize: 13,
+                        border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
+                        borderRadius: 6,
+                        backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+                        color: isDark ? "var(--theme-text)" : "#1e293b",
+                        fontFamily: "monospace",
+                        textAlign: "right",
+                      }}
+                    />
+                  </div>
+                  <button
+                    style={{ ...styles.btnAcao, backgroundColor: "#f59e0b", color: "#fff" }}
+                    onClick={handleRegularizar}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>check</span>
+                    Confirmar
+                  </button>
+                  <button
+                    style={{ ...styles.btnAcao, ...styles.btnSecundario }}
+                    onClick={() => setMostrarFormRegularizacao(false)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  style={{ ...styles.btnAcao, backgroundColor: "#f59e0b", color: "#fff", marginTop: 8 }}
+                  onClick={() => setMostrarFormRegularizacao(true)}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>verified</span>
+                  Regularizar Natureza
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* Acoes para natureza normal */
+          <div style={styles.acoes}>
             <button
-              style={{ ...styles.btnAcao, ...styles.btnPerigo }}
-              onClick={() => onExcluirNatureza?.(natureza)}
+              style={{ ...styles.btnAcao, ...styles.btnPrimario }}
+              onClick={() => onNovaDespesa?.(natureza)}
+              disabled={saldoDisponivel <= 0}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-                delete
+                add
               </span>
-              Excluir
+              Nova Despesa
             </button>
-          )}
-        </div>
+
+            <button
+              style={{ ...styles.btnAcao, ...styles.btnSecundario }}
+              onClick={() => onEditarNatureza?.(natureza)}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                edit
+              </span>
+              Editar
+            </button>
+
+            {despesas.length === 0 && (
+              <button
+                style={{ ...styles.btnAcao, ...styles.btnPerigo }}
+                onClick={() => onExcluirNatureza?.(natureza)}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                  delete
+                </span>
+                Excluir
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Lista de despesas */}
         <div style={styles.despesasList}>

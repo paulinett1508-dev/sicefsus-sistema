@@ -3,7 +3,7 @@
 // ✅ CORRIGIDO: Proteções contra fechamento acidental
 // ✅ TODAS AS LÓGICAS ANTERIORES PRESERVADAS 100%
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -18,7 +18,6 @@ import {
 import { db } from "../../../../firebase/firebaseConfig";
 import { useTheme } from "../../../../context/ThemeContext";
 import Toast from "../../../Toast";
-import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
 import ConfirmationModal from "../../../ConfirmationModal";
 import { parseValorMonetario } from "../../../../utils/formatters";
@@ -540,10 +539,120 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       ? (stats.valorAlocado / stats.valorEmenda) * 100
       : 0;
 
+  // 🔄 UNIFICAÇÃO: Criar naturezas virtuais das despesas executadas sem naturezaId
+  const naturezasConsolidadas = useMemo(() => {
+    // Agrupar despesas executadas por código de natureza
+    const despesasSemNatureza = despesasExecutadas.filter(d => !d.naturezaId);
+    const agrupadas = {};
+
+    despesasSemNatureza.forEach(despesa => {
+      const naturezaStr = despesa.naturezaDespesa || despesa.estrategia || "339039 - OUTROS SERVIÇOS";
+      const codigo = naturezaStr.split(" - ")[0].trim();
+      const descricao = naturezaStr;
+
+      if (!agrupadas[codigo]) {
+        agrupadas[codigo] = {
+          codigo,
+          descricao,
+          despesas: [],
+          valorExecutado: 0,
+        };
+      }
+      agrupadas[codigo].despesas.push(despesa);
+      agrupadas[codigo].valorExecutado += parseValorMonetario(despesa.valor) || 0;
+    });
+
+    // Criar naturezas virtuais (prefixo virtual_ para identificar)
+    const naturezasVirtuais = Object.values(agrupadas).map(grupo => ({
+      id: `virtual_${grupo.codigo}`,
+      codigo: grupo.codigo,
+      descricao: grupo.descricao,
+      valorAlocado: 0, // Usuário precisa definir
+      valorExecutado: grupo.valorExecutado,
+      saldoDisponivel: -grupo.valorExecutado, // Negativo = precisa alocar
+      status: "pendente_regularizacao",
+      isVirtual: true, // Flag para identificar
+      despesasVinculadas: grupo.despesas,
+      quantidadeDespesas: grupo.despesas.length,
+    }));
+
+    // Mesclar naturezas reais com virtuais (reais primeiro)
+    const naturezasReais = naturezas.map(nat => ({
+      ...nat,
+      isVirtual: false,
+    }));
+
+    // Filtrar virtuais que já têm natureza real correspondente
+    const codigosReais = naturezasReais.map(n => n.codigo);
+    const virtuaisSemReal = naturezasVirtuais.filter(v => !codigosReais.includes(v.codigo));
+
+    return [...naturezasReais, ...virtuaisSemReal];
+  }, [naturezas, despesasExecutadas]);
+
+  // Quantidade de naturezas que precisam regularização
+  const naturezasPendentes = naturezasConsolidadas.filter(n => n.isVirtual).length;
+
+  // 🔄 Despesas já vinculadas a naturezas (para não duplicar na lista separada)
+  const despesasVinculadasIds = useMemo(() => {
+    const ids = new Set();
+    naturezasConsolidadas.forEach(nat => {
+      if (nat.despesasVinculadas) {
+        nat.despesasVinculadas.forEach(d => ids.add(d.id));
+      }
+    });
+    // Também incluir despesas com naturezaId
+    despesasExecutadas.filter(d => d.naturezaId).forEach(d => ids.add(d.id));
+    return ids;
+  }, [naturezasConsolidadas, despesasExecutadas]);
+
   const showToast = (config) => {
     setToast({ show: true, ...config });
     setTimeout(() => setToast({ show: false, message: "", type: "" }), 3000);
   };
+
+  // 🔄 REGULARIZAR: Converter natureza virtual em real e vincular despesas
+  const regularizarNatureza = useCallback(async (naturezaVirtual, valorAlocado) => {
+    if (!naturezaVirtual.isVirtual) return;
+
+    try {
+      console.log("🔄 Regularizando natureza virtual:", naturezaVirtual);
+      setMigrandoLegado(true);
+
+      // Criar natureza real
+      const novaNatureza = await criarNatureza({
+        codigo: naturezaVirtual.codigo,
+        descricao: naturezaVirtual.descricao,
+        valorAlocado: valorAlocado || naturezaVirtual.valorExecutado,
+      });
+
+      console.log("✅ Natureza criada:", novaNatureza);
+
+      // Vincular todas as despesas à natureza criada
+      for (const despesa of naturezaVirtual.despesasVinculadas || []) {
+        await updateDoc(doc(db, "despesas", despesa.id), {
+          naturezaId: novaNatureza.id || novaNatureza,
+          atualizadoEm: new Date().toISOString(),
+        });
+        console.log(`✅ Despesa ${despesa.id} vinculada à natureza`);
+      }
+
+      showToast({
+        message: `Natureza "${naturezaVirtual.descricao}" regularizada com sucesso!`,
+        type: "success",
+      });
+
+      // Recarregar dados
+      await carregarDespesas();
+    } catch (error) {
+      console.error("❌ Erro ao regularizar:", error);
+      showToast({
+        message: "Erro ao regularizar natureza: " + error.message,
+        type: "error",
+      });
+    } finally {
+      setMigrandoLegado(false);
+    }
+  }, [criarNatureza, carregarDespesas]);
 
   const handleEditarDespesa = (despesa) => {
     console.log("✏️ ExecucaoOrcamentaria: Tentando abrir EDIÇÃO", {
@@ -902,11 +1011,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
 
-      {/* Seção: Naturezas de Despesa (Envelopes Orçamentários) */}
+      {/* Seção Unificada: Execução Orçamentária */}
       <fieldset style={dynamicStyles.fieldset}>
         <legend style={dynamicStyles.legend}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>account_balance_wallet</span>
-          Planejamento Orçamentário
+          Execução Orçamentária
           <span style={{
             marginLeft: 8,
             backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
@@ -916,11 +1025,24 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             fontSize: 12,
             fontWeight: 600
           }}>
-            {naturezas.length} naturezas
+            {naturezasConsolidadas.length} naturezas
           </span>
+          {naturezasPendentes > 0 && (
+            <span style={{
+              marginLeft: 8,
+              backgroundColor: "#f59e0b",
+              color: "#fff",
+              padding: "2px 10px",
+              borderRadius: 12,
+              fontSize: 12,
+              fontWeight: 600
+            }}>
+              {naturezasPendentes} pendentes
+            </span>
+          )}
         </legend>
 
-        {/* Banner de migração de despesas legado */}
+        {/* Banner de migração de despesas legado (PLANEJADAS) */}
         {despesasPlanejadas.length > 0 && (
           <div style={{
             padding: "12px 16px",
@@ -936,7 +1058,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f59e0b" }}>sync</span>
               <span style={{ fontSize: 13, color: isDark ? "#fcd34d" : "#92400e" }}>
-                <strong>{despesasPlanejadas.length} despesas</strong> do sistema antigo podem ser migradas para naturezas.
+                <strong>{despesasPlanejadas.length} despesas planejadas</strong> do sistema antigo serão migradas.
               </span>
             </div>
             <button
@@ -973,9 +1095,32 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
         )}
 
+        {/* Banner informativo sobre naturezas pendentes de regularização */}
+        {naturezasPendentes > 0 && (
+          <div style={{
+            padding: "12px 16px",
+            backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "#eff6ff",
+            borderRadius: 8,
+            marginBottom: 16,
+            border: `1px solid ${isDark ? "#3b82f6" : "#93c5fd"}`,
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#3b82f6" }}>info</span>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? "#93c5fd" : "#1e40af" }}>
+                  {naturezasPendentes} naturezas detectadas automaticamente
+                </span>
+                <p style={{ fontSize: 12, color: isDark ? "#93c5fd" : "#3b82f6", margin: "4px 0 0 0" }}>
+                  Despesas executadas foram agrupadas por natureza. Clique em "Regularizar" para definir o valor alocado.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {temEmendaSalva && (
           <NaturezasList
-            naturezas={naturezas}
+            naturezas={naturezasConsolidadas}
             emenda={{
               id: emendaId,
               valor: stats.valorEmenda,
@@ -987,11 +1132,17 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               uf: formData?.uf,
             }}
             loading={loadingNaturezas}
-            salvando={salvandoNatureza}
+            salvando={salvandoNatureza || migrandoLegado}
             onCriarNatureza={criarNatureza}
             onEditarNatureza={atualizarNatureza}
             onExcluirNatureza={excluirNatureza}
+            onRegularizarNatureza={regularizarNatureza}
             onNovaDespesa={(natureza) => {
+              // Se for natureza virtual, precisa regularizar primeiro
+              if (natureza.isVirtual) {
+                alert("Regularize esta natureza antes de adicionar novas despesas.");
+                return;
+              }
               console.log("🆕 Criar despesa na natureza:", natureza);
               setDespesaEmEdicao({
                 status: 'EXECUTADA',
@@ -1013,111 +1164,6 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             despesasPorNatureza={despesasPorNatureza}
           />
         )}
-      </fieldset>
-
-      {/* Seção: Despesas Executadas */}
-      <fieldset style={dynamicStyles.fieldset}>
-        <legend style={dynamicStyles.legend}>
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>payments</span>
-          Despesas Executadas
-          <span style={{
-            marginLeft: 8,
-            backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
-            color: isDark ? "var(--theme-text)" : "#fff",
-            padding: "2px 10px",
-            borderRadius: 12,
-            fontSize: 12,
-            fontWeight: 600
-          }}>
-            {despesasExecutadas.length}
-          </span>
-        </legend>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-          <button
-            onClick={() => {
-              console.log("🆕 Abrindo formulário para criar despesa executada diretamente");
-              console.log("📋 Usuário completo:", {
-                tipo: usuario?.tipo,
-                role: usuario?.role,
-                email: usuario?.email,
-                municipio: usuario?.municipio,
-                uf: usuario?.uf
-              });
-              console.log("📋 Emenda ID:", emendaId);
-              console.log("📋 Form Data:", {
-                numero: formData?.numero,
-                municipio: formData?.municipio,
-                uf: formData?.uf,
-                valorRecurso: formData?.valorRecurso
-              });
-
-              // ✅ VALIDAÇÃO AMPLIADA: Verificar tipo e role (Admin, Gestor ou Operador)
-              const isAdmin = usuario?.tipo === "admin" || usuario?.role === "admin";
-              const isGestor = usuario?.tipo === "gestor" || usuario?.role === "gestor";
-              const isOperador = usuario?.tipo === "operador" || usuario?.role === "operador";
-
-              console.log("🔐 Verificação de permissões:", {
-                isAdmin,
-                isGestor,
-                isOperador,
-                tipoOriginal: usuario?.tipo,
-                roleOriginal: usuario?.role
-              });
-
-              if (!isAdmin && !isGestor && !isOperador) {
-                console.error("❌ ACESSO NEGADO - Tipo:", usuario?.tipo, "| Role:", usuario?.role);
-                alert("⚠️ Apenas Administradores, Gestores e Operadores podem criar despesas executadas.");
-                return;
-              }
-
-              // ✅ VALIDAÇÃO: Verificar se tem município/UF (Gestor ou Operador)
-              if ((isGestor || isOperador) && (!usuario?.municipio || !usuario?.uf)) {
-                console.error("❌ USUÁRIO SEM LOCALIZAÇÃO:", {
-                  tipo: usuario?.tipo,
-                  municipio: usuario?.municipio,
-                  uf: usuario?.uf
-                });
-                alert("⚠️ Você precisa ter município/UF configurados para criar despesas executadas.");
-                return;
-              }
-
-              // ✅ CORREÇÃO: Criar objeto de despesa com TODOS os campos necessários
-              const novaDespesa = {
-                status: 'EXECUTADA',
-                emendaId: emendaId,
-                discriminacao: '',
-                valor: '',
-                numeroEmenda: formData?.numero || '',
-                municipio: formData?.municipio || usuario?.municipio || '',
-                uf: formData?.uf || usuario?.uf || '',
-                criadoPor: usuario?.email || '',
-                tipoUsuario: usuario?.tipo || usuario?.role || '',
-              };
-
-              console.log("✅ Despesa pré-configurada:", novaDespesa);
-
-              setDespesaEmEdicao(novaDespesa);
-              setModoVisualizacao("criar-executada");
-
-              console.log("✅ Modal configurado - Modo: criar-executada | Usuário:", usuario?.tipo || usuario?.role);
-            }}
-            style={styles.btnNovaDespesa}
-            title="Criar despesa executada"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>add</span> Nova Despesa
-          </button>
-        </div>
-
-        <DespesasList
-          despesas={despesasExecutadas}
-          emendas={[]}
-          loading={loading}
-          onEdit={handleEditarDespesa}
-          onView={handleVisualizarDespesa}
-          onRecarregar={carregarDespesas}
-          ocultarBotaoNovo={true}
-          exibirModoCards={true}
-        />
       </fieldset>
 
       {/* FORMULÁRIO UNIVERSAL: Edição | Visualização | Execução | Criação Direta */}
