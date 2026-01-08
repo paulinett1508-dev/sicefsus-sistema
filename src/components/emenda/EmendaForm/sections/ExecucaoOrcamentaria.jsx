@@ -11,22 +11,17 @@ import {
   query,
   where,
   getDocs,
-  addDoc,
   updateDoc,
   doc,
   deleteDoc,
 } from "firebase/firestore";
-import { db, auth } from "../../../../firebase/firebaseConfig"; // Import auth para obter o usuário atual
+import { db } from "../../../../firebase/firebaseConfig";
 import { useTheme } from "../../../../context/ThemeContext";
 import Toast from "../../../Toast";
 import DespesasList from "../../../DespesasList";
 import DespesaForm from "../../../DespesaForm";
 import ConfirmationModal from "../../../ConfirmationModal";
-import { NATUREZAS_DESPESA } from "../../../../config/constants";
-import {
-  formatarMoedaInput,
-  parseValorMonetario,
-} from "../../../../utils/formatters";
+import { parseValorMonetario } from "../../../../utils/formatters";
 // 🆕 Importações para sistema de naturezas (envelopes orçamentários)
 import NaturezasList from "../../../natureza/NaturezasList";
 import { useNaturezasData } from "../../../../hooks/useNaturezasData";
@@ -38,297 +33,6 @@ const formatCurrency = (valor) =>
     currency: "BRL",
   });
 
-// Estilos do formulário com suporte a dark mode
-const getFormStyles = (isDark) => ({
-  label: {
-    fontWeight: 600,
-    color: isDark ? "var(--theme-text)" : "#2563EB"
-  },
-  input: {
-    border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
-    borderRadius: 8,
-    padding: "10px 12px",
-    outline: "none",
-    backgroundColor: isDark ? "var(--theme-input-bg)" : "#fff",
-    color: isDark ? "var(--theme-text)" : "inherit",
-  },
-  select: {
-    border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
-    borderRadius: 8,
-    padding: "10px 12px",
-    outline: "none",
-    backgroundColor: isDark ? "var(--theme-input-bg)" : "#fff",
-    color: isDark ? "var(--theme-text)" : "inherit",
-  },
-  inputCustomizadoWrapper: { display: "flex", gap: 8 },
-  btnVoltarSelect: {
-    backgroundColor: "#6c757d",
-    color: "#fff",
-    border: "none",
-    padding: "10px 12px",
-    borderRadius: 8,
-    cursor: "pointer",
-  },
-});
-
-// ===== Formulário inline (PLANEJADA) =====
-const DespesaPlanejadaForm = ({
-  emendaId,
-  valorEmenda,
-  totalExecutado,
-  onSuccess,
-  usuario,
-  emendaInfo, // 🆕 Receber info da emenda
-}) => {
-  const { isDark } = useTheme();
-  const [modoCustomizado, setModoCustomizado] = useState(false);
-  const [despesaCustomizada, setDespesaCustomizada] = useState("");
-  const [estrategia, setEstrategia] = useState("");
-  const [valor, setValor] = useState("");
-  const [salvando, setSalvando] = useState(false);
-
-  // Estilos dinâmicos para o formulário
-  const formDynamicStyles = {
-    cardFormInline: {
-      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
-      border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
-      borderRadius: 12,
-      padding: 12,
-      marginBottom: 12,
-    },
-  };
-
-  // Obter estilos do formulário baseado no tema
-  const formStyles = getFormStyles(isDark);
-
-  const saldoDisponivel = valorEmenda - totalExecutado;
-
-  const handleEstrategiaChange = (e) => {
-    const selected = e.target.value;
-    if (selected === "__customizado__") {
-      setModoCustomizado(true);
-      setEstrategia("");
-    } else {
-      setModoCustomizado(false);
-      setDespesaCustomizada("");
-      setEstrategia(selected);
-    }
-  };
-
-  const validarFormulario = () => {
-    if (!emendaId)
-      return {
-        valido: false,
-        mensagem: "Salve a emenda antes de adicionar despesas.",
-      };
-    const v = parseValorMonetario(valor);
-    if (!modoCustomizado && !estrategia)
-      return { valido: false, mensagem: "Selecione a natureza da despesa." };
-    if (modoCustomizado && !despesaCustomizada.trim())
-      return { valido: false, mensagem: "Informe a natureza de despesa." };
-    if (!valor || v <= 0)
-      return { valido: false, mensagem: "Informe um valor válido." };
-    return { valido: true };
-  };
-
-  const handleSalvarPlanejada = async () => {
-    console.log("🔍 INÍCIO handleSalvarPlanejada - Dados recebidos:", {
-      emendaId,
-      valorEmenda,
-      totalExecutado,
-      usuario: {
-        email: usuario?.email,
-        tipo: usuario?.tipo,
-        role: usuario?.role,
-        uid: usuario?.uid,
-        municipio: usuario?.municipio,
-        uf: usuario?.uf
-      },
-      emendaInfo: {
-        numero: emendaInfo?.numero,
-        municipio: emendaInfo?.municipio,
-        uf: emendaInfo?.uf
-      }
-    });
-
-    const valid = validarFormulario();
-    if (!valid.valido) {
-      console.warn("⚠️ Validação falhou:", valid.mensagem);
-      alert(valid.mensagem);
-      return;
-    }
-
-    try {
-      setSalvando(true);
-      const estrategiaFinal = modoCustomizado ? despesaCustomizada : estrategia;
-
-      // ✅ CORREÇÃO CRÍTICA: Incluir município e UF da emenda
-      const novaDespesa = {
-        emendaId,
-        estrategia: estrategiaFinal,
-        naturezaDespesa: estrategiaFinal,
-        discriminacao: estrategiaFinal,
-        valor: parseValorMonetario(valor),
-        status: "PLANEJADA",
-        statusPagamento: "pendente",
-
-        // ✅ ADICIONAR CAMPOS GEOGRÁFICOS (necessários para as regras do Firestore)
-        municipio: emendaInfo?.municipio || usuario?.municipio || "",
-        uf: emendaInfo?.uf || usuario?.uf || "",
-        numeroEmenda: emendaInfo?.numero || "",
-
-        // Campos vazios (serão preenchidos na execução)
-        fornecedor: "",
-        numeroEmpenho: "",
-        numeroNota: "",
-        numeroContrato: "",
-        dataEmpenho: null,
-        dataLiquidacao: null,
-        dataPagamento: null,
-
-        // Metadados
-        criadaEm: new Date().toISOString(),
-        criadaPor: usuario?.email || "sistema",
-        atualizadoEm: new Date().toISOString(),
-      };
-
-      console.log("💾 Tentando salvar despesa planejada:", {
-        ...novaDespesa,
-        valorOriginal: valor,
-        valorParsed: parseValorMonetario(valor)
-      });
-
-      console.log("🔑 Verificando autenticação Firebase:", {
-        hasAuth: !!db,
-        collection: "despesas",
-        timestamp: new Date().toISOString()
-      });
-
-      const docRef = await addDoc(collection(db, "despesas"), novaDespesa);
-
-      console.log("✅ Despesa planejada criada com sucesso! ID:", docRef.id);
-
-      // Limpar formulário
-      setEstrategia("");
-      setDespesaCustomizada("");
-      setValor("");
-      setModoCustomizado(false);
-
-      onSuccess?.();
-    } catch (e) {
-      console.error("❌ ERRO DETALHADO ao adicionar despesa:", {
-        code: e.code,
-        message: e.message,
-        name: e.name,
-        stack: e.stack,
-        fullError: e
-      });
-
-      // Mensagem específica para erro de permissão
-      if (e.code === 'permission-denied') {
-        console.error("🔒 ERRO DE PERMISSÃO - Detalhes:", {
-          emendaId,
-          municipio: emendaInfo?.municipio || usuario?.municipio,
-          uf: emendaInfo?.uf || usuario?.uf,
-          usuarioTipo: usuario?.tipo,
-          usuarioRole: usuario?.role
-        });
-        alert(`❌ Erro de permissão ao adicionar despesa.\n\nVerifique:\n1. Município/UF da emenda\n2. Permissões do usuário\n3. Regras do Firestore\n\nDetalhes: ${e.message}`);
-      } else {
-        alert(`Erro ao adicionar despesa: ${e.message || "Erro desconhecido"}`);
-      }
-    } finally {
-      setSalvando(false);
-    }
-  };
-
-  return (
-    <div style={formDynamicStyles.cardFormInline}>
-      <div style={styles.formInline}>
-        <div style={styles.formGroup}>
-          <label style={formStyles.label}>Natureza de Despesa</label>
-          {!modoCustomizado ? (
-            <select
-              id="naturezaDespesaSelect"
-              value={estrategia}
-              onChange={handleEstrategiaChange}
-              style={formStyles.select}
-            >
-              <option value="">Selecione a natureza de despesas</option>
-              {NATUREZAS_DESPESA.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-              <option value="__customizado__">Digitar outra...</option>
-            </select>
-          ) : (
-            <div style={formStyles.inputCustomizadoWrapper}>
-              <input
-                type="text"
-                value={despesaCustomizada}
-                onChange={(e) => setDespesaCustomizada(e.target.value)}
-                placeholder="Digite a natureza de despesa..."
-                style={formStyles.input}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setModoCustomizado(false);
-                  setDespesaCustomizada("");
-                  setEstrategia("");
-                }}
-                style={formStyles.btnVoltarSelect}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>undo</span>
-                Voltar
-              </button>
-            </div>
-          )}
-        </div>
-        <div style={styles.formGroup}>
-          <label style={formStyles.label}>Valor</label>
-          <input
-            type="text"
-            value={valor}
-            onChange={(e) => setValor(formatarMoedaInput(e.target.value))}
-            placeholder="R$ 0,00"
-            style={{
-              ...formStyles.input,
-              textAlign: "right",
-              fontFamily: "monospace",
-            }}
-          />
-        </div>
-        <div style={styles.formGroupButton}>
-          <label style={{ visibility: "hidden" }}>Ações</label>
-          <button
-            type="button"
-            onClick={handleSalvarPlanejada}
-            disabled={salvando}
-            style={{
-              ...styles.btn,
-              ...styles.btnPrimary,
-              opacity: salvando ? 0.5 : 1,
-              cursor: salvando ? "not-allowed" : "pointer",
-            }}
-            title="Adicionar despesa planejada"
-          >
-            {salvando ? "Salvando..." : "Adicionar"}
-          </button>
-        </div>
-      </div>
-      <div style={styles.formFooterHint}>
-        <span>Saldo disponível: </span>
-        <strong>{formatCurrency(saldoDisponivel)}</strong>
-        <span style={{ opacity: 0.6, marginLeft: 8 }}>
-          (planejadas não consomem)
-        </span>
-      </div>
-    </div>
-  );
-};
-
 // ===== Principal =====
 const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const navigate = useNavigate();
@@ -339,8 +43,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
-  // 🆕 Estado para controlar visualização: 'naturezas' | 'legado'
-  const [modoVisualizacaoEnvelopes, setModoVisualizacaoEnvelopes] = useState("naturezas");
+  // Estado para controle de migração de despesas legado
+  const [migrandoLegado, setMigrandoLegado] = useState(false);
 
   // Estilos dinâmicos baseados no tema
   const dynamicStyles = {
@@ -609,6 +313,78 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     validarAlocacao,
     calculos: calculosNaturezas,
   } = useNaturezasData(emendaId, usuario, { autoCarregar: temEmendaSalva });
+
+  // 🔄 MIGRAÇÃO AUTOMÁTICA: Converter despesas PLANEJADAS em naturezas
+  const migrarDespesasPlanejadas = useCallback(async () => {
+    if (!emendaId || migrandoLegado) return;
+
+    try {
+      // Buscar despesas planejadas sem naturezaId
+      const despesasSemNatureza = despesas.filter(
+        (d) => d.status === "PLANEJADA" && !d.naturezaId
+      );
+
+      if (despesasSemNatureza.length === 0) return;
+
+      console.log(`🔄 Migrando ${despesasSemNatureza.length} despesas planejadas para naturezas...`);
+      setMigrandoLegado(true);
+
+      for (const despesa of despesasSemNatureza) {
+        const naturezaCodigo = despesa.estrategia || despesa.naturezaDespesa || "339039";
+        const naturezaDescricao = despesa.estrategia || despesa.naturezaDespesa || "OUTROS SERVIÇOS";
+        const valorDespesa = parseValorMonetario(despesa.valor) || 0;
+
+        // Verificar se já existe natureza com esse código
+        const naturezaExistente = naturezas.find(
+          (n) => n.codigo === naturezaCodigo.split(" - ")[0]
+        );
+
+        let naturezaId;
+
+        if (naturezaExistente) {
+          // Usar natureza existente
+          naturezaId = naturezaExistente.id;
+          console.log(`📦 Usando natureza existente: ${naturezaExistente.descricao}`);
+        } else {
+          // Criar nova natureza com o valor da despesa
+          const novaNatureza = await criarNatureza({
+            codigo: naturezaCodigo.split(" - ")[0],
+            descricao: naturezaDescricao,
+            valorAlocado: valorDespesa,
+          });
+          naturezaId = novaNatureza.id;
+          console.log(`✅ Natureza criada: ${naturezaDescricao}`);
+        }
+
+        // Atualizar despesa para vincular à natureza e mudar status
+        await updateDoc(doc(db, "despesas", despesa.id), {
+          naturezaId,
+          status: "EXECUTADA",
+          statusPagamento: despesa.statusPagamento || "pendente",
+          atualizadoEm: new Date().toISOString(),
+          migradoDeLegado: true,
+        });
+
+        console.log(`✅ Despesa ${despesa.id} migrada para natureza ${naturezaId}`);
+      }
+
+      showToast({
+        message: `${despesasSemNatureza.length} despesas migradas com sucesso!`,
+        type: "success",
+      });
+
+      // Recarregar dados
+      await carregarDespesas();
+    } catch (error) {
+      console.error("❌ Erro na migração:", error);
+      showToast({
+        message: "Erro ao migrar despesas: " + error.message,
+        type: "error",
+      });
+    } finally {
+      setMigrandoLegado(false);
+    }
+  }, [emendaId, despesas, naturezas, migrandoLegado, criarNatureza]);
 
   // ✅ CARREGAR DESPESAS DA EMENDA
   const carregarDespesas = async () => {
@@ -1126,7 +902,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
 
-      {/* 🆕 Seção: Naturezas de Despesa (Envelopes Orçamentários) */}
+      {/* Seção: Naturezas de Despesa (Envelopes Orçamentários) */}
       <fieldset style={dynamicStyles.fieldset}>
         <legend style={dynamicStyles.legend}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>account_balance_wallet</span>
@@ -1142,74 +918,62 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           }}>
             {naturezas.length} naturezas
           </span>
-          {despesasPlanejadas.length > 0 && (
-            <span style={{
-              marginLeft: 8,
-              backgroundColor: "#f59e0b",
-              color: "#fff",
-              padding: "2px 10px",
-              borderRadius: 12,
-              fontSize: 12,
-              fontWeight: 600
-            }}>
-              {despesasPlanejadas.length} legado
-            </span>
-          )}
         </legend>
 
-        {/* Toggle entre modos */}
+        {/* Banner de migração de despesas legado */}
         {despesasPlanejadas.length > 0 && (
           <div style={{
-            display: "flex",
-            gap: 8,
-            marginBottom: 16,
-            padding: "8px 12px",
-            backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
+            padding: "12px 16px",
+            backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
             borderRadius: 8,
-            border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+            marginBottom: 16,
+            border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
           }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f59e0b" }}>sync</span>
+              <span style={{ fontSize: 13, color: isDark ? "#fcd34d" : "#92400e" }}>
+                <strong>{despesasPlanejadas.length} despesas</strong> do sistema antigo podem ser migradas para naturezas.
+              </span>
+            </div>
             <button
               type="button"
-              onClick={() => setModoVisualizacaoEnvelopes("naturezas")}
+              onClick={migrarDespesasPlanejadas}
+              disabled={migrandoLegado}
               style={{
-                padding: "6px 12px",
+                padding: "8px 16px",
                 borderRadius: 6,
                 border: "none",
                 fontSize: 13,
-                fontWeight: 500,
-                cursor: "pointer",
-                backgroundColor: modoVisualizacaoEnvelopes === "naturezas" ? "#3b82f6" : "transparent",
-                color: modoVisualizacaoEnvelopes === "naturezas" ? "#fff" : (isDark ? "var(--text-secondary)" : "#64748b"),
+                fontWeight: 600,
+                cursor: migrandoLegado ? "not-allowed" : "pointer",
+                backgroundColor: migrandoLegado ? "#d1d5db" : "#f59e0b",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                opacity: migrandoLegado ? 0.7 : 1,
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
-                account_balance_wallet
-              </span>
-              Naturezas (Novo)
-            </button>
-            <button
-              type="button"
-              onClick={() => setModoVisualizacaoEnvelopes("legado")}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "none",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: "pointer",
-                backgroundColor: modoVisualizacaoEnvelopes === "legado" ? "#f59e0b" : "transparent",
-                color: modoVisualizacaoEnvelopes === "legado" ? "#fff" : (isDark ? "var(--text-secondary)" : "#64748b"),
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
-                schedule
-              </span>
-              Planejadas (Legado)
+              {migrandoLegado ? (
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, animation: "spin 1s linear infinite" }}>sync</span>
+                  Migrando...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upgrade</span>
+                  Migrar Agora
+                </>
+              )}
             </button>
           </div>
         )}
 
-        {temEmendaSalva && modoVisualizacaoEnvelopes === "naturezas" && (
+        {temEmendaSalva && (
           <NaturezasList
             naturezas={naturezas}
             emenda={{
@@ -1248,121 +1012,6 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             validarAlocacao={validarAlocacao}
             despesasPorNatureza={despesasPorNatureza}
           />
-        )}
-
-        {/* Modo Legado - Despesas Planejadas antigas */}
-        {temEmendaSalva && modoVisualizacaoEnvelopes === "legado" && (
-          <>
-            <div style={{
-              padding: "12px 16px",
-              backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
-              borderRadius: 8,
-              marginBottom: 16,
-              border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f59e0b" }}>info</span>
-                <span style={{ fontSize: 13, color: isDark ? "#fcd34d" : "#92400e" }}>
-                  <strong>Modo Legado:</strong> Estas despesas planejadas foram criadas antes do sistema de naturezas.
-                  Considere migrá-las para naturezas para melhor controle orçamentário.
-                </span>
-              </div>
-            </div>
-
-            <DespesaPlanejadaForm
-              emendaId={emendaId}
-              valorEmenda={stats.valorEmenda}
-              totalExecutado={stats.totalExecutado}
-              onSuccess={carregarDespesas}
-              usuario={usuario}
-              emendaInfo={{
-                numero: formData?.numero,
-                municipio: formData?.municipio,
-                uf: formData?.uf,
-              }}
-            />
-
-            {despesasPlanejadas.length === 0 ? (
-              <div style={dynamicStyles.emptyState}>
-                <div>
-                  <div style={styles.emptyEmoji}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>target</span></div>
-                  <h3 style={dynamicStyles.emptyTitle}>Nenhuma despesa planejada (legado)</h3>
-                  <p style={dynamicStyles.emptyText}>
-                    Use o modo Naturezas para planejar o orçamento da emenda.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div style={dynamicStyles.tabelaWrapper}>
-                <table style={styles.table}>
-                  <thead style={dynamicStyles.thead}>
-                    <tr>
-                      <th style={{ padding: "12px 8px", textAlign: "left" }}>
-                        NATUREZA DA DESPESA
-                      </th>
-                      <th style={{ padding: "12px 8px", textAlign: "right" }}>
-                        VALOR
-                      </th>
-                      <th
-                        style={{
-                          padding: "12px 8px",
-                          textAlign: "center",
-                          width: 120,
-                        }}
-                      >
-                        AÇÕES
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody style={styles.tbody}>
-                    {despesasPlanejadas.map((despesa, idx) => (
-                      <tr
-                        key={despesa.id}
-                        style={idx % 2 === 0 ? dynamicStyles.trEven : dynamicStyles.trOdd}
-                      >
-                        <td style={dynamicStyles.td}>
-                          {despesa.estrategia || despesa.naturezaDespesa}
-                        </td>
-                        <td style={styles.tdValorPlanejado}>
-                          {formatCurrency(despesa.valor)}
-                        </td>
-                        <td style={dynamicStyles.td}>
-                          <div style={styles.despesaAcoes}>
-                            <button
-                              onClick={(e) => {
-                                console.log("CLIQUE NO BOTÃO EXECUTAR");
-                                console.log("Despesa a executar:", despesa);
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleExecutarDespesa(despesa);
-                              }}
-                              style={styles.btnIconExecutar}
-                              title="Executar despesa"
-                              type="button"
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>play_arrow</span>
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleRemoverDespesaPlanejada(despesa, e);
-                              }}
-                              style={styles.btnIconRemover}
-                              title="Remover despesa"
-                              type="button"
-                            >
-                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>delete</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
         )}
       </fieldset>
 
