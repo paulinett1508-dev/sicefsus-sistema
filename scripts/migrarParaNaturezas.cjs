@@ -13,6 +13,7 @@
 
 const admin = require("firebase-admin");
 const path = require("path");
+const fs = require("fs");
 
 // ==== CONFIGURACAO ====
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -51,22 +52,52 @@ console.log(`
 ================================================================================
 `);
 
-// ==== INICIALIZAR FIREBASE ADMIN ====
-const serviceAccountPath = USE_DEV
-  ? path.join(__dirname, "../firebase-mcp-server/service-account-dev.json")
-  : path.join(__dirname, "../firebase-mcp-server/service-account.json");
+// ==== CARREGAR VARIAVEIS DE AMBIENTE ====
+const envPath = path.join(__dirname, "../firebase-mcp-server/.env");
+let envVars = {};
 
-let serviceAccount;
 try {
-  serviceAccount = require(serviceAccountPath);
+  const envContent = fs.readFileSync(envPath, "utf8");
+  envContent.split("\n").forEach((line) => {
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      let value = match[2].trim();
+      // Remover aspas se existirem
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      envVars[match[1].trim()] = value;
+    }
+  });
 } catch (error) {
-  console.error(`Erro ao carregar service account de: ${serviceAccountPath}`);
-  console.error("Verifique se o arquivo existe e esta corretamente configurado.");
+  console.error(`Erro ao carregar .env de: ${envPath}`);
+  console.error(error.message);
   process.exit(1);
 }
 
+// ==== INICIALIZAR FIREBASE ADMIN ====
+const prefix = USE_DEV ? "FIREBASE_DEV" : "FIREBASE_PROD";
+const projectId = envVars[`${prefix}_PROJECT_ID`];
+const clientEmail = envVars[`${prefix}_CLIENT_EMAIL`];
+const privateKey = envVars[`${prefix}_PRIVATE_KEY`]?.replace(/\\n/g, "\n");
+
+if (!projectId || !clientEmail || !privateKey) {
+  console.error(`Erro: Credenciais ${prefix} nao encontradas no .env`);
+  console.error(`  PROJECT_ID: ${projectId ? "OK" : "FALTANDO"}`);
+  console.error(`  CLIENT_EMAIL: ${clientEmail ? "OK" : "FALTANDO"}`);
+  console.error(`  PRIVATE_KEY: ${privateKey ? "OK" : "FALTANDO"}`);
+  process.exit(1);
+}
+
+console.log(`  Project ID: ${projectId}`);
+
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert({
+    projectId,
+    clientEmail,
+    privateKey,
+  }),
 });
 
 const db = admin.firestore();
