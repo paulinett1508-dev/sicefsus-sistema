@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { recalcularSaldoEmenda } from "../utils/emendaCalculos"; // ✅ RECÁLCULO AUTOMÁTICO
+import { recalcularNatureza } from "../utils/naturezaCalculos"; // 🆕 RECÁLCULO DE NATUREZA
 
 // ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
 const pick = (obj, keys) => {
@@ -113,6 +114,7 @@ const DespesaForm = ({
   // ✅ ESTADO DO FORMULÁRIO (ESSENCIAL)
   const [formData, setFormData] = useState({
     emendaId: emendaPreSelecionada || emendaId || "",
+    naturezaId: despesaParaEditar?.naturezaId || "", // 🆕 Vínculo com natureza (envelope orçamentário)
     discriminacao: "",
     fornecedor: "",
     valor: "",
@@ -476,6 +478,8 @@ const DespesaForm = ({
         ...formDataLimpo,
         emendaId:
           formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
+        // 🆕 Vínculo com natureza (envelope orçamentário)
+        naturezaId: formData.naturezaId || despesaParaEditar?.naturezaId || null,
         valor: parseValorMonetario(formData.valor),
         contrapartida: parseFloat(formData.contrapartida) || 0,
         percentualExecucao: parseFloat(formData.percentualExecucao) || 0,
@@ -577,10 +581,30 @@ const DespesaForm = ({
         });
       }
 
-      // 🔄 RECÁLCULO AUTOMÁTICO DA EMENDA
+      // 🔄 RECÁLCULO AUTOMÁTICO DA EMENDA E NATUREZA
       const emendaIdParaRecalcular =
         formData.emendaId || despesaParaEditar?.emendaId || emendaId;
+      const naturezaIdParaRecalcular =
+        formData.naturezaId || despesaParaEditar?.naturezaId;
 
+      // 🆕 Recalcular natureza primeiro (se vinculada)
+      if (naturezaIdParaRecalcular) {
+        console.log(
+          `🔄 Iniciando recálculo da natureza ${naturezaIdParaRecalcular}...`,
+        );
+        try {
+          const resultadoNatureza = await recalcularNatureza(naturezaIdParaRecalcular);
+          if (resultadoNatureza.success) {
+            console.log(`✅ Recálculo da natureza concluído:`, resultadoNatureza.valores);
+          } else {
+            console.warn(`⚠️ Recálculo da natureza falhou: ${resultadoNatureza.error}`);
+          }
+        } catch (errNatureza) {
+          console.warn(`⚠️ Erro ao recalcular natureza:`, errNatureza);
+        }
+      }
+
+      // Recalcular emenda
       if (emendaIdParaRecalcular) {
         console.log(
           `🔄 Iniciando recálculo automático da emenda ${emendaIdParaRecalcular}...`,

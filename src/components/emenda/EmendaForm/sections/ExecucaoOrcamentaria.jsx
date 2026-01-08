@@ -27,6 +27,9 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
+// 🆕 Importações para sistema de naturezas (envelopes orçamentários)
+import NaturezasList from "../../../natureza/NaturezasList";
+import { useNaturezasData } from "../../../../hooks/useNaturezasData";
 
 
 const formatCurrency = (valor) =>
@@ -336,6 +339,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [emendaIdReal, setEmendaIdReal] = useState(null);
 
+  // 🆕 Estado para controlar visualização: 'naturezas' | 'legado'
+  const [modoVisualizacaoEnvelopes, setModoVisualizacaoEnvelopes] = useState("naturezas");
+
   // Estilos dinâmicos baseados no tema
   const dynamicStyles = {
     container: {
@@ -590,6 +596,20 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const emendaId = emendaIdReal || formData?.id || formData?.emendaId;
   const temEmendaSalva = !!emendaId;
 
+  // 🆕 Hook para gerenciar naturezas (envelopes orçamentários)
+  const {
+    naturezas,
+    despesasPorNatureza,
+    loading: loadingNaturezas,
+    salvando: salvandoNatureza,
+    criar: criarNatureza,
+    atualizar: atualizarNatureza,
+    excluir: excluirNatureza,
+    carregarDespesasNatureza,
+    validarAlocacao,
+    calculos: calculosNaturezas,
+  } = useNaturezasData(emendaId, usuario, { autoCarregar: temEmendaSalva });
+
   // ✅ CARREGAR DESPESAS DA EMENDA
   const carregarDespesas = async () => {
     if (!emendaId) {
@@ -735,6 +755,14 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   stats.saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
   stats.percentualExecutado =
     (stats.totalExecutado / stats.valorEmenda) * 100 || 0;
+
+  // 🆕 Cálculos de naturezas (envelopes orçamentários)
+  stats.valorAlocado = calculosNaturezas?.valorTotalAlocado || 0;
+  stats.saldoLivre = stats.valorEmenda - stats.valorAlocado;
+  stats.percentualAlocado =
+    stats.valorEmenda > 0
+      ? (stats.valorAlocado / stats.valorEmenda) * 100
+      : 0;
 
   const showToast = (config) => {
     setToast({ show: true, ...config });
@@ -983,42 +1011,71 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
         </div>
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#f39c12" }}>schedule</span> Total Planejado</div>
-          <div style={{ ...styles.statValue, color: "#f39c12" }}>
-            {formatCurrency(stats.totalPlanejado)}
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#3b82f6" }}>account_balance_wallet</span> Total Alocado</div>
+          <div style={{ ...styles.statValue, color: "#3b82f6" }}>
+            {formatCurrency(stats.valorAlocado)}
           </div>
-          <div style={styles.statHint}>não consome saldo</div>
+          <div style={styles.statHint}>reservado em naturezas</div>
+        </div>
+        <div style={dynamicStyles.statCard}>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: stats.saldoLivre > 0 ? "#10b981" : "#ef4444" }}>savings</span> Saldo Livre</div>
+          <div style={{ ...styles.statValue, color: stats.saldoLivre > 0 ? "#10b981" : "#ef4444" }}>
+            {formatCurrency(stats.saldoLivre)}
+          </div>
+          <div style={styles.statHint}>para novas naturezas</div>
         </div>
         <div style={dynamicStyles.statCard}>
           <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
           <div style={{ ...styles.statValue, color: "#27ae60" }}>
             {formatCurrency(stats.totalExecutado)}
           </div>
-          <div style={styles.statHint}>consome saldo</div>
+          <div style={styles.statHint}>consome das naturezas</div>
         </div>
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span> Saldo Disponível</div>
-          <div
-            style={{
-              ...styles.statValue,
-              color:
-                stats.saldoDisponivel < 0
-                  ? "#e74c3c"
-                  : stats.saldoDisponivel === 0
-                    ? "#95a5a6"
-                    : "#27ae60",
-            }}
-          >
-            {formatCurrency(stats.saldoDisponivel)}
-          </div>
-        </div>
-        <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> Percentual Executado</div>
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> % Executado</div>
           <div style={styles.statValue}>
             {stats.percentualExecutado.toFixed(1)}%
           </div>
         </div>
       </div>
+
+      {/* 🆕 Indicador de alocação visual */}
+      {stats.valorAlocado > 0 && (
+        <div style={{
+          backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+          borderRadius: 12,
+          padding: 16,
+          boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.06)",
+          border: isDark ? "1px solid var(--theme-border)" : "none",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>
+              Alocação Orçamentária
+            </span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#3b82f6" }}>
+              {stats.percentualAlocado.toFixed(1)}% alocado
+            </span>
+          </div>
+          <div style={{
+            height: 8,
+            backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#e2e8f0",
+            borderRadius: 4,
+            overflow: "hidden",
+          }}>
+            <div style={{
+              height: "100%",
+              width: `${Math.min(stats.percentualAlocado, 100)}%`,
+              backgroundColor: stats.percentualAlocado >= 100 ? "#ef4444" : "#3b82f6",
+              borderRadius: 4,
+              transition: "width 0.3s ease",
+            }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: isDark ? "var(--theme-text-secondary)" : "#94a3b8" }}>
+            <span>{naturezas.length} naturezas cadastradas</span>
+            <span>Livre: {formatCurrency(stats.saldoLivre)}</span>
+          </div>
+        </div>
+      )}
 
       {/* 🆕 Mini-cards de status financeiro */}
       <div style={dynamicStyles.statusFinanceiroWrapper}>
@@ -1069,11 +1126,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
 
-      {/* Seção: Despesas Planejadas */}
+      {/* 🆕 Seção: Naturezas de Despesa (Envelopes Orçamentários) */}
       <fieldset style={dynamicStyles.fieldset}>
         <legend style={dynamicStyles.legend}>
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>schedule</span>
-          Planejar Despesas
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>account_balance_wallet</span>
+          Planejamento Orçamentário
           <span style={{
             marginLeft: 8,
             backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
@@ -1083,12 +1140,135 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             fontSize: 12,
             fontWeight: 600
           }}>
-            {despesasPlanejadas.length}
+            {naturezas.length} naturezas
           </span>
+          {despesasPlanejadas.length > 0 && (
+            <span style={{
+              marginLeft: 8,
+              backgroundColor: "#f59e0b",
+              color: "#fff",
+              padding: "2px 10px",
+              borderRadius: 12,
+              fontSize: 12,
+              fontWeight: 600
+            }}>
+              {despesasPlanejadas.length} legado
+            </span>
+          )}
         </legend>
 
-        {temEmendaSalva && (
+        {/* Toggle entre modos */}
+        {despesasPlanejadas.length > 0 && (
+          <div style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 16,
+            padding: "8px 12px",
+            backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8fafc",
+            borderRadius: 8,
+            border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+          }}>
+            <button
+              type="button"
+              onClick={() => setModoVisualizacaoEnvelopes("naturezas")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "none",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                backgroundColor: modoVisualizacaoEnvelopes === "naturezas" ? "#3b82f6" : "transparent",
+                color: modoVisualizacaoEnvelopes === "naturezas" ? "#fff" : (isDark ? "var(--text-secondary)" : "#64748b"),
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
+                account_balance_wallet
+              </span>
+              Naturezas (Novo)
+            </button>
+            <button
+              type="button"
+              onClick={() => setModoVisualizacaoEnvelopes("legado")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "none",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                backgroundColor: modoVisualizacaoEnvelopes === "legado" ? "#f59e0b" : "transparent",
+                color: modoVisualizacaoEnvelopes === "legado" ? "#fff" : (isDark ? "var(--text-secondary)" : "#64748b"),
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>
+                schedule
+              </span>
+              Planejadas (Legado)
+            </button>
+          </div>
+        )}
+
+        {temEmendaSalva && modoVisualizacaoEnvelopes === "naturezas" && (
+          <NaturezasList
+            naturezas={naturezas}
+            emenda={{
+              id: emendaId,
+              valor: stats.valorEmenda,
+              valorRecurso: stats.valorEmenda,
+              valorAlocado: stats.valorAlocado,
+              saldoLivre: stats.saldoLivre,
+              numero: formData?.numero,
+              municipio: formData?.municipio,
+              uf: formData?.uf,
+            }}
+            loading={loadingNaturezas}
+            salvando={salvandoNatureza}
+            onCriarNatureza={criarNatureza}
+            onEditarNatureza={atualizarNatureza}
+            onExcluirNatureza={excluirNatureza}
+            onNovaDespesa={(natureza) => {
+              console.log("🆕 Criar despesa na natureza:", natureza);
+              setDespesaEmEdicao({
+                status: 'EXECUTADA',
+                emendaId: emendaId,
+                naturezaId: natureza.id,
+                naturezaDespesa: natureza.descricao,
+                discriminacao: '',
+                valor: '',
+                numeroEmenda: formData?.numero || '',
+                municipio: formData?.municipio || usuario?.municipio || '',
+                uf: formData?.uf || usuario?.uf || '',
+              });
+              setModoVisualizacao("criar-executada");
+            }}
+            onEditarDespesa={handleEditarDespesa}
+            onVisualizarDespesa={handleVisualizarDespesa}
+            onCarregarDespesas={carregarDespesasNatureza}
+            validarAlocacao={validarAlocacao}
+            despesasPorNatureza={despesasPorNatureza}
+          />
+        )}
+
+        {/* Modo Legado - Despesas Planejadas antigas */}
+        {temEmendaSalva && modoVisualizacaoEnvelopes === "legado" && (
           <>
+            <div style={{
+              padding: "12px 16px",
+              backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
+              borderRadius: 8,
+              marginBottom: 16,
+              border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#f59e0b" }}>info</span>
+                <span style={{ fontSize: 13, color: isDark ? "#fcd34d" : "#92400e" }}>
+                  <strong>Modo Legado:</strong> Estas despesas planejadas foram criadas antes do sistema de naturezas.
+                  Considere migrá-las para naturezas para melhor controle orçamentário.
+                </span>
+              </div>
+            </div>
+
             <DespesaPlanejadaForm
               emendaId={emendaId}
               valorEmenda={stats.valorEmenda}
@@ -1106,9 +1286,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               <div style={dynamicStyles.emptyState}>
                 <div>
                   <div style={styles.emptyEmoji}><span className="material-symbols-outlined" style={{ fontSize: 28 }}>target</span></div>
-                  <h3 style={dynamicStyles.emptyTitle}>Nenhuma despesa planejada</h3>
+                  <h3 style={dynamicStyles.emptyTitle}>Nenhuma despesa planejada (legado)</h3>
                   <p style={dynamicStyles.emptyText}>
-                    Use o formulário acima para adicionar despesas planejadas.
+                    Use o modo Naturezas para planejar o orçamento da emenda.
                   </p>
                 </div>
               </div>

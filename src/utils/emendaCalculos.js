@@ -2,6 +2,7 @@
 // ✅ Função de recálculo automático de valores da emenda
 // Chamada automaticamente após criar/editar/deletar despesas
 // ✅ CORREÇÃO P1: Usar parseValorMonetario centralizado de formatters.js
+// ✅ v2.0: Adicionado suporte a naturezas (envelopes orçamentários)
 
 import {
   doc,
@@ -11,6 +12,7 @@ import {
   query,
   where,
   getDocs,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "./formatters";
@@ -41,7 +43,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
 
     const emenda = emendaSnap.data();
 
-    // 2️⃣ Buscar APENAS despesas EXECUTADAS da emenda (status !== "PLANEJADA")
+    // 2️⃣ Buscar despesas da emenda
     const despesasQuery = query(
       collection(db, "despesas"),
       where("emendaId", "==", emendaId),
@@ -51,6 +53,15 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
 
     // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
     const despesas = todasDespesas.filter(d => d.status !== "PLANEJADA");
+
+    // 2️⃣b Buscar naturezas ativas da emenda (envelopes orçamentários)
+    const naturezasQuery = query(
+      collection(db, "naturezas"),
+      where("emendaId", "==", emendaId),
+      where("status", "==", "ativo")
+    );
+    const naturezasSnapshot = await getDocs(naturezasQuery);
+    const naturezas = naturezasSnapshot.docs.map((doc) => doc.data());
 
     // 3️⃣ CORREÇÃO P1: Ordem padronizada de fallback
     const valorTotal = parseValorMonetario(
@@ -63,18 +74,30 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       return sum + valorDespesa;
     }, 0);
 
-    // 5️⃣ Calcular saldo disponível
-    const saldoDisponivel = valorTotal - valorExecutado;
+    // 4️⃣b Calcular valor alocado (soma das naturezas - envelopes)
+    const valorAlocado = naturezas.reduce((sum, natureza) => {
+      return sum + parseValorMonetario(natureza.valorAlocado || 0);
+    }, 0);
 
-    // 6️⃣ Calcular percentual executado
+    // 5️⃣ Calcular saldos
+    const saldoDisponivel = valorTotal - valorExecutado;
+    const saldoLivre = valorTotal - valorAlocado; // Para novas naturezas
+
+    // 6️⃣ Calcular percentuais
     const percentualExecutado =
       valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    const percentualAlocado =
+      valorTotal > 0 ? (valorAlocado / valorTotal) * 100 : 0;
 
     // 7️⃣ Arredondar valores para 2 casas decimais
     const valoresCalculados = {
       valorExecutado: Math.round(valorExecutado * 100) / 100,
       saldoDisponivel: Math.round(saldoDisponivel * 100) / 100,
       percentualExecutado: Math.round(percentualExecutado * 100) / 100,
+      // Novos campos para naturezas (envelopes)
+      valorAlocado: Math.round(valorAlocado * 100) / 100,
+      saldoLivre: Math.round(saldoLivre * 100) / 100,
+      percentualAlocado: Math.round(percentualAlocado * 100) / 100,
     };
 
     // 🔍 DEBUG: Log completo antes de salvar
@@ -83,7 +106,9 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
         emendaId,
         valorTotal,
         despesasEncontradas: despesas.length,
+        naturezasEncontradas: naturezas.length,
         valorExecutadoBruto: valorExecutado,
+        valorAlocadoBruto: valorAlocado,
         ...valoresCalculados,
       });
     }
@@ -99,7 +124,11 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
           valorExecutado: valoresCalculados.valorExecutado,
           saldoDisponivel: valoresCalculados.saldoDisponivel,
           percentualExecutado: valoresCalculados.percentualExecutado,
-          atualizadoEm: new Date(),
+          // Novos campos para naturezas (envelopes)
+          valorAlocado: valoresCalculados.valorAlocado,
+          saldoLivre: valoresCalculados.saldoLivre,
+          percentualAlocado: valoresCalculados.percentualAlocado,
+          atualizadoEm: serverTimestamp(),
           versaoCalculo: Date.now(), // Timestamp para detectar conflitos
         });
         salvamentoSucesso = true;
@@ -120,6 +149,9 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
         valorExecutado: valoresCalculados.valorExecutado,
         saldoDisponivel: valoresCalculados.saldoDisponivel,
         percentualExecutado: valoresCalculados.percentualExecutado,
+        valorAlocado: valoresCalculados.valorAlocado,
+        saldoLivre: valoresCalculados.saldoLivre,
+        percentualAlocado: valoresCalculados.percentualAlocado,
       });
     }
 
@@ -127,6 +159,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       console.log(`✅ Emenda ${emendaId} recalculada:`, {
         valorTotal,
         despesas: despesas.length,
+        naturezas: naturezas.length,
         ...valoresCalculados,
       });
     }
@@ -135,6 +168,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       success: true,
       valores: valoresCalculados,
       despesas: despesas.length,
+      naturezas: naturezas.length,
       valorTotal,
     };
   } catch (error) {
