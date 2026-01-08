@@ -122,6 +122,38 @@ service cloud.firestore {
     }
 
     // ========================================
+    // COLEÇÃO: NATUREZAS (Envelopes Orçamentários)
+    // ========================================
+
+    match /naturezas/{naturezaId} {
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Leitura permitida se autenticado
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      );
+
+      // Criar natureza: Admin sem restrição, outros validam localização
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+      );
+
+      // Atualizar: Admin sem restrição, outros validam localização
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(resource.data))
+      );
+
+      // Apenas Admin e Gestor podem excluir
+      allow delete: if isAuthenticated() && (
+        isAdmin() ||
+        (isGestor() && matchesUserLocation(resource.data))
+      );
+    }
+
+    // ========================================
     // COLEÇÃO: AUDIT_LOGS
     // ========================================
 
