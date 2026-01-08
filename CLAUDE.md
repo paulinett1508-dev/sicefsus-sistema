@@ -7,9 +7,16 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 27/12/2025
+## Ultima Atualizacao - 08/01/2026
 
-**Transformacao Visual Aplicada:**
+**Sistema de Naturezas Unificado (Envelopes Orcamentarios):**
+- Secao "Despesas Executadas" removida - tudo dentro de "Execucao Orcamentaria"
+- Naturezas virtuais criadas automaticamente de despesas existentes
+- Botao "Regularizar" para definir valor alocado
+- Despesas agrupadas por codigo de natureza (ex: 339030)
+- Ver `src/components/natureza/` para componentes
+
+**Transformacao Visual (27/12/2025):**
 - Paleta de cores atualizada para estilo moderno (Tailwind)
 - Fonte Inter adicionada
 - Novas classes CSS utilitarias
@@ -70,6 +77,11 @@ src/
 │   │   ├── EmendasTable.jsx         # Tabela de emendas
 │   │   ├── EmendasFilters.jsx       # Filtros de emendas
 │   │   └── ModalExclusaoEmenda.jsx  # Modal de exclusao
+│   │
+│   ├── natureza/                    # 🆕 Sistema de envelopes orcamentarios
+│   │   ├── NaturezasList.jsx        # Lista de naturezas (reais + virtuais)
+│   │   ├── NaturezaCard.jsx         # Card expansivel de natureza
+│   │   └── NaturezaForm.jsx         # Formulario criar/editar natureza
 │   │
 │   ├── despesa/
 │   │   ├── DespesaCard/             # Cards de despesa
@@ -388,6 +400,7 @@ EXECUTAR:
 | `useEmendaFormData` | `src/hooks/useEmendaFormData.js` | EmendaForm/index.jsx |
 | `useEmendaFormNavigation` | `src/hooks/useEmendaFormNavigation.js` | EmendaForm (navegacao entre abas) |
 | `useEmendaDespesa` | `src/hooks/useEmendaDespesa.js` | Operacoes CRUD emenda-despesa |
+| `useNaturezasData` | `src/hooks/useNaturezasData.js` | CRUD de naturezas (envelopes orcamentarios) |
 | `useNavigationProtection` | `src/hooks/useNavigationProtection.js` | App.jsx, formularios |
 | `useRelatoriosData` | `src/hooks/useRelatoriosData.js` | Relatorios.jsx |
 | `useValidation` | `src/hooks/useValidation.js` | Formularios em geral |
@@ -413,7 +426,8 @@ EXECUTAR:
 |---------|-------------------|
 | `usuarios` | uid, email, nome, tipo, municipio, uf, status, superAdmin |
 | `emendas` | id, numero, autor, municipio, uf, valor, dataValidade, status |
-| `despesas` | id, emendaId, municipio, uf, valor, status, descricao, dataExecucao |
+| `despesas` | id, emendaId, naturezaId, municipio, uf, valor, status, statusPagamento |
+| `naturezas` | id, emendaId, codigo, descricao, valorAlocado, criadoEm |
 
 ---
 
