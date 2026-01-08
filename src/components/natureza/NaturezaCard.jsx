@@ -59,202 +59,213 @@ const NaturezaCard = ({
     }
   };
 
-  // Estilos
+  // Estilos - Design compacto e profissional
   const styles = {
     card: {
-      backgroundColor: isDark ? "var(--bg-secondary)" : "#ffffff",
-      borderRadius: "12px",
-      border: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
+      backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
+      borderRadius: "var(--border-radius-md, 8px)",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
       overflow: "hidden",
-      marginBottom: "12px",
     },
     header: {
       display: "flex",
       alignItems: "center",
-      padding: "16px",
+      padding: "10px 12px",
       cursor: "pointer",
       transition: "background-color 0.2s",
       backgroundColor: expandidoLocal
         ? isDark
-          ? "var(--bg-tertiary)"
-          : "#f8fafc"
+          ? "var(--theme-surface-secondary)"
+          : "var(--gray-50, #F8FAFC)"
         : "transparent",
     },
     expandIcon: {
-      fontSize: 20,
-      color: isDark ? "var(--text-secondary)" : "#64748b",
-      marginRight: "12px",
+      fontSize: 18,
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
+      marginRight: "8px",
       transition: "transform 0.2s",
       transform: expandidoLocal ? "rotate(90deg)" : "rotate(0deg)",
     },
     info: {
       flex: 1,
+      minWidth: 0,
     },
     titulo: {
-      fontSize: "14px",
-      fontWeight: 600,
-      color: isDark ? "var(--text-primary)" : "#1e293b",
-      marginBottom: "4px",
+      fontSize: "var(--font-size-sm, 13px)",
+      fontWeight: "var(--font-weight-semibold, 600)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       display: "flex",
       alignItems: "center",
-      gap: "8px",
+      gap: "6px",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
     },
     codigo: {
-      fontSize: "12px",
-      color: isDark ? "var(--text-secondary)" : "#64748b",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#f1f5f9",
-      padding: "2px 8px",
-      borderRadius: "4px",
+      fontSize: "11px",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--gray-100, #F1F5F9)",
+      padding: "2px 6px",
+      borderRadius: "var(--border-radius-sm, 4px)",
       fontFamily: "monospace",
+      flexShrink: 0,
     },
     metricas: {
       display: "flex",
       alignItems: "center",
-      gap: "16px",
+      gap: "12px",
+      flexShrink: 0,
     },
     metrica: {
       textAlign: "right",
     },
     metricaLabel: {
-      fontSize: "11px",
-      color: isDark ? "var(--text-secondary)" : "#94a3b8",
+      fontSize: "10px",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-400, #94A3B8)",
       display: "block",
     },
     metricaValor: {
-      fontSize: "14px",
-      fontWeight: 600,
-      color: isDark ? "var(--text-primary)" : "#1e293b",
+      fontSize: "var(--font-size-sm, 13px)",
+      fontWeight: "var(--font-weight-semibold, 600)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
     },
     progressBar: {
-      width: "100px",
-      height: "6px",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#e2e8f0",
-      borderRadius: "3px",
+      width: "60px",
+      height: "4px",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--gray-200, #E2E8F0)",
+      borderRadius: "2px",
       overflow: "hidden",
     },
     progressFill: {
       height: "100%",
       backgroundColor: getStatusColor(),
-      borderRadius: "3px",
+      borderRadius: "2px",
       transition: "width 0.3s",
     },
     percentual: {
-      fontSize: "12px",
+      fontSize: "11px",
       fontWeight: 600,
       color: getStatusColor(),
-      marginLeft: "8px",
-      minWidth: "40px",
+      marginLeft: "6px",
+      minWidth: "32px",
     },
     body: {
-      borderTop: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
-      padding: "16px",
+      borderTop: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      padding: "12px",
       display: expandidoLocal ? "block" : "none",
     },
     acoes: {
       display: "flex",
-      gap: "8px",
-      marginBottom: "16px",
+      gap: "6px",
+      marginBottom: "12px",
     },
     btnAcao: {
-      padding: "8px 16px",
-      fontSize: "13px",
-      fontWeight: 500,
+      padding: "6px 12px",
+      fontSize: "var(--font-size-xs, 12px)",
+      fontWeight: "var(--font-weight-medium, 500)",
       border: "none",
-      borderRadius: "6px",
+      borderRadius: "var(--border-radius-sm, 4px)",
       cursor: "pointer",
       display: "flex",
       alignItems: "center",
-      gap: "6px",
+      gap: "4px",
     },
     btnPrimario: {
-      backgroundColor: "#3b82f6",
-      color: "#ffffff",
+      backgroundColor: "var(--primary, #2563EB)",
+      color: "var(--white, #ffffff)",
     },
     btnSecundario: {
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#f1f5f9",
-      color: isDark ? "var(--text-primary)" : "#64748b",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--gray-100, #F1F5F9)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-500, #64748B)",
     },
     btnPerigo: {
-      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "#fee2e2",
-      color: "#dc2626",
+      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(239, 68, 68, 0.1)",
+      color: "var(--error, #EF4444)",
     },
     despesasList: {
-      marginTop: "16px",
+      marginTop: "10px",
     },
     despesaItem: {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "12px",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#f8fafc",
-      borderRadius: "8px",
-      marginBottom: "8px",
+      padding: "8px 10px",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--gray-50, #F8FAFC)",
+      borderRadius: "var(--border-radius, 6px)",
+      marginBottom: "6px",
     },
     despesaInfo: {
       flex: 1,
+      minWidth: 0,
     },
     despesaDescricao: {
-      fontSize: "13px",
-      fontWeight: 500,
-      color: isDark ? "var(--text-primary)" : "#1e293b",
-      marginBottom: "4px",
+      fontSize: "var(--font-size-xs, 12px)",
+      fontWeight: "var(--font-weight-medium, 500)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
+      marginBottom: "2px",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
     },
     despesaMeta: {
-      fontSize: "12px",
-      color: isDark ? "var(--text-secondary)" : "#64748b",
+      fontSize: "11px",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
       display: "flex",
       alignItems: "center",
-      gap: "12px",
+      gap: "8px",
     },
     despesaValor: {
-      fontSize: "14px",
-      fontWeight: 600,
-      color: isDark ? "var(--text-primary)" : "#1e293b",
+      fontSize: "var(--font-size-sm, 13px)",
+      fontWeight: "var(--font-weight-semibold, 600)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
+      marginLeft: "8px",
+      flexShrink: 0,
     },
     despesaAcoes: {
       display: "flex",
-      gap: "8px",
+      gap: "4px",
+      marginLeft: "8px",
     },
     btnIcone: {
-      padding: "6px",
+      padding: "4px",
       border: "none",
-      borderRadius: "6px",
+      borderRadius: "var(--border-radius-sm, 4px)",
       backgroundColor: "transparent",
-      color: isDark ? "var(--text-secondary)" : "#64748b",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
       cursor: "pointer",
     },
     emptyState: {
       textAlign: "center",
-      padding: "24px",
-      color: isDark ? "var(--text-secondary)" : "#94a3b8",
+      padding: "16px",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-400, #94A3B8)",
     },
     emptyIcon: {
-      fontSize: 40,
-      marginBottom: "8px",
+      fontSize: 28,
+      marginBottom: "6px",
       opacity: 0.5,
     },
     statusBadge: {
-      padding: "2px 8px",
-      borderRadius: "4px",
+      padding: "2px 6px",
+      borderRadius: "var(--border-radius-sm, 4px)",
       fontSize: "10px",
-      fontWeight: 600,
+      fontWeight: "var(--font-weight-semibold, 600)",
       textTransform: "uppercase",
     },
     statusPendente: {
-      backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
-      color: "#d97706",
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "rgba(245, 158, 11, 0.15)",
+      color: "var(--warning, #F59E0B)",
     },
     statusEmpenhado: {
-      backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "#dbeafe",
-      color: "#2563eb",
+      backgroundColor: isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.1)",
+      color: "var(--primary, #2563EB)",
     },
     statusLiquidado: {
-      backgroundColor: isDark ? "rgba(139, 92, 246, 0.1)" : "#ede9fe",
-      color: "#7c3aed",
+      backgroundColor: isDark ? "rgba(139, 92, 246, 0.1)" : "rgba(139, 92, 246, 0.1)",
+      color: "#8B5CF6",
     },
     statusPago: {
-      backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "#d1fae5",
-      color: "#059669",
+      backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "rgba(16, 185, 129, 0.1)",
+      color: "var(--success, #10B981)",
     },
   };
 
@@ -274,8 +285,16 @@ const NaturezaCard = ({
   return (
     <div style={styles.card}>
       {/* Header - sempre visivel */}
-      <div style={styles.header} onClick={handleToggleExpandir}>
-        <span className="material-symbols-outlined" style={styles.expandIcon}>
+      <div
+        style={styles.header}
+        onClick={handleToggleExpandir}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleToggleExpandir(); } }}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expandidoLocal}
+        aria-label={`${natureza.descricao}, ${expandidoLocal ? 'clique para recolher' : 'clique para expandir'}`}
+      >
+        <span className="material-symbols-outlined" style={styles.expandIcon} aria-hidden="true">
           chevron_right
         </span>
 
@@ -326,7 +345,7 @@ const NaturezaCard = ({
             onClick={() => onNovaDespesa?.(natureza)}
             disabled={saldoDisponivel <= 0}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
               add
             </span>
             Nova Despesa
@@ -336,7 +355,7 @@ const NaturezaCard = ({
             style={{ ...styles.btnAcao, ...styles.btnSecundario }}
             onClick={() => onEditarNatureza?.(natureza)}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
               edit
             </span>
             Editar
@@ -347,7 +366,7 @@ const NaturezaCard = ({
               style={{ ...styles.btnAcao, ...styles.btnPerigo }}
               onClick={() => onExcluirNatureza?.(natureza)}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 delete
               </span>
               Excluir
@@ -359,10 +378,10 @@ const NaturezaCard = ({
         <div style={styles.despesasList}>
           <h4
             style={{
-              fontSize: "13px",
+              fontSize: "12px",
               fontWeight: 600,
               color: isDark ? "var(--text-secondary)" : "#64748b",
-              marginBottom: "12px",
+              margin: "0 0 8px 0",
             }}
           >
             Despesas ({despesas.length})
@@ -433,7 +452,7 @@ const NaturezaCard = ({
                     onClick={() => onVisualizarDespesa?.(despesa)}
                     title="Visualizar"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                       visibility
                     </span>
                   </button>
@@ -442,7 +461,7 @@ const NaturezaCard = ({
                     onClick={() => onEditarDespesa?.(despesa)}
                     title="Editar"
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                       edit
                     </span>
                   </button>

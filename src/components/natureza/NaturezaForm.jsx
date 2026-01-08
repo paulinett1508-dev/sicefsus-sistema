@@ -135,142 +135,142 @@ const NaturezaForm = ({
     }
   };
 
-  // Estilos
+  // Estilos - Design compacto e profissional
   const styles = {
     container: {
-      backgroundColor: isDark ? "var(--bg-secondary)" : "#ffffff",
-      borderRadius: "12px",
-      padding: "20px",
-      border: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
+      backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
+      borderRadius: "var(--border-radius-md, 8px)",
+      padding: "16px",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
     },
     header: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: "20px",
+      marginBottom: "12px",
     },
     titulo: {
-      fontSize: "16px",
-      fontWeight: 600,
-      color: isDark ? "var(--text-primary)" : "#1e293b",
+      fontSize: "var(--font-size-sm, 14px)",
+      fontWeight: "var(--font-weight-semibold, 600)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       margin: 0,
       display: "flex",
       alignItems: "center",
-      gap: "8px",
+      gap: "6px",
     },
     campo: {
-      marginBottom: "16px",
+      marginBottom: "12px",
     },
     label: {
       display: "block",
-      fontSize: "13px",
-      fontWeight: 500,
-      color: isDark ? "var(--text-secondary)" : "#64748b",
-      marginBottom: "6px",
+      fontSize: "var(--font-size-xs, 12px)",
+      fontWeight: "var(--font-weight-medium, 500)",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
+      marginBottom: "4px",
     },
     input: {
       width: "100%",
-      padding: "10px 12px",
-      fontSize: "14px",
-      border: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
-      borderRadius: "8px",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#ffffff",
-      color: isDark ? "var(--text-primary)" : "#1e293b",
+      padding: "8px 10px",
+      fontSize: "var(--font-size-sm, 13px)",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      borderRadius: "var(--border-radius, 6px)",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--theme-surface, #ffffff)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       boxSizing: "border-box",
     },
     select: {
       width: "100%",
-      padding: "10px 12px",
-      fontSize: "14px",
-      border: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
-      borderRadius: "8px",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#ffffff",
-      color: isDark ? "var(--text-primary)" : "#1e293b",
+      padding: "8px 10px",
+      fontSize: "var(--font-size-sm, 13px)",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      borderRadius: "var(--border-radius, 6px)",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--theme-surface, #ffffff)",
+      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       cursor: "pointer",
     },
     saldoInfo: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      padding: "12px",
-      backgroundColor: isDark ? "var(--bg-tertiary)" : "#f8fafc",
-      borderRadius: "8px",
-      marginBottom: "16px",
-      fontSize: "13px",
+      padding: "8px 10px",
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "var(--gray-50, #F8FAFC)",
+      borderRadius: "var(--border-radius, 6px)",
+      marginBottom: "12px",
+      fontSize: "var(--font-size-xs, 12px)",
     },
     saldoLabel: {
-      color: isDark ? "var(--text-secondary)" : "#64748b",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
     },
     saldoValor: {
-      fontWeight: 600,
-      color: saldoLivre > 0 ? "#10b981" : "#ef4444",
+      fontWeight: "var(--font-weight-semibold, 600)",
+      color: saldoLivre > 0 ? "var(--success, #10B981)" : "var(--error, #EF4444)",
     },
     validacao: {
-      marginTop: "8px",
-      padding: "8px 12px",
-      borderRadius: "6px",
-      fontSize: "12px",
+      marginTop: "6px",
+      padding: "6px 10px",
+      borderRadius: "var(--border-radius-sm, 4px)",
+      fontSize: "11px",
       display: "flex",
       alignItems: "center",
-      gap: "6px",
+      gap: "4px",
     },
     validacaoSucesso: {
-      backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "#d1fae5",
-      color: "#059669",
+      backgroundColor: isDark ? "rgba(16, 185, 129, 0.1)" : "rgba(16, 185, 129, 0.1)",
+      color: "var(--success, #10B981)",
     },
     validacaoErro: {
-      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "#fee2e2",
-      color: "#dc2626",
+      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(239, 68, 68, 0.1)",
+      color: "var(--error, #EF4444)",
     },
     erro: {
-      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "#fee2e2",
-      color: "#dc2626",
-      padding: "10px 12px",
-      borderRadius: "8px",
-      fontSize: "13px",
-      marginBottom: "16px",
+      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(239, 68, 68, 0.1)",
+      color: "var(--error, #EF4444)",
+      padding: "8px 10px",
+      borderRadius: "var(--border-radius, 6px)",
+      fontSize: "var(--font-size-xs, 12px)",
+      marginBottom: "12px",
     },
     acoes: {
       display: "flex",
-      gap: "12px",
+      gap: "8px",
       justifyContent: "flex-end",
-      marginTop: "20px",
-      paddingTop: "16px",
-      borderTop: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
+      marginTop: "12px",
+      paddingTop: "12px",
+      borderTop: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
     },
     btnCancelar: {
-      padding: "10px 20px",
-      fontSize: "14px",
-      fontWeight: 500,
-      border: `1px solid ${isDark ? "var(--border-color)" : "#e2e8f0"}`,
-      borderRadius: "8px",
+      padding: "8px 16px",
+      fontSize: "var(--font-size-sm, 13px)",
+      fontWeight: "var(--font-weight-medium, 500)",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      borderRadius: "var(--border-radius, 6px)",
       backgroundColor: "transparent",
-      color: isDark ? "var(--text-secondary)" : "#64748b",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
       cursor: "pointer",
     },
     btnSalvar: {
-      padding: "10px 20px",
-      fontSize: "14px",
-      fontWeight: 500,
+      padding: "8px 16px",
+      fontSize: "var(--font-size-sm, 13px)",
+      fontWeight: "var(--font-weight-medium, 500)",
       border: "none",
-      borderRadius: "8px",
-      backgroundColor: "#3b82f6",
-      color: "#ffffff",
+      borderRadius: "var(--border-radius, 6px)",
+      backgroundColor: "var(--primary, #2563EB)",
+      color: "var(--white, #ffffff)",
       cursor: "pointer",
       display: "flex",
       alignItems: "center",
-      gap: "8px",
+      gap: "6px",
     },
     btnSalvarDisabled: {
       opacity: 0.6,
       cursor: "not-allowed",
     },
     linkVoltar: {
-      color: "#3b82f6",
-      fontSize: "12px",
+      color: "var(--primary, #2563EB)",
+      fontSize: "11px",
       cursor: "pointer",
       textDecoration: "underline",
-      marginTop: "8px",
+      marginTop: "6px",
       display: "inline-block",
     },
   };
@@ -286,7 +286,7 @@ const NaturezaForm = ({
     <div style={styles.container}>
       <div style={styles.header}>
         <h3 style={styles.titulo}>
-          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
             {naturezaParaEditar ? "edit" : "add_circle"}
           </span>
           {naturezaParaEditar ? "Editar Natureza" : "Nova Natureza de Despesa"}
@@ -306,11 +306,12 @@ const NaturezaForm = ({
 
       {/* Campo natureza */}
       <div style={styles.campo}>
-        <label style={styles.label}>Natureza de Despesa *</label>
+        <label htmlFor="naturezaDespesa" style={styles.label}>Natureza de Despesa *</label>
         {modoCustomizado ? (
           <>
             <input
               type="text"
+              id="naturezaDespesa"
               style={styles.input}
               placeholder="Ex: 339030 - MATERIAL DE CONSUMO"
               value={descricao}
@@ -319,6 +320,7 @@ const NaturezaForm = ({
                 const partes = e.target.value.split(" - ");
                 setCodigo(partes[0] || e.target.value);
               }}
+              aria-describedby="naturezaHint"
             />
             <span
               style={styles.linkVoltar}
@@ -333,9 +335,11 @@ const NaturezaForm = ({
           </>
         ) : (
           <select
+            id="naturezaDespesa"
             style={styles.select}
             value={descricao}
             onChange={handleSelecionarNatureza}
+            aria-describedby="naturezaHint"
           >
             <option value="">Selecione uma natureza...</option>
             {NATUREZAS_DESPESA.map((natureza) => (
@@ -350,21 +354,25 @@ const NaturezaForm = ({
 
       {/* Campo valor */}
       <div style={styles.campo}>
-        <label style={styles.label}>Valor a Alocar (R$) *</label>
+        <label htmlFor="valorAlocado" style={styles.label}>Valor a Alocar (R$) *</label>
         <input
           type="text"
+          id="valorAlocado"
           style={styles.input}
           placeholder="0,00"
           value={valorAlocado}
           onChange={handleValorChange}
+          aria-describedby="valorFeedback"
+          inputMode="decimal"
         />
 
         {/* Feedback de validacao */}
         {validando && (
-          <div style={{ ...styles.validacao, backgroundColor: "#f3f4f6" }}>
+          <div id="valorFeedback" style={{ ...styles.validacao, backgroundColor: "#f3f4f6" }} role="status" aria-live="polite">
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: 14, animation: "spin 1s linear infinite" }}
+              style={{ fontSize: 12, animation: "spin 1s linear infinite" }}
+              aria-hidden="true"
             >
               sync
             </span>
@@ -373,6 +381,9 @@ const NaturezaForm = ({
         )}
         {!validando && validacaoResultado && (
           <div
+            id="valorFeedback"
+            role="status"
+            aria-live="polite"
             style={{
               ...styles.validacao,
               ...(validacaoResultado.valido
@@ -380,7 +391,7 @@ const NaturezaForm = ({
                 : styles.validacaoErro),
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12 }}>
               {validacaoResultado.valido ? "check_circle" : "error"}
             </span>
             {validacaoResultado.mensagem}
@@ -414,7 +425,7 @@ const NaturezaForm = ({
             <>
               <span
                 className="material-symbols-outlined"
-                style={{ fontSize: 16, animation: "spin 1s linear infinite" }}
+                style={{ fontSize: 14, animation: "spin 1s linear infinite" }}
               >
                 sync
               </span>
@@ -422,7 +433,7 @@ const NaturezaForm = ({
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 save
               </span>
               {naturezaParaEditar ? "Salvar Alteracoes" : "Criar Natureza"}
