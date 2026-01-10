@@ -318,20 +318,89 @@ const EmendasTable = ({
                   {/* Execução */}
                   <td style={{ ...styles.td, paddingLeft: "16px", verticalAlign: "middle" }}>
                     <div style={styles.execucaoCell}>
-                      <div style={styles.progressContainer}>
-                        <div style={styles.progressBg}>
-                          <div
-                            style={{
-                              ...styles.progressFill,
-                              width: `${Math.min(emenda.percentualExecutado || 0, 100)}%`,
-                              backgroundColor: getProgressColor(emenda.percentualExecutado || 0)
-                            }}
-                          />
-                        </div>
-                        <span style={styles.progressText}>
-                          {(emenda.percentualExecutado || 0).toFixed(0)}%
-                        </span>
-                      </div>
+                      {(() => {
+                        const percExecutado = emenda.percentualExecutado || 0;
+                        const percPlanejado = emenda.percentualPlanejado || 0;
+                        const percTotal = percExecutado + percPlanejado;
+                        const isOver = percTotal > 100;
+                        
+                        // Ajustar percentuais se over (normalizar para exibição)
+                        const displayExecutado = isOver ? (percExecutado / percTotal) * 100 : percExecutado;
+                        const displayPlanejado = isOver ? (percPlanejado / percTotal) * 100 : percPlanejado;
+                        const displayDisponivel = isOver ? 0 : (100 - percTotal);
+
+                        return (
+                          <div style={styles.execucaoWrapper}>
+                            {/* Barra segmentada */}
+                            <div style={styles.barraSegmentada}>
+                              {/* Segmento EXECUTADO (verde sólido) */}
+                              {displayExecutado > 0 && (
+                                <div
+                                  style={{
+                                    width: `${displayExecutado}%`,
+                                    height: '100%',
+                                    backgroundColor: '#10B981',
+                                    transition: 'width 0.3s ease',
+                                  }}
+                                  title={`Executado: ${percExecutado.toFixed(1)}%`}
+                                />
+                              )}
+                              
+                              {/* Segmento PLANEJADO (laranja listrado) */}
+                              {displayPlanejado > 0 && (
+                                <div
+                                  style={{
+                                    width: `${displayPlanejado}%`,
+                                    height: '100%',
+                                    background: 'repeating-linear-gradient(45deg, #F59E0B, #F59E0B 3px, #FCD34D 3px, #FCD34D 6px)',
+                                    transition: 'width 0.3s ease',
+                                  }}
+                                  title={`Planejado: ${percPlanejado.toFixed(1)}%`}
+                                />
+                              )}
+                              
+                              {/* Segmento DISPONÍVEL (cinza claro) */}
+                              {displayDisponivel > 0 && (
+                                <div
+                                  style={{
+                                    width: `${displayDisponivel}%`,
+                                    height: '100%',
+                                    backgroundColor: 'var(--gray-100, #F1F5F9)',
+                                    transition: 'width 0.3s ease',
+                                  }}
+                                  title={`Disponível: ${(100 - percTotal).toFixed(1)}%`}
+                                />
+                              )}
+                            </div>
+
+                            {/* Labels */}
+                            <div style={styles.execucaoLabels}>
+                              <div style={styles.labelGroup}>
+                                {percExecutado > 0 && (
+                                  <div style={styles.labelItem}>
+                                    <span style={{ ...styles.labelDot, backgroundColor: '#10B981' }} />
+                                    <span style={styles.labelText}>{percExecutado.toFixed(0)}%</span>
+                                  </div>
+                                )}
+                                {percPlanejado > 0 && (
+                                  <div style={styles.labelItem}>
+                                    <span style={{ 
+                                      ...styles.labelDot, 
+                                      background: 'repeating-linear-gradient(45deg, #F59E0B, #F59E0B 2px, #FCD34D 2px, #FCD34D 4px)',
+                                    }} />
+                                    <span style={{ ...styles.labelText, fontStyle: 'italic' }}>
+                                      {percPlanejado.toFixed(0)}%
+                                    </span>
+                                  </div>
+                                )}
+                                {isOver && (
+                                  <span style={styles.overBadge}>OVER</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </td>
 
@@ -614,6 +683,56 @@ const styles = {
   execucaoCell: {
     width: "100%",
   },
+  execucaoWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    width: '100%',
+  },
+  barraSegmentada: {
+    display: 'flex',
+    height: '8px',
+    width: '100%',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    backgroundColor: 'var(--gray-100, #F1F5F9)',
+    border: '1px solid var(--theme-border-light, #E2E8F0)',
+  },
+  execucaoLabels: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  labelGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  labelItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '3px',
+  },
+  labelDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    flexShrink: 0,
+  },
+  labelText: {
+    fontSize: '10px',
+    fontWeight: '500',
+    color: 'var(--theme-text-muted)',
+  },
+  overBadge: {
+    fontSize: '8px',
+    fontWeight: '700',
+    color: '#EF4444',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: '2px 5px',
+    borderRadius: '3px',
+    textTransform: 'uppercase',
+  },
   progressContainer: {
     display: "flex",
     alignItems: "center",
@@ -625,6 +744,7 @@ const styles = {
     backgroundColor: "var(--gray-100, #F1F5F9)",
     borderRadius: "9999px",
     overflow: "hidden",
+    position: "relative",
   },
   progressFill: {
     height: "100%",

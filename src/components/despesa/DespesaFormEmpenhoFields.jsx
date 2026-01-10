@@ -13,7 +13,7 @@ const DespesaFormEmpenhoFields = ({
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📄</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>article</span>
         Dados do Empenho e Nota Fiscal
       </legend>
 
@@ -39,10 +39,11 @@ const DespesaFormEmpenhoFields = ({
           <label style={styles.labelRequired}>
             Nº da Nota Fiscal *
             <span
-              style={styles.infoIcon}
+              className="material-symbols-outlined"
+              style={{ fontSize: 14, color: "#3b82f6", cursor: "help", marginLeft: 4 }}
               title="Obrigatório - toda despesa deve ter nota fiscal"
             >
-              ℹ️
+              info
             </span>
           </label>
           <input

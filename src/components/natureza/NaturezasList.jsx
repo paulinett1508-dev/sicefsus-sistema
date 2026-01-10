@@ -21,6 +21,7 @@ import ConfirmationModal from "../ConfirmationModal";
  * @param {function} props.onNovaDespesa - Callback para criar despesa
  * @param {function} props.onEditarDespesa - Callback para editar despesa
  * @param {function} props.onVisualizarDespesa - Callback para visualizar despesa
+ * @param {function} props.onExcluirDespesa - Callback para excluir despesa
  * @param {function} props.onCarregarDespesas - Callback para carregar despesas de uma natureza
  * @param {function} props.validarAlocacao - Funcao para validar alocacao
  * @param {object} props.despesasPorNatureza - Mapa de despesas por natureza
@@ -37,6 +38,7 @@ const NaturezasList = ({
   onNovaDespesa,
   onEditarDespesa,
   onVisualizarDespesa,
+  onExcluirDespesa,
   onCarregarDespesas,
   validarAlocacao,
   despesasPorNatureza = {},
@@ -47,8 +49,14 @@ const NaturezasList = ({
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [naturezaEmEdicao, setNaturezaEmEdicao] = useState(null);
   const [naturezaParaExcluir, setNaturezaParaExcluir] = useState(null);
+  const [despesaParaExcluir, setDespesaParaExcluir] = useState(null);
   const [naturezasExpandidas, setNaturezasExpandidas] = useState({});
   const [carregandoDespesas, setCarregandoDespesas] = useState({});
+
+  // Estados para regularizacao em lote
+  const [mostrarModalRegularizarTodas, setMostrarModalRegularizarTodas] = useState(false);
+  const [regularizandoTodas, setRegularizandoTodas] = useState(false);
+  const [progressoRegularizacao, setProgressoRegularizacao] = useState({ atual: 0, total: 0 });
 
   // Calcular saldo livre da emenda
   const valorTotal = parseValorMonetario(
@@ -62,6 +70,15 @@ const NaturezasList = ({
     (sum, n) => sum + parseValorMonetario(n.valorExecutado || 0),
     0
   );
+
+  // Naturezas virtuais para regularizacao em lote
+  const naturezasVirtuais = naturezas.filter(n => n.isVirtual);
+  const totalNaturezasVirtuais = naturezasVirtuais.length;
+  const valorTotalVirtuais = naturezasVirtuais.reduce(
+    (sum, n) => sum + parseValorMonetario(n.valorExecutado || 0),
+    0
+  );
+  const saldoSuficiente = saldoLivre >= valorTotalVirtuais;
 
   // Handlers
   const handleAbrirFormulario = () => {
@@ -100,6 +117,55 @@ const NaturezasList = ({
         console.error("Erro ao excluir:", error);
       }
       setNaturezaParaExcluir(null);
+    }
+  };
+
+  const handleConfirmarExclusaoDespesa = async () => {
+    if (despesaParaExcluir) {
+      try {
+        await onExcluirDespesa?.(despesaParaExcluir);
+      } catch (error) {
+        console.error("Erro ao excluir despesa:", error);
+      }
+      setDespesaParaExcluir(null);
+    }
+  };
+
+  // Handler para regularizar todas as naturezas virtuais em lote
+  const handleRegularizarTodas = async () => {
+    if (!naturezasVirtuais.length || !saldoSuficiente) return;
+
+    setRegularizandoTodas(true);
+    setProgressoRegularizacao({ atual: 0, total: naturezasVirtuais.length });
+
+    let sucessos = 0;
+    const falhas = [];
+
+    try {
+      for (let i = 0; i < naturezasVirtuais.length; i++) {
+        const nat = naturezasVirtuais[i];
+        setProgressoRegularizacao({ atual: i + 1, total: naturezasVirtuais.length });
+
+        try {
+          const valorAlocar = parseValorMonetario(nat.valorExecutado || 0);
+          await onRegularizarNatureza?.(nat, valorAlocar);
+          sucessos++;
+        } catch (error) {
+          console.error(`Erro ao regularizar ${nat.codigo}:`, error);
+          falhas.push({ codigo: nat.codigo, erro: error.message });
+        }
+      }
+
+      // Log do resultado
+      if (falhas.length === 0) {
+        console.log(`${sucessos} naturezas regularizadas com sucesso`);
+      } else {
+        console.warn(`${sucessos} sucessos, ${falhas.length} falhas:`, falhas);
+      }
+    } finally {
+      setRegularizandoTodas(false);
+      setMostrarModalRegularizarTodas(false);
+      setProgressoRegularizacao({ atual: 0, total: 0 });
     }
   };
 
@@ -259,24 +325,51 @@ const NaturezasList = ({
         </h3>
 
         {!mostrarFormulario && (
-          <button
-            style={{
-              ...styles.btnNovo,
-              ...(saldoLivre <= 0 ? styles.btnNovoDisabled : {}),
-            }}
-            onClick={handleAbrirFormulario}
-            disabled={saldoLivre <= 0}
-            title={
-              saldoLivre <= 0
-                ? "Sem saldo livre para alocar"
-                : "Criar nova natureza"
-            }
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-              add
-            </span>
-            Nova Natureza
-          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {/* Botao Regularizar Todas - so aparece quando ha virtuais */}
+            {totalNaturezasVirtuais > 0 && (
+              <button
+                style={{
+                  ...styles.btnNovo,
+                  backgroundColor: saldoSuficiente ? "#f59e0b" : "#d1d5db",
+                  opacity: saldoSuficiente && !regularizandoTodas ? 1 : 0.6,
+                  cursor: saldoSuficiente && !regularizandoTodas ? "pointer" : "not-allowed",
+                }}
+                onClick={() => setMostrarModalRegularizarTodas(true)}
+                disabled={!saldoSuficiente || regularizandoTodas}
+                title={
+                  !saldoSuficiente
+                    ? `Saldo livre insuficiente. Necessario: R$ ${valorTotalVirtuais.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
+                    : `Regularizar ${totalNaturezasVirtuais} natureza${totalNaturezasVirtuais > 1 ? "s" : ""} virtual${totalNaturezasVirtuais > 1 ? "is" : ""}`
+                }
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  verified
+                </span>
+                Regularizar Todas ({totalNaturezasVirtuais})
+              </button>
+            )}
+
+            {/* Botao Nova Natureza */}
+            <button
+              style={{
+                ...styles.btnNovo,
+                ...(saldoLivre <= 0 ? styles.btnNovoDisabled : {}),
+              }}
+              onClick={handleAbrirFormulario}
+              disabled={saldoLivre <= 0}
+              title={
+                saldoLivre <= 0
+                  ? "Sem saldo livre para alocar"
+                  : "Criar nova natureza"
+              }
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                add
+              </span>
+              Nova Natureza
+            </button>
+          </div>
         )}
       </div>
 
@@ -375,12 +468,13 @@ const NaturezasList = ({
               onRegularizarNatureza={onRegularizarNatureza}
               onEditarDespesa={onEditarDespesa}
               onVisualizarDespesa={onVisualizarDespesa}
+              onExcluirDespesa={(d) => setDespesaParaExcluir(d)}
             />
           ))}
         </div>
       )}
 
-      {/* Modal de confirmacao de exclusao */}
+      {/* Modal de confirmacao de exclusao de natureza */}
       {naturezaParaExcluir && (
         <ConfirmationModal
           isOpen={true}
@@ -391,6 +485,219 @@ const NaturezasList = ({
           confirmText="Excluir"
           cancelText="Cancelar"
           type="danger"
+        />
+      )}
+
+      {/* Modal de confirmacao de exclusao de despesa */}
+      {despesaParaExcluir && (
+        <ConfirmationModal
+          isOpen={true}
+          onClose={() => setDespesaParaExcluir(null)}
+          onConfirm={handleConfirmarExclusaoDespesa}
+          title="Excluir Despesa"
+          message={`Tem certeza que deseja excluir a despesa "${despesaParaExcluir.discriminacao || despesaParaExcluir.descricao || "Despesa"}"? Esta acao nao pode ser desfeita.`}
+          confirmText="Excluir"
+          cancelText="Cancelar"
+          type="danger"
+        />
+      )}
+
+      {/* Modal de confirmacao de regularizacao em lote */}
+      {mostrarModalRegularizarTodas && (
+        <ConfirmationModal
+          isOpen={true}
+          onClose={() => !regularizandoTodas && setMostrarModalRegularizarTodas(false)}
+          onConfirm={handleRegularizarTodas}
+          title="Regularizar Todas as Naturezas"
+          message={
+            regularizandoTodas ? (
+              <div style={{ textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: 20, animation: "spin 1s linear infinite" }}
+                  >
+                    sync
+                  </span>
+                  <span style={{ fontWeight: 600 }}>Regularizando naturezas...</span>
+                </div>
+                <div
+                  style={{
+                    height: 8,
+                    backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#e2e8f0",
+                    borderRadius: 4,
+                    overflow: "hidden",
+                    marginBottom: 8,
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      width: `${(progressoRegularizacao.atual / progressoRegularizacao.total) * 100}%`,
+                      backgroundColor: "#f59e0b",
+                      transition: "width 0.3s",
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: isDark ? "var(--theme-text-secondary)" : "#64748b",
+                  }}
+                >
+                  {progressoRegularizacao.atual} de {progressoRegularizacao.total} naturezas
+                  processadas
+                </span>
+              </div>
+            ) : (
+              <div style={{ textAlign: "left" }}>
+                <p
+                  style={{
+                    marginBottom: 12,
+                    color: isDark ? "var(--theme-text-secondary)" : "#475569",
+                  }}
+                >
+                  As seguintes naturezas virtuais serao convertidas em naturezas reais:
+                </p>
+
+                {/* Tabela listando naturezas virtuais */}
+                <div
+                  style={{
+                    maxHeight: 200,
+                    overflowY: "auto",
+                    border: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+                    borderRadius: 6,
+                    marginBottom: 12,
+                  }}
+                >
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: isDark
+                            ? "var(--theme-surface-secondary)"
+                            : "#f8fafc",
+                          borderBottom: `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
+                        }}
+                      >
+                        <th style={{ padding: "8px 10px", textAlign: "left" }}>Codigo</th>
+                        <th style={{ padding: "8px 10px", textAlign: "left" }}>Descricao</th>
+                        <th style={{ padding: "8px 10px", textAlign: "right" }}>
+                          Valor a Alocar
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {naturezasVirtuais.map((nat, idx) => (
+                        <tr
+                          key={nat.id}
+                          style={{
+                            backgroundColor:
+                              idx % 2 === 0
+                                ? isDark
+                                  ? "var(--theme-surface)"
+                                  : "#fff"
+                                : isDark
+                                  ? "var(--theme-surface-secondary)"
+                                  : "#f8fafc",
+                          }}
+                        >
+                          <td style={{ padding: "6px 10px", fontFamily: "monospace" }}>
+                            {nat.codigo}
+                          </td>
+                          <td
+                            style={{
+                              padding: "6px 10px",
+                              maxWidth: 200,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {nat.descricao?.replace(`${nat.codigo} - `, "")}
+                          </td>
+                          <td
+                            style={{
+                              padding: "6px 10px",
+                              textAlign: "right",
+                              fontFamily: "monospace",
+                            }}
+                          >
+                            R${" "}
+                            {parseValorMonetario(nat.valorExecutado || 0).toLocaleString(
+                              "pt-BR",
+                              { minimumFractionDigits: 2 }
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Resumo */}
+                <div
+                  style={{
+                    padding: 12,
+                    backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
+                    borderRadius: 6,
+                    border: `1px solid ${isDark ? "#f59e0b" : "#fcd34d"}`,
+                  }}
+                >
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}
+                  >
+                    <span style={{ fontSize: 12, color: isDark ? "#fcd34d" : "#92400e" }}>
+                      Total de naturezas:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: isDark ? "#fcd34d" : "#92400e",
+                      }}
+                    >
+                      {totalNaturezasVirtuais}
+                    </span>
+                  </div>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}
+                  >
+                    <span style={{ fontSize: 12, color: isDark ? "#fcd34d" : "#92400e" }}>
+                      Valor total a alocar:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: isDark ? "#fcd34d" : "#92400e",
+                      }}
+                    >
+                      R$ {valorTotalVirtuais.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 12, color: isDark ? "#fcd34d" : "#92400e" }}>
+                      Saldo livre disponivel:
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: saldoSuficiente ? "#10b981" : "#ef4444",
+                      }}
+                    >
+                      R$ {saldoLivre.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+          confirmText={regularizandoTodas ? "Processando..." : "Confirmar Regularizacao"}
+          cancelText="Cancelar"
+          type="warning"
+          disabled={regularizandoTodas}
         />
       )}
     </div>

@@ -7,7 +7,8 @@
   "main": "generateHandover.cjs",
   "scripts": {
     "handover": "node generateHandover.cjs",
-    "docs": "node generateHandover.cjs"
+    "docs": "node generateHandover.cjs",
+    "normalizar-over": "node normalizar-emendas-over.cjs"
   },
   "keywords": ["sicefsus", "handover", "documentation"],
   "author": "Sistema SICEFSUS",

@@ -4,6 +4,26 @@ import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
+// Função para parsear valores monetários brasileiros
+function parseValorMonetario(valor) {
+  if (valor === null || valor === undefined || valor === "") return 0;
+  if (typeof valor === "number") return valor;
+  
+  // Remove R$, espaços e caracteres especiais
+  let valorLimpo = String(valor)
+    .replace(/R\$\s*/gi, "")
+    .replace(/\s/g, "")
+    .trim();
+  
+  // Formato brasileiro: 1.234.567,89 -> 1234567.89
+  if (valorLimpo.includes(",")) {
+    valorLimpo = valorLimpo.replace(/\./g, "").replace(",", ".");
+  }
+  
+  const resultado = parseFloat(valorLimpo);
+  return isNaN(resultado) ? 0 : resultado;
+}
+
 export function useRelatoriosData(usuario) {
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
@@ -31,18 +51,45 @@ export function useRelatoriosData(usuario) {
         }
 
         const emendasSnapshot = await getDocs(emendasRef);
-        const emendasData = emendasSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const emendasData = emendasSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Normalizar valor da emenda
+          const valorOriginal = data.valor || data.valorRecurso || data.valorTotal || 0;
+          const valorNormalizado = parseValorMonetario(valorOriginal);
+          
+          // Debug: verificar normalização
+          if (valorOriginal && valorNormalizado === 0) {
+            console.warn(`⚠️ Emenda ${doc.id}: valor "${valorOriginal}" não foi parseado corretamente`);
+          }
+          
+          return {
+            id: doc.id,
+            ...data,
+            valorTotal: valorNormalizado,
+          };
+        });
+        
+        // Debug: log de valores carregados
+        console.log("📊 [Relatórios] Emendas carregadas:", emendasData.length);
+        console.log("📊 [Relatórios] Exemplo de valores:", emendasData.slice(0, 3).map(e => ({
+          id: e.id,
+          autor: e.autor,
+          valorOriginal: e.valor || e.valorRecurso,
+          valorNormalizado: e.valorTotal
+        })));
+        
         setEmendas(emendasData);
 
         // Carregar despesas
         const despesasSnapshot = await getDocs(collection(db, "despesas"));
-        let despesasData = despesasSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        let despesasData = despesasSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            valor: parseValorMonetario(data.valor),
+          };
+        });
 
         // Filtrar despesas se não for admin
         if (userRole && userRole !== "admin") {

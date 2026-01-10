@@ -16,6 +16,7 @@ const DespesaFormDateFields = ({
   emendaInfo, // ✅ Dados da emenda para validação
   onValidationChange, // ✅ NOVO: Callback para informar estado de validação ao formulário pai
 }) => {
+  const { isDark } = useTheme?.() || { isDark: false };
   // ✅ VALIDAÇÃO EM TEMPO REAL mais específica e clara
   const validarDataCampo = (nomeCampo, valor) => {
     if (!valor) return { isValid: false, message: "Data obrigatória" };
@@ -151,18 +152,19 @@ const DespesaFormDateFields = ({
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>📅</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>calendar_today</span>
         Datas de Execução
       </legend>
 
       {/* ✅ BANNER informativo sobre período da emenda */}
       {emendaInfo && (
         <div style={styles.emendaBanner}>
-          📅 Período da Emenda: {formatarPeriodoVigenciaEmenda(emendaInfo)}
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>event</span>
+          Período da Emenda: {formatarPeriodoVigenciaEmenda(emendaInfo)}
           <br />
           <small style={styles.bannerHint}>
-            ⚖️ Fluxo obrigatório: Empenho → Liquidação → Pagamento (Lei
-            4.320/64)
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>balance</span>
+            Fluxo obrigatório: Empenho → Liquidação → Pagamento (Lei 4.320/64)
           </small>
         </div>
       )}
@@ -260,6 +262,7 @@ const DespesaFormDateFields = ({
             dataEmpenho={formData.dataEmpenho}
             dataLiquidacao={formData.dataLiquidacao}
             dataPagamento={formData.dataPagamento}
+            isDark={isDark}
           />
         )}
     </fieldset>
@@ -271,6 +274,7 @@ const ValidacaoSequenciaDatas = ({
   dataEmpenho,
   dataLiquidacao,
   dataPagamento,
+  isDark,
 }) => {
   const empenho = new Date(dataEmpenho);
   const liquidacao = new Date(dataLiquidacao);
@@ -278,12 +282,49 @@ const ValidacaoSequenciaDatas = ({
 
   const sequenciaCorreta = empenho <= liquidacao && liquidacao <= pagamento;
 
+  const sequenceStyles = {
+    success: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "12px",
+      padding: "12px 16px",
+      borderRadius: "6px",
+      border: `1px solid ${isDark ? "#22c55e" : "#28a745"}`,
+      backgroundColor: isDark ? "rgba(34, 197, 94, 0.1)" : "rgba(40, 167, 69, 0.1)",
+      marginTop: "16px",
+    },
+    error: {
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "12px",
+      padding: "12px 16px",
+      borderRadius: "6px",
+      border: `1px solid ${isDark ? "#ef4444" : "#dc3545"}`,
+      backgroundColor: isDark ? "rgba(239, 68, 68, 0.1)" : "rgba(220, 53, 69, 0.1)",
+      marginTop: "16px",
+    },
+    content: {
+      fontSize: "13px",
+      lineHeight: "1.4",
+      color: isDark ? "var(--theme-text)" : "#333",
+    },
+  };
+
   return (
-    <div
-      style={sequenciaCorreta ? styles.sequenceSuccess : styles.sequenceError}
-    >
-      <div style={styles.sequenceIcon}>{sequenciaCorreta ? "✅" : "⚠️"}</div>
-      <div style={styles.sequenceContent}>
+    <div style={sequenciaCorreta ? sequenceStyles.success : sequenceStyles.error}>
+      <span
+        className="material-symbols-outlined"
+        style={{
+          fontSize: 18,
+          color: sequenciaCorreta
+            ? (isDark ? "#4ade80" : "#28a745")
+            : (isDark ? "#f87171" : "#dc3545"),
+          flexShrink: 0,
+        }}
+      >
+        {sequenciaCorreta ? "check_circle" : "warning"}
+      </span>
+      <div style={sequenceStyles.content}>
         <strong>
           {sequenciaCorreta
             ? "Sequência Cronológica Correta"
@@ -330,20 +371,20 @@ const styles = {
   },
 
   emendaBanner: {
-    backgroundColor: "rgba(52, 152, 219, 0.1)",
-    border: "1px solid rgba(52, 152, 219, 0.3)",
+    backgroundColor: "var(--info-bg, rgba(59, 130, 246, 0.1))",
+    border: "1px solid var(--info-border, rgba(59, 130, 246, 0.3))",
     borderRadius: "8px",
     padding: "16px",
     marginBottom: "20px",
     fontSize: "14px",
-    color: "#2980b9",
+    color: "var(--info-text, #3b82f6)",
     fontWeight: "500",
     textAlign: "center",
     lineHeight: "1.5",
   },
 
   bannerHint: {
-    color: "rgba(52, 152, 219, 0.7)",
+    color: "var(--theme-text-secondary)",
     fontSize: "12px",
     fontStyle: "italic",
     marginTop: "4px",
@@ -379,62 +420,29 @@ const styles = {
   },
 
   inputError: {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
-    boxShadow: "0 0 0 3px rgba(220, 53, 69, 0.1)",
+    borderColor: "var(--danger, #dc3545)",
+    backgroundColor: "var(--danger-bg, rgba(220, 53, 69, 0.05))",
+    boxShadow: "0 0 0 3px var(--danger-shadow, rgba(220, 53, 69, 0.1))",
   },
 
   inputSuccess: {
-    borderColor: "#28a745",
-    backgroundColor: "#f8fff9",
-    boxShadow: "0 0 0 3px rgba(40, 167, 69, 0.1)",
+    borderColor: "var(--success, #28a745)",
+    backgroundColor: "var(--success-bg, rgba(40, 167, 69, 0.05))",
+    boxShadow: "0 0 0 3px var(--success-shadow, rgba(40, 167, 69, 0.1))",
   },
 
   errorText: {
-    color: "#dc3545",
+    color: "var(--danger, #dc3545)",
     fontSize: "12px",
     marginTop: "4px",
     fontWeight: "500",
   },
 
   successText: {
-    color: "#28a745",
+    color: "var(--success, #28a745)",
     fontSize: "12px",
     marginTop: "4px",
     fontWeight: "500",
-  },
-
-  sequenceSuccess: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "12px 16px",
-    borderRadius: "6px",
-    border: "1px solid #28a745",
-    backgroundColor: "rgba(40, 167, 69, 0.1)",
-    marginTop: "16px",
-  },
-
-  sequenceError: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: "12px",
-    padding: "12px 16px",
-    borderRadius: "6px",
-    border: "1px solid #dc3545",
-    backgroundColor: "rgba(220, 53, 69, 0.1)",
-    marginTop: "16px",
-  },
-
-  sequenceIcon: {
-    fontSize: "16px",
-    flexShrink: 0,
-  },
-
-  sequenceContent: {
-    fontSize: "13px",
-    lineHeight: "1.4",
-    color: "var(--theme-text, #333)",
   },
 };
 

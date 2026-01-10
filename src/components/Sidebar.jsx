@@ -436,7 +436,7 @@ const styles = {
 
   toggleButtonHover: {
     backgroundColor: "var(--theme-sidebar-item-hover-bg)",
-    borderColor: "var(--primary)",
+    border: "1px solid var(--primary)",
     color: "var(--primary)",
   },
 

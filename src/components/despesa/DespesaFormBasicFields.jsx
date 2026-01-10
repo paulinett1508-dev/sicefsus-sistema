@@ -45,6 +45,7 @@ const DespesaFormBasicFields = ({
   despesaParaEditar = null,
   onValorExcedeSaldo,
 }) => {
+  const { isDark } = useTheme?.() || { isDark: false };
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
   const [novoValorPendente, setNovoValorPendente] = useState(null);
   const [valorAnterior, setValorAnterior] = useState(null);
@@ -284,50 +285,51 @@ const DespesaFormBasicFields = ({
       fontSize: "15px",
       transition: "all 0.3s ease",
       fontFamily: "inherit",
-      backgroundColor: "#fff5f5",
+      backgroundColor: isDark ? "rgba(220, 53, 69, 0.1)" : "#fff5f5",
+      color: isDark ? "var(--theme-text)" : "inherit",
       boxSizing: "border-box",
     },
-    // ✅ CAMPO VALOR DESTACADO
+    // ✅ CAMPO VALOR DESTACADO - Dark mode compatible
     inputValor: {
       padding: "14px 16px",
-      height: "54px", // ✅ ALTURA FIXA
-      border: "2px solid #27ae60",
+      height: "54px",
+      border: `2px solid ${isDark ? "#22c55e" : "#27ae60"}`,
       borderRadius: "8px",
-      fontSize: "18px", // ✅ Fonte maior
-      fontWeight: "600", // ✅ Negrito
+      fontSize: "18px",
+      fontWeight: "600",
       transition: "all 0.3s ease",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      backgroundColor: "#f0fdf4",
-      color: "#065f46",
-      textAlign: "right", // ✅ Alinhado à direita (padrão para valores)
+      fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      backgroundColor: isDark ? "rgba(34, 197, 94, 0.1)" : "#f0fdf4",
+      color: isDark ? "#4ade80" : "#065f46",
+      textAlign: "right",
       letterSpacing: "0.5px",
-      boxSizing: "border-box", // ✅ IMPORTANTE!
+      boxSizing: "border-box",
     },
     inputValorError: {
       padding: "14px 16px",
-      height: "54px", // ✅ ALTURA FIXA
+      height: "54px",
       border: "2px solid #e74c3c",
       borderRadius: "8px",
       fontSize: "18px",
       fontWeight: "600",
       transition: "all 0.3s ease",
-      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-      backgroundColor: "#fef2f2",
-      color: "#991b1b",
+      fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      backgroundColor: isDark ? "rgba(220, 53, 69, 0.1)" : "#fef2f2",
+      color: isDark ? "#f87171" : "#991b1b",
       textAlign: "right",
       letterSpacing: "0.5px",
-      boxSizing: "border-box", // ✅ IMPORTANTE!
+      boxSizing: "border-box",
     },
     emendaInfoBox: {
       padding: "14px 16px",
-      height: "54px", // ✅ ALTURA FIXA
-      backgroundColor: "#e8f4f8",
-      border: "2px solid #3498db",
+      height: "54px",
+      backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "#e8f4f8",
+      border: `2px solid ${isDark ? "#3b82f6" : "#3498db"}`,
       borderRadius: "8px",
       display: "flex",
       alignItems: "center",
       gap: "10px",
-      boxSizing: "border-box", // ✅ IMPORTANTE!
+      boxSizing: "border-box",
     },
     emendaText: {
       color: "var(--theme-text, #1E293B)",
@@ -348,14 +350,14 @@ const DespesaFormBasicFields = ({
       gap: "10px",
       alignItems: "center",
     },
-    // ✅ BOTÃO LIMPAR DISCRETO
+    // ✅ BOTÃO LIMPAR DISCRETO - Dark mode compatible
     clearButton: {
       padding: "8px 12px",
-      backgroundColor: "#f8f9fa", // ✅ Cinza claro
-      color: "#6c757d", // ✅ Texto cinza
-      border: "1px solid #dee2e6", // ✅ Borda sutil
+      backgroundColor: isDark ? "var(--theme-surface-secondary, #1e293b)" : "#f8f9fa",
+      color: isDark ? "var(--theme-text-secondary)" : "#6c757d",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
       borderRadius: "6px",
-      fontSize: "12px", // ✅ Menor
+      fontSize: "12px",
       fontWeight: "500",
       cursor: "pointer",
       transition: "all 0.2s",
@@ -365,8 +367,8 @@ const DespesaFormBasicFields = ({
       gap: "4px",
     },
     clearButtonHover: {
-      backgroundColor: "#e9ecef",
-      borderColor: "#adb5bd",
+      backgroundColor: isDark ? "var(--theme-surface)" : "#e9ecef",
+      borderColor: isDark ? "var(--theme-border)" : "#adb5bd",
       transform: "scale(1.02)",
     },
     modalOverlay: {
@@ -392,13 +394,13 @@ const DespesaFormBasicFields = ({
     },
     modalHeader: {
       padding: "20px",
-      backgroundColor: "#fff3cd",
-      borderBottom: "2px solid #ffc107",
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : "#fff3cd",
+      borderBottom: `2px solid ${isDark ? "#f59e0b" : "#ffc107"}`,
     },
     modalTitle: {
       margin: 0,
       fontSize: "20px",
-      color: "#856404",
+      color: isDark ? "#fbbf24" : "#856404",
       display: "flex",
       alignItems: "center",
       gap: "10px",
@@ -419,7 +421,7 @@ const DespesaFormBasicFields = ({
       gap: "15px",
       marginBottom: "20px",
       padding: "20px",
-      backgroundColor: "#f8f9fa",
+      backgroundColor: isDark ? "var(--theme-surface-secondary, #0f172a)" : "#f8f9fa",
       borderRadius: "8px",
     },
     valorBox: {
@@ -430,37 +432,37 @@ const DespesaFormBasicFields = ({
     },
     valorLabel: {
       fontSize: "12px",
-      color: "#6c757d",
+      color: isDark ? "var(--theme-text-secondary)" : "#6c757d",
       textTransform: "uppercase",
       fontWeight: "600",
     },
     valorAntigo: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "#dc3545",
+      color: isDark ? "#f87171" : "#dc3545",
     },
     valorNovo: {
       fontSize: "20px",
       fontWeight: "bold",
-      color: "#28a745",
+      color: isDark ? "#4ade80" : "#28a745",
     },
     seta: {
       fontSize: "24px",
-      color: "#6c757d",
+      color: isDark ? "var(--theme-text-secondary)" : "#6c757d",
     },
     modalWarning: {
       fontSize: "13px",
-      color: "#856404",
-      backgroundColor: "#fff3cd",
+      color: isDark ? "#fbbf24" : "#856404",
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fff3cd",
       padding: "12px",
       borderRadius: "6px",
-      border: "1px solid #ffc107",
+      border: `1px solid ${isDark ? "#f59e0b" : "#ffc107"}`,
       textAlign: "center",
     },
     modalFooter: {
       padding: "15px 20px",
-      backgroundColor: "#f8f9fa",
-      borderTop: "1px solid #dee2e6",
+      backgroundColor: isDark ? "var(--theme-surface-secondary, #0f172a)" : "#f8f9fa",
+      borderTop: `1px solid ${isDark ? "var(--theme-border)" : "#dee2e6"}`,
       display: "flex",
       justifyContent: "flex-end",
       gap: "10px",
@@ -470,9 +472,9 @@ const DespesaFormBasicFields = ({
       fontSize: "14px",
       fontWeight: "600",
       borderRadius: "6px",
-      border: "2px solid #6c757d",
-      backgroundColor: "white",
-      color: "#6c757d",
+      border: `2px solid ${isDark ? "var(--theme-border)" : "#6c757d"}`,
+      backgroundColor: isDark ? "var(--theme-surface)" : "white",
+      color: isDark ? "var(--theme-text)" : "#6c757d",
       cursor: "pointer",
       transition: "all 0.2s",
     },

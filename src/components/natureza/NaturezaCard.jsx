@@ -15,6 +15,7 @@ import { useTheme } from "../../context/ThemeContext";
  * @param {function} props.onExcluirNatureza - Callback para excluir natureza
  * @param {function} props.onEditarDespesa - Callback para editar despesa
  * @param {function} props.onVisualizarDespesa - Callback para visualizar despesa
+ * @param {function} props.onExcluirDespesa - Callback para excluir despesa
  * @param {boolean} props.carregandoDespesas - Se esta carregando despesas
  * @param {function} props.onExpandir - Callback ao expandir
  * @param {boolean} props.expandido - Se esta expandido
@@ -28,6 +29,7 @@ const NaturezaCard = ({
   onRegularizarNatureza,
   onEditarDespesa,
   onVisualizarDespesa,
+  onExcluirDespesa,
   carregandoDespesas = false,
   onExpandir,
   expandido = false,
@@ -265,6 +267,9 @@ const NaturezaCard = ({
       backgroundColor: "transparent",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
       cursor: "pointer",
+    },
+    btnIconePerigo: {
+      color: isDark ? "#f87171" : "#EF4444",
     },
     emptyState: {
       textAlign: "center",
@@ -607,6 +612,15 @@ const NaturezaCard = ({
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                       edit
+                    </span>
+                  </button>
+                  <button
+                    style={{ ...styles.btnIcone, ...styles.btnIconePerigo }}
+                    onClick={() => onExcluirDespesa?.(despesa)}
+                    title="Excluir despesa"
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                      delete
                     </span>
                   </button>
                 </div>

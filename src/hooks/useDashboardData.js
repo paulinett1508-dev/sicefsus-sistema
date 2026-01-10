@@ -205,30 +205,63 @@ const useDashboardData = (user, permissions) => {
 
       // ✅ CORREÇÃO: Calcular execução individual de cada emenda COM parseValorMonetario
       const emendasComExecucao = resultado.emendasData.map((emenda) => {
-        // ✅ CORREÇÃO P0: Filtrar APENAS despesas EXECUTADAS (excluir PLANEJADA)
-        const despesasEmenda = resultado.despesasData.filter(
-          (despesa) => despesa.emendaId === emenda.id && despesa.status !== "PLANEJADA",
+        const todasDespesasEmenda = resultado.despesasData.filter(
+          (despesa) => despesa.emendaId === emenda.id
+        );
+
+        // ✅ SEPARAR: Executado (pago) e Planejado
+        const despesasExecutadas = todasDespesasEmenda.filter(
+          (despesa) => despesa.status !== "PLANEJADA"
+        );
+
+        const despesasPlanejadas = todasDespesasEmenda.filter(
+          (despesa) => despesa.status === "PLANEJADA"
         );
 
         // ✅ CORREÇÃO P1: Ordem padronizada de fallback
         const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
 
-        // ✅ CORREÇÃO: Usar parseValorMonetario no reduce (já filtrado acima)
-        const valorExecutado = despesasEmenda.reduce((sum, despesa) => {
+        // ✅ CORREÇÃO: Usar parseValorMonetario no reduce
+        const valorExecutado = despesasExecutadas.reduce((sum, despesa) => {
           return sum + parseValorMonetario(despesa.valor);
         }, 0);
 
-        const saldoDisponivel = valorTotal - valorExecutado;
+        const valorPlanejado = despesasPlanejadas.reduce((sum, despesa) => {
+          return sum + parseValorMonetario(despesa.valor);
+        }, 0);
+
+        const valorComprometido = valorExecutado + valorPlanejado;
+        const saldoDisponivel = valorTotal - valorComprometido;
+        
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+
+        const percentualPlanejado =
+          valorTotal > 0 ? (valorPlanejado / valorTotal) * 100 : 0;
+
+        // ⚠️ ALERTA: Detectar over-commitment
+        const totalPerc = percentualExecutado + percentualPlanejado;
+        if (totalPerc > 100 && valorTotal > 0) {
+          console.error(`🚨 Dashboard: Emenda ${emenda.numero || emenda.id} está OVER ${totalPerc.toFixed(1)}%`, {
+            valorTotal,
+            valorExecutado,
+            valorPlanejado,
+            valorComprometido,
+            excesso: valorComprometido - valorTotal,
+            totalDespesas: todasDespesasEmenda.length
+          });
+        }
 
         return {
           ...emenda,
           valorExecutado,
+          valorPlanejado,
+          valorComprometido,
           saldoDisponivel,
           percentualExecutado,
-          totalDespesas: despesasEmenda.length,
-          despesasVinculadas: despesasEmenda,
+          percentualPlanejado,
+          totalDespesas: todasDespesasEmenda.length,
+          despesasVinculadas: todasDespesasEmenda,
         };
       });
 

@@ -1,8 +1,10 @@
 // src/components/despesa/DespesaFormClassificacaoFuncional.jsx
 // ✅ ATUALIZADO 06/11/2025: Corrigido select de Natureza - usando apenas constants.js
 // 🔧 CORREÇÃO: Removida dependência do Firebase para naturezas (causava erro de permissão)
+// ✅ DARK MODE: Suporte completo ao tema escuro
 
 import React, { useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import {
   NATUREZAS_DESPESA,
   ELEMENTOS_DESPESA,
@@ -16,6 +18,9 @@ const DespesaFormClassificacaoFuncional = ({
   modoVisualizacao,
   handleInputChange,
 }) => {
+  const { isDark } = useTheme?.() || { isDark: false };
+  const styles = getStyles(isDark);
+
   const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
@@ -341,7 +346,7 @@ const DespesaFormClassificacaoFuncional = ({
   return (
     <fieldset style={styles.fieldset}>
       <legend style={styles.legend}>
-        <span style={styles.legendIcon}>💼</span>
+        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>work</span>
         Classificação Funcional-Programática
       </legend>
 
@@ -365,7 +370,7 @@ const DespesaFormClassificacaoFuncional = ({
                   {nat}
                 </option>
               ))}
-              <option value="__DIGITAR_OUTRA__">✏️ Digitar Outra...</option>
+              <option value="__DIGITAR_OUTRA__">Digitar Outra...</option>
             </select>
           ) : (
             <div style={styles.inputCustomizadoWrapper}>
@@ -382,7 +387,8 @@ const DespesaFormClassificacaoFuncional = ({
                 onClick={salvarNaturezaCustomizada}
                 style={styles.voltarButton}
               >
-                ✓ Salvar
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>check</span>
+                Salvar
               </button>
               <button
                 type="button"
@@ -392,7 +398,7 @@ const DespesaFormClassificacaoFuncional = ({
                 }}
                 style={styles.voltarButton}
               >
-                ✕
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>close</span>
               </button>
             </div>
           )}
@@ -414,7 +420,7 @@ const DespesaFormClassificacaoFuncional = ({
                   {el}
                 </option>
               ))}
-              <option value="__DIGITAR_OUTRO__">✏️ Digitar Outro...</option>
+              <option value="__DIGITAR_OUTRO__">Digitar Outro...</option>
             </select>
           ) : (
             <div style={styles.inputCustomizadoWrapper}>
@@ -431,7 +437,8 @@ const DespesaFormClassificacaoFuncional = ({
                 onClick={salvarElementoCustomizado}
                 style={styles.voltarButton}
               >
-                ✓ Salvar
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 4 }}>check</span>
+                Salvar
               </button>
               <button
                 type="button"
@@ -441,7 +448,7 @@ const DespesaFormClassificacaoFuncional = ({
                 }}
                 style={styles.voltarButton}
               >
-                ✕
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>close</span>
               </button>
             </div>
           )}
@@ -527,7 +534,7 @@ const DespesaFormClassificacaoFuncional = ({
           <div style={styles.formGroupCNPJ}>
             <label style={styles.labelRequired}>
               CNPJ <span style={{ color: "#dc3545" }}>*</span>
-              {cnpjError && <span style={styles.validationBadge}>⚠️</span>}
+              {cnpjError && <span className="material-symbols-outlined" style={{ ...styles.validationBadge, fontSize: 14 }}>warning</span>}
               {cnpjEncontrado && (
                 <span style={{ ...styles.validationBadge, color: "#10B981" }}>
                   ✓
@@ -572,7 +579,9 @@ const DespesaFormClassificacaoFuncional = ({
               }}
               title="Buscar dados do CNPJ"
             >
-              {buscandoCNPJ ? "🔄" : "🔍"}
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                {buscandoCNPJ ? "sync" : "search"}
+              </span>
             </button>
           )}
         </div>
@@ -624,7 +633,7 @@ const DespesaFormClassificacaoFuncional = ({
 
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            Email {emailError && <span style={styles.validationBadge}>⚠️</span>}
+            Email {emailError && <span className="material-symbols-outlined" style={{ ...styles.validationBadge, fontSize: 14 }}>warning</span>}
           </label>
           <input
             type="email"
@@ -720,20 +729,21 @@ const DespesaFormClassificacaoFuncional = ({
   );
 };
 
-const styles = {
+// ✅ ESTILOS COM SUPORTE A DARK MODE
+const getStyles = (isDark) => ({
   fieldset: {
-    border: "1px solid #E2E8F0",
+    border: `1px solid ${isDark ? "var(--theme-border, #334155)" : "#E2E8F0"}`,
     borderRadius: "12px",
     padding: "20px",
-    backgroundColor: "#ffffff",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+    backgroundColor: isDark ? "var(--theme-surface, #1e293b)" : "#ffffff",
+    boxShadow: isDark ? "0 1px 3px rgba(0,0,0,0.2)" : "0 1px 3px rgba(0,0,0,0.05)",
   },
   legend: {
-    background: "white",
+    background: isDark ? "var(--theme-surface, #1e293b)" : "white",
     padding: "6px 16px",
     borderRadius: "9999px",
-    border: "1px solid #E2E8F0",
-    color: "#334155",
+    border: `1px solid ${isDark ? "var(--theme-border, #334155)" : "#E2E8F0"}`,
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#334155",
     fontWeight: "600",
     fontSize: "14px",
     display: "flex",
@@ -741,7 +751,6 @@ const styles = {
     gap: "8px",
     fontFamily: "'Inter', sans-serif",
   },
-  legendIcon: { fontSize: "18px" },
   formRow: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -773,7 +782,7 @@ const styles = {
     flex: 1,
   },
   btnRefresh: {
-    backgroundColor: "#2563EB",
+    backgroundColor: isDark ? "#3b82f6" : "#2563EB",
     color: "white",
     border: "none",
     padding: "12px 16px",
@@ -781,7 +790,7 @@ const styles = {
     fontSize: "18px",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)",
+    boxShadow: isDark ? "0 2px 4px rgba(59, 130, 246, 0.3)" : "0 2px 4px rgba(37, 99, 235, 0.2)",
     height: "46px",
     minWidth: "46px",
     display: "flex",
@@ -810,7 +819,7 @@ const styles = {
   },
   labelRequired: {
     fontWeight: "bold",
-    color: "#333",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#333",
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
@@ -818,7 +827,7 @@ const styles = {
   },
   label: {
     fontWeight: "bold",
-    color: "#333",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#333",
     fontSize: "14px",
     display: "flex",
     alignItems: "center",
@@ -826,40 +835,43 @@ const styles = {
   },
   input: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    border: `2px solid ${isDark ? "var(--theme-border, #475569)" : "#dee2e6"}`,
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.3s ease",
-    backgroundColor: "white",
+    backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "white",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "inherit",
     boxSizing: "border-box",
   },
   inputError: {
     padding: "12px",
-    border: "2px solid #dc3545",
+    border: `2px solid ${isDark ? "#f87171" : "#dc3545"}`,
     borderRadius: "6px",
     fontSize: "14px",
-    backgroundColor: "#fff5f5",
+    backgroundColor: isDark ? "rgba(248, 113, 113, 0.1)" : "#fff5f5",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "inherit",
     boxSizing: "border-box",
   },
   select: {
     padding: "12px",
-    border: "2px solid #dee2e6",
+    border: `2px solid ${isDark ? "var(--theme-border, #475569)" : "#dee2e6"}`,
     borderRadius: "6px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "white",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "inherit",
     cursor: "pointer",
     boxSizing: "border-box",
   },
   errorText: {
-    color: "#dc3545",
+    color: isDark ? "#f87171" : "#dc3545",
     fontSize: "12px",
     marginTop: "5px",
     fontWeight: "500",
   },
-  validationBadge: { marginLeft: "5px", fontSize: "12px", color: "#dc3545" },
+  validationBadge: { marginLeft: "5px", color: isDark ? "#f87171" : "#dc3545", verticalAlign: "middle" },
   inputCustomizadoWrapper: { display: "flex", gap: "8px" },
   voltarButton: {
-    backgroundColor: "#6c757d",
+    backgroundColor: isDark ? "#475569" : "#6c757d",
     color: "white",
     border: "none",
     padding: "8px 12px",
@@ -867,10 +879,12 @@ const styles = {
     fontSize: "14px",
     cursor: "pointer",
     whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
   },
   divider: {
     margin: "30px 0 20px 0",
-    borderTop: "2px solid #dee2e6",
+    borderTop: `2px solid ${isDark ? "var(--theme-border, #475569)" : "#dee2e6"}`,
     position: "relative",
     height: "1px",
   },
@@ -879,14 +893,14 @@ const styles = {
     top: "-12px",
     left: "50%",
     transform: "translateX(-50%)",
-    backgroundColor: "#ffffff",
+    backgroundColor: isDark ? "var(--theme-surface, #1e293b)" : "#ffffff",
     padding: "0 15px",
     fontSize: "13px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: isDark ? "#60a5fa" : "#2563EB",
     letterSpacing: "0.5px",
     whiteSpace: "nowrap",
   },
-};
+});
 
 export default DespesaFormClassificacaoFuncional;

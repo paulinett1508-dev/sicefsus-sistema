@@ -826,6 +826,35 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     }
   };
 
+  // ✅ Handler para excluir despesa (usado pelo NaturezasList)
+  const handleExcluirDespesa = async (despesa) => {
+    if (!despesa?.id) {
+      console.warn("⚠️ Tentativa de excluir despesa sem ID");
+      return;
+    }
+
+    console.log("🗑️ Excluindo despesa:", despesa.id);
+
+    try {
+      await deleteDoc(doc(db, "despesas", despesa.id));
+      console.log("✅ Despesa excluída com sucesso");
+
+      showToast({
+        message: "Despesa excluída com sucesso",
+        type: "success",
+      });
+
+      // Recarregar lista
+      await carregarDespesas();
+    } catch (e) {
+      console.error("❌ Erro ao excluir despesa:", e);
+      showToast({
+        message: "Erro ao excluir despesa: " + e.message,
+        type: "error",
+      });
+    }
+  };
+
   // ✅ PROTEÇÃO: Rastrear mudanças de estado
   useEffect(() => {
     console.log("🔄 ExecucaoOrcamentaria - Estado mudou:", {
@@ -1159,6 +1188,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             }}
             onEditarDespesa={handleEditarDespesa}
             onVisualizarDespesa={handleVisualizarDespesa}
+            onExcluirDespesa={handleExcluirDespesa}
             onCarregarDespesas={carregarDespesasNatureza}
             validarAlocacao={validarAlocacao}
             despesasPorNatureza={despesasPorNatureza}

@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebaseConfig";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import { useTheme } from "../../context/ThemeContext";
 
 const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
+  const { isDark } = useTheme?.() || { isDark: false };
   const [formData, setFormData] = useState({
     // Dados já preenchidos pelo contexto da emenda
     emendaId: emenda?.id || "",
@@ -170,6 +172,9 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
       currency: "BRL",
     }).format(valor || 0);
   };
+
+  // Gerar estilos com base no tema
+  const styles = getStyles(isDark);
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -458,19 +463,21 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
   );
 };
 
-const styles = {
+// Função para gerar estilos com suporte a dark mode
+const getStyles = (isDark) => ({
   overlay: {
     position: "fixed",
     inset: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
     padding: "16px",
+    backdropFilter: "blur(2px)",
   },
   modal: {
-    backgroundColor: "white",
+    backgroundColor: isDark ? "var(--theme-surface, #1e293b)" : "var(--theme-surface, #ffffff)",
     borderRadius: "8px",
     maxWidth: "900px",
     width: "100%",
@@ -478,23 +485,27 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
+    border: isDark ? "1px solid var(--theme-border)" : "none",
+    boxShadow: isDark
+      ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+      : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
     padding: "24px",
-    borderBottom: "1px solid #e5e7eb",
+    borderBottom: `1px solid ${isDark ? "var(--theme-border)" : "#e5e7eb"}`,
   },
   title: {
     fontSize: "20px",
     fontWeight: "bold",
-    color: "#111827",
+    color: isDark ? "var(--theme-text)" : "#111827",
     margin: 0,
   },
   subtitle: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: isDark ? "var(--theme-text-secondary)" : "#6b7280",
     marginTop: "4px",
   },
   closeButton: {
@@ -503,7 +514,7 @@ const styles = {
     border: "none",
     fontSize: "24px",
     cursor: "pointer",
-    color: "#6b7280",
+    color: isDark ? "var(--theme-text-secondary)" : "#6b7280",
     borderRadius: "6px",
     transition: "background-color 0.2s",
   },
@@ -529,7 +540,7 @@ const styles = {
   sectionTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#111827",
+    color: isDark ? "var(--theme-text)" : "#111827",
     margin: 0,
   },
   grid: {
@@ -545,36 +556,41 @@ const styles = {
   label: {
     fontSize: "14px",
     fontWeight: "500",
-    color: "#374151",
+    color: isDark ? "var(--theme-text)" : "#374151",
   },
   input: {
     width: "100%",
     padding: "10px 12px",
-    border: "1px solid #d1d5db",
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#d1d5db"}`,
     borderRadius: "6px",
     fontSize: "14px",
     transition: "border-color 0.2s, box-shadow 0.2s",
     outline: "none",
+    backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "var(--theme-input-bg, #ffffff)",
+    color: isDark ? "var(--theme-text)" : "inherit",
   },
   select: {
     width: "100%",
     padding: "10px 12px",
-    border: "1px solid #d1d5db",
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#d1d5db"}`,
     borderRadius: "6px",
     fontSize: "14px",
-    backgroundColor: "white",
+    backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "var(--theme-input-bg, #ffffff)",
+    color: isDark ? "var(--theme-text)" : "inherit",
     cursor: "pointer",
     outline: "none",
   },
   textarea: {
     width: "100%",
     padding: "10px 12px",
-    border: "1px solid #d1d5db",
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#d1d5db"}`,
     borderRadius: "6px",
     fontSize: "14px",
     fontFamily: "inherit",
     resize: "vertical",
     outline: "none",
+    backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "var(--theme-input-bg, #ffffff)",
+    color: isDark ? "var(--theme-text)" : "inherit",
   },
   inputError: {
     borderColor: "#ef4444",
@@ -594,14 +610,14 @@ const styles = {
     justifyContent: "flex-end",
     gap: "12px",
     padding: "16px 24px",
-    borderTop: "1px solid #e5e7eb",
-    backgroundColor: "#f9fafb",
+    borderTop: `1px solid ${isDark ? "var(--theme-border)" : "#e5e7eb"}`,
+    backgroundColor: isDark ? "var(--theme-surface-secondary, #0f172a)" : "#f9fafb",
   },
   cancelButton: {
     padding: "10px 20px",
-    border: "1px solid #d1d5db",
-    backgroundColor: "white",
-    color: "#374151",
+    border: `1px solid ${isDark ? "var(--theme-border)" : "#d1d5db"}`,
+    backgroundColor: isDark ? "var(--theme-surface)" : "white",
+    color: isDark ? "var(--theme-text)" : "#374151",
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "500",
@@ -619,6 +635,6 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.2s",
   },
-};
+});
 
 export default DespesaModal;

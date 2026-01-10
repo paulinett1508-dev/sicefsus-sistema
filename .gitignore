@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*sicefsus-sistema
+.mcp.json
+
+# Claude Code settings com credenciais
+.claude/settings.json
+.claude/settings.local.json
+
+# Firebase MCP Server credenciais
+firebase-mcp-server/.env

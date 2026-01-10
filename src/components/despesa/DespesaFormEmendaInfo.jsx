@@ -3,8 +3,10 @@
 // ✅ Componente especializado para exibir informações da emenda selecionada
 // ✅ CORRIGIDO: Cálculo de saldo baseado APENAS no valor total da emenda
 // ✅ Saldo = Valor Total - Valor Executado (despesas executadas)
+// ✅ DARK MODE: Suporte completo ao tema escuro
 
 import React from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 const DespesaFormEmendaInfo = ({
   emendaInfo,
@@ -12,6 +14,9 @@ const DespesaFormEmendaInfo = ({
   handleInputChange = () => {},
   modoVisualizacao = false,
 }) => {
+  const { isDark } = useTheme?.() || { isDark: false };
+  const styles = getStyles(isDark);
+
   // 🆕 Garantir que todos os dados sejam encontrados com fallbacks
   const parlamentar =
     emendaInfo?.parlamentar || emendaInfo?.autor || "Não informado";
@@ -39,19 +44,19 @@ const DespesaFormEmendaInfo = ({
     valorRecurso > 0 ? (valorExecutado / valorRecurso) * 100 : 0;
   const percentualDisponivel = 100 - percentualExecutado;
 
-  // 🚦 CORES SEMAFÓRICAS BASEADAS NO SALDO (LÓGICA CORRIGIDA)
+  // 🚦 CORES SEMAFÓRICAS BASEADAS NO SALDO (LÓGICA CORRIGIDA + DARK MODE)
   const getSaldoColor = () => {
-    if (percentualDisponivel >= 15) return "#27ae60"; // Verde - Saldo saudável (≥15%)
-    if (percentualDisponivel >= 5) return "#f39c12"; // Amarelo - Saldo baixo (5-15%)
-    if (percentualDisponivel > 0) return "#e74c3c"; // Vermelho - Saldo crítico (<5%)
-    return "#95a5a6"; // Cinza - Sem saldo
+    if (percentualDisponivel >= 15) return isDark ? "#4ade80" : "#27ae60"; // Verde
+    if (percentualDisponivel >= 5) return isDark ? "#fbbf24" : "#f39c12"; // Amarelo
+    if (percentualDisponivel > 0) return isDark ? "#f87171" : "#e74c3c"; // Vermelho
+    return isDark ? "#6b7280" : "#95a5a6"; // Cinza
   };
 
   const getSaldoBgColor = () => {
-    if (percentualDisponivel >= 15) return "#d4edda"; // Verde claro
-    if (percentualDisponivel >= 5) return "#fff3cd"; // Amarelo claro
-    if (percentualDisponivel > 0) return "#f8d7da"; // Vermelho claro
-    return "#f0f0f0"; // Cinza claro
+    if (percentualDisponivel >= 15) return isDark ? "rgba(74, 222, 128, 0.15)" : "#d4edda"; // Verde claro
+    if (percentualDisponivel >= 5) return isDark ? "rgba(251, 191, 36, 0.15)" : "#fff3cd"; // Amarelo claro
+    if (percentualDisponivel > 0) return isDark ? "rgba(248, 113, 113, 0.15)" : "#f8d7da"; // Vermelho claro
+    return isDark ? "rgba(107, 114, 128, 0.15)" : "#f0f0f0"; // Cinza claro
   };
 
   const getSaldoIcon = () => {
@@ -61,13 +66,13 @@ const DespesaFormEmendaInfo = ({
     return <span className="material-symbols-outlined" style={{ fontSize: 20 }}>cancel</span>; // Sem saldo
   };
 
-  // 📊 STATUS DA EMENDA
+  // 📊 STATUS DA EMENDA (COM DARK MODE)
   const getStatusEmenda = () => {
-    if (saldoDisponivel <= 0) return { label: "Finalizada", color: "#95a5a6" };
-    if (percentualExecutado < 25) return { label: "Início", color: "#3498db" };
+    if (saldoDisponivel <= 0) return { label: "Finalizada", color: isDark ? "#6b7280" : "#95a5a6" };
+    if (percentualExecutado < 25) return { label: "Início", color: isDark ? "#60a5fa" : "#3498db" };
     if (percentualExecutado < 75)
-      return { label: "Em Execução", color: "#f39c12" };
-    return { label: "Quase Finalizada", color: "#e67e22" };
+      return { label: "Em Execução", color: isDark ? "#fbbf24" : "#f39c12" };
+    return { label: "Quase Finalizada", color: isDark ? "#fb923c" : "#e67e22" };
   };
 
   const status = getStatusEmenda();
@@ -193,14 +198,15 @@ const DespesaFormEmendaInfo = ({
   );
 };
 
-const styles = {
+// ✅ ESTILOS COM SUPORTE A DARK MODE
+const getStyles = (isDark) => ({
   container: {
-    backgroundColor: "#ffffff",
-    border: "2px solid #e3f2fd",
+    backgroundColor: isDark ? "var(--theme-surface, #1e293b)" : "#ffffff",
+    border: `2px solid ${isDark ? "var(--theme-border, #334155)" : "#e3f2fd"}`,
     borderRadius: "8px",
     padding: "16px",
     marginBottom: "20px",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+    boxShadow: isDark ? "0 2px 6px rgba(0,0,0,0.2)" : "0 2px 6px rgba(0,0,0,0.06)",
   },
 
   // 📋 HEADER
@@ -217,7 +223,7 @@ const styles = {
   title: {
     fontSize: "15px",
     fontWeight: "bold",
-    color: "#1565c0",
+    color: isDark ? "#60a5fa" : "#1565c0",
     margin: 0,
   },
   statusBadge: {
@@ -234,7 +240,7 @@ const styles = {
   progressSection: {
     marginBottom: "12px",
     padding: "12px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: isDark ? "rgba(51, 65, 85, 0.5)" : "#f8f9fa",
     borderRadius: "6px",
   },
   progressHeader: {
@@ -246,21 +252,21 @@ const styles = {
   progressLabel: {
     fontSize: "12px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#1E293B",
   },
   progressPercentage: {
     fontSize: "12px",
     fontWeight: "bold",
-    color: "#1565c0",
+    color: isDark ? "#60a5fa" : "#1565c0",
   },
   progressBarContainer: {
     width: "100%",
     height: "16px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: isDark ? "rgba(71, 85, 105, 0.5)" : "#e9ecef",
     borderRadius: "8px",
     overflow: "hidden",
     marginBottom: "8px",
-    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.1)",
+    boxShadow: isDark ? "inset 0 1px 3px rgba(0,0,0,0.3)" : "inset 0 1px 3px rgba(0,0,0,0.1)",
   },
   progressBarFilled: {
     height: "100%",
@@ -278,7 +284,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     fontSize: "11px",
-    color: "#495057",
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#495057",
   },
   progressValueItem: {
     display: "flex",
@@ -310,7 +316,7 @@ const styles = {
   saldoLabel: {
     fontSize: "11px",
     fontWeight: "600",
-    color: "#495057",
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#495057",
     textTransform: "uppercase",
     letterSpacing: "0.3px",
   },
@@ -321,7 +327,7 @@ const styles = {
   saldoPercentual: {
     fontSize: "15px",
     fontWeight: "bold",
-    color: "#6c757d",
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#6c757d",
   },
 
   // 🔍 GRID DE DETALHES
@@ -335,24 +341,24 @@ const styles = {
     flexDirection: "column",
     gap: "4px",
     padding: "8px 10px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: isDark ? "rgba(51, 65, 85, 0.5)" : "#f8f9fa",
     borderRadius: "6px",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
     cursor: "default",
   },
   detailLabel: {
     fontSize: "10px",
-    color: "#6c757d",
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#6c757d",
     fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: "0.3px",
   },
   detailValue: {
     fontSize: "12px",
-    color: "#1E293B",
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#1E293B",
     fontWeight: "600",
     wordBreak: "break-word",
   },
-};
+});
 
 export default DespesaFormEmendaInfo;

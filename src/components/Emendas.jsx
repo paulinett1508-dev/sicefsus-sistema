@@ -126,27 +126,88 @@ const Emendas = () => {
           (despesa) => despesa.emendaId === emenda.id
         );
 
+        // ✅ DEBUG: Log para diagnóstico
+        if (despesasEmenda.length > 0) {
+          console.log(`📊 Emenda ${emenda.numero}: ${despesasEmenda.length} despesas encontradas`, {
+            emendaId: emenda.id,
+            despesas: despesasEmenda.map(d => ({
+              id: d.id,
+              valor: d.valor,
+              status: d.status,
+              emendaId: d.emendaId
+            }))
+          });
+        }
+
         // ✅ CORREÇÃO P1: Ordem padronizada de fallback
         const valorTotal = parseValorMonetario(
           emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0
         );
 
+        // ✅ SEPARAR: Executado (pago) e Planejado
         const valorExecutado = despesasEmenda
           .filter((d) => d.status !== "PLANEJADA")
           .reduce((acc, despesa) => acc + parseValorMonetario(despesa.valor), 0);
 
-        const saldoDisponivel = valorTotal - valorExecutado;
+        const valorPlanejado = despesasEmenda
+          .filter((d) => d.status === "PLANEJADA")
+          .reduce((acc, despesa) => acc + parseValorMonetario(despesa.valor), 0);
+
+        const valorComprometido = valorExecutado + valorPlanejado;
+        const saldoDisponivel = valorTotal - valorComprometido;
+        
         const percentualExecutado =
           valorTotal > 0
             ? parseFloat(((valorExecutado / valorTotal) * 100).toFixed(1))
             : 0;
 
+        const percentualPlanejado =
+          valorTotal > 0
+            ? parseFloat(((valorPlanejado / valorTotal) * 100).toFixed(1))
+            : 0;
+
+        // ✅ DEBUG: Log do cálculo final
+        if (despesasEmenda.length > 0) {
+          const totalPerc = percentualExecutado + percentualPlanejado;
+          console.log(`💰 Emenda ${emenda.numero} - Cálculo:`, {
+            valorTotal,
+            valorExecutado,
+            valorPlanejado,
+            valorComprometido,
+            percentualExecutado,
+            percentualPlanejado,
+            percentualTotal: totalPerc,
+            totalDespesas: despesasEmenda.length,
+            isOver: totalPerc > 100,
+          });
+          
+          // ⚠️ ALERTA: Se ultrapassar 100%
+          if (totalPerc > 100) {
+            console.error(`🚨 ERRO: Emenda ${emenda.numero} está com ${totalPerc.toFixed(1)}% comprometido!`, {
+              valorTotal: `R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              valorExecutado: `R$ ${valorExecutado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              valorPlanejado: `R$ ${valorPlanejado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              valorComprometido: `R$ ${valorComprometido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              excesso: `R$ ${(valorComprometido - valorTotal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+              despesas: despesasEmenda.map(d => ({
+                id: d.id,
+                descricao: d.descricao,
+                valor: `R$ ${parseValorMonetario(d.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                status: d.status
+              }))
+            });
+          }
+        }
+
         return {
           ...emenda,
           valorTotal,
           valorExecutado,
+          valorPlanejado,
+          valorComprometido,
           saldoDisponivel,
           percentualExecutado,
+          percentualPlanejado,
           totalDespesas: despesasEmenda.length,
         };
       });
