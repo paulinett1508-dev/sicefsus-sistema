@@ -22,7 +22,14 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import express from 'express';
 import { firebaseService } from './services/firebase.js';
 import { registerTools } from './tools/index.js';
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Carregar .env do diretório do projeto MCP (não do cwd)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+config({ path: join(__dirname, '..', '.env') });
 
 // Configuração via variáveis de ambiente
 const DEV_CONFIG = {

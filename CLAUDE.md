@@ -7,7 +7,41 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 08/01/2026
+## Ultima Atualizacao - 10/01/2026
+
+## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
+
+O projeto possui um servidor MCP configurado para acesso direto ao Firestore.
+**O MCP ja esta configurado e deve conectar automaticamente.**
+
+### Verificacao Rapida
+Ao iniciar uma sessao, use `mcp__firebase__firebase_status` para verificar conexao.
+Se aparecer `devConnected: true` e `prodConnected: true`, esta tudo OK.
+
+### Se o MCP nao conectar automaticamente:
+1. Verificar se o processo esta rodando: `ps aux | grep firebase-mcp`
+2. Se nao estiver, matar e deixar reiniciar: `pkill -f "firebase-mcp-server/dist/index.js"`
+3. Aguardar 2 segundos e testar novamente com `firebase_status`
+
+### Tools disponiveis:
+| Tool | Descricao |
+|------|-----------|
+| `firebase_status` | Status das conexoes DEV/PROD |
+| `firebase_switch` | Trocar ambiente (dev/prod) |
+| `firebase_query` | Consultar documentos de colecao |
+| `firebase_get_document` | Buscar documento por ID |
+| `firebase_search` | Buscar por campo/valor |
+| `firebase_compare` | Comparar DEV vs PROD |
+| `firebase_backup` | Exportar colecao para JSON |
+| `firebase_collections` | Listar colecoes disponiveis |
+
+### Configuracao:
+- **Localizacao:** `firebase-mcp-server/`
+- **Credenciais:** `.claude/settings.json` (env) + `firebase-mcp-server/.env`
+- **Build:** `npm run build` no diretorio do MCP
+- **Ambientes:** DEV (emendas-parlamentares-60dbd) e PROD (emendas-parlamentares-prod)
+
+---
 
 **Sistema de Naturezas Unificado (Envelopes Orcamentarios):**
 - Secao "Despesas Executadas" removida - tudo dentro de "Execucao Orcamentaria"
