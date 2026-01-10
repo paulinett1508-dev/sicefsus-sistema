@@ -49,7 +49,10 @@ const NaturezaCard = ({
   // Calculos
   const valorAlocado = parseValorMonetario(natureza.valorAlocado || 0);
   const valorExecutado = parseValorMonetario(natureza.valorExecutado || 0);
-  const saldoDisponivel = parseValorMonetario(natureza.saldoDisponivel || 0);
+  // Calcular saldo: se não vier definido, calcular como valorAlocado - valorExecutado
+  const saldoDisponivel = natureza.saldoDisponivel !== undefined 
+    ? parseValorMonetario(natureza.saldoDisponivel) 
+    : (valorAlocado - valorExecutado);
   const percentualExecutado = natureza.percentualExecutado || 0;
 
   // Status visual
@@ -489,9 +492,18 @@ const NaturezaCard = ({
           /* Acoes para natureza normal */
           <div style={styles.acoes}>
             <button
-              style={{ ...styles.btnAcao, ...styles.btnPrimario }}
+              style={{ 
+                ...styles.btnAcao, 
+                ...styles.btnPrimario,
+                ...(saldoDisponivel <= 0 ? { 
+                  opacity: 0.5, 
+                  cursor: "not-allowed",
+                  backgroundColor: isDark ? "#475569" : "#94a3b8"
+                } : {})
+              }}
               onClick={() => onNovaDespesa?.(natureza)}
               disabled={saldoDisponivel <= 0}
+              title={saldoDisponivel <= 0 ? "Sem saldo disponível nesta natureza" : "Criar nova despesa"}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
                 add

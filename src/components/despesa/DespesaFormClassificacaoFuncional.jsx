@@ -704,8 +704,9 @@ const DespesaFormClassificacaoFuncional = ({
               ...styles.input,
               color: getCorSituacao(formData.situacaoCadastral),
               fontWeight: "bold",
-              backgroundColor: "#f8f9fa",
+              backgroundColor: isDark ? "var(--theme-input-bg, #0f172a)" : "#f8f9fa",
               cursor: "not-allowed",
+              opacity: 1, // Garantir que o texto seja legível mesmo em readOnly
             }}
             readOnly={true}
             placeholder="Preenchido automaticamente"

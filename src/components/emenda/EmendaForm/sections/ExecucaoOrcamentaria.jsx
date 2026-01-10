@@ -313,49 +313,55 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     calculos: calculosNaturezas,
   } = useNaturezasData(emendaId, usuario, { autoCarregar: temEmendaSalva });
 
-  // 🔄 MIGRAÇÃO AUTOMÁTICA: Converter despesas PLANEJADAS em naturezas
+  // 🔄 MIGRAÇÃO AUTOMÁTICA: Converter despesas PLANEJADAS em EXECUTADAS (vinculadas a naturezas)
   const migrarDespesasPlanejadas = useCallback(async () => {
     if (!emendaId || migrandoLegado) return;
 
     try {
-      // Buscar despesas planejadas sem naturezaId
-      const despesasSemNatureza = despesas.filter(
-        (d) => d.status === "PLANEJADA" && !d.naturezaId
+      // Buscar TODAS as despesas planejadas (com ou sem naturezaId)
+      const despesasParaMigrar = despesas.filter(
+        (d) => d.status === "PLANEJADA"
       );
 
-      if (despesasSemNatureza.length === 0) return;
+      if (despesasParaMigrar.length === 0) {
+        console.log('ℹ️ Nenhuma despesa planejada para migrar');
+        return;
+      }
 
-      console.log(`🔄 Migrando ${despesasSemNatureza.length} despesas planejadas para naturezas...`);
+      console.log(`🔄 Migrando ${despesasParaMigrar.length} despesas planejadas para executadas...`);
       setMigrandoLegado(true);
 
-      for (const despesa of despesasSemNatureza) {
+      for (const despesa of despesasParaMigrar) {
         const naturezaCodigo = despesa.estrategia || despesa.naturezaDespesa || "339039";
         const naturezaDescricao = despesa.estrategia || despesa.naturezaDespesa || "OUTROS SERVIÇOS";
         const valorDespesa = parseValorMonetario(despesa.valor) || 0;
 
-        // Verificar se já existe natureza com esse código
-        const naturezaExistente = naturezas.find(
-          (n) => n.codigo === naturezaCodigo.split(" - ")[0]
-        );
+        let naturezaId = despesa.naturezaId; // Pode já ter naturezaId
 
-        let naturezaId;
+        // Se não tem naturezaId, vincular a uma natureza existente ou criar nova
+        if (!naturezaId) {
+          // Verificar se já existe natureza com esse código
+          const naturezaExistente = naturezas.find(
+            (n) => n.codigo === naturezaCodigo.split(" - ")[0]
+          );
 
-        if (naturezaExistente) {
-          // Usar natureza existente
-          naturezaId = naturezaExistente.id;
-          console.log(`📦 Usando natureza existente: ${naturezaExistente.descricao}`);
-        } else {
-          // Criar nova natureza com o valor da despesa
-          const novaNatureza = await criarNatureza({
-            codigo: naturezaCodigo.split(" - ")[0],
-            descricao: naturezaDescricao,
-            valorAlocado: valorDespesa,
-          });
-          naturezaId = novaNatureza.id;
-          console.log(`✅ Natureza criada: ${naturezaDescricao}`);
+          if (naturezaExistente) {
+            // Usar natureza existente
+            naturezaId = naturezaExistente.id;
+            console.log(`📦 Usando natureza existente: ${naturezaExistente.descricao}`);
+          } else {
+            // Criar nova natureza com o valor da despesa
+            const novaNatureza = await criarNatureza({
+              codigo: naturezaCodigo.split(" - ")[0],
+              descricao: naturezaDescricao,
+              valorAlocado: valorDespesa,
+            });
+            naturezaId = novaNatureza.id;
+            console.log(`✅ Natureza criada: ${naturezaDescricao}`);
+          }
         }
 
-        // Atualizar despesa para vincular à natureza e mudar status
+        // Atualizar despesa: mudar status para EXECUTADA
         await updateDoc(doc(db, "despesas", despesa.id), {
           naturezaId,
           status: "EXECUTADA",
@@ -364,11 +370,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           migradoDeLegado: true,
         });
 
-        console.log(`✅ Despesa ${despesa.id} migrada para natureza ${naturezaId}`);
+        console.log(`✅ Despesa ${despesa.id} migrada para EXECUTADA (natureza: ${naturezaId})`);
       }
 
       showToast({
-        message: `${despesasSemNatureza.length} despesas migradas com sucesso!`,
+        message: `${despesasParaMigrar.length} despesas migradas com sucesso!`,
         type: "success",
       });
 
