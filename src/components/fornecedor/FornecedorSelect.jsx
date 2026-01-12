@@ -41,14 +41,20 @@ const FornecedorSelect = ({
     return fornecedores.find((f) => f.id === value) || null;
   }, [value, fornecedores]);
 
-  // Filtrar fornecedores
+  // Filtrar fornecedores (apenas ATIVOS e pelo termo de busca)
   const fornecedoresFiltrados = useMemo(() => {
-    if (!termoBusca) return fornecedores;
+    // Primeiro, filtrar apenas fornecedores com situacao ATIVA
+    const ativos = fornecedores.filter((f) => {
+      const situacao = f.situacaoCadastral?.toUpperCase();
+      return situacao === "ATIVA" || !situacao; // Aceita ATIVA ou sem situacao definida
+    });
+
+    if (!termoBusca) return ativos;
 
     const termoLower = termoBusca.toLowerCase();
     const termoNumerico = termoBusca.replace(/\D/g, "");
 
-    return fornecedores.filter((f) => {
+    return ativos.filter((f) => {
       const matchCNPJ =
         termoNumerico && f.cnpj?.replace(/\D/g, "").includes(termoNumerico);
       const matchRazao = f.razaoSocial?.toLowerCase().includes(termoLower);
@@ -486,8 +492,9 @@ const FornecedorSelect = ({
       {/* Modal de Formulario */}
       {mostrarFormulario && (
         <FornecedorForm
+          isVisible={true}
           onSalvar={handleSalvarNovo}
-          onCancelar={() => setMostrarFormulario(false)}
+          onClose={() => setMostrarFormulario(false)}
           salvando={salvandoNovo}
         />
       )}

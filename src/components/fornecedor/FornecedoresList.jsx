@@ -48,7 +48,7 @@ const FornecedoresList = () => {
     return filtrar(termoBusca);
   }, [termoBusca, filtrar]);
 
-  // Carregar contagem de despesas por fornecedor
+  // Carregar contagem de despesas por fornecedor (por CNPJ)
   useEffect(() => {
     const carregarDespesas = async () => {
       if (!fornecedores.length) return;
@@ -57,17 +57,15 @@ const FornecedoresList = () => {
       const contagens = {};
 
       try {
-        // Buscar todas as despesas que tem fornecedorId
-        const despesasQuery = query(
-          collection(db, "despesas"),
-          where("fornecedorId", "!=", null)
-        );
-        const snapshot = await getDocs(despesasQuery);
+        // Buscar todas as despesas
+        const snapshot = await getDocs(collection(db, "despesas"));
 
         snapshot.docs.forEach((doc) => {
-          const fornecedorId = doc.data().fornecedorId;
-          if (fornecedorId) {
-            contagens[fornecedorId] = (contagens[fornecedorId] || 0) + 1;
+          const data = doc.data();
+          // Contar por CNPJ (campo cnpjFornecedor nas despesas)
+          const cnpj = data.cnpjFornecedor?.replace(/\D/g, "");
+          if (cnpj) {
+            contagens[cnpj] = (contagens[cnpj] || 0) + 1;
           }
         });
       } catch (err) {
@@ -453,26 +451,30 @@ const FornecedoresList = () => {
         </div>
       ) : (
         <div style={styles.lista}>
-          {fornecedoresFiltrados.map((fornecedor) => (
-            <FornecedorCard
-              key={fornecedor.id}
-              fornecedor={fornecedor}
-              despesasVinculadas={despesasPorFornecedor[fornecedor.id] || 0}
-              onEditar={handleEditarFornecedor}
-              onExcluir={handleExcluirFornecedor}
-              podeEditar={podeEditar(fornecedor)}
-              podeExcluir={podeExcluir(fornecedor)}
-            />
-          ))}
+          {fornecedoresFiltrados.map((fornecedor) => {
+            const cnpjLimpo = fornecedor.cnpj?.replace(/\D/g, "");
+            return (
+              <FornecedorCard
+                key={fornecedor.id}
+                fornecedor={fornecedor}
+                despesasVinculadas={despesasPorFornecedor[cnpjLimpo] || 0}
+                onEditar={handleEditarFornecedor}
+                onExcluir={handleExcluirFornecedor}
+                podeEditar={podeEditar(fornecedor)}
+                podeExcluir={podeExcluir(fornecedor)}
+              />
+            );
+          })}
         </div>
       )}
 
       {/* Modal de Formulario */}
       {mostrarFormulario && (
         <FornecedorForm
+          isVisible={true}
           fornecedor={fornecedorEmEdicao}
           onSalvar={handleSalvarFornecedor}
-          onCancelar={handleFecharFormulario}
+          onClose={handleFecharFormulario}
           salvando={salvando}
         />
       )}
