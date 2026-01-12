@@ -18,6 +18,7 @@ const getEnvironment = () => {
 const menuItems = [
   { label: "Dashboard", icon: "dashboard", path: "/dashboard" },
   { label: "Emendas", icon: "description", path: "/emendas" },
+  { label: "Fornecedores", icon: "business", path: "/fornecedores" },
   { label: "Relatórios", icon: "analytics", path: "/relatorios" },
 ];
 

@@ -2,15 +2,19 @@
 // ✅ ATUALIZADO 06/11/2025: Corrigido select de Natureza - usando apenas constants.js
 // 🔧 CORREÇÃO: Removida dependência do Firebase para naturezas (causava erro de permissão)
 // ✅ DARK MODE: Suporte completo ao tema escuro
+// ✅ ATUALIZADO 12/01/2026: Integração com FornecedorSelect
 
 import React, { useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { useUser } from "../../context/UserContext";
 import {
   NATUREZAS_DESPESA,
   ELEMENTOS_DESPESA,
   ACOES_ORCAMENTARIAS,
   STATUS_PAGAMENTO_DESPESA,
 } from "../../config/constants";
+import FornecedorSelect from "../fornecedor/FornecedorSelect";
+import { useFornecedoresData } from "../../hooks/useFornecedoresData";
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -19,8 +23,13 @@ const DespesaFormClassificacaoFuncional = ({
   handleInputChange,
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
+  const { usuario } = useUser?.() || { usuario: null };
   const styles = getStyles(isDark);
 
+  // Hook de fornecedores
+  const { fornecedores, loading: loadingFornecedores, criar: criarFornecedor } = useFornecedoresData(usuario);
+
+  const [modoFornecedor, setModoFornecedor] = useState("manual"); // "selecionar" | "manual"
   const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
@@ -270,6 +279,61 @@ const DespesaFormClassificacaoFuncional = ({
     handleInputChange({
       target: { name: "cep", value: cepFormatado },
     });
+  };
+
+  // Handler para selecionar fornecedor existente
+  const handleSelecionarFornecedor = (fornecedor) => {
+    if (!fornecedor) {
+      // Limpar todos os campos do fornecedor
+      handleInputChange({ target: { name: "fornecedorId", value: "" } });
+      handleInputChange({ target: { name: "cnpjFornecedor", value: "" } });
+      handleInputChange({ target: { name: "fornecedor", value: "" } });
+      handleInputChange({ target: { name: "nomeFantasia", value: "" } });
+      handleInputChange({ target: { name: "telefoneFornecedor", value: "" } });
+      handleInputChange({ target: { name: "emailFornecedor", value: "" } });
+      handleInputChange({ target: { name: "enderecoFornecedor", value: "" } });
+      handleInputChange({ target: { name: "cidadeUf", value: "" } });
+      handleInputChange({ target: { name: "cep", value: "" } });
+      handleInputChange({ target: { name: "situacaoCadastral", value: "" } });
+      setCnpjEncontrado(false);
+      return;
+    }
+
+    // Preencher campos com dados do fornecedor selecionado
+    handleInputChange({ target: { name: "fornecedorId", value: fornecedor.id } });
+    handleInputChange({ target: { name: "cnpjFornecedor", value: formatarCNPJ(fornecedor.cnpj || "") } });
+    handleInputChange({ target: { name: "fornecedor", value: fornecedor.razaoSocial || "" } });
+    handleInputChange({ target: { name: "nomeFantasia", value: fornecedor.nomeFantasia || "" } });
+    handleInputChange({ target: { name: "telefoneFornecedor", value: fornecedor.contato?.telefone || "" } });
+    handleInputChange({ target: { name: "emailFornecedor", value: fornecedor.contato?.email || "" } });
+
+    // Montar endereco completo
+    const endereco = fornecedor.endereco || {};
+    const enderecoCompleto = [
+      endereco.logradouro,
+      endereco.numero && `n ${endereco.numero}`,
+      endereco.complemento,
+      endereco.bairro,
+    ].filter(Boolean).join(", ");
+
+    handleInputChange({ target: { name: "enderecoFornecedor", value: enderecoCompleto } });
+    handleInputChange({ target: { name: "cidadeUf", value: `${endereco.cidade || ""}/${endereco.uf || ""}` } });
+    handleInputChange({ target: { name: "cep", value: formatarCEP(endereco.cep || "") } });
+    handleInputChange({ target: { name: "situacaoCadastral", value: fornecedor.situacaoCadastral || "ATIVA" } });
+
+    setCnpjEncontrado(true);
+    setCnpjError("");
+  };
+
+  // Handler para criar novo fornecedor via FornecedorSelect
+  const handleCriarFornecedorViaSelect = async (dados) => {
+    try {
+      const novoId = await criarFornecedor(dados);
+      return novoId;
+    } catch (error) {
+      console.error("Erro ao criar fornecedor:", error);
+      throw error;
+    }
   };
 
   const handleNaturezaChange = (e) => {
@@ -527,6 +591,66 @@ const DespesaFormClassificacaoFuncional = ({
       <div style={styles.divider}>
         <span style={styles.dividerText}>DADOS DO FORNECEDOR</span>
       </div>
+
+      {/* Toggle: Selecionar Existente ou Preencher Manualmente */}
+      {!modoVisualizacao && fornecedores.length > 0 && (
+        <div style={styles.fornecedorModoToggle}>
+          <button
+            type="button"
+            style={{
+              ...styles.modoToggleBtn,
+              ...(modoFornecedor === "selecionar" ? styles.modoToggleBtnActive : {}),
+            }}
+            onClick={() => setModoFornecedor("selecionar")}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>
+              list
+            </span>
+            Selecionar Existente
+          </button>
+          <button
+            type="button"
+            style={{
+              ...styles.modoToggleBtn,
+              ...(modoFornecedor === "manual" ? styles.modoToggleBtnActive : {}),
+            }}
+            onClick={() => setModoFornecedor("manual")}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>
+              edit
+            </span>
+            Preencher Manualmente
+          </button>
+        </div>
+      )}
+
+      {/* Seletor de Fornecedor Existente */}
+      {modoFornecedor === "selecionar" && !modoVisualizacao && fornecedores.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <label style={styles.label}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>
+              business
+            </span>
+            Selecionar Fornecedor
+          </label>
+          <FornecedorSelect
+            fornecedores={fornecedores}
+            value={formData.fornecedorId || ""}
+            onChange={handleSelecionarFornecedor}
+            onCriarFornecedor={handleCriarFornecedorViaSelect}
+            loading={loadingFornecedores}
+            placeholder="Busque por CNPJ ou razao social..."
+          />
+          {formData.fornecedorId && (
+            <p style={styles.fornecedorSelecionadoHint}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#10B981", verticalAlign: "middle", marginRight: 4 }}>
+                check_circle
+              </span>
+              Fornecedor selecionado. Campos preenchidos automaticamente.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* LINHA 3: CNPJ | Razão Social */}
       <div style={styles.formRowCNPJ}>
@@ -901,6 +1025,39 @@ const getStyles = (isDark) => ({
     color: isDark ? "#60a5fa" : "#2563EB",
     letterSpacing: "0.5px",
     whiteSpace: "nowrap",
+  },
+  fornecedorModoToggle: {
+    display: "flex",
+    gap: "8px",
+    marginBottom: "16px",
+  },
+  modoToggleBtn: {
+    flex: 1,
+    padding: "10px 16px",
+    border: `2px solid ${isDark ? "var(--theme-border, #475569)" : "#dee2e6"}`,
+    borderRadius: "8px",
+    backgroundColor: isDark ? "var(--theme-surface-secondary, #0f172a)" : "#f8f9fa",
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#6c757d",
+    fontSize: "13px",
+    fontWeight: "500",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+  },
+  modoToggleBtnActive: {
+    borderColor: isDark ? "#3b82f6" : "#2563EB",
+    backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(37, 99, 235, 0.05)",
+    color: isDark ? "#60a5fa" : "#2563EB",
+    fontWeight: "600",
+  },
+  fornecedorSelecionadoHint: {
+    marginTop: "8px",
+    fontSize: "12px",
+    color: isDark ? "#86efac" : "#10B981",
+    display: "flex",
+    alignItems: "center",
   },
 });
 

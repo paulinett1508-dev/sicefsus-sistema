@@ -25,6 +25,7 @@ import Sobre from "./components/Sobre";
 import Administracao from "./components/Administracao";
 import MigracaoCompleta from "./components/admin/MigracaoCompleta";
 import FerramentasDev from "./components/dev/FerramentasDev";
+import FornecedoresList from "./components/fornecedor/FornecedoresList";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 // import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
@@ -408,6 +409,16 @@ function AppContent() {
                   <PrivateRoute usuario={usuario}>
                     <ProtectedRouteWrapper usuario={usuario}>
                       <Relatorios usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/fornecedores"
+                element={
+                  <PrivateRoute usuario={usuario}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <FornecedoresList />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
