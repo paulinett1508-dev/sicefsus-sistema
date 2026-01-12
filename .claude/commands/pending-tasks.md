@@ -345,13 +345,14 @@ Administracao (admin only)
 
 | Bug | Severidade | Status |
 |-----|------------|--------|
-| Botao Excluir Despesa nao funciona | Alta | Corrigir na proxima sessao |
+| ~~Botao Excluir Despesa nao funciona~~ | ~~Alta~~ | CORRIGIDO (2026-01-12) |
 | Saldo negativo em algumas emendas PROD | Media | Investigar |
 
 ---
 
 ## Historico
 
+- **2026-01-12**: Correcao bug Excluir Despesa (props erradas no ConfirmationModal: isOpen->isVisible, onClose->onCancel)
 - **2026-01-10**: Correcao MCP Server + plano modulo Fornecedores + testes completos
 - **2026-01-08**: Unificacao de naturezas + despesas executadas
 - **2026-01-07**: Auditoria Firebase completa

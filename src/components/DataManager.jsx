@@ -643,7 +643,7 @@ const DataManager = () => {
       )}
 
       <ConfirmationModal
-        isOpen={showImportModal}
+        isVisible={showImportModal}
         onConfirm={handleImport}
         onCancel={() => {
           setShowImportModal(false);

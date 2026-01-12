@@ -477,8 +477,8 @@ const NaturezasList = ({
       {/* Modal de confirmacao de exclusao de natureza */}
       {naturezaParaExcluir && (
         <ConfirmationModal
-          isOpen={true}
-          onClose={() => setNaturezaParaExcluir(null)}
+          isVisible={true}
+          onCancel={() => setNaturezaParaExcluir(null)}
           onConfirm={handleConfirmarExclusao}
           title="Excluir Natureza"
           message={`Tem certeza que deseja excluir a natureza "${naturezaParaExcluir.descricao}"? O valor alocado sera liberado para o saldo livre da emenda.`}
@@ -491,8 +491,8 @@ const NaturezasList = ({
       {/* Modal de confirmacao de exclusao de despesa */}
       {despesaParaExcluir && (
         <ConfirmationModal
-          isOpen={true}
-          onClose={() => setDespesaParaExcluir(null)}
+          isVisible={true}
+          onCancel={() => setDespesaParaExcluir(null)}
           onConfirm={handleConfirmarExclusaoDespesa}
           title="Excluir Despesa"
           message={`Tem certeza que deseja excluir a despesa "${despesaParaExcluir.discriminacao || despesaParaExcluir.descricao || "Despesa"}"? Esta acao nao pode ser desfeita.`}
@@ -505,8 +505,8 @@ const NaturezasList = ({
       {/* Modal de confirmacao de regularizacao em lote */}
       {mostrarModalRegularizarTodas && (
         <ConfirmationModal
-          isOpen={true}
-          onClose={() => !regularizandoTodas && setMostrarModalRegularizarTodas(false)}
+          isVisible={true}
+          onCancel={() => !regularizandoTodas && setMostrarModalRegularizarTodas(false)}
           onConfirm={handleRegularizarTodas}
           title="Regularizar Todas as Naturezas"
           message={

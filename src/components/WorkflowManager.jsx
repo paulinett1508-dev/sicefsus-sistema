@@ -315,7 +315,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
 
       {/* Modal de Aprovação */}
       <ConfirmationModal
-        isOpen={showApprovalModal}
+        isVisible={showApprovalModal}
         onConfirm={() => handleStatusChange("aprovada", "APROVADA", comments)}
         onCancel={() => {
           setShowApprovalModal(false);
@@ -342,7 +342,7 @@ const WorkflowManager = ({ despesa, onStatusChange, onClose }) => {
 
       {/* Modal de Rejeição */}
       <ConfirmationModal
-        isOpen={showRejectModal}
+        isVisible={showRejectModal}
         onConfirm={() => handleStatusChange("rejeitada", "REJEITADA", comments)}
         onCancel={() => {
           setShowRejectModal(false);
