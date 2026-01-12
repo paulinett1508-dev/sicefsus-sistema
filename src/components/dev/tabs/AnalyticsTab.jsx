@@ -307,8 +307,8 @@ function AnalyticsTab() {
       {/* BANNER INFORMATIVO SE NÃO HOUVER DADOS */}
       {!temDados && (
         <div style={{
-          backgroundColor: '#fef3c7',
-          border: '1px solid #f59e0b',
+          backgroundColor: 'var(--warning-bg, rgba(234, 179, 8, 0.1))',
+          border: '1px solid var(--warning, #f59e0b)',
           borderRadius: '8px',
           padding: '16px 20px',
           marginBottom: '24px',
@@ -318,10 +318,10 @@ function AnalyticsTab() {
         }}>
           <div style={{ fontSize: '24px' }}>💡</div>
           <div>
-            <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>
+            <div style={{ fontWeight: '600', color: 'var(--warning-fg, #92400e)', marginBottom: '4px' }}>
               Nenhum dado de analytics disponível
             </div>
-            <div style={{ fontSize: '14px', color: '#78350f' }}>
+            <div style={{ fontSize: '14px', color: 'var(--theme-text-secondary)' }}>
               Os dados de analytics são gerados automaticamente quando você usa o sistema.
               Execute ações como criar, editar ou visualizar emendas/despesas para começar a coletar dados.
             </div>
@@ -553,6 +553,7 @@ function AnalyticsTab() {
   );
 }
 
+// Dark Mode Compatible Styles
 const styles = {
   header: {
     display: 'flex',
@@ -565,12 +566,12 @@ const styles = {
   title: {
     fontSize: '24px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--theme-text)',
     margin: 0
   },
   subtitle: {
     fontSize: '14px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     margin: '4px 0 0 0'
   },
   controls: {
@@ -583,13 +584,13 @@ const styles = {
     borderRadius: '6px',
     border: '1px solid var(--theme-border)',
     fontSize: '14px',
-    backgroundColor: 'var(--theme-input-bg)',
+    backgroundColor: 'var(--theme-surface)',
     color: 'var(--theme-text)',
     cursor: 'pointer'
   },
   refreshBtn: {
     padding: '8px 16px',
-    backgroundColor: '#667eea',
+    backgroundColor: 'var(--primary)',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
@@ -612,7 +613,7 @@ const styles = {
     backgroundColor: 'var(--theme-surface)',
     borderRadius: '8px',
     border: '1px solid var(--theme-border)',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+    boxShadow: 'var(--shadow-sm)'
   },
   summaryIcon: {
     fontSize: '32px'
@@ -620,11 +621,11 @@ const styles = {
   summaryValue: {
     fontSize: '28px',
     fontWeight: '700',
-    color: '#111827'
+    color: 'var(--theme-text)'
   },
   summaryLabel: {
     fontSize: '13px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     marginTop: '4px'
   },
   chartSection: {
@@ -637,7 +638,7 @@ const styles = {
   chartTitle: {
     fontSize: '16px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--theme-text)',
     marginBottom: '20px',
     margin: 0
   },
@@ -658,14 +659,14 @@ const styles = {
   },
   timelineBarFill: {
     width: '100%',
-    backgroundColor: '#667eea',
+    backgroundColor: 'var(--primary)',
     borderRadius: '4px 4px 0 0',
     minHeight: '4px',
     transition: 'height 0.3s ease'
   },
   timelineLabel: {
     fontSize: '10px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     marginTop: '8px',
     transform: 'rotate(-45deg)',
     transformOrigin: 'top left',
@@ -685,7 +686,7 @@ const styles = {
   metricTitle: {
     fontSize: '15px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--theme-text)',
     marginBottom: '16px',
     margin: 0
   },
@@ -702,7 +703,7 @@ const styles = {
   listRank: {
     fontSize: '14px',
     fontWeight: '700',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     minWidth: '32px'
   },
   listContent: {
@@ -711,7 +712,7 @@ const styles = {
   },
   listLabel: {
     fontSize: '13px',
-    color: '#374151',
+    color: 'var(--theme-text-secondary)',
     fontWeight: '500',
     marginBottom: '4px',
     overflow: 'hidden',
@@ -720,20 +721,20 @@ const styles = {
   },
   listBar: {
     height: '6px',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: 'var(--theme-border)',
     borderRadius: '3px',
     overflow: 'hidden'
   },
   listBarFill: {
     height: '100%',
-    backgroundColor: '#667eea',
+    backgroundColor: 'var(--primary)',
     borderRadius: '3px',
     transition: 'width 0.3s ease'
   },
   listValue: {
     fontSize: '14px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--theme-text)',
     minWidth: '48px',
     textAlign: 'right'
   },
@@ -747,7 +748,7 @@ const styles = {
     alignItems: 'center',
     gap: '12px',
     padding: '12px',
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'var(--theme-hover)',
     borderRadius: '6px'
   },
   statusDot: {
@@ -760,13 +761,13 @@ const styles = {
   },
   statusLabel: {
     fontSize: '13px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     marginBottom: '2px'
   },
   statusValue: {
     fontSize: '20px',
     fontWeight: '700',
-    color: '#111827'
+    color: 'var(--theme-text)'
   }
 };
 

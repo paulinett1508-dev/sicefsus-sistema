@@ -187,7 +187,7 @@ function ManutencaoTab() {
               <div style={{
                 width: '100%',
                 height: '6px',
-                background: '#f3f4f6',
+                background: 'var(--theme-border)',
                 borderRadius: '3px',
                 overflow: 'hidden',
                 marginTop: '8px'
@@ -195,7 +195,7 @@ function ManutencaoTab() {
                 <div style={{
                   width: `${metricsRealTime.memory.percentage}%`,
                   height: '100%',
-                  background: parseFloat(metricsRealTime.memory.percentage) > 80 ? '#ef4444' : '#10b981',
+                  background: parseFloat(metricsRealTime.memory.percentage) > 80 ? 'var(--danger, #ef4444)' : 'var(--success, #10b981)',
                   transition: 'width 0.3s ease'
                 }} />
               </div>
@@ -351,6 +351,7 @@ function ManutencaoTab() {
   );
 }
 
+// Dark Mode Compatible Styles
 const styles = {
   container: {
     padding: '0'
@@ -364,12 +365,12 @@ const styles = {
   title: {
     fontSize: '18px',
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--theme-text)',
     margin: 0
   },
   btnRefresh: {
     padding: '8px 16px',
-    background: '#2563eb',
+    background: 'var(--primary)',
     color: 'white',
     border: 'none',
     borderRadius: '6px',
@@ -378,26 +379,27 @@ const styles = {
     cursor: 'pointer'
   },
   section: {
-    background: 'white',
-    border: '1px solid #e5e7eb',
+    background: 'var(--theme-surface)',
+    border: '1px solid var(--theme-border)',
     borderRadius: '8px',
     marginBottom: '16px',
     overflow: 'hidden'
   },
   sectionHeader: {
     padding: '16px',
-    background: '#f9fafb',
-    borderBottom: '1px solid #e5e7eb',
+    background: 'var(--theme-bg)',
+    borderBottom: '1px solid var(--theme-border)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     cursor: 'pointer',
     fontWeight: '600',
-    fontSize: '14px'
+    fontSize: '14px',
+    color: 'var(--theme-text)'
   },
   toggle: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--theme-text-muted)'
   },
   metricsRow: {
     display: 'grid',
@@ -410,7 +412,7 @@ const styles = {
   },
   metricLabel: {
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     marginBottom: '4px'
   },
   metricValue: {
@@ -419,21 +421,23 @@ const styles = {
   },
   details: {
     padding: '16px',
-    background: '#f9fafb',
-    borderTop: '1px solid #e5e7eb',
-    fontSize: '13px'
+    background: 'var(--theme-hover)',
+    borderTop: '1px solid var(--theme-border)',
+    fontSize: '13px',
+    color: 'var(--theme-text-secondary)'
   },
   table: {
     width: '100%',
     marginTop: '8px',
     borderCollapse: 'collapse',
-    fontSize: '12px'
+    fontSize: '12px',
+    color: 'var(--theme-text)'
   },
   loading: {
     textAlign: 'center',
     padding: '40px',
     fontSize: '16px',
-    color: '#6b7280'
+    color: 'var(--theme-text-muted)'
   },
   realTimeGrid: {
     display: 'grid',
@@ -442,10 +446,10 @@ const styles = {
     padding: '16px'
   },
   metricCard: {
-    background: '#f9fafb',
+    background: 'var(--theme-hover)',
     padding: '16px',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid var(--theme-border)',
     textAlign: 'center'
   },
   metricCardIcon: {
@@ -454,19 +458,19 @@ const styles = {
   },
   metricCardTitle: {
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--theme-text-muted)',
     marginBottom: '8px',
     fontWeight: '500'
   },
   metricCardValue: {
     fontSize: '24px',
     fontWeight: '700',
-    color: '#111827',
+    color: 'var(--theme-text)',
     marginBottom: '4px'
   },
   metricCardSubtext: {
     fontSize: '11px',
-    color: '#9ca3af'
+    color: 'var(--theme-text-muted)'
   }
 };
 

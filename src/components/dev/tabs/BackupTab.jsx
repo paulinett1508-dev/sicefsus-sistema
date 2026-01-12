@@ -251,14 +251,14 @@ function BackupTab() {
         .backup-section {
           margin-top: 24px;
           padding: 24px;
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
-          border: 2px solid #e2e8f0;
+          border: 1px solid var(--theme-border);
         }
 
         .backup-section h3 {
           margin: 0 0 16px 0;
-          color: #2d3748;
+          color: var(--theme-text);
           font-size: 16px;
         }
 
@@ -267,7 +267,7 @@ function BackupTab() {
           gap: 24px;
           margin-bottom: 24px;
           padding: 16px;
-          background: #f7fafc;
+          background: var(--theme-hover);
           border-radius: 8px;
         }
 
@@ -278,6 +278,7 @@ function BackupTab() {
           font-size: 14px;
           cursor: pointer;
           font-weight: 500;
+          color: var(--theme-text);
         }
 
         .export-options input[type="radio"] {
@@ -295,9 +296,10 @@ function BackupTab() {
         .btn-export,
         .btn-export-all {
           padding: 12px 20px;
-          border: 2px solid #e2e8f0;
+          border: 1px solid var(--theme-border);
           border-radius: 8px;
-          background: white;
+          background: var(--theme-surface);
+          color: var(--theme-text);
           font-weight: 600;
           cursor: pointer;
           transition: all 0.2s ease;
@@ -305,21 +307,21 @@ function BackupTab() {
         }
 
         .btn-export:hover:not(:disabled) {
-          border-color: #2563eb;
-          background: #eff6ff;
+          border-color: var(--primary);
+          background: var(--theme-hover);
           transform: translateY(-1px);
         }
 
         .btn-export-all {
-          background: #2563eb;
+          background: var(--primary);
           color: white;
-          border-color: #2563eb;
+          border-color: var(--primary);
           grid-column: 1 / -1;
           font-size: 15px;
         }
 
         .btn-export-all:hover:not(:disabled) {
-          background: #1d4ed8;
+          background: var(--primary-dark);
           transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }

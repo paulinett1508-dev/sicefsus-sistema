@@ -2,11 +2,15 @@ import React from 'react';
 import './shared-styles.css';
 
 function AlertaBanner({ tipo = 'info', mensagem, onFechar, icone }) {
+  // Usa CSS variables com fallback para cores hardcoded
   const tiposConfig = {
-    sucesso: { cor: '#48bb78', icone: '✅', label: 'Sucesso' },
-    erro: { cor: '#f56565', icone: '❌', label: 'Erro' },
-    aviso: { cor: '#ffc107', icone: '⚠️', label: 'Atenção' },
-    info: { cor: '#4299e1', icone: 'ℹ️', label: 'Informação' },
+    sucesso: { cor: 'var(--success, #48bb78)', icone: '✅', label: 'Sucesso' },
+    success: { cor: 'var(--success, #48bb78)', icone: '✅', label: 'Sucesso' },
+    erro: { cor: 'var(--danger, #f56565)', icone: '❌', label: 'Erro' },
+    error: { cor: 'var(--danger, #f56565)', icone: '❌', label: 'Erro' },
+    aviso: { cor: 'var(--warning, #ffc107)', icone: '⚠️', label: 'Atenção' },
+    warning: { cor: 'var(--warning, #ffc107)', icone: '⚠️', label: 'Atenção' },
+    info: { cor: 'var(--info, #4299e1)', icone: 'ℹ️', label: 'Informação' },
   };
 
   const config = tiposConfig[tipo] || tiposConfig.info;

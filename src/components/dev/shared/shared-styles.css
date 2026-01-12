@@ -1,5 +1,6 @@
 /* ========================================
    COMPONENTES COMPARTILHADOS - ESTILOS
+   Dark Mode Compatible
    ======================================== */
 
 /* ========== PROGRESS BAR ========== */
@@ -12,18 +13,18 @@
   justify-content: space-between;
   margin-bottom: 8px;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--theme-text);
   font-weight: 500;
 }
 
 .progress-numeros {
-  color: #718096;
+  color: var(--theme-text-secondary);
   font-weight: 400;
 }
 
 .progress-track {
   height: 24px;
-  background: #e2e8f0;
+  background: var(--theme-hover);
   border-radius: 12px;
   overflow: hidden;
   position: relative;
@@ -51,7 +52,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 9998;
   animation: fadeIn 0.2s ease;
 }
@@ -61,13 +62,14 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: white;
+  background: var(--theme-surface);
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   z-index: 9999;
   min-width: 400px;
   max-width: 500px;
   animation: slideUp 0.3s ease;
+  border: 1px solid var(--theme-border);
 }
 
 @keyframes slideUp {
@@ -86,7 +88,7 @@
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 1px solid var(--theme-border);
   border-left: 4px solid;
 }
 
@@ -97,7 +99,7 @@
 .confirm-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #2d3748;
+  color: var(--theme-text);
 }
 
 .confirm-body {
@@ -108,7 +110,7 @@
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
-  color: #4a5568;
+  color: var(--theme-text-secondary);
 }
 
 .confirm-footer {
@@ -116,8 +118,9 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  background: #f7fafc;
+  background: var(--theme-bg);
   border-radius: 0 0 12px 12px;
+  border-top: 1px solid var(--theme-border);
 }
 
 .btn-cancelar,
@@ -135,12 +138,12 @@
 }
 
 .btn-cancelar {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: var(--theme-hover);
+  color: var(--theme-text);
 }
 
 .btn-cancelar:hover:not(:disabled) {
-  background: #cbd5e0;
+  background: var(--theme-border);
 }
 
 .btn-confirmar {
@@ -149,8 +152,8 @@
 }
 
 .btn-confirmar.warning {
-  background: #ffc107;
-  color: #2d3748;
+  background: var(--warning);
+  color: var(--warning-fg, #1a1a1a);
 }
 
 .btn-confirmar.danger {
@@ -186,12 +189,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: white;
+  background: var(--theme-surface);
   border-left: 4px solid;
   border-radius: 8px;
   padding: 16px 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--theme-border);
 }
 
 .alerta-banner-icone {
@@ -202,20 +206,20 @@
 .alerta-banner-conteudo {
   flex: 1;
   font-size: 14px;
-  color: #4a5568;
+  color: var(--theme-text-secondary);
   line-height: 1.5;
 }
 
 .alerta-banner-conteudo strong {
   font-weight: 700;
-  color: #2d3748;
+  color: var(--theme-text);
 }
 
 .alerta-banner-fechar {
   background: none;
   border: none;
   font-size: 24px;
-  color: #a0aec0;
+  color: var(--theme-text-muted);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -228,15 +232,15 @@
 }
 
 .alerta-banner-fechar:hover {
-  background: #f7fafc;
-  color: #4a5568;
+  background: var(--theme-hover);
+  color: var(--theme-text);
 }
 
 /* ========== RESULT TABLE ========== */
 .result-table-container {
   overflow-x: auto;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--theme-border);
 }
 
 .result-table {
@@ -246,25 +250,25 @@
 }
 
 .result-table thead {
-  background: #f7fafc;
-  border-bottom: 2px solid #e2e8f0;
+  background: var(--theme-bg);
+  border-bottom: 1px solid var(--theme-border);
 }
 
 .result-table th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--theme-text);
   white-space: nowrap;
 }
 
 .result-table tbody tr {
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--theme-border);
   transition: background 0.2s ease;
 }
 
 .result-table tbody tr:hover {
-  background: #f7fafc;
+  background: var(--theme-hover);
 }
 
 .result-table tbody tr:last-child {
@@ -273,7 +277,7 @@
 
 .result-table td {
   padding: 12px 16px;
-  color: #4a5568;
+  color: var(--theme-text-secondary);
 }
 
 .result-table-loading,
@@ -289,8 +293,8 @@
 .spinner-grande {
   width: 48px;
   height: 48px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #667eea;
+  border: 4px solid var(--theme-border);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin-bottom: 16px;
@@ -298,7 +302,7 @@
 
 .result-table-loading p,
 .result-table-vazia p {
-  color: #718096;
+  color: var(--theme-text-muted);
   font-size: 14px;
   margin: 8px 0 0 0;
 }
@@ -307,6 +311,7 @@
   font-size: 48px;
   margin-bottom: 12px;
   opacity: 0.5;
+  color: var(--theme-text-muted);
 }
 
 /* ========== RESPONSIVIDADE ========== */

@@ -470,7 +470,7 @@ export default function RecalcularEmenda() {
                         {formatarMoeda(preview.diferenca)}
                       </td>
                     </tr>
-                    <tr style={{ background: "#f8f9fa" }}>
+                    <tr style={{ background: "var(--theme-hover)" }}>
                       <td style={styles.tdComparacao}>Saldo Disponível</td>
                       <td style={styles.tdComparacao}>
                         {formatarMoeda(preview.saldoBanco)}
@@ -542,7 +542,7 @@ export default function RecalcularEmenda() {
   );
 }
 
-// 🎨 ESTILOS
+// 🎨 ESTILOS - Dark Mode Compatible
 const styles = {
   container: {
     padding: "20px",
@@ -553,11 +553,11 @@ const styles = {
   title: {
     fontSize: "24px",
     fontWeight: "600",
-    color: "#1E293B",
+    color: "var(--theme-text)",
     marginBottom: "8px",
   },
   subtitle: {
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontSize: "14px",
     margin: 0,
   },
@@ -571,21 +571,25 @@ const styles = {
     flex: 1,
     minWidth: "300px",
     padding: "10px 14px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     borderRadius: "6px",
     fontSize: "14px",
+    background: "var(--theme-surface)",
+    color: "var(--theme-text)",
   },
   select: {
     padding: "10px 14px",
-    border: "1px solid #dee2e6",
+    border: "1px solid var(--theme-border)",
     borderRadius: "6px",
     fontSize: "14px",
     minWidth: "200px",
     cursor: "pointer",
+    background: "var(--theme-surface)",
+    color: "var(--theme-text)",
   },
   btnRecarregar: {
     padding: "10px 20px",
-    background: "#667eea",
+    background: "var(--primary)",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -594,40 +598,42 @@ const styles = {
     cursor: "pointer",
   },
   erro: {
-    background: "#f8d7da",
-    color: "#721c24",
+    background: "var(--danger-bg, rgba(220, 38, 38, 0.1))",
+    color: "var(--danger, #dc2626)",
     padding: "12px",
     borderRadius: "6px",
     marginBottom: "16px",
-    border: "1px solid #f5c6cb",
+    border: "1px solid var(--danger, #dc2626)",
   },
   sucesso: {
-    background: "#d4edda",
-    color: "#155724",
+    background: "var(--success-bg, rgba(22, 163, 74, 0.1))",
+    color: "var(--success, #16a34a)",
     padding: "12px",
     borderRadius: "6px",
     marginBottom: "16px",
-    border: "1px solid #c3e6cb",
+    border: "1px solid var(--success, #16a34a)",
     whiteSpace: "pre-line",
   },
   loading: {
     textAlign: "center",
     padding: "40px",
+    color: "var(--theme-text-secondary)",
   },
   spinner: {
     width: "40px",
     height: "40px",
-    border: "4px solid #f3f3f3",
-    borderTop: "4px solid #667eea",
+    border: "4px solid var(--theme-border)",
+    borderTop: "4px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 16px",
   },
   tabelaContainer: {
     overflowX: "auto",
-    background: "white",
+    background: "var(--theme-surface)",
     borderRadius: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow-sm)",
+    border: "1px solid var(--theme-border)",
   },
   tabela: {
     width: "100%",
@@ -649,9 +655,9 @@ const styles = {
   semResultados: {
     textAlign: "center",
     padding: "60px 20px",
-    background: "white",
+    background: "var(--theme-surface)",
     borderRadius: "8px",
-    color: "#6c757d",
+    color: "var(--theme-text-muted)",
   },
 
   // MODAL
@@ -668,13 +674,14 @@ const styles = {
     zIndex: 9999,
   },
   modalContent: {
-    background: "white",
+    background: "var(--theme-surface)",
     borderRadius: "12px",
     width: "90%",
     maxWidth: "800px",
     maxHeight: "90vh",
     overflow: "auto",
     boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+    border: "1px solid var(--theme-border)",
   },
   modalHeader: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -695,18 +702,20 @@ const styles = {
   },
   modalBody: {
     padding: "30px",
+    color: "var(--theme-text)",
   },
   previewSection: {
     marginBottom: "25px",
     padding: "20px",
-    background: "#f8f9fa",
+    background: "var(--theme-hover)",
     borderRadius: "8px",
+    color: "var(--theme-text)",
   },
   sectionTitle: {
     marginTop: 0,
     marginBottom: "15px",
     fontSize: "16px",
-    color: "#1E293B",
+    color: "var(--theme-text)",
   },
   tabelaComparacao: {
     width: "100%",
@@ -715,20 +724,22 @@ const styles = {
     fontSize: "14px",
   },
   thComparacao: {
-    background: "#e9ecef",
+    background: "var(--theme-bg)",
     padding: "12px",
     textAlign: "left",
     fontWeight: "600",
-    borderBottom: "2px solid #dee2e6",
+    borderBottom: "2px solid var(--theme-border)",
+    color: "var(--theme-text)",
   },
   tdComparacao: {
     padding: "12px",
-    borderBottom: "1px solid #dee2e6",
+    borderBottom: "1px solid var(--theme-border)",
+    color: "var(--theme-text-secondary)",
   },
   alerta: {
-    background: "#fff3cd",
-    border: "1px solid #ffc107",
-    color: "#856404",
+    background: "var(--warning-bg, rgba(234, 179, 8, 0.1))",
+    border: "1px solid var(--warning, #eab308)",
+    color: "var(--warning-fg, #a16207)",
     padding: "15px",
     borderRadius: "8px",
     marginTop: "20px",
@@ -736,16 +747,18 @@ const styles = {
   },
   modalFooter: {
     padding: "20px 30px",
-    borderTop: "1px solid #e9ecef",
+    borderTop: "1px solid var(--theme-border)",
     display: "flex",
     justifyContent: "flex-end",
     gap: "12px",
+    background: "var(--theme-bg)",
+    borderRadius: "0 0 12px 12px",
   },
   btnCancelar: {
     padding: "12px 24px",
-    background: "#6c757d",
-    color: "white",
-    border: "none",
+    background: "var(--theme-hover)",
+    color: "var(--theme-text)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "600",
@@ -763,7 +776,7 @@ const styles = {
   },
 };
 
-// Adicionar animação do spinner
+// Adicionar animação do spinner - Dark Mode Compatible
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = `
@@ -785,24 +798,30 @@ if (typeof document !== "undefined") {
 
     .tabela-recalculo tbody tr {
       transition: all 0.2s ease;
+      color: var(--theme-text);
     }
 
     .tabela-recalculo tbody tr:hover {
-      background-color: #f8f9fa;
+      background-color: var(--theme-hover);
       transform: scale(1.005);
     }
 
     .tabela-recalculo tbody tr.com-problema {
-      background-color: #fff3cd;
+      background-color: var(--warning-bg, rgba(234, 179, 8, 0.15));
     }
 
     .tabela-recalculo tbody tr.com-problema:hover {
-      background-color: #ffe69c;
+      background-color: var(--warning-bg-hover, rgba(234, 179, 8, 0.25));
     }
 
     .tabela-recalculo td {
       padding: 14px 12px;
-      border-bottom: 1px solid #dee2e6;
+      border-bottom: 1px solid var(--theme-border);
+      color: var(--theme-text-secondary);
+    }
+
+    .tabela-recalculo td strong {
+      color: var(--theme-text);
     }
 
     .badge-ok {
@@ -811,7 +830,7 @@ if (typeof document !== "undefined") {
       border-radius: 12px;
       font-size: 11px;
       font-weight: 600;
-      background: #28a745;
+      background: var(--success, #28a745);
       color: white;
       text-transform: uppercase;
     }

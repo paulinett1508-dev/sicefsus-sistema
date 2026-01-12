@@ -67,10 +67,10 @@ function ConfigTab() {
         }
 
         .config-section {
-          background: white;
+          background: var(--theme-surface);
           padding: 24px;
           border-radius: 12px;
-          border: 2px solid #e2e8f0;
+          border: 1px solid var(--theme-border);
         }
 
         .section-header {
@@ -83,7 +83,7 @@ function ConfigTab() {
         .config-section h3 {
           margin: 0 0 16px 0;
           font-size: 16px;
-          color: #2d3748;
+          color: var(--theme-text);
         }
 
         .toggle-sensiveis {
@@ -91,7 +91,7 @@ function ConfigTab() {
           align-items: center;
           gap: 8px;
           font-size: 14px;
-          color: #4a5568;
+          color: var(--theme-text-secondary);
           cursor: pointer;
         }
 
@@ -106,14 +106,14 @@ function ConfigTab() {
           justify-content: space-between;
           align-items: center;
           padding: 12px 16px;
-          background: #f7fafc;
+          background: var(--theme-hover);
           border-radius: 8px;
         }
 
         .variavel-key {
           font-size: 13px;
           font-weight: 600;
-          color: #2d3748;
+          color: var(--theme-text);
           font-family: monospace;
           display: flex;
           align-items: center;
@@ -126,7 +126,7 @@ function ConfigTab() {
 
         .variavel-valor {
           font-size: 13px;
-          color: #718096;
+          color: var(--theme-text-muted);
           font-family: monospace;
         }
 
@@ -141,11 +141,11 @@ function ConfigTab() {
           align-items: center;
           gap: 12px;
           padding: 12px;
-          background: #f7fafc;
+          background: var(--theme-hover);
           border-radius: 8px;
           cursor: pointer;
           font-size: 14px;
-          color: #4a5568;
+          color: var(--theme-text-secondary);
         }
 
         .limites-grid {
@@ -162,19 +162,21 @@ function ConfigTab() {
 
         .limite-label {
           font-size: 13px;
-          color: #4a5568;
+          color: var(--theme-text-secondary);
           font-weight: 600;
         }
 
         .limite-item input {
           padding: 10px 12px;
-          border: 2px solid #e2e8f0;
+          border: 1px solid var(--theme-border);
           border-radius: 8px;
           font-size: 14px;
+          background: var(--theme-surface);
+          color: var(--theme-text);
         }
 
         .limite-item input:disabled {
-          background: #f7fafc;
+          background: var(--theme-hover);
           cursor: not-allowed;
         }
 
@@ -186,19 +188,20 @@ function ConfigTab() {
 
         .btn-personalizacao {
           padding: 12px 20px;
-          background: white;
-          border: 2px solid #e2e8f0;
+          background: var(--theme-surface);
+          border: 1px solid var(--theme-border);
           border-radius: 8px;
           font-size: 14px;
           font-weight: 600;
           cursor: pointer;
           text-align: left;
           transition: all 0.2s ease;
+          color: var(--theme-text);
         }
 
         .btn-personalizacao:hover:not(:disabled) {
-          border-color: #667eea;
-          background: #f7fafc;
+          border-color: var(--primary);
+          background: var(--theme-hover);
         }
 
         .btn-personalizacao:disabled {
