@@ -339,10 +339,10 @@ export default function RecalcularEmenda() {
                         style={{
                           color:
                             emenda.severidade === "crítica"
-                              ? "#dc3545"
+                              ? "var(--danger)"
                               : emenda.severidade === "moderada"
-                                ? "#856404"
-                                : "#0c5460",
+                                ? "var(--warning-fg)"
+                                : "var(--info-fg)",
                           fontWeight: "bold",
                         }}
                       >
@@ -364,10 +364,10 @@ export default function RecalcularEmenda() {
                           fontWeight: "600",
                           background:
                             emenda.severidade === "crítica"
-                              ? "#dc3545"
+                              ? "var(--danger)"
                               : emenda.severidade === "moderada"
-                                ? "#ffc107"
-                                : "#17a2b8",
+                                ? "var(--warning)"
+                                : "var(--info)",
                           color: "white",
                         }}
                       >
@@ -454,7 +454,7 @@ export default function RecalcularEmenda() {
                         style={{
                           ...styles.tdComparacao,
                           fontWeight: "bold",
-                          color: "#28a745",
+                          color: "var(--success)",
                         }}
                       >
                         {formatarMoeda(preview.valorCalculado)}
@@ -463,7 +463,7 @@ export default function RecalcularEmenda() {
                         style={{
                           ...styles.tdComparacao,
                           color:
-                            preview.diferenca > 1000 ? "#dc3545" : "#28a745",
+                            preview.diferenca > 1000 ? "var(--danger)" : "var(--success)",
                           fontWeight: "bold",
                         }}
                       >
@@ -479,7 +479,7 @@ export default function RecalcularEmenda() {
                         style={{
                           ...styles.tdComparacao,
                           fontWeight: "bold",
-                          color: "#28a745",
+                          color: "var(--success)",
                         }}
                       >
                         {formatarMoeda(preview.saldoCalculado)}
@@ -495,7 +495,7 @@ export default function RecalcularEmenda() {
                         style={{
                           ...styles.tdComparacao,
                           fontWeight: "bold",
-                          color: "#28a745",
+                          color: "var(--success)",
                         }}
                       >
                         {preview.percentualCalculado.toFixed(2)}%
@@ -641,7 +641,7 @@ const styles = {
     fontSize: "13px",
   },
   btnSelecionar: {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "var(--primary)",
     color: "white",
     border: "none",
     padding: "8px 16px",
@@ -684,7 +684,7 @@ const styles = {
     border: "1px solid var(--theme-border)",
   },
   modalHeader: {
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "var(--primary)",
     color: "white",
     padding: "20px",
     display: "flex",
@@ -766,7 +766,7 @@ const styles = {
   },
   btnAplicar: {
     padding: "12px 24px",
-    background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+    background: "var(--success)",
     color: "white",
     border: "none",
     borderRadius: "6px",
@@ -786,7 +786,7 @@ if (typeof document !== "undefined") {
     }
 
     .tabela-recalculo thead th {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary);
       color: white;
       padding: 14px 12px;
       text-align: left;
@@ -837,7 +837,7 @@ if (typeof document !== "undefined") {
 
     .btn-selecionar-tabela:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: var(--shadow-md);
     }
   `;
   document.head.appendChild(style);

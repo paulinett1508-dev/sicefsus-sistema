@@ -2,14 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
 
-// Importar abas
+// Importar abas - apenas as úteis e operacionais
 import DiagnosticoTab from "./tabs/DiagnosticoTab";
 import ManutencaoTab from "./tabs/ManutencaoTab";
 import BackupTab from "./tabs/BackupTab";
-import UsuariosTab from "./tabs/UsuariosTab";
-import ConfigTab from "./tabs/ConfigTab";
-import IAMTab from "./tabs/IAMTab";
-import AnalyticsTab from './tabs/AnalyticsTab'; // Importar aba Analytics
 
 // CSS Module
 import styles from "./FerramentasDev.module.css";
@@ -59,25 +55,6 @@ const FerramentasDev = () => {
       componente: ManutencaoTab
     },
     { id: "backup", icone: "backup", label: "Backup", componente: BackupTab },
-    {
-      id: "analytics",
-      icone: "analytics",
-      label: "Analytics",
-      componente: AnalyticsTab,
-    },
-    { id: "usuarios", icone: "group", label: "Usuários", componente: UsuariosTab },
-    {
-      id: "iam",
-      icone: "admin_panel_settings",
-      label: "IAM",
-      componente: IAMTab,
-    },
-    {
-      id: "config",
-      icone: "settings",
-      label: "Configurações",
-      componente: ConfigTab,
-    },
     {
       id: "rules",
       icone: "description",

@@ -21,9 +21,9 @@ function ConfirmDialog({
   };
 
   const cores = {
-    warning: '#ffc107',
-    danger: '#f56565',
-    info: '#4299e1',
+    warning: 'var(--warning, #ffc107)',
+    danger: 'var(--danger, #f56565)',
+    info: 'var(--info, #4299e1)',
   };
 
   return (

@@ -70,7 +70,14 @@ function ManutencaoTab() {
       const despesasSnap = await getDocs(collection(db, 'despesas'));
       const emendasSnap = await getDocs(collection(db, 'emendas'));
       const usuariosSnap = await getDocs(collection(db, 'usuarios'));
-      const logsSnap = await getDocs(collection(db, 'logs'));
+
+      // Logs pode não ter permissão - tratar separadamente
+      let logsSnap = { docs: [], size: 0 };
+      try {
+        logsSnap = await getDocs(collection(db, 'logs'));
+      } catch (logsError) {
+        console.warn('⚠️ Sem permissão para ler logs:', logsError.message);
+      }
 
       const despesas = despesasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const emendas = emendasSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -127,10 +134,10 @@ function ManutencaoTab() {
 
   const getStatusColor = (status) => {
     switch(status) {
-      case 'ok': return '#10b981';
-      case 'warning': return '#f59e0b';
-      case 'slow': return '#ef4444';
-      default: return '#6b7280';
+      case 'ok': return 'var(--success, #10b981)';
+      case 'warning': return 'var(--warning, #f59e0b)';
+      case 'slow': return 'var(--danger, #ef4444)';
+      default: return 'var(--theme-text-muted, #6b7280)';
     }
   };
 

@@ -22,18 +22,28 @@
   --success: #10B981;
   --success-light: #34D399;
   --success-dark: #059669;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --success-fg: #065f46;
 
   --warning: #F59E0B;
   --warning-light: #FBBF24;
   --warning-dark: #D97706;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --warning-fg: #92400e;
+  --warning-bg-hover: rgba(245, 158, 11, 0.2);
 
   --error: #EF4444;
   --error-light: #F87171;
   --error-dark: #DC2626;
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --danger-fg: #991b1b;
 
   --info: #0EA5E9;
   --info-light: #38BDF8;
   --info-dark: #0284C7;
+  --info-bg: rgba(14, 165, 233, 0.1);
+  --info-fg: #075985;
 
   /* === CORES NEUTRAS (Slate Palette) === */
   --white: #ffffff;
@@ -65,6 +75,7 @@
   --theme-sidebar-item-active-bg: rgba(26, 58, 74, 0.08);
   --theme-input-bg: #ffffff;
   --theme-surface-hover: #F1F5F9;
+  --theme-hover: #F1F5F9;
 
   /* === SOMBRAS (Mais Suaves) === */
   --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -153,6 +164,7 @@
   --theme-surface: #1E293B;
   --theme-surface-secondary: #334155;
   --theme-surface-hover: #2D3B4F;
+  --theme-hover: #2D3B4F;
   --theme-text: #F1F5F9;
   --theme-text-secondary: #CBD5E1;
   --theme-text-muted: #94A3B8;
@@ -169,6 +181,17 @@
   --primary: #3B82F6;
   --primary-light: #60A5FA;
   --primary-dark: #2563EB;
+
+  /* Cores de status ajustadas para dark mode */
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --success-fg: #34D399;
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --warning-fg: #FBBF24;
+  --warning-bg-hover: rgba(245, 158, 11, 0.25);
+  --danger-bg: rgba(239, 68, 68, 0.15);
+  --danger-fg: #F87171;
+  --info-bg: rgba(14, 165, 233, 0.15);
+  --info-fg: #38BDF8;
 
   /* Cores que precisam de ajuste no dark */
   --gray-50: #1E293B;

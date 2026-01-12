@@ -1,7 +1,7 @@
 import React from 'react';
 import './shared-styles.css';
 
-function ProgressBar({ progresso, total, label, cor = '#667eea' }) {
+function ProgressBar({ progresso, total, label, cor = 'var(--primary)' }) {
   const percentual = total > 0 ? Math.round((progresso / total) * 100) : 0;
 
   return (

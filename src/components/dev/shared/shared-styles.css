@@ -147,7 +147,7 @@
 }
 
 .btn-confirmar {
-  background: #667eea;
+  background: var(--primary);
   color: white;
 }
 
@@ -157,7 +157,7 @@
 }
 
 .btn-confirmar.danger {
-  background: #f56565;
+  background: var(--danger, #f56565);
   color: white;
 }
 

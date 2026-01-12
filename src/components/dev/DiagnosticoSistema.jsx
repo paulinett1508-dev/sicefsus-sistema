@@ -363,12 +363,12 @@ function DiagnosticoSistema() {
         .diagnostico-header h2 {
           font-size: 24px;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--theme-text);
           margin: 0 0 8px 0;
         }
 
         .descricao {
-          color: #64748b;
+          color: var(--theme-text-muted);
           font-size: 14px;
           margin: 0;
         }
@@ -376,7 +376,7 @@ function DiagnosticoSistema() {
         .btn-diagnostico {
           width: 100%;
           padding: 16px 24px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: var(--primary);
           color: white;
           border: none;
           border-radius: 8px;
@@ -389,7 +389,8 @@ function DiagnosticoSistema() {
 
         .btn-diagnostico:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+          filter: brightness(1.1);
+          box-shadow: var(--shadow-md);
         }
 
         .btn-diagnostico:disabled {
@@ -402,17 +403,18 @@ function DiagnosticoSistema() {
         }
 
         .resumo-geral {
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
           padding: 24px;
           margin-bottom: 24px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--theme-border);
         }
 
         .resumo-geral h3 {
           font-size: 18px;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--theme-text);
           margin: 0 0 16px 0;
         }
 
@@ -424,7 +426,7 @@ function DiagnosticoSistema() {
         }
 
         .card-stat {
-          background: #f8fafc;
+          background: var(--theme-hover);
           border-radius: 8px;
           padding: 16px;
           display: flex;
@@ -433,15 +435,15 @@ function DiagnosticoSistema() {
         }
 
         .card-stat.total {
-          border-left: 4px solid #3b82f6;
+          border-left: 4px solid var(--primary);
         }
 
         .card-stat.ok {
-          border-left: 4px solid #10b981;
+          border-left: 4px solid var(--success);
         }
 
         .card-stat.problema {
-          border-left: 4px solid #f59e0b;
+          border-left: 4px solid var(--warning);
         }
 
         .stat-icone {
@@ -456,24 +458,24 @@ function DiagnosticoSistema() {
         .stat-numero {
           font-size: 24px;
           font-weight: 700;
-          color: #1e293b;
+          color: var(--theme-text);
         }
 
         .stat-descricao {
           font-size: 12px;
-          color: #64748b;
+          color: var(--theme-text-muted);
         }
 
         .detalhamento-severidade {
           margin-top: 20px;
           padding-top: 20px;
-          border-top: 1px solid #e2e8f0;
+          border-top: 1px solid var(--theme-border);
         }
 
         .detalhamento-severidade h4 {
           font-size: 14px;
           font-weight: 600;
-          color: #475569;
+          color: var(--theme-text-secondary);
           margin: 0 0 12px 0;
         }
 
@@ -493,18 +495,18 @@ function DiagnosticoSistema() {
         }
 
         .badge-item.critica {
-          background: #fee2e2;
-          color: #991b1b;
+          background: var(--danger-bg);
+          color: var(--danger-fg);
         }
 
         .badge-item.moderada {
-          background: #fef3c7;
-          color: #92400e;
+          background: var(--warning-bg);
+          color: var(--warning-fg);
         }
 
         .badge-item.leve {
-          background: #dbeafe;
-          color: #1e40af;
+          background: var(--info-bg);
+          color: var(--info-fg);
         }
 
         .badge-numero {
@@ -527,13 +529,13 @@ function DiagnosticoSistema() {
         }
 
         .status-sistema.ok {
-          background: #d1fae5;
-          color: #065f46;
+          background: var(--success-bg);
+          color: var(--success-fg);
         }
 
         .status-sistema.alerta {
-          background: #fed7aa;
-          color: #92400e;
+          background: var(--warning-bg);
+          color: var(--warning-fg);
         }
 
         .status-icone {
@@ -545,10 +547,11 @@ function DiagnosticoSistema() {
         }
 
         .secao-problemas {
-          background: white;
+          background: var(--theme-surface);
           border-radius: 12px;
           padding: 24px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--theme-border);
         }
 
         .header-problemas {
@@ -561,13 +564,13 @@ function DiagnosticoSistema() {
         .header-problemas h3 {
           font-size: 18px;
           font-weight: 600;
-          color: #1e293b;
+          color: var(--theme-text);
           margin: 0;
         }
 
         .btn-copiar-ids {
           padding: 8px 16px;
-          background: #3b82f6;
+          background: var(--primary);
           color: white;
           border: none;
           border-radius: 6px;
@@ -578,7 +581,7 @@ function DiagnosticoSistema() {
         }
 
         .btn-copiar-ids:hover {
-          background: #2563eb;
+          filter: brightness(1.1);
         }
 
         .lista-problemas {
@@ -588,22 +591,22 @@ function DiagnosticoSistema() {
         }
 
         .problema-card {
-          background: #f8fafc;
+          background: var(--theme-hover);
           border-radius: 8px;
           padding: 16px;
-          border-left: 4px solid #cbd5e1;
+          border-left: 4px solid var(--theme-border);
         }
 
         .problema-card.crítica {
-          border-left-color: #dc2626;
+          border-left-color: var(--danger);
         }
 
         .problema-card.moderada {
-          border-left-color: #f59e0b;
+          border-left-color: var(--warning);
         }
 
         .problema-card.leve {
-          border-left-color: #3b82f6;
+          border-left-color: var(--primary);
         }
 
         .problema-header {
@@ -621,7 +624,7 @@ function DiagnosticoSistema() {
 
         .problema-titulo strong {
           font-size: 16px;
-          color: #1e293b;
+          color: var(--theme-text);
         }
 
         .badge-severidade {
@@ -634,32 +637,33 @@ function DiagnosticoSistema() {
         }
 
         .badge-severidade.crítica {
-          background: #dc2626;
+          background: var(--danger);
           color: white;
         }
 
         .badge-severidade.moderada {
-          background: #f59e0b;
+          background: var(--warning);
           color: white;
         }
 
         .badge-severidade.leve {
-          background: #3b82f6;
+          background: var(--primary);
           color: white;
         }
 
         .btn-copiar-id {
           padding: 6px 12px;
-          background: #e2e8f0;
+          background: var(--theme-border);
           border: none;
           border-radius: 4px;
           cursor: pointer;
           font-size: 14px;
           transition: all 0.2s;
+          color: var(--theme-text);
         }
 
         .btn-copiar-id:hover {
-          background: #cbd5e1;
+          background: var(--theme-hover);
         }
 
         .problema-info {
@@ -682,21 +686,21 @@ function DiagnosticoSistema() {
 
         .label {
           font-size: 12px;
-          color: #64748b;
+          color: var(--theme-text-muted);
           font-weight: 500;
         }
 
         .valor {
           font-size: 14px;
-          color: #1e293b;
+          color: var(--theme-text);
           font-weight: 600;
         }
 
         .valor-id {
           font-size: 11px;
-          color: #64748b;
+          color: var(--theme-text-muted);
           font-family: monospace;
-          background: #e2e8f0;
+          background: var(--theme-border);
           padding: 4px 8px;
           border-radius: 4px;
           word-break: break-all;
@@ -708,8 +712,9 @@ function DiagnosticoSistema() {
           gap: 16px;
           align-items: center;
           padding: 16px;
-          background: white;
+          background: var(--theme-surface);
           border-radius: 8px;
+          border: 1px solid var(--theme-border);
         }
 
         .comparacao-coluna {
@@ -725,11 +730,11 @@ function DiagnosticoSistema() {
         }
 
         .comparacao-coluna.banco h5 {
-          color: #dc2626;
+          color: var(--danger);
         }
 
         .comparacao-coluna.real h5 {
-          color: #10b981;
+          color: var(--success);
         }
 
         .valores {
@@ -743,29 +748,29 @@ function DiagnosticoSistema() {
           justify-content: space-between;
           align-items: center;
           padding: 8px;
-          background: #f8fafc;
+          background: var(--theme-hover);
           border-radius: 4px;
           font-size: 13px;
         }
 
         .valor-item span {
-          color: #64748b;
+          color: var(--theme-text-muted);
         }
 
         .valor-item strong {
-          color: #1e293b;
+          color: var(--theme-text);
           font-weight: 600;
         }
 
         .comparacao-seta {
           font-size: 24px;
-          color: #cbd5e1;
+          color: var(--theme-border);
           font-weight: bold;
         }
 
         .alerta-diferenca {
-          background: #fef3c7;
-          border: 1px solid #fbbf24;
+          background: var(--warning-bg);
+          border: 1px solid var(--warning);
           border-radius: 6px;
           padding: 12px;
           display: flex;
@@ -779,7 +784,7 @@ function DiagnosticoSistema() {
 
         .texto-diferenca {
           font-size: 14px;
-          color: #92400e;
+          color: var(--warning-fg);
         }
 
         .texto-diferenca strong {
@@ -787,8 +792,8 @@ function DiagnosticoSistema() {
         }
 
         .acoes-recomendadas {
-          background: #eff6ff;
-          border: 1px solid #bfdbfe;
+          background: var(--info-bg);
+          border: 1px solid var(--info);
           border-radius: 8px;
           padding: 20px;
           margin-top: 24px;
@@ -797,14 +802,14 @@ function DiagnosticoSistema() {
         .acoes-recomendadas h4 {
           font-size: 16px;
           font-weight: 600;
-          color: #1e40af;
+          color: var(--info-fg);
           margin: 0 0 12px 0;
         }
 
         .acoes-recomendadas ol {
           margin: 0;
           padding-left: 20px;
-          color: #1e40af;
+          color: var(--info-fg);
         }
 
         .acoes-recomendadas li {
@@ -820,7 +825,7 @@ function DiagnosticoSistema() {
         }
 
         .badge-inline.critica {
-          background: #dc2626;
+          background: var(--danger);
           color: white;
         }
       `}</style>
