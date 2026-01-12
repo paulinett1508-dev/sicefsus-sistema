@@ -1,98 +1,6 @@
 # Tarefas Pendentes para Proxima Sessao
 
-## Atualizado em: 2026-01-10
-
----
-
-## NOVO MODULO: Cadastro de Fornecedores
-
-### Problema Atual
-Atualmente, ao criar uma despesa, o usuario precisa informar todos os dados do fornecedor manualmente:
-- CNPJ (com lookup automatico via ReceitaWS/BrasilAPI)
-- Razao Social
-- Nome Fantasia
-- Endereco completo
-- Telefone, Email
-- Situacao Cadastral
-
-**Problema:** Se o usuario precisar cadastrar outra despesa para o MESMO fornecedor, precisa preencher tudo novamente ou depender do lookup do CNPJ.
-
-### Solucao Proposta
-
-#### 1. Nova Colecao Firebase: `fornecedores`
-```javascript
-{
-  id: "auto-generated",
-  cnpj: "00.000.000/0001-00",        // Unico
-  razaoSocial: "EMPRESA LTDA",
-  nomeFantasia: "NOME FANTASIA",
-  endereco: {
-    logradouro: "RUA EXEMPLO",
-    numero: "123",
-    complemento: "",
-    bairro: "CENTRO",
-    cidade: "CIDADE",
-    uf: "MA",
-    cep: "00000-000"
-  },
-  contato: {
-    telefone: "(00) 0000-0000",
-    email: "contato@empresa.com"
-  },
-  situacaoCadastral: "ATIVA",
-  dataUltimaConsulta: Timestamp,     // Ultima consulta na Receita
-  // Metadados
-  criadoPor: "userId",
-  criadoEm: Timestamp,
-  atualizadoPor: "userId",
-  atualizadoEm: Timestamp,
-  // Vinculo geografico (opcional)
-  municipiosAtendidos: ["Passagem Franca", "Sucupira"],
-  uf: "MA"
-}
-```
-
-#### 2. Componentes Necessarios
-
-| Componente | Descricao | Localizacao |
-|------------|-----------|-------------|
-| `FornecedoresList.jsx` | Lista de fornecedores com busca/filtros | `src/components/fornecedor/` |
-| `FornecedorForm.jsx` | Formulario criar/editar fornecedor | `src/components/fornecedor/` |
-| `FornecedorCard.jsx` | Card resumido do fornecedor | `src/components/fornecedor/` |
-| `FornecedorSelect.jsx` | Dropdown para selecionar fornecedor existente | `src/components/fornecedor/` |
-| `useFornecedoresData.js` | Hook CRUD fornecedores | `src/hooks/` |
-
-#### 3. Integracao com Despesas
-
-**Fluxo no formulario de despesa:**
-1. Usuario clica em "Selecionar Fornecedor"
-2. Modal abre com:
-   - Campo de busca (por CNPJ, razao social ou nome fantasia)
-   - Lista de fornecedores ja cadastrados
-   - Botao "Cadastrar Novo Fornecedor"
-3. Ao selecionar, preenche automaticamente todos os campos
-4. Campo `fornecedorId` salvo na despesa para referencia
-
-**Fallback:** Manter opcao de preencher manualmente (para casos unicos)
-
-#### 4. Menu/Navegacao
-
-Adicionar no Sidebar:
-```
-Emendas
-Relatorios
-Fornecedores  <- NOVO
-Administracao (admin only)
-```
-
-#### 5. Permissoes
-
-| Acao | Admin | Gestor | Operador |
-|------|-------|--------|----------|
-| Visualizar fornecedores | Sim | Sim (seu municipio) | Sim (seu municipio) |
-| Criar fornecedor | Sim | Sim | Sim |
-| Editar fornecedor | Sim | Sim (se criou) | Nao |
-| Excluir fornecedor | Sim | Nao | Nao |
+## Atualizado em: 2026-01-12
 
 ---
 
@@ -239,7 +147,42 @@ Administracao (admin only)
 | Excluir planejada | Excluir | Removida |
 | Excluir executada | Excluir | Removida (recalcula saldos) |
 
-### 6. Relatorios
+### 6. Fornecedores (NOVO)
+
+#### Listagem
+| Cenario | Passos | Resultado Esperado |
+|---------|--------|-------------------|
+| Acessar pagina | Clicar em Fornecedores no menu | Abre /fornecedores |
+| Listar todos | Acessar /fornecedores | Lista de fornecedores |
+| Buscar por CNPJ | Digitar CNPJ | Filtra resultados |
+| Buscar por nome | Digitar razao social | Filtra resultados |
+| Cards de resumo | Verificar totais | Total, Ativos, Inativos corretos |
+
+#### Criar Fornecedor
+| Cenario | Passos | Resultado Esperado |
+|---------|--------|-------------------|
+| Criar via pagina | Clicar "Novo Fornecedor" | Abre modal |
+| Lookup CNPJ | Digitar CNPJ valido | Preenche dados automaticamente |
+| CNPJ duplicado | Tentar CNPJ ja cadastrado | Bloqueia com aviso |
+| Salvar | Preencher + salvar | Fornecedor criado no Firestore |
+
+#### Editar/Excluir Fornecedor
+| Cenario | Passos | Resultado Esperado |
+|---------|--------|-------------------|
+| Editar | Clicar Editar no card | Abre modal com dados |
+| Excluir sem despesas | Excluir fornecedor | Removido |
+| Excluir com despesas | Tentar excluir | Bloqueia com aviso |
+
+#### Integracao com Despesas
+| Cenario | Passos | Resultado Esperado |
+|---------|--------|-------------------|
+| Selecionar existente | Toggle "Selecionar Existente" | Mostra dropdown |
+| Buscar no dropdown | Digitar no FornecedorSelect | Filtra fornecedores |
+| Selecionar | Clicar em fornecedor | Preenche todos campos |
+| Criar via despesa | Clicar "Cadastrar Novo" no dropdown | Abre modal, cria, seleciona |
+| Preencher manual | Toggle "Preencher Manualmente" | Mostra campos normais |
+
+### 7. Relatorios
 
 | Cenario | Passos | Resultado Esperado |
 |---------|--------|-------------------|
@@ -249,7 +192,7 @@ Administracao (admin only)
 | Exportar Excel | Clicar exportar | Download .xlsx |
 | Guia de emenda | Selecionar emenda especifica | PDF detalhado da emenda |
 
-### 7. Administracao
+### 8. Administracao
 
 | Cenario | Passos | Resultado Esperado |
 |---------|--------|-------------------|
@@ -258,7 +201,7 @@ Administracao (admin only)
 | Logs de auditoria | Acessar logs | Lista de acoes |
 | Backup manual | Clicar backup | Exporta dados |
 
-### 8. Navegacao e UX
+### 9. Navegacao e UX
 
 | Cenario | Passos | Resultado Esperado |
 |---------|--------|-------------------|
@@ -272,7 +215,7 @@ Administracao (admin only)
 | Breadcrumbs | Navegar em profundidade | Caminho visivel |
 | Voltar | Clicar voltar | Retorna pagina anterior |
 
-### 9. Permissoes por Tipo de Usuario
+### 10. Permissoes por Tipo de Usuario
 
 #### Admin
 - [x] Acesso total ao sistema
@@ -294,6 +237,66 @@ Administracao (admin only)
 - [x] Pode criar/editar despesas
 - [x] NAO pode excluir emendas
 - [x] NAO gerencia usuarios
+
+---
+
+## Concluido - Modulo Fornecedores (2026-01-12)
+
+### Arquivos Criados
+| Arquivo | Descricao |
+|---------|-----------|
+| `src/hooks/useFornecedoresData.js` | Hook CRUD com real-time sync via onSnapshot |
+| `src/components/fornecedor/FornecedorForm.jsx` | Modal criar/editar com lookup CNPJ |
+| `src/components/fornecedor/FornecedorCard.jsx` | Card expansivel com detalhes e acoes |
+| `src/components/fornecedor/FornecedoresList.jsx` | Pagina de listagem com busca e cards resumo |
+| `src/components/fornecedor/FornecedorSelect.jsx` | Dropdown para selecao no formulario de despesa |
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/App.jsx` | Rota `/fornecedores` adicionada |
+| `src/components/Sidebar.jsx` | Menu "Fornecedores" entre Emendas e Relatorios |
+| `src/components/despesa/DespesaFormClassificacaoFuncional.jsx` | Toggle "Selecionar Existente" / "Preencher Manualmente" |
+
+### Estrutura de Dados (Firestore)
+```javascript
+// Colecao: fornecedores
+{
+  id: "auto-generated",
+  cnpj: "00000000000000",              // Unico, apenas numeros
+  razaoSocial: "EMPRESA LTDA",
+  nomeFantasia: "NOME FANTASIA",
+  endereco: {
+    logradouro: "RUA EXEMPLO",
+    numero: "123",
+    complemento: "",
+    bairro: "CENTRO",
+    cidade: "CIDADE",
+    uf: "MA",
+    cep: "00000000"
+  },
+  contato: {
+    telefone: "(00) 0000-0000",
+    email: "contato@empresa.com"
+  },
+  situacaoCadastral: "ATIVA",
+  dataUltimaConsulta: Timestamp,
+  uf: "MA",                            // Filtro geografico
+  municipiosAtendidos: ["Passagem Franca"],
+  criadoPor: "userId",
+  criadoEm: Timestamp,
+  atualizadoPor: "userId",
+  atualizadoEm: Timestamp
+}
+```
+
+### Permissoes
+| Acao | Admin | Gestor | Operador |
+|------|-------|--------|----------|
+| Visualizar | Todos | Filtrado por UF | Filtrado por UF |
+| Criar | Sim | Sim | Sim |
+| Editar | Sim | Se criou | Nao |
+| Excluir | Sim | Nao | Nao |
 
 ---
 
@@ -352,6 +355,7 @@ Administracao (admin only)
 
 ## Historico
 
+- **2026-01-12**: Implementacao completa do modulo Fornecedores (CRUD + integracao despesas)
 - **2026-01-12**: Correcao saldo negativo em 4 emendas PROD (script fix-saldo-negativo.cjs)
 - **2026-01-12**: Correcao bug Excluir Despesa (props erradas no ConfirmationModal: isOpen->isVisible, onClose->onCancel)
 - **2026-01-10**: Correcao MCP Server + plano modulo Fornecedores + testes completos
