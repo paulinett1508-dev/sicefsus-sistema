@@ -346,12 +346,13 @@ Administracao (admin only)
 | Bug | Severidade | Status |
 |-----|------------|--------|
 | ~~Botao Excluir Despesa nao funciona~~ | ~~Alta~~ | CORRIGIDO (2026-01-12) |
-| Saldo negativo em algumas emendas PROD | Media | Investigar |
+| ~~Saldo negativo em algumas emendas PROD~~ | ~~Media~~ | CORRIGIDO (2026-01-12) |
 
 ---
 
 ## Historico
 
+- **2026-01-12**: Correcao saldo negativo em 4 emendas PROD (script fix-saldo-negativo.cjs)
 - **2026-01-12**: Correcao bug Excluir Despesa (props erradas no ConfirmationModal: isOpen->isVisible, onClose->onCancel)
 - **2026-01-10**: Correcao MCP Server + plano modulo Fornecedores + testes completos
 - **2026-01-08**: Unificacao de naturezas + despesas executadas
