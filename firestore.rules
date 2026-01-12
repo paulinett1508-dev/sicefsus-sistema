@@ -172,6 +172,15 @@ service cloud.firestore {
     }
 
     // ========================================
+    // COLEÇÃO: FORNECEDORES
+    // ========================================
+
+    match /fornecedores/{fornecedorId} {
+      // Qualquer usuário autenticado pode ler, criar, atualizar e excluir
+      allow read, write: if isAuthenticated();
+    }
+
+    // ========================================
     // DENY ALL (Padrão)
     // ========================================
 
