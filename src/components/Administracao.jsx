@@ -166,12 +166,18 @@ const Administracao = () => {
       setLogs(logsData);
       console.log(`✅ ${logsData.length} logs carregados`);
     } catch (error) {
-      console.error("❌ Erro ao carregar logs:", error);
-      showToast({
-        tipo: "error",
-        titulo: "Erro",
-        mensagem: "Erro ao carregar logs de auditoria",
-      });
+      // Erro de permissão é esperado - coleção logs pode não ter regras
+      if (error.code === 'permission-denied') {
+        console.warn("⚠️ Sem permissão para ler logs - funcionalidade desabilitada");
+        setLogs([]);
+      } else {
+        console.error("❌ Erro ao carregar logs:", error);
+        showToast({
+          tipo: "error",
+          titulo: "Erro",
+          mensagem: "Erro ao carregar logs de auditoria",
+        });
+      }
     }
   };
 
@@ -403,15 +409,16 @@ const Administracao = () => {
             style={{
               marginTop: "10px",
               padding: "10px",
-              backgroundColor: "#fff3cd",
-              border: "1px solid #ffeaa7",
+              backgroundColor: "var(--warning-100)",
+              border: "1px solid var(--warning-300)",
               borderRadius: "5px",
-              color: "#856404",
+              color: "var(--warning-800)",
               fontWeight: "bold",
               textAlign: "center",
             }}
           >
-            ⚠️ Esta ação NÃO pode ser desfeita!
+            <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>warning</span>
+            Esta ação NÃO pode ser desfeita!
           </p>
         </div>
       ),

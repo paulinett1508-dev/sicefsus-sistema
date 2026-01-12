@@ -117,17 +117,17 @@ const LogsSection = ({
       case "DELETE_EMENDA":
       case "DELETE_DESPESA":
       case "DELETE_USER":
-        return "#dc3545";
+        return "var(--error)";
       case "CREATE_EMENDA":
       case "CREATE_DESPESA":
       case "CREATE_USER":
-        return "#28a745";
+        return "var(--success)";
       case "UPDATE_EMENDA":
       case "UPDATE_DESPESA":
       case "UPDATE_USER":
-        return "#ffc107";
+        return "var(--warning)";
       default:
-        return "#6c757d";
+        return "var(--secondary)";
     }
   };
 
@@ -272,8 +272,8 @@ const LogsSection = ({
                 <tr
                   key={log.id || index}
                   style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8f9fa",
-                    borderBottom: "1px solid #e9ecef",
+                    backgroundColor: index % 2 === 0 ? "var(--theme-surface)" : "var(--theme-surface-secondary)",
+                    borderBottom: "1px solid var(--theme-border)",
                   }}
                 >
                   <td style={styles.tableCell}>
@@ -363,9 +363,9 @@ const LogsSection = ({
                         <span
                           style={{
                             fontSize: "10px",
-                            color: "white",
+                            color: "var(--white)",
                             backgroundColor:
-                              log.userRole === "admin" ? "#dc3545" : "#28a745",
+                              log.userRole === "admin" ? "var(--error)" : "var(--success)",
                             padding: "4px 10px",
                             borderRadius: "12px",
                             textTransform: "uppercase",
@@ -387,7 +387,7 @@ const LogsSection = ({
                         fontWeight: "bold",
                         textTransform: "uppercase",
                         backgroundColor: getActionColor(log.action),
-                        color: "white",
+                        color: "var(--white)",
                       }}
                     >
                       {getActionIcon(log.action)}{" "}
@@ -450,7 +450,7 @@ const LogsSection = ({
                         fontSize: '20px',
                         filter: log.success !== false ? 'none' : 'grayscale(100%)'
                       }}>
-                        {log.success !== false ? <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#28a745" }}>check_circle</span> : <span className="material-symbols-outlined" style={{ fontSize: 20, color: "#dc3545" }}>cancel</span>}
+                        {log.success !== false ? <span className="material-symbols-outlined" style={{ fontSize: 20, color: "var(--success)" }}>check_circle</span> : <span className="material-symbols-outlined" style={{ fontSize: 20, color: "var(--error)" }}>cancel</span>}
                       </span>
                       {log.errorMessage && (
                         <span style={{
@@ -500,8 +500,8 @@ const styles = {
   },
 
   refreshButton: {
-    backgroundColor: "var(--theme-text-secondary)",
-    color: "white",
+    backgroundColor: "var(--secondary)",
+    color: "var(--white)",
     border: "none",
     padding: "10px 16px",
     borderRadius: "6px",
@@ -535,9 +535,11 @@ const styles = {
   filterInput: {
     width: "100%",
     padding: "8px 12px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     fontSize: "14px",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
   },
   loading: {
     textAlign: "center",
@@ -546,8 +548,8 @@ const styles = {
   spinner: {
     width: "40px",
     height: "40px",
-    border: "3px solid #f3f3f3",
-    borderTop: "3px solid #007bff",
+    border: "3px solid var(--theme-border)",
+    borderTop: "3px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 16px",

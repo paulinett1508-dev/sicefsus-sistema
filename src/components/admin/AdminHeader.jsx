@@ -59,6 +59,7 @@ const styles = {
     fontSize: "24px",
     fontWeight: "bold",
     margin: "0 0 8px 0",
+    color: "var(--theme-text)",
   },
   subtitle: {
     fontSize: "14px",

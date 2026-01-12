@@ -1,7 +1,6 @@
 // src/components/admin/UsersSection.jsx
 import React from "react";
 import UsersTable from "./UsersTable";
-import { useTheme } from "../../context/ThemeContext";
 
 const UsersSection = ({
   users,
@@ -13,42 +12,6 @@ const UsersSection = ({
   handleToggleStatus,
   loading,
 }) => {
-  const { isDark } = useTheme();
-
-  // Estilos dinâmicos baseados no tema
-  const dynamicStyles = {
-    tableContainer: {
-      backgroundColor: isDark ? "var(--theme-surface)" : "white",
-      borderRadius: "8px",
-      padding: "12px 16px",
-      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
-      border: isDark ? "1px solid var(--theme-border)" : "none",
-    },
-    sectionTitle: {
-      fontSize: "18px",
-      fontWeight: "bold",
-      margin: 0,
-      color: isDark ? "var(--theme-text)" : "#333",
-    },
-    searchInput: {
-      width: "100%",
-      padding: "8px 12px",
-      border: isDark ? "1px solid var(--theme-border)" : "1px solid #ced4da",
-      borderRadius: "5px",
-      fontSize: "13px",
-      backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
-      color: isDark ? "var(--theme-text)" : "#333",
-    },
-    spinner: {
-      width: "40px",
-      height: "40px",
-      border: isDark ? "3px solid var(--theme-border)" : "3px solid #f3f3f3",
-      borderTop: "3px solid #007bff",
-      borderRadius: "50%",
-      animation: "spin 1s linear infinite",
-      margin: "0 auto 16px",
-    },
-  };
 
   const exportarUsuarios = () => {
     if (!users || users.length === 0) {
@@ -95,10 +58,10 @@ const UsersSection = ({
   };
 
   return (
-    <div style={dynamicStyles.tableContainer}>
+    <div style={styles.tableContainer}>
       {/* Cabeçalho da seção com botões */}
       <div style={styles.sectionHeader}>
-        <h3 style={dynamicStyles.sectionTitle}>
+        <h3 style={styles.sectionTitle}>
           <span className="material-symbols-outlined" style={{ fontSize: 18, verticalAlign: "middle", marginRight: 6 }}>group</span>
           Lista de Usuários ({users?.length || 0})
         </h3>
@@ -127,13 +90,13 @@ const UsersSection = ({
           placeholder="Buscar usuário por nome ou email..."
           value={userFilter}
           onChange={(e) => setUserFilter(e.target.value)}
-          style={dynamicStyles.searchInput}
+          style={styles.searchInput}
         />
       </div>
 
       {loading ? (
         <div style={styles.loading}>
-          <div style={dynamicStyles.spinner}></div>
+          <div style={styles.spinner}></div>
           <p>Carregando usuários...</p>
         </div>
       ) : (

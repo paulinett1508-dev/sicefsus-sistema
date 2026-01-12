@@ -1,6 +1,5 @@
 // src/components/admin/MigracaoCompleta.jsx
-// 🔄 MIGRAÇÃO COMPLETA VIA WEB
-// ✅ Usa autenticação do usuário logado
+// Migração Completa via Web - Usa autenticação do usuário logado
 
 import React, { useState } from "react";
 import {
@@ -38,7 +37,7 @@ const MigracaoCompleta = () => {
   const executarMigracao = async () => {
     if (
       !window.confirm(
-        '⚠️ Esta migração irá:\n\n1. Adicionar status="EXECUTADA" nas despesas existentes\n2. Converter acoesServicos em despesas PLANEJADAS\n\nDeseja continuar?',
+        'Esta migração irá:\n\n1. Adicionar status="EXECUTADA" nas despesas existentes\n2. Converter acoesServicos em despesas PLANEJADAS\n\nDeseja continuar?',
       )
     ) {
       return;
@@ -49,27 +48,21 @@ const MigracaoCompleta = () => {
     setLog([]);
 
     const stats = {
-      // Etapa 1: Status nas despesas
       totalDespesas: 0,
       despesasComStatus: 0,
       despesasAtualizadas: 0,
-
-      // Etapa 2: acoesServicos → despesas
       totalEmendas: 0,
       emendasComAcoes: 0,
       despesasPlanejadas: 0,
       emendasLimpas: 0,
-
       erros: 0,
     };
 
     try {
-      // ═══════════════════════════════════════════════════════════
       // ETAPA 1: ADICIONAR STATUS NAS DESPESAS EXISTENTES
-      // ═══════════════════════════════════════════════════════════
       setEtapaAtual("Etapa 1: Atualizando despesas existentes");
       adicionarLog("═".repeat(50));
-      adicionarLog("🚀 ETAPA 1: Adicionar status nas despesas");
+      adicionarLog("ETAPA 1: Adicionar status nas despesas");
       adicionarLog("═".repeat(50));
 
       const despesasRef = collection(db, "despesas");
@@ -77,7 +70,7 @@ const MigracaoCompleta = () => {
 
       stats.totalDespesas = despesasSnapshot.size;
       setProgresso({ atual: 0, total: stats.totalDespesas });
-      adicionarLog(`📊 Encontradas ${stats.totalDespesas} despesas`);
+      adicionarLog(`Encontradas ${stats.totalDespesas} despesas`);
 
       let contador = 0;
       for (const despesaDoc of despesasSnapshot.docs) {
@@ -89,12 +82,11 @@ const MigracaoCompleta = () => {
         if (despesa.status) {
           stats.despesasComStatus++;
           adicionarLog(
-            `⏭️  [${contador}/${stats.totalDespesas}] Despesa ${despesaDoc.id.substring(0, 8)}... já tem status`,
+            `[${contador}/${stats.totalDespesas}] Despesa ${despesaDoc.id.substring(0, 8)}... já tem status`,
           );
           continue;
         }
 
-        // Adicionar status EXECUTADA
         await updateDoc(doc(db, "despesas", despesaDoc.id), {
           status: "EXECUTADA",
           migradoEm: new Date().toISOString(),
@@ -103,43 +95,39 @@ const MigracaoCompleta = () => {
 
         stats.despesasAtualizadas++;
         adicionarLog(
-          `✅ [${contador}/${stats.totalDespesas}] Despesa ${despesaDoc.id.substring(0, 8)}... → EXECUTADA`,
+          `[${contador}/${stats.totalDespesas}] Despesa ${despesaDoc.id.substring(0, 8)}... → EXECUTADA`,
         );
       }
 
       adicionarLog(
-        `\n✅ Etapa 1 concluída: ${stats.despesasAtualizadas} despesas atualizadas\n`,
+        `\nEtapa 1 concluída: ${stats.despesasAtualizadas} despesas atualizadas\n`,
       );
 
-      // ═══════════════════════════════════════════════════════════
       // ETAPA 2: MIGRAR acoesServicos PARA DESPESAS PLANEJADAS
-      // ═══════════════════════════════════════════════════════════
       setEtapaAtual("Etapa 2: Criando despesas planejadas");
       adicionarLog("═".repeat(50));
-      adicionarLog("🚀 ETAPA 2: Migrar acoesServicos → despesas PLANEJADAS");
+      adicionarLog("ETAPA 2: Migrar acoesServicos → despesas PLANEJADAS");
       adicionarLog("═".repeat(50));
 
       const emendasRef = collection(db, "emendas");
       const emendasSnapshot = await getDocs(emendasRef);
 
       stats.totalEmendas = emendasSnapshot.size;
-      adicionarLog(`📊 Encontradas ${stats.totalEmendas} emendas`);
+      adicionarLog(`Encontradas ${stats.totalEmendas} emendas`);
 
       for (const emendaDoc of emendasSnapshot.docs) {
         const emenda = emendaDoc.data();
         const emendaId = emendaDoc.id;
 
-        // Verificar se tem acoesServicos
         if (!emenda.acoesServicos || emenda.acoesServicos.length === 0) {
           continue;
         }
 
         stats.emendasComAcoes++;
         adicionarLog(
-          `\n📋 Emenda ${emenda.numero || emendaId}: ${emenda.acoesServicos.length} ações`,
+          `\nEmenda ${emenda.numero || emendaId}: ${emenda.acoesServicos.length} ações`,
         );
 
-        // Criar despesas PLANEJADAS para cada ação
         for (const acao of emenda.acoesServicos) {
           try {
             const novaDespesa = {
@@ -148,8 +136,6 @@ const MigracaoCompleta = () => {
               naturezaDespesa: acao.estrategia || "3.3.9.0.30 – Material de Despesa",
               valor: parseValorMonetario(acao.valorAcao),
               status: "PLANEJADA",
-
-              // Campos vazios (preenchidos na execução)
               discriminacao: acao.estrategia || "",
               numeroEmpenho: "",
               numeroNota: "",
@@ -190,42 +176,38 @@ const MigracaoCompleta = () => {
             stats.despesasPlanejadas++;
 
             adicionarLog(
-              `   ✅ Despesa PLANEJADA: ${acao.estrategia} - R$ ${parseValorMonetario(acao.valorAcao).toFixed(2)}`,
+              `   Despesa PLANEJADA: ${acao.estrategia} - R$ ${parseValorMonetario(acao.valorAcao).toFixed(2)}`,
             );
           } catch (error) {
-            adicionarLog(`   ❌ Erro: ${error.message}`);
+            adicionarLog(`   Erro: ${error.message}`);
             stats.erros++;
           }
         }
 
-        // Remover acoesServicos da emenda
         try {
           await updateDoc(doc(db, "emendas", emendaId), {
             acoesServicos: deleteField(),
           });
           stats.emendasLimpas++;
-          adicionarLog(`   🗑️  Campo acoesServicos removido`);
+          adicionarLog(`   Campo acoesServicos removido`);
         } catch (error) {
-          adicionarLog(`   ⚠️  Erro ao remover: ${error.message}`);
+          adicionarLog(`   Erro ao remover: ${error.message}`);
           stats.erros++;
         }
       }
 
       adicionarLog(
-        `\n✅ Etapa 2 concluída: ${stats.despesasPlanejadas} despesas PLANEJADAS criadas\n`,
+        `\nEtapa 2 concluída: ${stats.despesasPlanejadas} despesas PLANEJADAS criadas\n`,
       );
 
-      // ═══════════════════════════════════════════════════════════
-      // RELATÓRIO FINAL
-      // ═══════════════════════════════════════════════════════════
       adicionarLog("═".repeat(50));
-      adicionarLog("🎉 MIGRAÇÃO COMPLETA!");
+      adicionarLog("MIGRAÇÃO COMPLETA!");
       adicionarLog("═".repeat(50));
 
       setResultado(stats);
     } catch (error) {
-      console.error("❌ Erro na migração:", error);
-      adicionarLog(`❌ ERRO CRÍTICO: ${error.message}`);
+      console.error("Erro na migração:", error);
+      adicionarLog(`ERRO CRÍTICO: ${error.message}`);
       stats.erros++;
       setResultado(stats);
     } finally {
@@ -237,10 +219,16 @@ const MigracaoCompleta = () => {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>🔄 Migração Completa do Sistema</h2>
+        <h2 style={styles.title}>
+          <span className="material-symbols-outlined" style={{ fontSize: 24, marginRight: 8, verticalAlign: "middle" }}>sync</span>
+          Migração Completa do Sistema
+        </h2>
 
         <div style={styles.infoBox}>
-          <h3 style={styles.infoTitle}>📋 O que esta migração faz:</h3>
+          <h3 style={styles.infoTitle}>
+            <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>description</span>
+            O que esta migração faz:
+          </h3>
           <ol style={styles.infoList}>
             <li>
               <strong>Etapa 1:</strong> Adiciona campo{" "}
@@ -255,7 +243,8 @@ const MigracaoCompleta = () => {
         </div>
 
         <div style={styles.warning}>
-          <strong>⚠️ IMPORTANTE:</strong> Execute esta migração apenas UMA vez!
+          <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>warning</span>
+          <strong>IMPORTANTE:</strong> Execute esta migração apenas UMA vez!
         </div>
 
         <button
@@ -266,7 +255,10 @@ const MigracaoCompleta = () => {
             ...(processando ? styles.buttonDisabled : {}),
           }}
         >
-          {processando ? "⏳ Processando..." : "🚀 Iniciar Migração Completa"}
+          <span className="material-symbols-outlined" style={{ fontSize: 18, marginRight: 6, verticalAlign: "middle" }}>
+            {processando ? "hourglass_empty" : "rocket_launch"}
+          </span>
+          {processando ? "Processando..." : "Iniciar Migração Completa"}
         </button>
 
         {etapaAtual && <div style={styles.etapaAtual}>{etapaAtual}</div>}
@@ -289,7 +281,10 @@ const MigracaoCompleta = () => {
 
         {resultado && (
           <div style={styles.resultado}>
-            <h3 style={styles.resultadoTitle}>📊 Resultado da Migração</h3>
+            <h3 style={styles.resultadoTitle}>
+              <span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 6, verticalAlign: "middle" }}>analytics</span>
+              Resultado da Migração
+            </h3>
 
             <div style={styles.resultadoSection}>
               <h4 style={styles.sectionTitle}>Etapa 1: Despesas Existentes</h4>
@@ -306,8 +301,11 @@ const MigracaoCompleta = () => {
                     </td>
                   </tr>
                   <tr>
-                    <td style={styles.tableLabel}>✅ Atualizadas:</td>
-                    <td style={{ ...styles.tableValue, color: "#28a745" }}>
+                    <td style={styles.tableLabel}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "var(--success)" }}>check_circle</span>
+                      Atualizadas:
+                    </td>
+                    <td style={{ ...styles.tableValue, color: "var(--success)" }}>
                       {resultado.despesasAtualizadas}
                     </td>
                   </tr>
@@ -333,14 +331,18 @@ const MigracaoCompleta = () => {
                   </tr>
                   <tr>
                     <td style={styles.tableLabel}>
-                      ✅ Despesas PLANEJADAS criadas:
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "var(--warning)" }}>check_circle</span>
+                      Despesas PLANEJADAS criadas:
                     </td>
-                    <td style={{ ...styles.tableValue, color: "#f39c12" }}>
+                    <td style={{ ...styles.tableValue, color: "var(--warning)" }}>
                       {resultado.despesasPlanejadas}
                     </td>
                   </tr>
                   <tr>
-                    <td style={styles.tableLabel}>🗑️ Emendas limpas:</td>
+                    <td style={styles.tableLabel}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>delete</span>
+                      Emendas limpas:
+                    </td>
                     <td style={styles.tableValue}>{resultado.emendasLimpas}</td>
                   </tr>
                 </tbody>
@@ -352,12 +354,15 @@ const MigracaoCompleta = () => {
                 <tbody>
                   <tr>
                     <td style={styles.tableLabel}>
-                      <strong>❌ Total de erros:</strong>
+                      <strong>
+                        <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>cancel</span>
+                        Total de erros:
+                      </strong>
                     </td>
                     <td
                       style={{
                         ...styles.tableValue,
-                        color: resultado.erros > 0 ? "#dc3545" : "#28a745",
+                        color: resultado.erros > 0 ? "var(--error)" : "var(--success)",
                       }}
                     >
                       {resultado.erros}
@@ -369,8 +374,8 @@ const MigracaoCompleta = () => {
 
             {resultado.erros === 0 && (
               <div style={styles.successMessage}>
-                🎉 Migração concluída com sucesso! O sistema está pronto para
-                uso.
+                <span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 6, verticalAlign: "middle" }}>celebration</span>
+                Migração concluída com sucesso! O sistema está pronto para uso.
               </div>
             )}
           </div>
@@ -378,7 +383,10 @@ const MigracaoCompleta = () => {
 
         {log.length > 0 && (
           <div style={styles.logContainer}>
-            <h3 style={styles.logTitle}>📝 Log Detalhado</h3>
+            <h3 style={styles.logTitle}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6, verticalAlign: "middle" }}>terminal</span>
+              Log Detalhado
+            </h3>
             <div style={styles.logContent}>
               {log.map((linha, index) => (
                 <div key={index} style={styles.logLine}>
@@ -400,45 +408,46 @@ const styles = {
     margin: "0 auto",
   },
   card: {
-    backgroundColor: "white",
+    backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     padding: "24px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
   },
   title: {
     margin: "0 0 20px 0",
-    color: "#2563EB",
+    color: "var(--primary)",
     fontSize: "24px",
   },
   infoBox: {
-    backgroundColor: "#e3f2fd",
-    border: "1px solid #2196f3",
+    backgroundColor: "var(--info-100)",
+    border: "1px solid var(--info)",
     borderRadius: "6px",
     padding: "16px",
     marginBottom: "20px",
   },
   infoTitle: {
     margin: "0 0 12px 0",
-    color: "#1565c0",
+    color: "var(--info-700)",
     fontSize: "16px",
   },
   infoList: {
     margin: "0",
     paddingLeft: "20px",
-    color: "#1976d2",
+    color: "var(--info-600)",
     lineHeight: "1.8",
   },
   warning: {
-    backgroundColor: "#fff3cd",
-    border: "1px solid #ffc107",
+    backgroundColor: "var(--warning-100)",
+    border: "1px solid var(--warning)",
     borderRadius: "4px",
     padding: "12px",
     marginBottom: "20px",
-    color: "#856404",
+    color: "var(--warning-800)",
   },
   button: {
-    backgroundColor: "#28a745",
-    color: "white",
+    backgroundColor: "var(--success)",
+    color: "var(--white)",
     border: "none",
     padding: "14px 28px",
     borderRadius: "6px",
@@ -447,20 +456,23 @@ const styles = {
     cursor: "pointer",
     width: "100%",
     transition: "all 0.2s",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonDisabled: {
-    backgroundColor: "#6c757d",
+    backgroundColor: "var(--secondary)",
     cursor: "not-allowed",
     opacity: 0.6,
   },
   etapaAtual: {
     marginTop: "16px",
     padding: "12px",
-    backgroundColor: "#e3f2fd",
+    backgroundColor: "var(--info-100)",
     borderRadius: "4px",
     textAlign: "center",
     fontWeight: "bold",
-    color: "#1565c0",
+    color: "var(--info-700)",
   },
   progressContainer: {
     marginTop: "20px",
@@ -468,19 +480,19 @@ const styles = {
   progressBar: {
     width: "100%",
     height: "24px",
-    backgroundColor: "#e9ecef",
+    backgroundColor: "var(--theme-border)",
     borderRadius: "12px",
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: "#28a745",
+    backgroundColor: "var(--success)",
     transition: "width 0.3s ease",
   },
   progressText: {
     textAlign: "center",
     marginTop: "8px",
-    color: "#666",
+    color: "var(--theme-text-secondary)",
     fontSize: "14px",
   },
   resultado: {
@@ -489,18 +501,18 @@ const styles = {
   resultadoTitle: {
     margin: "0 0 20px 0",
     fontSize: "20px",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   resultadoSection: {
     marginBottom: "20px",
     padding: "16px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "6px",
   },
   sectionTitle: {
     margin: "0 0 12px 0",
     fontSize: "16px",
-    color: "#495057",
+    color: "var(--theme-text)",
   },
   table: {
     width: "100%",
@@ -508,7 +520,7 @@ const styles = {
   },
   tableLabel: {
     padding: "8px",
-    color: "#495057",
+    color: "var(--theme-text-secondary)",
     width: "70%",
   },
   tableValue: {
@@ -516,15 +528,15 @@ const styles = {
     textAlign: "right",
     fontSize: "16px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--primary)",
   },
   successMessage: {
     marginTop: "16px",
     padding: "16px",
-    backgroundColor: "#d4edda",
-    border: "1px solid #c3e6cb",
+    backgroundColor: "var(--success-100)",
+    border: "1px solid var(--success-300)",
     borderRadius: "6px",
-    color: "#155724",
+    color: "var(--success-700)",
     textAlign: "center",
     fontSize: "16px",
     fontWeight: "bold",
@@ -535,11 +547,11 @@ const styles = {
   logTitle: {
     margin: "0 0 12px 0",
     fontSize: "16px",
-    color: "#495057",
+    color: "var(--theme-text)",
   },
   logContent: {
-    backgroundColor: "#f8f9fa",
-    border: "1px solid #dee2e6",
+    backgroundColor: "var(--theme-surface-secondary)",
+    border: "1px solid var(--theme-border)",
     borderRadius: "4px",
     padding: "12px",
     maxHeight: "400px",
@@ -549,8 +561,8 @@ const styles = {
   },
   logLine: {
     padding: "2px 0",
-    color: "#495057",
-    borderBottom: "1px solid #e9ecef",
+    color: "var(--theme-text-secondary)",
+    borderBottom: "1px solid var(--theme-border)",
   },
 };
 

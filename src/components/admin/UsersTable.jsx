@@ -1,6 +1,5 @@
-// src/components/admin/UsersTable.jsx - VERSÃO CORRIGIDA COMPLETA
+// src/components/admin/UsersTable.jsx
 import React from "react";
-import { useTheme } from "../../context/ThemeContext";
 
 const UsersTable = ({
   users,
@@ -9,98 +8,53 @@ const UsersTable = ({
   onToggleStatus,
   loading,
 }) => {
-  const { isDark } = useTheme();
-
-  // Estilos dinâmicos baseados no tema
-  const dynamicStyles = {
-    container: {
-      backgroundColor: isDark ? "var(--theme-surface)" : "white",
-      borderRadius: "8px",
-      overflow: "hidden",
-      boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
-      border: isDark ? "1px solid var(--theme-border)" : "none",
-    },
-    tableHeader: {
-      padding: "8px 10px",
-      textAlign: "left",
-      fontWeight: "bold",
-      fontSize: "11px",
-      color: isDark ? "var(--theme-text-secondary)" : "#495057",
-      textTransform: "uppercase",
-      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
-      borderBottom: isDark ? "2px solid var(--theme-border)" : "2px solid #e9ecef",
-    },
-    rowEven: {
-      backgroundColor: isDark ? "var(--theme-surface)" : "#ffffff",
-      borderBottom: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
-    },
-    rowOdd: {
-      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f8f9fa",
-      borderBottom: isDark ? "1px solid var(--theme-border)" : "1px solid #e9ecef",
-    },
-    subdued: {
-      color: isDark ? "var(--theme-text-muted)" : "#666",
-    },
-    muted: {
-      color: isDark ? "var(--theme-text-muted)" : "#999",
-      fontStyle: "italic",
-    },
-    emptyState: {
-      textAlign: "center",
-      padding: "40px",
-      color: isDark ? "var(--theme-text-muted)" : "#6c757d",
-      backgroundColor: isDark ? "var(--theme-surface)" : "transparent",
-      borderRadius: "8px",
-    },
-  };
-
   if (!users || users.length === 0) {
     return (
-      <div style={dynamicStyles.emptyState}>
+      <div style={styles.emptyState}>
         <div style={{ fontSize: "48px", marginBottom: "16px" }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 48, color: isDark ? "var(--theme-text-muted)" : "#6c757d" }}>group</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 48, color: "var(--theme-text-muted)" }}>group</span>
         </div>
-        <h3 style={{ color: isDark ? "var(--theme-text)" : "inherit" }}>Nenhum usuário encontrado</h3>
+        <h3 style={{ color: "var(--theme-text)" }}>Nenhum usuário encontrado</h3>
         <p>Ainda não há usuários cadastrados no sistema</p>
       </div>
     );
   }
 
   return (
-    <div style={dynamicStyles.container}>
+    <div style={styles.container}>
       <table style={styles.usersTable}>
         <thead>
           <tr>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Nome</th>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>mail</span> Email</th>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_city</span> Local</th>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Tipo</th>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>monitoring</span> Status</th>
-            <th style={dynamicStyles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>build</span> Ações</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Nome</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>mail</span> Email</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>location_city</span> Local</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Tipo</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>monitoring</span> Status</th>
+            <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>build</span> Ações</th>
           </tr>
         </thead>
         <tbody>
           {users.map((usuario, index) => (
             <tr
               key={usuario.id}
-              style={index % 2 === 0 ? dynamicStyles.rowEven : dynamicStyles.rowOdd}
+              style={index % 2 === 0 ? styles.rowEven : styles.rowOdd}
             >
-              <td style={{ ...styles.tableCell, color: isDark ? "var(--theme-text)" : "inherit" }}>
+              <td style={styles.tableCell}>
                 <div style={{ fontWeight: "500" }}>{usuario.nome || "N/A"}</div>
               </td>
-              <td style={{ ...styles.tableCell, color: isDark ? "var(--theme-text)" : "inherit" }}>
+              <td style={styles.tableCell}>
                 <div style={{ fontSize: "13px" }}>{usuario.email || "N/A"}</div>
               </td>
               <td style={styles.tableCell}>
                 {usuario.municipio && usuario.uf ? (
                   <div>
-                    <div style={{ fontWeight: "500", color: isDark ? "var(--theme-text)" : "inherit" }}>{usuario.municipio}</div>
-                    <div style={{ fontSize: "11px", ...dynamicStyles.subdued }}>
+                    <div style={{ fontWeight: "500" }}>{usuario.municipio}</div>
+                    <div style={styles.subdued}>
                       {usuario.uf}
                     </div>
                   </div>
                 ) : (
-                  <span style={dynamicStyles.muted}>
+                  <span style={styles.muted}>
                     N/A
                   </span>
                 )}
@@ -109,13 +63,13 @@ const UsersTable = ({
                 <span
                   style={{
                     fontSize: "10px",
-                    color: usuario.tipo === "gestor" ? "#92400e" : "white",
+                    color: usuario.tipo === "gestor" ? "var(--warning-800)" : "var(--white)",
                     backgroundColor:
                       usuario.tipo === "admin"
-                        ? "var(--error, #dc3545)"
+                        ? "var(--error)"
                         : usuario.tipo === "gestor"
-                        ? "#fde68a"
-                        : "var(--success, #28a745)",
+                        ? "var(--warning-200)"
+                        : "var(--success)",
                     padding: "3px 8px",
                     borderRadius: "10px",
                     textTransform: "uppercase",
@@ -135,9 +89,9 @@ const UsersTable = ({
                 <span
                   style={{
                     fontSize: "10px",
-                    color: "white",
+                    color: "var(--white)",
                     backgroundColor:
-                      usuario.status === "ativo" ? "var(--success, #28a745)" : "var(--error, #dc3545)",
+                      usuario.status === "ativo" ? "var(--success)" : "var(--error)",
                     padding: "3px 8px",
                     borderRadius: "10px",
                     textTransform: "uppercase",
@@ -181,7 +135,7 @@ const UsersTable = ({
                     style={{
                       ...styles.actionButton,
                       backgroundColor:
-                        usuario.status === "ativo" ? "var(--warning, #f59e0b)" : "var(--success, #28a745)",
+                        usuario.status === "ativo" ? "var(--warning)" : "var(--success)",
                     }}
                     title={
                       usuario.status === "ativo"
@@ -231,7 +185,7 @@ const UsersTable = ({
 };
 
 const styles = {
-  usersTableContainer: {
+  container: {
     backgroundColor: "var(--theme-surface)",
     borderRadius: "8px",
     overflow: "hidden",
@@ -243,20 +197,36 @@ const styles = {
     borderCollapse: "collapse",
   },
   tableHeader: {
-    padding: "12px",
+    padding: "8px 10px",
     textAlign: "left",
     fontWeight: "bold",
-    fontSize: "12px",
+    fontSize: "11px",
     color: "var(--theme-text-secondary)",
     textTransform: "uppercase",
     backgroundColor: "var(--theme-surface-secondary)",
     borderBottom: "2px solid var(--theme-border)",
+  },
+  rowEven: {
+    backgroundColor: "var(--theme-surface)",
+    borderBottom: "1px solid var(--theme-border)",
+  },
+  rowOdd: {
+    backgroundColor: "var(--theme-surface-secondary)",
+    borderBottom: "1px solid var(--theme-border)",
   },
   tableCell: {
     padding: "6px 10px",
     fontSize: "12px",
     verticalAlign: "middle",
     color: "var(--theme-text)",
+  },
+  subdued: {
+    fontSize: "11px",
+    color: "var(--theme-text-muted)",
+  },
+  muted: {
+    color: "var(--theme-text-muted)",
+    fontStyle: "italic",
   },
   actionButton: {
     backgroundColor: "var(--success)",
@@ -277,6 +247,8 @@ const styles = {
     textAlign: "center",
     padding: "40px",
     color: "var(--theme-text-secondary)",
+    backgroundColor: "var(--theme-surface)",
+    borderRadius: "8px",
   },
 };
 

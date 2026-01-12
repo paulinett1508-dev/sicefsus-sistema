@@ -17,12 +17,12 @@ const SystemHeader = ({
 
   const getRoleBadge = () => {
     if (userRole === "admin") {
-      return { label: "Admin", color: "#EF4444", bg: "rgba(239, 68, 68, 0.1)" };
+      return { label: "Admin", color: "var(--error)", bg: "var(--error-100)" };
     }
     if (userRole === "gestor") {
-      return { label: "Gestor", color: "#F59E0B", bg: "rgba(245, 158, 11, 0.1)" };
+      return { label: "Gestor", color: "var(--warning)", bg: "var(--warning-100)" };
     }
-    return { label: "Operador", color: "#10B981", bg: "rgba(16, 185, 129, 0.1)" };
+    return { label: "Operador", color: "var(--success)", bg: "var(--success-100)" };
   };
 
   const badge = getRoleBadge();
@@ -78,12 +78,12 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "var(--theme-surface)",
     padding: "12px 20px",
     borderRadius: "12px",
     marginBottom: "20px",
-    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
-    border: "1px solid #E2E8F0",
+    boxShadow: "var(--shadow)",
+    border: "1px solid var(--theme-border)",
     fontFamily: "'Inter', sans-serif",
   },
 
@@ -104,27 +104,27 @@ const styles = {
     alignItems: "center",
     gap: 8,
     padding: "6px 12px",
-    backgroundColor: "rgba(16, 185, 129, 0.08)",
+    backgroundColor: "var(--success-100)",
     borderRadius: "9999px",
-    border: "1px solid rgba(16, 185, 129, 0.2)",
+    border: "1px solid var(--success-200)",
   },
 
   statusDot: {
     width: 6,
     height: 6,
     borderRadius: "50%",
-    backgroundColor: "#10B981",
+    backgroundColor: "var(--success)",
   },
 
   statusText: {
     fontSize: 12,
     fontWeight: 500,
-    color: "#059669",
+    color: "var(--success-700)",
   },
 
   versionText: {
     fontSize: 11,
-    color: "#64748B",
+    color: "var(--theme-text-muted)",
     marginLeft: 4,
   },
 
@@ -133,17 +133,17 @@ const styles = {
     alignItems: "center",
     gap: 6,
     fontSize: 13,
-    color: "#64748B",
+    color: "var(--theme-text-secondary)",
   },
 
   infoIcon: {
     fontSize: 16,
-    color: "#94A3B8",
+    color: "var(--theme-text-muted)",
   },
 
   infoValue: {
     fontWeight: 600,
-    color: "#334155",
+    color: "var(--theme-text)",
   },
 
   infoLabel: {

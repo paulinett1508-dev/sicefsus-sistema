@@ -50,48 +50,48 @@ const UsersReportSection = ({ users, loading }) => {
     <div style={styles.container}>
       {/* Estatísticas */}
       <div style={styles.statsGrid}>
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #007bff" }}>
-          <div style={styles.statIcon}>👥</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--primary)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32 }}>group</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.total}</div>
             <div style={styles.statLabel}>Total de Usuários</div>
           </div>
         </div>
 
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #28a745" }}>
-          <div style={styles.statIcon}>✅</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--success)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--success)" }}>check_circle</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.ativos}</div>
             <div style={styles.statLabel}>Usuários Ativos</div>
           </div>
         </div>
 
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #dc3545" }}>
-          <div style={styles.statIcon}>⏸️</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--error)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--error)" }}>pause_circle</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.inativos}</div>
             <div style={styles.statLabel}>Usuários Inativos</div>
           </div>
         </div>
 
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #dc3545" }}>
-          <div style={styles.statIcon}>🔑</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--error)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--error)" }}>shield</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.admins}</div>
             <div style={styles.statLabel}>Administradores</div>
           </div>
         </div>
 
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #ffc107" }}>
-          <div style={styles.statIcon}>🏛️</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--warning)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--warning)" }}>account_balance</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.gestores}</div>
             <div style={styles.statLabel}>Gestores</div>
           </div>
         </div>
 
-        <div style={{ ...styles.statCard, borderLeft: "4px solid #28a745" }}>
-          <div style={styles.statIcon}>👤</div>
+        <div style={{ ...styles.statCard, borderLeft: "4px solid var(--success)" }}>
+          <div style={styles.statIcon}><span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--success)" }}>person</span></div>
           <div style={styles.statContent}>
             <div style={styles.statValue}>{stats.operadores}</div>
             <div style={styles.statLabel}>Operadores</div>
@@ -157,7 +157,7 @@ const UsersReportSection = ({ users, loading }) => {
                 <tr
                   key={user.id}
                   style={{
-                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8f9fa",
+                    backgroundColor: index % 2 === 0 ? "var(--theme-surface)" : "var(--theme-surface-secondary)",
                   }}
                 >
                   <td style={styles.td}>{index + 1}</td>
@@ -182,17 +182,17 @@ const UsersReportSection = ({ users, loading }) => {
                         ...styles.badge,
                         backgroundColor:
                           user.tipo === "admin"
-                            ? "#dc3545"
+                            ? "var(--error)"
                             : user.tipo === "gestor"
-                            ? "#ffc107"
-                            : "#28a745",
+                            ? "var(--warning)"
+                            : "var(--success)",
+                        color: user.tipo === "gestor" ? "var(--warning-800)" : "var(--white)",
                       }}
                     >
-                      {user.tipo === "admin"
-                        ? "🔑 ADMIN"
-                        : user.tipo === "gestor"
-                        ? "🏛️ GESTOR"
-                        : "👤 OPERADOR"}
+                      <span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 4, verticalAlign: "middle" }}>
+                        {user.tipo === "admin" ? "shield" : user.tipo === "gestor" ? "account_balance" : "person"}
+                      </span>
+                      {user.tipo?.toUpperCase() || "N/A"}
                     </span>
                   </td>
                   <td style={styles.td}>
@@ -200,10 +200,13 @@ const UsersReportSection = ({ users, loading }) => {
                       style={{
                         ...styles.badge,
                         backgroundColor:
-                          user.status === "ativo" ? "#28a745" : "#6c757d",
+                          user.status === "ativo" ? "var(--success)" : "var(--secondary)",
                       }}
                     >
-                      {user.status === "ativo" ? "✅ ATIVO" : "⏸️ INATIVO"}
+                      <span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 4, verticalAlign: "middle" }}>
+                        {user.status === "ativo" ? "check_circle" : "pause_circle"}
+                      </span>
+                      {user.status === "ativo" ? "ATIVO" : "INATIVO"}
                     </span>
                   </td>
                   <td style={styles.td}>
@@ -282,9 +285,11 @@ const styles = {
 
   searchInput: {
     padding: "10px 15px",
-    border: "1px solid #ced4da",
+    border: "1px solid var(--theme-border)",
     borderRadius: "5px",
     fontSize: "14px",
+    backgroundColor: "var(--theme-surface)",
+    color: "var(--theme-text)",
   },
 
   select: {
@@ -324,7 +329,7 @@ const styles = {
 
   badge: {
     fontSize: "10px",
-    color: "white",
+    color: "var(--white)",
     padding: "4px 8px",
     borderRadius: "12px",
     textTransform: "uppercase",
@@ -355,8 +360,8 @@ const styles = {
   spinner: {
     width: "40px",
     height: "40px",
-    border: "3px solid #f3f3f3",
-    borderTop: "3px solid #007bff",
+    border: "3px solid var(--theme-border)",
+    borderTop: "3px solid var(--primary)",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
     margin: "0 auto 16px",
