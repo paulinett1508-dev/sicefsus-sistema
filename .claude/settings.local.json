@@ -79,7 +79,41 @@
       "Bash(node scripts/check-dashboard-values.cjs:*)",
       "Bash(node ../scripts/check-dashboard-values.cjs:*)",
       "Bash(node:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(src/components/relatorios/geradores/RelatorioConsolidado.js )",
+      "Bash(src/components/relatorios/geradores/RelatorioDespesas.js )",
+      "Bash(src/components/relatorios/geradores/RelatorioExecucao.js )",
+      "Bash(src/components/relatorios/geradores/RelatorioPrestacao.js )",
+      "Bash(src/utils/pdfHelpers.js )",
+      "Bash(src/utils/relatoriosConstants.js)",
+      "Bash(src/components/relatorios/geradores/RelatorioAnalitico.js)",
+      "Bash(grep:*)",
+      "Skill(pending-tasks)",
+      "Bash(xargs cat:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(wc:*)",
+      "Bash(timeout 5 node:*)",
+      "Bash(npm ls:*)",
+      "mcp__firebase__firebase_collections",
+      "mcp__firebase__firebase_status",
+      "Bash(FIREBASE_DEV_PROJECT_ID=\"emendas-parlamentares-60dbd\" FIREBASE_DEV_CLIENT_EMAIL=\"firebase-adminsdk-fbsvc@emendas-parlamentares-60dbd.iam.gserviceaccount.com\" FIREBASE_DEV_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxMuajhVDLmUBq\nwF0uSA5BZwheBTgIe1Bi6c0T7ANuuKoQj8FuPycei3A3d5aNn8aDsLsqkPMMgG0K\nKXavbnXx3dKqoN27PHi3zb9SxxBxNEcjClonOCZ5/Zwe7BXb8bP5mMBQcX3db31y\nVQc9xmtEjNhmCKAaFFoPXUlqTrnRCYyilTpQmDH6yU1ELCzkOk7HniMGmbgQNdgP\ni7l6urmnb6ciyWJW5xIc1T+4kFkKpat9l15AybZmH3Ug26Yv7uw3h3BTKwDH6gFS\nitb4iCZP4sVUSzBYZggQMUOz7uQXjAnN+URgKk+NyrmCXyfasZC+pw+HUoRbF0aj\nYFq0VCu/AgMBAAECggEASt+jLP0sApui6HiX5vJzc5dBpdi2sH7KnMEF8qELYkGN\nOqpDpX3x3ao1pHpXl0gn7YVD0NymlmW9rUmP6NjX5XdBiO+oQXFv4NqDOUr725mn\nZVr+dQv41hsfWMGRCvq6fYDZ4iPSdzqg2yqqgKPSt4h798E1RU/MLinQ16akRXr7\nX0cjpJLWbIRXRuxOvJaV85jLO5qnApncNrxIjDF+p9J2jk4jCmizWgfcthpNMmdf\nnX1qFbdBzfuc+qtfRoAh92IiqsLWZLNbE01Joq6uj4DKzJXN3w4S3/Ym7Ef23i+L\n+oYgYiRqYLmZZK/eHBFEFSnn9ErIknNWJ3nyNY+5oQKBgQDdHxdZEYPfyPgRBKoq\n51Nb0Oin/thbv4XjE8p2Pxv9NXqLcK69T9ldL9gw8uv9cLe74Lzbwl7UONJsq92l\nha98zc7IkeUQoYgDKmPf6Jb4OhH43dFouW/DawduAg8y0xaTEx2F9/QdTjlxXtA0\njvYWm73MhrLtGJEekvXiGfuGuwKBgQDNJjWibFFYJ3AYdcI5OZusy8B5U1u4apBj\nd/8+pKf9xf+f/x+M4DEdlfL5at6kVLN0bi10rAlD+QmhovPtMnsdGp/AAR7g4diV\ne+eJ8J5f1nDkmMkvq2yUnDSIIQpfhpcq+ry6q3e3gdUnd01mMAqb6Xc17ca0rt74\n9wLOP7tYzQKBgGZYw7fIMZ/dJ2TJIfJly+GNmoJXpNEintfyCx4cK9pRbH0qFNcv\nJE7LnGdbqPtPtttRNFkLaFUWT99Y1WiNriI4KGQRk1LVUV0Vu9ChmW8fgb4M/aZZ\nXm+3FGNItLwzlBlTGbEuiWEfGdttpTUOjrz8LSeDmUHAwzrBjumuWQuNAoGABB9h\ncosks1XPjd5H8ehzdWx+yLFhJXqWvjj6GyMp8RKaiXeSBb23nvWVdWetY7YECTHx\nneebJA+MHwBsUHb0PGh9j1k2aqR/OrnLtFzugdSIXj+nw1p5ix78e0PWtoa44Pc6\n9bFebYShaPKfzo7ml62AZMgLdzQQbQZhuw1S0X0CgYEAosd3pMoJRCEoYXul3Hal\nw7Mct1F+STQ8BC2o9EEdpkiShLxOQ0UHdAMt6HI0OBn1aUSvfxO7gAEOSQ461eZ3\n2f2HR8/dkA8yU9SJstXMJzNZGBBUhWPq9xHGhFopk1XHBC166x3Y9sQHmtZfyL/P\nFTODC1QM+GpS/GXMT/F4XXQ=\n-----END PRIVATE KEY-----\n\" timeout 5 node dist/index.js)",
+      "Bash(python3:*)",
+      "Bash(timeout 3 node:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "mcp__firebase__firebase_query",
+      "mcp__firebase__firebase_compare",
+      "mcp__firebase__firebase_switch",
+      "Bash(/tmp/test_status.sh)",
+      "mcp__firebase__firebase_search",
+      "mcp__firebase__firebase_get_document",
+      "Bash(pgrep:*)",
+      "Bash(npm run dev:*)",
+      "Bash(claude:*)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "firebase"
+  ]
 }

@@ -1,31 +1,42 @@
 {
-    "projectType": "react-firebase",
-    "language": "pt-BR",
-    "codeStyle": {
-      "preserveExisting": true,
-      "minimalChanges": true,
-      "completeFiles": true
-    },
-    "rules": [
-      "Sempre use validadores de src/utils/validators.js",
-      "Sempre use formatters para valores monetários",
-      "Nunca reescreva código funcional",
-      "Mudanças cirúrgicas - preserve o que funciona",
-      "Forneça arquivos completos para substituição",
-      "Teste como Admin E Operador"
-    ],
-    "ignorePaths": [
-      "node_modules",
-      "dist",
-      ".git",
-      "backups"
-    ],
-    "mcpServers": {
-      "firebase": {
-        "command": "node",
-        "args": ["/home/runner/workspace/firebase-mcp-server/dist/index.js"],
-        "env": {},
-        "disabled": false
-      }
+  "projectType": "react-firebase",
+  "language": "pt-BR",
+  "codeStyle": {
+    "preserveExisting": true,
+    "minimalChanges": true,
+    "completeFiles": true
+  },
+  "rules": [
+    "Sempre use validadores de src/utils/validators.js",
+    "Sempre use formatters para valores monetários",
+    "Nunca reescreva código funcional",
+    "Mudanças cirúrgicas - preserve o que funciona",
+    "Forneça arquivos completos para substituição",
+    "Teste como Admin E Operador"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    ".git",
+    "backups"
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/runner/workspace/.claude/statusline.sh"
+  },
+  "mcpServers": {
+    "firebase": {
+      "command": "node",
+      "args": ["/home/runner/workspace/firebase-mcp-server/dist/index.js"],
+      "env": {
+        "FIREBASE_DEV_PROJECT_ID": "emendas-parlamentares-60dbd",
+        "FIREBASE_DEV_CLIENT_EMAIL": "firebase-adminsdk-fbsvc@emendas-parlamentares-60dbd.iam.gserviceaccount.com",
+        "FIREBASE_DEV_PRIVATE_KEY": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxMuajhVDLmUBq\nwF0uSA5BZwheBTgIe1Bi6c0T7ANuuKoQj8FuPycei3A3d5aNn8aDsLsqkPMMgG0K\nKXavbnXx3dKqoN27PHi3zb9SxxBxNEcjClonOCZ5/Zwe7BXb8bP5mMBQcX3db31y\nVQc9xmtEjNhmCKAaFFoPXUlqTrnRCYyilTpQmDH6yU1ELCzkOk7HniMGmbgQNdgP\ni7l6urmnb6ciyWJW5xIc1T+4kFkKpat9l15AybZmH3Ug26Yv7uw3h3BTKwDH6gFS\nitb4iCZP4sVUSzBYZggQMUOz7uQXjAnN+URgKk+NyrmCXyfasZC+pw+HUoRbF0aj\nYFq0VCu/AgMBAAECggEASt+jLP0sApui6HiX5vJzc5dBpdi2sH7KnMEF8qELYkGN\nOqpDpX3x3ao1pHpXl0gn7YVD0NymlmW9rUmP6NjX5XdBiO+oQXFv4NqDOUr725mn\nZVr+dQv41hsfWMGRCvq6fYDZ4iPSdzqg2yqqgKPSt4h798E1RU/MLinQ16akRXr7\nX0cjpJLWbIRXRuxOvJaV85jLO5qnApncNrxIjDF+p9J2jk4jCmizWgfcthpNMmdf\nnX1qFbdBzfuc+qtfRoAh92IiqsLWZLNbE01Joq6uj4DKzJXN3w4S3/Ym7Ef23i+L\n+oYgYiRqYLmZZK/eHBFEFSnn9ErIknNWJ3nyNY+5oQKBgQDdHxdZEYPfyPgRBKoq\n51Nb0Oin/thbv4XjE8p2Pxv9NXqLcK69T9ldL9gw8uv9cLe74Lzbwl7UONJsq92l\nha98zc7IkeUQoYgDKmPf6Jb4OhH43dFouW/DawduAg8y0xaTEx2F9/QdTjlxXtA0\njvYWm73MhrLtGJEekvXiGfuGuwKBgQDNJjWibFFYJ3AYdcI5OZusy8B5U1u4apBj\nd/8+pKf9xf+f/x+M4DEdlfL5at6kVLN0bi10rAlD+QmhovPtMnsdGp/AAR7g4diV\ne+eJ8J5f1nDkmMkvq2yUnDSIIQpfhpcq+ry6q3e3gdUnd01mMAqb6Xc17ca0rt74\n9wLOP7tYzQKBgGZYw7fIMZ/dJ2TJIfJly+GNmoJXpNEintfyCx4cK9pRbH0qFNcv\nJE7LnGdbqPtPtttRNFkLaFUWT99Y1WiNriI4KGQRk1LVUV0Vu9ChmW8fgb4M/aZZ\nXm+3FGNItLwzlBlTGbEuiWEfGdttpTUOjrz8LSeDmUHAwzrBjumuWQuNAoGABB9h\ncosks1XPjd5H8ehzdWx+yLFhJXqWvjj6GyMp8RKaiXeSBb23nvWVdWetY7YECTHx\nneebJA+MHwBsUHb0PGh9j1k2aqR/OrnLtFzugdSIXj+nw1p5ix78e0PWtoa44Pc6\n9bFebYShaPKfzo7ml62AZMgLdzQQbQZhuw1S0X0CgYEAosd3pMoJRCEoYXul3Hal\nw7Mct1F+STQ8BC2o9EEdpkiShLxOQ0UHdAMt6HI0OBn1aUSvfxO7gAEOSQ461eZ3\n2f2HR8/dkA7yU9SJstXMJzNZGBBUhWPq9xHGhFopk1XHBC166x3Y9sQHmtZfyL/P\nFTODCIQM+GpS/GXMT/F4XXQ=\n-----END PRIVATE KEY-----\n",
+        "FIREBASE_PROD_PROJECT_ID": "emendas-parlamentares-prod",
+        "FIREBASE_PROD_CLIENT_EMAIL": "firebase-adminsdk-fbsvc@emendas-parlamentares-prod.iam.gserviceaccount.com",
+        "FIREBASE_PROD_PRIVATE_KEY": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCxWnlPOGUynOCH\nFPotJIc6qR/zFFVb7h1eTyah/vDDBmALsL2oh0bajrEZNsudcI3HQ34aWW8665kN\nKjBje/7racF+yHIVKAG39/a9/ILGoWfYZjba6+wUAA9PGNMgBQv2u8Tja+KaxPwt\naK4DvvqjM2RjeZgs9P+LxAi7/SUXNmrvhOdDvoNaEPVvrKe1PGoHCpa8tixBq5bc\nNrJtYfKXaE9A8n/WmrhrClxCY69hg2lqWVjvefdva0aPGxs3g/zTas6S8HHq78P5\nxVBkeGMNY5Xq7rbeOSqfSPD5C4CAB7nDluWiJog1+Qk6d8yYnoFrTvL5ijHVxuJf\n558GzX87AgMBAAECggEATXRLRW9GNufvYN8m8T8iNdq1wtWu/7KKrezYXOg3opyu\npnxeH/NQXNPzgST+oLgOmycdNAm5+5v34Bl8P35gEtTBdgq5VAcAVSVcY5WbUX8d\nGJNvQoXFOOjbxrn7PmEl2/AeKQotUVVVIsm0MZue31Zq8cyhSoUG87W98Me6Apv8\nxYnwVyD6uUE967PeziXSPOEdKUNV1Em9N5qQUOWlDLa2ySHBjLxFpS0SIt9hcm01\nGVr9gnHw7QWJlXc4uQzua5p03lSZvs4i5EAuVjU7nZ9otekcv5stLNkx8O+o01yK\n8dZqnKQG2fUkpWYh7ZaSnmnfaca1yn+BrN1uQo0nIQKBgQDs/ErzrT/7DDG6A1H5\n3dVedhZBFJww0QQ5jlHWfo70rmDExydnw4CHcM0GlWuuY0B35ED1cnPwINhhrcSR\nhrwN+BMNcoX44+njb7+ERH0gte5WLPZnQHjp8kib1mRuAdPEw/3OMB/0PkYAhses\naCYvAUDZcVrRRBeDe0elp4hbmwKBgQC/lVTZIml1/14zIL2icRQMHnWetwneP8gH\ncvhc6RGhIc5ApW2Hwgzo+eSvRqQcuOtTGfLZunwjtuVx3FOUf1FHIxGE83v/nRCo\nYPVm0Wn1zUbjOBfHukQjf8n1GVYR8VXidBTJns3hRypOPmBO4ZcKE8F+PmXTQFjf\nfueUzWS04QKBgQCFy0plmIJuscvBQO6fKuazleeqhoBH7zl7ZSY++uSqr2hisC1H\nH9EIpl6aQPGyWsai6XLjH+LkxyZiv0AjCPZSzKO1C9snUUVS6lwtyJz8Qrp0XJ4g\nXP3m1qq3kKrSkKWGiUBZkEH6Gs5arb09UO99yi9ak+y6CL9ds9QXaiZJ0QKBgCva\nKZ698rfQqSY4009QZM9VVYTrzrVxkf6qgVD7BE8GpuhDNWwCrePR91dravssFKlj\n4iOWPP4Lyj8iuHrgHaGT1FnDRdm/gOWZs/JB8ugRga1W1JKh/yDFClww3XOj8w2v\nlmaEFAoBuRxJyM+lcWYcGYklDTeqne0iZi24SdnhAoGAC7IZdbYfc0c3K3SHZNRH\np9kzKBV20C0PjtL3FDU2bI3tSfbLaCrTBPYc2JQgXyOg88i7xZ/0UX/1QR7rpIUr\nvnwipVXs+hBmIEZwCwpysZHStN0lT8iDBO0r7NQqqrnwVlrWShbCXXYvTfRNCuIj\nytUKZzNc8iXFPc/jU/xQgDs=\n-----END PRIVATE KEY-----\n"
+      },
+      "disabled": false
     }
   }
+}
