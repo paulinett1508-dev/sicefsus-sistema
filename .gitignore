@@ -133,6 +133,8 @@ dist
 # Claude Code settings com credenciais
 .claude/settings.json
 .claude/settings.local.json
+# Permitir statusline script
+!.claude/statusline.sh
 
 # Firebase MCP Server credenciais
 firebase-mcp-server/.env

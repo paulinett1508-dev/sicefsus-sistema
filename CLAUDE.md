@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 10/01/2026
+## Ultima Atualizacao - 12/01/2026
 
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
@@ -40,6 +40,56 @@ Se aparecer `devConnected: true` e `prodConnected: true`, esta tudo OK.
 - **Credenciais:** `.claude/settings.json` (env) + `firebase-mcp-server/.env`
 - **Build:** `npm run build` no diretorio do MCP
 - **Ambientes:** DEV (emendas-parlamentares-60dbd) e PROD (emendas-parlamentares-prod)
+
+---
+
+## StatusLine (Barra de Status)
+
+O projeto possui um statusline customizado que exibe informacoes uteis durante a sessao.
+
+### O que exibe:
+```
+[Opus 4.5 | 31% | 63k/200k | 1h0m | +35/-29 | workspace/main | DEV]
+```
+
+| Campo | Cor | Descricao |
+|-------|-----|-----------|
+| **Modelo** | Magenta | Modelo Claude em uso (ex: Opus 4.5) |
+| **Memoria %** | Verde/Amarelo/Vermelho | Porcentagem do contexto usado |
+| **Tokens** | Ciano | Tokens totais (input+output) / limite |
+| **Tempo** | Verde/Amarelo/Vermelho | Duracao da sessao |
+| **Arquivos** | Branco | Linhas adicionadas/removidas (+/-) |
+| **Diretorio/Branch** | Azul/Verde | Raiz do projeto e branch git |
+| **Ambiente** | Amarelo (DEV) / Vermelho (PROD) | Ambiente Firebase ativo |
+
+### Arquivos:
+- **Script:** `.claude/statusline.sh` (commitado no git)
+- **Config:** `.claude/settings.json` (chave `statusLine` - nao commitado)
+- **Setup:** `.claude/setup-statusline.sh` (para configurar na primeira sessao)
+
+### Configuracao na Primeira Sessao:
+Se o statusline nao aparecer automaticamente, adicione ao `.claude/settings.json`:
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/runner/workspace/.claude/statusline.sh"
+  },
+  // ... resto das configuracoes
+}
+```
+
+### Alertas de Memoria (quando fazer /compact):
+| Uso | Cor | Alerta |
+|-----|-----|--------|
+| < 50% | Verde | Nenhum |
+| 50-75% | Amarelo | `!` aparece |
+| > 75% | Vermelho | `/compact` aparece |
+
+### Cores do Tempo:
+- Verde: < 30 minutos
+- Amarelo: 30-60 minutos
+- Vermelho: > 60 minutos
 
 ---
 
