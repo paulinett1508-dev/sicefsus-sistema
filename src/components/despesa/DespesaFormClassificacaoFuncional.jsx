@@ -119,59 +119,35 @@ const DespesaFormClassificacaoFuncional = ({
     setCnpjEncontrado(false);
 
     try {
-      let dados = null;
+      // Buscar na BrasilAPI (fonte oficial e confiavel)
+      const response = await fetch(
+        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+      );
 
-      // Tentar BrasilAPI
-      try {
-        const response = await fetch(
-          `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
-        );
-        if (response.ok) {
-          dados = await response.json();
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("CNPJ nao encontrado na base da Receita Federal");
         }
-      } catch (error) {
-        console.log("BrasilAPI indisponível");
+        throw new Error("Servico temporariamente indisponivel. Tente novamente.");
       }
 
-      // Fallback: ReceitaWS via proxy
-      if (!dados) {
-        const response = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(
-            `https://www.receitaws.com.br/v1/cnpj/${cnpjLimpo}`,
-          )}`,
-        );
-        const result = await response.json();
-        dados = JSON.parse(result.contents);
-      }
+      const dados = await response.json();
 
-      if (!dados || dados.status === "ERROR") {
-        throw new Error("CNPJ não encontrado");
-      }
-
-      // Preencher campos
-      if (dados.nome || dados.razao_social) {
+      // Preencher campos com dados da BrasilAPI
+      if (dados.razao_social) {
         handleInputChange({
-          target: {
-            name: "fornecedor",
-            value: dados.nome || dados.razao_social,
-          },
+          target: { name: "fornecedor", value: dados.razao_social },
         });
       }
 
-      if (dados.fantasia || dados.nome_fantasia) {
+      if (dados.nome_fantasia) {
         handleInputChange({
-          target: {
-            name: "nomeFantasia",
-            value: dados.fantasia || dados.nome_fantasia,
-          },
+          target: { name: "nomeFantasia", value: dados.nome_fantasia },
         });
       }
 
-      if (dados.telefone || dados.ddd_telefone_1) {
-        const tel = (dados.telefone || dados.ddd_telefone_1).replace(
-          /[^\d]/g,
-          "",
-        );
+      if (dados.ddd_telefone_1) {
+        const tel = dados.ddd_telefone_1.replace(/[^\d]/g, "");
         handleInputChange({
           target: { name: "telefoneFornecedor", value: formatarTelefone(tel) },
         });
@@ -212,7 +188,7 @@ const DespesaFormClassificacaoFuncional = ({
       }
 
       // Situação cadastral
-      const situacao = dados.situacao || "ATIVA";
+      const situacao = dados.descricao_situacao_cadastral || "ATIVA";
       handleInputChange({
         target: { name: "situacaoCadastral", value: situacao.toUpperCase() },
       });
@@ -221,7 +197,7 @@ const DespesaFormClassificacaoFuncional = ({
       setCnpjError("");
     } catch (error) {
       console.error("Erro ao buscar CNPJ:", error);
-      setCnpjError("CNPJ não encontrado");
+      setCnpjError(error.message || "Erro ao buscar CNPJ");
       setCnpjEncontrado(false);
     } finally {
       setBuscandoCNPJ(false);

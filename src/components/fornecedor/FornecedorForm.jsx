@@ -113,40 +113,25 @@ const FornecedorForm = ({
     setCnpjError("");
 
     try {
-      let dados = null;
+      // Buscar na BrasilAPI (fonte oficial e confiavel)
+      const response = await fetch(
+        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`
+      );
 
-      // Tentar BrasilAPI
-      try {
-        const response = await fetch(
-          `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`
-        );
-        if (response.ok) {
-          dados = await response.json();
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("CNPJ nao encontrado na base da Receita Federal");
         }
-      } catch (error) {
-        console.log("BrasilAPI indisponivel, tentando ReceitaWS...");
+        throw new Error("Servico temporariamente indisponivel. Tente novamente em alguns minutos.");
       }
 
-      // Fallback: ReceitaWS via proxy
-      if (!dados) {
-        const response = await fetch(
-          `https://api.allorigins.win/get?url=${encodeURIComponent(
-            `https://www.receitaws.com.br/v1/cnpj/${cnpjLimpo}`
-          )}`
-        );
-        const result = await response.json();
-        dados = JSON.parse(result.contents);
-      }
-
-      if (!dados || dados.status === "ERROR") {
-        throw new Error("CNPJ nao encontrado na base de dados");
-      }
+      const dados = await response.json();
 
       // Preencher campos com dados da API
       setFormData((prev) => ({
         ...prev,
-        razaoSocial: dados.nome || dados.razao_social || prev.razaoSocial,
-        nomeFantasia: dados.fantasia || dados.nome_fantasia || prev.nomeFantasia,
+        razaoSocial: dados.razao_social || prev.razaoSocial,
+        nomeFantasia: dados.nome_fantasia || prev.nomeFantasia,
         logradouro: dados.logradouro || prev.logradouro,
         numero: dados.numero || prev.numero,
         complemento: dados.complemento || prev.complemento,
@@ -154,11 +139,9 @@ const FornecedorForm = ({
         cidade: dados.municipio || prev.cidade,
         ufEndereco: dados.uf || prev.ufEndereco,
         cep: formatarCEP(dados.cep) || prev.cep,
-        telefone: formatarTelefone(
-          dados.telefone || dados.ddd_telefone_1 || ""
-        ) || prev.telefone,
+        telefone: formatarTelefone(dados.ddd_telefone_1 || "") || prev.telefone,
         email: dados.email || prev.email,
-        situacaoCadastral: (dados.situacao || dados.descricao_situacao_cadastral || "ATIVA").toUpperCase(),
+        situacaoCadastral: (dados.descricao_situacao_cadastral || "ATIVA").toUpperCase(),
       }));
 
       setCnpjEncontrado(true);
