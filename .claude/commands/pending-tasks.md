@@ -4,6 +4,34 @@
 
 ---
 
+## PRIORITARIO - Importar Fornecedores em PROD
+
+### Contexto
+O script de importacao de fornecedores foi executado com sucesso em DEV.
+Agora precisa ser executado em PROD para popular a colecao `fornecedores` com os dados extraidos das despesas existentes.
+
+### Script
+```bash
+node scripts/import-fornecedores.cjs prod
+```
+
+### O que o script faz:
+1. Le todas as despesas de PROD
+2. Extrai fornecedores unicos por CNPJ
+3. Verifica quais ja estao cadastrados
+4. Lista os novos para confirmacao
+5. Importa os selecionados para a colecao `fornecedores`
+
+### Pre-requisitos
+- Credenciais PROD configuradas em `firebase-migration/prod-credentials.json`
+- Regras do Firestore ja deployadas (feito em 2026-01-12)
+
+### Resultado esperado em DEV (referencia)
+- 14 fornecedores importados
+- 0 erros
+
+---
+
 ## Testes Completos do Sistema
 
 ### 1. Autenticacao e Usuarios
