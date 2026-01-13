@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 12/01/2026
+## Ultima Atualizacao - 13/01/2026
 
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
@@ -676,3 +676,79 @@ SKILL: quando voce precisa de analise ou raciocinio
        Ex: "revise esse codigo", "encontre bugs nesse componente"
        O agente vai usar a skill automaticamente se relevante
 ```
+
+---
+
+## Scripts de Manutencao do Banco de Dados
+
+Scripts Node.js para corrigir inconsistencias no Firestore. Localizados em `scripts/`.
+
+**Requisitos:**
+- Credenciais de producao em `firebase-migration/prod-credentials.json`
+- Node.js com firebase-admin instalado
+
+**Padrao de uso:**
+```bash
+node scripts/<script>.cjs           # Modo dry-run (apenas diagnostico)
+node scripts/<script>.cjs --apply   # Aplicar correcoes
+```
+
+### Scripts Disponiveis
+
+| Script | Funcao | Ultima Execucao |
+|--------|--------|-----------------|
+| `recalcular-valor-executado.cjs` | Recalcula valorExecutado nas emendas baseado na soma das despesas EXECUTADAS | 13/01/2026 - 18 emendas corrigidas |
+| `corrigir-municipio-despesas.cjs` | Preenche municipio/uf nas despesas copiando da emenda vinculada | 13/01/2026 - 81 despesas corrigidas |
+| `vincular-despesas-naturezas.cjs` | Vincula despesas a naturezas existentes ou cria novas naturezas | 13/01/2026 - 51 despesas vinculadas, 6 naturezas criadas |
+| `corrigir-estouro-emendas.cjs` | Ajusta valor das emendas para cobrir despesas executadas (saldo negativo) | 13/01/2026 - 4 emendas corrigidas |
+| `fix-saldo-negativo.cjs` | Corrige emendas especificas com saldo negativo (IDs hardcoded) | Script pontual |
+
+### Detalhes dos Scripts
+
+#### recalcular-valor-executado.cjs
+- **Problema:** Emendas com valorExecutado=0 mas com milhoes em despesas executadas
+- **Solucao:** Soma todas as despesas com status="EXECUTADA" e atualiza:
+  - `valorExecutado`, `saldoDisponivel`, `percentualExecutado`
+  - `valorAlocado`, `saldoLivre`, `percentualAlocado`
+- **Campos atualizados:** 6 campos por emenda
+
+#### corrigir-municipio-despesas.cjs
+- **Problema:** Despesas com municipio vazio ou "N/A"
+- **Solucao:** Copia municipio e uf da emenda vinculada
+- **Dependencia:** Despesa precisa ter emendaId valido
+
+#### vincular-despesas-naturezas.cjs
+- **Problema:** Despesas sem naturezaId (nao vinculadas a envelopes orcamentarios)
+- **Solucao:**
+  1. Extrai codigo de natureza do campo `naturezaDespesa` (ex: "339030", "3.3.90.30", "3.3.9.0.30")
+  2. Busca natureza existente com mesmo codigo + emendaId
+  3. Se nao existir, cria nova natureza
+  4. Vincula despesa a natureza
+- **Formatos suportados:**
+  - `339030` - codigo direto
+  - `339030 - DESCRICAO` - codigo com descricao
+  - `3.3.90.30` - formato com pontos (4 partes)
+  - `3.3.9.0.30` - formato com pontos (5 partes)
+
+#### corrigir-estouro-emendas.cjs
+- **Problema:** Emendas com despesas executadas > valor da emenda (saldo negativo)
+- **Solucao:** Aumenta `valor` e `valorRecurso` para cobrir o total executado
+- **IDs hardcoded:** 4 emendas especificas identificadas na auditoria
+- **Campos atualizados:** valor, valorRecurso, valorExecutado, saldoDisponivel, percentualExecutado
+
+### Auditoria de Integridade (13/01/2026)
+
+Resultado da auditoria completa do banco PROD:
+
+| Verificacao | Antes | Depois |
+|-------------|-------|--------|
+| valorExecutado divergente | 18 emendas | 0 |
+| Despesas sem municipio | 82 despesas | 0 |
+| Despesas sem naturezaId | 100 despesas | 0 |
+| Emendas com estouro | 4 emendas | 0 |
+| Despesa orfa | 1 | 0 (deletada) |
+
+**Estado atual do banco PROD:**
+- Emendas: 29 documentos
+- Despesas: 129 documentos
+- Naturezas: 58 documentos
