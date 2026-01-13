@@ -240,6 +240,62 @@
 
 ---
 
+## Concluido - Correcao Logica Orcamentaria (2026-01-13)
+
+### Problema Identificado
+Confusao semantica nos campos de saldo das emendas:
+- `saldoDisponivel` e `saldoLivre` tinham significados ambiguos
+- Naturezas com `valorAlocado=0` mas `valorExecutado>0` geravam saldos negativos
+
+### Solucao Implementada
+
+#### Novos Campos com Nomes Claros
+
+**Na EMENDA:**
+| Campo Antigo | Campo Novo | Formula | Uso |
+|--------------|------------|---------|-----|
+| `saldoLivre` | `saldoParaNaturezas` | `valor - valorAlocado` | Bloqueia botao "Nova Natureza" |
+| `saldoDisponivel` | `saldoNaoExecutado` | `valor - valorExecutado` | Informativo: quanto falta gastar |
+
+**Na NATUREZA:**
+| Campo | Formula | Uso |
+|-------|---------|-----|
+| `saldoDisponivel` | `valorAlocado - valorExecutado` | Limite para novas despesas |
+
+#### Script de Correcao
+- **Arquivo:** `scripts/corrigir-logica-orcamentaria.cjs`
+- **Funcoes:**
+  1. Auto-regularizar naturezas com valorAlocado=0 mas valorExecutado>0
+  2. Recalcular todos os campos das emendas com novos nomes
+- **Uso:** `node scripts/corrigir-logica-orcamentaria.cjs [--dev] [--apply]`
+
+#### Execucao
+| Ambiente | Naturezas Regularizadas | Emendas Recalculadas |
+|----------|-------------------------|----------------------|
+| DEV | 1 | 4 |
+| PROD | 0 | 11 |
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/utils/emendaCalculos.js` | Novos campos + aliases para compatibilidade |
+| `src/components/emenda/EmendaForm/sections/ExecucaoOrcamentaria.jsx` | Labels atualizados na UI |
+| `src/components/natureza/NaturezasList.jsx` | Usa novos campos |
+| `scripts/corrigir-logica-orcamentaria.cjs` | Novo script de correcao |
+| `CLAUDE.md` | Documentacao dos novos campos |
+
+### Auditoria Final
+| Ambiente | Emendas | Naturezas | Status |
+|----------|---------|-----------|--------|
+| DEV | 21 OK | 59 (56 ativas + 3 encerradas) | OK |
+| PROD | 29 OK | 58 OK | OK |
+
+### Commits
+- `dae7da1` refactor(orcamento): renomear campos de saldo para maior clareza
+- `b9f380c` docs: documentar novos campos de saldo orcamentario
+
+---
+
 ## Concluido - Modulo Relatorios (2026-01-13)
 
 ### Code Review e Correcoes
@@ -403,6 +459,7 @@
 
 ## Historico
 
+- **2026-01-13**: Correcao logica orcamentaria (novos campos saldoParaNaturezas/saldoNaoExecutado, auditoria DEV+PROD)
 - **2026-01-13**: Code review e correcoes completas do modulo Relatorios (P1/P2/P3)
 - **2026-01-12**: Importacao de fornecedores em PROD (30 fornecedores, 0 erros)
 - **2026-01-12**: Implementacao completa do modulo Fornecedores (CRUD + integracao despesas)
