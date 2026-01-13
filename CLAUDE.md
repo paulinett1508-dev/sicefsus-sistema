@@ -124,6 +124,12 @@ NATUREZA 339039:
 └── saldoDisponivel: R$ 0,00 (esgotada)
 ```
 
+**IMPORTANTE - Logica de Validacao de Despesas:**
+- Ao criar despesa DENTRO de uma natureza: valida contra `natureza.saldoDisponivel`
+- Se a natureza esta esgotada (saldoDisponivel <= 0): botao "Nova Despesa" mostra alerta
+- O `saldoParaNaturezas` da emenda NAO pode ser usado diretamente para despesas
+- Fluxo obrigatorio: Emenda -> Alocar em Natureza -> Criar Despesa na Natureza
+
 **Transformacao Visual (27/12/2025):**
 - Paleta de cores atualizada para estilo moderno (Tailwind)
 - Fonte Inter adicionada

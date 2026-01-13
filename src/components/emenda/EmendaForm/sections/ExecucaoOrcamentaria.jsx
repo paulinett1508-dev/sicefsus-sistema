@@ -1251,6 +1251,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 alert("Regularize esta natureza antes de adicionar novas despesas.");
                 return;
               }
+              // 🆕 Verificar se a natureza tem saldo disponível
+              const saldoNatureza = parseValorMonetario(natureza.saldoDisponivel || 0);
+              if (saldoNatureza <= 0) {
+                alert(`⚠️ A natureza "${natureza.descricao}" está esgotada (saldo: R$ 0,00).\n\nPara adicionar despesas, aumente o valor alocado ou crie uma nova natureza.`);
+                return;
+              }
               console.log("🆕 Criar despesa na natureza:", natureza);
               setDespesaEmEdicao({
                 status: 'EXECUTADA',
@@ -1262,6 +1268,15 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 numeroEmenda: formData?.numero || '',
                 municipio: formData?.municipio || usuario?.municipio || '',
                 uf: formData?.uf || usuario?.uf || '',
+                // 🆕 Passar informações da natureza para validação de saldo
+                naturezaInfo: {
+                  id: natureza.id,
+                  codigo: natureza.codigo,
+                  descricao: natureza.descricao,
+                  valorAlocado: parseValorMonetario(natureza.valorAlocado || 0),
+                  valorExecutado: parseValorMonetario(natureza.valorExecutado || 0),
+                  saldoDisponivel: saldoNatureza,
+                },
               });
               setModoVisualizacao("criar-executada");
             }}

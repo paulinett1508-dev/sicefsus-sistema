@@ -44,6 +44,8 @@ const DespesaFormBasicFields = ({
   handleInputChange,
   despesaParaEditar = null,
   onValorExcedeSaldo,
+  naturezaInfo = null, // 🆕 Informações da natureza (envelope orçamentário)
+  modoCriacaoDireta = false, // 🆕 Indica criação direta de despesa executada
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
   const [showModalConfirmacao, setShowModalConfirmacao] = useState(false);
@@ -169,20 +171,36 @@ const DespesaFormBasicFields = ({
     setValorAnterior(null);
   };
 
-  // Atualizar valor quando emendaInfo mudar (para modo criar)
+  // Atualizar valor quando emendaInfo ou naturezaInfo mudar (para modo criar)
   useEffect(() => {
-    if (!despesaParaEditar && emendaInfo?.saldoDisponivel) {
-      const valorFormatado = formatarMoedaInput(
-        String(emendaInfo.saldoDisponivel),
-      );
-      handleInputChange({
-        target: {
-          name: "valor",
-          value: valorFormatado,
-        },
-      });
+    if (!despesaParaEditar) {
+      // 🆕 Priorizar saldo da natureza se estiver criando dentro de uma natureza
+      if (modoCriacaoDireta && naturezaInfo?.saldoDisponivel > 0) {
+        const valorFormatado = formatarMoedaInput(
+          String(naturezaInfo.saldoDisponivel),
+        );
+        handleInputChange({
+          target: {
+            name: "valor",
+            value: valorFormatado,
+          },
+        });
+        return;
+      }
+      // Fallback: usar saldo da emenda
+      if (emendaInfo?.saldoDisponivel) {
+        const valorFormatado = formatarMoedaInput(
+          String(emendaInfo.saldoDisponivel),
+        );
+        handleInputChange({
+          target: {
+            name: "valor",
+            value: valorFormatado,
+          },
+        });
+      }
     }
-  }, [emendaInfo?.saldoDisponivel, despesaParaEditar]);
+  }, [emendaInfo?.saldoDisponivel, despesaParaEditar, modoCriacaoDireta, naturezaInfo?.saldoDisponivel]);
 
   // ✅ FORMATAR VALOR AO CARREGAR DESPESA PARA EDIÇÃO
   useEffect(() => {
@@ -203,14 +221,28 @@ const DespesaFormBasicFields = ({
     }
   }, [despesaParaEditar?.valor]);
 
-  // ✅ CORREÇÃO: Despesas planejadas NUNCA validam saldo
-  // Validação de saldo só acontece na EXECUÇÃO (modal de executar)
+  // ✅ VALIDAÇÃO DE SALDO - Diferente para cada modo
   useEffect(() => {
+    // 🆕 Se é criação direta (despesa executada) E tem naturezaInfo, validar saldo da NATUREZA
+    if (modoCriacaoDireta && naturezaInfo) {
+      const valorDespesa = parseValorMonetario(formData.valor);
+      const saldoNatureza = naturezaInfo.saldoDisponivel || 0;
+
+      const excede = valorDespesa > saldoNatureza;
+      setValorExcedeSaldo(excede);
+      onValorExcedeSaldo?.(excede);
+
+      if (excede) {
+        console.log(`⚠️ Valor excede saldo da natureza: R$ ${valorDespesa.toFixed(2)} > R$ ${saldoNatureza.toFixed(2)}`);
+      }
+      return;
+    }
+
     // 🚫 Despesas planejadas: SEM validação de saldo
     // ✅ É apenas planejamento, pode ser qualquer valor
     setValorExcedeSaldo(false);
     onValorExcedeSaldo?.(false);
-  }, [formData.valor, onValorExcedeSaldo]);
+  }, [formData.valor, onValorExcedeSaldo, modoCriacaoDireta, naturezaInfo]);
 
 
   const styles = {
@@ -499,6 +531,50 @@ const DespesaFormBasicFields = ({
           Dados Básicos da Despesa
         </legend>
         <div style={styles.formGrid}>
+          {/* 🆕 Banner informativo quando criando dentro de uma natureza */}
+          {modoCriacaoDireta && naturezaInfo && (
+            <div style={{
+              gridColumn: "1 / -1",
+              padding: "12px 16px",
+              backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "#eff6ff",
+              borderRadius: "8px",
+              border: `1px solid ${isDark ? "#3b82f6" : "#93c5fd"}`,
+              marginBottom: "8px",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#3b82f6" }}>account_balance_wallet</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: isDark ? "#93c5fd" : "#1e40af" }}>
+                  Criando despesa na natureza: {naturezaInfo.codigo}
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: "24px", fontSize: 13 }}>
+                <div>
+                  <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>Alocado: </span>
+                  <span style={{ fontWeight: 600, color: isDark ? "var(--theme-text)" : "#0f172a" }}>
+                    {formatarValorMonetario(naturezaInfo.valorAlocado)}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>Executado: </span>
+                  <span style={{ fontWeight: 600, color: isDark ? "#f87171" : "#dc2626" }}>
+                    {formatarValorMonetario(naturezaInfo.valorExecutado)}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>Disponível: </span>
+                  <span style={{
+                    fontWeight: 600,
+                    color: naturezaInfo.saldoDisponivel > 0
+                      ? (isDark ? "#4ade80" : "#16a34a")
+                      : (isDark ? "#f87171" : "#dc2626")
+                  }}>
+                    {formatarValorMonetario(naturezaInfo.saldoDisponivel)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ✅ EMENDA E VALOR NA MESMA LINHA (proporções ajustadas) */}
           <div style={styles.formGridRow}>
             {/* EMENDA VINCULADA (READ-ONLY) - 60% */}
@@ -539,8 +615,11 @@ const DespesaFormBasicFields = ({
               />
               {valorExcedeSaldo && (
                 <span style={styles.errorText}>
-                  <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span> Valor excede o saldo disponível (
-                  {formatarValorMonetario(saldoDisponivel)})
+                  <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>warning</span>
+                  {naturezaInfo
+                    ? `Valor excede o saldo da natureza (${formatarValorMonetario(naturezaInfo.saldoDisponivel)})`
+                    : `Valor excede o saldo disponível (${formatarValorMonetario(emendaInfo?.saldoDisponivel || 0)})`
+                  }
                 </span>
               )}
               {errors.valor && !valorExcedeSaldo && (

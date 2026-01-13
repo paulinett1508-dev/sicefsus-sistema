@@ -780,6 +780,8 @@ const DespesaForm = ({
           handleInputChange={handleInputChange}
           despesaParaEditar={despesaParaEditar}
           onValorExcedeSaldo={setValorExcedeSaldo} // ✅ NOVO: Callback para receber status do saldo
+          naturezaInfo={despesaParaEditar?.naturezaInfo || null} // 🆕 Passar info da natureza para validar saldo
+          modoCriacaoDireta={isCriacaoDireta} // 🆕 Indica que é criação direta (executada)
         />
 
         <DespesaFormEmpenhoFields
