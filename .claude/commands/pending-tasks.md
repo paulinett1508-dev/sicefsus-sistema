@@ -4,6 +4,69 @@
 
 ---
 
+## Concluido - Simplificacao Cards e Auditoria (2026-01-13)
+
+### Simplificacao dos Cards de Resumo Orcamentario
+
+Refatoracao dos cards na edicao de emenda para melhor experiencia do usuario:
+
+#### Antes (5 cards + duplicacao)
+- ExecucaoOrcamentaria: 5 cards (Valor, Alocado, Saldo, Executado, %)
+- NaturezasList: 4 cards duplicados
+
+#### Depois (4 cards unificados)
+| Card | Valor | Hint |
+|------|-------|------|
+| Valor da Emenda | `stats.valorEmenda` | "valor total recebido" |
+| Saldo da Emenda | `stats.saldoParaNaturezas` | "valor ainda nao distribuido" |
+| Naturezas de Despesa | `N naturezas` | "R$ X distribuidos" |
+| Saldo p/ Novas Naturezas | `stats.saldoParaNaturezas` | dinamico: "disponivel" ou "totalmente distribuido" |
+
+#### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `ExecucaoOrcamentaria.jsx` | 5 cards -> 4 cards com hints claros |
+| `NaturezasList.jsx` | Removidos cards duplicados + estilos orfaos + variavel nao usada |
+
+#### Commits
+- `e8f83d0` refactor(ui): simplificar cards de resumo orcamentario
+
+---
+
+### Auditoria Dashboard x Emendas
+
+Verificacao de sincronismo entre valorExecutado nas emendas e soma das despesas.
+
+#### Resultado PROD
+| Metrica | Valor |
+|---------|-------|
+| Total Emendas | 29 |
+| Valor Total | R$ 13.130.878,98 |
+| Diferenca | **R$ 0,00** |
+| Status | OK |
+
+#### Resultado DEV (antes da correcao)
+| Metrica | Valor |
+|---------|-------|
+| Total Emendas | 21 |
+| Diferenca | **R$ 33.187,51** |
+| Emendas divergentes | 3 |
+
+#### Emendas Corrigidas no DEV
+| Emenda | Municipio | Antes | Depois |
+|--------|-----------|-------|--------|
+| 304612542 | Passagem Franca | R$ 0 | R$ 4.770,50 |
+| 304512000 | Ferreira Gomes | R$ 0 | R$ 140,00 |
+| 41830007 | Antonio Almeida | R$ 0 | R$ 25.000,00 |
+
+#### Status Final
+| Ambiente | Status |
+|----------|--------|
+| PROD | Sincronizado |
+| DEV | Sincronizado |
+
+---
+
 ## Concluido - Validacao de Saldo e UX (2026-01-13)
 
 ### Validacao de Estouro de Saldo
@@ -501,6 +564,7 @@ Confusao semantica nos campos de saldo das emendas:
 
 ## Historico
 
+- **2026-01-13**: Simplificacao cards resumo orcamentario (5->4 cards, remocao duplicacao) + Auditoria Dashboard x Emendas (correcao 3 emendas DEV)
 - **2026-01-13**: Correcao logica orcamentaria (novos campos saldoParaNaturezas/saldoNaoExecutado, auditoria DEV+PROD)
 - **2026-01-13**: Code review e correcoes completas do modulo Relatorios (P1/P2/P3)
 - **2026-01-12**: Importacao de fornecedores em PROD (30 fornecedores, 0 erros)
