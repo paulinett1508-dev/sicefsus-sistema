@@ -7,30 +7,38 @@ import { useTheme } from "../../../../context/ThemeContext";
 const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
   const { isDark } = useTheme();
 
-  // Calcular valores
-  const valorRecurso =
-    parseFloat(
-      formData?.valorRecurso?.replace?.(/[^\d,]/g, "")?.replace(",", "."),
-    ) || 0;
+  // Função auxiliar para parsear valor monetário
+  const parseValor = (valor) => {
+    if (typeof valor === "number") return valor;
+    if (!valor) return 0;
+    const valorString = String(valor);
+    const valorLimpo = valorString
+      .replace(/[R$\s]/g, "")
+      .replace(/\./g, "")
+      .replace(",", ".");
+    return parseFloat(valorLimpo) || 0;
+  };
+
+  // Calcular valores - usar valor da emenda ou valorRecurso
+  const valorRecurso = parseValor(formData?.valor) || parseValor(formData?.valorRecurso) || 0;
   const acoesServicos = formData?.acoesServicos || [];
 
   // Total planejado
   const totalPlanejado = acoesServicos.reduce((sum, acao) => {
-    const valor =
-      parseFloat(acao.valorAcao?.replace?.(/[^\d,]/g, "")?.replace(",", ".")) ||
-      0;
-    return sum + valor;
+    return sum + parseValor(acao.valorAcao);
   }, 0);
 
-  // Total executado
-  const totalExecutado = despesas.reduce(
-    (sum, d) => sum + (parseFloat(d.valor) || 0),
+  // Total executado - PRIORIZA valores salvos na emenda, fallback para soma das despesas
+  const valorExecutadoEmenda = parseValor(formData?.valorExecutado);
+  const totalExecutadoDespesas = despesas.reduce(
+    (sum, d) => sum + parseValor(d.valor),
     0,
   );
+  const totalExecutado = valorExecutadoEmenda > 0 ? valorExecutadoEmenda : totalExecutadoDespesas;
 
-  // Saldos
+  // Saldos - usar valores salvos ou calcular
   const saldoPlanejamento = valorRecurso - totalPlanejado;
-  const saldoExecucao = valorRecurso - totalExecutado;
+  const saldoExecucao = parseValor(formData?.saldoDisponivel) || parseValor(formData?.saldoNaoExecutado) || (valorRecurso - totalExecutado);
   const percentualExecutado =
     valorRecurso > 0 ? ((totalExecutado / valorRecurso) * 100).toFixed(1) : 0;
 
