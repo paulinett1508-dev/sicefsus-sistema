@@ -111,7 +111,8 @@
       "Bash(npm run dev:*)",
       "Bash(claude:*)",
       "Bash(jq:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(replit deploy --help:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
