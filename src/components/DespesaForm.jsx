@@ -23,7 +23,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { recalcularSaldoEmenda } from "../utils/emendaCalculos"; // ✅ RECÁLCULO AUTOMÁTICO
-import { recalcularNatureza } from "../utils/naturezaCalculos"; // 🆕 RECÁLCULO DE NATUREZA
+import { recalcularNatureza, validarDespesaNatureza } from "../utils/naturezaCalculos"; // 🆕 RECÁLCULO E VALIDAÇÃO DE NATUREZA
 
 // ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
 const pick = (obj, keys) => {
@@ -463,6 +463,33 @@ const DespesaForm = ({
     setLoading(true);
 
     try {
+      // 🔒 VALIDAÇÃO DE SALDO ANTES DE SALVAR
+      const naturezaIdParaValidar = formData.naturezaId || despesaParaEditar?.naturezaId;
+      const valorDespesa = parseValorMonetario(formData.valor);
+
+      // Se tem natureza vinculada, validar saldo disponível
+      if (naturezaIdParaValidar && (isCriacaoDireta || isExecucao)) {
+        console.log("🔒 Validando saldo da natureza antes de salvar...");
+        const validacao = await validarDespesaNatureza(
+          naturezaIdParaValidar,
+          valorDespesa,
+          despesaParaEditar?.id // Excluir a própria despesa se for edição
+        );
+
+        if (!validacao.valido) {
+          console.error("❌ Validação de saldo falhou:", validacao.mensagem);
+          setToast({
+            show: true,
+            message: `❌ ${validacao.mensagem}`,
+            type: "error",
+          });
+          setSalvando(false);
+          setLoading(false);
+          return; // ⚠️ BLOQUEIA O SALVAMENTO
+        }
+        console.log("✅ Saldo validado:", validacao);
+      }
+
       // ✅ CORREÇÃO: Remover campos vazios ANTES de criar dadosParaSalvar
       const formDataLimpo = Object.fromEntries(
         Object.entries(formData).filter(

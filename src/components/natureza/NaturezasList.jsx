@@ -381,24 +381,49 @@ const NaturezasList = ({
         )}
       </div>
 
-      {/* Resumo */}
+      {/* Resumo - Cards reorganizados para maior clareza */}
       <div style={styles.resumo}>
         <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>Valor da Emenda</div>
+          <div style={styles.cardResumoLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>payments</span>
+            Valor da Emenda
+          </div>
           <div style={styles.cardResumoValor}>
             R$ {valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </div>
         </div>
 
         <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>Total Alocado</div>
-          <div style={{ ...styles.cardResumoValor, color: "#3b82f6" }}>
-            R$ {valorAlocado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          <div style={styles.cardResumoLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>receipt_long</span>
+            Total Executado
+          </div>
+          <div style={{ ...styles.cardResumoValor, color: "#8b5cf6" }}>
+            R$ {totalExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          </div>
+          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
+            despesas pagas
           </div>
         </div>
 
         <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>Saldo p/ Naturezas</div>
+          <div style={styles.cardResumoLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span>
+            Total Alocado
+          </div>
+          <div style={{ ...styles.cardResumoValor, color: "#3b82f6" }}>
+            R$ {valorAlocado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          </div>
+          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
+            reservado em naturezas
+          </div>
+        </div>
+
+        <div style={styles.cardResumo}>
+          <div style={styles.cardResumoLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>add_circle</span>
+            Saldo p/ Naturezas
+          </div>
           <div
             style={{
               ...styles.cardResumoValor,
@@ -407,12 +432,8 @@ const NaturezasList = ({
           >
             R$ {saldoParaNaturezas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </div>
-        </div>
-
-        <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>Total Executado</div>
-          <div style={{ ...styles.cardResumoValor, color: "#8b5cf6" }}>
-            R$ {totalExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
+            disponível para alocar
           </div>
         </div>
       </div>
