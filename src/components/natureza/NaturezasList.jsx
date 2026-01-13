@@ -70,12 +70,6 @@ const NaturezasList = ({
   // Alias para compatibilidade
   const saldoLivre = saldoParaNaturezas;
 
-  // Calculos agregados
-  const totalExecutado = naturezas.reduce(
-    (sum, n) => sum + parseValorMonetario(n.valorExecutado || 0),
-    0
-  );
-
   // Naturezas virtuais para regularizacao em lote
   const naturezasVirtuais = naturezas.filter(n => n.isVirtual);
   const totalNaturezasVirtuais = naturezasVirtuais.length;
@@ -246,28 +240,6 @@ const NaturezasList = ({
       opacity: 0.6,
       cursor: "not-allowed",
     },
-    resumo: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-      gap: "8px",
-      marginBottom: "12px",
-    },
-    cardResumo: {
-      backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
-      borderRadius: "var(--border-radius, 6px)",
-      padding: "10px 12px",
-      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
-    },
-    cardResumoLabel: {
-      fontSize: "10px",
-      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
-      marginBottom: "2px",
-    },
-    cardResumoValor: {
-      fontSize: "var(--font-size-sm, 14px)",
-      fontWeight: "var(--font-weight-bold, 700)",
-      color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
-    },
     lista: {
       display: "flex",
       flexDirection: "column",
@@ -379,63 +351,6 @@ const NaturezasList = ({
             </button>
           </div>
         )}
-      </div>
-
-      {/* Resumo - Cards reorganizados para maior clareza */}
-      <div style={styles.resumo}>
-        <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>
-            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>payments</span>
-            Valor da Emenda
-          </div>
-          <div style={styles.cardResumoValor}>
-            R$ {valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </div>
-        </div>
-
-        <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>
-            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>receipt_long</span>
-            Total Executado
-          </div>
-          <div style={{ ...styles.cardResumoValor, color: "#8b5cf6" }}>
-            R$ {totalExecutado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </div>
-          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
-            despesas pagas
-          </div>
-        </div>
-
-        <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>
-            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>account_balance_wallet</span>
-            Total Alocado
-          </div>
-          <div style={{ ...styles.cardResumoValor, color: "#3b82f6" }}>
-            R$ {valorAlocado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </div>
-          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
-            reservado em naturezas
-          </div>
-        </div>
-
-        <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>
-            <span className="material-symbols-outlined" style={{ fontSize: 12, marginRight: 4, verticalAlign: "middle" }}>add_circle</span>
-            Saldo p/ Naturezas
-          </div>
-          <div
-            style={{
-              ...styles.cardResumoValor,
-              color: saldoParaNaturezas > 0 ? "#10b981" : "#ef4444",
-            }}
-          >
-            R$ {saldoParaNaturezas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-          </div>
-          <div style={{ fontSize: 9, color: isDark ? "var(--theme-text-muted)" : "#94a3b8", marginTop: 2 }}>
-            disponível para alocar
-          </div>
-        </div>
       </div>
 
       {/* Formulario */}

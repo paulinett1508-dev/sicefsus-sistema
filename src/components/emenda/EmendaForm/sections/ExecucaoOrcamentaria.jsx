@@ -994,40 +994,50 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     <div style={dynamicStyles.container}>
       {toast.show && <Toast message={toast.message} type={toast.type} />}
 
-      {/* Estatísticas principais */}
+      {/* Cards de Resumo Orçamentário */}
       <div style={styles.statsWrapper}>
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span> Valor da Emenda</div>
+          <div style={dynamicStyles.statLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>payments</span>
+            Valor da Emenda
+          </div>
           <div style={styles.statValue}>
             {formatCurrency(stats.valorEmenda)}
           </div>
+          <div style={styles.statHint}>valor total recebido</div>
         </div>
+
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#3b82f6" }}>account_balance_wallet</span> Total Alocado</div>
-          <div style={{ ...styles.statValue, color: "#3b82f6" }}>
-            {formatCurrency(stats.valorAlocado)}
+          <div style={dynamicStyles.statLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#3b82f6" }}>account_balance</span>
+            Saldo da Emenda
           </div>
-          <div style={styles.statHint}>reservado em naturezas</div>
-        </div>
-        <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#ef4444" }}>savings</span> Saldo p/ Naturezas</div>
-          <div style={{ ...styles.statValue, color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#ef4444" }}>
+          <div style={{ ...styles.statValue, color: stats.saldoParaNaturezas > 0 ? "#3b82f6" : "#ef4444" }}>
             {formatCurrency(stats.saldoParaNaturezas)}
           </div>
-          <div style={styles.statHint}>para criar novas naturezas</div>
+          <div style={styles.statHint}>valor ainda não distribuído</div>
         </div>
+
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
-          <div style={{ ...styles.statValue, color: "#27ae60" }}>
-            {formatCurrency(stats.totalExecutado)}
+          <div style={dynamicStyles.statLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#8b5cf6" }}>folder_open</span>
+            Naturezas de Despesa
           </div>
-          <div style={styles.statHint}>consome das naturezas</div>
+          <div style={{ ...styles.statValue, color: "#8b5cf6" }}>
+            {naturezas.length} {naturezas.length === 1 ? "natureza" : "naturezas"}
+          </div>
+          <div style={styles.statHint}>{formatCurrency(stats.valorAlocado)} distribuídos</div>
         </div>
+
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>analytics</span> % Executado</div>
-          <div style={styles.statValue}>
-            {stats.percentualExecutado.toFixed(1)}%
+          <div style={dynamicStyles.statLabel}>
+            <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#94a3b8" }}>add_circle</span>
+            Saldo p/ Novas Naturezas
           </div>
+          <div style={{ ...styles.statValue, color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#94a3b8" }}>
+            {formatCurrency(stats.saldoParaNaturezas)}
+          </div>
+          <div style={styles.statHint}>{stats.saldoParaNaturezas > 0 ? "disponível para criar" : "totalmente distribuído"}</div>
         </div>
       </div>
 
