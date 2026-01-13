@@ -481,6 +481,8 @@ export const useEmendaFormData = () => {
           const data = docSnap.data();
 
           setFormData({
+            // ID do documento (necessário para identificação)
+            id: docSnap.id,
             numero: data.numero || "",
             autor: data.autor || data.parlamentar || "",
             municipio: data.municipio || "",
@@ -525,6 +527,16 @@ export const useEmendaFormData = () => {
             numeroBeneficiarios: data.numeroBeneficiarios || "",
             justificativa: data.justificativa || "",
             observacoesFinais: data.observacoesFinais || "",
+            // 🆕 CAMPOS DE EXECUÇÃO ORÇAMENTÁRIA (para exibição no header)
+            valorExecutado: data.valorExecutado || 0,
+            valorAlocado: data.valorAlocado || 0,
+            percentualExecutado: data.percentualExecutado || 0,
+            percentualAlocado: data.percentualAlocado || 0,
+            saldoDisponivel: data.saldoDisponivel || 0,
+            saldoNaoExecutado: data.saldoNaoExecutado || 0,
+            saldoParaNaturezas: data.saldoParaNaturezas || 0,
+            saldoLivre: data.saldoLivre || 0,
+            totalDespesas: data.totalDespesas || 0,
           });
 
           setIsReady(true);
