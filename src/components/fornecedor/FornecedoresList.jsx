@@ -38,15 +38,51 @@ const FornecedoresList = () => {
   const [fornecedorParaExcluir, setFornecedorParaExcluir] = useState(null);
   const [despesasPorFornecedor, setDespesasPorFornecedor] = useState({});
   const [carregandoDespesas, setCarregandoDespesas] = useState(false);
+  const [ordenacao, setOrdenacao] = useState({ campo: "razaoSocial", direcao: "asc" });
 
   // Permissoes
   const userRole = usuario?.tipo || "operador";
   const isAdmin = userRole === "admin";
 
-  // Filtrar fornecedores pelo termo de busca
+  // Filtrar e ordenar fornecedores
   const fornecedoresFiltrados = useMemo(() => {
-    return filtrar(termoBusca);
-  }, [termoBusca, filtrar]);
+    const filtrados = filtrar(termoBusca);
+
+    // Aplicar ordenação
+    return [...filtrados].sort((a, b) => {
+      let valorA, valorB;
+
+      switch (ordenacao.campo) {
+        case "razaoSocial":
+          valorA = (a.razaoSocial || "").toLowerCase();
+          valorB = (b.razaoSocial || "").toLowerCase();
+          break;
+        case "cidade":
+          valorA = (a.endereco?.cidade || "").toLowerCase();
+          valorB = (b.endereco?.cidade || "").toLowerCase();
+          break;
+        case "cnpj":
+          valorA = (a.cnpj || "").replace(/\D/g, "");
+          valorB = (b.cnpj || "").replace(/\D/g, "");
+          break;
+        default:
+          valorA = (a.razaoSocial || "").toLowerCase();
+          valorB = (b.razaoSocial || "").toLowerCase();
+      }
+
+      if (valorA < valorB) return ordenacao.direcao === "asc" ? -1 : 1;
+      if (valorA > valorB) return ordenacao.direcao === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [termoBusca, filtrar, ordenacao]);
+
+  // Handler para alternar ordenação
+  const handleOrdenacao = (campo) => {
+    setOrdenacao((prev) => ({
+      campo,
+      direcao: prev.campo === campo && prev.direcao === "asc" ? "desc" : "asc",
+    }));
+  };
 
   // Carregar contagem de despesas por fornecedor (por CNPJ)
   useEffect(() => {
@@ -139,14 +175,14 @@ const FornecedoresList = () => {
   // Estilos
   const styles = {
     container: {
-      padding: "24px",
-      maxWidth: "1200px",
-      margin: "0 auto",
+      padding: "16px 32px",
+      backgroundColor: isDark ? "var(--theme-bg)" : "var(--theme-bg, #F8FAFC)",
+      minHeight: "100vh",
     },
     header: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "flex-start",
+      alignItems: "center",
       marginBottom: "24px",
       flexWrap: "wrap",
       gap: "16px",
@@ -155,81 +191,105 @@ const FornecedoresList = () => {
       flex: 1,
     },
     titulo: {
-      fontSize: "var(--font-size-xl, 20px)",
-      fontWeight: "var(--font-weight-bold, 700)",
+      fontSize: "24px",
+      fontWeight: "700",
       color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       display: "flex",
       alignItems: "center",
-      gap: "8px",
+      gap: "12px",
       marginBottom: "4px",
     },
     subtitulo: {
-      fontSize: "var(--font-size-sm, 14px)",
+      fontSize: "14px",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
+      marginLeft: "36px",
     },
     btnNovo: {
-      padding: "10px 16px",
-      fontSize: "var(--font-size-sm, 14px)",
-      fontWeight: "var(--font-weight-semibold, 600)",
+      padding: "10px 20px",
+      fontSize: "14px",
+      fontWeight: "600",
       border: "none",
-      borderRadius: "var(--border-radius, 6px)",
+      borderRadius: "8px",
       backgroundColor: "var(--primary, #2563EB)",
-      color: "var(--white, #ffffff)",
+      color: "#ffffff",
       cursor: "pointer",
       display: "flex",
       alignItems: "center",
-      gap: "6px",
-      transition: "background-color 0.2s",
+      gap: "8px",
+      transition: "all 0.2s ease",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
     },
     resumoCards: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-      gap: "12px",
-      marginBottom: "24px",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "16px",
+      marginBottom: "32px",
     },
     cardResumo: {
       backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
-      borderRadius: "var(--border-radius-md, 8px)",
-      padding: "16px",
+      borderRadius: "12px",
+      padding: "20px",
       border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
       display: "flex",
-      alignItems: "center",
-      gap: "12px",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      transition: "border-color 0.2s ease",
     },
     cardResumoIcon: {
-      width: "44px",
-      height: "44px",
-      borderRadius: "var(--border-radius-md, 8px)",
+      width: "48px",
+      height: "48px",
+      borderRadius: "12px",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
     },
     cardResumoInfo: {
-      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px",
     },
     cardResumoLabel: {
-      fontSize: "12px",
+      fontSize: "13px",
+      fontWeight: "500",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
-      marginBottom: "2px",
+      textTransform: "uppercase",
+      letterSpacing: "0.025em",
     },
     cardResumoValor: {
-      fontSize: "var(--font-size-lg, 18px)",
-      fontWeight: "var(--font-weight-bold, 700)",
+      fontSize: "28px",
+      fontWeight: "700",
       color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
+      lineHeight: "1",
+    },
+    toolbar: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "24px",
+      padding: "12px 16px",
+      backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
+      borderRadius: "12px",
+      border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      boxShadow: "var(--shadow-soft, 0 1px 3px rgba(0,0,0,0.05))",
+      gap: "16px",
+      flexWrap: "wrap",
     },
     buscaContainer: {
-      marginBottom: "20px",
+      flex: 1,
+      minWidth: "200px",
     },
     inputBusca: {
       width: "100%",
       maxWidth: "400px",
       padding: "10px 14px 10px 40px",
-      fontSize: "var(--font-size-sm, 14px)",
+      fontSize: "14px",
       border: `1px solid ${isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
-      borderRadius: "var(--border-radius, 6px)",
-      backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
+      borderRadius: "8px",
+      backgroundColor: isDark ? "var(--theme-bg)" : "var(--gray-50, #F8FAFC)",
       color: isDark ? "var(--theme-text)" : "var(--gray-800, #1E293B)",
       outline: "none",
+      transition: "border-color 0.2s, box-shadow 0.2s",
     },
     inputWrapper: {
       position: "relative",
@@ -245,6 +305,38 @@ const FornecedoresList = () => {
       fontSize: 18,
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-400, #94A3B8)",
     },
+    ordenacaoBar: (isDark) => ({
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      marginBottom: "16px",
+    }),
+    ordenacaoLabel: (isDark) => ({
+      fontSize: "13px",
+      color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
+    }),
+    ordenacaoBotoes: {
+      display: "flex",
+      gap: "8px",
+    },
+    ordenacaoBotao: (isDark, ativo) => ({
+      display: "flex",
+      alignItems: "center",
+      gap: "4px",
+      padding: "6px 12px",
+      fontSize: "13px",
+      fontWeight: ativo ? "600" : "500",
+      border: `1px solid ${ativo ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      borderRadius: "6px",
+      backgroundColor: ativo
+        ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
+        : isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
+      color: ativo
+        ? "var(--primary, #2563EB)"
+        : isDark ? "var(--theme-text)" : "var(--gray-700, #334155)",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+    }),
     lista: {
       display: "flex",
       flexDirection: "column",
@@ -288,9 +380,9 @@ const FornecedoresList = () => {
       color: "var(--error, #EF4444)",
     },
     resultadoBusca: {
-      fontSize: "var(--font-size-sm, 14px)",
+      fontSize: "13px",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500, #64748B)",
-      marginBottom: "12px",
+      whiteSpace: "nowrap",
     },
   };
 
@@ -352,6 +444,10 @@ const FornecedoresList = () => {
       {/* Cards de Resumo */}
       <div style={styles.resumoCards}>
         <div style={styles.cardResumo}>
+          <div style={styles.cardResumoInfo}>
+            <div style={styles.cardResumoLabel}>Total Cadastrados</div>
+            <div style={styles.cardResumoValor}>{calculos.total}</div>
+          </div>
           <div
             style={{
               ...styles.cardResumoIcon,
@@ -362,13 +458,13 @@ const FornecedoresList = () => {
               business
             </span>
           </div>
-          <div style={styles.cardResumoInfo}>
-            <div style={styles.cardResumoLabel}>Total Cadastrados</div>
-            <div style={styles.cardResumoValor}>{calculos.total}</div>
-          </div>
         </div>
 
         <div style={styles.cardResumo}>
+          <div style={styles.cardResumoInfo}>
+            <div style={styles.cardResumoLabel}>Ativos</div>
+            <div style={{ ...styles.cardResumoValor, color: "#10b981" }}>{calculos.ativos}</div>
+          </div>
           <div
             style={{
               ...styles.cardResumoIcon,
@@ -379,13 +475,13 @@ const FornecedoresList = () => {
               check_circle
             </span>
           </div>
-          <div style={styles.cardResumoInfo}>
-            <div style={styles.cardResumoLabel}>Ativos</div>
-            <div style={{ ...styles.cardResumoValor, color: "#10b981" }}>{calculos.ativos}</div>
-          </div>
         </div>
 
         <div style={styles.cardResumo}>
+          <div style={styles.cardResumoInfo}>
+            <div style={styles.cardResumoLabel}>Inativos</div>
+            <div style={{ ...styles.cardResumoValor, color: "#ef4444" }}>{calculos.inativos}</div>
+          </div>
           <div
             style={{
               ...styles.cardResumoIcon,
@@ -396,35 +492,31 @@ const FornecedoresList = () => {
               cancel
             </span>
           </div>
-          <div style={styles.cardResumoInfo}>
-            <div style={styles.cardResumoLabel}>Inativos</div>
-            <div style={{ ...styles.cardResumoValor, color: "#ef4444" }}>{calculos.inativos}</div>
+        </div>
+      </div>
+
+      {/* Toolbar com Busca */}
+      <div style={styles.toolbar}>
+        <div style={styles.buscaContainer}>
+          <div style={styles.inputWrapper}>
+            <span className="material-symbols-outlined" style={styles.searchIcon}>
+              search
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar por CNPJ, razao social ou cidade..."
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+              style={styles.inputBusca}
+            />
           </div>
         </div>
-      </div>
-
-      {/* Campo de Busca */}
-      <div style={styles.buscaContainer}>
-        <div style={styles.inputWrapper}>
-          <span className="material-symbols-outlined" style={styles.searchIcon}>
-            search
+        {termoBusca && (
+          <span style={styles.resultadoBusca}>
+            {fornecedoresFiltrados.length} encontrado(s)
           </span>
-          <input
-            type="text"
-            placeholder="Buscar por CNPJ, razao social ou cidade..."
-            value={termoBusca}
-            onChange={(e) => setTermoBusca(e.target.value)}
-            style={styles.inputBusca}
-          />
-        </div>
+        )}
       </div>
-
-      {/* Resultado da busca */}
-      {termoBusca && (
-        <p style={styles.resultadoBusca}>
-          {fornecedoresFiltrados.length} fornecedor(es) encontrado(s) para "{termoBusca}"
-        </p>
-      )}
 
       {/* Lista ou Empty State */}
       {fornecedoresFiltrados.length === 0 ? (
@@ -450,22 +542,65 @@ const FornecedoresList = () => {
           )}
         </div>
       ) : (
-        <div style={styles.lista}>
-          {fornecedoresFiltrados.map((fornecedor) => {
-            const cnpjLimpo = fornecedor.cnpj?.replace(/\D/g, "");
-            return (
-              <FornecedorCard
-                key={fornecedor.id}
-                fornecedor={fornecedor}
-                despesasVinculadas={despesasPorFornecedor[cnpjLimpo] || 0}
-                onEditar={handleEditarFornecedor}
-                onExcluir={handleExcluirFornecedor}
-                podeEditar={podeEditar(fornecedor)}
-                podeExcluir={podeExcluir(fornecedor)}
-              />
-            );
-          })}
-        </div>
+        <>
+          {/* Barra de ordenação */}
+          <div style={styles.ordenacaoBar(isDark)}>
+            <span style={styles.ordenacaoLabel(isDark)}>Ordenar por:</span>
+            <div style={styles.ordenacaoBotoes}>
+              <button
+                style={styles.ordenacaoBotao(isDark, ordenacao.campo === "razaoSocial")}
+                onClick={() => handleOrdenacao("razaoSocial")}
+              >
+                Nome
+                {ordenacao.campo === "razaoSocial" && (
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                    {ordenacao.direcao === "asc" ? "arrow_upward" : "arrow_downward"}
+                  </span>
+                )}
+              </button>
+              <button
+                style={styles.ordenacaoBotao(isDark, ordenacao.campo === "cnpj")}
+                onClick={() => handleOrdenacao("cnpj")}
+              >
+                CNPJ
+                {ordenacao.campo === "cnpj" && (
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                    {ordenacao.direcao === "asc" ? "arrow_upward" : "arrow_downward"}
+                  </span>
+                )}
+              </button>
+              <button
+                style={styles.ordenacaoBotao(isDark, ordenacao.campo === "cidade")}
+                onClick={() => handleOrdenacao("cidade")}
+              >
+                Cidade
+                {ordenacao.campo === "cidade" && (
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                    {ordenacao.direcao === "asc" ? "arrow_upward" : "arrow_downward"}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Lista de fornecedores */}
+          <div style={styles.lista}>
+            {fornecedoresFiltrados.map((fornecedor) => {
+              const cnpjLimpo = fornecedor.cnpj?.replace(/\D/g, "");
+              return (
+                <FornecedorCard
+                  key={fornecedor.id}
+                  fornecedor={fornecedor}
+                  despesasVinculadas={despesasPorFornecedor[cnpjLimpo] || 0}
+                  onEditar={handleEditarFornecedor}
+                  onExcluir={handleExcluirFornecedor}
+                  podeEditar={podeEditar(fornecedor)}
+                  podeExcluir={podeExcluir(fornecedor)}
+                />
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Modal de Formulario */}

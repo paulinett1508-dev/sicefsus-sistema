@@ -260,17 +260,15 @@ const FornecedorForm = ({
                     : undefined,
                 }}
                 maxLength={18}
-                disabled={isEdicao}
               />
               <button
                 type="button"
                 onClick={buscarDadosCNPJ}
                 disabled={
                   buscandoCNPJ ||
-                  formData.cnpj.replace(/\D/g, "").length !== 14 ||
-                  isEdicao
+                  formData.cnpj.replace(/\D/g, "").length !== 14
                 }
-                style={styles.btnBuscar(isDark, buscandoCNPJ)}
+                style={styles.btnBuscar(isDark, buscandoCNPJ || formData.cnpj.replace(/\D/g, "").length !== 14)}
                 title="Buscar dados do CNPJ"
               >
                 <span
