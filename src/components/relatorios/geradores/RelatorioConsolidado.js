@@ -23,10 +23,8 @@ export class RelatorioConsolidado extends BaseRelatorio {
     const totalEmendas = this.emendas.length;
     const totalDespesas = despesasExecutadas.length;
     
-    const valorTotal = this.emendas.reduce((sum, e) => {
-      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
+    // Usa valorTotal já normalizado pelo hook useRelatoriosData
+    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
     
     const valorExecutado = despesasExecutadas.reduce((sum, d) => {
       const valor = parseFloat(d.valor || 0);
@@ -52,7 +50,8 @@ export class RelatorioConsolidado extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     
     const fornecedoresUnicos = new Set(despesasExecutadas.map(d => d.fornecedor)).size;
-    const parlamentaresUnicos = new Set(this.emendas.map(e => e.autor)).size;
+    // Usa autor || parlamentar para capturar ambos os campos
+    const parlamentaresUnicos = new Set(this.emendas.map(e => e.autor || e.parlamentar)).size;
     
     const resumoItems = [
       `Emendas Cadastradas: ${totalEmendas}`,
@@ -76,15 +75,12 @@ export class RelatorioConsolidado extends BaseRelatorio {
         porTipo[tipo] = { quantidade: 0, valorTotal: 0, valorExecutado: 0 };
       }
 
-      const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      // Usa valorTotal já normalizado pelo hook
       porTipo[tipo].quantidade++;
-      porTipo[tipo].valorTotal += isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda;
+      porTipo[tipo].valorTotal += emenda.valorTotal || 0;
 
       const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-      porTipo[tipo].valorExecutado += despesasEmenda.reduce((sum, d) => {
-        const valor = parseFloat(d.valor || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
-      }, 0);
+      porTipo[tipo].valorExecutado += despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
     });
 
     const tabelaTipos = Object.entries(porTipo)
@@ -126,13 +122,10 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
     const emendasComExecucao = this.emendas
       .map((emenda) => {
-        const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+        // Usa valorTotal já normalizado pelo hook
         const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-        const executado = despesasEmenda.reduce((sum, d) => {
-          const valor = parseFloat(d.valor || 0);
-          return sum + (isNaN(valor) ? 0 : valor);
-        }, 0);
-        return { ...emenda, valorTotal: isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda, executado };
+        const executado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
+        return { ...emenda, executado };
       })
       .sort((a, b) => b.executado - a.executado)
       .slice(0, 10);
@@ -140,8 +133,8 @@ export class RelatorioConsolidado extends BaseRelatorio {
     const tabelaTop10 = emendasComExecucao.map((emenda, idx) => [
       `${idx + 1}`,
       emenda.numero || "-",
-      emenda.autor || "-",
-      this.formatCurrency(emenda.valorTotal),
+      emenda.autor || emenda.parlamentar || "-",
+      this.formatCurrency(emenda.valorTotal || 0),
       this.formatCurrency(emenda.executado),
       `${emenda.valorTotal > 0 ? ((emenda.executado / emenda.valorTotal) * 100).toFixed(0) : 0}%`,
     ]);
@@ -181,8 +174,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
         porFornecedor[fornecedor] = { quantidade: 0, valorTotal: 0 };
       }
       porFornecedor[fornecedor].quantidade++;
-      const valor = parseFloat(d.valor || 0);
-      porFornecedor[fornecedor].valorTotal += isNaN(valor) ? 0 : valor;
+      porFornecedor[fornecedor].valorTotal += d.valor || 0;
     });
 
     const tabelaFornecedores = Object.entries(porFornecedor)

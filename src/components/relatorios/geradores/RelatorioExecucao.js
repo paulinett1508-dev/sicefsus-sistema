@@ -30,10 +30,8 @@ export class RelatorioExecucao extends BaseRelatorio {
     const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
     const totalDespesas = despesasExecutadas.length;
     
-    const valorTotal = this.emendas.reduce((sum, e) => {
-      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
+    // Usa valorTotal já normalizado pelo hook useRelatoriosData
+    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
     
     const valorExecutado = despesasExecutadas.reduce((sum, d) => {
       const valor = parseFloat(d.valor || 0);
@@ -77,20 +75,18 @@ export class RelatorioExecucao extends BaseRelatorio {
     yPosition = addSectionTitle(this.doc, "Detalhamento por Emenda", yPosition);
 
     const emendasComExecucao = this.emendas.map((emenda) => {
-      const valorEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+      // Usa valorTotal já normalizado pelo hook
+      const valorEmenda = emenda.valorTotal || 0;
       const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-      const valorExec = despesasEmenda.reduce((sum, d) => {
-        const valor = parseFloat(d.valor || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
-      }, 0);
+      const valorExec = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
       const saldo = valorEmenda - valorExec;
       const percentual = valorEmenda > 0 ? (valorExec / valorEmenda) * 100 : 0;
 
       return {
         numero: emenda.numero || "-",
         tipo: emenda.tipo || "-",
-        parlamentar: emenda.autor || "-",
-        valorTotal: isNaN(valorEmenda) ? 0 : valorEmenda,
+        parlamentar: emenda.autor || emenda.parlamentar || "-",
+        valorTotal: valorEmenda,
         valorExecutado: valorExec,
         saldo,
         percentual,

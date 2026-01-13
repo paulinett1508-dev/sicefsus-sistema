@@ -20,12 +20,11 @@ export class RelatorioAnalitico extends BaseRelatorio {
     let yPosition = 58;
 
     const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    const parlamentares = [...new Set(this.emendas.map(e => e.autor).filter(Boolean))];
-    
-    const valorTotal = this.emendas.reduce((sum, e) => {
-      const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
+    // Usa autor || parlamentar para capturar ambos os campos
+    const parlamentares = [...new Set(this.emendas.map(e => e.autor || e.parlamentar).filter(Boolean))];
+
+    // Usa valorTotal já normalizado pelo hook useRelatoriosData
+    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
     
     const valorExecutado = despesasExecutadas.reduce((sum, d) => {
       const valor = parseFloat(d.valor || 0);
@@ -67,21 +66,19 @@ export class RelatorioAnalitico extends BaseRelatorio {
     yPosition = addSectionTitle(this.doc, "Analise por Parlamentar", yPosition);
 
     const analise = parlamentares.map((parlamentar) => {
-      const emendasParlamentar = this.emendas.filter((e) => e.autor === parlamentar);
-      
-      const valorTotalParlamentar = emendasParlamentar.reduce((sum, e) => {
-        const valor = parseFloat(e.valor || e.valorRecurso || e.valorTotal || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
-      }, 0);
+      // Filtra por autor OU parlamentar
+      const emendasParlamentar = this.emendas.filter((e) =>
+        (e.autor || e.parlamentar) === parlamentar
+      );
+
+      // Usa valorTotal já normalizado pelo hook
+      const valorTotalParlamentar = emendasParlamentar.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
 
       const despesasParlamentar = despesasExecutadas.filter((d) =>
         emendasParlamentar.some((e) => e.id === d.emendaId)
       );
 
-      const valorExecutadoParlamentar = despesasParlamentar.reduce((sum, d) => {
-        const valor = parseFloat(d.valor || 0);
-        return sum + (isNaN(valor) ? 0 : valor);
-      }, 0);
+      const valorExecutadoParlamentar = despesasParlamentar.reduce((sum, d) => sum + (d.valor || 0), 0);
 
       const saldo = valorTotalParlamentar - valorExecutadoParlamentar;
       const percentual = valorTotalParlamentar > 0 ? (valorExecutadoParlamentar / valorTotalParlamentar) * 100 : 0;
@@ -136,25 +133,26 @@ export class RelatorioAnalitico extends BaseRelatorio {
 
     const emendasDetalhadas = this.emendas
       .map((emenda) => {
-        const valorTotalEmenda = parseFloat(emenda.valor || emenda.valorRecurso || emenda.valorTotal || 0);
+        // Usa valorTotal já normalizado pelo hook
+        const valorTotalEmenda = emenda.valorTotal || 0;
         const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-        const executado = despesasEmenda.reduce((sum, d) => {
-          const valor = parseFloat(d.valor || 0);
-          return sum + (isNaN(valor) ? 0 : valor);
-        }, 0);
+        const executado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
         const percentual = valorTotalEmenda > 0 ? (executado / valorTotalEmenda) * 100 : 0;
-        return { ...emenda, valorTotal: isNaN(valorTotalEmenda) ? 0 : valorTotalEmenda, executado, percentual };
+        return { ...emenda, valorTotal: valorTotalEmenda, executado, percentual };
       })
       .sort((a, b) => b.percentual - a.percentual);
 
-    const tabelaEmendas = emendasDetalhadas.map((emenda) => [
-      emenda.numero || "-",
-      emenda.autor?.length > 20 ? emenda.autor.substring(0, 17) + "..." : (emenda.autor || "-"),
-      emenda.tipo || "-",
-      this.formatCurrency(emenda.valorTotal),
-      this.formatCurrency(emenda.executado),
-      `${emenda.percentual.toFixed(0)}%`,
-    ]);
+    const tabelaEmendas = emendasDetalhadas.map((emenda) => {
+      const parlamentar = emenda.autor || emenda.parlamentar || "-";
+      return [
+        emenda.numero || "-",
+        parlamentar.length > 20 ? parlamentar.substring(0, 17) + "..." : parlamentar,
+        emenda.tipo || "-",
+        this.formatCurrency(emenda.valorTotal),
+        this.formatCurrency(emenda.executado),
+        `${emenda.percentual.toFixed(0)}%`,
+      ];
+    });
 
     if (tabelaEmendas.length > 0) {
       try {

@@ -23,15 +23,9 @@ export class RelatorioDespesas extends BaseRelatorio {
     const despesasPlanejadas = this.despesas.filter(d => d.status === "PLANEJADA");
     const totalDespesas = this.despesas.length;
     
-    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
-    
-    const valorPlanejado = despesasPlanejadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
+    // Valores já normalizados pelo hook useRelatoriosData
+    const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
+    const valorPlanejado = despesasPlanejadas.reduce((sum, d) => sum + (d.valor || 0), 0);
 
     const fornecedores = new Set(this.despesas.map(d => d.fornecedor)).size;
 
@@ -51,7 +45,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     
     const mediaValor = totalDespesas > 0 ? (valorExecutado + valorPlanejado) / totalDespesas : 0;
-    const maiorDespesa = Math.max(...this.despesas.map(d => parseFloat(d.valor || 0)));
+    const maiorDespesa = Math.max(...this.despesas.map(d => d.valor || 0), 0);
     
     const resumoItems = [
       `Despesas Executadas: ${despesasExecutadas.length}`,
@@ -75,8 +69,7 @@ export class RelatorioDespesas extends BaseRelatorio {
         porStatus[status] = { quantidade: 0, valor: 0 };
       }
       porStatus[status].quantidade++;
-      const valor = parseFloat(d.valor || 0);
-      porStatus[status].valor += isNaN(valor) ? 0 : valor;
+      porStatus[status].valor += d.valor || 0;
     });
 
     const tabelaStatus = Object.entries(porStatus)
@@ -114,8 +107,9 @@ export class RelatorioDespesas extends BaseRelatorio {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Listagem Detalhada", yPosition);
 
+    // Valores já normalizados pelo hook
     const despesasOrdenadas = [...this.despesas]
-      .sort((a, b) => parseFloat(b.valor || 0) - parseFloat(a.valor || 0));
+      .sort((a, b) => (b.valor || 0) - (a.valor || 0));
 
     const tabelaDespesas = despesasOrdenadas.map((d) => {
       const emenda = this.emendas.find(e => e.id === d.emendaId);
@@ -124,7 +118,7 @@ export class RelatorioDespesas extends BaseRelatorio {
         d.descricao?.length > 25 ? d.descricao.substring(0, 22) + "..." : (d.descricao || "-"),
         d.fornecedor?.length > 20 ? d.fornecedor.substring(0, 17) + "..." : (d.fornecedor || "-"),
         emenda?.numero || "-",
-        this.formatCurrency(parseFloat(d.valor || 0)),
+        this.formatCurrency(d.valor || 0),
         d.status || "-",
       ];
     });
@@ -164,8 +158,7 @@ export class RelatorioDespesas extends BaseRelatorio {
         porFornecedor[fornecedor] = { quantidade: 0, valor: 0 };
       }
       porFornecedor[fornecedor].quantidade++;
-      const valor = parseFloat(d.valor || 0);
-      porFornecedor[fornecedor].valor += isNaN(valor) ? 0 : valor;
+      porFornecedor[fornecedor].valor += d.valor || 0;
     });
 
     const tabelaFornecedores = Object.entries(porFornecedor)
