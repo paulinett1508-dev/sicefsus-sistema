@@ -57,27 +57,13 @@ export function useRelatoriosData(usuario) {
           const valorOriginal = data.valor || data.valorRecurso || data.valorTotal || 0;
           const valorNormalizado = parseValorMonetario(valorOriginal);
           
-          // Debug: verificar normalização
-          if (valorOriginal && valorNormalizado === 0) {
-            console.warn(`⚠️ Emenda ${doc.id}: valor "${valorOriginal}" não foi parseado corretamente`);
-          }
-          
           return {
             id: doc.id,
             ...data,
             valorTotal: valorNormalizado,
           };
         });
-        
-        // Debug: log de valores carregados
-        console.log("📊 [Relatórios] Emendas carregadas:", emendasData.length);
-        console.log("📊 [Relatórios] Exemplo de valores:", emendasData.slice(0, 3).map(e => ({
-          id: e.id,
-          autor: e.autor,
-          valorOriginal: e.valor || e.valorRecurso,
-          valorNormalizado: e.valorTotal
-        })));
-        
+
         setEmendas(emendasData);
 
         // Carregar despesas

@@ -174,6 +174,5 @@ export class BaseRelatorio {
   salvar() {
     const nomeArquivo = gerarNomeArquivo(this.tipoRelatorio.id);
     this.doc.save(nomeArquivo);
-    console.log(`Relatório ${nomeArquivo} gerado com sucesso!`);
   }
 }

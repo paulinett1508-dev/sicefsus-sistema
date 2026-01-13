@@ -1,6 +1,7 @@
 // src/components/Relatorios.jsx
 import React, { useState } from "react";
 import { useRelatoriosData } from "../hooks/useRelatoriosData";
+import { useToast } from "./Toast";
 import RelatoriosCards from "./relatorios/RelatoriosCards";
 import RelatoriosFiltros from "./relatorios/RelatoriosFiltros";
 import { RelatorioExecucao } from "./relatorios/geradores/RelatorioExecucao";
@@ -44,6 +45,9 @@ export default function Relatorios({ usuario }) {
   const [generating, setGenerating] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  // Toast para notificações
+  const toast = useToast();
+
   // Hook customizado para carregar dados
   const {
     emendas,
@@ -82,11 +86,6 @@ export default function Relatorios({ usuario }) {
 
     try {
       const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
-
-      console.log("Dados filtrados:", {
-        emendas: emendasFiltradas.length,
-        despesas: despesasFiltradas.length,
-      });
 
       let gerador;
       switch (selectedReport.id) {
@@ -134,19 +133,14 @@ export default function Relatorios({ usuario }) {
           throw new Error("Tipo de relatório não reconhecido");
       }
 
-      console.log("Gerador criado:", gerador);
-
       await gerador.gerar(filtros);
       gerador.salvar();
 
       // Mostrar modal de sucesso
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Erro detalhado ao gerar relatório:", error);
-      console.error("Stack trace:", error.stack);
-      alert(
-        `Erro ao gerar relatório: ${error.message}\n\nVerifique o console para mais detalhes.`,
-      );
+      console.error("Erro ao gerar relatório:", error);
+      toast.error(`Erro ao gerar relatório: ${error.message}`);
     } finally {
       setGenerating(false);
     }
@@ -252,19 +246,4 @@ export default function Relatorios({ usuario }) {
       />
     </div>
   );
-}
-
-// CSS Animation
-if (typeof document !== "undefined") {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  `;
-  if (!document.head.querySelector('style[data-animation="spin"]')) {
-    style.setAttribute("data-animation", "spin");
-    document.head.appendChild(style);
-  }
 }
