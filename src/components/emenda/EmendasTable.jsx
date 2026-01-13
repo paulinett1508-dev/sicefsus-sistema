@@ -124,8 +124,22 @@ const EmendasTable = ({
             <strong style={{ ...styles.valorExecutado, color: "var(--primary-600)" }}>
               {formatCurrency(emenda.valorExecutado || 0)}
             </strong>
+            {/* Barra de progresso visual */}
+            <div style={styles.progressBarContainer}>
+              <div
+                style={{
+                  ...styles.progressBarFill,
+                  width: `${Math.min(percentualExecutado, 100)}%`,
+                  backgroundColor: percentualExecutado >= 100
+                    ? "var(--success-600)"
+                    : percentualExecutado >= 75
+                      ? "var(--warning-500)"
+                      : "var(--primary-600)",
+                }}
+              />
+            </div>
             <small style={styles.percentualExecutado}>
-              {percentualExecutado.toFixed(1)}%
+              {percentualExecutado.toFixed(1)}% executado
             </small>
           </div>
         </td>
@@ -348,12 +362,27 @@ const styles = {
   executadoInfo: {
     display: "flex",
     flexDirection: "column",
-    gap: "2px",
+    gap: "4px",
+    minWidth: "100px",
   },
 
   valorExecutado: {
     fontSize: "14px",
     fontWeight: "600",
+  },
+
+  progressBarContainer: {
+    width: "100%",
+    height: "6px",
+    backgroundColor: "var(--theme-border)",
+    borderRadius: "3px",
+    overflow: "hidden",
+  },
+
+  progressBarFill: {
+    height: "100%",
+    borderRadius: "3px",
+    transition: "width 0.3s ease",
   },
 
   percentualExecutado: {

@@ -147,14 +147,57 @@ const EmendaFormHeaderRich = ({ modo, formData, activeTab, despesas = [] }) => {
       {/* Cards de Informações Contextuais */}
       {modo === "editar" && valorRecurso > 0 && (
         <div style={dynamicStyles.infoCards}>
-          {/* Card: Valor Total */}
-          <div style={dynamicStyles.card}>
-            <div style={styles.cardIcon}>
-              <span className="material-symbols-outlined" style={{ fontSize: 28, color: "var(--primary)" }}>payments</span>
+          {/* Card: Valor Total com Barra de Progresso */}
+          <div style={{ ...dynamicStyles.card, gridColumn: "1 / -1", flexDirection: "column", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 28, color: "var(--primary)" }}>payments</span>
+                <div>
+                  <div style={dynamicStyles.cardLabel}>Valor da Emenda</div>
+                  <div style={dynamicStyles.cardValue}>{formatarMoeda(valorRecurso)}</div>
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={dynamicStyles.cardLabel}>Executado</div>
+                <div style={{
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  color: percentualExecutado >= 100 ? "var(--success)" : "var(--warning)",
+                }}>
+                  {percentualExecutado}%
+                </div>
+              </div>
             </div>
-            <div style={styles.cardContent}>
-              <div style={dynamicStyles.cardLabel}>Valor da Emenda</div>
-              <div style={dynamicStyles.cardValue}>{formatarMoeda(valorRecurso)}</div>
+            {/* Barra de Progresso Grande */}
+            <div style={{
+              width: "100%",
+              height: "12px",
+              backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#e9ecef",
+              borderRadius: "6px",
+              overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%",
+                width: `${Math.min(percentualExecutado, 100)}%`,
+                backgroundColor: percentualExecutado >= 100
+                  ? "var(--success)"
+                  : percentualExecutado >= 75
+                    ? "var(--warning)"
+                    : "var(--primary)",
+                borderRadius: "6px",
+                transition: "width 0.4s ease",
+              }} />
+            </div>
+            {/* Valores abaixo da barra */}
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", fontSize: "13px" }}>
+              <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#6b7280" }}>
+                Executado: <strong style={{ color: "var(--warning)" }}>{formatarMoeda(totalExecutado)}</strong>
+              </span>
+              <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#6b7280" }}>
+                Saldo: <strong style={{ color: saldoExecucao >= 0 ? "var(--success)" : "var(--danger)" }}>
+                  {formatarMoeda(saldoExecucao)}
+                </strong>
+              </span>
             </div>
           </div>
 
