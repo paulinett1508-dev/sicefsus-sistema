@@ -21,6 +21,7 @@ import Toast from "../../../Toast";
 import DespesaForm from "../../../DespesaForm";
 import ConfirmationModal from "../../../ConfirmationModal";
 import { parseValorMonetario } from "../../../../utils/formatters";
+import { serverTimestamp } from "firebase/firestore";
 // 🆕 Importações para sistema de naturezas (envelopes orçamentários)
 import NaturezasList from "../../../natureza/NaturezasList";
 import { useNaturezasData } from "../../../../hooks/useNaturezasData";
@@ -780,6 +781,59 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     carregarDespesas();
   };
 
+  // ✅ Função para recalcular e atualizar valores da emenda no Firestore
+  const atualizarValoresEmenda = useCallback(async (despesaExcluida = null) => {
+    if (!emendaId) return;
+
+    try {
+      // Recarregar despesas atualizadas do Firestore
+      const despesasQuery = query(
+        collection(db, "despesas"),
+        where("emendaId", "==", emendaId)
+      );
+      const despesasSnapshot = await getDocs(despesasQuery);
+      const despesasAtualizadas = despesasSnapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      // Calcular novo valor executado (apenas despesas EXECUTADAS)
+      const novoValorExecutado = despesasAtualizadas
+        .filter(d => d.status === "EXECUTADA")
+        .reduce((sum, d) => sum + parseValorMonetario(d.valor || 0), 0);
+
+      // Pegar valor total da emenda
+      const valorEmenda = parseValorMonetario(
+        formData?.valor || formData?.valorRecurso || formData?.valorTotal || 0
+      );
+
+      // Calcular saldo e percentual
+      const novoSaldoDisponivel = valorEmenda - novoValorExecutado;
+      const novoPercentual = valorEmenda > 0 ? (novoValorExecutado / valorEmenda) * 100 : 0;
+
+      // Atualizar emenda no Firestore
+      await updateDoc(doc(db, "emendas", emendaId), {
+        valorExecutado: novoValorExecutado,
+        saldoDisponivel: novoSaldoDisponivel,
+        percentualExecutado: novoPercentual,
+        totalDespesas: despesasAtualizadas.length,
+        atualizadoEm: serverTimestamp(),
+      });
+
+      console.log("✅ Valores da emenda atualizados:", {
+        valorExecutado: novoValorExecutado,
+        saldoDisponivel: novoSaldoDisponivel,
+        percentualExecutado: novoPercentual,
+        totalDespesas: despesasAtualizadas.length
+      });
+
+      return true;
+    } catch (error) {
+      console.error("❌ Erro ao atualizar valores da emenda:", error);
+      return false;
+    }
+  }, [emendaId, formData]);
+
   const handleRemoverDespesaPlanejada = (despesa, event) => {
     // ✅ CRÍTICO: Prevenir propagação de eventos
     if (event) {
@@ -800,7 +854,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
   const confirmarRemocaoPlanejada = async () => {
     const despesa = modalExclusaoPlanejada.despesa;
-    
+
     if (!despesa) {
       console.warn("⚠️ Tentativa de remover despesa sem dados");
       return;
@@ -811,15 +865,18 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     try {
       await deleteDoc(doc(db, "despesas", despesa.id));
       console.log("✅ Despesa removida com sucesso");
-      
+
+      // ✅ CORREÇÃO: Atualizar valores da emenda após exclusão
+      await atualizarValoresEmenda(despesa);
+
       showToast({
         message: "Despesa planejada removida",
         type: "success",
       });
-      
+
       // ✅ IMPORTANTE: Fechar modal ANTES de recarregar
       setModalExclusaoPlanejada({ isVisible: false, despesa: null });
-      
+
       // Recarregar lista
       await carregarDespesas();
     } catch (e) {
@@ -844,6 +901,9 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     try {
       await deleteDoc(doc(db, "despesas", despesa.id));
       console.log("✅ Despesa excluída com sucesso");
+
+      // ✅ CORREÇÃO: Atualizar valores da emenda após exclusão
+      await atualizarValoresEmenda(despesa);
 
       showToast({
         message: "Despesa excluída com sucesso",
