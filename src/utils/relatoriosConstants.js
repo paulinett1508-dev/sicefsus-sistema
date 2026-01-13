@@ -100,9 +100,12 @@ export const FILTROS_INICIAIS = {
   dataInicio: "",
   dataFim: "",
   parlamentar: "",
-  emenda: "", // ✅ NOVO: Filtro por emenda
+  emenda: "",
   municipio: "",
   uf: "",
-  fornecedor: "", // ✅ Adicionado fornecedor
+  fornecedor: "",
   status: "todos",
+  // Campos para relatórios mensais (Prestação, Analítico, Despesas, Consolidado)
+  mes: new Date().getMonth() + 1,
+  ano: new Date().getFullYear(),
 };

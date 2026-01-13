@@ -11,28 +11,14 @@ export class RelatorioConsolidado extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    const mes = filtros.mes || new Date().getMonth() + 1;
-    const ano = filtros.ano || new Date().getFullYear();
-    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
-
-    this.addHeader("Relatorio Consolidado", `${nomeMes} ${ano}`);
+    // HEADER com subtítulo do período
+    this.addHeader("Relatorio Consolidado", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
-    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    const totalEmendas = this.emendas.length;
-    const totalDespesas = despesasExecutadas.length;
-    
-    // Usa valorTotal já normalizado pelo hook useRelatoriosData
-    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
-    
-    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
-    
-    const saldoDisponivel = valorTotal - valorExecutado;
-    const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    // Usar métodos utilitários da BaseRelatorio
+    const { valorTotal, valorExecutado, saldoDisponivel, percentualGeral, totalEmendas, totalDespesas } = this.calcularMetricas();
+    const despesasExecutadas = this.getDespesasExecutadas();
 
     const kpis = [
       { label: "Emendas Ativas", value: totalEmendas.toString() },
@@ -50,8 +36,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     
     const fornecedoresUnicos = new Set(despesasExecutadas.map(d => d.fornecedor)).size;
-    // Usa autor || parlamentar para capturar ambos os campos
-    const parlamentaresUnicos = new Set(this.emendas.map(e => e.autor || e.parlamentar)).size;
+    const parlamentaresUnicos = this.getParlamentares().length;
     
     const resumoItems = [
       `Emendas Cadastradas: ${totalEmendas}`,
@@ -120,23 +105,18 @@ export class RelatorioConsolidado extends BaseRelatorio {
     yPosition = this.checkNewPage(yPosition, 60);
     yPosition = addSectionTitle(this.doc, "Top 10 Emendas por Execucao", yPosition);
 
-    const emendasComExecucao = this.emendas
-      .map((emenda) => {
-        // Usa valorTotal já normalizado pelo hook
-        const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-        const executado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
-        return { ...emenda, executado };
-      })
-      .sort((a, b) => b.executado - a.executado)
+    // Usar método utilitário, ordenado por valor executado, top 10
+    const emendasComExecucao = this.calcularExecucaoPorEmenda()
+      .sort((a, b) => b.valorExecutado - a.valorExecutado)
       .slice(0, 10);
 
-    const tabelaTop10 = emendasComExecucao.map((emenda, idx) => [
+    const tabelaTop10 = emendasComExecucao.map((e, idx) => [
       `${idx + 1}`,
-      emenda.numero || "-",
-      emenda.autor || emenda.parlamentar || "-",
-      this.formatCurrency(emenda.valorTotal || 0),
-      this.formatCurrency(emenda.executado),
-      `${emenda.valorTotal > 0 ? ((emenda.executado / emenda.valorTotal) * 100).toFixed(0) : 0}%`,
+      e.numero || "-",
+      e.parlamentar || "-",
+      this.formatCurrency(e.valorTotal),
+      this.formatCurrency(e.valorExecutado),
+      `${e.percentual.toFixed(0)}%`,
     ]);
 
     if (tabelaTop10.length > 0) {
@@ -167,24 +147,17 @@ export class RelatorioConsolidado extends BaseRelatorio {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Top 5 Fornecedores", yPosition);
 
-    const porFornecedor = {};
-    despesasExecutadas.forEach((d) => {
-      const fornecedor = d.fornecedor || "Nao informado";
-      if (!porFornecedor[fornecedor]) {
-        porFornecedor[fornecedor] = { quantidade: 0, valorTotal: 0 };
-      }
-      porFornecedor[fornecedor].quantidade++;
-      porFornecedor[fornecedor].valorTotal += d.valor || 0;
-    });
+    // Usar método utilitário para agregação por fornecedor
+    const porFornecedor = this.calcularPorFornecedor(true);
 
     const tabelaFornecedores = Object.entries(porFornecedor)
-      .sort(([, a], [, b]) => b.valorTotal - a.valorTotal)
+      .sort(([, a], [, b]) => b.valor - a.valor)
       .slice(0, 5)
       .map(([fornecedor, dados], idx) => [
         `${idx + 1}`,
         fornecedor.length > 40 ? fornecedor.substring(0, 37) + "..." : fornecedor,
         dados.quantidade.toString(),
-        this.formatCurrency(dados.valorTotal),
+        this.formatCurrency(dados.valor),
       ]);
 
     if (tabelaFornecedores.length > 0) {

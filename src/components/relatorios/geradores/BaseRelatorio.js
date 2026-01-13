@@ -61,6 +61,110 @@ export class BaseRelatorio {
     return formatDate(date);
   }
 
+  // ========== MÉTODOS UTILITÁRIOS COMUNS ==========
+
+  /**
+   * Retorna apenas despesas executadas (status !== "PLANEJADA")
+   */
+  getDespesasExecutadas() {
+    return this.despesas.filter(d => d.status !== "PLANEJADA");
+  }
+
+  /**
+   * Calcula métricas gerais do relatório
+   * @returns {Object} { valorTotal, valorExecutado, saldoDisponivel, percentualGeral, totalEmendas, totalDespesas }
+   */
+  calcularMetricas() {
+    const despesasExecutadas = this.getDespesasExecutadas();
+    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
+    const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
+    const saldoDisponivel = valorTotal - valorExecutado;
+    const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+
+    return {
+      valorTotal,
+      valorExecutado,
+      saldoDisponivel,
+      percentualGeral,
+      totalEmendas: this.emendas.length,
+      totalDespesas: despesasExecutadas.length,
+    };
+  }
+
+  /**
+   * Calcula execução por emenda
+   * @returns {Array} Lista de emendas com valorTotal, valorExecutado, saldo, percentual
+   */
+  calcularExecucaoPorEmenda() {
+    const despesasExecutadas = this.getDespesasExecutadas();
+
+    return this.emendas.map((emenda) => {
+      const valorEmenda = emenda.valorTotal || 0;
+      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
+      const valorExecutado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
+      const saldo = valorEmenda - valorExecutado;
+      const percentual = valorEmenda > 0 ? (valorExecutado / valorEmenda) * 100 : 0;
+
+      return {
+        ...emenda,
+        parlamentar: emenda.autor || emenda.parlamentar || "-",
+        valorTotal: valorEmenda,
+        valorExecutado,
+        saldo,
+        percentual,
+        despesasCount: despesasEmenda.length,
+      };
+    });
+  }
+
+  /**
+   * Agrupa despesas por fornecedor
+   * @param {boolean} apenasExecutadas - Se true, considera apenas despesas executadas
+   * @returns {Object} { fornecedor: { quantidade, valor } }
+   */
+  calcularPorFornecedor(apenasExecutadas = true) {
+    const despesas = apenasExecutadas ? this.getDespesasExecutadas() : this.despesas;
+    const porFornecedor = {};
+
+    despesas.forEach((d) => {
+      const fornecedor = d.fornecedor || "Nao informado";
+      if (!porFornecedor[fornecedor]) {
+        porFornecedor[fornecedor] = { quantidade: 0, valor: 0 };
+      }
+      porFornecedor[fornecedor].quantidade++;
+      porFornecedor[fornecedor].valor += d.valor || 0;
+    });
+
+    return porFornecedor;
+  }
+
+  /**
+   * Obtém lista única de parlamentares
+   * @returns {Array} Lista de nomes de parlamentares
+   */
+  getParlamentares() {
+    return [...new Set(this.emendas.map(e => e.autor || e.parlamentar).filter(Boolean))].sort();
+  }
+
+  /**
+   * Formata subtítulo do período baseado nos filtros
+   * @param {Object} filtros
+   * @returns {string|null}
+   */
+  getSubtituloPeriodo(filtros) {
+    if (filtros.dataInicio || filtros.dataFim) {
+      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Inicio";
+      const fim = filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual";
+      return `Periodo: ${inicio} a ${fim}`;
+    }
+
+    // Fallback para mês/ano
+    const mes = filtros.mes || new Date().getMonth() + 1;
+    const ano = filtros.ano || new Date().getFullYear();
+    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
+    return `${nomeMes} ${ano}`;
+  }
+
   async gerar() {
     await this.inicializar();
     // Método a ser implementado pelas subclasses

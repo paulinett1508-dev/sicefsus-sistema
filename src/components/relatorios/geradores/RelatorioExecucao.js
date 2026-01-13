@@ -12,40 +12,19 @@ export class RelatorioExecucao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    // Periodo para subtitulo
-    let subtitulo = null;
-    if (filtros.dataInicio || filtros.dataFim) {
-      const inicio = filtros.dataInicio ? this.formatDate(filtros.dataInicio) : "Inicio";
-      const fim = filtros.dataFim ? this.formatDate(filtros.dataFim) : "Atual";
-      subtitulo = `Periodo: ${inicio} a ${fim}`;
-    }
-
-    // HEADER
-    this.addHeader("Execucao Orcamentaria", subtitulo);
+    // HEADER com subtítulo do período
+    this.addHeader("Execucao Orcamentaria", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
-    // Calcular metricas
-    const totalEmendas = this.emendas.length;
-    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    const totalDespesas = despesasExecutadas.length;
-    
-    // Usa valorTotal já normalizado pelo hook useRelatoriosData
-    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
-    
-    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
-    
-    const saldoDisponivel = valorTotal - valorExecutado;
-    const percentualExecutado = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    // Usar métodos utilitários da BaseRelatorio
+    const { valorTotal, valorExecutado, saldoDisponivel, percentualGeral, totalEmendas, totalDespesas } = this.calcularMetricas();
 
     // KPI CARDS
     const kpis = [
       { label: "Total Emendas", value: totalEmendas.toString() },
       { label: "Valor Total", value: this.formatCurrency(valorTotal) },
-      { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualExecutado.toFixed(1)}%` },
+      { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
       { label: "Saldo", value: this.formatCurrency(saldoDisponivel) },
     ];
 
@@ -62,7 +41,7 @@ export class RelatorioExecucao extends BaseRelatorio {
       `Total de Emendas Cadastradas: ${totalEmendas}`,
       `Total de Despesas Executadas: ${totalDespesas}`,
       `Valor Total Alocado: ${this.formatCurrency(valorTotal)}`,
-      `Valor Executado: ${this.formatCurrency(valorExecutado)} (${percentualExecutado.toFixed(1)}%)`,
+      `Valor Executado: ${this.formatCurrency(valorExecutado)} (${percentualGeral.toFixed(1)}%)`,
       `Saldo Disponivel: ${this.formatCurrency(saldoDisponivel)}`,
     ];
     
@@ -74,34 +53,23 @@ export class RelatorioExecucao extends BaseRelatorio {
     // DETALHAMENTO POR EMENDA
     yPosition = addSectionTitle(this.doc, "Detalhamento por Emenda", yPosition);
 
-    const emendasComExecucao = this.emendas.map((emenda) => {
-      // Usa valorTotal já normalizado pelo hook
-      const valorEmenda = emenda.valorTotal || 0;
-      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-      const valorExec = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
-      const saldo = valorEmenda - valorExec;
-      const percentual = valorEmenda > 0 ? (valorExec / valorEmenda) * 100 : 0;
+    // Usar método utilitário da BaseRelatorio
+    const emendasComExecucao = this.calcularExecucaoPorEmenda()
+      .sort((a, b) => b.percentual - a.percentual);
 
-      return {
-        numero: emenda.numero || "-",
-        tipo: emenda.tipo || "-",
-        parlamentar: emenda.autor || emenda.parlamentar || "-",
-        valorTotal: valorEmenda,
-        valorExecutado: valorExec,
-        saldo,
-        percentual,
-      };
-    }).sort((a, b) => b.percentual - a.percentual);
-
-    const tabelaEmendas = emendasComExecucao.map((e) => [
-      e.numero,
-      e.tipo.length > 12 ? e.tipo.substring(0, 10) + ".." : e.tipo,
-      e.parlamentar.length > 18 ? e.parlamentar.substring(0, 15) + "..." : e.parlamentar,
-      this.formatCurrency(e.valorTotal),
-      this.formatCurrency(e.valorExecutado),
-      this.formatCurrency(e.saldo),
-      `${e.percentual.toFixed(0)}%`,
-    ]);
+    const tabelaEmendas = emendasComExecucao.map((e) => {
+      const tipo = e.tipo || "-";
+      const parlamentar = e.parlamentar || "-";
+      return [
+        e.numero || "-",
+        tipo.length > 12 ? tipo.substring(0, 10) + ".." : tipo,
+        parlamentar.length > 18 ? parlamentar.substring(0, 15) + "..." : parlamentar,
+        this.formatCurrency(e.valorTotal),
+        this.formatCurrency(e.valorExecutado),
+        this.formatCurrency(e.saldo),
+        `${e.percentual.toFixed(0)}%`,
+      ];
+    });
 
     if (tabelaEmendas.length > 0) {
       try {

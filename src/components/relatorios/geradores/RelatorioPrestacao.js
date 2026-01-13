@@ -11,32 +11,20 @@ export class RelatorioPrestacao extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    const mes = filtros.mes || new Date().getMonth() + 1;
-    const ano = filtros.ano || new Date().getFullYear();
-    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
-
-    this.addHeader("Prestacao de Contas", `${nomeMes} ${ano}`);
+    // HEADER com subtítulo do período
+    this.addHeader("Prestacao de Contas", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
-    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    
-    // Usa valorTotal já normalizado pelo hook useRelatoriosData
-    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
-    
-    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
-    
-    const saldoDisponivel = valorTotal - valorExecutado;
-    const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    // Usar métodos utilitários da BaseRelatorio
+    const { valorTotal, valorExecutado, saldoDisponivel, percentualGeral, totalDespesas } = this.calcularMetricas();
+    const despesasExecutadas = this.getDespesasExecutadas();
 
     const kpis = [
       { label: "Recurso Total", value: this.formatCurrency(valorTotal) },
       { label: "Utilizado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
       { label: "Saldo Disponivel", value: this.formatCurrency(saldoDisponivel) },
-      { label: "Despesas", value: despesasExecutadas.length.toString() },
+      { label: "Despesas", value: totalDespesas.toString() },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
@@ -47,22 +35,15 @@ export class RelatorioPrestacao extends BaseRelatorio {
     this.doc.setFont("helvetica", "normal");
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     
-    const emendasComExecucao = this.emendas.filter(e => {
-      const desp = despesasExecutadas.filter(d => d.emendaId === e.id);
-      return desp.length > 0;
-    }).length;
-    
-    const emendas100 = this.emendas.filter(e => {
-      const valorEmenda = e.valorTotal || 0;
-      const exec = despesasExecutadas.filter(d => d.emendaId === e.id)
-        .reduce((sum, d) => sum + (d.valor || 0), 0);
-      return valorEmenda > 0 && exec >= valorEmenda;
-    }).length;
-    
+    // Usar método utilitário para cálculos por emenda
+    const emendasCalculadas = this.calcularExecucaoPorEmenda();
+    const emendasComExecucaoCount = emendasCalculadas.filter(e => e.despesasCount > 0).length;
+    const emendas100Count = emendasCalculadas.filter(e => e.percentual >= 100).length;
+
     const resumoItems = [
-      `Periodo de Referencia: ${nomeMes} de ${ano}`,
-      `Emendas com Execucao: ${emendasComExecucao} de ${this.emendas.length}`,
-      `Emendas 100% Executadas: ${emendas100}`,
+      `Periodo de Referencia: ${this.getSubtituloPeriodo(filtros)}`,
+      `Emendas com Execucao: ${emendasComExecucaoCount} de ${this.emendas.length}`,
+      `Emendas 100% Executadas: ${emendas100Count}`,
       `Percentual Geral: ${percentualGeral.toFixed(1)}%`,
       `Saldo a Executar: ${this.formatCurrency(saldoDisponivel)}`,
     ];
@@ -74,32 +55,20 @@ export class RelatorioPrestacao extends BaseRelatorio {
 
     yPosition = addSectionTitle(this.doc, "Demonstrativo por Emenda", yPosition);
 
-    const demonstrativo = this.emendas.map((emenda) => {
-      // Usa valorTotal já normalizado pelo hook
-      const valorEmenda = emenda.valorTotal || 0;
-      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-      const executado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
-      const saldo = valorEmenda - executado;
-      const percentual = valorEmenda > 0 ? (executado / valorEmenda) * 100 : 0;
+    // Usar método utilitário, ordenado por valor executado
+    const demonstrativo = emendasCalculadas.sort((a, b) => b.valorExecutado - a.valorExecutado);
 
-      return {
-        numero: emenda.numero || "-",
-        parlamentar: emenda.autor || emenda.parlamentar || "-",
-        valorTotal: valorEmenda,
-        executado,
-        saldo,
-        percentual,
-      };
-    }).sort((a, b) => b.executado - a.executado);
-
-    const tabelaDemonstrativo = demonstrativo.map((d) => [
-      d.numero,
-      d.parlamentar.length > 20 ? d.parlamentar.substring(0, 17) + "..." : d.parlamentar,
-      this.formatCurrency(d.valorTotal),
-      this.formatCurrency(d.executado),
-      this.formatCurrency(d.saldo),
-      `${d.percentual.toFixed(0)}%`,
-    ]);
+    const tabelaDemonstrativo = demonstrativo.map((e) => {
+      const parlamentar = e.parlamentar || "-";
+      return [
+        e.numero || "-",
+        parlamentar.length > 20 ? parlamentar.substring(0, 17) + "..." : parlamentar,
+        this.formatCurrency(e.valorTotal),
+        this.formatCurrency(e.valorExecutado),
+        this.formatCurrency(e.saldo),
+        `${e.percentual.toFixed(0)}%`,
+      ];
+    });
 
     if (tabelaDemonstrativo.length > 0) {
       try {
@@ -143,7 +112,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
         emenda?.numero || "-",
         d.descricao?.length > 25 ? d.descricao.substring(0, 22) + "..." : (d.descricao || "-"),
         d.fornecedor?.length > 18 ? d.fornecedor.substring(0, 15) + "..." : (d.fornecedor || "-"),
-        this.formatCurrency(parseFloat(d.valor || 0)),
+        this.formatCurrency(d.valor || 0),
       ];
     });
 

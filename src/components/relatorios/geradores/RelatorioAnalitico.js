@@ -11,33 +11,21 @@ export class RelatorioAnalitico extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    const mes = filtros.mes || new Date().getMonth() + 1;
-    const ano = filtros.ano || new Date().getFullYear();
-    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
-
-    this.addHeader("Relatorio Analitico", `${nomeMes} ${ano}`);
+    // HEADER com subtítulo do período
+    this.addHeader("Relatorio Analitico", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
-    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
-    // Usa autor || parlamentar para capturar ambos os campos
-    const parlamentares = [...new Set(this.emendas.map(e => e.autor || e.parlamentar).filter(Boolean))];
-
-    // Usa valorTotal já normalizado pelo hook useRelatoriosData
-    const valorTotal = this.emendas.reduce((sum, e) => sum + (e.valorTotal || 0), 0);
-    
-    const valorExecutado = despesasExecutadas.reduce((sum, d) => {
-      const valor = parseFloat(d.valor || 0);
-      return sum + (isNaN(valor) ? 0 : valor);
-    }, 0);
-    
-    const percentualGeral = valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+    // Usar métodos utilitários da BaseRelatorio
+    const { valorTotal, valorExecutado, percentualGeral, totalDespesas } = this.calcularMetricas();
+    const despesasExecutadas = this.getDespesasExecutadas();
+    const parlamentares = this.getParlamentares();
 
     const kpis = [
       { label: "Parlamentares", value: parlamentares.length.toString() },
       { label: "Emendas", value: this.emendas.length.toString() },
       { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
-      { label: "Despesas", value: despesasExecutadas.length.toString() },
+      { label: "Despesas", value: totalDespesas.toString() },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
@@ -131,26 +119,19 @@ export class RelatorioAnalitico extends BaseRelatorio {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Detalhamento de Emendas", yPosition);
 
-    const emendasDetalhadas = this.emendas
-      .map((emenda) => {
-        // Usa valorTotal já normalizado pelo hook
-        const valorTotalEmenda = emenda.valorTotal || 0;
-        const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-        const executado = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
-        const percentual = valorTotalEmenda > 0 ? (executado / valorTotalEmenda) * 100 : 0;
-        return { ...emenda, valorTotal: valorTotalEmenda, executado, percentual };
-      })
+    // Usar método utilitário, ordenado por percentual
+    const emendasDetalhadas = this.calcularExecucaoPorEmenda()
       .sort((a, b) => b.percentual - a.percentual);
 
-    const tabelaEmendas = emendasDetalhadas.map((emenda) => {
-      const parlamentar = emenda.autor || emenda.parlamentar || "-";
+    const tabelaEmendas = emendasDetalhadas.map((e) => {
+      const parlamentar = e.parlamentar || "-";
       return [
-        emenda.numero || "-",
+        e.numero || "-",
         parlamentar.length > 20 ? parlamentar.substring(0, 17) + "..." : parlamentar,
-        emenda.tipo || "-",
-        this.formatCurrency(emenda.valorTotal),
-        this.formatCurrency(emenda.executado),
-        `${emenda.percentual.toFixed(0)}%`,
+        e.tipo || "-",
+        this.formatCurrency(e.valorTotal),
+        this.formatCurrency(e.valorExecutado),
+        `${e.percentual.toFixed(0)}%`,
       ];
     });
 
@@ -189,7 +170,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     const emendasAcima50 = emendasDetalhadas.filter(e => e.percentual >= 50).length;
     const emendasAcima80 = emendasDetalhadas.filter(e => e.percentual >= 80).length;
     const emendas100 = emendasDetalhadas.filter(e => e.percentual >= 100).length;
-    const emendasSemExecucao = emendasDetalhadas.filter(e => e.executado === 0).length;
+    const emendasSemExecucao = emendasDetalhadas.filter(e => e.valorExecutado === 0).length;
     
     const indicadores = [
       `Emendas com 100% de execucao: ${emendas100} (${this.emendas.length > 0 ? ((emendas100 / this.emendas.length) * 100).toFixed(0) : 0}%)`,

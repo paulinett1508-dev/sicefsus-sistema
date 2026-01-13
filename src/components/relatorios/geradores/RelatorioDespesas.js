@@ -11,19 +11,16 @@ export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    const mes = filtros.mes || new Date().getMonth() + 1;
-    const ano = filtros.ano || new Date().getFullYear();
-    const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
-
-    this.addHeader("Relatorio de Despesas", `${nomeMes} ${ano}`);
+    // HEADER com subtítulo do período
+    this.addHeader("Relatorio de Despesas", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
-    const despesasExecutadas = this.despesas.filter(d => d.status !== "PLANEJADA");
+    // Usar métodos utilitários da BaseRelatorio
+    const despesasExecutadas = this.getDespesasExecutadas();
     const despesasPlanejadas = this.despesas.filter(d => d.status === "PLANEJADA");
     const totalDespesas = this.despesas.length;
-    
-    // Valores já normalizados pelo hook useRelatoriosData
+
     const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
     const valorPlanejado = despesasPlanejadas.reduce((sum, d) => sum + (d.valor || 0), 0);
 
@@ -151,15 +148,8 @@ export class RelatorioDespesas extends BaseRelatorio {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Top 5 Fornecedores", yPosition);
 
-    const porFornecedor = {};
-    despesasExecutadas.forEach((d) => {
-      const fornecedor = d.fornecedor || "Nao informado";
-      if (!porFornecedor[fornecedor]) {
-        porFornecedor[fornecedor] = { quantidade: 0, valor: 0 };
-      }
-      porFornecedor[fornecedor].quantidade++;
-      porFornecedor[fornecedor].valor += d.valor || 0;
-    });
+    // Usar método utilitário para agregação por fornecedor
+    const porFornecedor = this.calcularPorFornecedor(true);
 
     const tabelaFornecedores = Object.entries(porFornecedor)
       .sort(([, a], [, b]) => b.valor - a.valor)
