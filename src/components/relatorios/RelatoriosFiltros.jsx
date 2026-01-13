@@ -33,6 +33,7 @@ export default function RelatoriosFiltros({
                 value={filtros.dataInicio}
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
+                  aria-label="Data de início do período"
               />
               <span className="relatorios-date-separator">até</span>
               <input
@@ -41,6 +42,7 @@ export default function RelatoriosFiltros({
                 value={filtros.dataFim}
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
+                  aria-label="Data de fim do período"
               />
             </div>
           </div>
@@ -55,6 +57,7 @@ export default function RelatoriosFiltros({
               value={filtros.parlamentar}
               onChange={onFiltroChange}
               className="relatorios-select"
+                aria-label="Filtro de parlamentar"
             >
               <option value="">Todos</option>
               {parlamentares.map((p) => (
@@ -75,6 +78,7 @@ export default function RelatoriosFiltros({
               value={filtros.emenda}
               onChange={onFiltroChange}
               className="relatorios-select"
+                aria-label="Filtro de emenda específica"
             >
               <option value="">Todas as emendas</option>
               {emendas.map((emenda) => (
@@ -98,6 +102,7 @@ export default function RelatoriosFiltros({
               onChange={onFiltroChange}
               placeholder="Digite o município"
               className="relatorios-input"
+                aria-label="Filtro de município"
             />
           </div>
         )}
@@ -111,6 +116,7 @@ export default function RelatoriosFiltros({
               value={filtros.uf}
               onChange={onFiltroChange}
               className="relatorios-select"
+                aria-label="Filtro de UF"
             >
               <option value="">Todas</option>
               {ufs.map((uf) => (
@@ -133,6 +139,7 @@ export default function RelatoriosFiltros({
               onChange={onFiltroChange}
               placeholder="Nome ou CNPJ do fornecedor"
               className="relatorios-input"
+                aria-label="Filtro de fornecedor"
             />
           </div>
         )}

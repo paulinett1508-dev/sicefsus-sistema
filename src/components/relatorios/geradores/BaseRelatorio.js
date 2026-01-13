@@ -27,7 +27,12 @@ export class BaseRelatorio {
   }
 
   async inicializar() {
-    this.logoBase64 = await getLogoBase64();
+    try {
+      this.logoBase64 = await getLogoBase64();
+    } catch (error) {
+      console.warn("Erro ao inicializar logoBase64:", error);
+      this.logoBase64 = null;
+    }
   }
 
   addHeader(titulo, subtitulo = null) {
