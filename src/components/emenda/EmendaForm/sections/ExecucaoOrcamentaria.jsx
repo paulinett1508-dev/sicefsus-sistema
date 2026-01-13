@@ -533,18 +533,24 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       ),
   };
 
-  // ✅ Cálculos derivados (mantidos intactos)
-  stats.saldoDisponivel = stats.valorEmenda - stats.totalExecutado;
+  // ✅ Cálculos derivados
   stats.percentualExecutado =
     (stats.totalExecutado / stats.valorEmenda) * 100 || 0;
 
   // 🆕 Cálculos de naturezas (envelopes orçamentários)
   stats.valorAlocado = calculosNaturezas?.valorTotalAlocado || 0;
-  stats.saldoLivre = stats.valorEmenda - stats.valorAlocado;
   stats.percentualAlocado =
     stats.valorEmenda > 0
       ? (stats.valorAlocado / stats.valorEmenda) * 100
       : 0;
+
+  // ✅ Novos campos com nomes claros
+  stats.saldoParaNaturezas = stats.valorEmenda - stats.valorAlocado; // Para criar NOVAS naturezas
+  stats.saldoNaoExecutado = stats.valorEmenda - stats.totalExecutado; // Quanto ainda não foi gasto
+
+  // Aliases para compatibilidade
+  stats.saldoLivre = stats.saldoParaNaturezas;
+  stats.saldoDisponivel = stats.saldoNaoExecutado;
 
   // 🔄 UNIFICAÇÃO: Criar naturezas virtuais das despesas executadas sem naturezaId
   const naturezasConsolidadas = useMemo(() => {
@@ -910,8 +916,14 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         type: "success",
       });
 
-      // Recarregar lista
+      // Recarregar lista geral
       await carregarDespesas();
+
+      // ✅ FIX: Atualizar despesasPorNatureza para a UI refletir a exclusão
+      if (despesa.naturezaId) {
+        console.log("🔄 Atualizando despesasPorNatureza para natureza:", despesa.naturezaId);
+        await carregarDespesasNatureza(despesa.naturezaId);
+      }
     } catch (e) {
       console.error("❌ Erro ao excluir despesa:", e);
       showToast({
@@ -998,11 +1010,11 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           <div style={styles.statHint}>reservado em naturezas</div>
         </div>
         <div style={dynamicStyles.statCard}>
-          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: stats.saldoLivre > 0 ? "#10b981" : "#ef4444" }}>savings</span> Saldo Livre</div>
-          <div style={{ ...styles.statValue, color: stats.saldoLivre > 0 ? "#10b981" : "#ef4444" }}>
-            {formatCurrency(stats.saldoLivre)}
+          <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#ef4444" }}>savings</span> Saldo p/ Naturezas</div>
+          <div style={{ ...styles.statValue, color: stats.saldoParaNaturezas > 0 ? "#10b981" : "#ef4444" }}>
+            {formatCurrency(stats.saldoParaNaturezas)}
           </div>
-          <div style={styles.statHint}>para novas naturezas</div>
+          <div style={styles.statHint}>para criar novas naturezas</div>
         </div>
         <div style={dynamicStyles.statCard}>
           <div style={dynamicStyles.statLabel}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle", color: "#27ae60" }}>check_circle</span> Total Executado</div>
@@ -1052,7 +1064,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 11, color: isDark ? "var(--theme-text-secondary)" : "#94a3b8" }}>
             <span>{naturezas.length} naturezas cadastradas</span>
-            <span>Livre: {formatCurrency(stats.saldoLivre)}</span>
+            <span>Para novas naturezas: {formatCurrency(stats.saldoParaNaturezas)}</span>
           </div>
         </div>
       )}
@@ -1221,7 +1233,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
               valor: stats.valorEmenda,
               valorRecurso: stats.valorEmenda,
               valorAlocado: stats.valorAlocado,
-              saldoLivre: stats.saldoLivre,
+              saldoParaNaturezas: stats.saldoParaNaturezas,
+              saldoLivre: stats.saldoParaNaturezas, // Alias para compatibilidade
               numero: formData?.numero,
               municipio: formData?.municipio,
               uf: formData?.uf,

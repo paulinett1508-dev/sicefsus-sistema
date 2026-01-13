@@ -80,8 +80,8 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     }, 0);
 
     // 5️⃣ Calcular saldos
-    const saldoDisponivel = valorTotal - valorExecutado;
-    const saldoLivre = valorTotal - valorAlocado; // Para novas naturezas
+    const saldoParaNaturezas = valorTotal - valorAlocado; // Para criar NOVAS naturezas
+    const saldoNaoExecutado = valorTotal - valorExecutado; // Quanto ainda não foi gasto
 
     // 6️⃣ Calcular percentuais
     const percentualExecutado =
@@ -91,13 +91,17 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
 
     // 7️⃣ Arredondar valores para 2 casas decimais
     const valoresCalculados = {
+      // Campos de execução
       valorExecutado: Math.round(valorExecutado * 100) / 100,
-      saldoDisponivel: Math.round(saldoDisponivel * 100) / 100,
+      saldoNaoExecutado: Math.round(saldoNaoExecutado * 100) / 100,
       percentualExecutado: Math.round(percentualExecutado * 100) / 100,
-      // Novos campos para naturezas (envelopes)
+      // Campos de alocação (naturezas/envelopes)
       valorAlocado: Math.round(valorAlocado * 100) / 100,
-      saldoLivre: Math.round(saldoLivre * 100) / 100,
+      saldoParaNaturezas: Math.round(saldoParaNaturezas * 100) / 100,
       percentualAlocado: Math.round(percentualAlocado * 100) / 100,
+      // Aliases para compatibilidade (campos antigos)
+      saldoDisponivel: Math.round(saldoNaoExecutado * 100) / 100,
+      saldoLivre: Math.round(saldoParaNaturezas * 100) / 100,
     };
 
     // 🔍 DEBUG: Log completo antes de salvar
@@ -121,15 +125,20 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     while (!salvamentoSucesso && tentativas < maxTentativas) {
       try {
         await updateDoc(emendaRef, {
+          // Campos de execução
           valorExecutado: valoresCalculados.valorExecutado,
-          saldoDisponivel: valoresCalculados.saldoDisponivel,
+          saldoNaoExecutado: valoresCalculados.saldoNaoExecutado,
           percentualExecutado: valoresCalculados.percentualExecutado,
-          // Novos campos para naturezas (envelopes)
+          // Campos de alocação (naturezas/envelopes)
           valorAlocado: valoresCalculados.valorAlocado,
-          saldoLivre: valoresCalculados.saldoLivre,
+          saldoParaNaturezas: valoresCalculados.saldoParaNaturezas,
           percentualAlocado: valoresCalculados.percentualAlocado,
+          // Aliases para compatibilidade (campos antigos)
+          saldoDisponivel: valoresCalculados.saldoDisponivel,
+          saldoLivre: valoresCalculados.saldoLivre,
+          // Metadados
           atualizadoEm: serverTimestamp(),
-          versaoCalculo: Date.now(), // Timestamp para detectar conflitos
+          versaoCalculo: Date.now(),
         });
         salvamentoSucesso = true;
       } catch (error) {
@@ -147,10 +156,10 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     if (!silent) {
       console.log(`✅ Valores SALVOS no Firebase:`, {
         valorExecutado: valoresCalculados.valorExecutado,
-        saldoDisponivel: valoresCalculados.saldoDisponivel,
+        saldoNaoExecutado: valoresCalculados.saldoNaoExecutado,
         percentualExecutado: valoresCalculados.percentualExecutado,
         valorAlocado: valoresCalculados.valorAlocado,
-        saldoLivre: valoresCalculados.saldoLivre,
+        saldoParaNaturezas: valoresCalculados.saldoParaNaturezas,
         percentualAlocado: valoresCalculados.percentualAlocado,
       });
     }

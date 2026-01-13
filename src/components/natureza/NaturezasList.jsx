@@ -58,12 +58,17 @@ const NaturezasList = ({
   const [regularizandoTodas, setRegularizandoTodas] = useState(false);
   const [progressoRegularizacao, setProgressoRegularizacao] = useState({ atual: 0, total: 0 });
 
-  // Calcular saldo livre da emenda
+  // Calcular saldo para novas naturezas
   const valorTotal = parseValorMonetario(
     emenda?.valor || emenda?.valorRecurso || emenda?.valorTotal || 0
   );
   const valorAlocado = parseValorMonetario(emenda?.valorAlocado || 0);
-  const saldoLivre = valorTotal - valorAlocado;
+  // Usar saldoParaNaturezas se disponivel, senao calcular
+  const saldoParaNaturezas = emenda?.saldoParaNaturezas !== undefined
+    ? parseValorMonetario(emenda.saldoParaNaturezas)
+    : valorTotal - valorAlocado;
+  // Alias para compatibilidade
+  const saldoLivre = saldoParaNaturezas;
 
   // Calculos agregados
   const totalExecutado = naturezas.reduce(
@@ -121,11 +126,14 @@ const NaturezasList = ({
   };
 
   const handleConfirmarExclusaoDespesa = async () => {
+    console.log("🗑️ handleConfirmarExclusaoDespesa chamado", { despesaParaExcluir });
     if (despesaParaExcluir) {
       try {
+        console.log("🗑️ Chamando onExcluirDespesa...");
         await onExcluirDespesa?.(despesaParaExcluir);
+        console.log("✅ onExcluirDespesa concluído");
       } catch (error) {
-        console.error("Erro ao excluir despesa:", error);
+        console.error("❌ Erro ao excluir despesa:", error);
       }
       setDespesaParaExcluir(null);
     }
@@ -390,14 +398,14 @@ const NaturezasList = ({
         </div>
 
         <div style={styles.cardResumo}>
-          <div style={styles.cardResumoLabel}>Saldo Livre</div>
+          <div style={styles.cardResumoLabel}>Saldo p/ Naturezas</div>
           <div
             style={{
               ...styles.cardResumoValor,
-              color: saldoLivre > 0 ? "#10b981" : "#ef4444",
+              color: saldoParaNaturezas > 0 ? "#10b981" : "#ef4444",
             }}
           >
-            R$ {saldoLivre.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+            R$ {saldoParaNaturezas.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -468,7 +476,10 @@ const NaturezasList = ({
               onRegularizarNatureza={onRegularizarNatureza}
               onEditarDespesa={onEditarDespesa}
               onVisualizarDespesa={onVisualizarDespesa}
-              onExcluirDespesa={(d) => setDespesaParaExcluir(d)}
+              onExcluirDespesa={(d) => {
+                console.log("🔴 Botão excluir clicado - despesa:", d?.id, d?.discriminacao);
+                setDespesaParaExcluir(d);
+              }}
             />
           ))}
         </div>
@@ -490,9 +501,13 @@ const NaturezasList = ({
 
       {/* Modal de confirmacao de exclusao de despesa */}
       {despesaParaExcluir && (
+        console.log("🟡 Modal de exclusão renderizado - despesa:", despesaParaExcluir?.id) || (
         <ConfirmationModal
           isVisible={true}
-          onCancel={() => setDespesaParaExcluir(null)}
+          onCancel={() => {
+            console.log("❌ Modal cancelado");
+            setDespesaParaExcluir(null);
+          }}
           onConfirm={handleConfirmarExclusaoDespesa}
           title="Excluir Despesa"
           message={`Tem certeza que deseja excluir a despesa "${despesaParaExcluir.discriminacao || despesaParaExcluir.descricao || "Despesa"}"? Esta acao nao pode ser desfeita.`}
@@ -500,7 +515,7 @@ const NaturezasList = ({
           cancelText="Cancelar"
           type="danger"
         />
-      )}
+      ))}
 
       {/* Modal de confirmacao de regularizacao em lote */}
       {mostrarModalRegularizarTodas && (
