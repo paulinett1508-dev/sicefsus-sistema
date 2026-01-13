@@ -80,24 +80,20 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     if (tabelaStatus.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Status", "Quantidade", "Valor Total", "% do Total"]],
-            body: tabelaStatus,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 'auto', halign: "left" },
-              1: { cellWidth: 24, halign: "right" },
-              2: { cellWidth: 35, halign: "right" },
-              3: { cellWidth: 24, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de status não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultStatus = this.createTable({
+          startY: yPosition,
+          head: [["Status", "Quantidade", "Valor Total", "% do Total"]],
+          body: tabelaStatus,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 'auto', halign: "left" },
+            1: { cellWidth: 24, halign: "right" },
+            2: { cellWidth: 35, halign: "right" },
+            3: { cellWidth: 24, halign: "center" },
+          },
+        });
+        yPosition = resultStatus.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
       }
@@ -124,26 +120,22 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     if (tabelaDespesas.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
-            body: tabelaDespesas,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 20, halign: "center" },
-              1: { cellWidth: 'auto', halign: "left" },
-              2: { cellWidth: 38, halign: "left" },
-              3: { cellWidth: 22, halign: "left" },
-              4: { cellWidth: 28, halign: "right" },
-              5: { cellWidth: 26, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de despesas não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultDespesas = this.createTable({
+          startY: yPosition,
+          head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
+          body: tabelaDespesas,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 20, halign: "center" },
+            1: { cellWidth: 'auto', halign: "left" },
+            2: { cellWidth: 38, halign: "left" },
+            3: { cellWidth: 22, halign: "left" },
+            4: { cellWidth: 28, halign: "right" },
+            5: { cellWidth: 26, halign: "center" },
+          },
+        });
+        yPosition = resultDespesas.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
@@ -167,24 +159,20 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     if (tabelaFornecedores.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
-            body: tabelaFornecedores,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 14, halign: "center" },
-              1: { cellWidth: 'auto', halign: "left" },
-              2: { cellWidth: 20, halign: "right" },
-              3: { cellWidth: 35, halign: "right" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de fornecedores não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultFornecedores = this.createTable({
+          startY: yPosition,
+          head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
+          body: tabelaFornecedores,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 14, halign: "center" },
+            1: { cellWidth: 'auto', halign: "left" },
+            2: { cellWidth: 20, halign: "right" },
+            3: { cellWidth: 35, halign: "right" },
+          },
+        });
+        yPosition = resultFornecedores.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
       }

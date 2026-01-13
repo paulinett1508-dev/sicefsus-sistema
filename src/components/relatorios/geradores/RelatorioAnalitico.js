@@ -93,26 +93,22 @@ export class RelatorioAnalitico extends BaseRelatorio {
 
     if (tabelaParlamentares.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Parlamentar", "Emendas", "Total", "Executado", "Saldo", "%"]],
-            body: tabelaParlamentares,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 'auto', halign: "left" },
-              1: { cellWidth: 18, halign: "right" },
-              2: { cellWidth: 30, halign: "right" },
-              3: { cellWidth: 30, halign: "right" },
-              4: { cellWidth: 28, halign: "right" },
-              5: { cellWidth: 16, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de parlamentares não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultParlamentares = this.createTable({
+          startY: yPosition,
+          head: [["Parlamentar", "Emendas", "Total", "Executado", "Saldo", "%"]],
+          body: tabelaParlamentares,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 'auto', halign: "left" },
+            1: { cellWidth: 18, halign: "right" },
+            2: { cellWidth: 30, halign: "right" },
+            3: { cellWidth: 30, halign: "right" },
+            4: { cellWidth: 28, halign: "right" },
+            5: { cellWidth: 16, halign: "center" },
+          },
+        });
+        yPosition = resultParlamentares.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de parlamentares: ${error.message}`);
       }
@@ -139,26 +135,22 @@ export class RelatorioAnalitico extends BaseRelatorio {
 
     if (tabelaEmendas.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Emenda", "Parlamentar", "Tipo", "Total", "Executado", "%"]],
-            body: tabelaEmendas,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 22, halign: "left" },
-              1: { cellWidth: 'auto', halign: "left" },
-              2: { cellWidth: 28, halign: "left" },
-              3: { cellWidth: 28, halign: "right" },
-              4: { cellWidth: 28, halign: "right" },
-              5: { cellWidth: 16, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de emendas não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultEmendas = this.createTable({
+          startY: yPosition,
+          head: [["Emenda", "Parlamentar", "Tipo", "Total", "Executado", "%"]],
+          body: tabelaEmendas,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 22, halign: "left" },
+            1: { cellWidth: 'auto', halign: "left" },
+            2: { cellWidth: 28, halign: "left" },
+            3: { cellWidth: 28, halign: "right" },
+            4: { cellWidth: 28, halign: "right" },
+            5: { cellWidth: 16, halign: "center" },
+          },
+        });
+        yPosition = resultEmendas.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }

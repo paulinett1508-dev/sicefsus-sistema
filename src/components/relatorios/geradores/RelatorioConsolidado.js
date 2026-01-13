@@ -81,25 +81,21 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
       if (tabelaTipos.length > 0) {
         try {
-          if (this.doc.autoTable) {
-            const modernStyles = getModernTableStyles();
-            this.doc.autoTable({
-              startY: yPosition,
-              head: [["Tipo", "Qtd", "Valor Total", "Executado", "%"]],
-              body: tabelaTipos,
-              ...modernStyles,
-              columnStyles: {
-                0: { cellWidth: 'auto', halign: "left" },
-                1: { cellWidth: 18, halign: "right" },
-                2: { cellWidth: 32, halign: "right" },
-                3: { cellWidth: 32, halign: "right" },
-                4: { cellWidth: 16, halign: "center" },
-              },
-            });
-            yPosition = this.doc.lastAutoTable.finalY + 10;
-          } else {
-            this.addWarning("Tabela de tipos não pôde ser gerada");
-          }
+          const modernStyles = getModernTableStyles();
+          const resultTipos = this.createTable({
+            startY: yPosition,
+            head: [["Tipo", "Qtd", "Valor Total", "Executado", "%"]],
+            body: tabelaTipos,
+            ...modernStyles,
+            columnStyles: {
+              0: { cellWidth: 'auto', halign: "left" },
+              1: { cellWidth: 18, halign: "right" },
+              2: { cellWidth: 32, halign: "right" },
+              3: { cellWidth: 32, halign: "right" },
+              4: { cellWidth: 16, halign: "center" },
+            },
+          });
+          yPosition = resultTipos.finalY + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de tipos: ${error.message}`);
         }
@@ -124,26 +120,22 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
       if (tabelaTop10.length > 0) {
         try {
-          if (this.doc.autoTable) {
-            const modernStyles = getModernTableStyles();
-            this.doc.autoTable({
-              startY: yPosition,
-              head: [["#", "Emenda", "Parlamentar", "Total", "Executado", "%"]],
-              body: tabelaTop10,
-              ...modernStyles,
-              columnStyles: {
-                0: { cellWidth: 14, halign: "center" },
-                1: { cellWidth: 22, halign: "left" },
-                2: { cellWidth: 'auto', halign: "left" },
-                3: { cellWidth: 28, halign: "right" },
-                4: { cellWidth: 28, halign: "right" },
-                5: { cellWidth: 14, halign: "center" },
-              },
-            });
-            yPosition = this.doc.lastAutoTable.finalY + 10;
-          } else {
-            this.addWarning("Tabela Top 10 não pôde ser gerada");
-          }
+          const modernStyles = getModernTableStyles();
+          const resultTop10 = this.createTable({
+            startY: yPosition,
+            head: [["#", "Emenda", "Parlamentar", "Total", "Executado", "%"]],
+            body: tabelaTop10,
+            ...modernStyles,
+            columnStyles: {
+              0: { cellWidth: 14, halign: "center" },
+              1: { cellWidth: 22, halign: "left" },
+              2: { cellWidth: 'auto', halign: "left" },
+              3: { cellWidth: 28, halign: "right" },
+              4: { cellWidth: 28, halign: "right" },
+              5: { cellWidth: 14, halign: "center" },
+            },
+          });
+          yPosition = resultTop10.finalY + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela Top 10: ${error.message}`);
         }
@@ -167,24 +159,20 @@ export class RelatorioConsolidado extends BaseRelatorio {
 
       if (tabelaFornecedores.length > 0) {
         try {
-          if (this.doc.autoTable) {
-            const modernStyles = getModernTableStyles();
-            this.doc.autoTable({
-              startY: yPosition,
-              head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
-              body: tabelaFornecedores,
-              ...modernStyles,
-              columnStyles: {
-                0: { cellWidth: 14, halign: "center" },
-                1: { cellWidth: 'auto', halign: "left" },
-                2: { cellWidth: 20, halign: "right" },
-                3: { cellWidth: 32, halign: "right" },
-              },
-            });
-            yPosition = this.doc.lastAutoTable.finalY + 10;
-          } else {
-            this.addWarning("Tabela de fornecedores não pôde ser gerada");
-          }
+          const modernStyles = getModernTableStyles();
+          const resultFornecedores = this.createTable({
+            startY: yPosition,
+            head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
+            body: tabelaFornecedores,
+            ...modernStyles,
+            columnStyles: {
+              0: { cellWidth: 14, halign: "center" },
+              1: { cellWidth: 'auto', halign: "left" },
+              2: { cellWidth: 20, halign: "right" },
+              3: { cellWidth: 32, halign: "right" },
+            },
+          });
+          yPosition = resultFornecedores.finalY + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
         }

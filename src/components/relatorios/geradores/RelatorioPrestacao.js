@@ -72,26 +72,22 @@ export class RelatorioPrestacao extends BaseRelatorio {
 
     if (tabelaDemonstrativo.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"]],
-            body: tabelaDemonstrativo,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 22, halign: "left" },
-              1: { cellWidth: 'auto', halign: "left" },
-              2: { cellWidth: 28, halign: "right" },
-              3: { cellWidth: 28, halign: "right" },
-              4: { cellWidth: 28, halign: "right" },
-              5: { cellWidth: 16, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de demonstrativo não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultDemonstrativo = this.createTable({
+          startY: yPosition,
+          head: [["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"]],
+          body: tabelaDemonstrativo,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 22, halign: "left" },
+            1: { cellWidth: 'auto', halign: "left" },
+            2: { cellWidth: 28, halign: "right" },
+            3: { cellWidth: 28, halign: "right" },
+            4: { cellWidth: 28, halign: "right" },
+            5: { cellWidth: 16, halign: "center" },
+          },
+        });
+        yPosition = resultDemonstrativo.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de demonstrativo: ${error.message}`);
       }
@@ -120,25 +116,21 @@ export class RelatorioPrestacao extends BaseRelatorio {
 
     if (tabelaDespesas.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Data", "Emenda", "Descrição", "Fornecedor", "Valor"]],
-            body: tabelaDespesas,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 20, halign: "center" },
-              1: { cellWidth: 22, halign: "left" },
-              2: { cellWidth: 'auto', halign: "left" },
-              3: { cellWidth: 38, halign: "left" },
-              4: { cellWidth: 28, halign: "right" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de despesas não pôde ser gerada");
-        }
+        const modernStyles = getModernTableStyles();
+        const resultDespesas = this.createTable({
+          startY: yPosition,
+          head: [["Data", "Emenda", "Descrição", "Fornecedor", "Valor"]],
+          body: tabelaDespesas,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 20, halign: "center" },
+            1: { cellWidth: 22, halign: "left" },
+            2: { cellWidth: 'auto', halign: "left" },
+            3: { cellWidth: 38, halign: "left" },
+            4: { cellWidth: 28, halign: "right" },
+          },
+        });
+        yPosition = resultDespesas.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }

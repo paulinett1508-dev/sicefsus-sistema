@@ -73,27 +73,23 @@ export class RelatorioExecucao extends BaseRelatorio {
 
     if (tabelaEmendas.length > 0) {
       try {
-        if (this.doc.autoTable) {
-          const modernStyles = getModernTableStyles();
-          this.doc.autoTable({
-            startY: yPosition,
-            head: [["Emenda", "Tipo", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
-            body: tabelaEmendas,
-            ...modernStyles,
-            columnStyles: {
-              0: { cellWidth: 22, halign: "left" },
-              1: { cellWidth: 24, halign: "left" },
-              2: { cellWidth: 'auto', halign: "left" },
-              3: { cellWidth: 26, halign: "right" },
-              4: { cellWidth: 26, halign: "right" },
-              5: { cellWidth: 26, halign: "right" },
-              6: { cellWidth: 14, halign: "center" },
-            },
-          });
-          yPosition = this.doc.lastAutoTable.finalY + 10;
-        } else {
-          this.addWarning("Tabela de emendas não pôde ser gerada (plugin não disponível)");
-        }
+        const modernStyles = getModernTableStyles();
+        const result = this.createTable({
+          startY: yPosition,
+          head: [["Emenda", "Tipo", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
+          body: tabelaEmendas,
+          ...modernStyles,
+          columnStyles: {
+            0: { cellWidth: 22, halign: "left" },
+            1: { cellWidth: 24, halign: "left" },
+            2: { cellWidth: 'auto', halign: "left" },
+            3: { cellWidth: 26, halign: "right" },
+            4: { cellWidth: 26, halign: "right" },
+            5: { cellWidth: 26, halign: "right" },
+            6: { cellWidth: 14, halign: "center" },
+          },
+        });
+        yPosition = result.finalY + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }
@@ -124,23 +120,19 @@ export class RelatorioExecucao extends BaseRelatorio {
     ]);
 
     try {
-      if (this.doc.autoTable) {
-        const modernStyles = getModernTableStyles();
-        this.doc.autoTable({
-          startY: yPosition,
-          head: [["Status", "Valor Executado", "% Emendas"]],
-          body: tabelaStatus,
-          ...modernStyles,
-          columnStyles: {
-            0: { cellWidth: 'auto', halign: "left" },
-            1: { cellWidth: 30, halign: "right" },
-            2: { cellWidth: 30, halign: "center" },
-          },
-        });
-        yPosition = this.doc.lastAutoTable.finalY + 10;
-      } else {
-        this.addWarning("Tabela de status não pôde ser gerada (plugin não disponível)");
-      }
+      const modernStyles = getModernTableStyles();
+      const resultStatus = this.createTable({
+        startY: yPosition,
+        head: [["Status", "Valor Executado", "% Emendas"]],
+        body: tabelaStatus,
+        ...modernStyles,
+        columnStyles: {
+          0: { cellWidth: 'auto', halign: "left" },
+          1: { cellWidth: 30, halign: "right" },
+          2: { cellWidth: 30, halign: "center" },
+        },
+      });
+      yPosition = resultStatus.finalY + 10;
     } catch (error) {
       this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
     }

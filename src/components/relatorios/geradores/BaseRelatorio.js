@@ -1,6 +1,6 @@
 // src/components/relatorios/geradores/BaseRelatorio.js
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import {
   addHeader,
   addFooter,
@@ -73,6 +73,15 @@ export class BaseRelatorio {
       return 70; // Retorna nova posição Y após adicionar página
     }
     return yPosition;
+  }
+
+  /**
+   * Cria uma tabela no PDF usando autoTable
+   * @param {Object} options - Configurações da tabela
+   * @returns {Object} Resultado do autoTable (contém finalY)
+   */
+  createTable(options) {
+    return autoTable(this.doc, options);
   }
 
   formatCurrency(value) {
