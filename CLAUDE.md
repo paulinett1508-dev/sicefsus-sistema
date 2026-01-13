@@ -100,6 +100,30 @@ Se o statusline nao aparecer automaticamente, adicione ao `.claude/settings.json
 - Despesas agrupadas por codigo de natureza (ex: 339030)
 - Ver `src/components/natureza/` para componentes
 
+**Campos de Saldo (atualizado 13/01/2026):**
+
+| Nivel | Campo | Formula | Uso |
+|-------|-------|---------|-----|
+| **Emenda** | `saldoParaNaturezas` | `valor - valorAlocado` | Quanto pode alocar em NOVAS naturezas |
+| **Emenda** | `saldoNaoExecutado` | `valor - valorExecutado` | Quanto ainda nao foi gasto |
+| **Emenda** | `saldoLivre` | (alias) | Compatibilidade - igual a saldoParaNaturezas |
+| **Emenda** | `saldoDisponivel` | (alias) | Compatibilidade - igual a saldoNaoExecutado |
+| **Natureza** | `saldoDisponivel` | `valorAlocado - valorExecutado` | Quanto pode gastar em despesas DENTRO dela |
+
+Exemplo pratico:
+```
+EMENDA: R$ 210,00
+├── valorAlocado: R$ 150,00 (natureza)
+├── valorExecutado: R$ 150,00 (despesas)
+├── saldoParaNaturezas: R$ 60,00 (pode criar mais naturezas)
+└── saldoNaoExecutado: R$ 60,00 (ainda nao gastou)
+
+NATUREZA 339039:
+├── valorAlocado: R$ 150,00
+├── valorExecutado: R$ 150,00
+└── saldoDisponivel: R$ 0,00 (esgotada)
+```
+
 **Transformacao Visual (27/12/2025):**
 - Paleta de cores atualizada para estilo moderno (Tailwind)
 - Fonte Inter adicionada
@@ -509,9 +533,9 @@ EXECUTAR:
 | Colecao | Campos principais |
 |---------|-------------------|
 | `usuarios` | uid, email, nome, tipo, municipio, uf, status, superAdmin |
-| `emendas` | id, numero, autor, municipio, uf, valor, dataValidade, status |
+| `emendas` | id, numero, autor, municipio, uf, valor, valorAlocado, valorExecutado, saldoParaNaturezas, saldoNaoExecutado, dataValidade, status |
 | `despesas` | id, emendaId, naturezaId, municipio, uf, valor, status, statusPagamento |
-| `naturezas` | id, emendaId, codigo, descricao, valorAlocado, criadoEm |
+| `naturezas` | id, emendaId, codigo, descricao, valorAlocado, valorExecutado, saldoDisponivel, criadoEm |
 
 ---
 
@@ -702,6 +726,7 @@ node scripts/<script>.cjs --apply   # Aplicar correcoes
 | `vincular-despesas-naturezas.cjs` | Vincula despesas a naturezas existentes ou cria novas naturezas | 13/01/2026 - 51 despesas vinculadas, 6 naturezas criadas |
 | `corrigir-estouro-emendas.cjs` | Ajusta valor das emendas para cobrir despesas executadas (saldo negativo) | 13/01/2026 - 4 emendas corrigidas |
 | `fix-saldo-negativo.cjs` | Corrige emendas especificas com saldo negativo (IDs hardcoded) | Script pontual |
+| `corrigir-logica-orcamentaria.cjs` | Auto-regulariza naturezas e adiciona novos campos de saldo (saldoParaNaturezas, saldoNaoExecutado) | 13/01/2026 - DEV: 1 nat + 4 emendas, PROD: 11 emendas |
 
 ### Detalhes dos Scripts
 
@@ -735,6 +760,19 @@ node scripts/<script>.cjs --apply   # Aplicar correcoes
 - **Solucao:** Aumenta `valor` e `valorRecurso` para cobrir o total executado
 - **IDs hardcoded:** 4 emendas especificas identificadas na auditoria
 - **Campos atualizados:** valor, valorRecurso, valorExecutado, saldoDisponivel, percentualExecutado
+
+#### corrigir-logica-orcamentaria.cjs
+- **Problema:** Naturezas com valorAlocado=0 mas valorExecutado>0 (nao regularizadas)
+- **Solucao em 2 fases:**
+  1. Auto-regulariza naturezas: define valorAlocado = valorExecutado
+  2. Recalcula emendas: adiciona novos campos saldoParaNaturezas e saldoNaoExecutado
+- **Flags:**
+  - `--dev`: usar banco DEV em vez de PROD
+  - `--apply`: aplicar correcoes (sem flag = dry-run)
+- **Campos adicionados:**
+  - `saldoParaNaturezas`: valor - valorAlocado (para criar novas naturezas)
+  - `saldoNaoExecutado`: valor - valorExecutado (quanto ainda nao gastou)
+  - Mantém aliases: saldoLivre, saldoDisponivel
 
 ### Auditoria de Integridade (13/01/2026)
 
