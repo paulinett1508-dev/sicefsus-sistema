@@ -109,7 +109,9 @@
       "mcp__firebase__firebase_get_document",
       "Bash(pgrep:*)",
       "Bash(npm run dev:*)",
-      "Bash(claude:*)"
+      "Bash(claude:*)",
+      "Bash(jq:*)",
+      "Bash(npm run lint:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
