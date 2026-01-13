@@ -4,6 +4,48 @@
 
 ---
 
+## Concluido - Validacao de Saldo e UX (2026-01-13)
+
+### Validacao de Estouro de Saldo
+
+Implementadas validacoes em multiplas camadas para prevenir "saldos overs" (estouros):
+
+#### Despesas - 3 Camadas de Protecao
+| Camada | Arquivo | Validacao |
+|--------|---------|-----------|
+| Abertura Modal | `ExecucaoOrcamentaria.jsx:1254-1259` | Bloqueia se `saldoDisponivel <= 0` |
+| Formulario | `DespesaFormBasicFields.jsx` | Desabilita botao se valor > saldo |
+| Submit | `DespesaForm.jsx:466-491` | `validarDespesaNatureza()` antes de salvar |
+
+#### Naturezas - Validacao no Service Layer
+| Operacao | Arquivo | Validacao |
+|----------|---------|-----------|
+| Criar | `naturezaService.js:42-45` | `validarAlocacaoNatureza()` |
+| Aumentar valor | `naturezaService.js:136-146` | Valida diferenca vs saldo livre |
+| Diminuir valor | `naturezaService.js:126-133` | Impede valor < executado |
+
+### Melhoria UX - Cards de Resumo (NaturezasList)
+
+Cards reorganizados com icones e subtitulos explicativos:
+
+| Card | Icone | Subtitulo |
+|------|-------|-----------|
+| Valor da Emenda | payments | - |
+| Total Executado | receipt_long | "despesas pagas" |
+| Total Alocado | account_balance_wallet | "reservado em naturezas" |
+| Saldo p/ Naturezas | add_circle | "disponivel para alocar" |
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/DespesaForm.jsx` | Import `validarDespesaNatureza` + validacao no handleSubmit |
+| `src/components/natureza/NaturezasList.jsx` | Cards com icones + subtitulos explicativos |
+
+### Commits
+- `b351ccf` fix(despesa): validar saldo no submit e melhorar cards de resumo
+
+---
+
 ## Testes Completos do Sistema
 
 ### 1. Autenticacao e Usuarios
