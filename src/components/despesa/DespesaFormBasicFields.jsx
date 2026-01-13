@@ -535,19 +535,20 @@ const DespesaFormBasicFields = ({
           {modoCriacaoDireta && naturezaInfo && (
             <div style={{
               gridColumn: "1 / -1",
-              padding: "12px 16px",
+              padding: "16px",
               backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "#eff6ff",
               borderRadius: "8px",
               border: `1px solid ${isDark ? "#3b82f6" : "#93c5fd"}`,
               marginBottom: "8px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              {/* Seção da Natureza */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "10px" }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18, color: "#3b82f6" }}>account_balance_wallet</span>
                 <span style={{ fontSize: 14, fontWeight: 600, color: isDark ? "#93c5fd" : "#1e40af" }}>
-                  Criando despesa na natureza: {naturezaInfo.codigo}
+                  Natureza: {naturezaInfo.codigo}
                 </span>
               </div>
-              <div style={{ display: "flex", gap: "24px", fontSize: 13 }}>
+              <div style={{ display: "flex", gap: "24px", fontSize: 13, marginBottom: "16px" }}>
                 <div>
                   <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>Alocado: </span>
                   <span style={{ fontWeight: 600, color: isDark ? "var(--theme-text)" : "#0f172a" }}>
@@ -572,6 +573,59 @@ const DespesaFormBasicFields = ({
                   </span>
                 </div>
               </div>
+
+              {/* Seção de Execução da Emenda */}
+              {emendaInfo && (
+                <div style={{
+                  paddingTop: "12px",
+                  borderTop: `1px solid ${isDark ? "rgba(59, 130, 246, 0.3)" : "#bfdbfe"}`,
+                }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: 16, color: isDark ? "#a78bfa" : "#7c3aed" }}>analytics</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: isDark ? "#a78bfa" : "#7c3aed" }}>
+                        Execução da Emenda
+                      </span>
+                    </div>
+                    <span style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: isDark ? "#a78bfa" : "#7c3aed",
+                    }}>
+                      {((parseValorMonetario(emendaInfo.valorExecutado || emendaInfo.totalExecutado || 0) / parseValorMonetario(emendaInfo.valor || emendaInfo.valorRecurso || 1)) * 100).toFixed(1)}% executado
+                    </span>
+                  </div>
+                  {/* Barra de progresso */}
+                  <div style={{
+                    height: "8px",
+                    backgroundColor: isDark ? "rgba(167, 139, 250, 0.2)" : "#ede9fe",
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                    marginBottom: "8px",
+                  }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${Math.min((parseValorMonetario(emendaInfo.valorExecutado || emendaInfo.totalExecutado || 0) / parseValorMonetario(emendaInfo.valor || emendaInfo.valorRecurso || 1)) * 100, 100)}%`,
+                      backgroundColor: isDark ? "#a78bfa" : "#7c3aed",
+                      borderRadius: "4px",
+                      transition: "width 0.3s ease",
+                    }} />
+                  </div>
+                  {/* Valores da emenda */}
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>
+                      Executado: <strong style={{ color: isDark ? "#a78bfa" : "#7c3aed" }}>
+                        {formatarValorMonetario(emendaInfo.valorExecutado || emendaInfo.totalExecutado || 0)}
+                      </strong>
+                    </span>
+                    <span style={{ color: isDark ? "var(--theme-text-secondary)" : "#64748b" }}>
+                      Total: <strong style={{ color: isDark ? "var(--theme-text)" : "#0f172a" }}>
+                        {formatarValorMonetario(emendaInfo.valor || emendaInfo.valorRecurso || 0)}
+                      </strong>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
