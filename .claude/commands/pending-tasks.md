@@ -1,6 +1,6 @@
 # Tarefas Pendentes para Proxima Sessao
 
-## Atualizado em: 2026-01-12
+## Atualizado em: 2026-01-13
 
 ---
 
@@ -240,6 +240,54 @@
 
 ---
 
+## Concluido - Modulo Relatorios (2026-01-13)
+
+### Code Review e Correcoes
+
+#### P1 - Criticos (Corrigidos)
+- Normalizacao de valores: `parseFloat(e.valor || e.valorRecurso...)` substituido por `e.valorTotal || 0`
+- Campo parlamentar padronizado: `e.autor || e.parlamentar || "-"`
+- Arquivos: RelatorioExecucao.js, RelatorioPrestacao.js, RelatorioAnalitico.js, RelatorioDespesas.js, RelatorioConsolidado.js
+
+#### P2 - Medios (Corrigidos)
+- Adicionado `mes` e `ano` em FILTROS_INICIAIS (relatoriosConstants.js)
+- Codigo duplicado extraido para BaseRelatorio.js:
+  - `getDespesasExecutadas()` - Filtra despesas com status !== "PLANEJADA"
+  - `calcularMetricas()` - Retorna valorTotal, valorExecutado, saldoDisponivel, percentualGeral
+  - `calcularExecucaoPorEmenda()` - Mapeia emendas com valores de execucao
+  - `calcularPorFornecedor()` - Agrupa despesas por fornecedor
+  - `getParlamentares()` - Lista unica de parlamentares
+  - `getSubtituloPeriodo()` - Formata subtitulo do periodo
+
+#### P3 - Baixos (Corrigidos)
+- Console.logs removidos de Relatorios.jsx, useRelatoriosData.js, BaseRelatorio.js
+- CSS injetado dinamicamente removido (ja estava em relatorios.css)
+- `alert()` substituido por `toast.error()` com useToast hook
+- Aria-labels adicionados em todos filtros (RelatoriosFiltros.jsx)
+- Try-catch adicionado em BaseRelatorio.inicializar() e RelatorioConsolidado.gerar()
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/Relatorios.jsx` | Removido console.logs, CSS injetado, alert() -> toast |
+| `src/hooks/useRelatoriosData.js` | Removido console.logs |
+| `src/utils/relatoriosConstants.js` | Adicionado mes/ano em FILTROS_INICIAIS |
+| `src/components/relatorios/geradores/BaseRelatorio.js` | 6 metodos utilitarios + try-catch |
+| `src/components/relatorios/geradores/RelatorioExecucao.js` | Usa metodos BaseRelatorio |
+| `src/components/relatorios/geradores/RelatorioPrestacao.js` | Usa metodos BaseRelatorio |
+| `src/components/relatorios/geradores/RelatorioAnalitico.js` | Usa metodos BaseRelatorio |
+| `src/components/relatorios/geradores/RelatorioDespesas.js` | Usa metodos BaseRelatorio |
+| `src/components/relatorios/geradores/RelatorioConsolidado.js` | Usa metodos BaseRelatorio + try-catch |
+| `src/components/relatorios/RelatoriosFiltros.jsx` | Aria-labels em todos inputs |
+
+### Commits
+- `8e1c849` fix(relatorios): corrigir normalizacao de valores e campo parlamentar
+- `21be57d` refactor(relatorios): extrair codigo duplicado para BaseRelatorio
+- `2da0dd8` chore(relatorios): limpeza de codigo e melhorias de UX
+- `68cef86` fix(relatorios): melhorias de robustez e acessibilidade
+
+---
+
 ## Concluido - Modulo Fornecedores (2026-01-12)
 
 ### Arquivos Criados
@@ -355,6 +403,7 @@
 
 ## Historico
 
+- **2026-01-13**: Code review e correcoes completas do modulo Relatorios (P1/P2/P3)
 - **2026-01-12**: Importacao de fornecedores em PROD (30 fornecedores, 0 erros)
 - **2026-01-12**: Implementacao completa do modulo Fornecedores (CRUD + integracao despesas)
 - **2026-01-12**: Correcao saldo negativo em 4 emendas PROD (script fix-saldo-negativo.cjs)
