@@ -87,7 +87,6 @@ export function useRelatoriosData(usuario) {
 
         setDespesas(despesasData);
       } catch (error) {
-        console.error("Erro ao carregar dados:", error);
         setError(error.message);
       } finally {
         setLoading(false);

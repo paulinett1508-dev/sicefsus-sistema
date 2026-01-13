@@ -12,7 +12,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     await this.inicializar();
 
     // HEADER com subtítulo do período
-    this.addHeader("Relatorio de Despesas", this.getSubtituloPeriodo(filtros));
+    this.addHeader("Relatório de Despesas", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
@@ -47,7 +47,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     const resumoItems = [
       `Despesas Executadas: ${despesasExecutadas.length}`,
       `Despesas Planejadas: ${despesasPlanejadas.length}`,
-      `Valor Medio por Despesa: ${this.formatCurrency(mediaValor)}`,
+      `Valor Médio por Despesa: ${this.formatCurrency(mediaValor)}`,
       `Maior Despesa: ${this.formatCurrency(isNaN(maiorDespesa) ? 0 : maiorDespesa)}`,
       `Fornecedores Distintos: ${fornecedores}`,
     ];
@@ -61,7 +61,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     const porStatus = {};
     this.despesas.forEach((d) => {
-      const status = d.status || "Nao definido";
+      const status = d.status || "Não definido";
       if (!porStatus[status]) {
         porStatus[status] = { quantidade: 0, valor: 0 };
       }
@@ -95,9 +95,11 @@ export class RelatorioDespesas extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de status não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
       }
     }
 
@@ -126,7 +128,7 @@ export class RelatorioDespesas extends BaseRelatorio {
           const modernStyles = getModernTableStyles();
           this.doc.autoTable({
             startY: yPosition,
-            head: [["Data", "Descricao", "Fornecedor", "Emenda", "Valor", "Status"]],
+            head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
             body: tabelaDespesas,
             ...modernStyles,
             columnStyles: {
@@ -139,9 +141,11 @@ export class RelatorioDespesas extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de despesas não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
     }
 
@@ -178,16 +182,18 @@ export class RelatorioDespesas extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de fornecedores não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
       }
     }
 
     this.doc.setTextColor(...PDF_COLORS.SLATE_400);
     this.doc.setFontSize(6);
     this.doc.setFont("helvetica", "italic");
-    this.doc.text("* Listagem completa de despesas. Relatorio gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+    this.doc.text("* Listagem completa de despesas. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
     this.addFooter();
   }

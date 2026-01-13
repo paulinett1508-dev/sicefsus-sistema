@@ -12,7 +12,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     await this.inicializar();
 
     // HEADER com subtítulo do período
-    this.addHeader("Relatorio Analitico", this.getSubtituloPeriodo(filtros));
+    this.addHeader("Relatório Analítico por Parlamentar", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
@@ -30,7 +30,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
 
-    yPosition = addSectionTitle(this.doc, "Visao Geral", yPosition);
+    yPosition = addSectionTitle(this.doc, "Visão Geral", yPosition);
     
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
@@ -41,9 +41,9 @@ export class RelatorioAnalitico extends BaseRelatorio {
     
     const resumoItems = [
       `Total de Parlamentares Ativos: ${parlamentares.length}`,
-      `Media de Valor por Parlamentar: ${this.formatCurrency(mediaPorParlamentar)}`,
-      `Media de Execucao por Parlamentar: ${this.formatCurrency(mediaExecPorParlamentar)}`,
-      `Percentual Geral de Execucao: ${percentualGeral.toFixed(1)}%`,
+      `Média de Valor por Parlamentar: ${this.formatCurrency(mediaPorParlamentar)}`,
+      `Média de Execução por Parlamentar: ${this.formatCurrency(mediaExecPorParlamentar)}`,
+      `Percentual Geral de Execução: ${percentualGeral.toFixed(1)}%`,
     ];
     
     resumoItems.forEach((item, i) => {
@@ -51,7 +51,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     });
     yPosition += (resumoItems.length * 4) + 6;
 
-    yPosition = addSectionTitle(this.doc, "Analise por Parlamentar", yPosition);
+    yPosition = addSectionTitle(this.doc, "Análise por Parlamentar", yPosition);
 
     const analise = parlamentares.map((parlamentar) => {
       // Filtra por autor OU parlamentar
@@ -110,9 +110,11 @@ export class RelatorioAnalitico extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de parlamentares não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de parlamentares: ${error.message}`);
       }
     }
 
@@ -154,9 +156,11 @@ export class RelatorioAnalitico extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de emendas não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }
     }
 
@@ -173,10 +177,10 @@ export class RelatorioAnalitico extends BaseRelatorio {
     const emendasSemExecucao = emendasDetalhadas.filter(e => e.valorExecutado === 0).length;
     
     const indicadores = [
-      `Emendas com 100% de execucao: ${emendas100} (${this.emendas.length > 0 ? ((emendas100 / this.emendas.length) * 100).toFixed(0) : 0}%)`,
+      `Emendas com 100% de execução: ${emendas100} (${this.emendas.length > 0 ? ((emendas100 / this.emendas.length) * 100).toFixed(0) : 0}%)`,
       `Emendas acima de 80%: ${emendasAcima80} (${this.emendas.length > 0 ? ((emendasAcima80 / this.emendas.length) * 100).toFixed(0) : 0}%)`,
       `Emendas acima de 50%: ${emendasAcima50} (${this.emendas.length > 0 ? ((emendasAcima50 / this.emendas.length) * 100).toFixed(0) : 0}%)`,
-      `Emendas sem execucao: ${emendasSemExecucao} (${this.emendas.length > 0 ? ((emendasSemExecucao / this.emendas.length) * 100).toFixed(0) : 0}%)`,
+      `Emendas sem execução: ${emendasSemExecucao} (${this.emendas.length > 0 ? ((emendasSemExecucao / this.emendas.length) * 100).toFixed(0) : 0}%)`,
     ];
     
     indicadores.forEach((item, i) => {
@@ -186,7 +190,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_400);
     this.doc.setFontSize(6);
     this.doc.setFont("helvetica", "italic");
-    this.doc.text("* Analise detalhada por parlamentar. Relatorio gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+    this.doc.text("* Análise detalhada por parlamentar. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
     this.addFooter();
   }

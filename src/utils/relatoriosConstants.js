@@ -60,7 +60,7 @@ export const TIPOS_RELATORIOS = [
     descricao: "Demonstrativo da execução financeira das emendas",
     icone: "analytics",
     cor: COLORS.PRIMARY,
-    campos: ["periodo", "parlamentar", "emenda", "status"],
+    campos: ["periodo", "parlamentar", "emenda"],
   },
   {
     id: "prestacao-contas",

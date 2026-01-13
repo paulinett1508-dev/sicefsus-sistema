@@ -19,11 +19,28 @@ export class BaseRelatorio {
     this.doc = new jsPDF();
     this.pageNum = 1;
     this.logoBase64 = null;
+    this.warnings = []; // Armazena avisos de erros durante a geração
 
     // Configurações da página
     this.pageWidth = this.doc.internal.pageSize.width;
     this.pageHeight = this.doc.internal.pageSize.height;
     this.margins = { top: 20, left: 20, right: 20, bottom: 30 };
+  }
+
+  /**
+   * Adiciona um aviso de erro durante a geração
+   * @param {string} message - Mensagem do aviso
+   */
+  addWarning(message) {
+    this.warnings.push(message);
+  }
+
+  /**
+   * Retorna os avisos acumulados
+   * @returns {Array<string>}
+   */
+  getWarnings() {
+    return this.warnings;
   }
 
   async inicializar() {

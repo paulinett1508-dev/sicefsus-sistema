@@ -25,39 +25,41 @@ export default function RelatoriosFiltros({
         {(selectedReport.campos.includes("periodo") ||
           selectedReport.campos.includes("mes")) && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Período</label>
-            <div className="relatorios-date-group">
+            <label className="relatorios-filter-label" id="label-periodo">Período</label>
+            <div className="relatorios-date-group" role="group" aria-labelledby="label-periodo">
               <input
                 type="date"
+                id="dataInicio"
                 name="dataInicio"
                 value={filtros.dataInicio}
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
-                  aria-label="Data de início do período"
+                aria-label="Data de início do período"
               />
               <span className="relatorios-date-separator">até</span>
               <input
                 type="date"
+                id="dataFim"
                 name="dataFim"
                 value={filtros.dataFim}
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
-                  aria-label="Data de fim do período"
+                aria-label="Data de fim do período"
               />
             </div>
           </div>
         )}
 
-        {/* ✅ NOVO: Filtro de Parlamentar */}
+        {/* Filtro de Parlamentar */}
         {selectedReport.campos.includes("parlamentar") && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Parlamentar</label>
+            <label htmlFor="parlamentar" className="relatorios-filter-label">Parlamentar</label>
             <select
+              id="parlamentar"
               name="parlamentar"
               value={filtros.parlamentar}
               onChange={onFiltroChange}
               className="relatorios-select"
-                aria-label="Filtro de parlamentar"
             >
               <option value="">Todos</option>
               {parlamentares.map((p) => (
@@ -69,16 +71,16 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* ✅ NOVO: Filtro de Emenda */}
+        {/* Filtro de Emenda */}
         {selectedReport.campos.includes("emenda") && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Emenda Específica</label>
+            <label htmlFor="emenda" className="relatorios-filter-label">Emenda Específica</label>
             <select
+              id="emenda"
               name="emenda"
               value={filtros.emenda}
               onChange={onFiltroChange}
               className="relatorios-select"
-                aria-label="Filtro de emenda específica"
             >
               <option value="">Todas as emendas</option>
               {emendas.map((emenda) => (
@@ -94,15 +96,15 @@ export default function RelatoriosFiltros({
         {/* Filtro de Município */}
         {selectedReport.campos.includes("municipio") && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Município</label>
+            <label htmlFor="municipio" className="relatorios-filter-label">Município</label>
             <input
               type="text"
+              id="municipio"
               name="municipio"
               value={filtros.municipio}
               onChange={onFiltroChange}
               placeholder="Digite o município"
               className="relatorios-input"
-                aria-label="Filtro de município"
             />
           </div>
         )}
@@ -110,13 +112,13 @@ export default function RelatoriosFiltros({
         {/* Filtro de UF */}
         {selectedReport.campos.includes("uf") && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">UF</label>
+            <label htmlFor="uf" className="relatorios-filter-label">UF</label>
             <select
+              id="uf"
               name="uf"
               value={filtros.uf}
               onChange={onFiltroChange}
               className="relatorios-select"
-                aria-label="Filtro de UF"
             >
               <option value="">Todas</option>
               {ufs.map((uf) => (
@@ -128,18 +130,18 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* ✅ NOVO: Filtro de Fornecedor (para relatório de despesas) */}
+        {/* Filtro de Fornecedor (para relatório de despesas) */}
         {selectedReport.campos.includes("fornecedor") && (
           <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Fornecedor</label>
+            <label htmlFor="fornecedor" className="relatorios-filter-label">Fornecedor</label>
             <input
               type="text"
+              id="fornecedor"
               name="fornecedor"
               value={filtros.fornecedor || ""}
               onChange={onFiltroChange}
               placeholder="Nome ou CNPJ do fornecedor"
               className="relatorios-input"
-                aria-label="Filtro de fornecedor"
             />
           </div>
         )}

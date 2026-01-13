@@ -136,6 +136,12 @@ export default function Relatorios({ usuario }) {
       await gerador.gerar(filtros);
       gerador.salvar();
 
+      // Verificar se houve warnings durante a geração
+      const warnings = gerador.getWarnings?.() || [];
+      if (warnings.length > 0) {
+        warnings.forEach(w => toast.warning(w));
+      }
+
       // Mostrar modal de sucesso
       setShowSuccessModal(true);
     } catch (error) {
@@ -213,6 +219,7 @@ export default function Relatorios({ usuario }) {
             onLimparFiltros={handleLimparFiltros}
             parlamentares={parlamentares}
             ufs={ufs}
+            emendas={emendas}
             previewData={getPreviewData()}
           />
 

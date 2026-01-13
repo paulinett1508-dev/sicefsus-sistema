@@ -12,7 +12,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
     await this.inicializar();
 
     // HEADER com subtítulo do período
-    this.addHeader("Prestacao de Contas", this.getSubtituloPeriodo(filtros));
+    this.addHeader("Prestação de Contas", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
@@ -23,13 +23,13 @@ export class RelatorioPrestacao extends BaseRelatorio {
     const kpis = [
       { label: "Recurso Total", value: this.formatCurrency(valorTotal) },
       { label: "Utilizado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
-      { label: "Saldo Disponivel", value: this.formatCurrency(saldoDisponivel) },
+      { label: "Saldo Disponível", value: this.formatCurrency(saldoDisponivel) },
       { label: "Despesas", value: totalDespesas.toString() },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
 
-    yPosition = addSectionTitle(this.doc, "Resumo da Prestacao de Contas", yPosition);
+    yPosition = addSectionTitle(this.doc, "Resumo da Prestação de Contas", yPosition);
     
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
@@ -41,8 +41,8 @@ export class RelatorioPrestacao extends BaseRelatorio {
     const emendas100Count = emendasCalculadas.filter(e => e.percentual >= 100).length;
 
     const resumoItems = [
-      `Periodo de Referencia: ${this.getSubtituloPeriodo(filtros)}`,
-      `Emendas com Execucao: ${emendasComExecucaoCount} de ${this.emendas.length}`,
+      `Período de Referência: ${this.getSubtituloPeriodo(filtros)}`,
+      `Emendas com Execução: ${emendasComExecucaoCount} de ${this.emendas.length}`,
       `Emendas 100% Executadas: ${emendas100Count}`,
       `Percentual Geral: ${percentualGeral.toFixed(1)}%`,
       `Saldo a Executar: ${this.formatCurrency(saldoDisponivel)}`,
@@ -89,9 +89,11 @@ export class RelatorioPrestacao extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de demonstrativo não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de demonstrativo: ${error.message}`);
       }
     }
 
@@ -122,7 +124,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
           const modernStyles = getModernTableStyles();
           this.doc.autoTable({
             startY: yPosition,
-            head: [["Data", "Emenda", "Descricao", "Fornecedor", "Valor"]],
+            head: [["Data", "Emenda", "Descrição", "Fornecedor", "Valor"]],
             body: tabelaDespesas,
             ...modernStyles,
             columnStyles: {
@@ -134,9 +136,11 @@ export class RelatorioPrestacao extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de despesas não pôde ser gerada");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela:", error);
+        this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
     }
 
@@ -151,7 +155,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
       `Total de Recursos Recebidos: ${this.formatCurrency(valorTotal)}`,
       `Total de Despesas Realizadas: ${this.formatCurrency(valorExecutado)}`,
       `Saldo em Caixa: ${this.formatCurrency(saldoDisponivel)}`,
-      `Percentual de Utilizacao: ${percentualGeral.toFixed(1)}%`,
+      `Percentual de Utilização: ${percentualGeral.toFixed(1)}%`,
     ];
     
     totais.forEach((item, i) => {
@@ -164,7 +168,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
     
     const assinaturaY = this.pageHeight - 45;
     this.doc.text("_____________________________________", 105, assinaturaY, { align: "center" });
-    this.doc.text("Responsavel pela Prestacao de Contas", 105, assinaturaY + 5, { align: "center" });
+    this.doc.text("Responsável pela Prestação de Contas", 105, assinaturaY + 5, { align: "center" });
     this.doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 105, assinaturaY + 10, { align: "center" });
 
     this.doc.setTextColor(...PDF_COLORS.SLATE_400);

@@ -13,7 +13,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       await this.inicializar();
 
       // HEADER com subtítulo do período
-      this.addHeader("Relatorio Consolidado", this.getSubtituloPeriodo(filtros));
+      this.addHeader("Relatório Consolidado Mensal", this.getSubtituloPeriodo(filtros));
 
       let yPosition = 58;
 
@@ -44,7 +44,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
         `Parlamentares com Emendas: ${parlamentaresUnicos}`,
         `Total de Despesas Executadas: ${totalDespesas}`,
         `Fornecedores Distintos: ${fornecedoresUnicos}`,
-        `Media de Execucao por Emenda: ${this.formatCurrency(totalEmendas > 0 ? valorExecutado / totalEmendas : 0)}`,
+        `Média de Execução por Emenda: ${this.formatCurrency(totalEmendas > 0 ? valorExecutado / totalEmendas : 0)}`,
       ];
       
       resumoItems.forEach((item, i) => {
@@ -52,11 +52,11 @@ export class RelatorioConsolidado extends BaseRelatorio {
       });
       yPosition += (resumoItems.length * 4) + 6;
 
-      yPosition = addSectionTitle(this.doc, "Distribuicao por Tipo de Emenda", yPosition);
+      yPosition = addSectionTitle(this.doc, "Distribuição por Tipo de Emenda", yPosition);
 
       const porTipo = {};
       this.emendas.forEach((emenda) => {
-        const tipo = emenda.tipo || "Nao definido";
+        const tipo = emenda.tipo || "Não definido";
         if (!porTipo[tipo]) {
           porTipo[tipo] = { quantidade: 0, valorTotal: 0, valorExecutado: 0 };
         }
@@ -97,14 +97,16 @@ export class RelatorioConsolidado extends BaseRelatorio {
               },
             });
             yPosition = this.doc.lastAutoTable.finalY + 10;
+          } else {
+            this.addWarning("Tabela de tipos não pôde ser gerada");
           }
         } catch (error) {
-          console.warn("Erro ao criar tabela:", error);
+          this.addWarning(`Erro ao criar tabela de tipos: ${error.message}`);
         }
       }
 
       yPosition = this.checkNewPage(yPosition, 60);
-      yPosition = addSectionTitle(this.doc, "Top 10 Emendas por Execucao", yPosition);
+      yPosition = addSectionTitle(this.doc, "Top 10 Emendas por Execução", yPosition);
 
       // Usar método utilitário, ordenado por valor executado, top 10
       const emendasComExecucao = this.calcularExecucaoPorEmenda()
@@ -139,9 +141,11 @@ export class RelatorioConsolidado extends BaseRelatorio {
               },
             });
             yPosition = this.doc.lastAutoTable.finalY + 10;
+          } else {
+            this.addWarning("Tabela Top 10 não pôde ser gerada");
           }
         } catch (error) {
-          console.warn("Erro ao criar tabela:", error);
+          this.addWarning(`Erro ao criar tabela Top 10: ${error.message}`);
         }
       }
 
@@ -178,20 +182,22 @@ export class RelatorioConsolidado extends BaseRelatorio {
               },
             });
             yPosition = this.doc.lastAutoTable.finalY + 10;
+          } else {
+            this.addWarning("Tabela de fornecedores não pôde ser gerada");
           }
         } catch (error) {
-          console.warn("Erro ao criar tabela:", error);
+          this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
         }
       }
 
       this.doc.setTextColor(...PDF_COLORS.SLATE_400);
       this.doc.setFontSize(6);
       this.doc.setFont("helvetica", "italic");
-      this.doc.text("* Valores consolidados. Relatorio gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+      this.doc.text("* Valores consolidados. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
       this.addFooter();
     } catch (error) {
-      console.warn("Erro ao gerar relatório consolidado:", error);
+      this.addWarning(`Erro ao gerar relatório consolidado: ${error.message}`);
     }
   }
 }

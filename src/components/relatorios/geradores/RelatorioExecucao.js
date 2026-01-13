@@ -13,7 +13,7 @@ export class RelatorioExecucao extends BaseRelatorio {
     await this.inicializar();
 
     // HEADER com subtítulo do período
-    this.addHeader("Execucao Orcamentaria", this.getSubtituloPeriodo(filtros));
+    this.addHeader("Execução Orçamentária", this.getSubtituloPeriodo(filtros));
 
     let yPosition = 58;
 
@@ -91,28 +91,30 @@ export class RelatorioExecucao extends BaseRelatorio {
             },
           });
           yPosition = this.doc.lastAutoTable.finalY + 10;
+        } else {
+          this.addWarning("Tabela de emendas não pôde ser gerada (plugin não disponível)");
         }
       } catch (error) {
-        console.warn("Erro ao criar tabela de emendas:", error);
+        this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }
     }
 
-    // ANALISE POR STATUS DE EXECUCAO
+    // ANÁLISE POR STATUS DE EXECUÇÃO
     yPosition = this.checkNewPage(yPosition, 50);
-    yPosition = addSectionTitle(this.doc, "Analise por Status de Execucao", yPosition);
+    yPosition = addSectionTitle(this.doc, "Análise por Status de Execução", yPosition);
 
     const statusExecucao = {
       "100% executado": emendasComExecucao.filter(e => e.percentual >= 100).length,
       "50-99%": emendasComExecucao.filter(e => e.percentual >= 50 && e.percentual < 100).length,
       "1-49%": emendasComExecucao.filter(e => e.percentual > 0 && e.percentual < 50).length,
-      "Sem execucao": emendasComExecucao.filter(e => e.percentual === 0).length,
+      "Sem execução": emendasComExecucao.filter(e => e.percentual === 0).length,
     };
 
     const valorPorStatus = {
       "100% executado": emendasComExecucao.filter(e => e.percentual >= 100).reduce((sum, e) => sum + e.valorExecutado, 0),
       "50-99%": emendasComExecucao.filter(e => e.percentual >= 50 && e.percentual < 100).reduce((sum, e) => sum + e.valorExecutado, 0),
       "1-49%": emendasComExecucao.filter(e => e.percentual > 0 && e.percentual < 50).reduce((sum, e) => sum + e.valorExecutado, 0),
-      "Sem execucao": 0,
+      "Sem execução": 0,
     };
 
     const tabelaStatus = Object.entries(statusExecucao).map(([status, qtd]) => [
@@ -136,9 +138,11 @@ export class RelatorioExecucao extends BaseRelatorio {
           },
         });
         yPosition = this.doc.lastAutoTable.finalY + 10;
+      } else {
+        this.addWarning("Tabela de status não pôde ser gerada (plugin não disponível)");
       }
     } catch (error) {
-      console.warn("Erro ao criar tabela de status:", error);
+      this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
     }
 
     // Nota de rodape
