@@ -505,6 +505,9 @@ const DespesaForm = ({
         ...formDataLimpo,
         emendaId:
           formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
+        // ✅ IMPORTANTE: incluir municipio/uf da emenda para que operadores vejam a despesa
+        municipio: emendaInfoDinamica?.municipio || emendaData?.municipio || despesaParaEditar?.municipio || "",
+        uf: emendaInfoDinamica?.uf || emendaData?.uf || despesaParaEditar?.uf || "",
         // 🆕 Vínculo com natureza (envelope orçamentário)
         naturezaId: formData.naturezaId || despesaParaEditar?.naturezaId || null,
         valor: parseValorMonetario(formData.valor),

@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { auditService } from "../services/auditService";
 import DespesasFilters from "./DespesasFilters";
 import DespesasTable from "./DespesasTable";
 
@@ -127,7 +128,48 @@ const DespesasList = ({
       return;
     }
 
+    // Buscar dados da despesa para o log
+    const despesaExcluida = despesas.find((d) => d.id === despesaId);
+    const emendaRelacionada = despesaExcluida?.emendaId
+      ? emendas.find((e) => e.id === despesaExcluida.emendaId)
+      : null;
+
     try {
+      // Registrar exclusão no log de auditoria ANTES de deletar
+      await auditService.logAction({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesaId,
+        dataBefore: despesaExcluida
+          ? {
+              valor: despesaExcluida.valor,
+              status: despesaExcluida.status,
+              descricao: despesaExcluida.descricao || despesaExcluida.discriminacao,
+              fornecedor: despesaExcluida.fornecedor,
+              emendaId: despesaExcluida.emendaId,
+              emendaNumero: emendaRelacionada?.numero,
+              municipio: despesaExcluida.municipio,
+              uf: despesaExcluida.uf,
+            }
+          : { id: despesaId },
+        dataAfter: null,
+        user: {
+          uid: usuario?.uid,
+          email: usuario?.email,
+          nome: usuario?.nome,
+          tipo: usuario?.tipo,
+          municipio: usuario?.municipio,
+          uf: usuario?.uf,
+        },
+        metadata: {
+          origem: "lista_despesas",
+        },
+        relatedResources: {
+          emendaId: despesaExcluida?.emendaId,
+          emendaNumero: emendaRelacionada?.numero,
+        },
+      });
+
       // Excluir do Firebase
       await deleteDoc(doc(db, "despesas", despesaId));
 
@@ -146,6 +188,18 @@ const DespesasList = ({
       }
     } catch (error) {
       console.error("❌ DespesasList: Erro ao excluir despesa:", error);
+      // Registrar erro
+      await auditService.logError({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesaId,
+        error,
+        user: {
+          uid: usuario?.uid,
+          email: usuario?.email,
+          tipo: usuario?.tipo,
+        },
+      });
       alert("Erro ao excluir despesa. Tente novamente.");
     }
   };

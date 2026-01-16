@@ -3,26 +3,30 @@
  * Script para preencher o campo municipio nas despesas que estão vazias,
  * copiando da emenda vinculada.
  *
- * Problema detectado: 82 despesas têm municipio = "N/A" ou vazio
- *
  * Uso:
- *   node scripts/corrigir-municipio-despesas.cjs           # modo dry-run
- *   node scripts/corrigir-municipio-despesas.cjs --apply   # aplicar correções
- *
- * Ambiente: PROD (usa prod-credentials.json)
+ *   node scripts/corrigir-municipio-despesas.cjs           # modo dry-run PROD
+ *   node scripts/corrigir-municipio-despesas.cjs --apply   # aplicar correções PROD
+ *   node scripts/corrigir-municipio-despesas.cjs --dev     # modo dry-run DEV
+ *   node scripts/corrigir-municipio-despesas.cjs --dev --apply   # aplicar correções DEV
  */
 
 const admin = require('firebase-admin');
 const path = require('path');
 
-// Verificar se credenciais existem
-const credentialsPath = path.join(__dirname, '../firebase-migration/prod-credentials.json');
+// Argumentos de linha de comando
+const APPLY_CHANGES = process.argv.includes('--apply');
+const USE_DEV = process.argv.includes('--dev');
+
+// Verificar credenciais
+const credentialsFile = USE_DEV ? 'dev-credentials.json' : 'prod-credentials.json';
+const credentialsPath = path.join(__dirname, '../firebase-migration', credentialsFile);
+
 let serviceAccount;
 try {
   serviceAccount = require(credentialsPath);
 } catch (err) {
   console.error('ERRO: Arquivo de credenciais não encontrado em:', credentialsPath);
-  console.error('Copie as credenciais de produção para esse caminho.');
+  console.error(`Copie as credenciais de ${USE_DEV ? 'desenvolvimento' : 'produção'} para esse caminho.`);
   process.exit(1);
 }
 
@@ -32,9 +36,6 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-
-// Argumento de linha de comando
-const APPLY_CHANGES = process.argv.includes('--apply');
 
 /**
  * Buscar todas as despesas
@@ -89,6 +90,7 @@ async function main() {
   console.log(' Preenche municipio/uf nas despesas copiando da emenda vinculada');
   console.log('='.repeat(80));
   console.log('');
+  console.log(`Ambiente: ${USE_DEV ? '🔧 DEV' : '🔴 PROD'}`);
   console.log(`Modo: ${APPLY_CHANGES ? '⚠️  APLICAR CORREÇÕES' : '🔍 DRY-RUN (apenas diagnóstico)'}`);
   console.log('');
 

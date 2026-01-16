@@ -145,10 +145,13 @@ const ExecutarDespesaModal = ({
     setSalvando(true);
     try {
       // Criar despesa executada
+      // ✅ IMPORTANTE: incluir municipio/uf da emenda para que operadores vejam a despesa
       await addDoc(collection(db, "despesas"), {
         ...formData,
         valor: parseValorMonetario(formData.valor),
         status: "EXECUTADA",
+        municipio: emendaInfo?.municipio || "",
+        uf: emendaInfo?.uf || "",
         criadaEm: new Date().toISOString(),
       });
 

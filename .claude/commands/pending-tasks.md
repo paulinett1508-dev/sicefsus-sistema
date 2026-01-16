@@ -4,6 +4,94 @@
 
 ---
 
+## Concluido - Correcao Despesas Sem Municipio + Orfas (2026-01-16)
+
+### Problema Identificado
+Auditoria revelou 3 problemas criticos:
+
+1. **Despesas sem municipio/uf:** Operadores filtrados por municipio nao viam despesas que pertenciam ao seu municipio
+2. **Despesas orfas:** Despesas vinculadas a emendas que foram deletadas
+3. **Bug no codigo:** Modais de despesa nao copiavam municipio/uf da emenda ao salvar
+
+### Diagnostico
+
+#### DEV
+| Problema | Quantidade |
+|----------|------------|
+| Despesas sem municipio | 84/85 (98.8%) |
+| Despesas orfas | 24 |
+
+#### PROD
+| Problema | Quantidade |
+|----------|------------|
+| Despesas sem municipio | 8/137 (5.8%) |
+| Despesas orfas | 13 (R$ 214.138,23) |
+
+### Correcoes Aplicadas
+
+#### 1. Codigo Corrigido (prevenir futuros problemas)
+
+**ExecutarDespesaModal.jsx** - Linha ~168:
+```javascript
+await addDoc(collection(db, "despesas"), {
+  ...formData,
+  valor: parseValorMonetario(formData.valor),
+  status: "EXECUTADA",
+  // ADICIONADO: incluir municipio/uf da emenda
+  municipio: emendaInfo?.municipio || "",
+  uf: emendaInfo?.uf || "",
+  criadaEm: new Date().toISOString(),
+});
+```
+
+**DespesaForm.jsx** - Linha ~455:
+```javascript
+const despesaData = {
+  ...formDataLimpo,
+  emendaId: formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
+  // ADICIONADO: incluir municipio/uf da emenda
+  municipio: emendaInfoDinamica?.municipio || emendaData?.municipio || despesaParaEditar?.municipio || "",
+  uf: emendaInfoDinamica?.uf || emendaData?.uf || despesaParaEditar?.uf || "",
+  // ... demais campos
+};
+```
+
+#### 2. Scripts de Correcao Executados
+
+**DEV:**
+| Script | Resultado |
+|--------|-----------|
+| `corrigir-municipio-despesas.cjs --dev --apply` | 61 despesas corrigidas |
+| `deletar-despesas-orfas.cjs --dev --apply` | 24 orfas deletadas |
+
+**PROD:**
+| Script | Resultado |
+|--------|-----------|
+| `corrigir-municipio-despesas.cjs --apply` | 2 despesas corrigidas |
+| `deletar-despesas-orfas.cjs --apply` | 13 orfas deletadas (R$ 214.138,23) |
+
+### Verificacao Final
+
+| Ambiente | Despesas | Sem Municipio | Orfas |
+|----------|----------|---------------|-------|
+| DEV | 61 | 0 | 0 |
+| PROD | 124 | 0 | 0 |
+
+### Scripts Criados/Atualizados
+| Script | Funcao |
+|--------|--------|
+| `scripts/corrigir-municipio-despesas.cjs` | Atualizado: suporte a `--dev` flag |
+| `scripts/deletar-despesas-orfas.cjs` | Novo: deleta despesas cujas emendas nao existem |
+| `scripts/audit-despesas.cjs` | Novo: diagnostico de problemas em despesas |
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/emenda/EmendaForm/sections/ExecutarDespesaModal.jsx` | Adiciona municipio/uf ao salvar |
+| `src/components/DespesaForm.jsx` | Adiciona municipio/uf ao salvar |
+
+---
+
 ## Concluido - Correcao Bug valorExecutado (2026-01-16)
 
 ### Problema Reportado
@@ -626,6 +714,7 @@ Confusao semantica nos campos de saldo das emendas:
 
 ## Historico
 
+- **2026-01-16**: Correcao despesas sem municipio/uf (DEV: 61, PROD: 2) + deletar orfas (DEV: 24, PROD: 13/R$214k) + fix codigo para prevenir novos casos
 - **2026-01-16**: Correcao bug valorExecutado (7 emendas PROD corrigidas, R$ 819k em divergencia) + fix nos modais ExecutarDespesaModal e DespesaModal
 - **2026-01-13**: Simplificacao cards resumo orcamentario (5->4 cards, remocao duplicacao) + Auditoria Dashboard x Emendas (correcao 3 emendas DEV)
 - **2026-01-13**: Correcao logica orcamentaria (novos campos saldoParaNaturezas/saldoNaoExecutado, auditoria DEV+PROD)

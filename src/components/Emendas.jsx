@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
+import { auditService } from "../services/auditService";
 import EmendasTable from "./EmendasTable";
 import EmendasFilters from "./EmendasFilters";
 import Toast from "./Toast";
@@ -284,15 +285,63 @@ const Emendas = () => {
 
     try {
       setModalExclusao((prev) => ({ ...prev, loading: true }));
-      await deleteDoc(doc(db, "emendas", modalExclusao.emenda.id));
 
-      setEmendas((prev) => prev.filter((e) => e.id !== modalExclusao.emenda.id));
+      const emendaExcluida = modalExclusao.emenda;
+
+      // Registrar exclusão no log de auditoria ANTES de deletar
+      await auditService.logAction({
+        action: "DELETE_EMENDA",
+        resourceType: "emenda",
+        resourceId: emendaExcluida.id,
+        dataBefore: {
+          numero: emendaExcluida.numero,
+          autor: emendaExcluida.autor || emendaExcluida.parlamentar,
+          municipio: emendaExcluida.municipio,
+          uf: emendaExcluida.uf,
+          valor: emendaExcluida.valor,
+          valorExecutado: emendaExcluida.valorExecutado,
+          status: emendaExcluida.status,
+        },
+        dataAfter: null,
+        user: {
+          uid: user?.uid,
+          email: user?.email,
+          nome: user?.nome,
+          tipo: user?.tipo,
+          municipio: user?.municipio,
+          uf: user?.uf,
+        },
+        metadata: {
+          origem: "tela_emendas",
+          motivoExclusao: "usuario_solicitou",
+        },
+        relatedResources: {
+          municipioEmenda: emendaExcluida.municipio,
+          ufEmenda: emendaExcluida.uf,
+        },
+      });
+
+      await deleteDoc(doc(db, "emendas", emendaExcluida.id));
+
+      setEmendas((prev) => prev.filter((e) => e.id !== emendaExcluida.id));
       setEmendasFiltradas((prev) =>
-        prev.filter((e) => e.id !== modalExclusao.emenda.id)
+        prev.filter((e) => e.id !== emendaExcluida.id)
       );
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
       setToast({ show: true, message: "Emenda excluída com sucesso!", type: "success" });
     } catch (error) {
+      // Registrar erro no log
+      await auditService.logError({
+        action: "DELETE_EMENDA",
+        resourceType: "emenda",
+        resourceId: modalExclusao.emenda?.id,
+        error,
+        user: {
+          uid: user?.uid,
+          email: user?.email,
+          tipo: user?.tipo,
+        },
+      });
       setModalExclusao((prev) => ({ ...prev, loading: false }));
       setToast({ show: true, message: `Erro: ${error.message}`, type: "error" });
     }

@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 13/01/2026
+## Ultima Atualizacao - 16/01/2026
 
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
@@ -728,7 +728,8 @@ node scripts/<script>.cjs --apply   # Aplicar correcoes
 | Script | Funcao | Ultima Execucao |
 |--------|--------|-----------------|
 | `recalcular-valor-executado.cjs` | Recalcula valorExecutado nas emendas baseado na soma das despesas EXECUTADAS | 13/01/2026 - 18 emendas corrigidas |
-| `corrigir-municipio-despesas.cjs` | Preenche municipio/uf nas despesas copiando da emenda vinculada | 13/01/2026 - 81 despesas corrigidas |
+| `corrigir-municipio-despesas.cjs` | Preenche municipio/uf nas despesas copiando da emenda vinculada | 16/01/2026 - DEV: 61, PROD: 2 |
+| `deletar-despesas-orfas.cjs` | Remove despesas cujas emendas foram deletadas | 16/01/2026 - DEV: 24, PROD: 13 |
 | `vincular-despesas-naturezas.cjs` | Vincula despesas a naturezas existentes ou cria novas naturezas | 13/01/2026 - 51 despesas vinculadas, 6 naturezas criadas |
 | `corrigir-estouro-emendas.cjs` | Ajusta valor das emendas para cobrir despesas executadas (saldo negativo) | 13/01/2026 - 4 emendas corrigidas |
 | `fix-saldo-negativo.cjs` | Corrige emendas especificas com saldo negativo (IDs hardcoded) | Script pontual |
@@ -747,6 +748,13 @@ node scripts/<script>.cjs --apply   # Aplicar correcoes
 - **Problema:** Despesas com municipio vazio ou "N/A"
 - **Solucao:** Copia municipio e uf da emenda vinculada
 - **Dependencia:** Despesa precisa ter emendaId valido
+- **Flags:** `--dev` (banco DEV), `--apply` (executar)
+
+#### deletar-despesas-orfas.cjs
+- **Problema:** Despesas vinculadas a emendas que foram deletadas
+- **Solucao:** Remove despesas cujo emendaId aponta para emenda inexistente
+- **Flags:** `--dev` (banco DEV), `--apply` (executar)
+- **Exibe:** Valor total das despesas orfas antes de deletar
 
 #### vincular-despesas-naturezas.cjs
 - **Problema:** Despesas sem naturezaId (nao vinculadas a envelopes orcamentarios)
@@ -780,19 +788,26 @@ node scripts/<script>.cjs --apply   # Aplicar correcoes
   - `saldoNaoExecutado`: valor - valorExecutado (quanto ainda nao gastou)
   - Mantém aliases: saldoLivre, saldoDisponivel
 
-### Auditoria de Integridade (13/01/2026)
+### Auditoria de Integridade (16/01/2026)
 
-Resultado da auditoria completa do banco PROD:
+Resultado da auditoria completa:
 
+**PROD:**
 | Verificacao | Antes | Depois |
 |-------------|-------|--------|
 | valorExecutado divergente | 18 emendas | 0 |
-| Despesas sem municipio | 82 despesas | 0 |
+| Despesas sem municipio | 8 despesas | 0 |
 | Despesas sem naturezaId | 100 despesas | 0 |
-| Emendas com estouro | 4 emendas | 0 |
-| Despesa orfa | 1 | 0 (deletada) |
+| Despesas orfas | 13 (R$ 214k) | 0 |
 
-**Estado atual do banco PROD:**
-- Emendas: 29 documentos
-- Despesas: 129 documentos
-- Naturezas: 58 documentos
+**DEV:**
+| Verificacao | Antes | Depois |
+|-------------|-------|--------|
+| Despesas sem municipio | 84 despesas | 0 |
+| Despesas orfas | 24 | 0 |
+
+**Estado atual:**
+| Ambiente | Emendas | Despesas |
+|----------|---------|----------|
+| PROD | 27 | 124 |
+| DEV | 21 | 61 |

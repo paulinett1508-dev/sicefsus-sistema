@@ -247,11 +247,30 @@ export const excluirNatureza = async (naturezaId, usuario, forcarExclusao = fals
       action: "DELETE_NATUREZA",
       resourceType: "natureza",
       resourceId: naturezaId,
-      dataBefore: natureza,
-      userId: usuario?.uid,
-      userEmail: usuario?.email,
+      dataBefore: {
+        codigo: natureza.codigo,
+        descricao: natureza.descricao,
+        valorAlocado: natureza.valorAlocado,
+        valorExecutado: natureza.valorExecutado,
+        emendaId: natureza.emendaId,
+        status: natureza.status,
+      },
+      dataAfter: { status: "encerrado" },
+      user: {
+        uid: usuario?.uid,
+        email: usuario?.email,
+        nome: usuario?.nome,
+        tipo: usuario?.tipo,
+        municipio: usuario?.municipio,
+        uf: usuario?.uf,
+      },
       metadata: {
+        origem: "natureza_service",
+        tipoExclusao: "soft_delete",
         despesasDesvinculadas: forcarExclusao ? despesasSnap.size : 0,
+      },
+      relatedResources: {
+        emendaId: natureza.emendaId,
       },
     });
 

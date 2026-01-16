@@ -25,6 +25,7 @@ import { serverTimestamp } from "firebase/firestore";
 // 🆕 Importações para sistema de naturezas (envelopes orçamentários)
 import NaturezasList from "../../../natureza/NaturezasList";
 import { useNaturezasData } from "../../../../hooks/useNaturezasData";
+import { auditService } from "../../../../services/auditService";
 
 
 const formatCurrency = (valor) =>
@@ -869,6 +870,41 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     console.log("✅ Confirmando remoção de despesa planejada:", despesa.id);
 
     try {
+      // Registrar exclusão no log de auditoria ANTES de deletar
+      await auditService.logAction({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesa.id,
+        dataBefore: {
+          valor: despesa.valor,
+          status: despesa.status,
+          descricao: despesa.descricao || despesa.discriminacao,
+          fornecedor: despesa.fornecedor,
+          emendaId: despesa.emendaId || emendaIdReal,
+          emendaNumero: formData?.numero,
+          municipio: despesa.municipio,
+          uf: despesa.uf,
+          naturezaId: despesa.naturezaId,
+        },
+        dataAfter: null,
+        user: {
+          uid: usuario?.uid,
+          email: usuario?.email,
+          nome: usuario?.nome,
+          tipo: usuario?.tipo,
+          municipio: usuario?.municipio,
+          uf: usuario?.uf,
+        },
+        metadata: {
+          origem: "execucao_orcamentaria",
+          tipoDespesa: "planejada",
+        },
+        relatedResources: {
+          emendaId: despesa.emendaId || emendaIdReal,
+          emendaNumero: formData?.numero,
+        },
+      });
+
       await deleteDoc(doc(db, "despesas", despesa.id));
       console.log("✅ Despesa removida com sucesso");
 
@@ -887,6 +923,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       await carregarDespesas();
     } catch (e) {
       console.error("❌ Erro ao remover despesa:", e);
+      await auditService.logError({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesa.id,
+        error: e,
+        user: { uid: usuario?.uid, email: usuario?.email, tipo: usuario?.tipo },
+      });
       showToast({
         message: "Erro ao remover despesa: " + e.message,
         type: "error",
@@ -905,6 +948,42 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     console.log("🗑️ Excluindo despesa:", despesa.id);
 
     try {
+      // Registrar exclusão no log de auditoria ANTES de deletar
+      await auditService.logAction({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesa.id,
+        dataBefore: {
+          valor: despesa.valor,
+          status: despesa.status,
+          descricao: despesa.descricao || despesa.discriminacao,
+          fornecedor: despesa.fornecedor,
+          emendaId: despesa.emendaId || emendaIdReal,
+          emendaNumero: formData?.numero,
+          municipio: despesa.municipio,
+          uf: despesa.uf,
+          naturezaId: despesa.naturezaId,
+        },
+        dataAfter: null,
+        user: {
+          uid: usuario?.uid,
+          email: usuario?.email,
+          nome: usuario?.nome,
+          tipo: usuario?.tipo,
+          municipio: usuario?.municipio,
+          uf: usuario?.uf,
+        },
+        metadata: {
+          origem: "naturezas_list",
+          tipoDespesa: despesa.status,
+        },
+        relatedResources: {
+          emendaId: despesa.emendaId || emendaIdReal,
+          emendaNumero: formData?.numero,
+          naturezaId: despesa.naturezaId,
+        },
+      });
+
       await deleteDoc(doc(db, "despesas", despesa.id));
       console.log("✅ Despesa excluída com sucesso");
 
@@ -926,6 +1005,13 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       }
     } catch (e) {
       console.error("❌ Erro ao excluir despesa:", e);
+      await auditService.logError({
+        action: "DELETE_DESPESA",
+        resourceType: "despesa",
+        resourceId: despesa.id,
+        error: e,
+        user: { uid: usuario?.uid, email: usuario?.email, tipo: usuario?.tipo },
+      });
       showToast({
         message: "Erro ao excluir despesa: " + e.message,
         type: "error",

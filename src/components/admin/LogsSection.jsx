@@ -116,7 +116,9 @@ const LogsSection = ({
     switch (action) {
       case "DELETE_EMENDA":
       case "DELETE_DESPESA":
+      case "DELETE_NATUREZA":
       case "DELETE_USER":
+      case "DELETE_USER_FIRESTORE":
         return "var(--error)";
       case "CREATE_EMENDA":
       case "CREATE_DESPESA":
@@ -125,6 +127,7 @@ const LogsSection = ({
       case "UPDATE_EMENDA":
       case "UPDATE_DESPESA":
       case "UPDATE_USER":
+      case "UPDATE_USER_STATUS":
         return "var(--warning)";
       default:
         return "var(--secondary)";
@@ -135,7 +138,9 @@ const LogsSection = ({
     switch (action) {
       case "DELETE_EMENDA":
       case "DELETE_DESPESA":
+      case "DELETE_NATUREZA":
       case "DELETE_USER":
+      case "DELETE_USER_FIRESTORE":
         return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>delete</span>;
       case "CREATE_EMENDA":
       case "CREATE_DESPESA":
@@ -144,9 +149,67 @@ const LogsSection = ({
       case "UPDATE_EMENDA":
       case "UPDATE_DESPESA":
       case "UPDATE_USER":
+      case "UPDATE_USER_STATUS":
         return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>edit</span>;
       default:
         return <span className="material-symbols-outlined" style={{ fontSize: 12 }}>bolt</span>;
+    }
+  };
+
+  // Gerar descrição legível da ação para super-usuário
+  const getActionDescription = (log) => {
+    const data = log.dataBefore || {};
+    const after = log.dataAfter || {};
+    const formatValor = (v) => (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+    switch (log.action) {
+      // EXCLUSÕES
+      case "DELETE_EMENDA":
+        return `Excluiu emenda "${data.numero || 'N/A'}" de ${data.municipio || 'N/A'}/${data.uf || ''} (R$ ${formatValor(data.valor)})`;
+      case "DELETE_DESPESA":
+        return `Excluiu despesa de R$ ${formatValor(data.valor)} - ${data.descricao || data.fornecedor || 'N/A'}`;
+      case "DELETE_NATUREZA":
+        return `Encerrou natureza ${data.codigo || 'N/A'} - ${data.descricao || 'N/A'} (Alocado: R$ ${formatValor(data.valorAlocado)})`;
+
+      // CRIAÇÕES
+      case "CREATE_EMENDA":
+        return `Criou emenda "${after.numero || 'N/A'}" de ${after.municipio || 'N/A'}/${after.uf || ''} (R$ ${formatValor(after.valor)})`;
+      case "CREATE_DESPESA":
+        return `Criou despesa de R$ ${formatValor(after.valor)} - ${after.descricao || after.fornecedor || 'N/A'}`;
+      case "CREATE_NATUREZA":
+        return `Criou natureza ${after.codigo || 'N/A'} - ${after.descricao || 'N/A'} (Alocado: R$ ${formatValor(after.valorAlocado)})`;
+
+      // ATUALIZAÇÕES
+      case "UPDATE_EMENDA":
+        return `Atualizou emenda "${data.numero || after.numero || 'N/A'}" de ${data.municipio || after.municipio || 'N/A'}`;
+      case "UPDATE_DESPESA":
+        return `Atualizou despesa - ${data.descricao || after.descricao || data.fornecedor || after.fornecedor || 'N/A'}`;
+      case "UPDATE_NATUREZA":
+        return `Atualizou natureza ${data.codigo || after.codigo || 'N/A'} - ${data.descricao || after.descricao || 'N/A'}`;
+
+      // USUÁRIOS
+      case "CREATE_USER":
+        return `Cadastrou usuário "${after.nome || after.email || 'N/A'}" (${after.tipo || 'N/A'})`;
+      case "UPDATE_USER":
+        return `Atualizou dados de "${data.nome || after.nome || log.relatedResources?.targetUserEmail || 'usuário'}"`;
+      case "UPDATE_USER_STATUS":
+        return `Alterou status de "${log.relatedResources?.targetUserNome || log.relatedResources?.targetUserEmail || 'usuário'}" de ${data.status || 'N/A'} para ${after.status || 'N/A'}`;
+      case "DELETE_USER":
+      case "DELETE_USER_FIRESTORE":
+        return `Removeu usuário "${log.relatedResources?.targetUserEmail || data.email || 'N/A'}" do sistema`;
+      case "ACTIVATE_USER":
+        return `Ativou usuário "${log.relatedResources?.targetUserNome || log.relatedResources?.targetUserEmail || 'N/A'}"`;
+      case "DEACTIVATE_USER":
+        return `Inativou usuário "${log.relatedResources?.targetUserNome || log.relatedResources?.targetUserEmail || 'N/A'}"`;
+      case "RESET_PASSWORD":
+        return `Resetou senha de "${log.relatedResources?.targetUserEmail || 'usuário'}"`;
+
+      default:
+        // Fallback genérico com informações disponíveis
+        if (log.resourceType && log.action) {
+          return `${log.action.replace(/_/g, ' ')} em ${log.resourceType}`;
+        }
+        return null;
     }
   };
 
@@ -195,13 +258,16 @@ const LogsSection = ({
               <option value="">Todas as ações</option>
               <option value="CREATE_EMENDA">Criar Emenda</option>
               <option value="UPDATE_EMENDA">Editar Emenda</option>
-              <option value="DELETE_EMENDA">Deletar Emenda</option>
+              <option value="DELETE_EMENDA">Excluir Emenda</option>
               <option value="CREATE_DESPESA">Criar Despesa</option>
               <option value="UPDATE_DESPESA">Editar Despesa</option>
-              <option value="DELETE_DESPESA">Deletar Despesa</option>
+              <option value="DELETE_DESPESA">Excluir Despesa</option>
+              <option value="DELETE_NATUREZA">Excluir Natureza</option>
               <option value="CREATE_USER">Criar Usuário</option>
               <option value="UPDATE_USER">Editar Usuário</option>
-              <option value="DELETE_USER">Deletar Usuário</option>
+              <option value="UPDATE_USER_STATUS">Alterar Status Usuário</option>
+              <option value="DELETE_USER">Excluir Usuário</option>
+              <option value="DELETE_USER_FIRESTORE">Excluir Usuário (Firestore)</option>
               <option value="ACTIVATE_USER">Ativar Usuário</option>
               <option value="DEACTIVATE_USER">Inativar Usuário</option>
               <option value="RESET_PASSWORD">Resetar Senha</option>
@@ -259,11 +325,10 @@ const LogsSection = ({
             <thead>
               <tr>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Data/Hora</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Usuário (Nome + Email)</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Usuário</th>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Ação</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>assignment</span> Recurso</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>edit_note</span> Dados ANTES</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>edit</span> Dados DEPOIS</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>description</span> O que foi feito</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>info</span> Detalhes</th>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>check_circle</span> Status</th>
               </tr>
             </thead>
@@ -394,48 +459,59 @@ const LogsSection = ({
                       {(log.action || "UNKNOWN").replace("_", " ")}
                     </span>
                   </td>
-                  <td style={styles.tableCell}>
-                    <div style={{ fontWeight: "500" }}>
-                      {log.resourceType || "N/A"}
-                    </div>
-                    <div style={{ fontSize: "11px", color: "var(--theme-text-secondary)" }}>
-                      ID: {(log.resourceId || "N/A").substring(0, 8)}...
-                    </div>
-                  </td>
-                  {/* DADOS ANTES */}
-                  <td style={{...styles.tableCell, maxWidth: '200px'}}>
-                    {log.dataBefore ? (
-                      <details style={styles.detailsExpand}>
-                        <summary style={styles.detailsSummary}>
-                          Ver dados anteriores <span className="material-symbols-outlined" style={{ fontSize: 12, marginLeft: 4, verticalAlign: "middle" }}>search</span>
-                        </summary>
-                        <pre style={styles.jsonPre}>
-                          {JSON.stringify(log.dataBefore, null, 2)}
-                        </pre>
-                      </details>
+                  {/* O QUE FOI FEITO - Descrição legível da ação */}
+                  <td style={{...styles.tableCell, minWidth: '220px'}}>
+                    {getActionDescription(log) ? (
+                      <div style={{
+                        fontSize: "13px",
+                        color: "var(--theme-text)",
+                        lineHeight: "1.4"
+                      }}>
+                        {getActionDescription(log)}
+                      </div>
                     ) : (
-                      <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
-                        {log.action?.includes('CREATE') ? '(Criação - sem dados anteriores)' : 'N/A'}
-                      </span>
+                      <div>
+                        <div style={{ fontWeight: "500", fontSize: "12px" }}>
+                          {log.resourceType || "Recurso"}
+                        </div>
+                        <div style={{ fontSize: "11px", color: "var(--theme-text-secondary)" }}>
+                          ID: {(log.resourceId || "N/A").substring(0, 8)}...
+                        </div>
+                      </div>
                     )}
                   </td>
 
-                  {/* DADOS DEPOIS */}
-                  <td style={{...styles.tableCell, maxWidth: '200px'}}>
-                    {log.dataAfter ? (
-                      <details style={styles.detailsExpand}>
-                        <summary style={styles.detailsSummary}>
-                          Ver dados atualizados <span className="material-symbols-outlined" style={{ fontSize: 12, marginLeft: 4, verticalAlign: "middle" }}>search</span>
-                        </summary>
-                        <pre style={styles.jsonPre}>
-                          {JSON.stringify(log.dataAfter, null, 2)}
-                        </pre>
-                      </details>
-                    ) : (
-                      <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
-                        {log.action?.includes('DELETE') ? '(Exclusão - sem dados finais)' : 'N/A'}
-                      </span>
-                    )}
+                  {/* DETALHES - Dados técnicos expansíveis */}
+                  <td style={{...styles.tableCell, maxWidth: '250px'}}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      {log.dataBefore && (
+                        <details style={styles.detailsExpand}>
+                          <summary style={styles.detailsSummary}>
+                            <span className="material-symbols-outlined" style={{ fontSize: 11, marginRight: 4, verticalAlign: "middle" }}>history</span>
+                            Dados anteriores
+                          </summary>
+                          <pre style={styles.jsonPre}>
+                            {JSON.stringify(log.dataBefore, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                      {log.dataAfter && (
+                        <details style={styles.detailsExpand}>
+                          <summary style={styles.detailsSummary}>
+                            <span className="material-symbols-outlined" style={{ fontSize: 11, marginRight: 4, verticalAlign: "middle" }}>update</span>
+                            Dados atualizados
+                          </summary>
+                          <pre style={styles.jsonPre}>
+                            {JSON.stringify(log.dataAfter, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                      {!log.dataBefore && !log.dataAfter && (
+                        <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
+                          Sem detalhes técnicos
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   {/* STATUS */}
