@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { db } from "../../firebase/firebaseConfig";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useTheme } from "../../context/ThemeContext";
+import { recalcularSaldoEmenda } from "../../utils/emendaCalculos";
 
 const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
   const { isDark } = useTheme?.() || { isDark: false };
@@ -155,6 +156,12 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
         despesaData.createdAt = new Date().toISOString();
         await addDoc(collection(db, "despesas"), despesaData);
         alert("Despesa cadastrada com sucesso!");
+      }
+
+      // Recalcular saldo da emenda após criar/atualizar despesa
+      if (emenda?.id) {
+        console.log(`Recalculando saldo da emenda ${emenda.id}...`);
+        await recalcularSaldoEmenda(emenda.id);
       }
 
       onSalvar();

@@ -9,6 +9,7 @@ import {
   formatarMoedaInput,
   parseValorMonetario,
 } from "../../../../utils/formatters";
+import { recalcularSaldoEmenda } from "../../../../utils/emendaCalculos";
 
 const ExecutarDespesaModal = ({
   isOpen,
@@ -154,6 +155,12 @@ const ExecutarDespesaModal = ({
       // Deletar despesa planejada
       if (despesa?.id) {
         await deleteDoc(doc(db, "despesas", despesa.id));
+      }
+
+      // Recalcular saldo da emenda após execução
+      if (emendaId) {
+        console.log(`Recalculando saldo da emenda ${emendaId}...`);
+        await recalcularSaldoEmenda(emendaId);
       }
 
       onSuccess?.();
