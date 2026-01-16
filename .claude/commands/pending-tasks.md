@@ -1,6 +1,68 @@
 # Tarefas Pendentes para Proxima Sessao
 
-## Atualizado em: 2026-01-13
+## Atualizado em: 2026-01-16
+
+---
+
+## Concluido - Correcao Bug valorExecutado (2026-01-16)
+
+### Problema Reportado
+Operador de Floriano-PI reportou que emendas nao mostravam o valor executado (barra de progresso zerada), como se nao tivesse iniciado a execucao.
+
+### Diagnostico
+1. **Dados incorretos no Firestore:** 3 de 4 emendas de Floriano tinham `valorExecutado: 0` mesmo com despesas EXECUTADAS
+2. **Bug no codigo:** Dois modais nao chamavam `recalcularSaldoEmenda()` apos salvar despesas
+
+### Componentes Afetados
+| Componente | Problema |
+|------------|----------|
+| `ExecutarDespesaModal.jsx` | Faltava chamada de recalculo |
+| `DespesaModal.jsx` | Faltava chamada de recalculo |
+| `DespesaForm.jsx` | OK (ja tinha recalculo) |
+
+### Correcoes Aplicadas
+
+#### 1. Dados PROD Corrigidos (via script)
+| Emenda | Municipio | valorExecutado Antes | Depois |
+|--------|-----------|---------------------|--------|
+| 8887878 | Floriano/PI | R$ 0 | R$ 135.013,23 |
+| 30303000 | Floriano/PI | R$ 0 | R$ 7.050,00 |
+| 0100 | Floriano/PI | R$ 0 | R$ 12.575,00 |
+| 888787877774 | Floriano/PI | R$ 0 | R$ 5.000,00 |
+| PRT 6916 | Sao Domingos/MA | R$ 0 | R$ 320.000,00 |
+| 000 | Sao Domingos/MA | R$ 0 | R$ 17.048,72 |
+| 40840005 | Sao Domingos/MA | R$ 0 | R$ 322.645,82 |
+
+**Total corrigido:** 7 emendas, R$ 819.332,77 em divergencia
+
+#### 2. Codigo Corrigido
+```javascript
+// ExecutarDespesaModal.jsx - Linha 160-164
+if (emendaId) {
+  console.log(`Recalculando saldo da emenda ${emendaId}...`);
+  await recalcularSaldoEmenda(emendaId);
+}
+
+// DespesaModal.jsx - Linha 161-165
+if (emenda?.id) {
+  console.log(`Recalculando saldo da emenda ${emenda.id}...`);
+  await recalcularSaldoEmenda(emenda.id);
+}
+```
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/emenda/EmendaForm/sections/ExecutarDespesaModal.jsx` | Import + chamada recalcularSaldoEmenda |
+| `src/components/emenda/DespesaModal.jsx` | Import + chamada recalcularSaldoEmenda |
+
+### Investigacao Adicional: Admin vs Operador
+Analisado por que admin via corretamente e operador nao:
+- **Causa principal:** Dados incorretos no Firestore (ja corrigido)
+- **Achado secundario:** Query em `Emendas.jsx` usa `municipio/uf` em vez de `emendaId` (edge case, nao critico)
+
+### Commits
+- `a748c9f` fix(despesa): recalcular valorExecutado ao executar despesa
 
 ---
 
@@ -564,6 +626,7 @@ Confusao semantica nos campos de saldo das emendas:
 
 ## Historico
 
+- **2026-01-16**: Correcao bug valorExecutado (7 emendas PROD corrigidas, R$ 819k em divergencia) + fix nos modais ExecutarDespesaModal e DespesaModal
 - **2026-01-13**: Simplificacao cards resumo orcamentario (5->4 cards, remocao duplicacao) + Auditoria Dashboard x Emendas (correcao 3 emendas DEV)
 - **2026-01-13**: Correcao logica orcamentaria (novos campos saldoParaNaturezas/saldoNaoExecutado, auditoria DEV+PROD)
 - **2026-01-13**: Code review e correcoes completas do modulo Relatorios (P1/P2/P3)
