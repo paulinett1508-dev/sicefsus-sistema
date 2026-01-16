@@ -804,6 +804,9 @@ export const useEmendaFormData = () => {
         let emendaId = id; // Para edição
 
         if (isEdicao) {
+          // ✅ CORREÇÃO: Não sobrescrever campos calculados automaticamente
+          // Esses campos são gerenciados por recalcularSaldoEmenda()
+          delete dadosParaSalvar.valorExecutado;
           await updateDoc(doc(db, "emendas", id), dadosParaSalvar);
           setToast({
             show: true,
