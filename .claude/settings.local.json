@@ -114,7 +114,13 @@
       "Bash(npm run lint:*)",
       "Bash(replit deploy --help:*)",
       "WebSearch",
-      "Bash(firebase:*)"
+      "Bash(firebase:*)",
+      "Bash(lsof:*)",
+      "Bash(sudo tee:*)",
+      "Bash(sudo sysctl:*)",
+      "Bash(jobs:*)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

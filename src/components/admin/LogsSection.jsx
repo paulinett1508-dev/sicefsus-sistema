@@ -213,6 +213,136 @@ const LogsSection = ({
     }
   };
 
+  // Gerar descrição leiga de "Como era" (valores anteriores)
+  const getComoEraDescription = (log) => {
+    const data = log.dataBefore || {};
+    const after = log.dataAfter || {};
+    const formatValor = (v) => (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+    // Para exclusões, mostrar o que foi excluído
+    if (log.action?.startsWith("DELETE_")) {
+      switch (log.action) {
+        case "DELETE_EMENDA":
+          return {
+            items: [
+              { label: "Número", value: data.numero || data.numeroEmenda || "N/A" },
+              { label: "Valor", value: `R$ ${formatValor(data.valor)}` },
+              { label: "Município", value: `${data.municipio || "N/A"}/${data.uf || ""}` }
+            ]
+          };
+        case "DELETE_DESPESA":
+          return {
+            items: [
+              { label: "Valor", value: `R$ ${formatValor(data.valor)}` },
+              { label: "Descrição", value: data.descricao || data.fornecedor || "N/A" }
+            ]
+          };
+        case "DELETE_NATUREZA":
+          return {
+            items: [
+              { label: "Código", value: data.codigo || "N/A" },
+              { label: "Valor alocado", value: `R$ ${formatValor(data.valorAlocado)}` }
+            ]
+          };
+        case "DELETE_USER":
+        case "DELETE_USER_FIRESTORE":
+          return {
+            items: [
+              { label: "Email", value: log.relatedResources?.targetUserEmail || data.email || "N/A" },
+              { label: "Nome", value: log.relatedResources?.targetUserNome || data.nome || "N/A" }
+            ]
+          };
+        default:
+          return null;
+      }
+    }
+
+    // Para atualizações, mostrar o que mudou
+    if (log.action?.startsWith("UPDATE_")) {
+      const changes = [];
+
+      // Comparar campos comuns
+      const camposLegiveis = {
+        valor: "Valor",
+        valorExecutado: "Valor executado",
+        saldoDisponivel: "Saldo disponível",
+        status: "Status",
+        nome: "Nome",
+        email: "Email",
+        tipo: "Perfil",
+        municipio: "Município",
+        uf: "UF",
+        descricao: "Descrição",
+        fornecedor: "Fornecedor",
+        valorAlocado: "Valor alocado"
+      };
+
+      Object.keys(camposLegiveis).forEach(campo => {
+        if (data[campo] !== undefined && after[campo] !== undefined && data[campo] !== after[campo]) {
+          let valorAnterior = data[campo];
+
+          // Formatar valores monetários
+          if (campo.includes("valor") || campo.includes("saldo") || campo === "Valor") {
+            valorAnterior = `R$ ${formatValor(valorAnterior)}`;
+          }
+
+          changes.push({
+            label: camposLegiveis[campo],
+            value: valorAnterior
+          });
+        }
+      });
+
+      if (changes.length > 0) {
+        return { items: changes };
+      }
+
+      // Fallback para atualizações sem mudanças detectadas
+      return {
+        items: [
+          { label: "Registro", value: "Dados atualizados" }
+        ]
+      };
+    }
+
+    // Para criações, não havia "antes"
+    if (log.action?.startsWith("CREATE_")) {
+      return {
+        items: [
+          { label: "", value: "Registro novo (não existia antes)" }
+        ],
+        isNew: true
+      };
+    }
+
+    // Ações de status de usuário
+    if (log.action === "UPDATE_USER_STATUS") {
+      return {
+        items: [
+          { label: "Status anterior", value: data.status || "N/A" }
+        ]
+      };
+    }
+
+    if (log.action === "ACTIVATE_USER" || log.action === "DEACTIVATE_USER") {
+      return {
+        items: [
+          { label: "Status anterior", value: log.action === "ACTIVATE_USER" ? "Inativo" : "Ativo" }
+        ]
+      };
+    }
+
+    if (log.action === "RESET_PASSWORD") {
+      return {
+        items: [
+          { label: "", value: "Senha foi redefinida" }
+        ]
+      };
+    }
+
+    return null;
+  };
+
   return (
     <div style={styles.tableContainer}>
       {/* Cabeçalho da seção com botão */}
@@ -326,9 +456,8 @@ const LogsSection = ({
               <tr>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>calendar_today</span> Data/Hora</th>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>person</span> Usuário</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>bolt</span> Ação</th>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>description</span> O que foi feito</th>
-                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>info</span> Detalhes</th>
+                <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>history</span> Como era</th>
                 <th style={styles.tableHeader}><span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4, verticalAlign: "middle" }}>check_circle</span> Status</th>
               </tr>
             </thead>
@@ -451,22 +580,6 @@ const LogsSection = ({
                       </div>
                     </div>
                   </td>
-                  <td style={styles.tableCell}>
-                    <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        fontWeight: "bold",
-                        textTransform: "uppercase",
-                        backgroundColor: getActionColor(log.action),
-                        color: "var(--white)",
-                      }}
-                    >
-                      {getActionIcon(log.action)}{" "}
-                      {(log.action || "UNKNOWN").replace("_", " ")}
-                    </span>
-                  </td>
                   {/* O QUE FOI FEITO - Descrição legível da ação */}
                   <td style={{...styles.tableCell, minWidth: '220px'}}>
                     {getActionDescription(log) ? (
@@ -489,37 +602,62 @@ const LogsSection = ({
                     )}
                   </td>
 
-                  {/* DETALHES - Dados técnicos expansíveis */}
-                  <td style={{...styles.tableCell, maxWidth: '250px'}}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      {log.dataBefore && (
-                        <details style={styles.detailsExpand}>
-                          <summary style={styles.detailsSummary}>
-                            <span className="material-symbols-outlined" style={{ fontSize: 11, marginRight: 4, verticalAlign: "middle" }}>history</span>
-                            Dados anteriores
-                          </summary>
-                          <pre style={styles.jsonPre}>
-                            {JSON.stringify(log.dataBefore, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                      {log.dataAfter && (
-                        <details style={styles.detailsExpand}>
-                          <summary style={styles.detailsSummary}>
-                            <span className="material-symbols-outlined" style={{ fontSize: 11, marginRight: 4, verticalAlign: "middle" }}>update</span>
-                            Dados atualizados
-                          </summary>
-                          <pre style={styles.jsonPre}>
-                            {JSON.stringify(log.dataAfter, null, 2)}
-                          </pre>
-                        </details>
-                      )}
-                      {!log.dataBefore && !log.dataAfter && (
-                        <span style={{ color: "var(--theme-text-muted)", fontSize: "11px" }}>
-                          Sem detalhes técnicos
-                        </span>
-                      )}
-                    </div>
+                  {/* COMO ERA - Valores anteriores em linguagem leiga */}
+                  <td style={{...styles.tableCell, maxWidth: '280px'}}>
+                    {(() => {
+                      const comoEra = getComoEraDescription(log);
+                      if (!comoEra) {
+                        return (
+                          <span style={{ color: "var(--theme-text-muted)", fontSize: "12px", fontStyle: "italic" }}>
+                            Sem informações anteriores
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          {comoEra.isNew ? (
+                            <span style={{
+                              color: "var(--success)",
+                              fontSize: "12px",
+                              fontStyle: "italic",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px"
+                            }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>add_circle</span>
+                              {comoEra.items[0].value}
+                            </span>
+                          ) : (
+                            comoEra.items.map((item, idx) => (
+                              <div key={idx} style={{
+                                fontSize: "12px",
+                                color: "var(--theme-text)",
+                                display: "flex",
+                                gap: "4px",
+                                flexWrap: "wrap"
+                              }}>
+                                {item.label && (
+                                  <span style={{
+                                    fontWeight: "600",
+                                    color: "var(--theme-text-secondary)",
+                                    minWidth: "fit-content"
+                                  }}>
+                                    {item.label}:
+                                  </span>
+                                )}
+                                <span style={{
+                                  color: "var(--warning-700, #b45309)",
+                                  fontWeight: "500"
+                                }}>
+                                  {item.value}
+                                </span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
 
                   {/* STATUS */}

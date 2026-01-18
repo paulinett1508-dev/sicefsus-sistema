@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   collection,
   getDocs,
+  getDoc,
   query,
   where,
   doc,
