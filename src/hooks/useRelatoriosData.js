@@ -66,8 +66,17 @@ export function useRelatoriosData(usuario) {
 
         setEmendas(emendasData);
 
-        // Carregar despesas
-        const despesasSnapshot = await getDocs(collection(db, "despesas"));
+        // Carregar despesas com filtro por município/UF se não for admin
+        let despesasRef = collection(db, "despesas");
+        if (userRole && userRole !== "admin" && userMunicipio) {
+          // 🔒 Operadores/Gestores só veem despesas do seu município
+          despesasRef = query(
+            despesasRef,
+            where("municipio", "==", userMunicipio),
+          );
+        }
+
+        const despesasSnapshot = await getDocs(despesasRef);
         let despesasData = despesasSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -77,7 +86,7 @@ export function useRelatoriosData(usuario) {
           };
         });
 
-        // Filtrar despesas se não for admin
+        // Filtro adicional por emendas permitidas (segurança extra)
         if (userRole && userRole !== "admin") {
           const allowedEmendaIds = new Set(emendasData.map((e) => e.id));
           despesasData = despesasData.filter((d) =>
