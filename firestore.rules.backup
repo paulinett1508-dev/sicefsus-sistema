@@ -1,0 +1,191 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // FUNÇÕES AUXILIARES
+    // ========================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Verifica se usuário é admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'admin';
+    }
+
+    function isGestor() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'gestor';
+    }
+
+    function isOperador() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipo == 'operador';
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function matchesUserLocation(data) {
+      let userData = getUserData();
+      return data.municipio == userData.municipio && 
+             data.uf == userData.uf;
+    }
+
+    // ========================================
+    // COLEÇÃO: USUÁRIOS
+    // ========================================
+
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        request.auth.uid == userId
+      );
+
+      allow create: if isAdmin();
+
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['tipo', 'status']))
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // ========================================
+    // COLEÇÃO: EMENDAS
+    // ========================================
+
+    match /emendas/{emendaId} {
+      // 🔓 Admin: Acesso total SEM restrição de localização
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Acesso restrito por localização
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      ) && matchesUserLocation(resource.data);
+
+      // 🎯 CRIAR: Admin sem restrição, Gestor/Operador com validação
+      allow create: if isAuthenticated() && (
+        isAdmin() || 
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+      );
+
+      // ATUALIZAR: Admin sem restrição, Gestor/Operador com validação
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        ((isGestor() || isOperador()) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data))
+      );
+
+      // 🔒 EXCLUIR: Apenas Admin e Gestor
+      allow delete: if isAuthenticated() && (
+        isAdmin() || 
+        (isGestor() && matchesUserLocation(resource.data))
+      );
+    }
+
+    // ========================================
+    // COLEÇÃO: DESPESAS
+    // ========================================
+
+    match /despesas/{despesaId} {
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Leitura permitida se autenticado
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      );
+
+      // Criar despesa: Admin sem restrição, outros validam
+      allow create: if isAuthenticated() && (
+        isAdmin() || isGestor() || isOperador()
+      );
+
+      // Atualizar: Admin sem restrição, outros validam localização se presente
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        ((isGestor() || isOperador()) && (
+          !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
+          matchesUserLocation(request.resource.data)
+        ))
+      );
+
+      // 🔒 Apenas Admin e Gestor podem excluir
+      allow delete: if isAuthenticated() && (
+        isAdmin() || isGestor()
+      );
+    }
+
+    // ========================================
+    // COLEÇÃO: NATUREZAS (Envelopes Orçamentários)
+    // ========================================
+
+    match /naturezas/{naturezaId} {
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Leitura permitida se autenticado
+      allow read: if isAuthenticated() && (
+        isGestor() || isOperador()
+      );
+
+      // Criar natureza: Admin sem restrição, outros validam localização
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+      );
+
+      // Atualizar: Admin sem restrição, outros validam localização
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(resource.data))
+      );
+
+      // Apenas Admin e Gestor podem excluir
+      allow delete: if isAuthenticated() && (
+        isAdmin() ||
+        (isGestor() && matchesUserLocation(resource.data))
+      );
+    }
+
+    // ========================================
+    // COLEÇÃO: AUDIT_LOGS
+    // ========================================
+
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow write: if isAuthenticated();
+    }
+
+    // ========================================
+    // COLEÇÃO: METADATA
+    // ========================================
+
+    match /metadata/{metaId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ========================================
+    // COLEÇÃO: FORNECEDORES
+    // ========================================
+
+    match /fornecedores/{fornecedorId} {
+      // Qualquer usuário autenticado pode ler, criar, atualizar e excluir
+      allow read, write: if isAuthenticated();
+    }
+
+    // ========================================
+    // DENY ALL (Padrão)
+    // ========================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

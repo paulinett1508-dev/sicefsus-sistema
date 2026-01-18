@@ -112,7 +112,9 @@
       "Bash(claude:*)",
       "Bash(jq:*)",
       "Bash(npm run lint:*)",
-      "Bash(replit deploy --help:*)"
+      "Bash(replit deploy --help:*)",
+      "WebSearch",
+      "Bash(firebase:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
