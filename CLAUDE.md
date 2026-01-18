@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 16/01/2026
+## Ultima Atualizacao - 18/01/2026
 
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
@@ -664,9 +664,104 @@ Servidor MCP para operacoes diretas no Firestore.
 
 ---
 
+## Framework de Desenvolvimento com Skills (IMPORTANTE)
+
+### Conceito
+
+As skills em `.claude/skills/` sao um **FRAMEWORK DE TRABALHO** reutilizavel, nao codigo especifico.
+O objetivo e separar o desenvolvimento em **3 sessoes isoladas** para preservar a janela de contexto (200k tokens).
+
+### Fluxo de Trabalho (para QUALQUER feature)
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   SESSAO 1      │     │   SESSAO 2      │     │   SESSAO 3      │
+│                 │     │                 │     │                 │
+│  PRD-GENERATOR  │────▶│  SPEC-GENERATOR │────▶│  CODE-IMPLEMENT │
+│   (pesquisa)    │     │   (projeto)     │     │   (codigo)      │
+│                 │     │                 │     │                 │
+│   ~40k tokens   │     │   ~50k tokens   │     │   ~60k tokens   │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+     PRD-XXX.md              SPEC-XXX.md            Codigo Final
+```
+
+**IMPORTANTE:** Cada sessao = terminal/conversa SEPARADA. Nao continuar na mesma sessao.
+
+### As 4 Skills Principais
+
+| Skill | Arquivo | Funcao |
+|-------|---------|--------|
+| **PRD-GENERATOR** | `PRD-GENERATOR.md` | Pesquisa codebase + docs + bibliotecas → gera PRD |
+| **SPEC-GENERATOR** | `SPEC-GENERATOR.md` | Le PRD → gera especificacao tecnica detalhada |
+| **CODE-IMPLEMENTER** | `CODE-IMPLEMENTER.md` | Le SPEC → implementa codigo final |
+| **ANTI-PATTERNS-CHECKER** | `ANTI-PATTERNS-CHECKER.md` | Valida qualidade em TODAS as fases |
+
+### ANTI-PATTERNS-CHECKER (Checkpoint de Qualidade)
+
+**NAO e uma sessao separada.** E um checkpoint usado DENTRO de cada fase:
+
+```
+SESSAO 1 (PRD)
+    ├── pesquisa...
+    ├── escreve PRD...
+    ├── ⚠️ ANTI-PATTERNS CHECK  ◀── valida ANTES de salvar
+    └── salva PRD-X.md
+
+SESSAO 2 (SPEC)
+    ├── le PRD...
+    ├── projeta arquitetura...
+    ├── ⚠️ ANTI-PATTERNS CHECK  ◀── valida ANTES de salvar
+    └── salva SPEC-X.md
+
+SESSAO 3 (CODE)
+    ├── le SPEC...
+    ├── implementa...
+    ├── ⚠️ ANTI-PATTERNS CHECK  ◀── valida ANTES de entregar
+    └── codigo final
+```
+
+**5 validacoes em cada checkpoint:**
+1. Overengineering? (complexidade desnecessaria)
+2. Reinventando roda? (ja existe solucao)
+3. Docs consultados? (documentacao lida)
+4. Codigo duplicado? (DRY violado)
+5. Arquivos >200 linhas? (monolitico)
+
+Se falhar qualquer validacao → corrige → valida novamente → so entao avanca.
+
+### Como Usar
+
+```
+Problema novo     → Abrir NOVA sessao + usar PRD-GENERATOR    → PRD.md
+PRD aprovado      → Abrir NOVA sessao + usar SPEC-GENERATOR   → SPEC.md
+SPEC aprovada     → Abrir NOVA sessao + usar CODE-IMPLEMENTER → Codigo
+```
+
+### Beneficios
+
+- **Contexto limpo:** <60k tokens por sessao (nunca "cansa" a IA)
+- **Artefatos persistentes:** arquivos .md entre sessoes
+- **Processo auditavel:** cada fase tem checkpoint de qualidade
+- **Replicavel:** funciona para qualquer problema futuro
+
+### Exemplo de Uso Real
+
+O sistema de permissoes (PRD-001 → SPEC-001 → codigo) foi apenas um **CASO DE USO** do framework.
+As skills servem para QUALQUER problema novo.
+
+### Localizacao dos Artefatos
+
+- **Skills:** `.claude/skills/`
+- **PRDs gerados:** `docs/prd/PRD-XXX-*.md`
+- **SPECs geradas:** `docs/prd/SPEC-XXX-*.md`
+
+---
+
 ## Comandos e Skills do Claude Code
 
-### Organizacao (atualizado 29/12/2025)
+### Organizacao (atualizado 18/01/2026)
 
 O projeto usa dois tipos de automacao para o Claude Code:
 
@@ -683,7 +778,18 @@ O projeto usa dois tipos de automacao para o Claude Code:
 | `verificar-ambientes-dev-prod` | Verificar configuracao de ambientes |
 
 #### Skills (`.claude/skills/`)
-**Competencias e playbooks** - heuristicas que o agente pode usar automaticamente.
+**Framework de desenvolvimento + competencias** - metodologia reutilizavel.
+
+**Skills de Framework (desenvolvimento em 3 fases):**
+
+| Skill | Funcao |
+|-------|--------|
+| `PRD-GENERATOR.md` | Sessao 1: Pesquisa e gera PRD |
+| `SPEC-GENERATOR.md` | Sessao 2: Transforma PRD em especificacao tecnica |
+| `CODE-IMPLEMENTER.md` | Sessao 3: Implementa codigo a partir da SPEC |
+| `ANTI-PATTERNS-CHECKER.md` | Checkpoint de qualidade em todas as fases |
+
+**Skills de Analise (usadas conforme necessidade):**
 
 | Skill | Quando Usar |
 |-------|-------------|
@@ -699,12 +805,17 @@ O projeto usa dois tipos de automacao para o Claude Code:
 ### Quando Usar Cada Um
 
 ```
-COMMAND: quando voce quer executar uma acao especifica
-         Ex: "rode o comando de handover", "/gerar-documentacao-handover"
+FRAMEWORK (PRD → SPEC → CODE):
+  Para desenvolver features novas ou refatoracoes grandes.
+  Cada fase em sessao separada.
 
-SKILL: quando voce precisa de analise ou raciocinio
-       Ex: "revise esse codigo", "encontre bugs nesse componente"
-       O agente vai usar a skill automaticamente se relevante
+COMMAND:
+  Para executar uma acao especifica.
+  Ex: "rode o comando de handover", "/gerar-documentacao-handover"
+
+SKILL DE ANALISE:
+  Para analise ou raciocinio pontual.
+  Ex: "revise esse codigo", "encontre bugs nesse componente"
 ```
 
 ---
