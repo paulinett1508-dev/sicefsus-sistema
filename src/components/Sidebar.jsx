@@ -262,6 +262,16 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
           </div>
         )}
 
+        {/* Logs - visivel para Admin e Gestor */}
+        {(usuario?.tipo === "admin" || usuario?.tipo === "gestor") && (
+          <NavItem
+            item={{ label: "Logs", icon: "assignment", path: "/logs" }}
+            isActive={activePath === "/logs"}
+            collapsed={collapsed}
+            onClick={() => onNavigate("/logs")}
+          />
+        )}
+
         {/* Ferramentas Dev - SuperAdmin */}
         {isSuperAdmin && (
           <NavItem

@@ -430,7 +430,9 @@ const LogsSection = ({
                             fontSize: "10px",
                             color: "var(--white)",
                             backgroundColor:
-                              log.userRole === "admin" ? "var(--error)" : "var(--success)",
+                              log.userRole === "admin" ? "var(--error)"
+                              : log.userRole === "gestor" ? "var(--warning)"
+                              : "var(--success)",
                             padding: "4px 10px",
                             borderRadius: "12px",
                             textTransform: "uppercase",
@@ -438,7 +440,13 @@ const LogsSection = ({
                             display: "inline-block"
                           }}
                         >
-                          {log.userRole === "admin" ? <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>workspace_premium</span> ADMIN</> : <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>person</span> OPERADOR</>}
+                          {log.userRole === "admin" ? (
+                            <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>workspace_premium</span> ADMIN</>
+                          ) : log.userRole === "gestor" ? (
+                            <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>supervised_user_circle</span> GESTOR</>
+                          ) : (
+                            <><span className="material-symbols-outlined" style={{ fontSize: 10, marginRight: 2, verticalAlign: "middle" }}>person</span> OPERADOR</>
+                          )}
                         </span>
                       </div>
                     </div>

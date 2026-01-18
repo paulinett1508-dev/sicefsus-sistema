@@ -18,6 +18,7 @@ export const PERMISSIONS = {
     acessoTotal: true,
     acessoFerramentasDev: true,
     podeGerenciarUsuarios: true,
+    podeVerLogs: true,            // Pode ver todos os logs do sistema
     podeCriarEmendas: true,
     podeEditarEmendas: true,
     podeDeletarEmendas: true,
@@ -32,6 +33,7 @@ export const PERMISSIONS = {
     acessoTotal: true,
     acessoFerramentasDev: false,
     podeGerenciarUsuarios: true,
+    podeVerLogs: true,            // Pode ver todos os logs do sistema
     podeCriarEmendas: true,
     podeEditarEmendas: true,
     podeDeletarEmendas: true,
@@ -46,6 +48,7 @@ export const PERMISSIONS = {
     acessoTotal: false,
     acessoFerramentasDev: false,
     podeGerenciarUsuarios: false,
+    podeVerLogs: true,            // Pode ver logs do seu municipio
     podeCriarEmendas: true,
     podeEditarEmendas: true,
     podeDeletarEmendas: true,
@@ -60,6 +63,7 @@ export const PERMISSIONS = {
     acessoTotal: false,
     acessoFerramentasDev: false,
     podeGerenciarUsuarios: false,
+    podeVerLogs: false,           // BLOQUEADO - nao pode ver logs
     podeCriarEmendas: false,      // BLOQUEADO
     podeEditarEmendas: false,     // BLOQUEADO - apenas visualiza
     podeDeletarEmendas: false,    // BLOQUEADO

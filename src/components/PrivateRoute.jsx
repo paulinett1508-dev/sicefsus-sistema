@@ -10,7 +10,6 @@ export default function PrivateRoute({ children, usuario, requiredRole }) {
       tipo: usuario?.tipo,
       requiredRole,
       isAuthenticated: !!usuario,
-      hasRequiredRole: !requiredRole || usuario?.tipo === requiredRole,
     });
   }
 
@@ -30,27 +29,26 @@ export default function PrivateRoute({ children, usuario, requiredRole }) {
     return <Navigate to="/unauthorized" />;
   }
 
-  // ✅ VERIFICAÇÃO DE TIPO PADRONIZADA
+  // ✅ VERIFICAÇÃO DE TIPO PADRONIZADA (suporta string ou array)
   if (requiredRole) {
-    if (requiredRole === "admin") {
-      const isAdmin = usuario.tipo === "admin";
-      if (!isAdmin) {
-        console.log(
-          "❌ PrivateRoute: Usuário não é admin, redirecionando para /unauthorized",
-        );
-        console.log(`   Tipo: ${usuario.tipo}, Requerido: admin`);
-        return <Navigate to="/unauthorized" />;
-      }
-    }
-    // ✅ VERIFICAÇÃO PARA OPERADOR
-    else if (requiredRole === "operador") {
-      const isOperadorOrAdmin =
-        usuario.tipo === "operador" || usuario.tipo === "admin";
+    // Converter para array se for string
+    const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
-      if (!isOperadorOrAdmin) {
-        console.log("❌ PrivateRoute: Usuário não é operador nem admin");
-        return <Navigate to="/unauthorized" />;
+    // Verificar se o tipo do usuário está na lista de roles permitidos
+    const hasRequiredRole = allowedRoles.some(role => {
+      // Admin sempre tem acesso a rotas de admin
+      if (role === "admin") {
+        return usuario.tipo === "admin";
       }
+      // Para outros roles, verificar se é o tipo exato ou é admin (que tem acesso total)
+      return usuario.tipo === role || usuario.tipo === "admin";
+    });
+
+    if (!hasRequiredRole) {
+      console.log(
+        `❌ PrivateRoute: Usuário ${usuario.tipo} não tem acesso. Roles permitidos: ${allowedRoles.join(", ")}`,
+      );
+      return <Navigate to="/unauthorized" />;
     }
   }
 

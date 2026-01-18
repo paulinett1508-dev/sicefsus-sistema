@@ -24,6 +24,7 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import { recalcularSaldoEmenda } from "../utils/emendaCalculos"; // ✅ RECÁLCULO AUTOMÁTICO
 import { recalcularNatureza, validarDespesaNatureza } from "../utils/naturezaCalculos"; // 🆕 RECÁLCULO E VALIDAÇÃO DE NATUREZA
+import { auditService } from "../services/auditService"; // 🔒 AUDIT TRAIL
 
 // ✅ HELPERS PARA VALIDAÇÃO DE BOTÕES
 const pick = (obj, keys) => {
@@ -544,6 +545,7 @@ const DespesaForm = ({
 
         // ✅ CORREÇÃO: Salvar ID antes de deletar
         const idPlanejada = despesaParaEditar?.id;
+        const dadosOriginais = despesaParaEditar ? { ...despesaParaEditar } : null;
 
         // 1️⃣ DELETAR despesa planejada PRIMEIRO
         if (idPlanejada) {
@@ -561,8 +563,37 @@ const DespesaForm = ({
           planejadaOriginalId: idPlanejada || null,
         };
 
-        await addDoc(collection(db, "despesas"), dadosExecutada);
+        const novaRef = await addDoc(collection(db, "despesas"), dadosExecutada);
         console.log("✅ Despesa executada criada com sucesso");
+
+        // 🔒 AUDIT LOG: Executar despesa (PLANEJADA -> EXECUTADA)
+        await auditService.logAction({
+          action: "UPDATE_DESPESA",
+          resourceType: "despesa",
+          resourceId: novaRef.id,
+          dataBefore: dadosOriginais ? {
+            id: idPlanejada,
+            valor: dadosOriginais.valor,
+            fornecedor: dadosOriginais.fornecedor,
+            status: dadosOriginais.status || "PLANEJADA",
+            discriminacao: dadosOriginais.discriminacao
+          } : null,
+          dataAfter: {
+            valor: dadosExecutada.valor,
+            fornecedor: dadosExecutada.fornecedor,
+            status: "EXECUTADA",
+            discriminacao: dadosExecutada.discriminacao,
+            numeroEmpenho: dadosExecutada.numeroEmpenho,
+            numeroNota: dadosExecutada.numeroNota
+          },
+          user: usuario,
+          metadata: {
+            operacao: "EXECUCAO",
+            emendaId: dadosExecutada.emendaId,
+            naturezaId: dadosExecutada.naturezaId,
+            planejadaOriginalId: idPlanejada
+          }
+        });
 
         setToast({
           show: true,
@@ -581,8 +612,31 @@ const DespesaForm = ({
           criadaDiretamente: true, // ✅ Flag para rastreabilidade
         };
 
-        await addDoc(collection(db, "despesas"), dadosExecutada);
+        const novaRef = await addDoc(collection(db, "despesas"), dadosExecutada);
         console.log("✅ Despesa executada criada diretamente com sucesso");
+
+        // 🔒 AUDIT LOG: Criar despesa executada diretamente
+        await auditService.logAction({
+          action: "CREATE_DESPESA",
+          resourceType: "despesa",
+          resourceId: novaRef.id,
+          dataBefore: null,
+          dataAfter: {
+            valor: dadosExecutada.valor,
+            fornecedor: dadosExecutada.fornecedor,
+            discriminacao: dadosExecutada.discriminacao,
+            status: "EXECUTADA",
+            naturezaDespesa: dadosExecutada.naturezaDespesa,
+            municipio: dadosExecutada.municipio,
+            uf: dadosExecutada.uf
+          },
+          user: usuario,
+          metadata: {
+            operacao: "CRIACAO_DIRETA",
+            emendaId: dadosExecutada.emendaId,
+            naturezaId: dadosExecutada.naturezaId
+          }
+        });
 
         setToast({
           show: true,
@@ -592,8 +646,38 @@ const DespesaForm = ({
       } else if (despesaRef) {
         // ✅ EDIÇÃO NORMAL
         console.log("✏️ Atualizando despesa existente");
+
+        // Guardar dados originais para o log
+        const dadosOriginais = despesaParaEditar ? {
+          valor: despesaParaEditar.valor,
+          fornecedor: despesaParaEditar.fornecedor,
+          discriminacao: despesaParaEditar.discriminacao,
+          status: despesaParaEditar.status
+        } : null;
+
         await updateDoc(despesaRef, despesaData);
         console.log("✅ Despesa atualizada com sucesso");
+
+        // 🔒 AUDIT LOG: Atualizar despesa
+        await auditService.logAction({
+          action: "UPDATE_DESPESA",
+          resourceType: "despesa",
+          resourceId: despesaParaEditar.id,
+          dataBefore: dadosOriginais,
+          dataAfter: {
+            valor: despesaData.valor,
+            fornecedor: despesaData.fornecedor,
+            discriminacao: despesaData.discriminacao,
+            status: despesaData.status
+          },
+          user: usuario,
+          metadata: {
+            operacao: "EDICAO",
+            emendaId: despesaData.emendaId,
+            naturezaId: despesaData.naturezaId
+          }
+        });
+
         setToast({
           show: true,
           message: "✅ Despesa atualizada com sucesso!",
@@ -602,8 +686,32 @@ const DespesaForm = ({
       } else {
         // ✅ CRIAÇÃO NORMAL
         console.log("🆕 Criando nova despesa");
-        await addDoc(collection(db, "despesas"), despesaData);
+        const novaRef = await addDoc(collection(db, "despesas"), despesaData);
         console.log("✅ Nova despesa criada com sucesso");
+
+        // 🔒 AUDIT LOG: Criar despesa planejada
+        await auditService.logAction({
+          action: "CREATE_DESPESA",
+          resourceType: "despesa",
+          resourceId: novaRef.id,
+          dataBefore: null,
+          dataAfter: {
+            valor: despesaData.valor,
+            fornecedor: despesaData.fornecedor,
+            discriminacao: despesaData.discriminacao,
+            status: despesaData.status || "PLANEJADA",
+            naturezaDespesa: despesaData.naturezaDespesa,
+            municipio: despesaData.municipio,
+            uf: despesaData.uf
+          },
+          user: usuario,
+          metadata: {
+            operacao: "CRIACAO",
+            emendaId: despesaData.emendaId,
+            naturezaId: despesaData.naturezaId
+          }
+        });
+
         setToast({
           show: true,
           message: "✅ Despesa cadastrada com sucesso!",

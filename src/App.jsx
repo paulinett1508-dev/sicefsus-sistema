@@ -26,6 +26,7 @@ import Administracao from "./components/Administracao";
 import MigracaoCompleta from "./components/admin/MigracaoCompleta";
 import FerramentasDev from "./components/dev/FerramentasDev";
 import FornecedoresList from "./components/fornecedor/FornecedoresList";
+import LogsPage from "./components/logs/LogsPage";
 import FirebaseError from "./components/FirebaseError";
 import { auth, db } from "./firebase/firebaseConfig";
 // import DespesaForm from "./components/DespesaForm"; // ❌ REMOVIDO - Agora é usado dentro da aba Despesas
@@ -479,6 +480,18 @@ function AppContent() {
                   <PrivateRoute usuario={usuario} requiredRole="admin">
                     <ProtectedRouteWrapper usuario={usuario}>
                       <Administracao usuario={usuario} />
+                    </ProtectedRouteWrapper>
+                  </PrivateRoute>
+                }
+              />
+
+              {/* Rota de Logs - Admin e Gestor */}
+              <Route
+                path="/logs"
+                element={
+                  <PrivateRoute usuario={usuario} requiredRole={["admin", "gestor"]}>
+                    <ProtectedRouteWrapper usuario={usuario}>
+                      <LogsPage />
                     </ProtectedRouteWrapper>
                   </PrivateRoute>
                 }
