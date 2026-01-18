@@ -69,16 +69,16 @@ service cloud.firestore {
         isGestor() || isOperador()
       ) && matchesUserLocation(resource.data);
 
-      // 🎯 CRIAR: Admin sem restrição, Gestor/Operador com validação
+      // CRIAR: Admin e Gestor podem criar, Operador NAO
       allow create: if isAuthenticated() && (
-        isAdmin() || 
-        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+        isAdmin() ||
+        (isGestor() && matchesUserLocation(request.resource.data))
       );
 
-      // ATUALIZAR: Admin sem restrição, Gestor/Operador com validação
+      // ATUALIZAR: Admin e Gestor podem editar, Operador NAO
       allow update: if isAuthenticated() && (
-        isAdmin() || 
-        ((isGestor() || isOperador()) && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data))
+        isAdmin() ||
+        (isGestor() && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data))
       );
 
       // 🔒 EXCLUIR: Apenas Admin e Gestor
@@ -96,9 +96,12 @@ service cloud.firestore {
       // Admin: Acesso total
       allow read, write: if isAdmin();
 
-      // Gestor/Operador: Leitura permitida se autenticado
+      // Gestor/Operador: Leitura permitida apenas do seu municipio
       allow read: if isAuthenticated() && (
-        isGestor() || isOperador()
+        (isGestor() || isOperador()) && (
+          !resource.data.keys().hasAny(['municipio']) ||
+          matchesUserLocation(resource.data)
+        )
       );
 
       // Criar despesa: Admin sem restrição, outros validam
@@ -115,9 +118,10 @@ service cloud.firestore {
         ))
       );
 
-      // 🔒 Apenas Admin e Gestor podem excluir
+      // Apenas Admin e Gestor podem excluir (com validacao de localizacao)
       allow delete: if isAuthenticated() && (
-        isAdmin() || isGestor()
+        isAdmin() ||
+        (isGestor() && matchesUserLocation(resource.data))
       );
     }
 
@@ -134,10 +138,10 @@ service cloud.firestore {
         isGestor() || isOperador()
       );
 
-      // Criar natureza: Admin sem restrição, outros validam localização
+      // Criar natureza: Admin e Gestor podem criar, Operador NAO
       allow create: if isAuthenticated() && (
         isAdmin() ||
-        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
+        (isGestor() && matchesUserLocation(request.resource.data))
       );
 
       // Atualizar: Admin sem restrição, outros validam localização

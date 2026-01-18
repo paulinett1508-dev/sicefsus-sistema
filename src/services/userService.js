@@ -163,7 +163,7 @@ export const createUserDirect = async (userData, navigate, showToast) => {
       email: userData.email,
       nome: userData.nome,
       tipo: tipoUsuario,
-      role: tipoUsuario,
+      // role removido - usar apenas "tipo" como padrao
       status: "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",
@@ -308,7 +308,7 @@ export const updateUser = async (userId, userData, originalEmail) => {
       nome: userData.nome,
       email: userData.email,
       tipo: tipoUsuario,
-      role: userData.role || tipoUsuario, // ✅ Priorizar role se existir
+      // role removido - usar apenas "tipo" como padrao
       status: userData.status || "ativo",
       departamento: userData.departamento || "",
       telefone: userData.telefone || "",

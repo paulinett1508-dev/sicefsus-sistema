@@ -2,6 +2,7 @@
 // ✅ Centraliza toda lógica de permissões do sistema
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { getPermissionsByRole } from "../config/permissions";
 import {
   validateLocation,
   normalizeUF,
@@ -55,17 +56,22 @@ const usePermissions = (usuario) => {
       const localizacao = validateLocation(municipio, uf);
 
       if (localizacao.valido) {
+        const basePermissions = getPermissionsByRole('gestor');
         const permissoesGestor = {
-          acessoTotal: false, // Não vê tudo, mas gerencia seu município
+          acessoTotal: false,
           filtroAplicado: true,
           semAcesso: false,
           temAcessoSistema: true,
-          podeGerenciarUsuarios: false, // Gestor não gerencia usuários globalmente
-          podeGerenciarDespesas: true, // ✅ GESTOR PODE CRIAR/EDITAR/DELETAR DESPESAS
-          podeCriarDespesas: true, // ✅ GESTOR PODE CRIAR DESPESAS
-          podeEditarDespesas: true, // ✅ GESTOR PODE EDITAR DESPESAS
-          podeDeletarDespesas: true, // ✅ GESTOR PODE DELETAR DESPESAS
-          podeExecutarDespesas: true, // ✅ GESTOR PODE EXECUTAR DESPESAS PLANEJADAS
+          podeGerenciarUsuarios: basePermissions.podeGerenciarUsuarios,
+          podeGerenciarDespesas: true,
+          podeCriarDespesas: basePermissions.podeCriarDespesas,
+          podeEditarDespesas: basePermissions.podeEditarDespesas,
+          podeDeletarDespesas: basePermissions.podeDeletarDespesas,
+          podeExecutarDespesas: basePermissions.podeExecutarDespesas,
+          podeCriarEmendas: basePermissions.podeCriarEmendas,
+          podeEditarEmendas: basePermissions.podeEditarEmendas,
+          podeDeletarEmendas: basePermissions.podeDeletarEmendas,
+          podeCriarNaturezas: basePermissions.podeCriarNaturezas,
           motivo: `Gestor com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
           aviso: null,
           filtroMunicipio: localizacao.municipio,
@@ -73,7 +79,7 @@ const usePermissions = (usuario) => {
           tipo: "gestor_filtrado",
         };
 
-        console.log("✅ usePermissions - Permissões GESTOR calculadas:", permissoesGestor);
+        console.log("usePermissions - Permissoes GESTOR calculadas:", permissoesGestor);
         return permissoesGestor;
       } else {
         // Gestor sem localização válida - acesso bloqueado até completar
@@ -103,19 +109,22 @@ const usePermissions = (usuario) => {
     const localizacao = validateLocation(municipio, uf);
 
     if (localizacao.valido) {
+      const basePermissions = getPermissionsByRole('operador');
       const permissoesOperador = {
         acessoTotal: false,
         filtroAplicado: true,
         semAcesso: false,
-        temAcessoSistema: true, // ✅ OPERADOR TEM ACESSO AO SISTEMA
-        podeGerenciarUsuarios: false, // ❌ OPERADOR NÃO PODE GERENCIAR USUÁRIOS
-        podeGerenciarDespesas: true, // ✅ OPERADOR PODE GERENCIAR DESPESAS
-        podeCriarDespesas: true, // ✅ OPERADOR PODE CRIAR DESPESAS
-        podeEditarDespesas: true, // ✅ OPERADOR PODE EDITAR DESPESAS
-        podeDeletarDespesas: true, // ✅ OPERADOR PODE DELETAR DESPESAS
-        podeExecutarDespesas: true, // ✅ OPERADOR PODE EXECUTAR DESPESAS (do seu município)
-        podeEditarEmendas: true, // ✅ OPERADOR PODE EDITAR EMENDAS
-        podeDeletarEmendas: false, // ❌ OPERADOR NÃO PODE DELETAR EMENDAS
+        temAcessoSistema: true,
+        podeGerenciarUsuarios: basePermissions.podeGerenciarUsuarios,
+        podeGerenciarDespesas: true,
+        podeCriarDespesas: basePermissions.podeCriarDespesas,
+        podeEditarDespesas: basePermissions.podeEditarDespesas,
+        podeDeletarDespesas: basePermissions.podeDeletarDespesas,    // FALSE
+        podeExecutarDespesas: basePermissions.podeExecutarDespesas,
+        podeCriarEmendas: basePermissions.podeCriarEmendas,          // FALSE
+        podeEditarEmendas: basePermissions.podeEditarEmendas,
+        podeDeletarEmendas: basePermissions.podeDeletarEmendas,      // FALSE
+        podeCriarNaturezas: basePermissions.podeCriarNaturezas,      // FALSE
         motivo: `Operador com acesso a ${localizacao.municipio}/${localizacao.uf.toUpperCase()}`,
         aviso: null,
         filtroMunicipio: localizacao.municipio,
@@ -123,7 +132,7 @@ const usePermissions = (usuario) => {
         tipo: "operador_filtrado",
       };
 
-      console.log("✅ usePermissions - Permissões OPERADOR calculadas:", permissoesOperador);
+      console.log("usePermissions - Permissoes OPERADOR calculadas:", permissoesOperador);
       return permissoesOperador;
     }
 
@@ -306,13 +315,17 @@ const usePermissions = (usuario) => {
     [usuario],
   );
 
-  // ✅ PERMISSÃO PARA DELETAR EMENDA E DESPESA (ADMIN E GESTOR)
+  // PERMISSAO PARA DELETAR EMENDA E DESPESA (baseado em permissions.js)
   const podeDeletarEmenda = useCallback(() => {
-    return usuario?.tipo === "admin" || usuario?.tipo === "gestor";
+    if (!usuario?.tipo) return false;
+    const perms = getPermissionsByRole(usuario.tipo);
+    return perms.podeDeletarEmendas === true;
   }, [usuario]);
 
   const podeDeletarDespesa = useCallback(() => {
-    return usuario?.tipo === "admin" || usuario?.tipo === "gestor";
+    if (!usuario?.tipo) return false;
+    const perms = getPermissionsByRole(usuario.tipo);
+    return perms.podeDeletarDespesas === true;
   }, [usuario]);
 
   // ✅ ATUALIZAR PERMISSÕES QUANDO USUÁRIO MUDAR

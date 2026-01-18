@@ -160,7 +160,7 @@ export const validatePassword = (senha) => {
  * @returns {boolean} - true se válido
  */
 export const validateUserTipo = (tipo) => {
-  const tiposValidos = ["admin", "operador"]; // ✅ APENAS DOIS TIPOS VÁLIDOS
+  const tiposValidos = ["admin", "gestor", "operador"]; // TRES TIPOS VALIDOS
   return tiposValidos.includes(tipo);
 };
 
@@ -180,7 +180,7 @@ export const validateUserStatus = (status) => {
  * @returns {boolean} - true se válido
  */
 export const validateUserRole = (role) => {
-  const rolesValidos = ["admin", "user", "operador"];
+  const rolesValidos = ["admin", "gestor", "operador"];
   return rolesValidos.includes(role);
 };
 
