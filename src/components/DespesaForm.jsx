@@ -877,6 +877,8 @@ const DespesaForm = ({
             formData={formData}
             modoVisualizacao={modoVisualizacao}
             showSuccessMessage={showSuccessMessage}
+            naturezaInfo={despesaParaEditar?.naturezaInfo || null} // 🆕 Passar info da natureza
+            emendaInfo={emendaInfoDinamica || emendaInfo} // 🆕 Passar info da emenda
           />
 
           <DespesaFormBanners
@@ -899,6 +901,8 @@ const DespesaForm = ({
           formData={formData}
           handleInputChange={handleInputChange}
           modoVisualizacao={modoVisualizacao} // ✅ Apenas modo visualizar bloqueia
+          naturezaInfo={despesaParaEditar?.naturezaInfo || null} // 🆕 Passar info da natureza
+          modoCriacaoDireta={isCriacaoDireta} // 🆕 Indica criação direta na natureza
         />
       )}
 

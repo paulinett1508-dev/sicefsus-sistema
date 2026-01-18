@@ -4,6 +4,7 @@
 // ✅ CORRIGIDO: Cálculo de saldo baseado APENAS no valor total da emenda
 // ✅ Saldo = Valor Total - Valor Executado (despesas executadas)
 // ✅ DARK MODE: Suporte completo ao tema escuro
+// ✅ ATUALIZADO 18/01/2026: Quando naturezaInfo presente, prioriza saldo da natureza
 
 import React from "react";
 import { useTheme } from "../../context/ThemeContext";
@@ -13,9 +14,15 @@ const DespesaFormEmendaInfo = ({
   formData = {},
   handleInputChange = () => {},
   modoVisualizacao = false,
+  naturezaInfo = null, // 🆕 Informações da natureza para priorizar saldo
+  modoCriacaoDireta = false, // 🆕 Indica se está criando despesa diretamente na natureza
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
   const styles = getStyles(isDark);
+
+  // 🆕 Se está criando despesa dentro de uma natureza, mostrar layout simplificado
+  // O header já mostra as informações da natureza, então aqui mostramos apenas dados complementares da emenda
+  const temNatureza = naturezaInfo && naturezaInfo.id && modoCriacaoDireta;
 
   // 🆕 Garantir que todos os dados sejam encontrados com fallbacks
   const parlamentar =
@@ -86,6 +93,40 @@ const DespesaFormEmendaInfo = ({
       : `R$ ${valor}`;
   };
 
+  // 🆕 LAYOUT COMPACTO: Quando criando despesa dentro de uma natureza
+  // O header já mostra natureza em destaque, aqui mostramos apenas resumo da emenda
+  if (temNatureza) {
+    return (
+      <div style={styles.containerCompacto}>
+        <div style={styles.compactoHeader}>
+          <span className="material-symbols-outlined" style={{ fontSize: 16, color: isDark ? "#94a3b8" : "#64748b" }}>
+            description
+          </span>
+          <span style={styles.compactoTitulo}>Emenda Vinculada</span>
+        </div>
+        <div style={styles.compactoGrid}>
+          <div style={styles.compactoItem}>
+            <span style={styles.compactoLabel}>Parlamentar</span>
+            <strong style={styles.compactoValor}>{parlamentar}</strong>
+          </div>
+          <div style={styles.compactoItem}>
+            <span style={styles.compactoLabel}>Número</span>
+            <strong style={styles.compactoValor}>{numero}</strong>
+          </div>
+          <div style={styles.compactoItem}>
+            <span style={styles.compactoLabel}>Município</span>
+            <strong style={styles.compactoValor}>{municipio}{uf ? `/${uf}` : ""}</strong>
+          </div>
+          <div style={styles.compactoItem}>
+            <span style={styles.compactoLabel}>Valor Total</span>
+            <strong style={styles.compactoValor}>{formatMoeda(valorRecurso)}</strong>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // LAYOUT COMPLETO: Modo padrão (sem natureza)
   return (
     <div style={styles.container}>
       {/* 📋 HEADER COM STATUS */}
@@ -207,6 +248,52 @@ const getStyles = (isDark) => ({
     padding: "16px",
     marginBottom: "20px",
     boxShadow: isDark ? "0 2px 6px rgba(0,0,0,0.2)" : "0 2px 6px rgba(0,0,0,0.06)",
+  },
+
+  // 🆕 LAYOUT COMPACTO (quando criando despesa dentro de natureza)
+  containerCompacto: {
+    backgroundColor: isDark ? "var(--theme-surface, #1e293b)" : "#ffffff",
+    border: `1px solid ${isDark ? "var(--theme-border, #334155)" : "#e2e8f0"}`,
+    borderRadius: "8px",
+    padding: "12px 16px",
+    marginBottom: "16px",
+  },
+  compactoHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    marginBottom: "10px",
+    paddingBottom: "8px",
+    borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`,
+  },
+  compactoTitulo: {
+    fontSize: "12px",
+    fontWeight: 600,
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  },
+  compactoGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+    gap: "12px",
+  },
+  compactoItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+  },
+  compactoLabel: {
+    fontSize: "10px",
+    fontWeight: 600,
+    color: isDark ? "var(--theme-text-secondary, #94a3b8)" : "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: "0.3px",
+  },
+  compactoValor: {
+    fontSize: "13px",
+    fontWeight: 600,
+    color: isDark ? "var(--theme-text, #e2e8f0)" : "#1e293b",
   },
 
   // 📋 HEADER
