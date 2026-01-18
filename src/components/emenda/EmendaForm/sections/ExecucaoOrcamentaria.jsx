@@ -1439,6 +1439,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             }}
           >
             <div style={dynamicStyles.formularioEdicaoModal}>
+              {/* Header do modal */}
               <div style={styles.formularioEdicaoHeader}>
                 <h2 style={styles.formularioTitulo}>
                   {modoVisualizacao === "editar" && <><span className="material-symbols-outlined" style={{ fontSize: 20, marginRight: 8, verticalAlign: "middle" }}>description</span> Informações da Despesa</>}
@@ -1449,10 +1450,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                 </h2>
                 <button
                   onClick={() => {
-                    console.log(
-                      "🔘 Botão Voltar clicado - Modo:",
-                      modoVisualizacao,
-                    );
+                    console.log("🔘 Botão Voltar clicado - Modo:", modoVisualizacao);
                     handleFecharFormulario();
                   }}
                   style={dynamicStyles.btnVoltar}
@@ -1460,6 +1458,107 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                   ← Voltar
                 </button>
               </div>
+
+              {/* 🆕 Barra contextual da natureza - separada do header azul */}
+              {modoVisualizacao === "criar-executada" && despesaEmEdicao?.naturezaInfo && (
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px 24px",
+                  backgroundColor: isDark ? "#1e293b" : "#f8fafc",
+                  borderBottom: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+                  gap: 16,
+                  flexWrap: "wrap",
+                }}>
+                  {/* Natureza */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: 20,
+                      color: isDark ? "#60a5fa" : "#3b82f6"
+                    }}>
+                      account_balance_wallet
+                    </span>
+                    <div>
+                      <div style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: isDark ? "#94a3b8" : "#64748b",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        marginBottom: 2,
+                      }}>
+                        Natureza
+                      </div>
+                      <div style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: isDark ? "#e2e8f0" : "#1e293b",
+                        fontFamily: "monospace",
+                      }}>
+                        {despesaEmEdicao.naturezaInfo.codigo}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Saldo disponível */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "8px 16px",
+                    backgroundColor: despesaEmEdicao.naturezaInfo.saldoDisponivel > 0
+                      ? (isDark ? "rgba(34, 197, 94, 0.15)" : "#f0fdf4")
+                      : (isDark ? "rgba(239, 68, 68, 0.15)" : "#fef2f2"),
+                    borderRadius: 8,
+                    border: `1px solid ${despesaEmEdicao.naturezaInfo.saldoDisponivel > 0
+                      ? (isDark ? "#22c55e" : "#86efac")
+                      : (isDark ? "#ef4444" : "#fca5a5")}`,
+                  }}>
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: 18,
+                      color: despesaEmEdicao.naturezaInfo.saldoDisponivel > 0
+                        ? (isDark ? "#4ade80" : "#16a34a")
+                        : (isDark ? "#f87171" : "#dc2626"),
+                    }}>
+                      {despesaEmEdicao.naturezaInfo.saldoDisponivel > 0 ? "check_circle" : "warning"}
+                    </span>
+                    <div>
+                      <div style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: isDark ? "#94a3b8" : "#64748b",
+                        textTransform: "uppercase",
+                      }}>
+                        Saldo Disponível
+                      </div>
+                      <div style={{
+                        fontSize: 15,
+                        fontWeight: 700,
+                        color: despesaEmEdicao.naturezaInfo.saldoDisponivel > 0
+                          ? (isDark ? "#4ade80" : "#16a34a")
+                          : (isDark ? "#f87171" : "#dc2626"),
+                        fontFamily: "monospace",
+                      }}>
+                        {formatCurrency(despesaEmEdicao.naturezaInfo.saldoDisponivel)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Referência da emenda */}
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    color: isDark ? "#94a3b8" : "#64748b",
+                    fontSize: 12,
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>link</span>
+                    <span>Emenda <strong style={{ color: isDark ? "#e2e8f0" : "#1e293b" }}>{formData?.numero}</strong></span>
+                    {formData?.autor && <span>• {formData.autor}</span>}
+                  </div>
+                </div>
+              )}
               <div style={styles.formularioEdicaoContent}>
                 {(() => {
                   try {
@@ -1479,6 +1578,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
                         somenteLeitura={modoVisualizacao === "visualizar"}
                         modoExecucao={modoVisualizacao === "executar"} // 🔑 Flag especial
                         modoCriacaoDireta={modoVisualizacao === "criar-executada"}
+                        hideHeader={true} // 🆕 Esconder header interno - modal já tem header próprio
                         emendaInfo={{
                           id: emendaId,
                           numero: formData?.numero,
