@@ -1,4 +1,3 @@
-cat > ~/workspace/docs/skills/CODE-IMPLEMENTER.md << 'EOF'
 # CODE Implementer Skill
 
 ## Session Management
