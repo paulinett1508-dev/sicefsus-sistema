@@ -295,7 +295,49 @@ const Emendas = () => {
 
       const emendaExcluida = modalExclusao.emenda;
 
-      // Registrar exclusão no log de auditoria ANTES de deletar
+      // 1. Buscar e deletar NATUREZAS vinculadas
+      const naturezasQuery = query(
+        collection(db, "naturezas"),
+        where("emendaId", "==", emendaExcluida.id)
+      );
+      const naturezasSnap = await getDocs(naturezasQuery);
+      const naturezasDeletadas = [];
+
+      for (const natDoc of naturezasSnap.docs) {
+        await deleteDoc(doc(db, "naturezas", natDoc.id));
+        naturezasDeletadas.push({
+          id: natDoc.id,
+          codigo: natDoc.data().codigo,
+          valorAlocado: natDoc.data().valorAlocado,
+        });
+      }
+
+      if (naturezasDeletadas.length > 0) {
+        console.log(`🗑️ ${naturezasDeletadas.length} naturezas deletadas da emenda ${emendaExcluida.numero}`);
+      }
+
+      // 2. Buscar e deletar DESPESAS vinculadas
+      const despesasQuery = query(
+        collection(db, "despesas"),
+        where("emendaId", "==", emendaExcluida.id)
+      );
+      const despesasSnap = await getDocs(despesasQuery);
+      const despesasDeletadas = [];
+
+      for (const despDoc of despesasSnap.docs) {
+        await deleteDoc(doc(db, "despesas", despDoc.id));
+        despesasDeletadas.push({
+          id: despDoc.id,
+          valor: despDoc.data().valor,
+          status: despDoc.data().status,
+        });
+      }
+
+      if (despesasDeletadas.length > 0) {
+        console.log(`🗑️ ${despesasDeletadas.length} despesas deletadas da emenda ${emendaExcluida.numero}`);
+      }
+
+      // 3. Registrar exclusão no log de auditoria
       await auditService.logAction({
         action: "DELETE_EMENDA",
         resourceType: "emenda",
@@ -321,13 +363,18 @@ const Emendas = () => {
         metadata: {
           origem: "tela_emendas",
           motivoExclusao: "usuario_solicitou",
+          naturezasDeletadas: naturezasDeletadas.length,
+          despesasDeletadas: despesasDeletadas.length,
         },
         relatedResources: {
           municipioEmenda: emendaExcluida.municipio,
           ufEmenda: emendaExcluida.uf,
+          naturezas: naturezasDeletadas,
+          despesas: despesasDeletadas,
         },
       });
 
+      // 4. Deletar a emenda
       await deleteDoc(doc(db, "emendas", emendaExcluida.id));
 
       setEmendas((prev) => prev.filter((e) => e.id !== emendaExcluida.id));
@@ -335,7 +382,17 @@ const Emendas = () => {
         prev.filter((e) => e.id !== emendaExcluida.id)
       );
       setModalExclusao({ isOpen: false, emenda: null, loading: false });
-      setToast({ show: true, message: "Emenda excluída com sucesso!", type: "success" });
+
+      // Mensagem informativa sobre exclusão em cascata
+      const extras = [];
+      if (naturezasDeletadas.length > 0) {
+        extras.push(`${naturezasDeletadas.length} natureza(s)`);
+      }
+      if (despesasDeletadas.length > 0) {
+        extras.push(`${despesasDeletadas.length} despesa(s)`);
+      }
+      const msgExtra = extras.length > 0 ? ` (+ ${extras.join(" e ")})` : "";
+      setToast({ show: true, message: `Emenda excluída com sucesso!${msgExtra}`, type: "success" });
     } catch (error) {
       // Registrar erro no log
       await auditService.logError({
