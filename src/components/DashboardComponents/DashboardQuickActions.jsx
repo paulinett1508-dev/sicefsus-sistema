@@ -42,7 +42,7 @@ const DashboardQuickActions = ({ userRole = "operador" }) => {
       descricao: "Cadastrar emenda",
       cor: "#F59E0B",
       rota: "/emendas/novo",
-      permissoes: ["admin"],
+      permissoes: ["admin", "gestor"], // 🔒 Admin e Gestor podem criar emendas
     },
     {
       id: "usuarios",

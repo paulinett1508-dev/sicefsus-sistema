@@ -3,13 +3,14 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { useSearchParams, useParams, useLocation } from "react-router-dom";
+import { useSearchParams, useParams, useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../../firebase/firebaseConfig";
 import { UserContext } from "../../../context/UserContext";
 import { useTheme } from "../../../context/ThemeContext";
 
 import { useEmendaFormData } from "../../../hooks/useEmendaFormData";
 import { useEmendaFormNavigation } from "../../../hooks/useEmendaFormNavigation";
+import { hasPermission } from "../../../config/permissions"; // 🔒 Sistema de permissões
 
 import TabNavigation from "./components/TabNavigation";
 import DadosBasicosTab from "./sections/DadosBasicosTab";
@@ -23,10 +24,28 @@ import Toast from "../../Toast";
 export default function EmendaForm() {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dadosBasicos");
   const { user } = useContext(UserContext);
   const [searchParams] = useSearchParams();
   const { isDark } = useTheme();
+
+  // 🔒 Verificar permissões
+  const userRole = user?.tipo || "operador";
+  const podeCriarEmendas = hasPermission(userRole, "podeCriarEmendas");
+  const podeEditarEmendas = hasPermission(userRole, "podeEditarEmendas");
+  const isNovo = !id || id === "novo";
+
+  // 🔒 Bloquear acesso não autorizado
+  useEffect(() => {
+    if (isNovo && !podeCriarEmendas) {
+      console.warn("🔒 Acesso negado: usuário não tem permissão para criar emendas");
+      navigate("/emendas", { replace: true });
+    } else if (!isNovo && !podeEditarEmendas && !podeCriarEmendas) {
+      // Se não pode criar nem editar, só pode visualizar (operador)
+      // Operador pode visualizar emendas existentes
+    }
+  }, [isNovo, podeCriarEmendas, podeEditarEmendas, navigate]);
 
   // Estilos dinâmicos baseados no tema
   const dynamicStyles = {

@@ -17,6 +17,7 @@ import {
 import { db } from "../firebase/firebaseConfig";
 import { useUser } from "../context/UserContext";
 import { auditService } from "../services/auditService";
+import { hasPermission } from "../config/permissions"; // 🔒 Sistema de permissões
 import EmendasTable from "./EmendasTable";
 import EmendasFilters from "./EmendasFilters";
 import Toast from "./Toast";
@@ -59,6 +60,10 @@ const Emendas = () => {
   const userRole = user?.tipo || "operador";
   const userMunicipio = user?.municipio;
   const userUf = user?.uf;
+
+  // 🔒 Verificar permissões
+  const podeCriarEmendas = hasPermission(userRole, "podeCriarEmendas");
+  const podeDeletarEmendas = hasPermission(userRole, "podeDeletarEmendas");
   const userEmail = user?.email;
 
   // Loading do usuário
@@ -542,11 +547,13 @@ const Emendas = () => {
             />
           </div>
 
-          {/* Nova Emenda */}
-          <button style={styles.primaryButton} onClick={handleCriar}>
-            <span className="material-symbols-outlined icon-sm">add</span>
-            <span style={styles.buttonText}>Nova Emenda</span>
-          </button>
+          {/* Nova Emenda - só exibe se tiver permissão */}
+          {podeCriarEmendas && (
+            <button style={styles.primaryButton} onClick={handleCriar}>
+              <span className="material-symbols-outlined icon-sm">add</span>
+              <span style={styles.buttonText}>Nova Emenda</span>
+            </button>
+          )}
         </div>
       </div>
 
