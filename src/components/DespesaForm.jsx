@@ -190,10 +190,11 @@ const DespesaForm = ({
   // ✅ CONFIGURAÇÃO DE MODO SIMPLIFICADA
   const configModo = useMemo(() => {
     if (modoVisualizacao) return { modo: "visualizar", readOnly: true };
-    if (isExecucao) return { modo: "executar", readOnly: false }; // Ajustado para modo de execução
-    if (despesaParaEditar) return { modo: "editar", readOnly: false };
+    if (isExecucao) return { modo: "executar", readOnly: false }; // Executando despesa planejada
+    if (isCriacaoDireta) return { modo: "criar", readOnly: false }; // 🆕 Criação direta de despesa executada
+    if (despesaParaEditar?.id) return { modo: "editar", readOnly: false }; // 🔧 Só edição se tiver ID real
     return { modo: "criar", readOnly: false };
-  }, [modoVisualizacao, despesaParaEditar, isExecucao]); // Adicionado isExecucao
+  }, [modoVisualizacao, despesaParaEditar?.id, isExecucao, isCriacaoDireta]);
 
   // ✅ CARREGAR EMENDAS COM FILTRO POR MUNICÍPIO
   const carregarEmendas = useCallback(async () => {
@@ -879,6 +880,7 @@ const DespesaForm = ({
             showSuccessMessage={showSuccessMessage}
             naturezaInfo={despesaParaEditar?.naturezaInfo || null} // 🆕 Passar info da natureza
             emendaInfo={emendaInfoDinamica || emendaInfo} // 🆕 Passar info da emenda
+            modoCriacaoDireta={isCriacaoDireta} // 🆕 Flag direta para condição
           />
 
           <DespesaFormBanners

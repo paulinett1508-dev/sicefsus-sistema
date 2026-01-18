@@ -20,6 +20,7 @@ const DespesaFormHeader = ({
   showSuccessMessage,
   naturezaInfo = null, // 🆕 Informações da natureza (envelope orçamentário)
   emendaInfo = null, // 🆕 Informações da emenda para referência
+  modoCriacaoDireta = false, // 🆕 Flag direta para criação de despesa executada
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
   const styles = getStyles(isDark);
@@ -27,8 +28,14 @@ const DespesaFormHeader = ({
   // Verificar se está criando despesa dentro de uma natureza
   const temNatureza = naturezaInfo && naturezaInfo.id;
 
-  // Se tem natureza, usar layout especial compacto
-  if (temNatureza && (configModo.modo === "criar" || configModo.modo === "executar")) {
+  // Se tem natureza E está em modo de criação/execução, usar layout compacto
+  const usarLayoutCompacto = temNatureza && (
+    modoCriacaoDireta ||
+    configModo.modo === "criar" ||
+    configModo.modo === "executar"
+  );
+
+  if (usarLayoutCompacto) {
     const saldoNatureza = naturezaInfo.saldoDisponivel || 0;
     const percentualUsado = naturezaInfo.valorAlocado > 0
       ? ((naturezaInfo.valorExecutado / naturezaInfo.valorAlocado) * 100)
