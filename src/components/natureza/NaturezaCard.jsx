@@ -33,11 +33,16 @@ const NaturezaCard = ({
   carregandoDespesas = false,
   onExpandir,
   expandido = false,
+  usuario, // 🔒 Prop para controle de permissão
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
   const [expandidoLocal, setExpandidoLocal] = useState(expandido);
   const [valorRegularizacao, setValorRegularizacao] = useState("");
   const [mostrarFormRegularizacao, setMostrarFormRegularizacao] = useState(false);
+
+  // 🔒 Verificação de permissão: operadores não podem excluir despesas
+  const isOperador = usuario?.tipo === "operador" || usuario?.tipo === "Operador";
+  const podeExcluirDespesa = !isOperador;
 
   useEffect(() => {
     setExpandidoLocal(expandido);
@@ -511,17 +516,20 @@ const NaturezaCard = ({
               Nova Despesa
             </button>
 
-            <button
-              style={{ ...styles.btnAcao, ...styles.btnSecundario }}
-              onClick={() => onEditarNatureza?.(natureza)}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
-                edit
-              </span>
-              Editar
-            </button>
+            {/* 🔒 Botões de editar/excluir natureza só para admin/gestor */}
+            {!isOperador && (
+              <button
+                style={{ ...styles.btnAcao, ...styles.btnSecundario }}
+                onClick={() => onEditarNatureza?.(natureza)}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                  edit
+                </span>
+                Editar
+              </button>
+            )}
 
-            {despesas.length === 0 && (
+            {!isOperador && despesas.length === 0 && (
               <button
                 style={{ ...styles.btnAcao, ...styles.btnPerigo }}
                 onClick={() => onExcluirNatureza?.(natureza)}
@@ -626,15 +634,17 @@ const NaturezaCard = ({
                       edit
                     </span>
                   </button>
-                  <button
-                    style={{ ...styles.btnIcone, ...styles.btnIconePerigo }}
-                    onClick={() => onExcluirDespesa?.(despesa)}
-                    title="Excluir despesa"
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-                      delete
-                    </span>
-                  </button>
+                  {podeExcluirDespesa && (
+                    <button
+                      style={{ ...styles.btnIcone, ...styles.btnIconePerigo }}
+                      onClick={() => onExcluirDespesa?.(despesa)}
+                      title="Excluir despesa"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                        delete
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))

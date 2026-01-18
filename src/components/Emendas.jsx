@@ -157,15 +157,22 @@ const Emendas = () => {
         const valorComprometido = valorExecutado + valorPlanejado;
         const saldoDisponivel = valorTotal - valorComprometido;
         
+        // Calcular percentual com precisao maior para nao perder valores pequenos
+        const percentualExecutadoRaw =
+          valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
+        const percentualPlanejadoRaw =
+          valorTotal > 0 ? (valorPlanejado / valorTotal) * 100 : 0;
+
+        // Arredondar para 1 casa decimal, mas garantir que valores > 0 nao zerem
         const percentualExecutado =
-          valorTotal > 0
-            ? parseFloat(((valorExecutado / valorTotal) * 100).toFixed(1))
-            : 0;
+          percentualExecutadoRaw > 0 && percentualExecutadoRaw < 0.1
+            ? 0.1 // Minimo visual para indicar que ha execucao
+            : parseFloat(percentualExecutadoRaw.toFixed(1));
 
         const percentualPlanejado =
-          valorTotal > 0
-            ? parseFloat(((valorPlanejado / valorTotal) * 100).toFixed(1))
-            : 0;
+          percentualPlanejadoRaw > 0 && percentualPlanejadoRaw < 0.1
+            ? 0.1 // Minimo visual para indicar que ha planejamento
+            : parseFloat(percentualPlanejadoRaw.toFixed(1));
 
         // ✅ DEBUG: Log do cálculo final
         if (despesasEmenda.length > 0) {
@@ -388,7 +395,7 @@ const Emendas = () => {
         loading={modalExclusao.loading}
         userRole={userRole}
         onConfirm={handleConfirmarExclusao}
-        onCancel={() => setModalExclusao({ isOpen: false, emenda: null, loading: false })}
+        onClose={() => setModalExclusao({ isOpen: false, emenda: null, loading: false })}
       />
 
       {/* Info Bar */}

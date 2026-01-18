@@ -60,6 +60,12 @@ const Identificacao = ({
       backgroundColor: isDark ? "var(--theme-input-bg)" : "white",
       color: isDark ? "var(--theme-text)" : "inherit",
     },
+    inputDisabled: {
+      backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#e9ecef",
+      color: isDark ? "var(--theme-text-muted)" : "inherit",
+      cursor: "not-allowed",
+      opacity: 0.7,
+    },
   };
   const isOperador = user?.tipo === "operador";
   const isGestor = user?.tipo === "gestor";
@@ -235,7 +241,7 @@ const Identificacao = ({
             style={{
               ...dynamicStyles.input,
               ...(fieldErrors.uf && styles.inputError),
-              ...(isBloqueadoLocalizacao && styles.inputDisabled),
+              ...(isBloqueadoLocalizacao && dynamicStyles.inputDisabled),
             }}
             required
           >
@@ -265,7 +271,7 @@ const Identificacao = ({
               ...dynamicStyles.input,
               ...(fieldErrors.municipio && styles.inputError),
               ...(loadingMunicipios && styles.inputLoading),
-              ...(isBloqueadoLocalizacao && styles.inputDisabled),
+              ...(isBloqueadoLocalizacao && dynamicStyles.inputDisabled),
             }}
             required
           >

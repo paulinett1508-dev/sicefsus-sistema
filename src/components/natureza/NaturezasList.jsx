@@ -42,6 +42,7 @@ const NaturezasList = ({
   onCarregarDespesas,
   validarAlocacao,
   despesasPorNatureza = {},
+  usuario, // 🔒 Prop para controle de permissão
 }) => {
   const { isDark } = useTheme?.() || { isDark: false };
 
@@ -57,6 +58,14 @@ const NaturezasList = ({
   const [mostrarModalRegularizarTodas, setMostrarModalRegularizarTodas] = useState(false);
   const [regularizandoTodas, setRegularizandoTodas] = useState(false);
   const [progressoRegularizacao, setProgressoRegularizacao] = useState({ atual: 0, total: 0 });
+
+  // 🔒 Estado para modal de permissão negada
+  const [mostrarModalPermissaoNegada, setMostrarModalPermissaoNegada] = useState(false);
+  const [acaoNegada, setAcaoNegada] = useState(""); // "criar", "editar", "excluir"
+
+  // 🔒 Verificação de permissão
+  const isOperador = usuario?.tipo === "operador" || usuario?.tipo === "Operador";
+  const podeGerenciarNaturezas = !isOperador; // Admin e Gestor podem gerenciar
 
   // Calcular saldo para novas naturezas
   const valorTotal = parseValorMonetario(
@@ -81,11 +90,23 @@ const NaturezasList = ({
 
   // Handlers
   const handleAbrirFormulario = () => {
+    // 🔒 Verificar permissão antes de abrir
+    if (!podeGerenciarNaturezas) {
+      setAcaoNegada("criar");
+      setMostrarModalPermissaoNegada(true);
+      return;
+    }
     setNaturezaEmEdicao(null);
     setMostrarFormulario(true);
   };
 
   const handleEditarNatureza = (natureza) => {
+    // 🔒 Verificar permissão antes de editar
+    if (!podeGerenciarNaturezas) {
+      setAcaoNegada("editar");
+      setMostrarModalPermissaoNegada(true);
+      return;
+    }
     setNaturezaEmEdicao(natureza);
     setMostrarFormulario(true);
   };
@@ -334,18 +355,21 @@ const NaturezasList = ({
             <button
               style={{
                 ...styles.btnNovo,
-                ...(saldoLivre <= 0 ? styles.btnNovoDisabled : {}),
+                ...(saldoLivre <= 0 || !podeGerenciarNaturezas ? styles.btnNovoDisabled : {}),
+                ...(isOperador ? { backgroundColor: isDark ? "#475569" : "#94a3b8" } : {}),
               }}
               onClick={handleAbrirFormulario}
               disabled={saldoLivre <= 0}
               title={
-                saldoLivre <= 0
-                  ? "Sem saldo livre para alocar"
-                  : "Criar nova natureza"
+                isOperador
+                  ? "Operadores não podem criar naturezas"
+                  : saldoLivre <= 0
+                    ? "Sem saldo livre para alocar"
+                    : "Criar nova natureza"
               }
             >
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                add
+                {isOperador ? "lock" : "add"}
               </span>
               Nova Natureza
             </button>
@@ -416,6 +440,7 @@ const NaturezasList = ({
                 console.log("🔴 Botão excluir clicado - despesa:", d?.id, d?.discriminacao);
                 setDespesaParaExcluir(d);
               }}
+              usuario={usuario}
             />
           ))}
         </div>
@@ -650,6 +675,146 @@ const NaturezasList = ({
           type="warning"
           disabled={regularizandoTodas}
         />
+      )}
+
+      {/* 🔒 Modal de Permissão Negada - Estilo amigável */}
+      {mostrarModalPermissaoNegada && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+          onClick={() => setMostrarModalPermissaoNegada(false)}
+        >
+          <div
+            style={{
+              backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
+              borderRadius: 16,
+              padding: 32,
+              maxWidth: 420,
+              width: "90%",
+              textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+              border: isDark ? "1px solid var(--theme-border)" : "none",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ícone */}
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : "#fef3c7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 20px",
+              }}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 32, color: "#f59e0b" }}
+              >
+                lock
+              </span>
+            </div>
+
+            {/* Título */}
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: isDark ? "var(--theme-text)" : "#1e293b",
+                marginBottom: 12,
+              }}
+            >
+              Ação Não Permitida
+            </h2>
+
+            {/* Mensagem */}
+            <p
+              style={{
+                fontSize: 14,
+                color: isDark ? "var(--theme-text-secondary)" : "#64748b",
+                marginBottom: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              Como <strong>operador</strong>, você não tem permissão para{" "}
+              {acaoNegada === "criar" && "criar naturezas de despesa"}
+              {acaoNegada === "editar" && "editar naturezas de despesa"}
+              {acaoNegada === "excluir" && "excluir naturezas de despesa"}.
+            </p>
+
+            <p
+              style={{
+                fontSize: 13,
+                color: isDark ? "var(--theme-text-secondary)" : "#94a3b8",
+                marginBottom: 20,
+              }}
+            >
+              Por favor, solicite esta ação a um administrador ou gestor do sistema.
+            </p>
+
+            {/* Dica */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                padding: 12,
+                backgroundColor: isDark ? "rgba(245, 158, 11, 0.1)" : "#fef3c7",
+                borderRadius: 8,
+                marginBottom: 24,
+                textAlign: "left",
+              }}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: 18, color: "#f59e0b", flexShrink: 0, marginTop: 1 }}
+              >
+                lightbulb
+              </span>
+              <span
+                style={{
+                  fontSize: 12,
+                  color: isDark ? "#fcd34d" : "#92400e",
+                  lineHeight: 1.4,
+                }}
+              >
+                Entre em contato com o administrador responsável pelo seu
+                município para solicitar alterações nas naturezas de despesa.
+              </span>
+            </div>
+
+            {/* Botão */}
+            <button
+              onClick={() => setMostrarModalPermissaoNegada(false)}
+              style={{
+                padding: "12px 32px",
+                fontSize: 14,
+                fontWeight: 600,
+                backgroundColor: isDark ? "var(--theme-surface-secondary)" : "#f1f5f9",
+                color: isDark ? "var(--theme-text)" : "#475569",
+                border: "none",
+                borderRadius: 8,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

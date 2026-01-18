@@ -337,7 +337,8 @@ const EmendasTable = ({
                               {displayExecutado > 0 && (
                                 <div
                                   style={{
-                                    width: `${displayExecutado}%`,
+                                    width: `${Math.max(displayExecutado, 2)}%`, // Minimo 2% visual
+                                    minWidth: '4px', // Garantir visibilidade minima
                                     height: '100%',
                                     backgroundColor: '#10B981',
                                     transition: 'width 0.3s ease',
@@ -379,7 +380,9 @@ const EmendasTable = ({
                                 {percExecutado > 0 && (
                                   <div style={styles.labelItem}>
                                     <span style={{ ...styles.labelDot, backgroundColor: '#10B981' }} />
-                                    <span style={styles.labelText}>{percExecutado.toFixed(0)}%</span>
+                                    <span style={styles.labelText}>
+                                      {percExecutado < 1 ? '<1' : percExecutado.toFixed(0)}%
+                                    </span>
                                   </div>
                                 )}
                                 {percPlanejado > 0 && (

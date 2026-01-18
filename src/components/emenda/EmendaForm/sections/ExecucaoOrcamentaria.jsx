@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  getDocsFromServer,
   updateDoc,
   doc,
   deleteDoc,
@@ -424,7 +425,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
         }
       });
 
-      const despesasSnapshot = await getDocs(despesasQuery);
+      // ✅ CORREÇÃO: Usar getDocsFromServer para garantir dados atualizados do servidor
+      const despesasSnapshot = await getDocsFromServer(despesasQuery);
       const despesasData = despesasSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -761,7 +763,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
 
 
   // ✅ Handler para fechar formulário (COM PROTEÇÃO)
-  const handleFecharFormulario = (foiSalvoComSucesso = false) => {
+  const handleFecharFormulario = async (foiSalvoComSucesso = false) => {
     console.log(
       "🚪 Tentando fechar - Modo:",
       modoVisualizacao,
@@ -782,10 +784,26 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       }
     }
 
+    // ✅ CORREÇÃO: Capturar naturezaId ANTES de limpar despesaEmEdicao
+    const naturezaIdParaAtualizar = despesaEmEdicao?.naturezaId;
+
     console.log("✅ Fechando formulário");
     setDespesaEmEdicao(null);
     setModoVisualizacao(null);
-    carregarDespesas();
+
+    // Recarregar despesas gerais
+    await carregarDespesas();
+
+    // ✅ CORREÇÃO: Se salvou com sucesso e tinha naturezaId, atualizar despesasPorNatureza
+    if (foiSalvoComSucesso && naturezaIdParaAtualizar && carregarDespesasNatureza) {
+      console.log("🔄 Atualizando despesasPorNatureza para natureza:", naturezaIdParaAtualizar);
+      try {
+        await carregarDespesasNatureza(naturezaIdParaAtualizar);
+        console.log("✅ despesasPorNatureza atualizado");
+      } catch (error) {
+        console.error("❌ Erro ao atualizar despesasPorNatureza:", error);
+      }
+    }
   };
 
   // ✅ Função para recalcular e atualizar valores da emenda no Firestore
@@ -793,12 +811,12 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     if (!emendaId) return;
 
     try {
-      // Recarregar despesas atualizadas do Firestore
+      // Recarregar despesas atualizadas do Firestore (forçar do servidor)
       const despesasQuery = query(
         collection(db, "despesas"),
         where("emendaId", "==", emendaId)
       );
-      const despesasSnapshot = await getDocs(despesasQuery);
+      const despesasSnapshot = await getDocsFromServer(despesasQuery);
       const despesasAtualizadas = despesasSnapshot.docs.map(d => ({
         id: d.id,
         ...d.data()
@@ -942,6 +960,17 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
   const handleExcluirDespesa = async (despesa) => {
     if (!despesa?.id) {
       console.warn("⚠️ Tentativa de excluir despesa sem ID");
+      return;
+    }
+
+    // 🔒 VALIDAÇÃO DE PERMISSÃO: Operadores NÃO podem excluir despesas
+    const isOperador = usuario?.tipo === "operador" || usuario?.tipo === "Operador";
+    if (isOperador) {
+      console.warn("🚫 Operador tentou excluir despesa - ação bloqueada");
+      showToast({
+        message: "Operadores não têm permissão para excluir despesas",
+        type: "error",
+      });
       return;
     }
 
@@ -1382,6 +1411,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
             onCarregarDespesas={carregarDespesasNatureza}
             validarAlocacao={validarAlocacao}
             despesasPorNatureza={despesasPorNatureza}
+            usuario={usuario}
           />
         )}
       </fieldset>

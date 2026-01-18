@@ -731,18 +731,15 @@ const DespesaForm = ({
           `🔄 Iniciando recálculo da natureza ${naturezaIdParaRecalcular}...`,
         );
         try {
-          const resultadoNatureza = await recalcularNatureza(naturezaIdParaRecalcular);
-          if (resultadoNatureza.success) {
-            console.log(`✅ Recálculo da natureza concluído:`, resultadoNatureza.valores);
-          } else {
-            console.warn(`⚠️ Recálculo da natureza falhou: ${resultadoNatureza.error}`);
-          }
+          // recalcularNatureza retorna diretamente os valores calculados
+          const valoresNatureza = await recalcularNatureza(naturezaIdParaRecalcular);
+          console.log(`✅ Natureza recalculada:`, valoresNatureza);
         } catch (errNatureza) {
           console.warn(`⚠️ Erro ao recalcular natureza:`, errNatureza);
         }
       }
 
-      // Recalcular emenda
+      // Recalcular emenda (todos os usuários - operadores podem atualizar campos de cálculo)
       if (emendaIdParaRecalcular) {
         console.log(
           `🔄 Iniciando recálculo automático da emenda ${emendaIdParaRecalcular}...`,

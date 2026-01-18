@@ -32,8 +32,20 @@ service cloud.firestore {
 
     function matchesUserLocation(data) {
       let userData = getUserData();
-      return data.municipio == userData.municipio && 
+      return data.municipio == userData.municipio &&
              data.uf == userData.uf;
+    }
+
+    // Verifica se a atualização contém APENAS campos de cálculo (para operadores)
+    function isOnlyCalculationFields() {
+      let allowedFields = [
+        'valorExecutado', 'valorAlocado',
+        'saldoNaoExecutado', 'saldoParaNaturezas',
+        'saldoDisponivel', 'saldoLivre',
+        'percentualExecutado', 'percentualAlocado',
+        'atualizadoEm', 'versaoCalculo'
+      ];
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
     }
 
     // ========================================
@@ -75,10 +87,14 @@ service cloud.firestore {
         (isGestor() && matchesUserLocation(request.resource.data))
       );
 
-      // ATUALIZAR: Admin e Gestor podem editar, Operador NAO
+      // ATUALIZAR:
+      // - Admin: acesso total
+      // - Gestor: pode editar emendas do seu município
+      // - Operador: pode atualizar APENAS campos de cálculo (recálculo automático após salvar despesas)
       allow update: if isAuthenticated() && (
         isAdmin() ||
-        (isGestor() && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data))
+        (isGestor() && matchesUserLocation(resource.data) && matchesUserLocation(request.resource.data)) ||
+        (isOperador() && matchesUserLocation(resource.data) && isOnlyCalculationFields())
       );
 
       // 🔒 EXCLUIR: Apenas Admin e Gestor
@@ -158,12 +174,20 @@ service cloud.firestore {
     }
 
     // ========================================
-    // COLEÇÃO: AUDIT_LOGS
+    // COLEÇÃO: AUDIT_LOGS / LOGS
     // ========================================
 
     match /audit_logs/{logId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || isGestor();
       allow write: if isAuthenticated();
+    }
+
+    // Coleção usada pelo auditService.js
+    match /logs/{logId} {
+      allow read: if isAdmin() || isGestor();
+      allow create: if isAuthenticated();
+      // Logs não devem ser editados ou deletados
+      allow update, delete: if false;
     }
 
     // ========================================

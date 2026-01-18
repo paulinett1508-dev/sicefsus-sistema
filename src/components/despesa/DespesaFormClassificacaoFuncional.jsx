@@ -1023,7 +1023,7 @@ const getStyles = (isDark) => ({
     transition: "all 0.2s ease",
   },
   modoToggleBtnActive: {
-    borderColor: isDark ? "#3b82f6" : "#2563EB",
+    border: `2px solid ${isDark ? "#3b82f6" : "#2563EB"}`,
     backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(37, 99, 235, 0.05)",
     color: isDark ? "#60a5fa" : "#2563EB",
     fontWeight: "600",

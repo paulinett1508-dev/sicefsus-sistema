@@ -60,7 +60,7 @@
   --gray-900: #0F172A;
 
   /* === TEMA LIGHT (Padrão) === */
-  --theme-bg: #F8FAFC;
+  --theme-bg: #F0F4F8;
   --theme-surface: #ffffff;
   --theme-surface-secondary: #F1F5F9;
   --theme-text: #334155;
@@ -70,12 +70,20 @@
   --theme-border-light: #F1F5F9;
   --theme-shadow: rgba(0, 0, 0, 0.08);
   --theme-shadow-light: rgba(0, 0, 0, 0.03);
-  --theme-sidebar-bg: #ffffff;
-  --theme-sidebar-item-hover-bg: rgba(241, 245, 249, 1);
-  --theme-sidebar-item-active-bg: rgba(26, 58, 74, 0.08);
   --theme-input-bg: #ffffff;
   --theme-surface-hover: #F1F5F9;
   --theme-hover: #F1F5F9;
+
+  /* === SIDEBAR COLORIDA (Light Mode) === */
+  --theme-sidebar-bg: linear-gradient(180deg, #1A3A4A 0%, #0F2830 100%);
+  --theme-sidebar-bg-solid: #1A3A4A;
+  --theme-sidebar-text: #F8FAFC;
+  --theme-sidebar-text-secondary: #CBD5E1;
+  --theme-sidebar-text-muted: #94A3B8;
+  --theme-sidebar-border: rgba(255, 255, 255, 0.1);
+  --theme-sidebar-item-hover-bg: rgba(255, 255, 255, 0.1);
+  --theme-sidebar-item-active-bg: rgba(255, 255, 255, 0.15);
+  --theme-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
 
   /* === SOMBRAS (Mais Suaves) === */
   --shadow-soft: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
@@ -172,10 +180,18 @@
   --theme-border-light: #475569;
   --theme-shadow: rgba(0, 0, 0, 0.3);
   --theme-shadow-light: rgba(0, 0, 0, 0.2);
-  --theme-sidebar-bg: #1E293B;
+  --theme-input-bg: #0F172A;
+
+  /* Sidebar no dark mode */
+  --theme-sidebar-bg: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  --theme-sidebar-bg-solid: #1E293B;
+  --theme-sidebar-text: #F1F5F9;
+  --theme-sidebar-text-secondary: #CBD5E1;
+  --theme-sidebar-text-muted: #64748B;
+  --theme-sidebar-border: rgba(255, 255, 255, 0.06);
   --theme-sidebar-item-hover-bg: rgba(255, 255, 255, 0.08);
   --theme-sidebar-item-active-bg: rgba(255, 255, 255, 0.12);
-  --theme-input-bg: #0F172A;
+  --theme-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
 
   /* Cores primárias ajustadas para dark */
   --primary: #3B82F6;
@@ -935,4 +951,16 @@ button:focus-visible {
   height: 1rem;
   background-color: var(--gray-300);
   margin: 0 0.5rem;
+}
+
+/* === SIDEBAR SEARCH PLACEHOLDER === */
+/* Estilo para placeholder do input de busca na sidebar escura */
+aside input::placeholder {
+  color: var(--theme-sidebar-text-muted, #94A3B8) !important;
+  opacity: 0.8;
+}
+
+aside input:focus {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
 }

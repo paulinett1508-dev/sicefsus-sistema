@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  getDocsFromServer,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -348,16 +349,21 @@ export const listarNaturezas = async (emendaId, options = {}) => {
 /**
  * Lista despesas de uma natureza
  * @param {string} naturezaId - ID da natureza
+ * @param {boolean} forceServer - Forçar leitura do servidor (ignorar cache)
  * @returns {Promise<Array>} Lista de despesas
  */
-export const listarDespesasNatureza = async (naturezaId) => {
+export const listarDespesasNatureza = async (naturezaId, forceServer = true) => {
   try {
     const despesasQuery = query(
       collection(db, "despesas"),
       where("naturezaId", "==", naturezaId)
     );
 
-    const snapshot = await getDocs(despesasQuery);
+    // ✅ CORREÇÃO: Usar getDocsFromServer para garantir dados atualizados
+    const snapshot = forceServer
+      ? await getDocsFromServer(despesasQuery)
+      : await getDocs(despesasQuery);
+
     const despesas = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -370,6 +376,7 @@ export const listarDespesasNatureza = async (naturezaId) => {
       return dataB - dataA;
     });
 
+    console.log(`📥 Despesas carregadas para natureza ${naturezaId}:`, despesas.length, forceServer ? "(do servidor)" : "(cache)");
     return despesas;
   } catch (error) {
     console.error("Erro ao listar despesas da natureza:", error);

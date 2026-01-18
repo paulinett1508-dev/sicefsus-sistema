@@ -35,7 +35,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
   const { version } = useVersion();
   const { isDark } = useTheme();
   const env = getEnvironment();
-  const logoSicefsus = isDark ? logoSicefsusDark : logoSicefsusLight;
+  // Sidebar escura em ambos os modos, então sempre usa logo para fundo escuro
+  const logoSicefsus = logoSicefsusDark;
 
   // Notificar o pai quando o collapsed muda
   const handleToggle = () => {
@@ -363,7 +364,7 @@ function NavItem({ item, isActive, collapsed, onClick, badge }) {
       : hovered
         ? "var(--theme-sidebar-item-hover-bg)"
         : "transparent",
-    color: "var(--theme-text)",
+    color: "var(--theme-sidebar-text)",
     opacity: isActive ? 1 : hovered ? 1 : 0.85,
   };
 
@@ -399,11 +400,12 @@ const styles = {
   sidebar: (collapsed) => ({
     width: collapsed ? 80 : 256,
     flexShrink: 0,
-    backgroundColor: "var(--theme-sidebar-bg, var(--theme-surface))",
-    borderRight: "1px solid var(--theme-border)",
+    background: "var(--theme-sidebar-bg)",
+    borderRight: "1px solid var(--theme-sidebar-border)",
+    boxShadow: "var(--theme-sidebar-shadow)",
     display: "flex",
     flexDirection: "column",
-    transition: "width 0.3s ease, background-color 0.3s ease",
+    transition: "width 0.3s ease, background 0.3s ease",
     position: "fixed",
     top: 0,
     left: 0,
@@ -417,7 +419,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    borderBottom: "1px solid var(--theme-border-light)",
+    borderBottom: "1px solid var(--theme-sidebar-border)",
     padding: "0 16px",
     position: "relative",
   },
@@ -427,7 +429,7 @@ const styles = {
     alignItems: "center",
     gap: 8,
     cursor: "pointer",
-    color: "var(--theme-text)",
+    color: "var(--theme-sidebar-text)",
   },
 
   toggleButton: {
@@ -436,19 +438,19 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
-    border: "1px solid var(--theme-border)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    border: "1px solid var(--theme-sidebar-border)",
     borderRadius: "6px",
     cursor: "pointer",
-    color: "var(--theme-text-secondary)",
+    color: "var(--theme-sidebar-text-secondary)",
     transition: "all 0.15s ease",
     flexShrink: 0,
   },
 
   toggleButtonHover: {
-    backgroundColor: "var(--theme-sidebar-item-hover-bg)",
-    border: "1px solid var(--primary)",
-    color: "var(--primary)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    color: "var(--theme-sidebar-text)",
   },
 
   logoImage: {
@@ -467,6 +469,7 @@ const styles = {
     fontWeight: 700,
     fontSize: 20,
     letterSpacing: "-0.5px",
+    color: "var(--theme-sidebar-text)",
   },
 
   searchContainer: {
@@ -475,12 +478,12 @@ const styles = {
 
   infoPanel: (expanded) => ({
     margin: "8px 12px",
-    backgroundColor: "var(--theme-surface-secondary)",
-    border: "1px solid var(--theme-border)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    border: "1px solid var(--theme-sidebar-border)",
     borderRadius: "8px",
     overflow: "hidden",
     transition: "all 0.3s ease",
-    boxShadow: expanded ? "var(--shadow-sm)" : "none",
+    boxShadow: expanded ? "0 2px 8px rgba(0,0,0,0.15)" : "none",
   }),
 
   infoPanelHeader: {
@@ -490,9 +493,7 @@ const styles = {
     justifyContent: "space-between",
     cursor: "pointer",
     transition: "background-color 0.15s ease",
-    "&:hover": {
-      backgroundColor: "var(--theme-sidebar-item-hover-bg)",
-    },
+    color: "var(--theme-sidebar-text-secondary)",
   },
 
   infoPanelTitle: {
@@ -501,7 +502,7 @@ const styles = {
     gap: 8,
     fontSize: "13px",
     fontWeight: 600,
-    color: "var(--theme-text)",
+    color: "var(--theme-sidebar-text)",
   },
 
   infoPanelContent: {
@@ -509,7 +510,7 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: 8,
-    borderTop: "1px solid var(--theme-border-light)",
+    borderTop: "1px solid var(--theme-sidebar-border)",
     animation: "slideDown 0.3s ease",
   },
 
@@ -518,20 +519,20 @@ const styles = {
     alignItems: "center",
     gap: 8,
     padding: "6px 8px",
-    backgroundColor: "var(--theme-bg)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: "6px",
   },
 
   techIcon: {
     fontSize: 18,
-    color: "var(--primary)",
-    opacity: 0.8,
+    color: "var(--accent-light, #60A5FA)",
+    opacity: 0.9,
   },
 
   techLabel: {
     fontSize: "10px",
     fontWeight: 600,
-    color: "var(--theme-text-secondary)",
+    color: "var(--theme-sidebar-text-muted)",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
@@ -539,17 +540,17 @@ const styles = {
   techValue: {
     fontSize: "12px",
     fontWeight: 500,
-    color: "var(--theme-text)",
+    color: "var(--theme-sidebar-text)",
   },
 
   formWarning: {
     margin: "8px 12px",
     padding: "10px 12px",
-    backgroundColor: "rgba(245, 158, 11, 0.1)",
-    border: "1px solid rgba(245, 158, 11, 0.3)",
+    backgroundColor: "rgba(245, 158, 11, 0.2)",
+    border: "1px solid rgba(245, 158, 11, 0.4)",
     borderRadius: "8px",
     fontSize: "11px",
-    color: "var(--warning-dark)",
+    color: "#FBBF24",
     display: "flex",
     alignItems: "center",
   },
@@ -565,8 +566,8 @@ const styles = {
   },
 
   badge: {
-    backgroundColor: "rgba(245, 158, 11, 0.15)",
-    color: "var(--warning-dark)",
+    backgroundColor: "rgba(245, 158, 11, 0.25)",
+    color: "#FBBF24",
     fontSize: "9px",
     fontWeight: 700,
     padding: "2px 6px",
@@ -575,7 +576,7 @@ const styles = {
   },
 
   footer: {
-    borderTop: "1px solid var(--theme-border)",
+    borderTop: "1px solid var(--theme-sidebar-border)",
     padding: "12px 16px",
   },
 
@@ -585,14 +586,14 @@ const styles = {
     cursor: "pointer",
     borderRadius: "8px",
     fontSize: "13px",
-    color: "var(--theme-text-secondary)",
+    color: "var(--theme-sidebar-text-secondary)",
     transition: "all 0.15s ease",
     marginBottom: 8,
   },
 
   footerDivider: {
     height: 1,
-    backgroundColor: "var(--theme-border-light)",
+    backgroundColor: "var(--theme-sidebar-border)",
     margin: "8px 0",
   },
 
@@ -606,15 +607,15 @@ const styles = {
     width: 36,
     height: 36,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
+    background: "linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "var(--white)",
+    color: "#ffffff",
     fontWeight: 700,
     fontSize: 12,
     flexShrink: 0,
-    boxShadow: "var(--shadow-sm)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
   },
 
   userInfo: {
@@ -626,7 +627,7 @@ const styles = {
     margin: 0,
     fontSize: "14px",
     fontWeight: 500,
-    color: "var(--theme-text)",
+    color: "var(--theme-sidebar-text)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -635,15 +636,15 @@ const styles = {
   userRole: {
     margin: 0,
     fontSize: "12px",
-    color: "var(--theme-text-secondary)",
+    color: "var(--theme-sidebar-text-secondary)",
   },
 
   logoutBtn: {
-    background: "transparent",
+    background: "rgba(255, 255, 255, 0.1)",
     border: "none",
     padding: 8,
     cursor: "pointer",
-    color: "var(--theme-text-muted)",
+    color: "var(--theme-sidebar-text-muted)",
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
@@ -652,11 +653,11 @@ const styles = {
   },
 
   logoutBtnCollapsed: {
-    background: "transparent",
+    background: "rgba(255, 255, 255, 0.1)",
     border: "none",
     padding: 8,
     cursor: "pointer",
-    color: "var(--theme-text-muted)",
+    color: "var(--theme-sidebar-text-muted)",
     borderRadius: "6px",
     display: "flex",
     alignItems: "center",
@@ -673,13 +674,13 @@ const styles = {
     gap: 6,
     marginTop: 12,
     paddingTop: 12,
-    borderTop: "1px solid var(--theme-border-light)",
+    borderTop: "1px solid var(--theme-sidebar-border)",
   }),
 
   envBadge: {
     fontSize: "9px",
     fontWeight: 700,
-    color: "var(--white)",
+    color: "#ffffff",
     padding: "2px 5px",
     borderRadius: "3px",
     letterSpacing: "0.5px",
@@ -687,7 +688,7 @@ const styles = {
 
   versionText: {
     fontSize: "10px",
-    color: "var(--theme-text-muted)",
+    color: "var(--theme-sidebar-text-muted)",
     fontFamily: "monospace",
   },
 };
