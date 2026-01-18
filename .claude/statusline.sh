@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Statusline para Claude Code
+#
+# LIMITAÇÃO CONHECIDA (Issue #13783, #5601):
+# O Claude Code passa tokens CUMULATIVOS no JSON, não o uso atual do contexto.
+# Isso significa que após um /compact, os valores não resetam.
+# Este script tenta mitigar usando current_usage se disponível e
+# ajustando o limite para 80% (quando auto-compact dispara).
+#
+# Se a porcentagem parecer incorreta comparada ao "Context left until auto-compact",
+# é devido a esta limitação da API do Claude Code.
+
 # Lê o JSON de entrada do Claude Code
 input=$(cat 2>/dev/null || echo "{}")
 
@@ -16,38 +27,64 @@ WHITE="\033[97m"
 BOLD="\033[1m"
 BLINK="\033[5m"
 
-# Extrair valores numéricos do JSON
+# Extrair valores numéricos do JSON (suporta nested objects)
 extract_num() {
   echo "$input" | grep -o "\"$1\":[0-9.]*" | head -1 | sed 's/.*://'
+}
+
+# Extrair valor de objeto nested (ex: context_window.current_usage)
+extract_nested() {
+  echo "$input" | grep -o "\"$1\":{[^}]*}" | grep -o "\"$2\":[0-9.]*" | head -1 | sed 's/.*://'
 }
 
 # Modelo
 model_name=$(echo "$input" | grep -o '"display_name":"[^"]*"' | head -1 | sed 's/.*:"//' | tr -d '"')
 [ -z "$model_name" ] && model_name="Opus 4.5"
 
-# Tokens
-input_tokens=$(extract_num "total_input_tokens")
-output_tokens=$(extract_num "total_output_tokens")
-context_size=$(extract_num "context_window_size")
+# Tentar obter uso atual do contexto (campo mais preciso se disponível)
+current_usage=$(extract_nested "context_window" "current_usage")
+context_size=$(extract_nested "context_window" "context_window_size")
 
-[ -z "$input_tokens" ] && input_tokens="0"
-[ -z "$output_tokens" ] && output_tokens="0"
-[ -z "$context_size" ] && context_size="200000"
-
-total_tokens=$((input_tokens + output_tokens))
-
-# Calcular porcentagem de memória
-if [ "$total_tokens" -gt 0 ] 2>/dev/null; then
-  mem_percent=$((total_tokens * 100 / context_size))
-  tokens_k=$((total_tokens / 1000))
-  context_k=$((context_size / 1000))
-  tokens_display="${tokens_k}k/${context_k}k"
-else
-  mem_percent="0"
-  tokens_display="0k/200k"
+# Fallback para campos antigos se não encontrar nested
+if [ -z "$current_usage" ]; then
+  current_usage=$(extract_num "current_usage")
+fi
+if [ -z "$context_size" ]; then
+  context_size=$(extract_num "context_window_size")
 fi
 
-# Cor da memória + alerta /compact
+# Se ainda não tiver current_usage, usar tokens cumulativos (menos preciso)
+if [ -z "$current_usage" ] || [ "$current_usage" = "0" ]; then
+  input_tokens=$(extract_num "total_input_tokens")
+  output_tokens=$(extract_num "total_output_tokens")
+  [ -z "$input_tokens" ] && input_tokens="0"
+  [ -z "$output_tokens" ] && output_tokens="0"
+  # NOTA: Isso é impreciso - tokens cumulativos não refletem contexto atual
+  current_usage=$((input_tokens + output_tokens))
+fi
+
+[ -z "$context_size" ] && context_size="200000"
+
+# Auto-compact dispara em ~80% do contexto (160k de 200k)
+# Ajustar o limite efetivo para refletir isso
+effective_limit=$((context_size * 80 / 100))
+
+# Calcular porcentagem de memória em relação ao limite de auto-compact
+if [ "$current_usage" -gt 0 ] 2>/dev/null; then
+  # Porcentagem em relação ao limite de auto-compact (80%)
+  mem_percent=$((current_usage * 100 / effective_limit))
+  # Cap em 100% para não mostrar >100%
+  [ "$mem_percent" -gt 100 ] && mem_percent=100
+
+  tokens_k=$((current_usage / 1000))
+  effective_k=$((effective_limit / 1000))
+  tokens_display="${tokens_k}k/${effective_k}k"
+else
+  mem_percent="0"
+  tokens_display="0k/160k"
+fi
+
+# Cor da memória + alerta /compact (baseado no limite de 80%)
 if [ "$mem_percent" -lt 50 ] 2>/dev/null; then
   MEM_COLOR=$GREEN
   COMPACT_ALERT=""
