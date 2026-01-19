@@ -28,7 +28,7 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 | Cenario | O que verificar |
 |---------|-----------------|
 | Demonstrativo por Emenda | Quebra de pagina correta |
-| Despesas Executadas | Lista completa sem sobreposicao |
+| **Despesas por Emenda (NOVO)** | Lista despesas agrupadas por emenda (data/descricao/fornecedor/nota fiscal/valor) |
 | Totalizadores | Aparecem na posicao correta |
 | Assinatura | Nao sobrepoe conteudo |
 
@@ -59,6 +59,7 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 | `RelatorioConsolidado.js` | `this.doc.lastAutoTable?.finalY` |
 
 ### Commits Relacionados
+- `edde371` feat: agrupar despesas por emenda no relatorio Prestacao de Contas
 - `c2f35da` feat: adicionar detalhamento de despesas por emenda no relatorio Execucao Orcamentaria
 - `e1bc860` fix: corrigir captura de finalY nas tabelas PDF
 - `2577708` feat: adicionar cabecalho de continuacao em relatorios PDF multi-pagina
