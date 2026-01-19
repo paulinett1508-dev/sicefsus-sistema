@@ -3,6 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
   addHeader,
+  addHeaderContinuacao,
   addFooter,
   formatCurrency,
   formatDate,
@@ -20,6 +21,8 @@ export class BaseRelatorio {
     this.pageNum = 1;
     this.logoBase64 = null;
     this.warnings = []; // Armazena avisos de erros durante a geração
+    this.tituloRelatorio = null; // Armazena título para cabeçalhos de continuação
+    this.subtituloRelatorio = null; // Armazena subtítulo para cabeçalhos de continuação
 
     // Configurações da página
     this.pageWidth = this.doc.internal.pageSize.width;
@@ -53,6 +56,10 @@ export class BaseRelatorio {
   }
 
   addHeader(titulo, subtitulo = null) {
+    // Armazena título e subtítulo para uso em páginas de continuação
+    this.tituloRelatorio = titulo;
+    this.subtituloRelatorio = subtitulo;
+
     // Extrair informações do usuário para o cabeçalho
     const opcoes = {
       municipio: this.usuario?.municipio,
@@ -60,6 +67,13 @@ export class BaseRelatorio {
       usuario: this.usuario?.nome || this.usuario?.email,
     };
     addHeader(this.doc, titulo, this.logoBase64, subtitulo, opcoes);
+  }
+
+  /**
+   * Adiciona cabeçalho compacto para páginas de continuação
+   */
+  addHeaderContinuacao() {
+    addHeaderContinuacao(this.doc, this.tituloRelatorio || "Relatório");
   }
 
   addFooter() {
@@ -70,7 +84,8 @@ export class BaseRelatorio {
     if (yPosition + minSpace > this.pageHeight - this.margins.bottom) {
       this.doc.addPage();
       this.pageNum++;
-      return 70; // Retorna nova posição Y após adicionar página
+      this.addHeaderContinuacao(); // Adiciona cabeçalho na nova página
+      return 20; // Retorna nova posição Y após o cabeçalho de continuação
     }
     return yPosition;
   }
@@ -81,7 +96,32 @@ export class BaseRelatorio {
    * @returns {Object} Resultado do autoTable (contém finalY)
    */
   createTable(options) {
-    return autoTable(this.doc, options);
+    const self = this;
+    let isFirstPage = true;
+
+    return autoTable(this.doc, {
+      ...options,
+      showHead: 'everyPage', // Repete cabeçalho da tabela em cada página
+      margin: {
+        left: options.margin?.left || 15,
+        right: options.margin?.right || 15,
+        top: 20, // Espaço para cabeçalho de continuação
+        bottom: 25, // Espaço para rodapé
+      },
+      didDrawPage: (data) => {
+        // Adiciona cabeçalho de continuação em páginas após a primeira
+        if (!isFirstPage) {
+          self.addHeaderContinuacao();
+          self.pageNum++;
+        }
+        isFirstPage = false;
+
+        // Chama o didDrawPage original se existir
+        if (options.didDrawPage) {
+          options.didDrawPage(data);
+        }
+      },
+    });
   }
 
   formatCurrency(value) {
