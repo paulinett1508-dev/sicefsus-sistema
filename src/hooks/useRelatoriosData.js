@@ -40,10 +40,24 @@ export function useRelatoriosData(usuario) {
       setError(null);
 
       try {
+        // 🔒 SEGURANÇA: Operador/Gestor SEM localização válida não pode ver NADA
+        const isAdmin = userRole === "admin";
+        const temLocalizacaoValida = userMunicipio && userUf;
+
+        if (!isAdmin && !temLocalizacaoValida) {
+          console.warn("⚠️ useRelatoriosData - Usuário sem localização válida, bloqueando acesso");
+          setEmendas([]);
+          setDespesas([]);
+          setError("Seu cadastro não possui município/UF definido. Contate o administrador.");
+          setLoading(false);
+          return;
+        }
+
         // Construir query para emendas baseado no perfil do usuário
         // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf para operadores/gestores
         let emendasRef = collection(db, "emendas");
-        if (userRole && userRole !== "admin" && userMunicipio && userUf) {
+        if (!isAdmin) {
+          // Operador/Gestor SEMPRE filtra por localização
           emendasRef = query(
             emendasRef,
             where("municipio", "==", userMunicipio),
@@ -51,14 +65,13 @@ export function useRelatoriosData(usuario) {
           );
         }
 
-        console.log("📊 useRelatoriosData - Query emendas:", { userRole, userMunicipio, userUf });
         const emendasSnapshot = await getDocs(emendasRef);
         const emendasData = emendasSnapshot.docs.map((doc) => {
           const data = doc.data();
           // Normalizar valor da emenda
           const valorOriginal = data.valor || data.valorRecurso || data.valorTotal || 0;
           const valorNormalizado = parseValorMonetario(valorOriginal);
-          
+
           return {
             id: doc.id,
             ...data,
@@ -71,7 +84,8 @@ export function useRelatoriosData(usuario) {
         // Carregar despesas com filtro por município/UF se não for admin
         // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf
         let despesasRef = collection(db, "despesas");
-        if (userRole && userRole !== "admin" && userMunicipio && userUf) {
+        if (!isAdmin) {
+          // Operador/Gestor SEMPRE filtra por localização
           despesasRef = query(
             despesasRef,
             where("municipio", "==", userMunicipio),
@@ -90,7 +104,7 @@ export function useRelatoriosData(usuario) {
         });
 
         // Filtro adicional por emendas permitidas (segurança extra)
-        if (userRole && userRole !== "admin") {
+        if (!isAdmin) {
           const allowedEmendaIds = new Set(emendasData.map((e) => e.id));
           despesasData = despesasData.filter((d) =>
             allowedEmendaIds.has(d.emendaId),
