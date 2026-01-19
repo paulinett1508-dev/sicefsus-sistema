@@ -132,6 +132,44 @@ export class BaseRelatorio {
     return formatDate(date);
   }
 
+  /**
+   * Converte diferentes formatos de data para timestamp (milissegundos)
+   * Suporta: string "2025-09-24", Timestamp {_seconds}, ISO string
+   */
+  parseData(dataRaw) {
+    if (!dataRaw) return 0;
+
+    // Timestamp do Firestore {_seconds: number}
+    if (dataRaw._seconds) {
+      return dataRaw._seconds * 1000;
+    }
+
+    // String ou Date
+    const parsed = new Date(dataRaw).getTime();
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  /**
+   * Formata data para exibição no formato brasileiro
+   * Suporta: string "2025-09-24", Timestamp {_seconds}, ISO string
+   */
+  formatarData(dataRaw) {
+    if (!dataRaw) return "-";
+
+    let date;
+
+    // Timestamp do Firestore {_seconds: number}
+    if (dataRaw._seconds) {
+      date = new Date(dataRaw._seconds * 1000);
+    } else {
+      date = new Date(dataRaw);
+    }
+
+    if (isNaN(date.getTime())) return "-";
+
+    return date.toLocaleDateString("pt-BR");
+  }
+
   // ========== MÉTODOS UTILITÁRIOS COMUNS ==========
 
   /**

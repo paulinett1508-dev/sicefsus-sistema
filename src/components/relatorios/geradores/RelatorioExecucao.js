@@ -126,12 +126,22 @@ export class RelatorioExecucao extends BaseRelatorio {
           .filter(d => d.emendaId === emenda.id)
           .sort((a, b) => (b.valor || 0) - (a.valor || 0));
 
-        const tabelaDespesasEmenda = despesasEmenda.map(d => [
-          d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "-",
-          d.descricao?.length > 30 ? d.descricao.substring(0, 27) + "..." : (d.descricao || "-"),
-          d.fornecedor?.length > 25 ? d.fornecedor.substring(0, 22) + "..." : (d.fornecedor || "-"),
-          this.formatCurrency(d.valor || 0),
-        ]);
+        const tabelaDespesasEmenda = despesasEmenda.map(d => {
+          // Data: usa dataPagamento, dataLiquidacao ou dataEmpenho (nessa ordem)
+          const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
+          const dataFormatada = this.formatarData(dataRaw);
+
+          // Descrição: usa discriminacao (campo real) ou descricao como fallback
+          const descricao = d.discriminacao || d.descricao || "-";
+          const descricaoTruncada = descricao.length > 30 ? descricao.substring(0, 27) + "..." : descricao;
+
+          return [
+            dataFormatada,
+            descricaoTruncada,
+            d.fornecedor?.length > 25 ? d.fornecedor.substring(0, 22) + "..." : (d.fornecedor || "-"),
+            this.formatCurrency(d.valor || 0),
+          ];
+        });
 
         if (tabelaDespesasEmenda.length > 0) {
           try {

@@ -108,9 +108,18 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     const tabelaDespesas = despesasOrdenadas.map((d) => {
       const emenda = this.emendas.find(e => e.id === d.emendaId);
+
+      // Data: usa dataPagamento, dataLiquidacao ou dataEmpenho (nessa ordem)
+      const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
+      const dataFormatada = this.formatarData(dataRaw);
+
+      // Descrição: usa discriminacao (campo real) ou descricao como fallback
+      const descricao = d.discriminacao || d.descricao || "-";
+      const descricaoTruncada = descricao.length > 25 ? descricao.substring(0, 22) + "..." : descricao;
+
       return [
-        d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "-",
-        d.descricao?.length > 25 ? d.descricao.substring(0, 22) + "..." : (d.descricao || "-"),
+        dataFormatada,
+        descricaoTruncada,
         d.fornecedor?.length > 20 ? d.fornecedor.substring(0, 17) + "..." : (d.fornecedor || "-"),
         emenda?.numero || "-",
         this.formatCurrency(d.valor || 0),

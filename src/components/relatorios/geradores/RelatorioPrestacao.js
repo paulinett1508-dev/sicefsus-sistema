@@ -124,18 +124,28 @@ export class RelatorioPrestacao extends BaseRelatorio {
         const despesasEmenda = despesasExecutadas
           .filter(d => d.emendaId === emenda.id)
           .sort((a, b) => {
-            const dataA = a.data ? new Date(a.data).getTime() : 0;
-            const dataB = b.data ? new Date(b.data).getTime() : 0;
+            const dataA = this.parseData(a.dataPagamento || a.dataLiquidacao || a.dataEmpenho);
+            const dataB = this.parseData(b.dataPagamento || b.dataLiquidacao || b.dataEmpenho);
             return dataB - dataA;
           });
 
-        const tabelaDespesasEmenda = despesasEmenda.map(d => [
-          d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "-",
-          d.descricao?.length > 28 ? d.descricao.substring(0, 25) + "..." : (d.descricao || "-"),
-          d.fornecedor?.length > 22 ? d.fornecedor.substring(0, 19) + "..." : (d.fornecedor || "-"),
-          d.numeroNota || "-",
-          this.formatCurrency(d.valor || 0),
-        ]);
+        const tabelaDespesasEmenda = despesasEmenda.map(d => {
+          // Data: usa dataPagamento, dataLiquidacao ou dataEmpenho (nessa ordem)
+          const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
+          const dataFormatada = this.formatarData(dataRaw);
+
+          // Descrição: usa discriminacao (campo real) ou descricao como fallback
+          const descricao = d.discriminacao || d.descricao || "-";
+          const descricaoTruncada = descricao.length > 28 ? descricao.substring(0, 25) + "..." : descricao;
+
+          return [
+            dataFormatada,
+            descricaoTruncada,
+            d.fornecedor?.length > 22 ? d.fornecedor.substring(0, 19) + "..." : (d.fornecedor || "-"),
+            d.numeroNota || "-",
+            this.formatCurrency(d.valor || 0),
+          ];
+        });
 
         if (tabelaDespesasEmenda.length > 0) {
           try {
