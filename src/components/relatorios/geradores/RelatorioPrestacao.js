@@ -193,7 +193,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
       this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
     });
 
-    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
     
