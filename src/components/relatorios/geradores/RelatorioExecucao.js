@@ -96,6 +96,80 @@ export class RelatorioExecucao extends BaseRelatorio {
       }
     }
 
+    // DETALHAMENTO DAS DESPESAS POR EMENDA
+    yPosition = this.checkNewPage(yPosition, 60);
+    yPosition = addSectionTitle(this.doc, "Despesas por Emenda", yPosition);
+
+    const despesasExecutadas = this.getDespesasExecutadas();
+
+    // Para cada emenda que tem despesas, listar suas despesas
+    const emendasComDespesas = emendasComExecucao.filter(e => e.despesasCount > 0);
+
+    if (emendasComDespesas.length > 0) {
+      for (const emenda of emendasComDespesas) {
+        yPosition = this.checkNewPage(yPosition, 40);
+
+        // Subtítulo da emenda
+        this.doc.setFontSize(8);
+        this.doc.setFont("helvetica", "bold");
+        this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+        this.doc.text(`Emenda: ${emenda.numero || emenda.id}`, 15, yPosition);
+
+        this.doc.setFontSize(7);
+        this.doc.setFont("helvetica", "normal");
+        this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+        this.doc.text(`Parlamentar: ${emenda.parlamentar} | Executado: ${this.formatCurrency(emenda.valorExecutado)} de ${this.formatCurrency(emenda.valorTotal)} (${emenda.percentual.toFixed(0)}%)`, 15, yPosition + 4);
+        yPosition += 10;
+
+        // Despesas desta emenda
+        const despesasEmenda = despesasExecutadas
+          .filter(d => d.emendaId === emenda.id)
+          .sort((a, b) => (b.valor || 0) - (a.valor || 0));
+
+        const tabelaDespesasEmenda = despesasEmenda.map(d => [
+          d.data ? new Date(d.data).toLocaleDateString("pt-BR") : "-",
+          d.descricao?.length > 30 ? d.descricao.substring(0, 27) + "..." : (d.descricao || "-"),
+          d.fornecedor?.length > 25 ? d.fornecedor.substring(0, 22) + "..." : (d.fornecedor || "-"),
+          this.formatCurrency(d.valor || 0),
+        ]);
+
+        if (tabelaDespesasEmenda.length > 0) {
+          try {
+            const modernStyles = getModernTableStyles();
+            this.createTable({
+              startY: yPosition,
+              head: [["Data", "Descrição", "Fornecedor", "Valor"]],
+              body: tabelaDespesasEmenda,
+              ...modernStyles,
+              styles: {
+                ...modernStyles.styles,
+                fontSize: 6,
+              },
+              headStyles: {
+                ...modernStyles.headStyles,
+                fontSize: 6,
+              },
+              columnStyles: {
+                0: { cellWidth: 18, halign: "center" },
+                1: { cellWidth: 'auto', halign: "left" },
+                2: { cellWidth: 50, halign: "left" },
+                3: { cellWidth: 28, halign: "right" },
+              },
+            });
+            yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 8;
+          } catch (error) {
+            this.addWarning(`Erro ao criar tabela de despesas da emenda ${emenda.numero}: ${error.message}`);
+          }
+        }
+      }
+    } else {
+      this.doc.setFontSize(7);
+      this.doc.setFont("helvetica", "italic");
+      this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+      this.doc.text("Nenhuma despesa executada encontrada.", 15, yPosition);
+      yPosition += 8;
+    }
+
     // ANÁLISE POR STATUS DE EXECUÇÃO
     yPosition = this.checkNewPage(yPosition, 60);
     yPosition = addSectionTitle(this.doc, "Análise por Status de Execução", yPosition);
