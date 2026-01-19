@@ -310,13 +310,13 @@ export const addMiniTable = (doc, data, startY, options = {}) => {
     doc.text(`${index + 1}.`, margins.left, y);
 
     // Nome/Label
-    doc.setTextColor(...PDF_COLORS.SLATE_700);
+    doc.setTextColor(...PDF_COLORS.BLACK);
     doc.setFontSize(9);
     const label = row.label.length > 35 ? row.label.substring(0, 32) + "..." : row.label;
     doc.text(label, margins.left + 8, y);
 
     // Valor (direita)
-    doc.setTextColor(...PDF_COLORS.SLATE_900);
+    doc.setTextColor(...PDF_COLORS.BLACK);
     doc.setFont("helvetica", "bold");
     doc.text(row.value, pageWidth - margins.right, y, { align: "right" });
 
@@ -406,7 +406,7 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
   doc.setFillColor(...PDF_COLORS.SLATE_100);
   doc.rect(margins.left, y, tableWidth, headerHeight, "F");
   
-  doc.setTextColor(...PDF_COLORS.SLATE_700);
+  doc.setTextColor(...PDF_COLORS.BLACK);
   doc.setFontSize(fontSize);
   doc.setFont("helvetica", "bold");
 
@@ -439,7 +439,7 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
       const lines = wrapText(cell, maxWidth);
       
       const isNumber = /^R?\$?\s*-?[\d.,]+%?$/.test(String(cell).trim());
-      doc.setTextColor(...PDF_COLORS.SLATE_700);
+      doc.setTextColor(...PDF_COLORS.BLACK);
       doc.setFontSize(fontSize);
 
       // Alinhar valores monetários à direita
@@ -475,7 +475,7 @@ export const createManualTable = (doc, headers, data, startY, options = {}) => {
 export const getModernTableStyles = () => ({
   headStyles: {
     fillColor: PDF_COLORS.SLATE_100,
-    textColor: PDF_COLORS.SLATE_700,
+    textColor: PDF_COLORS.BLACK,
     fontStyle: 'bold',
     fontSize: 7,
     cellPadding: 2,
@@ -483,11 +483,14 @@ export const getModernTableStyles = () => ({
   styles: {
     fontSize: 7,
     cellPadding: 2,
-    textColor: PDF_COLORS.SLATE_700,
-    lineColor: PDF_COLORS.SLATE_200,
-    lineWidth: 0.15,
+    textColor: PDF_COLORS.BLACK,
+    lineColor: PDF_COLORS.SLATE_300,
+    lineWidth: 0.2,
     overflow: 'linebreak', // Quebra de linha automática
     cellWidth: 'wrap',
+  },
+  bodyStyles: {
+    textColor: PDF_COLORS.BLACK,
   },
   alternateRowStyles: {
     fillColor: PDF_COLORS.SLATE_50,

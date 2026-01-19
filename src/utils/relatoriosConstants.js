@@ -51,6 +51,7 @@ export const PDF_COLORS = {
   STATUS_BAIXO: [239, 68, 68],     // Red 500
   ACCENT: [20, 67, 96],            // Azul marinho escuro (cor padrão do sistema)
   WHITE: [255, 255, 255],
+  BLACK: [0, 0, 0],                 // Preto puro para texto de tabelas
 };
 
 export const TIPOS_RELATORIOS = [
