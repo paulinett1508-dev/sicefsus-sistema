@@ -26,8 +26,14 @@ export const formatDate = (dateStr) => {
   }
 };
 
-// Converter logo para base64
+// Cache do logo em base64 para evitar reconversões
+let logoCache = null;
+
+// Converter logo para base64 (com cache)
 export const getLogoBase64 = async () => {
+  // Retornar do cache se disponível
+  if (logoCache) return logoCache;
+
   try {
     const img = new Image();
     img.src = logoSicefsus;
@@ -39,7 +45,8 @@ export const getLogoBase64 = async () => {
         canvas.height = img.height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL("image/png"));
+        logoCache = canvas.toDataURL("image/png"); // Salvar no cache
+        resolve(logoCache);
       };
       img.onerror = () => resolve(null);
     });

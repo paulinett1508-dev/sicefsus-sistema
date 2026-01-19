@@ -71,10 +71,9 @@ function GlobalSearch({ onNavigate, onResultSelect, compact = false, userTipo, u
   }, [searchTerm, allData]);
 
   const loadAllData = async () => {
-    // Check if user data is available before proceeding
+    // Aguardar dados do usuário antes de carregar
     if (!userTipo || !userUf || !userMunicipio) {
-      console.warn("User data not available, skipping initial data load for search.");
-      // Optionally show a toast or handle this state appropriately
+      // Silencioso - useEffect vai re-executar quando dados estiverem prontos
       return;
     }
 

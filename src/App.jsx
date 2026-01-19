@@ -39,11 +39,9 @@ import UpdateNotification from "./components/UpdateNotification";
 import SystemStatusBar from "./components/SystemStatusBar";
 import ThemeToggleButton from "./components/ThemeToggleButton";
 
-console.log("🔥 PROD Firebase Check:", {
-  mode: import.meta.env.MODE,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+console.log(`🔥 Firebase [${import.meta.env.MODE?.toUpperCase() || 'DEV'}]:`, {
+  project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  ready: !!import.meta.env.VITE_FIREBASE_API_KEY,
 });
 
 // Sistema inteligente de controle de logs

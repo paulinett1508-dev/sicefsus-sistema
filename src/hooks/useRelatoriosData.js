@@ -41,15 +41,17 @@ export function useRelatoriosData(usuario) {
 
       try {
         // Construir query para emendas baseado no perfil do usuário
+        // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf para operadores/gestores
         let emendasRef = collection(db, "emendas");
-        if (userRole && userRole !== "admin") {
+        if (userRole && userRole !== "admin" && userMunicipio && userUf) {
           emendasRef = query(
             emendasRef,
-            where("municipio", "==", userMunicipio || null),
-            where("uf", "==", userUf || null),
+            where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf),
           );
         }
 
+        console.log("📊 useRelatoriosData - Query emendas:", { userRole, userMunicipio, userUf });
         const emendasSnapshot = await getDocs(emendasRef);
         const emendasData = emendasSnapshot.docs.map((doc) => {
           const data = doc.data();
@@ -67,12 +69,13 @@ export function useRelatoriosData(usuario) {
         setEmendas(emendasData);
 
         // Carregar despesas com filtro por município/UF se não for admin
+        // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf
         let despesasRef = collection(db, "despesas");
-        if (userRole && userRole !== "admin" && userMunicipio) {
-          // 🔒 Operadores/Gestores só veem despesas do seu município
+        if (userRole && userRole !== "admin" && userMunicipio && userUf) {
           despesasRef = query(
             despesasRef,
             where("municipio", "==", userMunicipio),
+            where("uf", "==", userUf),
           );
         }
 
