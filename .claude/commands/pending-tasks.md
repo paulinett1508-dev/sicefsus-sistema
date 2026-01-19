@@ -18,6 +18,7 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 |---------|-----------------|
 | Tabela pequena (1 pagina) | Layout correto, sem sobreposicoes |
 | Tabela grande (2+ paginas) | Cabecalho de continuacao aparece |
+| **Despesas por Emenda (NOVO)** | Lista despesas de cada emenda (data/descricao/fornecedor/valor) |
 | Secao "Analise por Status" | Nao esta obstruida pela tabela anterior |
 | Cabecalho da tabela | Repete em cada pagina |
 | Cor do texto | Preto (nao cinza) |
@@ -58,6 +59,7 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 | `RelatorioConsolidado.js` | `this.doc.lastAutoTable?.finalY` |
 
 ### Commits Relacionados
+- `c2f35da` feat: adicionar detalhamento de despesas por emenda no relatorio Execucao Orcamentaria
 - `e1bc860` fix: corrigir captura de finalY nas tabelas PDF
 - `2577708` feat: adicionar cabecalho de continuacao em relatorios PDF multi-pagina
 
