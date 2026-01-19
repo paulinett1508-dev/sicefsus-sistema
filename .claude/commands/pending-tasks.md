@@ -10,7 +10,6 @@
 Foram feitas melhorias significativas nos geradores de relatorios PDF:
 1. Correcao da captura de `finalY` nas tabelas (evita sobreposicao)
 2. Cabecalho de continuacao em paginas multiplas
-3. Repeticao do cabecalho da tabela em cada pagina (`showHead: 'everyPage'`)
 
 ### Testes Necessarios
 
@@ -36,11 +35,6 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 | Cenario | O que verificar |
 |---------|-----------------|
 | Tabela de Parlamentares | Cabecalho repete |
-| Detalhamento de Emendas | Quebra de pagina correta |
-| Indicadores de Desempenho | Posicao correta |
-
-#### 4. Despesas Detalhado
-| Cenario | O que verificar |
 |---------|-----------------|
 | Listagem Detalhada | Muitas despesas quebram bem |
 | Top 5 Fornecedores | Aparece apos listagem |
@@ -75,10 +69,7 @@ Foram feitas melhorias significativas nos geradores de relatorios PDF:
 Auditoria revelou 3 problemas criticos:
 
 1. **Despesas sem municipio/uf:** Operadores filtrados por municipio nao viam despesas que pertenciam ao seu municipio
-2. **Despesas orfas:** Despesas vinculadas a emendas que foram deletadas
-3. **Bug no codigo:** Modais de despesa nao copiavam municipio/uf da emenda ao salvar
 
-### Diagnostico
 
 #### DEV
 | Problema | Quantidade |
@@ -98,68 +89,22 @@ Auditoria revelou 3 problemas criticos:
 
 **ExecutarDespesaModal.jsx** - Linha ~168:
 ```javascript
-await addDoc(collection(db, "despesas"), {
-  ...formData,
   valor: parseValorMonetario(formData.valor),
-  status: "EXECUTADA",
-  // ADICIONADO: incluir municipio/uf da emenda
-  municipio: emendaInfo?.municipio || "",
   uf: emendaInfo?.uf || "",
-  criadaEm: new Date().toISOString(),
-});
-```
 
-**DespesaForm.jsx** - Linha ~455:
-```javascript
-const despesaData = {
-  ...formDataLimpo,
-  emendaId: formData.emendaId || despesaParaEditar?.emendaId || emendaId || "",
-  // ADICIONADO: incluir municipio/uf da emenda
-  municipio: emendaInfoDinamica?.municipio || emendaData?.municipio || despesaParaEditar?.municipio || "",
   uf: emendaInfoDinamica?.uf || emendaData?.uf || despesaParaEditar?.uf || "",
   // ... demais campos
-};
-```
-
-#### 2. Scripts de Correcao Executados
-
-**DEV:**
 | Script | Resultado |
-|--------|-----------|
-| `corrigir-municipio-despesas.cjs --dev --apply` | 61 despesas corrigidas |
-| `deletar-despesas-orfas.cjs --dev --apply` | 24 orfas deletadas |
 
-**PROD:**
-| Script | Resultado |
-|--------|-----------|
-| `corrigir-municipio-despesas.cjs --apply` | 2 despesas corrigidas |
-| `deletar-despesas-orfas.cjs --apply` | 13 orfas deletadas (R$ 214.138,23) |
-
-### Verificacao Final
-
-| Ambiente | Despesas | Sem Municipio | Orfas |
 |----------|----------|---------------|-------|
-| DEV | 61 | 0 | 0 |
 | PROD | 124 | 0 | 0 |
 
 ### Scripts Criados/Atualizados
-| Script | Funcao |
-|--------|--------|
-| `scripts/corrigir-municipio-despesas.cjs` | Atualizado: suporte a `--dev` flag |
-| `scripts/deletar-despesas-orfas.cjs` | Novo: deleta despesas cujas emendas nao existem |
-| `scripts/audit-despesas.cjs` | Novo: diagnostico de problemas em despesas |
 
-### Arquivos Modificados
 | Arquivo | Mudanca |
 |---------|---------|
 | `src/components/emenda/EmendaForm/sections/ExecutarDespesaModal.jsx` | Adiciona municipio/uf ao salvar |
-| `src/components/DespesaForm.jsx` | Adiciona municipio/uf ao salvar |
 
----
-
-## Concluido - Correcao Bug valorExecutado (2026-01-16)
-
-### Problema Reportado
 Operador de Floriano-PI reportou que emendas nao mostravam o valor executado (barra de progresso zerada), como se nao tivesse iniciado a execucao.
 
 ### Diagnostico
