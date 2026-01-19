@@ -74,7 +74,7 @@ export class RelatorioExecucao extends BaseRelatorio {
     if (tabelaEmendas.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const result = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Emenda", "Tipo", "Parlamentar", "Total", "Executado", "Saldo", "%"]],
           body: tabelaEmendas,
@@ -89,14 +89,15 @@ export class RelatorioExecucao extends BaseRelatorio {
             6: { cellWidth: 14, halign: "center" },
           },
         });
-        yPosition = (result?.finalY ?? yPosition) + 10;
+        // Captura a posição final da tabela via lastAutoTable
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }
     }
 
     // ANÁLISE POR STATUS DE EXECUÇÃO
-    yPosition = this.checkNewPage(yPosition, 50);
+    yPosition = this.checkNewPage(yPosition, 60);
     yPosition = addSectionTitle(this.doc, "Análise por Status de Execução", yPosition);
 
     const statusExecucao = {
@@ -121,7 +122,7 @@ export class RelatorioExecucao extends BaseRelatorio {
 
     try {
       const modernStyles = getModernTableStyles();
-      const resultStatus = this.createTable({
+      this.createTable({
         startY: yPosition,
         head: [["Status", "Valor Executado", "% Emendas"]],
         body: tabelaStatus,
@@ -132,7 +133,7 @@ export class RelatorioExecucao extends BaseRelatorio {
           2: { cellWidth: 30, halign: "center" },
         },
       });
-      yPosition = (resultStatus?.finalY ?? yPosition) + 10;
+      yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
     } catch (error) {
       this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
     }

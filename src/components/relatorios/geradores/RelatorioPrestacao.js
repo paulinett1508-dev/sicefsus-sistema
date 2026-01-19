@@ -73,7 +73,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
     if (tabelaDemonstrativo.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultDemonstrativo = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Emenda", "Parlamentar", "Valor Total", "Executado", "Saldo", "%"]],
           body: tabelaDemonstrativo,
@@ -87,7 +87,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = (resultDemonstrativo?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de demonstrativo: ${error.message}`);
       }
@@ -117,7 +117,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
     if (tabelaDespesas.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultDespesas = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Data", "Emenda", "Descrição", "Fornecedor", "Valor"]],
           body: tabelaDespesas,
@@ -130,7 +130,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
             4: { cellWidth: 28, halign: "right" },
           },
         });
-        yPosition = (resultDespesas?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }

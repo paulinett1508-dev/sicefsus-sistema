@@ -82,7 +82,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       if (tabelaTipos.length > 0) {
         try {
           const modernStyles = getModernTableStyles();
-          const resultTipos = this.createTable({
+          this.createTable({
             startY: yPosition,
             head: [["Tipo", "Qtd", "Valor Total", "Executado", "%"]],
             body: tabelaTipos,
@@ -95,7 +95,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               4: { cellWidth: 16, halign: "center" },
             },
           });
-          yPosition = (resultTipos?.finalY ?? yPosition) + 10;
+          yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de tipos: ${error.message}`);
         }
@@ -121,7 +121,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       if (tabelaTop10.length > 0) {
         try {
           const modernStyles = getModernTableStyles();
-          const resultTop10 = this.createTable({
+          this.createTable({
             startY: yPosition,
             head: [["#", "Emenda", "Parlamentar", "Total", "Executado", "%"]],
             body: tabelaTop10,
@@ -135,7 +135,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               5: { cellWidth: 14, halign: "center" },
             },
           });
-          yPosition = (resultTop10?.finalY ?? yPosition) + 10;
+          yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela Top 10: ${error.message}`);
         }
@@ -160,7 +160,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
       if (tabelaFornecedores.length > 0) {
         try {
           const modernStyles = getModernTableStyles();
-          const resultFornecedores = this.createTable({
+          this.createTable({
             startY: yPosition,
             head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
             body: tabelaFornecedores,
@@ -172,7 +172,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               3: { cellWidth: 32, halign: "right" },
             },
           });
-          yPosition = (resultFornecedores?.finalY ?? yPosition) + 10;
+          yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
         }

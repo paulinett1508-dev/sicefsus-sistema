@@ -94,7 +94,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     if (tabelaParlamentares.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultParlamentares = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Parlamentar", "Emendas", "Total", "Executado", "Saldo", "%"]],
           body: tabelaParlamentares,
@@ -108,7 +108,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = (resultParlamentares?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de parlamentares: ${error.message}`);
       }
@@ -136,7 +136,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
     if (tabelaEmendas.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultEmendas = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Emenda", "Parlamentar", "Tipo", "Total", "Executado", "%"]],
           body: tabelaEmendas,
@@ -150,7 +150,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = (resultEmendas?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }

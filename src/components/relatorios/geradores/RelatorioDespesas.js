@@ -81,7 +81,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     if (tabelaStatus.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultStatus = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Status", "Quantidade", "Valor Total", "% do Total"]],
           body: tabelaStatus,
@@ -93,7 +93,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             3: { cellWidth: 24, halign: "center" },
           },
         });
-        yPosition = (resultStatus?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
       }
@@ -121,7 +121,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     if (tabelaDespesas.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultDespesas = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
           body: tabelaDespesas,
@@ -135,7 +135,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             5: { cellWidth: 26, halign: "center" },
           },
         });
-        yPosition = (resultDespesas?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
@@ -160,7 +160,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     if (tabelaFornecedores.length > 0) {
       try {
         const modernStyles = getModernTableStyles();
-        const resultFornecedores = this.createTable({
+        this.createTable({
           startY: yPosition,
           head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
           body: tabelaFornecedores,
@@ -172,7 +172,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             3: { cellWidth: 35, halign: "right" },
           },
         });
-        yPosition = (resultFornecedores?.finalY ?? yPosition) + 10;
+        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
       }
