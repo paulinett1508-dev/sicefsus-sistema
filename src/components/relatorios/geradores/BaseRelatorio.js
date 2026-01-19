@@ -134,13 +134,23 @@ export class BaseRelatorio {
 
   /**
    * Converte diferentes formatos de data para timestamp (milissegundos)
-   * Suporta: string "2025-09-24", Timestamp {_seconds}, ISO string
+   * Suporta: string "2025-09-24", Timestamp Firestore (JS SDK e Admin SDK), ISO string
    */
   parseData(dataRaw) {
     if (!dataRaw) return 0;
 
-    // Timestamp do Firestore {_seconds: number}
-    if (dataRaw._seconds) {
+    // Timestamp do Firestore - JS SDK com método toDate()
+    if (typeof dataRaw.toDate === "function") {
+      return dataRaw.toDate().getTime();
+    }
+
+    // Timestamp do Firestore - JS SDK {seconds: number}
+    if (dataRaw.seconds !== undefined) {
+      return dataRaw.seconds * 1000;
+    }
+
+    // Timestamp do Firestore - Admin SDK {_seconds: number}
+    if (dataRaw._seconds !== undefined) {
       return dataRaw._seconds * 1000;
     }
 
@@ -151,17 +161,27 @@ export class BaseRelatorio {
 
   /**
    * Formata data para exibição no formato brasileiro
-   * Suporta: string "2025-09-24", Timestamp {_seconds}, ISO string
+   * Suporta: string "2025-09-24", Timestamp Firestore (JS SDK e Admin SDK), ISO string
    */
   formatarData(dataRaw) {
     if (!dataRaw) return "-";
 
     let date;
 
-    // Timestamp do Firestore {_seconds: number}
-    if (dataRaw._seconds) {
+    // Timestamp do Firestore - JS SDK com método toDate()
+    if (typeof dataRaw.toDate === "function") {
+      date = dataRaw.toDate();
+    }
+    // Timestamp do Firestore - JS SDK {seconds: number}
+    else if (dataRaw.seconds !== undefined) {
+      date = new Date(dataRaw.seconds * 1000);
+    }
+    // Timestamp do Firestore - Admin SDK {_seconds: number}
+    else if (dataRaw._seconds !== undefined) {
       date = new Date(dataRaw._seconds * 1000);
-    } else {
+    }
+    // String ou Date
+    else {
       date = new Date(dataRaw);
     }
 
