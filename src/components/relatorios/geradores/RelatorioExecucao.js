@@ -89,7 +89,7 @@ export class RelatorioExecucao extends BaseRelatorio {
             6: { cellWidth: 14, halign: "center" },
           },
         });
-        yPosition = result.finalY + 10;
+        yPosition = (result?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }
@@ -132,7 +132,7 @@ export class RelatorioExecucao extends BaseRelatorio {
           2: { cellWidth: 30, halign: "center" },
         },
       });
-      yPosition = resultStatus.finalY + 10;
+      yPosition = (resultStatus?.finalY ?? yPosition) + 10;
     } catch (error) {
       this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
     }

@@ -108,7 +108,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = resultParlamentares.finalY + 10;
+        yPosition = (resultParlamentares?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de parlamentares: ${error.message}`);
       }
@@ -150,7 +150,7 @@ export class RelatorioAnalitico extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = resultEmendas.finalY + 10;
+        yPosition = (resultEmendas?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de emendas: ${error.message}`);
       }

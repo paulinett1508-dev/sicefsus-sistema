@@ -93,7 +93,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             3: { cellWidth: 24, halign: "center" },
           },
         });
-        yPosition = resultStatus.finalY + 10;
+        yPosition = (resultStatus?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de status: ${error.message}`);
       }
@@ -135,7 +135,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             5: { cellWidth: 26, halign: "center" },
           },
         });
-        yPosition = resultDespesas.finalY + 10;
+        yPosition = (resultDespesas?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
@@ -172,7 +172,7 @@ export class RelatorioDespesas extends BaseRelatorio {
             3: { cellWidth: 35, halign: "right" },
           },
         });
-        yPosition = resultFornecedores.finalY + 10;
+        yPosition = (resultFornecedores?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
       }

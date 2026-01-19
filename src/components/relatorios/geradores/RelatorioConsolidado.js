@@ -95,7 +95,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               4: { cellWidth: 16, halign: "center" },
             },
           });
-          yPosition = resultTipos.finalY + 10;
+          yPosition = (resultTipos?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de tipos: ${error.message}`);
         }
@@ -135,7 +135,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               5: { cellWidth: 14, halign: "center" },
             },
           });
-          yPosition = resultTop10.finalY + 10;
+          yPosition = (resultTop10?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela Top 10: ${error.message}`);
         }
@@ -172,7 +172,7 @@ export class RelatorioConsolidado extends BaseRelatorio {
               3: { cellWidth: 32, halign: "right" },
             },
           });
-          yPosition = resultFornecedores.finalY + 10;
+          yPosition = (resultFornecedores?.finalY ?? yPosition) + 10;
         } catch (error) {
           this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
         }

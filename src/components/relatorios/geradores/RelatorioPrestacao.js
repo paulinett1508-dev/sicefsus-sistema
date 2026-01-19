@@ -87,7 +87,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
             5: { cellWidth: 16, halign: "center" },
           },
         });
-        yPosition = resultDemonstrativo.finalY + 10;
+        yPosition = (resultDemonstrativo?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de demonstrativo: ${error.message}`);
       }
@@ -130,7 +130,7 @@ export class RelatorioPrestacao extends BaseRelatorio {
             4: { cellWidth: 28, halign: "right" },
           },
         });
-        yPosition = resultDespesas.finalY + 10;
+        yPosition = (resultDespesas?.finalY ?? yPosition) + 10;
       } catch (error) {
         this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
       }
