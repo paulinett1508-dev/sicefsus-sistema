@@ -171,7 +171,7 @@ export class RelatorioDespesas extends BaseRelatorio {
         const modernStyles = getModernTableStyles();
         this.createTable({
           startY: yPosition,
-          head: [["#", "Fornecedor", "Qtd", "Valor Total"]],
+          head: [["#", "Fornecedor", "Despesas", "Valor Total"]],
           body: tabelaFornecedores,
           ...modernStyles,
           columnStyles: {
