@@ -1,6 +1,71 @@
 # Tarefas Pendentes para Proxima Sessao
 
-## Atualizado em: 2026-01-16
+## Atualizado em: 2026-01-19
+
+---
+
+## Pendente - Testar Relatorios PDF (2026-01-19)
+
+### Contexto
+Foram feitas melhorias significativas nos geradores de relatorios PDF:
+1. Correcao da captura de `finalY` nas tabelas (evita sobreposicao)
+2. Cabecalho de continuacao em paginas multiplas
+3. Repeticao do cabecalho da tabela em cada pagina (`showHead: 'everyPage'`)
+
+### Testes Necessarios
+
+#### 1. Execucao Orcamentaria
+| Cenario | O que verificar |
+|---------|-----------------|
+| Tabela pequena (1 pagina) | Layout correto, sem sobreposicoes |
+| Tabela grande (2+ paginas) | Cabecalho de continuacao aparece |
+| Secao "Analise por Status" | Nao esta obstruida pela tabela anterior |
+| Cabecalho da tabela | Repete em cada pagina |
+| Cor do texto | Preto (nao cinza) |
+| Bordas | Visiveis (SLATE_300) |
+
+#### 2. Prestacao de Contas
+| Cenario | O que verificar |
+|---------|-----------------|
+| Demonstrativo por Emenda | Quebra de pagina correta |
+| Despesas Executadas | Lista completa sem sobreposicao |
+| Totalizadores | Aparecem na posicao correta |
+| Assinatura | Nao sobrepoe conteudo |
+
+#### 3. Analitico por Parlamentar
+| Cenario | O que verificar |
+|---------|-----------------|
+| Tabela de Parlamentares | Cabecalho repete |
+| Detalhamento de Emendas | Quebra de pagina correta |
+| Indicadores de Desempenho | Posicao correta |
+
+#### 4. Despesas Detalhado
+| Cenario | O que verificar |
+|---------|-----------------|
+| Listagem Detalhada | Muitas despesas quebram bem |
+| Top 5 Fornecedores | Aparece apos listagem |
+| Despesas por Status | Tabela correta |
+
+#### 5. Consolidado Mensal
+| Cenario | O que verificar |
+|---------|-----------------|
+| Top 10 Emendas | Cabecalho repete |
+| Top 5 Fornecedores | Posicao correta |
+| Distribuicao por Tipo | Tabela correta |
+
+### Arquivos Modificados
+| Arquivo | Mudanca |
+|---------|---------|
+| `BaseRelatorio.js` | `addHeaderContinuacao()`, `createTable()` com hooks |
+| `RelatorioExecucao.js` | `this.doc.lastAutoTable?.finalY` |
+| `RelatorioPrestacao.js` | `this.doc.lastAutoTable?.finalY` |
+| `RelatorioAnalitico.js` | `this.doc.lastAutoTable?.finalY` |
+| `RelatorioDespesas.js` | `this.doc.lastAutoTable?.finalY` |
+| `RelatorioConsolidado.js` | `this.doc.lastAutoTable?.finalY` |
+
+### Commits Relacionados
+- `e1bc860` fix: corrigir captura de finalY nas tabelas PDF
+- `2577708` feat: adicionar cabecalho de continuacao em relatorios PDF multi-pagina
 
 ---
 
