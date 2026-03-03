@@ -556,6 +556,63 @@ Restaurar valores antigos em theme.css:
 
 ---
 
+## 13. Acessibilidade (WCAG AA)
+
+> Regras de acessibilidade para sistema governo/saude. Baseado em WCAG 2.1 AA
+> e boas praticas para aplicacoes de setor publico.
+
+### Contraste de Cores
+
+| Elemento | Ratio Minimo | Nota |
+|----------|-------------|------|
+| Texto normal (< 18px) | 4.5:1 | Contra background |
+| Texto grande (>= 18px bold ou >= 24px) | 3:1 | Contra background |
+| Elementos graficos (icones, bordas) | 3:1 | Contra background adjacente |
+| Componentes interativos (botoes, inputs) | 3:1 | Estado default e hover |
+
+**Verificacao rapida:** Cores do design system v2.0 no background branco:
+- `--primary (#2563EB)` sobre branco: 4.6:1 (passa AA)
+- `--success (#10B981)` sobre branco: 3.1:1 (passa AA para texto grande, usar `--success-dark` para texto pequeno)
+- `--error (#EF4444)` sobre branco: 3.9:1 (usar `--error-dark` para texto pequeno)
+- `--warning (#F59E0B)` sobre branco: 2.1:1 (usar APENAS como background com texto escuro)
+
+### Alvos de Toque
+
+- Tamanho minimo: **44x44px** para elementos clicaveis (botoes, links, checkboxes)
+- Espacamento minimo entre alvos: **8px**
+- Excecao: links inline em texto corrido podem ser menores
+
+### Tipografia Legivel
+
+- Corpo de texto: **minimo 16px** (`--font-size-base`)
+- Dados em tabelas: **minimo 14px** (`--font-size-sm`)
+- Labels de formulario: **minimo 14px** com `font-weight: medium`
+- Nunca usar abaixo de **12px** (`--font-size-xs`) exceto para informacao auxiliar
+
+### Indicadores Visuais
+
+- **Cor nunca como unico indicador**: sempre acompanhar com icone ou texto
+  - Bom: `check_circle` verde + "Aprovado"
+  - Ruim: apenas bolinha verde sem texto
+- **Focus visible**: todos elementos interativos devem ter `outline` visivel ao navegar por teclado
+- **Estados de erro**: usar icone `error` + mensagem de texto + borda vermelha (3 indicadores)
+
+### Formularios
+
+- Todo input deve ter `<label>` associado (visivel, nao apenas `aria-label`)
+- Mensagens de erro devem aparecer proximo ao campo, nao apenas no topo
+- Campos obrigatorios marcados com `*` E com `aria-required="true"`
+- Agrupar campos relacionados com `<fieldset>` e `<legend>` quando aplicavel
+
+### Navegacao por Teclado
+
+- Ordem de tab logica (seguir fluxo visual da pagina)
+- Modais devem prender foco (focus trap) enquanto abertos
+- `Escape` deve fechar modais e dropdowns
+- Skip links para conteudo principal (util quando escalar para muitos usuarios)
+
+---
+
 **Documento gerado em:** 27/12/2025
-**Versao:** 2.0 (transformacao visual aplicada)
+**Versao:** 2.1 (acessibilidade WCAG AA adicionada em 03/03/2026)
 **Autor:** Claude Code Audit
