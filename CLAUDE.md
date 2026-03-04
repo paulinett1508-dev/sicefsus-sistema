@@ -552,12 +552,35 @@ EXECUTAR:
 - Usar `src/utils/formatters.js` para valores monetarios
 - Testar como Admin E como Operador
 - Preservar codigo funcional - mudancas cirurgicas
+- Atualizar `STATE.md` ao final de cada sessao de desenvolvimento
 
 ### NUNCA
 - Reescrever codigo funcional sem necessidade
 - Misturar strings e numeros em calculos monetarios
 - Salvar dados sem validacao previa
 - Commitar arquivos `.env`
+
+### Padrao de Commits por Fase
+
+Ao trabalhar com o framework PRD → SPEC → CODE, usar prefixos rastreavéis:
+
+```
+feat(PRD-XXX): descricao da pesquisa/requisito
+spec(SPEC-XXX): descricao da especificacao tecnica
+impl(SPEC-XXX): implementacao do componente/feature
+fix(SPEC-XXX): correcao relacionada a implementacao
+```
+
+Para commits fora do framework de fases:
+```
+feat: nova funcionalidade
+fix: correcao de bug
+refactor: refatoracao sem mudanca de comportamento
+docs: atualizacao de documentacao
+chore: manutencao (scripts, config, deps)
+```
+
+Cada commit deve ser atomico (uma mudanca logica por commit) e rastreavel a fase de origem quando aplicavel.
 
 ## Dicas
 - Despesas PLANEJADA nao consomem saldo
