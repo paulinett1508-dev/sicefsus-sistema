@@ -59,3 +59,5 @@ Avaliar todas as operações Firebase (queries, escritas, listeners) identifican
 - **P0**: Memory leaks, falhas de segurança
 - **P1**: Performance degradada, queries ineficientes
 - **P2**: Otimizações, melhores práticas
+
+> Complemento: `.agnostic-core/skills/database/query-compliance.md`, `schema-design.md`, `.agnostic-core/skills/backend/financial-operations.md` (idempotencia e atomicidade)
