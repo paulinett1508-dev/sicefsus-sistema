@@ -178,7 +178,9 @@ service cloud.firestore {
 
     match /audit_logs/{logId} {
       allow read: if isAdmin() || isGestor();
-      allow write: if isAuthenticated();
+      allow create: if isAuthenticated();
+      // Logs de auditoria não podem ser editados ou deletados
+      allow update, delete: if false;
     }
 
     // Coleção usada pelo auditService.js

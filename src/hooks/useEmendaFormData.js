@@ -860,36 +860,51 @@ export const useEmendaFormData = () => {
               "box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);" +
               "animation: slideUp 0.3s ease;";
 
-            modalBox.innerHTML = `
-              <style>
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-              </style>
-              <div style="text-align: center;">
-                <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-                <h2 style="color: #2563EB; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;">
-                  Emenda Cadastrada!
-                </h2>
-                <p style="color: #666; margin: 0 0 24px 0; font-size: 15px; line-height: 1.5;">
-                  Deseja cadastrar a primeira despesa desta emenda agora?
-                </p>
-                <div style="display: flex; gap: 12px; justify-content: center;">
-                  <button id="modal-nao" style="background: #6c757d; color: white; border: none; padding: 12px 32px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
-                    Não, voltar
-                  </button>
-                  <button id="modal-sim" style="background: #28a745; color: white; border: none; padding: 12px 32px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
-                    Sim, cadastrar
-                  </button>
-                </div>
-              </div>
-            `;
+            // Criar elementos do modal sem innerHTML (prevenir XSS)
+            const style = document.createElement("style");
+            style.textContent = "@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }";
+            modalBox.appendChild(style);
+
+            const contentDiv = document.createElement("div");
+            contentDiv.style.cssText = "text-align: center;";
+
+            const iconDiv = document.createElement("div");
+            iconDiv.style.cssText = "font-size: 48px; margin-bottom: 16px;";
+            const iconSpan = document.createElement("span");
+            iconSpan.className = "material-symbols-outlined";
+            iconSpan.style.cssText = "font-size: 48px; color: #28a745;";
+            iconSpan.textContent = "check_circle";
+            iconDiv.appendChild(iconSpan);
+            contentDiv.appendChild(iconDiv);
+
+            const h2 = document.createElement("h2");
+            h2.style.cssText = "color: #2563EB; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;";
+            h2.textContent = "Emenda Cadastrada!";
+            contentDiv.appendChild(h2);
+
+            const p = document.createElement("p");
+            p.style.cssText = "color: #666; margin: 0 0 24px 0; font-size: 15px; line-height: 1.5;";
+            p.textContent = "Deseja cadastrar a primeira despesa desta emenda agora?";
+            contentDiv.appendChild(p);
+
+            const btnContainer = document.createElement("div");
+            btnContainer.style.cssText = "display: flex; gap: 12px; justify-content: center;";
+
+            const btnNao = document.createElement("button");
+            btnNao.style.cssText = "background: #6c757d; color: white; border: none; padding: 12px 32px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;";
+            btnNao.textContent = "Não, voltar";
+            btnContainer.appendChild(btnNao);
+
+            const btnSim = document.createElement("button");
+            btnSim.style.cssText = "background: #28a745; color: white; border: none; padding: 12px 32px; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;";
+            btnSim.textContent = "Sim, cadastrar";
+            btnContainer.appendChild(btnSim);
+
+            contentDiv.appendChild(btnContainer);
+            modalBox.appendChild(contentDiv);
 
             modalOverlay.appendChild(modalBox);
             document.body.appendChild(modalOverlay);
-
-            // Efeitos hover
-            const btnSim = document.getElementById("modal-sim");
-            const btnNao = document.getElementById("modal-nao");
 
             btnSim.onmouseover = () => (btnSim.style.background = "#218838");
             btnSim.onmouseout = () => (btnSim.style.background = "#28a745");
