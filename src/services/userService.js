@@ -113,17 +113,12 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     throw new Error("Admin não está logado");
   }
 
-  // Pedir senha do admin para relogar depois
-  const adminPassword =
-    localStorage.getItem("admin_temp_password") ||
-    prompt("Para criar usuário, digite sua senha de admin:");
+  // Pedir senha do admin para relogar caso necessário (não armazenada)
+  const adminPassword = prompt("Para criar usuário, confirme sua senha de admin:");
 
   if (!adminPassword) {
     throw new Error("Senha do admin necessária para criar usuário");
   }
-
-  // Salvar senha temporariamente (apenas para esta operação)
-  localStorage.setItem("admin_temp_password", adminPassword);
 
   let userCredential = null;
 
@@ -174,7 +169,6 @@ export const createUserDirect = async (userData, navigate, showToast) => {
       ultimoAcesso: null,
       criadoEm: serverTimestamp(),
       dataAtualizacao: serverTimestamp(),
-      senhaTemporaria: senhaTemporaria,
       primeiroLogin: true,
       needPasswordReset: true,
     };
@@ -191,15 +185,11 @@ export const createUserDirect = async (userData, navigate, showToast) => {
       console.warn("⚠️ Erro ao enviar email:", emailError.message);
     }
 
-    // 🧹 Limpar senha temporária
-    localStorage.removeItem("admin_temp_password");
-
     return {
       success: true,
       method: "firebase_direct_fixed",
       uid: userCredential.user.uid,
-      senhaTemporaria: senhaTemporaria,
-      mensagem: `Usuário ${userData.nome} criado com sucesso!`,
+      mensagem: `Usuário ${userData.nome} criado com sucesso! Um email de redefinição de senha foi enviado.`,
       detalhes: {
         auth: true,
         firestore: true,
@@ -222,9 +212,6 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     } catch (cleanupError) {
       console.error("❌ Erro na limpeza:", cleanupError);
     }
-
-    // Limpar senha temporária
-    localStorage.removeItem("admin_temp_password");
 
     throw {
       codigo: error.code,

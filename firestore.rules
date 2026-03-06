@@ -114,24 +114,22 @@ service cloud.firestore {
 
       // Gestor/Operador: Leitura permitida apenas do seu municipio
       allow read: if isAuthenticated() && (
-        (isGestor() || isOperador()) && (
-          !resource.data.keys().hasAny(['municipio']) ||
-          matchesUserLocation(resource.data)
-        )
+        (isGestor() || isOperador()) &&
+        matchesUserLocation(resource.data)
       );
 
-      // Criar despesa: Admin sem restrição, outros validam
+      // Criar despesa: Admin sem restrição, outros validam localização
       allow create: if isAuthenticated() && (
-        isAdmin() || isGestor() || isOperador()
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
       );
 
-      // Atualizar: Admin sem restrição, outros validam localização se presente
+      // Atualizar: Admin sem restrição, outros validam localização
       allow update: if isAuthenticated() && (
-        isAdmin() || 
-        ((isGestor() || isOperador()) && (
-          !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
-          matchesUserLocation(request.resource.data)
-        ))
+        isAdmin() ||
+        ((isGestor() || isOperador()) &&
+          matchesUserLocation(resource.data) &&
+          matchesUserLocation(request.resource.data))
       );
 
       // Apenas Admin e Gestor podem excluir (com validacao de localizacao)

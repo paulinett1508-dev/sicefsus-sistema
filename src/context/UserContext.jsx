@@ -122,10 +122,9 @@ export const UserProvider = ({ children }) => {
             return;
           }
         } catch (error) {
-          console.error("❌ Erro ao carregar dados do usuário:", error);
+          console.error("Erro ao carregar dados do usuário:", error);
 
-          // ✅ FALLBACK robusto em caso de erro
-          const isAdminEmail = firebaseUser.email === "paulinett1508@gmail.com";
+          // Fallback seguro: sem escalação de privilégios
           const fallbackName =
             firebaseUser.displayName ||
             firebaseUser.email?.split("@")[0] ||
@@ -136,11 +135,12 @@ export const UserProvider = ({ children }) => {
             email: firebaseUser.email,
             nome: fallbackName,
             displayName: fallbackName,
-            tipo: isAdminEmail ? "admin" : "operador",
-            isActive: true,
-            status: "ativo",
-            municipio: "", // Sem município definido
-            uf: "", // Sem UF definida
+            tipo: "operador",
+            isActive: false,
+            status: "pendente",
+            municipio: "",
+            uf: "",
+            erroCarregamento: true,
           });
         }
       } else {
