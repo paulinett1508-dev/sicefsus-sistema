@@ -7,6 +7,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   signInWithEmailAndPassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   getAuth,
   sendPasswordResetEmail,
 } from "firebase/auth";
@@ -113,18 +115,27 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     throw new Error("Admin não está logado");
   }
 
-  // Pedir senha do admin para relogar caso necessário (não armazenada)
+  // Pedir senha do admin para reautenticação (não armazenada)
   const adminPassword = prompt("Para criar usuário, confirme sua senha de admin:");
 
   if (!adminPassword) {
     throw new Error("Senha do admin necessária para criar usuário");
   }
 
+  // Reautenticar admin antes de prosseguir (valida credenciais)
+  try {
+    const credential = EmailAuthProvider.credential(adminEmail, adminPassword);
+    await reauthenticateWithCredential(adminUser, credential);
+  } catch (reauthError) {
+    throw new Error("Senha de admin incorreta. Operação cancelada.");
+  }
+
   let userCredential = null;
 
   try {
-    const senhaTemporaria = Math.random().toString(36).slice(-8);
-    // Senha temporaria gerada - nao logar em producao por seguranca
+    // Senha temporária com entropia criptográfica
+    const randomBytes = crypto.getRandomValues(new Uint8Array(16));
+    const senhaTemporaria = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
 
     // 🚨 CORREÇÃO CRÍTICA: Usar instância secundária para não deslogar admin
     console.log("🔄 Criando usuário em instância secundária...");

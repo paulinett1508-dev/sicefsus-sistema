@@ -223,17 +223,32 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       loadingRef.current = true;
       setLoading(true);
 
-      console.log("📊 Carregando emendas e despesas...");
+      const usuario = usuarioRef.current;
+      const isUsuarioAdmin = usuario?.tipo === "admin";
 
-      // Query base - sempre carregar todas para admins
-      let emendasQuery = query(
-        collection(db, "emendas"),
-        orderBy("numero", "asc"),
-      );
+      // Queries filtradas por localização para não-admins
+      let emendasQuery;
+      let despesasQuery;
+
+      if (isUsuarioAdmin || !usuario?.municipio || !usuario?.uf) {
+        emendasQuery = query(collection(db, "emendas"), orderBy("numero", "asc"));
+        despesasQuery = query(collection(db, "despesas"));
+      } else {
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", usuario.municipio),
+          where("uf", "==", usuario.uf),
+        );
+        despesasQuery = query(
+          collection(db, "despesas"),
+          where("municipio", "==", usuario.municipio),
+          where("uf", "==", usuario.uf),
+        );
+      }
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
         getDocs(emendasQuery),
-        getDocs(collection(db, "despesas")),
+        getDocs(despesasQuery),
       ]);
 
       if (!isMountedRef.current) return [];
