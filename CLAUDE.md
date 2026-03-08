@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 18/01/2026
+## Ultima Atualizacao - 08/03/2026
 
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
@@ -684,6 +684,34 @@ Servidor MCP para operacoes diretas no Firestore.
 ### Proximos Passos Sugeridos
 - Verificar useEffects que precisam de cleanup
 - Completar substituicao de emojis em componentes dev/debug
+
+---
+
+## Historico de Sessao (08/03/2026)
+
+### Tarefas Realizadas
+1. **Integracao agnostic-core** como submodulo git (framework de skills/agents generico)
+2. **Auditoria de seguranca completa** — 21 vulnerabilidades corrigidas em 4 fases:
+   - **Fase 1 (8 criticas):** XSS innerHTML→createElement em versionControl.js, jsPDF 3.0.1→4.2.0 (7 CVEs), jspdf-autotable 5.0.2→5.0.7, Firestore Rules matchesUserLocation em despesas, removido senha em localStorage, removido senhaTemporaria do Firestore, removido email hardcoded em UserContext, credenciais removidas do git tracking
+   - **Fase 2 (3):** createAdminUser.js deletado (senha 123456 hardcoded), Firestore Rules em naturezas e fornecedores
+   - **Fase 3 (5):** XSS innerHTML em useEmendaFormData.js, isAdmin:true hardcoded corrigido em useEmendaDespesa.js, window.debugPermissoes removido, audit_logs restrito a create only, .env deletados do disco
+   - **Fase 4 (hardening):** reauthenticateWithCredential, crypto.getRandomValues (128-bit), queries filtradas por localizacao, project IDs redacted, git filter-repo para purgar credenciais do historico
+3. **Comando /security-review** adicionado (baseado em anthropics/claude-code-security-review)
+4. Cross-reference de operacoes financeiras na skill auditoria-firebase
+
+### Arquivos Modificados
+- `firestore.rules` — regras de seguranca reforçadas
+- `src/context/UserContext.jsx` — removido fallback de email hardcoded
+- `src/hooks/useEmendaDespesa.js` — permissoes e queries corrigidas
+- `src/hooks/useEmendaFormData.js` — XSS corrigido
+- `src/services/userService.js` — reautenticacao + crypto
+- `src/services/createAdminUser.js` — **DELETADO** (credenciais hardcoded)
+- `src/utils/versionControl.js` — XSS corrigido
+- `package.json` — deps atualizadas (jsPDF, jspdf-autotable)
+- `.gitignore` — credenciais excluidas
+
+### Acao Manual Pendente
+- **CRITICO:** Rotacionar chaves Firebase (DEV + PROD) no Google Cloud Console — credenciais antigas foram expostas no historico git
 
 ---
 
