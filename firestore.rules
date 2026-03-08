@@ -114,24 +114,22 @@ service cloud.firestore {
 
       // Gestor/Operador: Leitura permitida apenas do seu municipio
       allow read: if isAuthenticated() && (
-        (isGestor() || isOperador()) && (
-          !resource.data.keys().hasAny(['municipio']) ||
-          matchesUserLocation(resource.data)
-        )
+        (isGestor() || isOperador()) &&
+        matchesUserLocation(resource.data)
       );
 
-      // Criar despesa: Admin sem restrição, outros validam
+      // Criar despesa: Admin sem restrição, outros validam localização
       allow create: if isAuthenticated() && (
-        isAdmin() || isGestor() || isOperador()
+        isAdmin() ||
+        ((isGestor() || isOperador()) && matchesUserLocation(request.resource.data))
       );
 
-      // Atualizar: Admin sem restrição, outros validam localização se presente
+      // Atualizar: Admin sem restrição, outros validam localização
       allow update: if isAuthenticated() && (
-        isAdmin() || 
-        ((isGestor() || isOperador()) && (
-          !request.resource.data.keys().hasAny(['municipio', 'uf']) ||
-          matchesUserLocation(request.resource.data)
-        ))
+        isAdmin() ||
+        ((isGestor() || isOperador()) &&
+          matchesUserLocation(resource.data) &&
+          matchesUserLocation(request.resource.data))
       );
 
       // Apenas Admin e Gestor podem excluir (com validacao de localizacao)
@@ -149,9 +147,10 @@ service cloud.firestore {
       // Admin: Acesso total
       allow read, write: if isAdmin();
 
-      // Gestor/Operador: Leitura permitida se autenticado
+      // Gestor/Operador: Leitura filtrada por localização (via emenda vinculada)
       allow read: if isAuthenticated() && (
-        isGestor() || isOperador()
+        (isGestor() || isOperador()) &&
+        matchesUserLocation(resource.data)
       );
 
       // Criar natureza: Admin e Gestor podem criar, Operador NAO
@@ -179,7 +178,9 @@ service cloud.firestore {
 
     match /audit_logs/{logId} {
       allow read: if isAdmin() || isGestor();
-      allow write: if isAuthenticated();
+      allow create: if isAuthenticated();
+      // Logs de auditoria não podem ser editados ou deletados
+      allow update, delete: if false;
     }
 
     // Coleção usada pelo auditService.js
@@ -204,8 +205,28 @@ service cloud.firestore {
     // ========================================
 
     match /fornecedores/{fornecedorId} {
-      // Qualquer usuário autenticado pode ler, criar, atualizar e excluir
-      allow read, write: if isAuthenticated();
+      // Admin: Acesso total
+      allow read, write: if isAdmin();
+
+      // Gestor/Operador: Leitura filtrada por localização
+      allow read: if isAuthenticated() && (
+        (isGestor() || isOperador()) &&
+        matchesUserLocation(resource.data)
+      );
+
+      // Gestor pode criar e atualizar (com validação de localização)
+      allow create: if isAuthenticated() && (
+        isGestor() && matchesUserLocation(request.resource.data)
+      );
+
+      allow update: if isAuthenticated() && (
+        isGestor() &&
+        matchesUserLocation(resource.data) &&
+        matchesUserLocation(request.resource.data)
+      );
+
+      // Apenas Admin pode excluir fornecedores
+      allow delete: if isAdmin();
     }
 
     // ========================================

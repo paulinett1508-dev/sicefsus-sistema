@@ -58,11 +58,11 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [permissoes, setPermissoes] = useState({
-    podeEditar: true,
+    podeEditar: false,
     podeVisualizar: true,
-    isAdmin: true,
-    acessoTotal: true,
-    filtroAplicado: false,
+    isAdmin: false,
+    acessoTotal: false,
+    filtroAplicado: true,
   });
   const [metricas, setMetricas] = useState({
     valorTotal: 0,
@@ -87,19 +87,21 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
     userRole: options.userRole || null,
   });
 
-  // ✅ CORREÇÃO 3: Permissões sempre liberadas (sem loops)
+  // Permissões baseadas no tipo real do usuário
   useEffect(() => {
-    const permissoesLiberadas = {
-      podeEditar: true,
-      podeVisualizar: true,
-      isAdmin: true,
-      acessoTotal: true,
-      filtroAplicado: false,
-    };
+    const tipo = usuarioRef.current?.tipo || "operador";
+    const isAdmin = tipo === "admin";
+    const isGestor = tipo === "gestor";
 
-    setPermissoes(permissoesLiberadas);
+    setPermissoes({
+      podeEditar: isAdmin || isGestor,
+      podeVisualizar: true,
+      isAdmin: isAdmin,
+      acessoTotal: isAdmin,
+      filtroAplicado: !isAdmin,
+    });
     setError(null);
-  }, []); // ✅ Sem dependências para evitar loops
+  }, [usuario?.tipo]);
 
   // ✅ FUNÇÃO: Calcular métricas financeiras de uma emenda (ESTÁVEL)
   const calcularMetricasEmenda = useCallback(
@@ -221,17 +223,32 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       loadingRef.current = true;
       setLoading(true);
 
-      console.log("📊 Carregando emendas e despesas...");
+      const usuario = usuarioRef.current;
+      const isUsuarioAdmin = usuario?.tipo === "admin";
 
-      // Query base - sempre carregar todas para admins
-      let emendasQuery = query(
-        collection(db, "emendas"),
-        orderBy("numero", "asc"),
-      );
+      // Queries filtradas por localização para não-admins
+      let emendasQuery;
+      let despesasQuery;
+
+      if (isUsuarioAdmin || !usuario?.municipio || !usuario?.uf) {
+        emendasQuery = query(collection(db, "emendas"), orderBy("numero", "asc"));
+        despesasQuery = query(collection(db, "despesas"));
+      } else {
+        emendasQuery = query(
+          collection(db, "emendas"),
+          where("municipio", "==", usuario.municipio),
+          where("uf", "==", usuario.uf),
+        );
+        despesasQuery = query(
+          collection(db, "despesas"),
+          where("municipio", "==", usuario.municipio),
+          where("uf", "==", usuario.uf),
+        );
+      }
 
       const [emendasSnapshot, despesasSnapshot] = await Promise.all([
         getDocs(emendasQuery),
-        getDocs(collection(db, "despesas")),
+        getDocs(despesasQuery),
       ]);
 
       if (!isMountedRef.current) return [];
@@ -603,17 +620,6 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
       listenersRef.current = {};
     };
   }, [options.emendaId]); // ✅ Apenas emendaId como dependência
-
-  // ✅ Debug function
-  if (typeof window !== "undefined") {
-    window.debugPermissoes = () => {
-      console.log("🔍 DEBUG PERMISSÕES:");
-      console.log("Usuario:", usuarioRef.current);
-      console.log("Permissões:", permissoes);
-      console.log("Loading:", loading);
-      console.log("Error:", error);
-    };
-  }
 
   return {
     // Dados principais

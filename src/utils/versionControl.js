@@ -44,35 +44,76 @@ export function checkVersion() {
  * Exibe notificação de atualização
  */
 function showUpdateNotification() {
-  // Criar container da notificação
+  // Criar container da notificação (sem innerHTML para prevenir XSS)
   const notification = document.createElement("div");
   notification.className = "version-notification";
-  notification.innerHTML = `
-    <div class="version-notification-content">
-      <div class="version-notification-header">
-        <h3>🎉 Sistema Atualizado!</h3>
-        <button class="version-notification-close" onclick="this.parentElement.parentElement.parentElement.remove()">✕</button>
-      </div>
-      <div class="version-notification-body">
-        <p><strong>Versão ${APP_VERSION.number}</strong> - ${APP_VERSION.date}</p>
-        <p><strong>Novidades desta versão:</strong></p>
-        <ul>
-          ${APP_VERSION.changes.map((change) => `<li>${change}</li>`).join("")}
-        </ul>
-        <p class="version-notification-info">
-          ℹ️ Pressione <strong>F5</strong> ou <strong>Ctrl+F5</strong> para garantir que está usando a versão mais recente.
-        </p>
-      </div>
-      <div class="version-notification-footer">
-<button class="version-notification-btn-reload" onclick="window.location.href='/'">
-  🔄 Atualizar Agora
-</button>
-        <button class="version-notification-btn-later" onclick="this.parentElement.parentElement.parentElement.remove()">
-          Mais Tarde
-        </button>
-      </div>
-    </div>
-  `;
+
+  const content = document.createElement("div");
+  content.className = "version-notification-content";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "version-notification-header";
+  const h3 = document.createElement("h3");
+  h3.textContent = "Sistema Atualizado!";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "version-notification-close";
+  closeBtn.textContent = "\u2715";
+  closeBtn.addEventListener("click", () => notification.remove());
+  header.appendChild(h3);
+  header.appendChild(closeBtn);
+
+  // Body
+  const body = document.createElement("div");
+  body.className = "version-notification-body";
+
+  const versionP = document.createElement("p");
+  const versionStrong = document.createElement("strong");
+  versionStrong.textContent = `Versão ${APP_VERSION.number}`;
+  versionP.appendChild(versionStrong);
+  versionP.appendChild(document.createTextNode(` - ${APP_VERSION.date}`));
+  body.appendChild(versionP);
+
+  const novP = document.createElement("p");
+  const novStrong = document.createElement("strong");
+  novStrong.textContent = "Novidades desta versão:";
+  novP.appendChild(novStrong);
+  body.appendChild(novP);
+
+  const ul = document.createElement("ul");
+  APP_VERSION.changes.forEach((change) => {
+    const li = document.createElement("li");
+    li.textContent = change;
+    ul.appendChild(li);
+  });
+  body.appendChild(ul);
+
+  const infoP = document.createElement("p");
+  infoP.className = "version-notification-info";
+  infoP.textContent = "Pressione F5 ou Ctrl+F5 para garantir que está usando a versão mais recente.";
+  body.appendChild(infoP);
+
+  // Footer
+  const footer = document.createElement("div");
+  footer.className = "version-notification-footer";
+
+  const reloadBtn = document.createElement("button");
+  reloadBtn.className = "version-notification-btn-reload";
+  reloadBtn.textContent = "Atualizar Agora";
+  reloadBtn.addEventListener("click", () => { window.location.href = "/"; });
+
+  const laterBtn = document.createElement("button");
+  laterBtn.className = "version-notification-btn-later";
+  laterBtn.textContent = "Mais Tarde";
+  laterBtn.addEventListener("click", () => notification.remove());
+
+  footer.appendChild(reloadBtn);
+  footer.appendChild(laterBtn);
+
+  content.appendChild(header);
+  content.appendChild(body);
+  content.appendChild(footer);
+  notification.appendChild(content);
 
   // Adicionar ao body
   document.body.appendChild(notification);

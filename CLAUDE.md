@@ -39,7 +39,7 @@ Se aparecer `devConnected: true` e `prodConnected: true`, esta tudo OK.
 - **Localizacao:** `firebase-mcp-server/`
 - **Credenciais:** `.claude/settings.json` (env) + `firebase-mcp-server/.env`
 - **Build:** `npm run build` no diretorio do MCP
-- **Ambientes:** DEV (emendas-parlamentares-60dbd) e PROD (emendas-parlamentares-prod)
+- **Ambientes:** DEV ([DEV-PROJECT-ID]) e PROD ([PROD-PROJECT-ID])
 
 ---
 
