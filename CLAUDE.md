@@ -9,6 +9,10 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 
 ## Ultima Atualizacao - 08/03/2026
 
+> **ACAO CRITICA PENDENTE:** Rotacionar chaves Firebase (DEV + PROD) no Google Cloud Console.
+> Credenciais antigas foram expostas no historico git e purgadas com git filter-repo (08/03/2026).
+> IAM → Service Accounts → Keys → Revogar e gerar novas → Atualizar .env local e firebase-mcp-server/.env
+
 ## Firebase MCP Server (IMPORTANTE - Ler ao iniciar sessao)
 
 O projeto possui um servidor MCP configurado para acesso direto ao Firestore.
@@ -149,12 +153,33 @@ NATUREZA 339039:
 - `src/context/UserContext.jsx` - Autenticacao e dados do usuario
 - `src/firebase/firebaseConfig.js` - Conexao Firebase
 - `src/config/constants.js` - Listas fixas (programas, naturezas)
+- `firestore.rules` - Regras de seguranca do Firestore (ver secao abaixo)
 
 ### Hooks Principais
-- `src/hooks/useEmendaFormData.js` - CRUD de emendas
+- `src/hooks/useEmendaFormData.js` - CRUD de emendas (DOM seguro, sem innerHTML)
 - `src/hooks/useDespesasData.js` - CRUD de despesas
+- `src/hooks/useEmendaDespesa.js` - Operacoes emenda-despesa (queries filtradas por localizacao para nao-admins)
 - `src/hooks/usePermissions.js` - Permissoes Admin/Gestor/Operador
 - `src/hooks/useDashboardData.js` - Dados do Dashboard
+
+### Seguranca - Padroes Atuais (08/03/2026)
+
+**Autenticacao (userService.js):**
+- Admin deve se reautenticar (`reauthenticateWithCredential`) antes de criar usuarios
+- Senhas temporarias geradas com `crypto.getRandomValues()` (128-bit)
+- Nunca armazenar senhas em localStorage ou Firestore
+
+**Firestore Rules (firestore.rules):**
+- `matchesUserLocation(data)` - funcao central que valida municipio+uf do usuario
+- Colecoes protegidas por localizacao: `despesas`, `naturezas`, `fornecedores`
+- `audit_logs` - somente criacao (create), update/delete bloqueados
+- Operadores/gestores so leem dados do proprio municipio/UF
+- Admins tem acesso total
+
+**Hooks - Filtros de Seguranca:**
+- `useEmendaDespesa.js` - usa permissoes reais do usuario (nao hardcoded), queries com `where("municipio")` para nao-admins
+- `useEmendaFormData.js` - manipulacao DOM via `createElement`/`textContent` (nunca innerHTML)
+- `versionControl.js` - mesma regra: sem innerHTML
 
 ---
 
@@ -163,6 +188,7 @@ NATUREZA 339039:
 ## 1. Arvore de Arquivos (src/ - 3 niveis)
 
 ```
+.agnostic-core/                          # Submodulo git - framework generico de skills/agents
 src/
 ├── App.jsx                          # Componente principal com rotas
 ├── index.jsx                        # Entry point da aplicacao
@@ -249,9 +275,9 @@ src/
 │
 ├── services/
 │   ├── emendasService.js            # Servico de emendas
-│   ├── userService.js               # Servico de usuarios
+│   ├── userService.js               # Servico de usuarios (reautentica admin + crypto para senhas)
 │   ├── auditService.js              # Servico de auditoria
-│   └── createAdminUser.js           # Criacao de admin
+│   └── naturezaService.js           # Servico de naturezas (envelopes orcamentarios)
 │
 ├── firebase/
 │   └── firebaseConfig.js            # Configuracao Firebase
@@ -536,12 +562,14 @@ EXECUTAR:
 
 ## Colecoes Firebase
 
-| Colecao | Campos principais |
-|---------|-------------------|
-| `usuarios` | uid, email, nome, tipo, municipio, uf, status, superAdmin |
-| `emendas` | id, numero, autor, municipio, uf, valor, valorAlocado, valorExecutado, saldoParaNaturezas, saldoNaoExecutado, dataValidade, status |
-| `despesas` | id, emendaId, naturezaId, municipio, uf, valor, status, statusPagamento |
-| `naturezas` | id, emendaId, codigo, descricao, valorAlocado, valorExecutado, saldoDisponivel, criadoEm |
+| Colecao | Campos principais | Regra de Acesso |
+|---------|-------------------|-----------------|
+| `usuarios` | uid, email, nome, tipo, municipio, uf, status, superAdmin | Admin: tudo. Outros: so proprio doc |
+| `emendas` | id, numero, autor, municipio, uf, valor, valorAlocado, valorExecutado, saldoParaNaturezas, saldoNaoExecutado, dataValidade, status | Admin: tudo. Outros: matchesUserLocation |
+| `despesas` | id, emendaId, naturezaId, municipio, uf, valor, status, statusPagamento | Admin: tudo. Outros: matchesUserLocation |
+| `naturezas` | id, emendaId, codigo, descricao, valorAlocado, valorExecutado, saldoDisponivel, criadoEm | Admin: tudo. Outros: matchesUserLocation |
+| `fornecedores` | cnpj, nome, municipio, uf | Admin: tudo. Gestor/Operador: matchesUserLocation |
+| `audit_logs` | acao, usuario, timestamp, dados | **Somente create** (imutavel) |
 
 ---
 
@@ -590,26 +618,17 @@ Cada commit deve ser atomico (uma mudanca logica por commit) e rastreavel a fase
 
 ---
 
-## Comandos Claude Disponiveis
+## Comandos Claude Disponiveis (atualizado 08/03/2026)
 
 Comandos customizados em `.claude/commands/`:
 
 | Comando | Funcao |
 |---------|--------|
-| `@mapear-arquitetura-completa.md` | Gera mapa completo do projeto (componentes, hooks, fluxos) |
-| `@auditoria-sistema-completa.md` | Auditoria geral (estrutura, Firebase, seguranca, consistencia) |
-| `@auditoria-design-ui-ux.md` | Auditoria visual (CSS, icones, responsividade, acessibilidade) |
-| `@auditoria-queries-firebase.md` | Auditoria Firebase (queries, listeners, escritas, regras) |
-| `@resolver-problema-guiado.md` | Corrige problemas de forma estruturada (diagnostico + solucao) |
-| `@revisar-codigo-qualidade.md` | Code review (limpeza, performance, duplicacao) |
-| `@detector-bugs-async-react.md` | Busca bugs potenciais (hooks, async/await, race conditions) |
-| `@verificar-ambientes-dev-prod.md` | Verifica configuracao de ambientes (.env dev/prod) |
-| `@buscar-valores-hardcoded.md` | Identifica valores hardcoded (URLs, credenciais, textos) |
-| `@gerenciar-ambiente-firebase.md` | Gerencia ambientes Firebase (verificar, listar, comparar) |
-| `@corrigir-claims-usuarios-firebase.md` | Atualiza custom claims no Firebase Auth |
-| `@gerar-documentacao-handover.md` | Gera documentacao completa do sistema |
-| `@migrar-acoes-para-despesas.md` | Migra acoesServicos para colecao despesas (PLANEJADA) |
-| `@tarefas-pendentes-dark-mode.md` | Tarefas pendentes P1/P2 de dark mode (proxima sessao) |
+| `corrigir-claims-usuarios-firebase` | Atualiza custom claims no Firebase Auth |
+| `pending-tasks` | Tarefas pendentes para proxima sessao |
+| `security-review` | Auditoria de seguranca completa do branch atual |
+
+> **Nota:** Comandos antigos (mapear-arquitetura, auditoria-*, resolver-problema, etc.) foram migrados para **skills** em `.claude/skills/`. Usar skills diretamente.
 
 ---
 
@@ -812,7 +831,7 @@ As skills servem para QUALQUER problema novo.
 
 ## Comandos e Skills do Claude Code
 
-### Organizacao (atualizado 18/01/2026)
+### Organizacao (atualizado 08/03/2026)
 
 O projeto usa dois tipos de automacao para o Claude Code:
 
@@ -822,11 +841,8 @@ O projeto usa dois tipos de automacao para o Claude Code:
 | Comando | Descricao |
 |---------|-----------|
 | `corrigir-claims-usuarios-firebase` | Roda `node scripts/fix-auth-claims.cjs` para atualizar claims |
-| `gerar-documentacao-handover` | Roda `node scripts/generateHandover.cjs` |
-| `gerenciar-ambiente-firebase` | Verificar/comparar ambientes dev/prod |
-| `migrar-acoes-para-despesas` | Migrar acoesServicos para despesas |
-| `tarefas-pendentes-dark-mode` | Checklist de tarefas dark mode |
-| `verificar-ambientes-dev-prod` | Verificar configuracao de ambientes |
+| `pending-tasks` | Tarefas pendentes para proxima sessao |
+| `security-review` | Auditoria de seguranca completa do branch atual (baseada em anthropics/claude-code-security-review) |
 
 #### Skills (`.claude/skills/`)
 **Framework de desenvolvimento + competencias** - metodologia reutilizavel.
