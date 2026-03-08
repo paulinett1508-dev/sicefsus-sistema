@@ -5,6 +5,7 @@
 
 ## Decisoes Tomadas
 
+- [08/03/2026] Auditoria de seguranca completa: 21 vulnerabilidades corrigidas em 4 fases (XSS, deps, Firestore Rules, Auth, credenciais). createAdminUser.js deletado. git filter-repo para purgar credenciais do historico. Comando /security-review adicionado. Submodulo agnostic-core integrado.
 - [03/03/2026] Analise de repos externos: GSD, ui-ux-pro-max-skill e awesome-claude-code avaliados. Nenhum incorporado como dependencia. Absorvidos: STATE.md (GSD), padrao de commits por fase (GSD), regras WCAG AA (ui-ux-pro-max).
 - [18/01/2026] Framework de skills consolidado: PRD → SPEC → CODE em sessoes isoladas
 - [16/01/2026] Auditoria de integridade concluida: PROD e DEV limpos (0 inconsistencias)
@@ -13,7 +14,7 @@
 
 ## Blockers Ativos
 
-- Nenhum
+- **Pos-merge:** Rotacionar chaves Firebase (DEV + PROD) no Google Cloud Console — credenciais antigas foram expostas no historico git
 
 ## Posicao no Workflow
 
