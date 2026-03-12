@@ -53,3 +53,67 @@ Para cada problema encontrado:
 - **P0**: Quebra visual, inacessibilidade crítica
 - **P1**: Inconsistência com design system, UX degradada
 - **P2**: Melhorias de polish, otimizações
+
+---
+
+## UI/UX Quality Gates (agnostic-core)
+
+5 gates obrigatorios antes de considerar uma interface "pronta":
+
+### Gate 1 — Hierarquia Visual
+- [ ] Titulo principal e o elemento mais proeminente
+- [ ] Sequencia clara: titulo → subtitulo → conteudo → acoes
+- [ ] Elementos secundarios nao competem com conteudo principal
+- [ ] Espacamento cria agrupamento logico
+
+### Gate 2 — Feedback de Interacao
+- [ ] Todo elemento clicavel tem hover state
+- [ ] Botoes com estados: default, hover, active, disabled
+- [ ] Acoes destrutivas pedem confirmacao
+- [ ] Loading states em operacoes async
+- [ ] Transicoes suaves (150-300ms)
+- [ ] Validacao de formularios proximo ao campo com erro
+
+### Gate 3 — Apresentacao de Dados
+- [ ] Numeros grandes com separadores de milhar
+- [ ] Tabelas/listas com ordenacao logica
+- [ ] Estados vazios com mensagem util e acao sugerida
+- [ ] Valores monetarios com simbolo consistente (R$)
+- [ ] Datas no formato do locale do usuario
+
+### Gate 4 — Responsivo e Acessivel
+- [ ] Layout funciona de 320px ate 1920px
+- [ ] Touch targets minimo 44x44px em mobile
+- [ ] Contraste WCAG AA (4.5:1 texto normal)
+- [ ] Fontes nao menores que 14px em mobile
+- [ ] Sem scroll horizontal
+- [ ] Tab order logico e foco visivel
+
+### Gate 5 — Design Emocional
+- [ ] Micro-interacoes em acoes importantes
+- [ ] Paleta de cores transmite tom correto
+- [ ] Tipografia cria personalidade (Inter)
+- [ ] Empty states humanizados
+
+**Minimo para entrega:** Gates 1-4. Gate 5 e o diferencial.
+
+---
+
+## WCAG 2.1 AA — Checklist Rapido (agnostic-core)
+
+- [ ] Contraste 4.5:1 (texto normal), 3:1 (texto grande)
+- [ ] Todos interativos focaveis por Tab
+- [ ] Um `<h1>` por pagina, hierarquia sem pular niveis
+- [ ] `alt` em imagens, `aria-label` em icones funcionais
+- [ ] `prefers-reduced-motion` implementado
+- [ ] Status nao depende apenas de cor
+
+**Ferramentas:** axe DevTools, Chrome Accessibility pane, Colour Contrast Analyser
+
+---
+
+## Skills Relacionadas
+
+- `skills/accessibility-checklist.md` — Checklist WCAG completo
+- `skills/css-governance.md` — Governanca CSS anti-Frankenstein
+- `skills/tailwind-patterns.md` — Padroes Tailwind

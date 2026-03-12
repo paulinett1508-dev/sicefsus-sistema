@@ -115,8 +115,59 @@ Diagnosticar problemas de forma sistemática, identificar causa raiz e implement
 - [ ] Sem regressões
 ```
 
+## Tecnica: 5 Whys (agnostic-core)
+
+Perguntar "por que?" 5 vezes para encontrar a causa raiz:
+
+```
+Por que o usuario ve erro 500?
+  → Porque a query retorna null
+Por que a query retorna null?
+  → Porque o campo foi renomeado
+Por que o campo renomeado quebrou?
+  → Porque o codigo referencia o nome antigo
+Por que o codigo nao foi atualizado?
+  → Porque migration e codigo foram em commits separados
+Por que nao foi pego nos testes?
+  → Porque nao tem teste para esse fluxo
+```
+
+**Diferenciar:** Sintoma vs Causa imediata vs Causa raiz
+
+---
+
+## Tecnicas de Isolamento
+
+- `git bisect` → encontrar commit que introduziu o bug
+- Comentar codigo → remover partes ate o bug desaparecer
+- Dados minimos → testar com menor input que reproduz
+- Ambiente limpo → sem extensoes, cache, plugins
+
+---
+
+## Anti-Patterns de Debugging
+
+| Anti-Pattern | Solucao |
+|-------------|---------|
+| Mudancas aleatorias | Usar evidencias |
+| Ignorar evidencias contraditorias | Mudar a teoria |
+| Parar no sintoma | Perguntar "por que?" |
+| Sem teste de regressao | Sempre adicionar teste |
+| Debugar em producao | Reproduzir local |
+| "Funciona na minha maquina" | Verificar ambiente/dados |
+
+---
+
 ## Princípios
 - Nunca assumir sem evidência
 - Preferir correção mínima e focada
 - Documentar o raciocínio
 - Validar antes de declarar resolvido
+
+---
+
+## Skills Relacionadas
+
+- `skills/debugging-sistematico.md` — Processo de 4 fases detalhado
+- `skills/testing-guide.md` — Testes de regressao
+- `skills/code-review.md` — Prevencao via revisao

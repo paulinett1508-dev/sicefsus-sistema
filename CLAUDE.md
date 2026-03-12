@@ -7,7 +7,7 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 08/03/2026
+## Ultima Atualizacao - 12/03/2026
 
 > **ACAO CRITICA PENDENTE:** Rotacionar chaves Firebase (DEV + PROD) no Google Cloud Console.
 > Credenciais antigas foram expostas no historico git e purgadas com git filter-repo (08/03/2026).
@@ -188,7 +188,7 @@ NATUREZA 339039:
 ## 1. Arvore de Arquivos (src/ - 3 niveis)
 
 ```
-.agnostic-core/                          # Submodulo git - framework generico de skills/agents
+# agnostic-core integrado diretamente em .claude/skills/ e .claude/commands/ (12/03/2026)
 src/
 ├── App.jsx                          # Componente principal com rotas
 ├── index.jsx                        # Entry point da aplicacao
@@ -709,7 +709,7 @@ Servidor MCP para operacoes diretas no Firestore.
 ## Historico de Sessao (08/03/2026)
 
 ### Tarefas Realizadas
-1. **Integracao agnostic-core** como submodulo git (framework de skills/agents generico)
+1. **Integracao agnostic-core** — submodulo removido, conteudo integrado diretamente em .claude/skills/ e .claude/commands/
 2. **Auditoria de seguranca completa** — 21 vulnerabilidades corrigidas em 4 fases:
    - **Fase 1 (8 criticas):** XSS innerHTML→createElement em versionControl.js, jsPDF 3.0.1→4.2.0 (7 CVEs), jspdf-autotable 5.0.2→5.0.7, Firestore Rules matchesUserLocation em despesas, removido senha em localStorage, removido senhaTemporaria do Firestore, removido email hardcoded em UserContext, credenciais removidas do git tracking
    - **Fase 2 (3):** createAdminUser.js deletado (senha 123456 hardcoded), Firestore Rules em naturezas e fornecedores
@@ -831,9 +831,10 @@ As skills servem para QUALQUER problema novo.
 
 ## Comandos e Skills do Claude Code
 
-### Organizacao (atualizado 08/03/2026)
+### Organizacao (atualizado 12/03/2026)
 
-O projeto usa dois tipos de automacao para o Claude Code:
+O projeto usa dois tipos de automacao para o Claude Code.
+Conteudo do agnostic-core (paulinett1508-dev/agnostic-core) foi integrado diretamente.
 
 #### Commands (`.claude/commands/`)
 **Tarefas deterministicas e scripts** - acoes concretas que voce dispara manualmente.
@@ -842,7 +843,10 @@ O projeto usa dois tipos de automacao para o Claude Code:
 |---------|-----------|
 | `corrigir-claims-usuarios-firebase` | Roda `node scripts/fix-auth-claims.cjs` para atualizar claims |
 | `pending-tasks` | Tarefas pendentes para proxima sessao |
-| `security-review` | Auditoria de seguranca completa do branch atual (baseada em anthropics/claude-code-security-review) |
+| `security-review` | Auditoria de seguranca completa do branch atual |
+| `brainstorm` | Decisao estruturada em 3 passos (agnostic-core) |
+| `deploy-checklist` | Checklist de deploy pre-flight/pos-deploy (agnostic-core) |
+| `create-feature` | Workflow completo para criar features (agnostic-core) |
 
 #### Skills (`.claude/skills/`)
 **Framework de desenvolvimento + competencias** - metodologia reutilizavel.
@@ -860,14 +864,33 @@ O projeto usa dois tipos de automacao para o Claude Code:
 
 | Skill | Quando Usar |
 |-------|-------------|
-| `auditoria-design-ui-ux` | Avaliar aspectos visuais, acessibilidade, design system |
+| `auditoria-design-ui-ux` | Avaliar visuais, acessibilidade, design system + Quality Gates |
 | `auditoria-firebase` | Analisar queries, listeners, regras de seguranca |
 | `auditoria-sistema` | Analise holistica: estrutura, codigo morto, consistencia |
-| `code-review` | Revisar codigo para qualidade e boas praticas |
-| `detectar-hardcodes` | Encontrar valores hardcoded que devem ser configuraveis |
+| `code-review` | Revisar codigo com prefixos BLOCKER/SUGESTAO/NITPICK |
+| `detectar-hardcodes` | Encontrar valores hardcoded + auditoria 4 passos |
 | `detector-bugs-react-async` | Identificar bugs em hooks, async/await, Firebase |
 | `mapear-arquitetura` | Documentar estrutura, dependencias, fluxos de dados |
-| `resolver-problema` | Diagnosticar e corrigir bugs de forma sistematica |
+| `resolver-problema` | Diagnosticar bugs com 5 Whys + anti-patterns |
+
+**Skills do agnostic-core (integradas 12/03/2026):**
+
+| Skill | Quando Usar |
+|-------|-------------|
+| `react-performance` | 58 regras de otimizacao React (waterfalls, bundles, re-renders) |
+| `css-governance` | Checkpoint anti-Frankenstein CSS antes de PR |
+| `accessibility-checklist` | WCAG 2.1 AA completo (contraste, teclado, ARIA) |
+| `tailwind-patterns` | Padroes Tailwind (responsivo, dark mode, layout) |
+| `owasp-checklist` | OWASP Top 10 2021 (auth, injecao, XSS, headers) |
+| `refactoring-seguro` | 7 fases de refatoracao incremental segura |
+| `validation-checklist` | Checklist pre-deploy (seguranca, qualidade, DB, UX) |
+| `pre-implementation` | 5 perguntas antes de codar (YAGNI, DRY, SRP) |
+| `code-inspector-sparc` | Auditoria SPARC (Security, Performance, Architecture, Reliability, Code) |
+| `context-management` | Gestao de contexto AI — pausar, handover, degradacao |
+| `context-audit` | Auditoria de tokens auto-carregados — reduzir desperdicio |
+| `goal-backward-planning` | Planejamento goal-backward — waves, checkpoints, discovery |
+| `testing-guide` | Guia de testes: unit, integration, E2E, TDD |
+| `debugging-sistematico` | 4 fases: Reproduzir → Isolar → Entender → Corrigir |
 
 ### Quando Usar Cada Um
 
