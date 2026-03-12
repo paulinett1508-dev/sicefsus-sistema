@@ -120,3 +120,70 @@ Buscar e classificar valores hardcoded, avaliando risco e sugerindo onde central
 - IDs de teste em arquivos de teste
 - Valores em mocks
 - Constantes legítimas (Math.PI, etc)
+
+---
+
+## Processo de Auditoria em 4 Passos (agnostic-core)
+
+### Passo 1 — Varredura automatizada
+```bash
+# Buscar credenciais
+grep -rn "password\|passwd\|secret\|token\|apikey\|api_key" \
+  --include="*.js" --include="*.jsx" \
+  --exclude-dir=node_modules src/
+
+# Verificar historico git por credenciais expostas
+git log --all -p --source | grep -i "api_key\|password\|secret" | head -50
+
+# Verificar .gitignore
+cat .gitignore | grep -E "\.env|secrets|credentials"
+```
+
+### Passo 2 — Classificar cada ocorrencia
+- [ ] Qual categoria? (CRITICO / ALTO / MEDIO / BAIXO)
+- [ ] Esta em codigo de producao ou apenas testes?
+- [ ] Ja existe variavel de ambiente equivalente?
+- [ ] Qual o impacto de expor este valor?
+
+### Passo 3 — Verificar historico git
+```bash
+# Credenciais ja commitadas (mesmo removidas depois)
+git log --all -p --source | grep -i "api_key\|password\|secret\|token" | head -50
+```
+
+### Passo 4 — Priorizar correcoes
+1. CRITICO em producao → rotacionar credencial, corrigir codigo
+2. CRITICO em historico → rotacionar + considerar reescrita
+3. ALTO → criar variavel de ambiente antes do proximo deploy
+4. MEDIO → criar constante nomeada (`config/constants.js`)
+5. BAIXO → planejar para proximo ciclo
+
+---
+
+## Padroes de Correcao
+
+### Credenciais → variaveis de ambiente
+```javascript
+// ERRADO
+const apiKey = "sk-ant-api03-..."
+
+// CORRETO
+const apiKey = import.meta.env.VITE_API_KEY
+if (!apiKey) throw new Error("VITE_API_KEY nao configurada")
+```
+
+### Constantes de negocio → centralizar
+```javascript
+// ERRADO (espalhado em varios arquivos)
+if (items.length > 50) { ... }
+
+// CORRETO (em config/constants.js)
+export const MAX_ITEMS_PER_PAGE = 50
+```
+
+---
+
+## Skills Relacionadas
+
+- `skills/owasp-checklist.md` — Checklist de seguranca
+- `skills/code-inspector-sparc.md` — Auditoria SPARC

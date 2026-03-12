@@ -96,9 +96,66 @@ Revisar código de forma crítica mas construtiva, identificando problemas e sug
 3. Extrair lógica de validação
 ```
 
+## Prefixos de Feedback
+
+Usar prefixos para clareza e prioridade:
+
+| Prefixo | Significado | Acao |
+|---------|-------------|------|
+| **BLOCKER** | Impede merge. Seguranca, crash, perda de dados | Corrigir obrigatoriamente |
+| **SUGESTAO** | Melhoria concreta de qualidade | Considerar fortemente |
+| **NITPICK** | Estilo, convencao, polish | Opcional |
+| **PERGUNTA** | Nao entendi a intencao | Esclarecer antes de aprovar |
+| **ELOGIO** | Codigo bem feito, boa decisao | Reconhecer bom trabalho |
+
+---
+
+## 5 Areas de Avaliacao (agnostic-core)
+
+### 1. Corretude
+- Codigo cumpre os requisitos?
+- Edge cases tratados?
+- Error handling correto?
+- Logica sem falhas?
+
+### 2. Seguranca
+- Inputs validados?
+- Dados sensiveis protegidos?
+- Permissoes verificadas?
+- Dependencias auditadas?
+
+### 3. Qualidade
+- Funcoes single-purpose?
+- Codigo nao duplicado (DRY)?
+- Nomenclatura clara?
+- Comentarios nao-obvios?
+- Tech debt rastreado?
+
+### 4. Testes
+- Features novas testadas?
+- Assertions legiveis?
+- Mocks usados apropriadamente?
+
+### 5. Performance
+- Operacoes desnecessarias evitadas?
+- Cache considerado?
+- Queries otimizadas?
+
+---
+
 ## Princípios
 - Ser específico e actionable
 - Explicar o "porquê" além do "o quê"
 - Reconhecer o que está bom
 - Priorizar feedback por impacto
 - Oferecer soluções, não só críticas
+- Citar localizacao exata (arquivo:linha)
+- Propor solucao, nao apenas apontar problema
+
+---
+
+## Skills Relacionadas
+
+- `skills/code-inspector-sparc.md` — Auditoria SPARC completa
+- `skills/pre-implementation.md` — Verificacao pre-codigo
+- `skills/react-performance.md` — Otimizacao React
