@@ -9,11 +9,13 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 
 ## Ambiente Replit (Infraestrutura)
 
-O sistema roda **exclusivamente no Replit**. Nunca referenciar `localhost` — o acesso e sempre pela URL publica do Repl.
+O sistema roda **exclusivamente no Replit**.
 
-### URL de Acesso
-- **Dev:** `https://<repl-name>.<username>.replit.dev`
-- **Deploy (producao):** URL configurada no painel Replit → Deployments
+### URLs de Acesso
+- **localhost/IP interno:** `http://localhost:5173/` e `http://<ip-interno>:5173/` so funcionam dentro da webview do Replit, **NAO** acessiveis do navegador externo
+- **URL DEV:** `https://${REPLIT_DEV_DOMAIN}` (proxy porta 5173 → 80). Atual: `https://91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev`
+- **URL PROD:** `https://sicefsus.replit.app`
+- **Para descobrir URL dev:** `echo $REPLIT_DEV_DOMAIN`
 
 ### Mapeamento de Portas (`.replit`)
 
