@@ -1,6 +1,10 @@
 {
-  "projectType": "react-firebase",
+  "statusLine": {
+    "type": "command",
+    "command": "bash /home/runner/workspace/.claude/statusline.sh"
+  },
   "language": "pt-BR",
+  "projectType": "react-firebase",
   "codeStyle": {
     "preserveExisting": true,
     "minimalChanges": true,
@@ -20,14 +24,12 @@
     ".git",
     "backups"
   ],
-  "statusLine": {
-    "type": "command",
-    "command": "bash /home/runner/workspace/.claude/statusline.sh"
-  },
   "mcpServers": {
     "firebase": {
       "command": "node",
-      "args": ["/home/runner/workspace/firebase-mcp-server/dist/index.js"],
+      "args": [
+        "/home/runner/workspace/firebase-mcp-server/dist/index.js"
+      ],
       "env": {
         "FIREBASE_DEV_PROJECT_ID": "emendas-parlamentares-60dbd",
         "FIREBASE_DEV_CLIENT_EMAIL": "firebase-adminsdk-fbsvc@emendas-parlamentares-60dbd.iam.gserviceaccount.com",
@@ -38,5 +40,8 @@
       },
       "disabled": false
     }
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }
