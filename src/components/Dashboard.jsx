@@ -239,11 +239,11 @@ const Dashboard = ({ usuario }) => {
         onVerDetalhes={() => navigate("/emendas")}
       />
 
-      {/* ========== GRID PRINCIPAL: EXECUÇÃO + TIMELINE ========== */}
-      <div style={styles.mainGrid}>
-        <DashboardExecucao emendas={emendas} />
-        <DashboardTimeline emendas={emendas} />
-      </div>
+      {/* ========== EXECUÇÃO POR TIPO (LARGURA TOTAL) ========== */}
+      <DashboardExecucao emendas={emendas} />
+
+      {/* ========== TIMELINE (ABAIXO) ========== */}
+      <DashboardTimeline emendas={emendas} />
 
       {/* ========== RANKINGS + MUNICÍPIOS (LADO A LADO) ========== */}
       <div style={styles.rankingsGrid}>

@@ -377,14 +377,19 @@ const styles = {
     fontWeight: "400",
   },
   tiposContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "16px",
+    alignItems: "start",
   },
   tipoSection: {
     display: "flex",
     flexDirection: "column",
     gap: "10px",
+    backgroundColor: "var(--theme-bg, #f8fafc)",
+    borderRadius: "10px",
+    border: "1px solid var(--theme-border)",
+    padding: "16px",
   },
   tipoHeader: {
     display: "flex",
