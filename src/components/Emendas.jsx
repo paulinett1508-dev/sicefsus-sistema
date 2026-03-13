@@ -606,7 +606,7 @@ const Emendas = () => {
 
       {/* Footer */}
       <div style={styles.footer}>
-        © 2025 SICEFSUS - Sistema Integrado de Controle de Emendas.
+        © {new Date().getFullYear()} SICEFSUS - Sistema Integrado de Controle de Emendas.
       </div>
     </div>
   );
