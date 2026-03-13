@@ -30,6 +30,7 @@ export default function Login({ onLoginSuccess }) {
   const [modoEsqueciSenha, setModoEsqueciSenha] = useState(false);
   const [emailReset, setEmailReset] = useState("");
   const [sucessoReset, setSucessoReset] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   useEffect(() => {
     const emailSalvo = localStorage.getItem("sicefsus_email");
@@ -209,15 +210,27 @@ export default function Login({ onLoginSuccess }) {
                   <span className="material-symbols-outlined input-icon">lock</span>
                   <input
                     id="senha"
-                    type="password"
+                    type={mostrarSenha ? "text" : "password"}
                     placeholder="Digite sua senha"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
                     required
                     className="form-input"
+                    style={{ paddingRight: "44px" }}
                     disabled={carregando}
                     autoComplete="current-password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setMostrarSenha(!mostrarSenha)}
+                    className="toggle-password"
+                    tabIndex={-1}
+                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    <span className="material-symbols-outlined">
+                      {mostrarSenha ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
                 </div>
               </div>
 
@@ -511,6 +524,28 @@ export default function Login({ onLoginSuccess }) {
         .form-input:focus + .input-icon,
         .input-wrapper:focus-within .input-icon {
           color: var(--primary);
+        }
+
+        .toggle-password {
+          position: absolute;
+          right: var(--space-3);
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          color: var(--gray-400);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: color var(--transition-fast);
+        }
+
+        .toggle-password:hover {
+          color: var(--primary);
+        }
+
+        .toggle-password .material-symbols-outlined {
+          font-size: 20px;
         }
 
         .form-input::placeholder {
