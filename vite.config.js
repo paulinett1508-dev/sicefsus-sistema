@@ -21,6 +21,16 @@ export default defineConfig(({ mode }) => {
       port: 5000,
       host: '0.0.0.0',
       strictPort: false,
+      watch: {
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/.config/**',
+          '**/dist/**',
+          '**/firebase-mcp-server/**',
+          '**/firebase-migration/**',
+        ],
+      },
       proxy: {
         "/api": {
           target: "http://localhost:3001",
