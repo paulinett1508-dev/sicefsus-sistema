@@ -124,7 +124,11 @@
       "Bash(echo:*)",
       "Bash(git pull:*)",
       "Bash(git fetch:*)",
-      "Bash(npx -y acorn --ecma2020 --module --allow-import-export-everywhere src/components/Login.jsx)"
+      "Bash(npx -y acorn --ecma2020 --module --allow-import-export-everywhere src/components/Login.jsx)",
+      "Bash(comm:*)",
+      "Bash(du:*)",
+      "Bash(sort:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"{}:\"\"\"\"; wc -l {}')"
     ]
   },
   "enableAllProjectMcpServers": true,
