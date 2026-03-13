@@ -242,22 +242,20 @@ const Dashboard = ({ usuario }) => {
       {/* ========== EXECUÇÃO POR TIPO (LARGURA TOTAL) ========== */}
       <DashboardExecucao emendas={emendas} />
 
-      {/* ========== TIMELINE (ABAIXO) ========== */}
-      <DashboardTimeline emendas={emendas} />
-
       {/* ========== RANKINGS + MUNICÍPIOS (LADO A LADO) ========== */}
       <div style={styles.rankingsGrid}>
         <DashboardRankings emendas={emendas} />
         <DashboardMunicipios emendas={emendas} userRole={user.tipo} />
       </div>
 
-      {/* ========== CRONOGRAMA WIDGET (EXISTENTE - PRESERVADO) ========== */}
+      {/* ========== ACOMPANHAMENTO DE PRAZOS (Timeline + Cronograma) ========== */}
       {emendas.length > 0 && (
         <div style={styles.cronogramaSection}>
           <h2 style={styles.sectionTitle}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>calendar_month</span>
             Acompanhamento de Prazos
           </h2>
+          <DashboardTimeline emendas={emendas} />
           <CronogramaWidget emendas={emendas} />
         </div>
       )}
