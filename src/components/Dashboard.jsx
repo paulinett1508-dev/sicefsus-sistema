@@ -402,6 +402,7 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
     gap: "12px",
     marginBottom: "16px",
+    alignItems: "start",
   },
   rankingsGrid: {
     display: "grid",
