@@ -102,7 +102,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
     if (!formData.estrategia)
       novosErros.estrategia = "Natureza de despesa é obrigatória";
     if (!formData.cnpjFornecedor)
-      novosErros.cnpjFornecedor = "CNPJ do fornecedor é obrigatório";
+      novosErros.cnpjFornecedor = "CPF/CNPJ do fornecedor é obrigatório";
     if (!formData.numeroDocumentoFiscal)
       novosErros.numeroDocumentoFiscal =
         "Número do documento fiscal é obrigatório";
@@ -342,13 +342,13 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
               </h3>
               <div style={styles.grid}>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>CNPJ *</label>
+                  <label style={styles.label}>CPF/CNPJ *</label>
                   <input
                     type="text"
                     name="cnpjFornecedor"
                     value={formData.cnpjFornecedor}
                     onChange={handleChange}
-                    placeholder="00.000.000/0000-00"
+                    placeholder="CPF ou CNPJ do fornecedor"
                     style={{
                       ...styles.input,
                       ...(errors.cnpjFornecedor ? styles.inputError : {}),

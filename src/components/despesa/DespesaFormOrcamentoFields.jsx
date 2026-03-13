@@ -145,7 +145,7 @@ const DespesaFormOrcamentoFields = ({
         </div>
 
         <div style={styles.formGroup}>
-          <label style={styles.label}>CNPJ do Fornecedor</label>
+          <label style={styles.label}>CPF/CNPJ do Fornecedor</label>
           <input
             type="text"
             name="cnpjFornecedor"
@@ -153,7 +153,7 @@ const DespesaFormOrcamentoFields = ({
             onChange={handleInputChange}
             style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="00.000.000/0000-00"
+            placeholder="CPF ou CNPJ do fornecedor"
           />
         </div>
 

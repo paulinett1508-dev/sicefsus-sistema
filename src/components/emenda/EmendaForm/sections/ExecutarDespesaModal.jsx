@@ -429,13 +429,13 @@ const ExecutarDespesaModal = ({
 
               <div style={styles.row}>
                 <div style={styles.field}>
-                  <label style={styles.label}>CNPJ *</label>
+                  <label style={styles.label}>CPF/CNPJ *</label>
                   <input
                     type="text"
                     name="cnpjFornecedor"
                     value={formData.cnpjFornecedor}
                     onChange={handleChange}
-                    placeholder="00.000.000/0000-00"
+                    placeholder="CPF ou CNPJ do fornecedor"
                     style={styles.input}
                   />
                   {errors.cnpjFornecedor && (

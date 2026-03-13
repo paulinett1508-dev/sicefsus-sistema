@@ -96,10 +96,10 @@ const DespesaFormAdvancedFields = ({
 
         <div style={styles.formGroup}>
           <label style={styles.label}>
-            CNPJ do Fornecedor
+            CPF/CNPJ do Fornecedor
             <span
               style={styles.infoIcon}
-              title="CNPJ será validado automaticamente"
+              title="CPF ou CNPJ sera validado automaticamente"
             >
               ℹ️
             </span>
@@ -111,7 +111,7 @@ const DespesaFormAdvancedFields = ({
             onChange={handleInputChange}
             style={cnpjError ? styles.inputError : styles.input}
             readOnly={modoVisualizacao}
-            placeholder="00.000.000/0000-00"
+            placeholder="CPF ou CNPJ do fornecedor"
             maxLength="18"
           />
           {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}

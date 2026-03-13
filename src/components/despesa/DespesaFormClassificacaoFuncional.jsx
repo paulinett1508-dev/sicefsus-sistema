@@ -15,6 +15,7 @@ import {
 } from "../../config/constants";
 import FornecedorSelect from "../fornecedor/FornecedorSelect";
 import { useFornecedoresData } from "../../hooks/useFornecedoresData";
+import { validarCPF, formatarCPF, formatarDocumento, detectarTipoDocumento } from "../../utils/cnpjUtils";
 
 const DespesaFormClassificacaoFuncional = ({
   formData,
@@ -30,6 +31,7 @@ const DespesaFormClassificacaoFuncional = ({
   const { fornecedores, loading: loadingFornecedores, criar: criarFornecedor } = useFornecedoresData(usuario);
 
   const [modoFornecedor, setModoFornecedor] = useState("manual"); // "selecionar" | "manual"
+  const [tipoPessoaFornecedor, setTipoPessoaFornecedor] = useState("PJ"); // "PF" | "PJ"
   const [cnpjError, setCnpjError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [modoNaturezaCustomizada, setModoNaturezaCustomizada] = useState(false);
@@ -107,21 +109,36 @@ const DespesaFormClassificacaoFuncional = ({
     return apenasNumeros.replace(/^(\d{5})(\d)/, "$1-$2").substring(0, 9);
   };
 
-  // 🔌 BUSCAR CNPJ
-  const buscarDadosCNPJ = async (cnpj) => {
-    const cnpjLimpo = cnpj.replace(/[^\d]/g, "");
+  // Trocar tipo de pessoa do fornecedor
+  const handleTipoPessoaFornecedor = (tipo) => {
+    setTipoPessoaFornecedor(tipo);
+    handleInputChange({ target: { name: "cnpjFornecedor", value: "" } });
+    setCnpjError("");
+    setCnpjEncontrado(false);
+  };
 
-    if (cnpjLimpo.length !== 14 || !validarCNPJ(cnpj)) {
+  // Tamanho esperado do documento
+  const docLengthFornecedor = tipoPessoaFornecedor === "PF" ? 11 : 14;
+
+  // Buscar dados do documento (CNPJ via API, CPF apenas valida)
+  const buscarDadosDocumento = async (doc) => {
+    const docLimpo = doc.replace(/[^\d]/g, "");
+
+    if (tipoPessoaFornecedor === "PF") {
+      if (docLimpo.length !== 11 || !validarCPF(doc)) return;
+      setCnpjEncontrado(true);
+      setCnpjError("");
       return;
     }
+
+    if (docLimpo.length !== 14 || !validarCNPJ(doc)) return;
 
     setBuscandoCNPJ(true);
     setCnpjEncontrado(false);
 
     try {
-      // Buscar na BrasilAPI (fonte oficial e confiavel)
       const response = await fetch(
-        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`,
+        `https://brasilapi.com.br/api/cnpj/v1/${docLimpo}`,
       );
 
       if (!response.ok) {
@@ -133,7 +150,6 @@ const DespesaFormClassificacaoFuncional = ({
 
       const dados = await response.json();
 
-      // Preencher campos com dados da BrasilAPI
       if (dados.razao_social) {
         handleInputChange({
           target: { name: "fornecedor", value: dados.razao_social },
@@ -159,7 +175,6 @@ const DespesaFormClassificacaoFuncional = ({
         });
       }
 
-      // Separar endereço, cidade/UF e CEP
       const endereco = [
         dados.logradouro,
         dados.numero,
@@ -187,7 +202,6 @@ const DespesaFormClassificacaoFuncional = ({
         });
       }
 
-      // Situação cadastral
       const situacao = dados.descricao_situacao_cadastral || "ATIVA";
       handleInputChange({
         target: { name: "situacaoCadastral", value: situacao.toUpperCase() },
@@ -204,26 +218,28 @@ const DespesaFormClassificacaoFuncional = ({
     }
   };
 
-  const handleCNPJChange = (e) => {
+  const handleDocumentoChange = (e) => {
     const { value } = e.target;
-    const cnpjFormatado = formatarCNPJ(value);
+    const docFormatado = tipoPessoaFornecedor === "PF" ? formatarCPF(value) : formatarCNPJ(value);
 
     handleInputChange({
-      target: { name: "cnpjFornecedor", value: cnpjFormatado },
+      target: { name: "cnpjFornecedor", value: docFormatado },
     });
 
-    const cnpjLimpo = cnpjFormatado.replace(/[^\d]/g, "");
+    const docLimpo = docFormatado.replace(/[^\d]/g, "");
+    const tamanhoEsperado = docLengthFornecedor;
 
-    if (cnpjLimpo.length === 14) {
-      if (!validarCNPJ(cnpjFormatado)) {
-        setCnpjError("CNPJ inválido");
+    if (docLimpo.length === tamanhoEsperado) {
+      const ehValido = tipoPessoaFornecedor === "PF" ? validarCPF(docFormatado) : validarCNPJ(docFormatado);
+      if (!ehValido) {
+        setCnpjError(tipoPessoaFornecedor === "PF" ? "CPF inválido" : "CNPJ inválido");
         setCnpjEncontrado(false);
       } else {
         setCnpjError("");
-        buscarDadosCNPJ(cnpjFormatado);
+        buscarDadosDocumento(docFormatado);
       }
-    } else if (cnpjLimpo.length > 0 && cnpjLimpo.length < 14) {
-      setCnpjError("CNPJ incompleto");
+    } else if (docLimpo.length > 0 && docLimpo.length < tamanhoEsperado) {
+      setCnpjError(tipoPessoaFornecedor === "PF" ? "CPF incompleto" : "CNPJ incompleto");
       setCnpjEncontrado(false);
     } else {
       setCnpjError("");
@@ -275,9 +291,11 @@ const DespesaFormClassificacaoFuncional = ({
       return;
     }
 
-    // Preencher campos com dados do fornecedor selecionado
+    // Detectar tipo e preencher campos com dados do fornecedor selecionado
+    const tipoDetectado = fornecedor.tipoPessoa || detectarTipoDocumento(fornecedor.cnpj) || "PJ";
+    setTipoPessoaFornecedor(tipoDetectado);
     handleInputChange({ target: { name: "fornecedorId", value: fornecedor.id } });
-    handleInputChange({ target: { name: "cnpjFornecedor", value: formatarCNPJ(fornecedor.cnpj || "") } });
+    handleInputChange({ target: { name: "cnpjFornecedor", value: formatarDocumento(fornecedor.cnpj || "", tipoDetectado) } });
     handleInputChange({ target: { name: "fornecedor", value: fornecedor.razaoSocial || "" } });
     handleInputChange({ target: { name: "nomeFantasia", value: fornecedor.nomeFantasia || "" } });
     handleInputChange({ target: { name: "telefoneFornecedor", value: fornecedor.contato?.telefone || "" } });
@@ -615,7 +633,7 @@ const DespesaFormClassificacaoFuncional = ({
             onChange={handleSelecionarFornecedor}
             onCriarFornecedor={handleCriarFornecedorViaSelect}
             loading={loadingFornecedores}
-            placeholder="Busque por CNPJ ou razao social..."
+            placeholder="Busque por CPF/CNPJ ou razao social..."
           />
           {formData.fornecedorId && (
             <p style={styles.fornecedorSelecionadoHint}>
@@ -628,12 +646,40 @@ const DespesaFormClassificacaoFuncional = ({
         </div>
       )}
 
-      {/* LINHA 3: CNPJ | Razão Social */}
+      {/* Toggle PF/PJ do Fornecedor (modo manual) */}
+      {modoFornecedor === "manual" && !modoVisualizacao && (
+        <div style={{ display: "flex", gap: "8px", marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={() => handleTipoPessoaFornecedor("PJ")}
+            style={{
+              ...styles.modoToggleBtn,
+              ...(tipoPessoaFornecedor === "PJ" ? styles.modoToggleBtnActive : {}),
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>business</span>
+            Pessoa Juridica (CNPJ)
+          </button>
+          <button
+            type="button"
+            onClick={() => handleTipoPessoaFornecedor("PF")}
+            style={{
+              ...styles.modoToggleBtn,
+              ...(tipoPessoaFornecedor === "PF" ? styles.modoToggleBtnActive : {}),
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: 6 }}>person</span>
+            Pessoa Fisica (CPF)
+          </button>
+        </div>
+      )}
+
+      {/* LINHA 3: CPF/CNPJ | Razão Social/Nome */}
       <div style={styles.formRowCNPJ}>
         <div style={styles.formGroupCNPJWrapper}>
           <div style={styles.formGroupCNPJ}>
             <label style={styles.labelRequired}>
-              CNPJ <span style={{ color: "#dc3545" }}>*</span>
+              {tipoPessoaFornecedor === "PF" ? "CPF" : "CNPJ"} <span style={{ color: "#dc3545" }}>*</span>
               {cnpjError && <span className="material-symbols-outlined" style={{ ...styles.validationBadge, fontSize: 14 }}>warning</span>}
               {cnpjEncontrado && (
                 <span style={{ ...styles.validationBadge, color: "#10B981" }}>
@@ -645,42 +691,42 @@ const DespesaFormClassificacaoFuncional = ({
               type="text"
               name="cnpjFornecedor"
               value={formData.cnpjFornecedor || ""}
-              onChange={handleCNPJChange}
+              onChange={handleDocumentoChange}
               style={cnpjError ? styles.inputError : styles.input}
               readOnly={modoVisualizacao}
-              placeholder="00.000.000/0000-00"
-              maxLength="18"
+              placeholder={tipoPessoaFornecedor === "PF" ? "000.000.000-00" : "00.000.000/0000-00"}
+              maxLength={tipoPessoaFornecedor === "PF" ? 14 : 18}
             />
             {cnpjError && <span style={styles.errorText}>{cnpjError}</span>}
           </div>
           {!modoVisualizacao && (
             <button
               type="button"
-              onClick={() => buscarDadosCNPJ(formData.cnpjFornecedor)}
+              onClick={() => buscarDadosDocumento(formData.cnpjFornecedor)}
               disabled={
                 buscandoCNPJ ||
                 !formData.cnpjFornecedor ||
-                formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+                formData.cnpjFornecedor.replace(/\D/g, "").length !== docLengthFornecedor
               }
               style={{
                 ...styles.btnRefresh,
                 opacity:
                   buscandoCNPJ ||
                   !formData.cnpjFornecedor ||
-                  formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+                  formData.cnpjFornecedor.replace(/\D/g, "").length !== docLengthFornecedor
                     ? 0.5
                     : 1,
                 cursor:
                   buscandoCNPJ ||
                   !formData.cnpjFornecedor ||
-                  formData.cnpjFornecedor.replace(/\D/g, "").length !== 14
+                  formData.cnpjFornecedor.replace(/\D/g, "").length !== docLengthFornecedor
                     ? "not-allowed"
                     : "pointer",
               }}
-              title="Buscar dados do CNPJ"
+              title={tipoPessoaFornecedor === "PF" ? "Validar CPF" : "Buscar dados do CNPJ"}
             >
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                {buscandoCNPJ ? "sync" : "search"}
+                {buscandoCNPJ ? "sync" : tipoPessoaFornecedor === "PF" ? "verified" : "search"}
               </span>
             </button>
           )}
@@ -688,7 +734,7 @@ const DespesaFormClassificacaoFuncional = ({
 
         <div style={styles.formGroupRazaoSocial}>
           <label style={styles.labelRequired}>
-            Razão Social <span style={{ color: "#dc3545" }}>*</span>
+            {tipoPessoaFornecedor === "PF" ? "Nome Completo" : "Razão Social"} <span style={{ color: "#dc3545" }}>*</span>
           </label>
           <input
             type="text"
@@ -697,7 +743,7 @@ const DespesaFormClassificacaoFuncional = ({
             onChange={handleInputChange}
             style={styles.input}
             readOnly={modoVisualizacao}
-            placeholder="Preenchido automaticamente"
+            placeholder={tipoPessoaFornecedor === "PF" ? "Nome completo da pessoa" : "Preenchido automaticamente"}
           />
         </div>
       </div>
