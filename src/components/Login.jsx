@@ -161,11 +161,9 @@ export default function Login({ onLoginSuccess }) {
   return (
     <div className="login-container">
       <div className="login-card">
-        {/* Header com gradiente */}
-        <div className="login-header">
-          <div className="login-logo-wrapper">
-            <img src={logoSicefsus} alt="SICEFSUS" className="login-logo" />
-          </div>
+        {/* Brand */}
+        <div className="login-brand">
+          <img src={logoSicefsus} alt="SICEFSUS" className="login-logo" />
           <h1 className="login-title">
             {modoEsqueciSenha ? "Recuperar Senha" : "SICEFSUS"}
           </h1>
@@ -365,15 +363,13 @@ export default function Login({ onLoginSuccess }) {
           )}
         </div>
 
-        {/* Footer com dica */}
-        <div className="login-footer">
-          <div className="login-tip">
-            <span className="material-symbols-outlined">lightbulb</span>
-            <span>
-              <strong>Dica:</strong> Se você é operador e não consegue fazer login,
-              verifique se o administrador já configurou seu município/UF.
-            </span>
-          </div>
+        {/* Dica */}
+        <div className="login-tip">
+          <span className="material-symbols-outlined">lightbulb</span>
+          <span>
+            <strong>Dica:</strong> Se você é operador e não consegue fazer login,
+            verifique se o administrador já configurou seu município/UF.
+          </span>
         </div>
       </div>
 
@@ -387,8 +383,8 @@ export default function Login({ onLoginSuccess }) {
           justify-content: center;
           padding: var(--space-4);
           background: ${isDark
-            ? 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)'
-            : 'linear-gradient(135deg, #1A3A4A 0%, #2A5A6A 50%, #1A3A4A 100%)'
+            ? 'linear-gradient(160deg, var(--gray-900) 0%, #1a2332 50%, var(--gray-900) 100%)'
+            : 'linear-gradient(160deg, var(--gray-100) 0%, var(--gray-200) 50%, var(--gray-100) 100%)'
           };
           position: relative;
           overflow: hidden;
@@ -397,51 +393,48 @@ export default function Login({ onLoginSuccess }) {
         .login-container::before {
           content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
-                      radial-gradient(circle at 70% 80%, rgba(255,255,255,0.05) 0%, transparent 40%);
+          top: -50%;
+          left: -50%;
+          right: -50%;
+          bottom: -50%;
+          background: ${isDark
+            ? 'radial-gradient(circle at 50% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 60%)'
+            : 'radial-gradient(circle at 50% 40%, rgba(26, 58, 74, 0.05) 0%, transparent 60%)'
+          };
           pointer-events: none;
         }
 
         .login-card {
           width: 100%;
-          max-width: 420px;
+          max-width: 400px;
           background: var(--theme-surface);
-          border-radius: var(--border-radius-xl);
+          border-radius: var(--border-radius-2xl);
           box-shadow: var(--shadow-xl);
           overflow: hidden;
           position: relative;
           z-index: 1;
           animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          border: 1px solid ${isDark ? 'var(--theme-border)' : 'transparent'};
         }
 
-        .login-header {
-          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-          padding: var(--space-8) var(--space-6);
+        .login-card::before {
+          content: '';
+          display: block;
+          height: 4px;
+          background: linear-gradient(90deg, var(--primary), var(--primary-light));
+          border-radius: var(--border-radius-2xl) var(--border-radius-2xl) 0 0;
+        }
+
+        .login-brand {
+          padding: var(--space-8) var(--space-6) var(--space-4);
           text-align: center;
-          color: var(--white);
-        }
-
-        .login-logo-wrapper {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 80px;
-          height: 80px;
-          background: var(--white);
-          border-radius: var(--border-radius-lg);
-          padding: var(--space-3);
-          margin-bottom: var(--space-4);
-          box-shadow: var(--shadow-md);
         }
 
         .login-logo {
-          width: 100%;
-          height: 100%;
+          height: 64px;
+          width: auto;
           object-fit: contain;
+          margin-bottom: var(--space-4);
         }
 
         .login-title {
@@ -449,17 +442,18 @@ export default function Login({ onLoginSuccess }) {
           font-size: var(--font-size-2xl);
           font-weight: var(--font-weight-bold);
           letter-spacing: -0.02em;
+          color: var(--primary);
         }
 
         .login-subtitle {
           margin: 0;
           font-size: var(--font-size-sm);
-          opacity: 0.9;
+          color: var(--theme-text-secondary);
           font-weight: var(--font-weight-normal);
         }
 
         .login-content {
-          padding: var(--space-6);
+          padding: 0 var(--space-6) var(--space-6);
         }
 
         .login-form {
@@ -511,7 +505,7 @@ export default function Login({ onLoginSuccess }) {
         .form-input:focus {
           outline: none;
           border-color: var(--primary);
-          box-shadow: 0 0 0 3px rgba(26, 58, 74, 0.15);
+          box-shadow: 0 0 0 3px ${isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(26, 58, 74, 0.15)'};
         }
 
         .form-input:focus + .input-icon,
@@ -584,7 +578,7 @@ export default function Login({ onLoginSuccess }) {
           gap: var(--space-2);
           width: 100%;
           padding: var(--space-4);
-          background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+          background: var(--primary);
           color: var(--white);
           border: none;
           border-radius: var(--border-radius-md);
@@ -596,8 +590,9 @@ export default function Login({ onLoginSuccess }) {
         }
 
         .btn-login:hover:not(:disabled) {
+          background: var(--primary-dark);
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+          box-shadow: 0 8px 20px ${isDark ? 'rgba(59, 130, 246, 0.25)' : 'rgba(26, 58, 74, 0.25)'};
         }
 
         .btn-login:active:not(:disabled) {
@@ -715,26 +710,21 @@ export default function Login({ onLoginSuccess }) {
           flex-shrink: 0;
         }
 
-        .login-footer {
-          padding: var(--space-4) var(--space-6);
-          background: var(--theme-surface-secondary);
-          border-top: 1px solid var(--theme-border);
-        }
-
         .login-tip {
           display: flex;
           align-items: flex-start;
-          gap: var(--space-3);
-          font-size: var(--font-size-sm);
-          color: var(--theme-text-secondary);
+          gap: var(--space-2);
+          font-size: var(--font-size-xs);
+          color: var(--theme-text-muted);
           line-height: var(--line-height-normal);
+          padding: 0 var(--space-6) var(--space-6);
         }
 
         .login-tip .material-symbols-outlined {
-          font-size: 18px;
-          color: var(--warning);
+          font-size: 16px;
+          color: var(--theme-text-muted);
           flex-shrink: 0;
-          margin-top: 2px;
+          margin-top: 1px;
         }
 
         @keyframes spin {
@@ -752,39 +742,27 @@ export default function Login({ onLoginSuccess }) {
           }
         }
 
-        /* Dark mode adjustments */
-        ${isDark ? `
-          .login-card {
-            border: 1px solid var(--theme-border);
-          }
-          .form-input:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-          }
-          .btn-login:hover:not(:disabled) {
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
-          }
-        ` : ''}
-
         /* Responsividade */
         @media (max-width: 480px) {
           .login-container {
             padding: var(--space-3);
+            align-items: flex-start;
+            padding-top: var(--space-10);
           }
           .login-card {
-            border-radius: var(--border-radius-lg);
+            border-radius: var(--border-radius-xl);
           }
-          .login-header {
-            padding: var(--space-6) var(--space-5);
+          .login-brand {
+            padding: var(--space-6) var(--space-5) var(--space-3);
           }
-          .login-logo-wrapper {
-            width: 64px;
-            height: 64px;
+          .login-logo {
+            height: 52px;
           }
           .login-title {
             font-size: var(--font-size-xl);
           }
           .login-content {
-            padding: var(--space-5);
+            padding: 0 var(--space-5) var(--space-5);
           }
           .login-options {
             flex-direction: column;
@@ -792,6 +770,9 @@ export default function Login({ onLoginSuccess }) {
           }
           .button-group {
             flex-direction: column;
+          }
+          .login-tip {
+            padding: 0 var(--space-5) var(--space-5);
           }
         }
       `}</style>
