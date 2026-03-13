@@ -4,6 +4,37 @@
 
 ---
 
+## Pendente - Melhorar Tela de Login (2026-01-19)
+
+### Problemas Identificados
+1. **Visualizacao de senha:** Nao existe icone de "olhinho" para mostrar/esconder senha
+2. **Logo em branco:** A logo do sistema aparece em branco no modal de login
+
+### Melhorias Necessarias
+
+#### 1. Toggle de Visualizacao de Senha
+| Item | Descricao |
+|------|-----------|
+| Icone | Material Symbol `visibility` / `visibility_off` |
+| Posicao | Dentro do input, lado direito |
+| Comportamento | Alterna entre `type="password"` e `type="text"` |
+| Acessibilidade | `aria-label="Mostrar senha"` / `aria-label="Ocultar senha"` |
+
+#### 2. Correcao da Logo
+| Item | Descricao |
+|------|-----------|
+| Problema | Logo aparece em branco (provavelmente SVG sem fill ou PNG com fundo transparente) |
+| Solucao | Verificar cor do SVG ou adicionar fundo/borda ao container |
+| Arquivo | `src/components/Login.jsx` ou `src/images/` |
+
+### Arquivos a Modificar
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/Login.jsx` | Adicionar toggle de senha + corrigir logo |
+| `src/styles/` ou CSS inline | Estilos do icone e container da logo |
+
+---
+
 ## Pendente - Testar Relatorios PDF (2026-01-19)
 
 ### Contexto
