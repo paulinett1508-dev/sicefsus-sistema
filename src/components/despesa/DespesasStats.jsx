@@ -1,5 +1,6 @@
 // src/components/despesa/DespesasStats.jsx
 import React from "react";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const DespesasStats = ({
   despesas,
@@ -14,7 +15,7 @@ const DespesasStats = ({
     (d) => d.status === "pendente",
   ).length;
   const valorTotal = despesas.reduce((sum, despesa) => {
-    return sum + (parseFloat(despesa.valor) || 0);
+    return sum + parseValorMonetario(despesa.valor || 0);
   }, 0);
 
   return (

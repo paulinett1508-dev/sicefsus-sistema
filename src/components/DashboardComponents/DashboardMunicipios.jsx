@@ -2,6 +2,7 @@
 // 🗺️ Ranking de Municípios (Admin Only)
 
 import React from "react";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
   // Não mostrar para operadores
@@ -15,8 +16,8 @@ const DashboardMunicipios = ({ emendas = [], userRole = "operador" }) => {
 
     emendas.forEach((emenda) => {
       const chave = `${emenda.municipio}/${emenda.uf}`;
-      const valorTotal = parseFloat(emenda.valorRecurso || emenda.valor || 0);
-      const valorExecutado = parseFloat(emenda.valorExecutado || 0);
+      const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || 0);
+      const valorExecutado = parseValorMonetario(emenda.valorExecutado || 0);
 
       if (!municipios[chave]) {
         municipios[chave] = {

@@ -46,9 +46,10 @@ export const recalcularNatureza = async (naturezaId, options = {}) => {
     const despesasSnapshot = await getDocs(despesasQuery);
     const despesas = despesasSnapshot.docs.map((doc) => doc.data());
 
-    // 3. Calcular valor executado (soma das despesas)
+    // 3. Calcular valor executado (soma das despesas, excluindo PLANEJADA)
     const valorAlocado = parseValorMonetario(natureza.valorAlocado || 0);
-    const valorExecutado = despesas.reduce((sum, despesa) => {
+    const despesasExecutadas = despesas.filter(d => d.status !== "PLANEJADA");
+    const valorExecutado = despesasExecutadas.reduce((sum, despesa) => {
       return sum + parseValorMonetario(despesa.valor || 0);
     }, 0);
 

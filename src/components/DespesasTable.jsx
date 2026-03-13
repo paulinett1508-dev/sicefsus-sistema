@@ -300,7 +300,7 @@ export default function DespesasTable({
         // ✅ CORREÇÃO: Apenas despesas EXECUTADAS devolvem saldo
         if (despesa.status === "EXECUTADA") {
           const saldoAtual = emendaDoc.data().saldo;
-          const novoSaldo = saldoAtual + parseFloat(despesa.valor || 0);
+          const novoSaldo = saldoAtual + parseValorMonetario(despesa.valor || 0);
           transaction.update(emendaRef, { saldo: novoSaldo });
           console.log(`✅ Despesa EXECUTADA deletada - Saldo devolvido: R$ ${despesa.valor}`);
         } else {

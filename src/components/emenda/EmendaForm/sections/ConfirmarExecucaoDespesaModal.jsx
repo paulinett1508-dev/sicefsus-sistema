@@ -2,7 +2,7 @@
 // 🎯 MODAL DE CONFIRMAÇÃO ANTES DE EXECUTAR DESPESA
 
 import React from "react";
-import { formatarMoeda } from "../../../../utils/formatters";
+import { formatarMoeda, parseValorMonetario } from "../../../../utils/formatters";
 
 const ConfirmarExecucaoDespesaModal = ({
   isOpen,
@@ -13,7 +13,7 @@ const ConfirmarExecucaoDespesaModal = ({
 }) => {
   if (!isOpen || !despesa) return null;
 
-  const valorDespesa = parseFloat(despesa.valor) || 0;
+  const valorDespesa = parseValorMonetario(despesa.valor || 0);
   const novoSaldo = saldoAtual - valorDespesa;
   const saldoNegativo = novoSaldo < 0;
 

@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../../firebase/firebaseConfig";
+import { parseValorMonetario } from "../../../../utils/formatters";
 
 // ✅ IMPORTAR COMPONENTES EXISTENTES DO MÓDULO DESPESAS
 import DespesaForm from "../../../DespesaForm";
@@ -241,13 +242,11 @@ const DespesasTab = ({
   // 📊 CALCULAR SALDOS E ESTATÍSTICAS
   const calcularEstatisticas = () => {
     const totalExecutado = despesas.reduce(
-      (sum, d) => sum + (parseFloat(d.valor) || 0),
+      (sum, d) => sum + parseValorMonetario(d.valor || 0),
       0,
     );
     const valorEmenda =
-      parseFloat(
-        formData?.valorRecurso?.replace?.(/[^\d,]/g, "")?.replace(",", "."),
-      ) || 0;
+      parseValorMonetario(formData?.valorRecurso || formData?.valor || 0);
     const saldoDisponivel = valorEmenda - totalExecutado;
 
     return {

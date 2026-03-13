@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const CronogramaWidget = ({ emendas = [] }) => {
   const navigate = useNavigate();
@@ -32,8 +33,8 @@ const CronogramaWidget = ({ emendas = [] }) => {
         const diffTime = dataValidade - hoje;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        const valorTotal = parseFloat(emenda.valor || emenda.valorRecurso || 0);
-        const valorExecutado = parseFloat(emenda.valorExecutado || 0);
+        const valorTotal = parseValorMonetario(emenda.valor || emenda.valorRecurso || 0);
+        const valorExecutado = parseValorMonetario(emenda.valorExecutado || 0);
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
 

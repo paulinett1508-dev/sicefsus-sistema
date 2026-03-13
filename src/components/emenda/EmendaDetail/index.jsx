@@ -8,6 +8,7 @@ import EmendaTabs from "./components/EmendaTabs";
 import VisaoGeralTab from "./sections/VisaoGeralTab";
 import DespesasTab from "./sections/DespesasTab";
 import NovaDespesaTab from "./sections/NovaDespesaTab";
+import { parseValorMonetario } from "../../../utils/formatters";
 
 const EmendaDetail = ({ emendaId, onVoltar, onEditarEmenda, usuario }) => {
   const [abaAtiva, setAbaAtiva] = useState("visao-geral");
@@ -131,7 +132,7 @@ const EmendaDetail = ({ emendaId, onVoltar, onEditarEmenda, usuario }) => {
       month: "short",
       year: "2-digit",
     });
-    acc[mes] = (acc[mes] || 0) + (despesa.valor || 0);
+    acc[mes] = (acc[mes] || 0) + parseValorMonetario(despesa.valor || 0);
     return acc;
   }, {});
 

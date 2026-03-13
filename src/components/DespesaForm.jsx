@@ -258,11 +258,11 @@ const DespesaForm = ({
 
         const totalExecutado = despesasSnapshot.docs.reduce((total, doc) => {
           const despesa = doc.data();
-          return total + (parseFloat(despesa.valor) || 0);
+          return total + parseValorMonetario(despesa.valor || 0);
         }, 0);
 
         const saldoDisponivel =
-          (parseFloat(emendaData.valor) || 0) - totalExecutado;
+          parseValorMonetario(emendaData.valor || 0) - totalExecutado;
 
         const emendaCompleta = {
           ...emendaData,

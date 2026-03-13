@@ -286,7 +286,7 @@ const AcoesServicos = ({
                   const valorPlanejado = parseValorMonetario(meta.valorAcao);
                   const valorExecutado = (despesas || [])
                     .filter((d) => d.estrategia === meta.estrategia)
-                    .reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0);
+                    .reduce((sum, d) => sum + parseValorMonetario(d.valor || 0), 0);
                   const saldoDisponivel = valorPlanejado - valorExecutado;
                   const percentualDisponivel =
                     valorPlanejado > 0
@@ -350,7 +350,7 @@ const AcoesServicos = ({
                   const valorPlanejado = parseValorMonetario(meta.valorAcao);
                   const valorExecutado = (despesas || [])
                     .filter((d) => d.estrategia === meta.estrategia)
-                    .reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0);
+                    .reduce((sum, d) => sum + parseValorMonetario(d.valor || 0), 0);
                   return sum + (valorPlanejado - valorExecutado);
                 }, 0)
                 .toLocaleString("pt-BR", {

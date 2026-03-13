@@ -2,6 +2,7 @@
 // ⚡ Velocidade de Execução e Projeções
 
 import React from "react";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const DashboardVelocidade = ({ despesas = [], stats = {} }) => {
   // Calcular velocidade de execução
@@ -36,12 +37,12 @@ const DashboardVelocidade = ({ despesas = [], stats = {} }) => {
 
     // Calcular totais
     const valorMesAtual = despesasMesAtual.reduce(
-      (sum, d) => sum + parseFloat(d.valor || 0),
+      (sum, d) => sum + parseValorMonetario(d.valor || 0),
       0,
     );
 
     const valorMesAnterior = despesasMesAnterior.reduce(
-      (sum, d) => sum + parseFloat(d.valor || 0),
+      (sum, d) => sum + parseValorMonetario(d.valor || 0),
       0,
     );
 

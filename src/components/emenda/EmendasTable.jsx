@@ -3,6 +3,7 @@
 // Mantidos apenas: Editar (✏️) e Excluir (🗑️)
 
 import React from "react";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const EmendasTable = ({
   emendas,              // ✅ Corrigido
@@ -68,7 +69,7 @@ const EmendasTable = ({
       return { text: "Vencida", color: "var(--danger-600)", icon: "error", iconColor: "var(--danger-600)" };
     } else if (saldo <= 0) {
       return { text: "Esgotada", color: "var(--warning-600)", icon: "warning", iconColor: "var(--warning-600)" };
-    } else if (saldo < (emenda.valorTotal || emenda.valorRecurso || 0) * 0.1) {
+    } else if (saldo < parseValorMonetario(emenda.valor || emenda.valorRecurso || 0) * 0.1) {
       // Menos de 10%
       return { text: "Saldo Baixo", color: "var(--warning-500)", icon: "bolt", iconColor: "var(--warning-500)" };
     } else {

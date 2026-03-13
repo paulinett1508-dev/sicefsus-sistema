@@ -4,6 +4,7 @@ import { db } from "../../firebase/firebaseConfig";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useTheme } from "../../context/ThemeContext";
 import { recalcularSaldoEmenda } from "../../utils/emendaCalculos";
+import { parseValorMonetario } from "../../utils/formatters";
 
 const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
   const { isDark } = useTheme?.() || { isDark: false };
@@ -45,13 +46,13 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
   // ✅ Calcular saldo disponível por natureza
   const calcularSaldoDisponivel = (acao) => {
     const planejado =
-      parseFloat(acao.valorAcao?.replace?.(/[^\d,]/g, "")?.replace(",", ".")) ||
+      parseValorMonetario(acao.valorAcao || 0) ||
       0;
 
     // Se estiver editando, não conta o valor da própria despesa
     const valorDespesaAtual =
       despesaEdit?.estrategia === acao.estrategia
-        ? parseFloat(despesaEdit.valor) || 0
+        ? parseValorMonetario(despesaEdit.valor || 0)
         : 0;
 
     // Buscar todas as despesas dessa natureza (exceto a atual se estiver editando)
@@ -60,7 +61,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
       .filter(
         (d) => d.estrategia === acao.estrategia && d.id !== despesaEdit?.id,
       )
-      .reduce((sum, d) => sum + (parseFloat(d.valor) || 0), 0);
+      .reduce((sum, d) => sum + parseValorMonetario(d.valor || 0), 0);
 
     return planejado - executado + valorDespesaAtual;
   };
@@ -95,7 +96,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
 
     // Validações obrigatórias
     if (!formData.data) novosErros.data = "Data é obrigatória";
-    if (!formData.valor || parseFloat(formData.valor) <= 0) {
+    if (!formData.valor || parseValorMonetario(formData.valor) <= 0) {
       novosErros.valor = "Valor deve ser maior que zero";
     }
     if (!formData.descricao) novosErros.descricao = "Descrição é obrigatória";
@@ -114,7 +115,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
       );
       if (acaoSelecionada) {
         const saldoDisponivel = calcularSaldoDisponivel(acaoSelecionada);
-        const valorDespesa = parseFloat(formData.valor) || 0;
+        const valorDespesa = parseValorMonetario(formData.valor || 0);
 
         if (valorDespesa > saldoDisponivel) {
           novosErros.valor = `Valor ultrapassa o saldo disponível (${formatarMoeda(saldoDisponivel)})`;
@@ -139,7 +140,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
     try {
       const despesaData = {
         ...formData,
-        valor: parseFloat(formData.valor),
+        valor: parseValorMonetario(formData.valor),
         emendaId: emenda.id,
         numeroEmenda: emenda.numero,
         municipio: emenda.municipio,

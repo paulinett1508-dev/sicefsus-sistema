@@ -7,6 +7,7 @@ import { db } from "../firebase/firebaseConfig";
 import { auditService } from "../services/auditService";
 import DespesasFilters from "./DespesasFilters";
 import DespesasTable from "./DespesasTable";
+import { parseValorMonetario } from "../utils/formatters";
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
 const PRIMARY = "#2563EB";
@@ -333,7 +334,7 @@ const DespesasList = ({
                         estilosCustomizados?.despesaValor || styles.despesaValor
                       }
                     >
-                      {parseFloat(despesa.valor || 0).toLocaleString("pt-BR", {
+                      {parseValorMonetario(despesa.valor || 0).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
