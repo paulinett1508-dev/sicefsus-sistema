@@ -7,7 +7,43 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
-## Ultima Atualizacao - 12/03/2026
+## Ambiente Replit (Infraestrutura)
+
+O sistema roda **exclusivamente no Replit**. Nunca referenciar `localhost` — o acesso e sempre pela URL publica do Repl.
+
+### URL de Acesso
+- **Dev:** `https://<repl-name>.<username>.replit.dev`
+- **Deploy (producao):** URL configurada no painel Replit → Deployments
+
+### Mapeamento de Portas (`.replit`)
+
+O Replit faz proxy automatico das portas internas para a URL publica:
+
+| Porta Local | Porta Externa | Uso |
+|-------------|---------------|-----|
+| `5173` | `80` | **Vite dev server** (porta principal do app) |
+| `4173` | `3002` | Vite preview (pos-build) |
+| `3001` | `5173` | Admin API (proxy `/api`) |
+
+### Comandos
+
+| Comando | Funcao |
+|---------|--------|
+| `npm run dev` | Inicia Vite dev server (porta 5173) — configurado como Run button no Replit |
+| `npm run build` | Build de producao → `dist/` |
+| `npm run preview` | Serve o build localmente (porta 4173) — usado no deploy |
+
+### Configuracao (`.replit`)
+- `run = "npm run dev"` — comando padrao do botao Run
+- `[deployment]` — deploy estatico, serve `dist/` com SPA rewrite (`/* → /index.html`)
+- `[nix]` — pacotes do sistema: firebase-tools, lsof, psmisc, nano, tree, openssh
+
+### Troubleshooting
+- **"Port 5173 already in use"**: Processo anterior nao foi encerrado. Rodar `kill $(lsof -t -i:5173)` e reiniciar.
+- **App nao carrega**: Verificar se o Vite esta rodando com `lsof -i :5173`. Se nao, `npm run dev`.
+- **Proxy `/api` falhando**: Admin API precisa estar rodando na porta 3001.
+
+## Ultima Atualizacao - 13/03/2026
 
 > **ACAO CRITICA PENDENTE:** Rotacionar chaves Firebase (DEV + PROD) no Google Cloud Console.
 > Credenciais antigas foram expostas no historico git e purgadas com git filter-repo (08/03/2026).
