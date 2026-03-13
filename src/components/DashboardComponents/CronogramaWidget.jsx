@@ -97,6 +97,73 @@ const CronogramaWidget = ({ emendas = [] }) => {
       </div>
 
       <div style={cronogramaStyles.metricsGrid}>
+        {/* 📅 PRÓXIMOS 30 DIAS */}
+        <div
+          style={{
+            ...cronogramaStyles.metricCard,
+            ...cronogramaStyles.timelineCard,
+            cursor: "pointer",
+          }}
+          onClick={() => handleCardClick("proximasVencer")}
+        >
+          <div style={cronogramaStyles.metricHeader}>
+            <div style={cronogramaStyles.iconContainer}>
+              <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#1565c0" }}>
+                calendar_month
+              </span>
+            </div>
+            <div>
+              <h4 style={cronogramaStyles.metricTitle}>Próximos 30 Dias</h4>
+              <p style={cronogramaStyles.metricSubtitle}>Eventos próximos</p>
+            </div>
+          </div>
+          <div style={cronogramaStyles.metricValue}>
+            {cronogramaData.proximasVencer.length + cronogramaData.vencidas.length}
+          </div>
+
+          <div style={cronogramaStyles.itemsList}>
+            {cronogramaData.proximasVencer.length === 0 && cronogramaData.vencidas.length === 0 ? (
+              <div style={cronogramaStyles.emptyMessage}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#10B981", verticalAlign: "middle", marginRight: 4 }}>
+                  check_circle
+                </span>
+                Nenhum evento próximo
+              </div>
+            ) : (
+              [...cronogramaData.vencidas.slice(0, 1), ...cronogramaData.proximasVencer.slice(0, 2)].map((emenda, index) => (
+                <div
+                  key={emenda.id || index}
+                  style={cronogramaStyles.emendaItem}
+                >
+                  <div style={cronogramaStyles.emendaInfo}>
+                    <strong>{emenda.parlamentar}</strong>
+                    <span style={cronogramaStyles.emendaLocal}>
+                      {emenda.numero || ""} - {emenda.municipio}/{emenda.uf}
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      ...cronogramaStyles.diasBadge,
+                      backgroundColor: emenda.diasRestantes < 0
+                        ? "#d32f2f"
+                        : emenda.diasRestantes <= 7
+                          ? "#f57c00"
+                          : "#1565c0",
+                      color: "white",
+                    }}
+                  >
+                    {emenda.diasRestantes < 0
+                      ? `-${Math.abs(emenda.diasRestantes)}d`
+                      : emenda.diasRestantes === 0
+                        ? "Hoje"
+                        : `${emenda.diasRestantes}d`}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* ⚠️ PRÓXIMAS AO VENCIMENTO */}
         <div
           style={{
@@ -415,6 +482,10 @@ const cronogramaStyles = {
   successCard: {
     borderColor: "#388e3c",
     backgroundColor: "rgba(56, 142, 60, 0.08)",
+  },
+  timelineCard: {
+    borderColor: "#1565c0",
+    backgroundColor: "rgba(21, 101, 192, 0.08)",
   },
   infoCard: {
     borderColor: "#0277bd",

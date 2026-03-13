@@ -13,7 +13,7 @@ import CronogramaWidget from "./DashboardComponents/CronogramaWidget";
 
 // 🆕 Novos componentes estratégicos
 import DashboardExecucao from "./DashboardComponents/DashboardExecucao";
-import DashboardTimeline from "./DashboardComponents/DashboardTimeline";
+// DashboardTimeline removido - funcionalidade embutida no CronogramaWidget
 import DashboardRankings from "./DashboardComponents/DashboardRankings";
 import DashboardMunicipios from "./DashboardComponents/DashboardMunicipios";
 import AlertasDetalhados from "./DashboardComponents/DashboardAlertasDetalhados";
@@ -248,16 +248,9 @@ const Dashboard = ({ usuario }) => {
         <DashboardMunicipios emendas={emendas} userRole={user.tipo} />
       </div>
 
-      {/* ========== ACOMPANHAMENTO DE PRAZOS (Timeline + Cronograma) ========== */}
+      {/* ========== ACOMPANHAMENTO DE PRAZOS ========== */}
       {emendas.length > 0 && (
-        <div style={styles.cronogramaSection}>
-          <h2 style={styles.sectionTitle}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>calendar_month</span>
-            Acompanhamento de Prazos
-          </h2>
-          <DashboardTimeline emendas={emendas} />
-          <CronogramaWidget emendas={emendas} />
-        </div>
+        <CronogramaWidget emendas={emendas} />
       )}
 
       {/* ========== ESTADO VAZIO ========== */}
