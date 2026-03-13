@@ -9,7 +9,10 @@ import { parseValorMonetario } from "../../utils/formatters";
 const DashboardExecucao = ({ emendas = [] }) => {
   const [naturezasPorEmenda, setNaturezasPorEmenda] = useState({});
   const [expandido, setExpandido] = useState({});
+  const [tiposExpandidos, setTiposExpandidos] = useState({});
+  const [tiposMostrarTodos, setTiposMostrarTodos] = useState({});
   const [carregandoNaturezas, setCarregandoNaturezas] = useState(false);
+  const LIMITE_EMENDAS = 5;
 
   // Carregar naturezas de todas as emendas
   useEffect(() => {
@@ -124,11 +127,30 @@ const DashboardExecucao = ({ emendas = [] }) => {
           );
           const percTipo = totalTipo > 0 ? (executadoTipo / totalTipo) * 100 : 0;
 
+          const isTipoAberto = tiposExpandidos[tipo] !== false; // aberto por padrao
+          const mostrarTodos = tiposMostrarTodos[tipo] || false;
+          const emendasVisiveis = mostrarTodos ? emendasDoTipo : emendasDoTipo.slice(0, LIMITE_EMENDAS);
+          const temMais = emendasDoTipo.length > LIMITE_EMENDAS;
+
           return (
             <div key={tipo} style={styles.tipoSection}>
-              {/* Header do Tipo */}
-              <div style={styles.tipoHeader}>
+              {/* Header do Tipo - clicavel para collapse */}
+              <div
+                style={styles.tipoHeader}
+                onClick={() => setTiposExpandidos((prev) => ({ ...prev, [tipo]: !isTipoAberto }))}
+              >
                 <div style={styles.tipoInfo}>
+                  <span
+                    className="material-symbols-outlined"
+                    style={{
+                      fontSize: 18,
+                      color: "var(--theme-text-secondary)",
+                      transition: "transform 0.2s",
+                      transform: isTipoAberto ? "rotate(90deg)" : "rotate(0)",
+                    }}
+                  >
+                    chevron_right
+                  </span>
                   <span style={styles.tipoLabel}>{tipo}</span>
                   <span style={styles.tipoCount}>
                     {emendasDoTipo.length} emenda{emendasDoTipo.length > 1 ? "s" : ""}
@@ -144,7 +166,7 @@ const DashboardExecucao = ({ emendas = [] }) => {
                 </div>
               </div>
 
-              {/* Barra de progresso do tipo */}
+              {/* Barra de progresso do tipo (sempre visivel) */}
               <div style={styles.barTrack}>
                 <div
                   style={{
@@ -155,9 +177,10 @@ const DashboardExecucao = ({ emendas = [] }) => {
                 />
               </div>
 
-              {/* Lista de Emendas dentro do tipo */}
+              {/* Lista de Emendas - colapsavel */}
+              {isTipoAberto && (
               <div style={styles.emendasLista}>
-                {emendasDoTipo.map((emenda) => {
+                {emendasVisiveis.map((emenda) => {
                   const valor = parseValorMonetario(emenda.valor || emenda.valorRecurso || 0);
                   const executado = parseValorMonetario(emenda.valorExecutado || 0);
                   const perc = valor > 0 ? (executado / valor) * 100 : 0;
@@ -341,7 +364,24 @@ const DashboardExecucao = ({ emendas = [] }) => {
                     </div>
                   );
                 })}
+
+                {/* Botao ver mais / ver menos */}
+                {temMais && (
+                  <button
+                    type="button"
+                    onClick={() => setTiposMostrarTodos((prev) => ({ ...prev, [tipo]: !mostrarTodos }))}
+                    style={styles.btnVerMais}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                      {mostrarTodos ? "expand_less" : "expand_more"}
+                    </span>
+                    {mostrarTodos
+                      ? "Ver menos"
+                      : `Ver mais ${emendasDoTipo.length - LIMITE_EMENDAS} emenda${emendasDoTipo.length - LIMITE_EMENDAS > 1 ? "s" : ""}`}
+                  </button>
+                )}
               </div>
+              )}
             </div>
           );
         })}
@@ -397,6 +437,7 @@ const styles = {
     alignItems: "center",
     flexWrap: "wrap",
     gap: "8px",
+    cursor: "pointer",
   },
   tipoInfo: {
     display: "flex",
@@ -610,6 +651,22 @@ const styles = {
   naturezaAlocado: {
     fontSize: "10px",
     color: "var(--theme-text-muted)",
+  },
+  btnVerMais: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "6px",
+    padding: "8px",
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "var(--theme-text-secondary)",
+    backgroundColor: "transparent",
+    border: "1px dashed var(--theme-border)",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all 0.2s",
+    width: "100%",
   },
   emptyState: {
     textAlign: "center",
