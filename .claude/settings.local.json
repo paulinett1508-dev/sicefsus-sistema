@@ -122,7 +122,8 @@
       "Bash(netstat:*)",
       "Bash(ss:*)",
       "Bash(echo:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
