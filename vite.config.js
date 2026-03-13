@@ -18,9 +18,9 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY PARA ADMIN API
     server: {
-      port: 5000,
+      port: 5173,
       host: '0.0.0.0',
-      strictPort: false,
+      strictPort: true,
       watch: {
         ignored: [
           '**/node_modules/**',
@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
 
     // 🚀 PROXY TAMBÉM NO PREVIEW (PRODUÇÃO)
     preview: {
-      port: 5000,
+      port: 4173,
       host: '0.0.0.0',
       // ✅ CORREÇÃO: SPA routing para deploy estático
       historyApiFallback: true,
