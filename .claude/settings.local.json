@@ -123,7 +123,8 @@
       "Bash(ss:*)",
       "Bash(echo:*)",
       "Bash(git pull:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(npx -y acorn --ecma2020 --module --allow-import-export-everywhere src/components/Login.jsx)"
     ]
   },
   "enableAllProjectMcpServers": true,
