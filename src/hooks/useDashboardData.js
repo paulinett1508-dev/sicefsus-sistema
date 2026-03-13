@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "../utils/formatters";
+import { DESPESA_STATUS } from "../config/constants";
 
 // ✅ CACHE GLOBAL com TTL de 5 minutos
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos em ms
@@ -211,11 +212,11 @@ const useDashboardData = (user, permissions) => {
 
         // ✅ SEPARAR: Executado (pago) e Planejado
         const despesasExecutadas = todasDespesasEmenda.filter(
-          (despesa) => despesa.status !== "PLANEJADA"
+          (despesa) => despesa.status !== DESPESA_STATUS.PLANEJADA
         );
 
         const despesasPlanejadas = todasDespesasEmenda.filter(
-          (despesa) => despesa.status === "PLANEJADA"
+          (despesa) => despesa.status === DESPESA_STATUS.PLANEJADA
         );
 
         // ✅ CORREÇÃO P1: Ordem padronizada de fallback

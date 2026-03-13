@@ -180,6 +180,23 @@ export const formatarCPF = (cpf) => {
   return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 };
 
+/**
+ * Formata valor monetario BRL com parseValorMonetario integrado
+ * Aceita string formatada ("1.500,50"), numero (1500.5) ou 0
+ * @param {number|string} valor - Valor a ser formatado
+ * @param {number} decimais - Casas decimais (padrao 2)
+ * @returns {string} Valor formatado como "R$ 1.500,50"
+ */
+export const formatarMoedaBRL = (valor, decimais = 2) => {
+  const numero = parseValorMonetario(valor);
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: decimais,
+    maximumFractionDigits: decimais,
+  });
+};
+
 // Export default para compatibilidade
 export default {
   formatarMoeda,

@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "./formatters";
+import { DESPESA_STATUS } from "../config/constants";
 
 /**
  * Recalcula os valores de uma natureza especifica
@@ -48,7 +49,7 @@ export const recalcularNatureza = async (naturezaId, options = {}) => {
 
     // 3. Calcular valor executado (soma das despesas, excluindo PLANEJADA)
     const valorAlocado = parseValorMonetario(natureza.valorAlocado || 0);
-    const despesasExecutadas = despesas.filter(d => d.status !== "PLANEJADA");
+    const despesasExecutadas = despesas.filter(d => d.status !== DESPESA_STATUS.PLANEJADA);
     const valorExecutado = despesasExecutadas.reduce((sum, despesa) => {
       return sum + parseValorMonetario(despesa.valor || 0);
     }, 0);

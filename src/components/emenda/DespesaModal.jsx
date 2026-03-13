@@ -5,6 +5,7 @@ import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useTheme } from "../../context/ThemeContext";
 import { recalcularSaldoEmenda } from "../../utils/emendaCalculos";
 import { parseValorMonetario } from "../../utils/formatters";
+import { DESPESA_STATUS } from "../../config/constants";
 
 const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
   const { isDark } = useTheme?.() || { isDark: false };
@@ -141,7 +142,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
       const despesaData = {
         ...formData,
         valor: parseValorMonetario(formData.valor),
-        status: formData.status || "EXECUTADA",
+        status: formData.status || DESPESA_STATUS.EXECUTADA,
         emendaId: emenda.id,
         numeroEmenda: emenda.numero,
         municipio: emenda.municipio,

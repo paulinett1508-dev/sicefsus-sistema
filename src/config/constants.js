@@ -131,3 +131,32 @@ export const USER_TYPES = {
   GESTOR: "gestor",
   OPERADOR: "user",
 };
+
+// ========================================
+// 📊 STATUS DE DESPESAS
+// ========================================
+export const DESPESA_STATUS = {
+  PLANEJADA: "PLANEJADA",
+  EXECUTADA: "EXECUTADA",
+};
+
+// ========================================
+// 💰 CAMPOS DE VALOR (ORDEM DE FALLBACK)
+// ========================================
+// Usar sempre nesta ordem ao buscar valor de uma emenda:
+// emenda[VALOR_FIELDS[0]] || emenda[VALOR_FIELDS[1]] || emenda[VALOR_FIELDS[2]] || 0
+export const VALOR_FIELDS = ["valor", "valorRecurso", "valorTotal"];
+
+/**
+ * Retorna o valor numerico de uma emenda usando a ordem padrao de fallback
+ * @param {object} emenda - Documento da emenda
+ * @param {function} parse - Funcao de parsing (parseValorMonetario)
+ * @returns {number} Valor numerico
+ */
+export const getValorEmenda = (emenda, parse) => {
+  if (!emenda) return 0;
+  for (const field of VALOR_FIELDS) {
+    if (emenda[field]) return parse ? parse(emenda[field]) : emenda[field];
+  }
+  return 0;
+};

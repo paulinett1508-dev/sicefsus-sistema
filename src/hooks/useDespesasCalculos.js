@@ -6,6 +6,7 @@
 
 import { useMemo } from "react";
 import { parseValorMonetario } from "../utils/formatters";
+import { DESPESA_STATUS } from "../config/constants";
 
 export function useDespesasCalculos(despesas, emendas) {
 
@@ -17,7 +18,7 @@ export function useDespesasCalculos(despesas, emendas) {
 
       // ✅ CRÍTICO: Filtrar APENAS despesas executadas (status !== "PLANEJADA")
       const despesasDaEmenda = despesas.filter(
-        d => d.emendaId === emendaId && d.status !== "PLANEJADA"
+        d => d.emendaId === emendaId && d.status !== DESPESA_STATUS.PLANEJADA
       );
 
       // ✅ CORREÇÃO P0: Usar parseValorMonetario para valores formatados BR

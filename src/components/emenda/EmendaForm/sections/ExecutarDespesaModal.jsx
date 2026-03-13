@@ -10,6 +10,7 @@ import {
   parseValorMonetario,
 } from "../../../../utils/formatters";
 import { recalcularSaldoEmenda } from "../../../../utils/emendaCalculos";
+import { DESPESA_STATUS } from "../../../../config/constants";
 
 const ExecutarDespesaModal = ({
   isOpen,
@@ -149,7 +150,7 @@ const ExecutarDespesaModal = ({
       await addDoc(collection(db, "despesas"), {
         ...formData,
         valor: parseValorMonetario(formData.valor),
-        status: "EXECUTADA",
+        status: DESPESA_STATUS.EXECUTADA,
         municipio: emendaInfo?.municipio || "",
         uf: emendaInfo?.uf || "",
         criadaEm: new Date().toISOString(),

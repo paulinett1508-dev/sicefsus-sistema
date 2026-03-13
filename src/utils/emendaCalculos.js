@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "./formatters";
+import { DESPESA_STATUS } from "../config/constants";
 
 /**
  * ✅ FUNÇÃO PRINCIPAL: Recalcular e salvar valores da emenda
@@ -51,8 +52,8 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     const despesasSnapshot = await getDocs(despesasQuery);
     const todasDespesas = despesasSnapshot.docs.map((doc) => doc.data());
 
-    // ✅ FILTRO CRÍTICO: Excluir APENAS despesas planejadas
-    const despesas = todasDespesas.filter(d => d.status !== "PLANEJADA");
+    // Filtro: somente despesas executadas contam para saldo
+    const despesas = todasDespesas.filter(d => d.status !== DESPESA_STATUS.PLANEJADA);
 
     // 2️⃣b Buscar naturezas ativas da emenda (envelopes orçamentários)
     const naturezasQuery = query(

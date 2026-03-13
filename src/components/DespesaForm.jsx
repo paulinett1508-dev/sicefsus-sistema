@@ -69,6 +69,7 @@ import {
   formatarMoedaDisplay,
   formatarMoedaInput,
 } from "../utils/formatters";
+import { DESPESA_STATUS } from "../config/constants";
 
 const DespesaForm = ({
   usuario,
@@ -130,7 +131,7 @@ const DespesaForm = ({
     categoria: "",
     descricao: "",
     observacoes: "",
-    status: modoCriacaoDireta || modoExecucao ? "EXECUTADA" : "PLANEJADA", // ✅ Status correto
+    status: modoCriacaoDireta || modoExecucao ? DESPESA_STATUS.EXECUTADA : DESPESA_STATUS.PLANEJADA, // ✅ Status correto
     statusPagamento: "pendente",
     naturezaDespesa: "3.3.9.0.30 – Material de Despesa",
     elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
@@ -362,7 +363,7 @@ const DespesaForm = ({
           categoria: despesaParaEditar.categoria || "",
           descricao: despesaParaEditar.descricao || "",
           observacoes: despesaParaEditar.observacoes || "",
-          status: despesaParaEditar.status || "PLANEJADA",
+          status: despesaParaEditar.status || DESPESA_STATUS.PLANEJADA,
           statusPagamento: despesaParaEditar.statusPagamento || "pendente",
           elementoDespesa:
             despesaParaEditar.elementoDespesa ||
@@ -557,7 +558,7 @@ const DespesaForm = ({
         // 2️⃣ CRIAR despesa executada DEPOIS
         const dadosExecutada = {
           ...despesaData,
-          status: "EXECUTADA", // 🔑 Força status como executada
+          status: DESPESA_STATUS.EXECUTADA, // 🔑 Força status como executada
           criadaEm: new Date().toISOString(),
           executadaEm: new Date().toISOString(),
           // ✅ Rastreabilidade: Guardar referência da planejada original
@@ -576,13 +577,13 @@ const DespesaForm = ({
             id: idPlanejada,
             valor: dadosOriginais.valor,
             fornecedor: dadosOriginais.fornecedor,
-            status: dadosOriginais.status || "PLANEJADA",
+            status: dadosOriginais.status || DESPESA_STATUS.PLANEJADA,
             discriminacao: dadosOriginais.discriminacao
           } : null,
           dataAfter: {
             valor: dadosExecutada.valor,
             fornecedor: dadosExecutada.fornecedor,
-            status: "EXECUTADA",
+            status: DESPESA_STATUS.EXECUTADA,
             discriminacao: dadosExecutada.discriminacao,
             numeroEmpenho: dadosExecutada.numeroEmpenho,
             numeroNota: dadosExecutada.numeroNota
@@ -607,7 +608,7 @@ const DespesaForm = ({
 
         const dadosExecutada = {
           ...despesaData,
-          status: "EXECUTADA", // 🔑 Status executada
+          status: DESPESA_STATUS.EXECUTADA, // 🔑 Status executada
           criadaEm: new Date().toISOString(),
           executadaEm: new Date().toISOString(),
           criadaDiretamente: true, // ✅ Flag para rastreabilidade
@@ -626,7 +627,7 @@ const DespesaForm = ({
             valor: dadosExecutada.valor,
             fornecedor: dadosExecutada.fornecedor,
             discriminacao: dadosExecutada.discriminacao,
-            status: "EXECUTADA",
+            status: DESPESA_STATUS.EXECUTADA,
             naturezaDespesa: dadosExecutada.naturezaDespesa,
             municipio: dadosExecutada.municipio,
             uf: dadosExecutada.uf
@@ -700,7 +701,7 @@ const DespesaForm = ({
             valor: despesaData.valor,
             fornecedor: despesaData.fornecedor,
             discriminacao: despesaData.discriminacao,
-            status: despesaData.status || "PLANEJADA",
+            status: despesaData.status || DESPESA_STATUS.PLANEJADA,
             naturezaDespesa: despesaData.naturezaDespesa,
             municipio: despesaData.municipio,
             uf: despesaData.uf
@@ -823,7 +824,7 @@ const DespesaForm = ({
       categoria: "",
       descricao: "",
       observacoes: "",
-      status: "PLANEJADA",
+      status: DESPESA_STATUS.PLANEJADA,
       statusPagamento: "pendente",
       naturezaDespesa: "3.3.9.0.30 – Material de Despesa",
       elementoDespesa: "3.3.90.30.99 - Outros Materiais de Consumo",
