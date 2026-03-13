@@ -1,5 +1,5 @@
-// ✅ UTILITÁRIOS PARA CNPJ - VALIDAÇÃO CORRIGIDA
-// Funções para formatação, validação e manipulação de CNPJ
+// ✅ UTILITÁRIOS PARA CNPJ/CPF - VALIDAÇÃO CORRIGIDA
+// Funções para formatação, validação e manipulação de CNPJ e CPF
 
 /**
  * Formatar CNPJ com máscara XX.XXX.XXX/XXXX-XX
@@ -155,6 +155,112 @@ export const pareceCNPJ = (valor) => {
  */
 export const obterNumerosCNPJ = (cnpj) => {
   return limparCNPJ(cnpj);
+};
+
+/**
+ * Formatar CPF com máscara XXX.XXX.XXX-XX
+ * @param {string} valor - CPF a ser formatado
+ * @returns {string} - CPF formatado
+ */
+export const formatarCPF = (valor) => {
+  if (!valor || typeof valor !== "string") return "";
+  const numeros = valor.replace(/\D/g, "");
+  const limitado = numeros.slice(0, 11);
+  return limitado
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+};
+
+/**
+ * Validar CPF brasileiro
+ * @param {string} cpf - CPF a ser validado
+ * @returns {boolean} - true se válido
+ */
+export const validarCPF = (cpf) => {
+  if (!cpf) return false;
+  const numero = String(cpf).replace(/[^\d]/g, "");
+  if (numero.length !== 11) return false;
+  if (/^(\d)\1+$/.test(numero)) return false;
+
+  const digits = numero.split("").map(Number);
+
+  // Primeiro dígito verificador
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += digits[i] * (10 - i);
+  }
+  let resto = (soma * 10) % 11;
+  const digito1 = resto === 10 ? 0 : resto;
+  if (digito1 !== digits[9]) return false;
+
+  // Segundo dígito verificador
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += digits[i] * (11 - i);
+  }
+  resto = (soma * 10) % 11;
+  const digito2 = resto === 10 ? 0 : resto;
+  return digito2 === digits[10];
+};
+
+/**
+ * Verificar se CPF está completo (11 dígitos)
+ * @param {string} cpf - CPF para verificar
+ * @returns {boolean} true se completo
+ */
+export const cpfCompleto = (cpf) => {
+  const numeros = limparCNPJ(cpf);
+  return numeros.length === 11;
+};
+
+/**
+ * Detectar tipo de documento pela quantidade de dígitos
+ * @param {string} documento - CPF ou CNPJ (com ou sem formatação)
+ * @returns {"PF"|"PJ"|null} Tipo de pessoa ou null se indeterminado
+ */
+export const detectarTipoDocumento = (documento) => {
+  if (!documento) return null;
+  const numeros = String(documento).replace(/\D/g, "");
+  if (numeros.length === 11) return "PF";
+  if (numeros.length === 14) return "PJ";
+  return null;
+};
+
+/**
+ * Formatar documento (CPF ou CNPJ) automaticamente
+ * @param {string} documento - Documento a formatar
+ * @param {string} tipoPessoa - "PF" ou "PJ" (opcional, auto-detecta)
+ * @returns {string} Documento formatado
+ */
+export const formatarDocumento = (documento, tipoPessoa = null) => {
+  if (!documento) return "";
+  const numeros = String(documento).replace(/\D/g, "");
+  const tipo = tipoPessoa || detectarTipoDocumento(documento);
+  if (tipo === "PF" || numeros.length <= 11) return formatarCPF(documento);
+  return formatarCNPJ(documento);
+};
+
+/**
+ * Validar documento (CPF ou CNPJ)
+ * @param {string} documento - Documento a validar
+ * @param {string} tipoPessoa - "PF" ou "PJ"
+ * @returns {boolean} true se válido
+ */
+export const validarDocumento = (documento, tipoPessoa) => {
+  if (tipoPessoa === "PF") return validarCPF(documento);
+  return validarCNPJ(documento);
+};
+
+/**
+ * Aplicar máscara de documento durante digitação
+ * @param {string} valor - Valor atual do input
+ * @param {string} tipoPessoa - "PF" ou "PJ"
+ * @returns {string} Valor com máscara aplicada
+ */
+export const aplicarMascaraDocumento = (valor, tipoPessoa) => {
+  if (tipoPessoa === "PF") return formatarCPF(valor);
+  return formatarCNPJ(valor);
 };
 
 /**

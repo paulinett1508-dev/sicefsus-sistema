@@ -504,7 +504,7 @@ const FornecedoresList = () => {
             </span>
             <input
               type="text"
-              placeholder="Buscar por CNPJ, razao social ou cidade..."
+              placeholder="Buscar por CPF/CNPJ, razao social ou cidade..."
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
               style={styles.inputBusca}
@@ -562,7 +562,7 @@ const FornecedoresList = () => {
                 style={styles.ordenacaoBotao(isDark, ordenacao.campo === "cnpj")}
                 onClick={() => handleOrdenacao("cnpj")}
               >
-                CNPJ
+                CPF/CNPJ
                 {ordenacao.campo === "cnpj" && (
                   <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
                     {ordenacao.direcao === "asc" ? "arrow_upward" : "arrow_downward"}

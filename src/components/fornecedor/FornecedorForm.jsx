@@ -3,7 +3,15 @@
 
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { validarCNPJ, formatarCNPJ } from "../../utils/cnpjUtils";
+import {
+  validarCNPJ,
+  formatarCNPJ,
+  validarCPF,
+  formatarCPF,
+  validarDocumento,
+  aplicarMascaraDocumento,
+  detectarTipoDocumento,
+} from "../../utils/cnpjUtils";
 
 /**
  * Modal para criar/editar fornecedor
@@ -18,8 +26,9 @@ const FornecedorForm = ({
   const { isDark } = useTheme?.() || { isDark: false };
 
   // Estados do formulario
+  const [tipoPessoa, setTipoPessoa] = useState("PJ"); // "PF" ou "PJ"
   const [formData, setFormData] = useState({
-    cnpj: "",
+    documento: "",
     razaoSocial: "",
     nomeFantasia: "",
     logradouro: "",
@@ -35,14 +44,19 @@ const FornecedorForm = ({
   });
 
   const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
-  const [cnpjError, setCnpjError] = useState("");
-  const [cnpjEncontrado, setCnpjEncontrado] = useState(false);
+  const [docError, setDocError] = useState("");
+  const [dadosEncontrados, setDadosEncontrados] = useState(false);
 
   // Carregar dados do fornecedor para edicao
   useEffect(() => {
     if (fornecedor) {
+      const tipo = fornecedor.tipoPessoa || detectarTipoDocumento(fornecedor.cnpj) || "PJ";
+      setTipoPessoa(tipo);
+      const docFormatado = tipo === "PF"
+        ? formatarCPF(fornecedor.cnpj) || ""
+        : formatarCNPJ(fornecedor.cnpj) || "";
       setFormData({
-        cnpj: formatarCNPJ(fornecedor.cnpj) || "",
+        documento: docFormatado,
         razaoSocial: fornecedor.razaoSocial || "",
         nomeFantasia: fornecedor.nomeFantasia || "",
         logradouro: fornecedor.endereco?.logradouro || "",
@@ -56,11 +70,11 @@ const FornecedorForm = ({
         email: fornecedor.contato?.email || "",
         situacaoCadastral: fornecedor.situacaoCadastral || "ATIVA",
       });
-      setCnpjEncontrado(true);
+      setDadosEncontrados(true);
     } else {
-      // Limpar para novo fornecedor
+      setTipoPessoa("PJ");
       setFormData({
-        cnpj: "",
+        documento: "",
         razaoSocial: "",
         nomeFantasia: "",
         logradouro: "",
@@ -74,9 +88,9 @@ const FornecedorForm = ({
         email: "",
         situacaoCadastral: "ATIVA",
       });
-      setCnpjEncontrado(false);
+      setDadosEncontrados(false);
     }
-    setCnpjError("");
+    setDocError("");
   }, [fornecedor, isVisible]);
 
   // Formatadores
@@ -95,27 +109,49 @@ const FornecedorForm = ({
     return numeros.replace(/(\d{5})(\d{3})/, "$1-$2");
   };
 
-  // Buscar dados do CNPJ via API
-  const buscarDadosCNPJ = async () => {
-    const cnpjLimpo = formData.cnpj.replace(/\D/g, "");
+  // Trocar tipo de pessoa
+  const handleTipoPessoa = (tipo) => {
+    setTipoPessoa(tipo);
+    setFormData((prev) => ({ ...prev, documento: "", nomeFantasia: tipo === "PF" ? "" : prev.nomeFantasia }));
+    setDocError("");
+    setDadosEncontrados(false);
+  };
 
-    if (cnpjLimpo.length !== 14) {
-      setCnpjError("CNPJ deve ter 14 digitos");
+  // Buscar dados do CNPJ via API (apenas PJ)
+  const buscarDadosCNPJ = async () => {
+    const docLimpo = formData.documento.replace(/\D/g, "");
+
+    if (tipoPessoa === "PF") {
+      // CPF nao tem API publica de consulta
+      if (docLimpo.length !== 11) {
+        setDocError("CPF deve ter 11 digitos");
+        return;
+      }
+      if (!validarCPF(formData.documento)) {
+        setDocError("CPF invalido");
+        return;
+      }
+      setDadosEncontrados(true);
+      setDocError("");
       return;
     }
 
-    if (!validarCNPJ(formData.cnpj)) {
-      setCnpjError("CNPJ invalido");
+    if (docLimpo.length !== 14) {
+      setDocError("CNPJ deve ter 14 digitos");
+      return;
+    }
+
+    if (!validarCNPJ(formData.documento)) {
+      setDocError("CNPJ invalido");
       return;
     }
 
     setBuscandoCNPJ(true);
-    setCnpjError("");
+    setDocError("");
 
     try {
-      // Buscar na BrasilAPI (fonte oficial e confiavel)
       const response = await fetch(
-        `https://brasilapi.com.br/api/cnpj/v1/${cnpjLimpo}`
+        `https://brasilapi.com.br/api/cnpj/v1/${docLimpo}`
       );
 
       if (!response.ok) {
@@ -127,7 +163,6 @@ const FornecedorForm = ({
 
       const dados = await response.json();
 
-      // Preencher campos com dados da API
       setFormData((prev) => ({
         ...prev,
         razaoSocial: dados.razao_social || prev.razaoSocial,
@@ -144,25 +179,28 @@ const FornecedorForm = ({
         situacaoCadastral: (dados.descricao_situacao_cadastral || "ATIVA").toUpperCase(),
       }));
 
-      setCnpjEncontrado(true);
+      setDadosEncontrados(true);
     } catch (error) {
       console.error("Erro ao buscar CNPJ:", error);
-      setCnpjError(error.message || "Erro ao buscar dados do CNPJ");
-      setCnpjEncontrado(false);
+      setDocError(error.message || "Erro ao buscar dados do CNPJ");
+      setDadosEncontrados(false);
     } finally {
       setBuscandoCNPJ(false);
     }
   };
 
+  // Tamanho esperado do documento
+  const docLength = tipoPessoa === "PF" ? 11 : 14;
+
   // Handler de mudanca de input
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "cnpj") {
-      const cnpjFormatado = formatarCNPJ(value);
-      setFormData((prev) => ({ ...prev, cnpj: cnpjFormatado }));
-      setCnpjError("");
-      setCnpjEncontrado(false);
+    if (name === "documento") {
+      const docFormatado = aplicarMascaraDocumento(value, tipoPessoa);
+      setFormData((prev) => ({ ...prev, documento: docFormatado }));
+      setDocError("");
+      setDadosEncontrados(false);
     } else if (name === "telefone") {
       setFormData((prev) => ({ ...prev, telefone: formatarTelefone(value) }));
     } else if (name === "cep") {
@@ -174,12 +212,13 @@ const FornecedorForm = ({
 
   // Validar formulario
   const validarForm = () => {
-    if (!formData.cnpj || formData.cnpj.replace(/\D/g, "").length !== 14) {
-      setCnpjError("CNPJ obrigatorio");
+    const docLimpo = formData.documento.replace(/\D/g, "");
+    if (!formData.documento || docLimpo.length !== docLength) {
+      setDocError(tipoPessoa === "PF" ? "CPF obrigatorio" : "CNPJ obrigatorio");
       return false;
     }
-    if (!validarCNPJ(formData.cnpj)) {
-      setCnpjError("CNPJ invalido");
+    if (!validarDocumento(formData.documento, tipoPessoa)) {
+      setDocError(tipoPessoa === "PF" ? "CPF invalido" : "CNPJ invalido");
       return false;
     }
     if (!formData.razaoSocial?.trim()) {
@@ -193,9 +232,10 @@ const FornecedorForm = ({
     if (!validarForm()) return;
 
     onSalvar({
-      cnpj: formData.cnpj,
+      cnpj: formData.documento,
+      tipoPessoa,
       razaoSocial: formData.razaoSocial,
-      nomeFantasia: formData.nomeFantasia,
+      nomeFantasia: tipoPessoa === "PJ" ? formData.nomeFantasia : "",
       endereco: {
         logradouro: formData.logradouro,
         numero: formData.numero,
@@ -238,38 +278,99 @@ const FornecedorForm = ({
 
         {/* Body */}
         <div style={styles.body}>
-          {/* CNPJ */}
+          {/* Toggle PF / PJ */}
+          <div style={styles.formGroup}>
+            <label style={styles.label(isDark)}>Tipo de Pessoa</label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                onClick={() => handleTipoPessoa("PJ")}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  border: `2px solid ${tipoPessoa === "PJ" ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
+                  borderRadius: "6px",
+                  backgroundColor: tipoPessoa === "PJ"
+                    ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
+                    : isDark ? "var(--theme-surface-secondary)" : "#ffffff",
+                  color: tipoPessoa === "PJ"
+                    ? "var(--primary, #2563EB)"
+                    : isDark ? "var(--theme-text-secondary)" : "#64748B",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  transition: "all 0.2s",
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>business</span>
+                Pessoa Juridica (CNPJ)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTipoPessoa("PF")}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  border: `2px solid ${tipoPessoa === "PF" ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
+                  borderRadius: "6px",
+                  backgroundColor: tipoPessoa === "PF"
+                    ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
+                    : isDark ? "var(--theme-surface-secondary)" : "#ffffff",
+                  color: tipoPessoa === "PF"
+                    ? "var(--primary, #2563EB)"
+                    : isDark ? "var(--theme-text-secondary)" : "#64748B",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  transition: "all 0.2s",
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person</span>
+                Pessoa Fisica (CPF)
+              </button>
+            </div>
+          </div>
+
+          {/* Documento (CPF ou CNPJ) */}
           <div style={styles.formGroup}>
             <label style={styles.label(isDark)}>
-              CNPJ <span style={{ color: "var(--error)" }}>*</span>
+              {tipoPessoa === "PF" ? "CPF" : "CNPJ"} <span style={{ color: "var(--error)" }}>*</span>
             </label>
             <div style={styles.inputGroup}>
               <input
                 type="text"
-                name="cnpj"
-                value={formData.cnpj}
+                name="documento"
+                value={formData.documento}
                 onChange={handleChange}
-                placeholder="00.000.000/0001-00"
+                placeholder={tipoPessoa === "PF" ? "000.000.000-00" : "00.000.000/0001-00"}
                 style={{
                   ...styles.input(isDark),
                   flex: 1,
-                  borderColor: cnpjError
+                  borderColor: docError
                     ? "var(--error)"
-                    : cnpjEncontrado
+                    : dadosEncontrados
                     ? "var(--success)"
                     : undefined,
                 }}
-                maxLength={18}
+                maxLength={tipoPessoa === "PF" ? 14 : 18}
               />
               <button
                 type="button"
                 onClick={buscarDadosCNPJ}
                 disabled={
                   buscandoCNPJ ||
-                  formData.cnpj.replace(/\D/g, "").length !== 14
+                  formData.documento.replace(/\D/g, "").length !== docLength
                 }
-                style={styles.btnBuscar(isDark, buscandoCNPJ || formData.cnpj.replace(/\D/g, "").length !== 14)}
-                title="Buscar dados do CNPJ"
+                style={styles.btnBuscar(isDark, buscandoCNPJ || formData.documento.replace(/\D/g, "").length !== docLength)}
+                title={tipoPessoa === "PF" ? "Validar CPF" : "Buscar dados do CNPJ"}
               >
                 <span
                   className="material-symbols-outlined"
@@ -278,48 +379,50 @@ const FornecedorForm = ({
                     animation: buscandoCNPJ ? "spin 1s linear infinite" : "none",
                   }}
                 >
-                  {buscandoCNPJ ? "sync" : "search"}
+                  {buscandoCNPJ ? "sync" : tipoPessoa === "PF" ? "verified" : "search"}
                 </span>
               </button>
             </div>
-            {cnpjError && <span style={styles.error}>{cnpjError}</span>}
-            {cnpjEncontrado && !cnpjError && (
+            {docError && <span style={styles.error}>{docError}</span>}
+            {dadosEncontrados && !docError && (
               <span style={styles.success}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
                   check_circle
                 </span>
-                Dados carregados
+                {tipoPessoa === "PF" ? "CPF validado" : "Dados carregados"}
               </span>
             )}
           </div>
 
-          {/* Razao Social */}
+          {/* Razao Social / Nome Completo */}
           <div style={styles.formGroup}>
             <label style={styles.label(isDark)}>
-              Razao Social <span style={{ color: "var(--error)" }}>*</span>
+              {tipoPessoa === "PF" ? "Nome Completo" : "Razao Social"} <span style={{ color: "var(--error)" }}>*</span>
             </label>
             <input
               type="text"
               name="razaoSocial"
               value={formData.razaoSocial}
               onChange={handleChange}
-              placeholder="Nome da empresa"
+              placeholder={tipoPessoa === "PF" ? "Nome completo da pessoa" : "Nome da empresa"}
               style={styles.input(isDark)}
             />
           </div>
 
-          {/* Nome Fantasia */}
-          <div style={styles.formGroup}>
-            <label style={styles.label(isDark)}>Nome Fantasia</label>
-            <input
-              type="text"
-              name="nomeFantasia"
-              value={formData.nomeFantasia}
-              onChange={handleChange}
-              placeholder="Nome fantasia"
-              style={styles.input(isDark)}
-            />
-          </div>
+          {/* Nome Fantasia - apenas PJ */}
+          {tipoPessoa === "PJ" && (
+            <div style={styles.formGroup}>
+              <label style={styles.label(isDark)}>Nome Fantasia</label>
+              <input
+                type="text"
+                name="nomeFantasia"
+                value={formData.nomeFantasia}
+                onChange={handleChange}
+                placeholder="Nome fantasia"
+                style={styles.input(isDark)}
+              />
+            </div>
+          )}
 
           {/* Separador - Endereco */}
           <div style={styles.separador(isDark)}>

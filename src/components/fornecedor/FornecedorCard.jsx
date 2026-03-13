@@ -21,15 +21,17 @@ const FornecedorCard = ({
   const { isDark } = useTheme?.() || { isDark: false };
   const [expandido, setExpandido] = useState(false);
 
-  // Formatar CNPJ
-  const formatarCNPJ = (cnpj) => {
-    if (!cnpj) return "-";
-    const numeros = cnpj.replace(/\D/g, "");
-    if (numeros.length !== 14) return cnpj;
-    return numeros.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      "$1.$2.$3/$4-$5"
-    );
+  // Formatar documento (CPF ou CNPJ)
+  const formatarDocumento = (doc) => {
+    if (!doc) return "-";
+    const numeros = doc.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+    }
+    if (numeros.length === 14) {
+      return numeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+    }
+    return doc;
   };
 
   // Status config
@@ -113,7 +115,7 @@ const FornecedorCard = ({
             flexShrink: 0,
           }}
         >
-          {formatarCNPJ(fornecedor.cnpj)}
+          {formatarDocumento(fornecedor.cnpj)}
         </span>
 
         {/* Razao Social - Flex grow, truncate */}
@@ -222,8 +224,10 @@ const FornecedorCard = ({
                   gap: "4px",
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>business</span>
-                Empresa
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+                  {fornecedor.tipoPessoa === "PF" ? "person" : "business"}
+                </span>
+                {fornecedor.tipoPessoa === "PF" ? "Pessoa Fisica" : "Empresa"}
               </h4>
               <div style={{ fontSize: "13px", color: isDark ? "var(--text-primary)" : "#334155" }}>
                 {fornecedor.nomeFantasia && (

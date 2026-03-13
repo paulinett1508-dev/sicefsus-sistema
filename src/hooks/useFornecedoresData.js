@@ -175,6 +175,7 @@ export const useFornecedoresData = (usuario, options = {}) => {
         // Preparar dados
         const fornecedorData = {
           cnpj: cnpjLimpo,
+          tipoPessoa: dados.tipoPessoa || "PJ",
           razaoSocial: dados.razaoSocial?.trim() || "",
           nomeFantasia: dados.nomeFantasia?.trim() || "",
           endereco: {
@@ -252,6 +253,7 @@ export const useFornecedoresData = (usuario, options = {}) => {
 
         // Adicionar campos se foram fornecidos
         if (dados.cnpj) updateData.cnpj = dados.cnpj.replace(/\D/g, "");
+        if (dados.tipoPessoa) updateData.tipoPessoa = dados.tipoPessoa;
         if (dados.razaoSocial) updateData.razaoSocial = dados.razaoSocial.trim();
         if (dados.nomeFantasia !== undefined) updateData.nomeFantasia = dados.nomeFantasia.trim();
         if (dados.situacaoCadastral) updateData.situacaoCadastral = dados.situacaoCadastral;

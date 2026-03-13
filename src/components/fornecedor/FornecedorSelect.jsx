@@ -82,15 +82,17 @@ const FornecedorSelect = ({
     }
   }, [aberto]);
 
-  // Formatar CNPJ
-  const formatarCNPJ = (cnpj) => {
-    if (!cnpj) return "-";
-    const numeros = cnpj.replace(/\D/g, "");
-    if (numeros.length !== 14) return cnpj;
-    return numeros.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      "$1.$2.$3/$4-$5"
-    );
+  // Formatar documento (CPF ou CNPJ)
+  const formatarDocumento = (doc) => {
+    if (!doc) return "-";
+    const numeros = doc.replace(/\D/g, "");
+    if (numeros.length === 11) {
+      return numeros.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+    }
+    if (numeros.length === 14) {
+      return numeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+    }
+    return doc;
   };
 
   // Handlers
@@ -344,7 +346,7 @@ const FornecedorSelect = ({
           ) : fornecedorSelecionado ? (
             <div style={styles.selecionado}>
               <span style={styles.razaoSocial}>{fornecedorSelecionado.razaoSocial}</span>
-              <span style={styles.cnpj}>{formatarCNPJ(fornecedorSelecionado.cnpj)}</span>
+              <span style={styles.cnpj}>{formatarDocumento(fornecedorSelecionado.cnpj)}</span>
             </div>
           ) : (
             <span style={styles.placeholder}>{placeholder}</span>
@@ -378,7 +380,7 @@ const FornecedorSelect = ({
             <input
               ref={inputRef}
               type="text"
-              placeholder="Buscar por CNPJ ou razao social..."
+              placeholder="Buscar por CPF/CNPJ ou razao social..."
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
               style={styles.searchInput}
@@ -435,7 +437,7 @@ const FornecedorSelect = ({
                         color: isDark ? "var(--theme-text-secondary)" : "var(--gray-500)",
                       }}
                     >
-                      business
+                      {fornecedor.tipoPessoa === "PF" ? "person" : "business"}
                     </span>
                   </div>
 
@@ -443,7 +445,7 @@ const FornecedorSelect = ({
                     <div style={styles.itemRazao}>{fornecedor.razaoSocial}</div>
                     <div style={styles.itemMeta}>
                       <span style={{ fontFamily: "monospace" }}>
-                        {formatarCNPJ(fornecedor.cnpj)}
+                        {formatarDocumento(fornecedor.cnpj)}
                       </span>
                       <span
                         style={{
