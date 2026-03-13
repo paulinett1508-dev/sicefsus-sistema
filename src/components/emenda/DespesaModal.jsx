@@ -141,6 +141,7 @@ const DespesaModal = ({ emenda, despesaEdit, onClose, onSalvar }) => {
       const despesaData = {
         ...formData,
         valor: parseValorMonetario(formData.valor),
+        status: formData.status || "EXECUTADA",
         emendaId: emenda.id,
         numeroEmenda: emenda.numero,
         municipio: emenda.municipio,

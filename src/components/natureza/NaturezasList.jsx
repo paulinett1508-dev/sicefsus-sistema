@@ -5,6 +5,7 @@ import React, { useState, useCallback } from "react";
 import NaturezaCard from "./NaturezaCard";
 import NaturezaForm from "./NaturezaForm";
 import { parseValorMonetario } from "../../utils/formatters";
+import { recalcularNatureza } from "../../utils/naturezaCalculos";
 import { useTheme } from "../../context/ThemeContext";
 import ConfirmationModal from "../ConfirmationModal";
 
@@ -141,14 +142,15 @@ const NaturezasList = ({
   };
 
   const handleConfirmarExclusaoDespesa = async () => {
-    console.log("🗑️ handleConfirmarExclusaoDespesa chamado", { despesaParaExcluir });
     if (despesaParaExcluir) {
       try {
-        console.log("🗑️ Chamando onExcluirDespesa...");
         await onExcluirDespesa?.(despesaParaExcluir);
-        console.log("✅ onExcluirDespesa concluído");
+        // Recalcular natureza pai para atualizar saldo
+        if (despesaParaExcluir.naturezaId) {
+          await recalcularNatureza(despesaParaExcluir.naturezaId, { silent: true });
+        }
       } catch (error) {
-        console.error("❌ Erro ao excluir despesa:", error);
+        console.error("Erro ao excluir despesa:", error);
       }
       setDespesaParaExcluir(null);
     }

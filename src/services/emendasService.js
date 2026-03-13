@@ -4,7 +4,7 @@
 import { query, collection, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
-export const carregarEmendasPorPermissao = async (userRole, userMunicipio) => {
+export const carregarEmendasPorPermissao = async (userRole, userMunicipio, userUf) => {
   try {
     console.log("🔍 Carregando emendas com filtro por município...");
 
@@ -20,10 +20,9 @@ export const carregarEmendasPorPermissao = async (userRole, userMunicipio) => {
       console.log(
         `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`,
       );
-      q = query(
-        collection(db, "emendas"),
-        where("municipio", "==", userMunicipio),
-      );
+      const filters = [where("municipio", "==", userMunicipio)];
+      if (userUf) filters.push(where("uf", "==", userUf));
+      q = query(collection(db, "emendas"), ...filters);
     } else {
       console.warn(
         "⚠️ Usuário sem permissões definidas ou município não informado",

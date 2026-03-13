@@ -230,8 +230,8 @@ const useDashboardData = (user, permissions) => {
           return sum + parseValorMonetario(despesa.valor);
         }, 0);
 
-        const valorComprometido = valorExecutado + valorPlanejado;
-        const saldoDisponivel = valorTotal - valorComprometido;
+        // Saldo considera apenas EXECUTADAS (alinhado com emendaCalculos.js)
+        const saldoDisponivel = valorTotal - valorExecutado;
         
         const percentualExecutado =
           valorTotal > 0 ? (valorExecutado / valorTotal) * 100 : 0;
@@ -239,15 +239,12 @@ const useDashboardData = (user, permissions) => {
         const percentualPlanejado =
           valorTotal > 0 ? (valorPlanejado / valorTotal) * 100 : 0;
 
-        // ⚠️ ALERTA: Detectar over-commitment
-        const totalPerc = percentualExecutado + percentualPlanejado;
-        if (totalPerc > 100 && valorTotal > 0) {
-          console.error(`🚨 Dashboard: Emenda ${emenda.numero || emenda.id} está OVER ${totalPerc.toFixed(1)}%`, {
+        // Alerta: Detectar execucao acima de 100%
+        if (percentualExecutado > 100 && valorTotal > 0) {
+          console.error(`Dashboard: Emenda ${emenda.numero || emenda.id} executou ${percentualExecutado.toFixed(1)}%`, {
             valorTotal,
             valorExecutado,
-            valorPlanejado,
-            valorComprometido,
-            excesso: valorComprometido - valorTotal,
+            excesso: valorExecutado - valorTotal,
             totalDespesas: todasDespesasEmenda.length
           });
         }
@@ -256,7 +253,6 @@ const useDashboardData = (user, permissions) => {
           ...emenda,
           valorExecutado,
           valorPlanejado,
-          valorComprometido,
           saldoDisponivel,
           percentualExecutado,
           percentualPlanejado,

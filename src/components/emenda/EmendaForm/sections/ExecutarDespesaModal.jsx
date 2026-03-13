@@ -223,7 +223,7 @@ const ExecutarDespesaModal = ({
               <div style={styles.emendaItem}>
                 <span style={styles.emendaLabel}>Valor Total:</span>
                 <span style={styles.emendaValue}>
-                  {(emendaInfo.valor || 0).toLocaleString("pt-BR", {
+                  {parseValorMonetario(emendaInfo.valor || 0).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL",
                   })}
