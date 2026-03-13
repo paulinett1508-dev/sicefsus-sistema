@@ -46,6 +46,8 @@ const FornecedorForm = ({
   const [buscandoCNPJ, setBuscandoCNPJ] = useState(false);
   const [docError, setDocError] = useState("");
   const [dadosEncontrados, setDadosEncontrados] = useState(false);
+  const [buscandoCEP, setBuscandoCEP] = useState(false);
+  const [cepStatus, setCepStatus] = useState(""); // "ok", "erro", ""
 
   // Carregar dados do fornecedor para edicao
   useEffect(() => {
@@ -192,6 +194,41 @@ const FornecedorForm = ({
   // Tamanho esperado do documento
   const docLength = tipoPessoa === "PF" ? 11 : 14;
 
+  // Buscar endereco pelo CEP via ViaCEP
+  const buscarCEP = async (cepValue) => {
+    const cepLimpo = cepValue.replace(/\D/g, "");
+    if (cepLimpo.length !== 8) return;
+
+    setBuscandoCEP(true);
+    setCepStatus("");
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+      if (!response.ok) throw new Error("Servico indisponivel");
+
+      const dados = await response.json();
+      if (dados.erro) {
+        setCepStatus("erro");
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        logradouro: dados.logradouro || prev.logradouro,
+        bairro: dados.bairro || prev.bairro,
+        cidade: dados.localidade || prev.cidade,
+        ufEndereco: dados.uf || prev.ufEndereco,
+        complemento: dados.complemento || prev.complemento,
+      }));
+      setCepStatus("ok");
+    } catch (error) {
+      console.error("Erro ao buscar CEP:", error);
+      setCepStatus("erro");
+    } finally {
+      setBuscandoCEP(false);
+    }
+  };
+
   // Handler de mudanca de input
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -204,7 +241,14 @@ const FornecedorForm = ({
     } else if (name === "telefone") {
       setFormData((prev) => ({ ...prev, telefone: formatarTelefone(value) }));
     } else if (name === "cep") {
-      setFormData((prev) => ({ ...prev, cep: formatarCEP(value) }));
+      const cepFormatado = formatarCEP(value);
+      setFormData((prev) => ({ ...prev, cep: cepFormatado }));
+      setCepStatus("");
+      // Auto-buscar quando CEP completo (8 digitos)
+      const cepLimpo = value.replace(/\D/g, "");
+      if (cepLimpo.length === 8) {
+        buscarCEP(cepLimpo);
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -432,6 +476,58 @@ const FornecedorForm = ({
             Endereco
           </div>
 
+          {/* CEP (primeiro, com busca automatica) */}
+          <div style={styles.formGroup}>
+            <label style={styles.label(isDark)}>CEP</label>
+            <div style={styles.inputGroup}>
+              <input
+                type="text"
+                name="cep"
+                value={formData.cep}
+                onChange={handleChange}
+                placeholder="00000-000"
+                style={{
+                  ...styles.input(isDark),
+                  flex: 1,
+                  borderColor: cepStatus === "erro"
+                    ? "var(--error)"
+                    : cepStatus === "ok"
+                    ? "var(--success)"
+                    : undefined,
+                }}
+                maxLength={9}
+              />
+              <button
+                type="button"
+                onClick={() => buscarCEP(formData.cep)}
+                disabled={buscandoCEP || formData.cep.replace(/\D/g, "").length !== 8}
+                style={styles.btnBuscar(isDark, buscandoCEP || formData.cep.replace(/\D/g, "").length !== 8)}
+                title="Buscar endereco pelo CEP"
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    fontSize: 18,
+                    animation: buscandoCEP ? "spin 1s linear infinite" : "none",
+                  }}
+                >
+                  {buscandoCEP ? "sync" : "search"}
+                </span>
+              </button>
+            </div>
+            {cepStatus === "ok" && (
+              <span style={styles.success}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, marginRight: 4 }}>
+                  check_circle
+                </span>
+                Endereco preenchido automaticamente
+              </span>
+            )}
+            {cepStatus === "erro" && (
+              <span style={styles.error}>CEP nao encontrado</span>
+            )}
+          </div>
+
           {/* Logradouro + Numero */}
           <div style={styles.row}>
             <div style={{ ...styles.formGroup, flex: 3 }}>
@@ -484,7 +580,7 @@ const FornecedorForm = ({
             </div>
           </div>
 
-          {/* Cidade + UF + CEP */}
+          {/* Cidade + UF */}
           <div style={styles.row}>
             <div style={{ ...styles.formGroup, flex: 2 }}>
               <label style={styles.label(isDark)}>Cidade</label>
@@ -507,18 +603,6 @@ const FornecedorForm = ({
                 placeholder="UF"
                 style={styles.input(isDark)}
                 maxLength={2}
-              />
-            </div>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label(isDark)}>CEP</label>
-              <input
-                type="text"
-                name="cep"
-                value={formData.cep}
-                onChange={handleChange}
-                placeholder="00000-000"
-                style={styles.input(isDark)}
-                maxLength={9}
               />
             </div>
           </div>
