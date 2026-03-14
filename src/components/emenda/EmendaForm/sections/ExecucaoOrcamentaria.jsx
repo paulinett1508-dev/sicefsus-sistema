@@ -82,7 +82,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
     fieldset: {
       borderWidth: "2px",
       borderStyle: "solid",
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
       borderRadius: "10px",
       padding: "20px",
       background: isDark
@@ -97,8 +97,8 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
       borderRadius: "20px",
       borderWidth: "2px",
       borderStyle: "solid",
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
-      color: isDark ? "var(--theme-text)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
+      color: isDark ? "var(--theme-text)" : "var(--action)",
       fontWeight: "bold",
       fontSize: "16px",
       display: "flex",
@@ -1250,7 +1250,7 @@ const ExecucaoOrcamentaria = ({ formData, usuario }) => {
           Execução Orçamentária
           <span style={{
             marginLeft: 8,
-            backgroundColor: isDark ? "var(--theme-surface)" : "#2563EB",
+            backgroundColor: isDark ? "var(--theme-surface)" : "var(--action)",
             color: isDark ? "var(--theme-text)" : "#fff",
             padding: "2px 10px",
             borderRadius: 12,
@@ -1680,7 +1680,7 @@ const styles = {
     backgroundColor: "#f8f9fa",
   },
   btnNovaDespesa: {
-    backgroundColor: "var(--primary, #2563EB)",
+    backgroundColor: "var(--primary, var(--action))",
     color: "var(--white, #ffffff)",
     border: "none",
     padding: "10px 20px",
@@ -1713,7 +1713,7 @@ const styles = {
   statValue: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
     fontFamily: "monospace",
   },
   statHint: { fontSize: 11, color: "#adb5bd", marginTop: 4 },
@@ -1808,10 +1808,10 @@ const styles = {
     margin: 0,
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
   },
   badge: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "var(--action)",
     color: "#fff",
     padding: "4px 12px",
     borderRadius: 999,
@@ -1907,7 +1907,7 @@ const styles = {
     transition: "background-color 0.2s",
   },
   btnIconExecutar: {
-    backgroundColor: "var(--primary, #2563EB)",
+    backgroundColor: "var(--primary, var(--action))",
     color: "var(--white, #ffffff)",
     border: "none",
     padding: "6px 10px",

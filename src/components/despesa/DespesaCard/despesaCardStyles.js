@@ -10,7 +10,7 @@ export const despesaCardStyles = {
   despesasSectionTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     marginBottom: "16px",
     display: "flex",
     alignItems: "center",
@@ -97,7 +97,7 @@ export const despesaCardStyles = {
 
   despesaValor: {
     fontSize: "16px",
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   // ==================== INFO EXTRA (SÓ EXECUTADAS) ====================

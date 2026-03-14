@@ -929,7 +929,7 @@ const getStyles = (isDark) => ({
     flex: 1,
   },
   btnRefresh: {
-    backgroundColor: isDark ? "#3b82f6" : "#2563EB",
+    backgroundColor: isDark ? "#3b82f6" : "var(--action)",
     color: "white",
     border: "none",
     padding: "12px 16px",
@@ -1044,7 +1044,7 @@ const getStyles = (isDark) => ({
     padding: "0 15px",
     fontSize: "13px",
     fontWeight: "600",
-    color: isDark ? "#60a5fa" : "#2563EB",
+    color: isDark ? "#60a5fa" : "var(--action)",
     letterSpacing: "0.5px",
     whiteSpace: "nowrap",
   },
@@ -1069,9 +1069,9 @@ const getStyles = (isDark) => ({
     transition: "all 0.2s ease",
   },
   modoToggleBtnActive: {
-    border: `2px solid ${isDark ? "#3b82f6" : "#2563EB"}`,
+    border: `2px solid ${isDark ? "#3b82f6" : "var(--action)"}`,
     backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(37, 99, 235, 0.05)",
-    color: isDark ? "#60a5fa" : "#2563EB",
+    color: isDark ? "#60a5fa" : "var(--action)",
     fontWeight: "600",
   },
   fornecedorSelecionadoHint: {

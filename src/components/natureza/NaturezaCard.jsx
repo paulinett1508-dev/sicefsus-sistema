@@ -213,7 +213,7 @@ const NaturezaCard = ({
       gap: "4px",
     },
     btnPrimario: {
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "var(--white, #ffffff)",
     },
     btnSecundario: {
@@ -302,7 +302,7 @@ const NaturezaCard = ({
     },
     statusEmpenhado: {
       backgroundColor: isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.1)",
-      color: "var(--primary, #2563EB)",
+      color: "var(--primary, var(--action))",
     },
     statusLiquidado: {
       backgroundColor: isDark ? "rgba(139, 92, 246, 0.1)" : "rgba(139, 92, 246, 0.1)",

@@ -24,7 +24,7 @@ const Identificacao = ({
     fieldset: {
       borderWidth: "2px",
       borderStyle: "solid",
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
       borderRadius: "10px",
       padding: "20px",
       background: isDark ? "var(--theme-surface)" : "white",
@@ -36,8 +36,8 @@ const Identificacao = ({
       borderRadius: "20px",
       borderWidth: "2px",
       borderStyle: "solid",
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
-      color: isDark ? "var(--theme-text)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
+      color: isDark ? "var(--theme-text)" : "var(--action)",
       fontWeight: "bold",
       fontSize: "16px",
       display: "flex",
@@ -309,7 +309,7 @@ const Identificacao = ({
 // ✅ ESTILOS MANTIDOS
 const styles = {
   fieldset: {
-    border: "2px solid #2563EB",
+    border: "2px solid var(--action)",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -319,8 +319,8 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #2563EB",
-    color: "#2563EB",
+    border: "2px solid var(--action)",
+    color: "var(--action)",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",

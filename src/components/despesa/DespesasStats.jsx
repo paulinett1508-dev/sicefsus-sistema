@@ -77,7 +77,7 @@ const styles = {
   statNumber: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 8px 0",
   },
 

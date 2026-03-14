@@ -294,7 +294,7 @@ const DadosBeneficiario = ({
 // ✅ ESTILOS MANTIDOS
 const customStyles = {
   section: {
-    border: "2px solid #2563EB",
+    border: "2px solid var(--action)",
     borderRadius: "10px",
     padding: "0",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -319,8 +319,8 @@ const customStyles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #2563EB",
-    color: "#2563EB",
+    border: "2px solid var(--action)",
+    color: "var(--action)",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -345,7 +345,7 @@ const customStyles = {
   toggleIcon: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   toggleText: {

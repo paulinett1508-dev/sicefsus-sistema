@@ -255,7 +255,7 @@ const styles = {
     borderRadius: 12,
     marginBottom: "20px",
     fontSize: 14,
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   avisoMunicipio: {

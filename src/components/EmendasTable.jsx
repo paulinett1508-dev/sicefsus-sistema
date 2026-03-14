@@ -56,9 +56,9 @@ const EmendasTable = ({
   const statusColors = {
     blue: {
       bg: "rgba(37, 99, 235, 0.1)",
-      text: "#2563EB",
+      text: "var(--action)",
       border: "rgba(37, 99, 235, 0.2)",
-      dot: "#2563EB"
+      dot: "var(--action)"
     },
     green: {
       bg: "rgba(16, 185, 129, 0.1)",
@@ -89,7 +89,7 @@ const EmendasTable = ({
   // Cor da progress bar
   const getProgressColor = (percentual) => {
     if (percentual === 0) return "#CBD5E1";
-    if (percentual < 50) return "#2563EB";
+    if (percentual < 50) return "var(--action)";
     if (percentual < 100) return "#10B981";
     return "#10B981";
   };
@@ -226,16 +226,16 @@ const EmendasTable = ({
                   key={emenda.id}
                   style={{
                     ...styles.tr,
-                    borderLeftColor: isSelected ? "var(--primary, #2563EB)" : "transparent"
+                    borderLeftColor: isSelected ? "var(--primary, var(--action))" : "transparent"
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "var(--gray-50, #F8FAFC)";
-                    e.currentTarget.style.borderLeftColor = "var(--primary, #2563EB)";
+                    e.currentTarget.style.borderLeftColor = "var(--primary, var(--action))";
                     e.currentTarget.querySelector('.action-buttons').style.opacity = "1";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = "transparent";
-                    e.currentTarget.style.borderLeftColor = isSelected ? "var(--primary, #2563EB)" : "transparent";
+                    e.currentTarget.style.borderLeftColor = isSelected ? "var(--primary, var(--action))" : "transparent";
                     e.currentTarget.querySelector('.action-buttons').style.opacity = "0";
                   }}
                 >
@@ -428,7 +428,7 @@ const EmendasTable = ({
                         style={styles.actionBtn}
                         title="Editar"
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = "#2563EB";
+                          e.currentTarget.style.color = "var(--action)";
                           e.currentTarget.style.backgroundColor = "rgba(37, 99, 235, 0.1)";
                         }}
                         onMouseLeave={(e) => {
@@ -587,8 +587,8 @@ const styles = {
     transition: "all 0.15s ease",
   },
   checkboxChecked: {
-    backgroundColor: "var(--primary, #2563EB)",
-    borderColor: "var(--primary, #2563EB)",
+    backgroundColor: "var(--primary, var(--action))",
+    borderColor: "var(--primary, var(--action))",
   },
   checkIcon: {
     width: "10px",

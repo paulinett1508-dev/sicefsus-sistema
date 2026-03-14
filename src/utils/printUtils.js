@@ -76,7 +76,7 @@ export const printReport = async (reportId, title) => {
           font-size: 18px;
           font-weight: bold;
           margin-bottom: 5px;
-          color: #2563EB;
+          color: var(--action);
         }
 
         .print-header h2 {
@@ -98,7 +98,7 @@ export const printReport = async (reportId, title) => {
         }
 
         .print-content h2 {
-          color: #2563EB;
+          color: var(--action);
           font-size: 16px;
           margin-bottom: 15px;
           padding-bottom: 5px;
@@ -106,7 +106,7 @@ export const printReport = async (reportId, title) => {
         }
 
         .print-content h3 {
-          color: #2563EB;
+          color: var(--action);
           font-size: 14px;
           margin: 15px 0 10px 0;
         }
@@ -129,7 +129,7 @@ export const printReport = async (reportId, title) => {
           background-color: #f0f0f0;
           font-weight: bold;
           text-align: center;
-          color: #2563EB;
+          color: var(--action);
         }
 
         .number, .currency {
@@ -159,7 +159,7 @@ export const printReport = async (reportId, title) => {
         .kpi-value {
           font-size: 16px;
           font-weight: bold;
-          color: #2563EB;
+          color: var(--action);
           margin-bottom: 5px;
         }
 
@@ -187,7 +187,7 @@ export const printReport = async (reportId, title) => {
 
         .alert-title {
           font-weight: bold;
-          color: #2563EB;
+          color: var(--action);
           margin-bottom: 5px;
         }
 

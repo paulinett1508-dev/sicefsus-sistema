@@ -210,7 +210,7 @@ const FornecedoresList = () => {
       fontWeight: "600",
       border: "none",
       borderRadius: "8px",
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "#ffffff",
       cursor: "pointer",
       display: "flex",
@@ -326,13 +326,13 @@ const FornecedoresList = () => {
       padding: "6px 12px",
       fontSize: "13px",
       fontWeight: ativo ? "600" : "500",
-      border: `1px solid ${ativo ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
+      border: `1px solid ${ativo ? "var(--primary, var(--action))" : isDark ? "var(--theme-border)" : "var(--theme-border, #E2E8F0)"}`,
       borderRadius: "6px",
       backgroundColor: ativo
         ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
         : isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
       color: ativo
-        ? "var(--primary, #2563EB)"
+        ? "var(--primary, var(--action))"
         : isDark ? "var(--theme-text)" : "var(--gray-700, #334155)",
       cursor: "pointer",
       transition: "all 0.2s ease",

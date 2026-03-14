@@ -102,7 +102,7 @@ export const emendaDetailStyles = {
   headerTitle: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 8px 0",
   },
 
@@ -216,7 +216,7 @@ export const emendaDetailStyles = {
   kpiValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   kpiLabel: {
@@ -285,7 +285,7 @@ export const emendaDetailStyles = {
   chartTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 16px 0",
     textAlign: "center",
   },
@@ -307,7 +307,7 @@ export const emendaDetailStyles = {
   detalheTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -346,7 +346,7 @@ export const emendaDetailStyles = {
   acoesTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -385,7 +385,7 @@ export const emendaDetailStyles = {
   despesasTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 
@@ -430,7 +430,7 @@ export const emendaDetailStyles = {
   formTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 
@@ -507,7 +507,7 @@ export const emendaDetailStyles = {
 
 // ==================== CORES DO TEMA ====================
 export const THEME_COLORS = {
-  PRIMARY: "#2563EB",
+  PRIMARY: "var(--action)",
   ACCENT: "#3B82F6",
   SUCCESS: "#10B981",
   WARNING: "#F59E0B",

@@ -12,7 +12,7 @@ const InformacoesComplementares = ({
   // Estilos dinâmicos baseados no tema
   const dynamicStyles = {
     fieldset: {
-      border: isDark ? "2px solid var(--theme-border)" : "2px solid #2563EB",
+      border: isDark ? "2px solid var(--theme-border)" : "2px solid var(--action)",
       background: isDark ? "var(--theme-surface)" : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
       boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
     },
@@ -22,14 +22,14 @@ const InformacoesComplementares = ({
     },
     legend: {
       background: isDark ? "var(--theme-surface)" : "white",
-      border: isDark ? "2px solid var(--theme-border)" : "2px solid #2563EB",
-      color: isDark ? "var(--theme-text)" : "#2563EB",
+      border: isDark ? "2px solid var(--theme-border)" : "2px solid var(--action)",
+      color: isDark ? "var(--theme-text)" : "var(--action)",
     },
     toggleButton: {
       color: isDark ? "var(--theme-text-secondary)" : "#495057",
     },
     toggleIcon: {
-      color: isDark ? "var(--theme-primary)" : "#2563EB",
+      color: isDark ? "var(--theme-primary)" : "var(--action)",
     },
     label: {
       color: isDark ? "var(--theme-text)" : "#333",
@@ -193,7 +193,7 @@ const InformacoesComplementares = ({
 
 const styles = {
   fieldset: {
-    border: "2px solid #2563EB",
+    border: "2px solid var(--action)",
     borderRadius: "10px",
     padding: "0",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -216,8 +216,8 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #2563EB",
-    color: "#2563EB",
+    border: "2px solid var(--action)",
+    color: "var(--action)",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -239,7 +239,7 @@ const styles = {
   toggleIcon: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
   },
   toggleText: {
     fontSize: "14px",

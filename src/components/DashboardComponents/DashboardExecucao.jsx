@@ -293,7 +293,7 @@ const DashboardExecucao = ({ emendas = [] }) => {
                               </span>
                               <span style={{
                                 ...styles.detalheValor,
-                                color: (valor - executado) > 0 ? "#2563EB" : "#EF4444",
+                                color: (valor - executado) > 0 ? "var(--action)" : "#EF4444",
                                 fontWeight: 700,
                               }}>
                                 {formatCurrency(valor - executado)}

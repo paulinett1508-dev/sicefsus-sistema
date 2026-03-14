@@ -17,14 +17,14 @@ const DadosBancarios = ({
   // Estilos dinâmicos baseados no tema
   const dynamicStyles = {
     fieldset: {
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
       background: isDark ? "var(--theme-surface)" : "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
       boxShadow: isDark ? "var(--shadow)" : "0 2px 4px rgba(0,0,0,0.1)",
     },
     legend: {
       background: isDark ? "var(--theme-surface-secondary)" : "white",
-      borderColor: isDark ? "var(--theme-border)" : "#2563EB",
-      color: isDark ? "var(--theme-text)" : "#2563EB",
+      borderColor: isDark ? "var(--theme-border)" : "var(--action)",
+      color: isDark ? "var(--theme-text)" : "var(--action)",
     },
     label: {
       color: isDark ? "var(--theme-text)" : "#333",
@@ -229,7 +229,7 @@ const styles = {
   fieldset: {
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#2563EB",
+    borderColor: "var(--action)",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -241,8 +241,8 @@ const styles = {
     borderRadius: "20px",
     borderWidth: "2px",
     borderStyle: "solid",
-    borderColor: "#2563EB",
-    color: "#2563EB",
+    borderColor: "var(--action)",
+    color: "var(--action)",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",
@@ -321,7 +321,7 @@ const styles = {
   },
   toggleIcon: {
     fontSize: "12px",
-    color: "#2563EB",
+    color: "var(--action)",
     transition: "transform 0.2s ease",
   },
   toggleText: {

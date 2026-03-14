@@ -10,7 +10,7 @@ import DespesasTable from "./DespesasTable";
 import { parseValorMonetario } from "../utils/formatters";
 
 // ✅ CORES PADRONIZADAS (mesmo padrão do Emendas)
-const PRIMARY = "#2563EB";
+const PRIMARY = "var(--action)";
 const ACCENT = "#3B82F6";
 const SUCCESS = "#10B981";
 const WARNING = "#F59E0B";
