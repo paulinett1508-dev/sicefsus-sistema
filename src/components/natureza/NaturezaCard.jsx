@@ -105,7 +105,7 @@ const NaturezaCard = ({
       backgroundColor: "#f59e0b",
       color: "#fff",
       padding: "2px 8px",
-      fontSize: "10px",
+      fontSize: "11px",
       fontWeight: 600,
       borderBottomLeftRadius: "6px",
     },
@@ -162,7 +162,7 @@ const NaturezaCard = ({
       textAlign: "right",
     },
     metricaLabel: {
-      fontSize: "10px",
+      fontSize: "11px",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-400, #94A3B8)",
       display: "block",
     },
@@ -292,7 +292,7 @@ const NaturezaCard = ({
     statusBadge: {
       padding: "2px 6px",
       borderRadius: "var(--border-radius-sm, 4px)",
-      fontSize: "10px",
+      fontSize: "11px",
       fontWeight: "var(--font-weight-semibold, 600)",
       textTransform: "uppercase",
     },

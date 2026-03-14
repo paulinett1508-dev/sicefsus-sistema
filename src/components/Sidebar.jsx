@@ -135,9 +135,10 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
     <aside style={styles.sidebar(collapsed)}>
       {/* Header com Logo */}
       <div style={styles.header}>
-        <div
+        <button
           style={styles.logoContainer}
           onClick={() => onNavigate("/dashboard")}
+          aria-label="Ir para Dashboard"
         >
           <img
             src={logoSicefsus}
@@ -145,7 +146,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
             style={collapsed ? styles.logoImageCollapsed : styles.logoImage}
           />
           {!collapsed && <span style={styles.logoText}>SICEFSUS</span>}
-        </div>
+        </button>
         
         {/* Botão Toggle Sidebar */}
         <button
@@ -178,9 +179,11 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
       {/* Painel de Informações Expansível - Apenas Super Admin */}
       {!collapsed && isSuperAdmin && (
         <div style={styles.infoPanel(infoExpanded)}>
-          <div 
-            style={styles.infoPanelHeader} 
+          <button
+            style={styles.infoPanelHeader}
             onClick={() => setInfoExpanded(!infoExpanded)}
+            aria-expanded={infoExpanded}
+            aria-label="Stack do Sistema"
           >
             <div style={styles.infoPanelTitle}>
               <span className="material-symbols-outlined" style={{ fontSize: 16 }}>info</span>
@@ -189,7 +192,7 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
               {infoExpanded ? 'expand_less' : 'expand_more'}
             </span>
-          </div>
+          </button>
           
           {infoExpanded && (
             <div style={styles.infoPanelContent}>
@@ -289,18 +292,18 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
       {/* Footer com Usuário */}
       <div style={styles.footer}>
         {/* Link "Sobre" discreto no topo do footer */}
-        <div
+        <button
           style={{
             ...styles.sobreLink,
             justifyContent: collapsed ? "center" : "flex-start",
             padding: collapsed ? "8px 0" : "8px 12px",
           }}
           onClick={() => onNavigate("/sobre")}
-          title="Sobre o sistema"
+          aria-label="Sobre o sistema"
         >
           <span className="material-symbols-outlined" style={{ fontSize: 16, marginRight: collapsed ? 0 : 8 }}>info</span>
           {!collapsed && <span>Sobre</span>}
-        </div>
+        </button>
 
         <div style={styles.footerDivider} />
 
@@ -375,12 +378,13 @@ function NavItem({ item, isActive, collapsed, onClick, badge }) {
   };
 
   return (
-    <div
-      style={itemStyle}
+    <button
+      style={{ ...itemStyle, border: "none", width: "100%", textAlign: "left" }}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      title={collapsed ? item.label : ""}
+      aria-label={item.label}
+      aria-current={isActive ? "page" : undefined}
     >
       <span className="material-symbols-outlined" style={iconStyle}>
         {item.icon}
@@ -391,7 +395,7 @@ function NavItem({ item, isActive, collapsed, onClick, badge }) {
       {!collapsed && badge && (
         <span style={styles.badge}>{badge}</span>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -430,6 +434,9 @@ const styles = {
     gap: 8,
     cursor: "pointer",
     color: "var(--theme-sidebar-text)",
+    background: "none",
+    border: "none",
+    padding: 0,
   },
 
   toggleButton: {
@@ -494,6 +501,10 @@ const styles = {
     cursor: "pointer",
     transition: "background-color 0.15s ease",
     color: "var(--theme-sidebar-text-secondary)",
+    background: "transparent",
+    border: "none",
+    width: "100%",
+    textAlign: "left",
   },
 
   infoPanelTitle: {
@@ -530,7 +541,7 @@ const styles = {
   },
 
   techLabel: {
-    fontSize: "10px",
+    fontSize: "11px",
     fontWeight: 600,
     color: "var(--theme-sidebar-text-muted)",
     textTransform: "uppercase",
@@ -549,7 +560,7 @@ const styles = {
     backgroundColor: "rgba(245, 158, 11, 0.2)",
     border: "1px solid rgba(245, 158, 11, 0.4)",
     borderRadius: "8px",
-    fontSize: "11px",
+    fontSize: "12px",
     color: "#FBBF24",
     display: "flex",
     alignItems: "center",
@@ -568,7 +579,7 @@ const styles = {
   badge: {
     backgroundColor: "rgba(245, 158, 11, 0.25)",
     color: "#FBBF24",
-    fontSize: "9px",
+    fontSize: "11px",
     fontWeight: 700,
     padding: "2px 6px",
     borderRadius: "4px",
@@ -589,6 +600,9 @@ const styles = {
     color: "var(--theme-sidebar-text-secondary)",
     transition: "all 0.15s ease",
     marginBottom: 8,
+    background: "none",
+    border: "none",
+    width: "100%",
   },
 
   footerDivider: {
@@ -678,7 +692,7 @@ const styles = {
   }),
 
   envBadge: {
-    fontSize: "9px",
+    fontSize: "11px",
     fontWeight: 700,
     color: "#ffffff",
     padding: "2px 5px",
@@ -687,7 +701,7 @@ const styles = {
   },
 
   versionText: {
-    fontSize: "10px",
+    fontSize: "11px",
     color: "var(--theme-sidebar-text-muted)",
     fontFamily: "monospace",
   },

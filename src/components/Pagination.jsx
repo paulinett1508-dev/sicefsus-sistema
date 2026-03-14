@@ -1,12 +1,12 @@
 // src/components/Pagination.jsx
 import React, { useState } from 'react';
 
-const PRIMARY = '#2563EB';
-const ACCENT = '#3B82F6';
-const WHITE = '#fff';
-const GRAY = '#F8FAFC';
-const SLATE = '#64748B';
-const SUCCESS = '#10B981';
+const PRIMARY = 'var(--primary)';
+const ACCENT = 'var(--primary-light)';
+const WHITE = 'var(--theme-surface)';
+const GRAY = 'var(--theme-surface-secondary)';
+const SLATE = 'var(--theme-text-secondary)';
+const SUCCESS = 'var(--success)';
 
 /**
  * Componente de Paginação
@@ -343,7 +343,7 @@ const styles = {
     gap: 16,
     alignItems: 'center',
     padding: '16px 0',
-    borderTop: '1px solid #E2E8F0',
+    borderTop: '1px solid var(--theme-border)',
     marginTop: 16,
     backgroundColor: WHITE,
     borderRadius: '0 0 8px 8px',
@@ -378,19 +378,19 @@ const styles = {
 
   label: {
     fontSize: 14,
-    color: '#334155',
+    color: 'var(--theme-text)',
     fontWeight: '500',
     whiteSpace: 'nowrap',
   },
 
   select: {
     padding: '6px 12px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid var(--theme-border)',
     borderRadius: 6,
     fontSize: 14,
     backgroundColor: WHITE,
     cursor: 'pointer',
-    color: '#334155',
+    color: 'var(--theme-text)',
   },
 
   navigationSection: {
@@ -408,7 +408,7 @@ const styles = {
 
   button: {
     padding: '8px 12px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid var(--theme-border)',
     borderRadius: 6,
     backgroundColor: WHITE,
     color: SLATE,
@@ -424,10 +424,10 @@ const styles = {
 
   disabledButton: {
     padding: '8px 12px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid var(--theme-border)',
     borderRadius: 6,
     backgroundColor: GRAY,
-    color: '#CBD5E1',
+    color: 'var(--gray-300)',
     cursor: 'not-allowed',
     fontSize: 14,
     minWidth: 40,
@@ -476,7 +476,7 @@ const styles = {
   jumpInput: {
     width: 60,
     padding: '6px 8px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid var(--theme-border)',
     borderRadius: 6,
     textAlign: 'center',
     fontSize: 14,
@@ -500,7 +500,7 @@ const styles = {
   progressBar: {
     width: '100%',
     height: 4,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: 'var(--gray-200)',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -528,7 +528,7 @@ const styles = {
 
   quickButton: {
     padding: '6px 12px',
-    border: '1px solid #E2E8F0',
+    border: '1px solid var(--theme-border)',
     borderRadius: 6,
     backgroundColor: WHITE,
     color: PRIMARY,
@@ -551,7 +551,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '8px 0',
-    borderTop: '1px solid #E2E8F0',
+    borderTop: '1px solid var(--theme-border)',
     marginTop: 8,
     fontFamily: "'Inter', sans-serif",
   },
@@ -564,7 +564,7 @@ const styles = {
 
   pageInfoText: {
     fontSize: 12,
-    color: '#94A3B8',
+    color: 'var(--gray-400)',
   },
 };
 
