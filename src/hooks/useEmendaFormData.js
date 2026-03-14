@@ -878,7 +878,7 @@ export const useEmendaFormData = () => {
             contentDiv.appendChild(iconDiv);
 
             const h2 = document.createElement("h2");
-            h2.style.cssText = "color: #2563EB; margin: 0 0 12px 0; font-size: 22px; font-weight: 600;";
+            h2.style.cssText = "color: var(--action); margin: 0 0 12px 0; font-size: 22px; font-weight: 600;";
             h2.textContent = "Emenda Cadastrada!";
             contentDiv.appendChild(h2);
 

@@ -478,7 +478,7 @@ const Emendas = () => {
             <p style={styles.statLabel}>Total de Emendas</p>
             <h3 style={styles.statNumber}>{totalEmendas}</h3>
           </div>
-          <div style={{ ...styles.statIcon, backgroundColor: "rgba(37, 99, 235, 0.1)", color: "#2563EB" }}>
+          <div style={{ ...styles.statIcon, backgroundColor: "rgba(37, 99, 235, 0.1)", color: "var(--action)" }}>
             <span className="material-symbols-outlined">assignment</span>
           </div>
         </div>
@@ -631,7 +631,7 @@ const styles = {
     width: "40px",
     height: "40px",
     border: "3px solid var(--gray-200, #E2E8F0)",
-    borderTop: "3px solid var(--primary, #2563EB)",
+    borderTop: "3px solid var(--primary, var(--action))",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
@@ -785,7 +785,7 @@ const styles = {
     border: "1px solid var(--theme-border, #E2E8F0)",
     borderRadius: "8px",
     cursor: "pointer",
-    color: "var(--primary, #2563EB)",
+    color: "var(--primary, var(--action))",
     fontWeight: "600",
     fontSize: "14px",
     transition: "all 0.15s ease",
@@ -793,14 +793,14 @@ const styles = {
   },
   filterButtonActive: {
     backgroundColor: "rgba(37, 99, 235, 0.08)",
-    borderColor: "var(--primary, #2563EB)",
+    borderColor: "var(--primary, var(--action))",
   },
   filterText: {
     color: "var(--theme-text)",
   },
   filterBadge: {
     backgroundColor: "rgba(37, 99, 235, 0.1)",
-    color: "var(--primary, #2563EB)",
+    color: "var(--primary, var(--action))",
     fontSize: "10px",
     fontWeight: "700",
     padding: "2px 6px",
@@ -835,7 +835,7 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     padding: "8px 16px",
-    backgroundColor: "var(--primary, #2563EB)",
+    backgroundColor: "var(--primary, var(--action))",
     border: "none",
     borderRadius: "8px",
     color: "#ffffff",

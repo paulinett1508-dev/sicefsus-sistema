@@ -145,7 +145,7 @@ const ClassificacaoTecnica = ({
 
 const styles = {
   fieldset: {
-    border: "2px solid #2563EB",
+    border: "2px solid var(--action)",
     borderRadius: "10px",
     padding: "20px",
     background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
@@ -155,8 +155,8 @@ const styles = {
     background: "white",
     padding: "5px 15px",
     borderRadius: "20px",
-    border: "2px solid #2563EB",
-    color: "#2563EB",
+    border: "2px solid var(--action)",
+    color: "var(--action)",
     fontWeight: "bold",
     fontSize: "16px",
     display: "flex",

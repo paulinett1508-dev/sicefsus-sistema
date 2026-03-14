@@ -211,7 +211,7 @@ const Dashboard = ({ usuario }) => {
                   : "Operador"}
               </span>
               {!permissions.acessoTotal && (
-                <span style={{ ...styles.badge, backgroundColor: "#2563EB", display: "flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ ...styles.badge, backgroundColor: "var(--action)", display: "flex", alignItems: "center", gap: "4px" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
                   {user.municipio}/{user.uf}
                 </span>
@@ -366,7 +366,7 @@ const styles = {
     textTransform: "capitalize",
   },
   refreshButton: {
-    backgroundColor: "var(--primary, #2563EB)",
+    backgroundColor: "var(--primary, var(--action))",
     color: "white",
     border: "none",
     padding: "8px 16px",
@@ -416,7 +416,7 @@ const styles = {
     width: "40px",
     height: "40px",
     border: "3px solid var(--gray-200, #E2E8F0)",
-    borderTop: "3px solid var(--primary, #2563EB)",
+    borderTop: "3px solid var(--primary, var(--action))",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },

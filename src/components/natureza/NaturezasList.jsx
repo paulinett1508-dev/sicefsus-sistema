@@ -239,7 +239,7 @@ const NaturezasList = ({
       gap: "6px",
     },
     badge: {
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "var(--white, #ffffff)",
       padding: "2px 6px",
       borderRadius: "var(--border-radius-full, 10px)",
@@ -252,7 +252,7 @@ const NaturezasList = ({
       fontWeight: "var(--font-weight-medium, 500)",
       border: "none",
       borderRadius: "var(--border-radius, 6px)",
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "var(--white, #ffffff)",
       cursor: "pointer",
       display: "flex",

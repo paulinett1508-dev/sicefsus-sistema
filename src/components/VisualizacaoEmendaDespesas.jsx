@@ -106,7 +106,7 @@ const VisualizacaoEmendaDespesas = ({
 
   // Cores para gráficos
   const COLORS = ["#3B82F6", "#10B981", "#F5A623", "#D0021B", "#9013FE"];
-  const PRIMARY = "#2563EB";
+  const PRIMARY = "var(--action)";
   const ACCENT = "#3B82F6";
   const SUCCESS = "#10B981";
   const WARNING = "#F59E0B";
@@ -859,7 +859,7 @@ const styles = {
   headerTitle: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 8px 0",
   },
 
@@ -973,7 +973,7 @@ const styles = {
   kpiValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   kpiLabel: {
@@ -1041,7 +1041,7 @@ const styles = {
   chartTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 16px 0",
     textAlign: "center",
   },
@@ -1062,7 +1062,7 @@ const styles = {
   detalheTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -1100,7 +1100,7 @@ const styles = {
   acoesTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -1138,7 +1138,7 @@ const styles = {
   despesasTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 
@@ -1161,7 +1161,7 @@ const styles = {
   formTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 

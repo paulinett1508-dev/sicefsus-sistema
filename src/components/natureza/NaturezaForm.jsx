@@ -254,7 +254,7 @@ const NaturezaForm = ({
       fontWeight: "var(--font-weight-medium, 500)",
       border: "none",
       borderRadius: "var(--border-radius, 6px)",
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "var(--white, #ffffff)",
       cursor: "pointer",
       display: "flex",
@@ -266,7 +266,7 @@ const NaturezaForm = ({
       cursor: "not-allowed",
     },
     linkVoltar: {
-      color: "var(--primary, #2563EB)",
+      color: "var(--primary, var(--action))",
       fontSize: "11px",
       cursor: "pointer",
       textDecoration: "underline",

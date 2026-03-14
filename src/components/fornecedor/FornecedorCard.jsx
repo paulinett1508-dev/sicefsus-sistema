@@ -66,7 +66,7 @@ const FornecedorCard = ({
         backgroundColor: isDark ? "var(--theme-surface)" : "#fff",
         borderRadius: "8px",
         border: selecionado
-          ? "2px solid var(--primary, #2563EB)"
+          ? "2px solid var(--primary, var(--action))"
           : `1px solid ${isDark ? "var(--theme-border)" : "#e2e8f0"}`,
         overflow: "hidden",
         transition: "all 0.15s ease",
@@ -92,7 +92,7 @@ const FornecedorCard = ({
           style={{
             fontSize: 20,
             color: modoSelecao && selecionado
-              ? "var(--primary, #2563EB)"
+              ? "var(--primary, var(--action))"
               : isDark ? "var(--text-secondary)" : "#94a3b8",
             transition: "transform 0.2s",
             transform: !modoSelecao && expandido ? "rotate(90deg)" : "rotate(0)",

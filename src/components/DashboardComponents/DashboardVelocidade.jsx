@@ -123,7 +123,7 @@ const DashboardVelocidade = ({ despesas = [], stats = {} }) => {
 
         <div style={{ ...styles.comparativoCard, ...styles.comparativoAtual }}>
           <span style={styles.comparativoLabel}>Mês Atual</span>
-          <span style={{ ...styles.comparativoValue, color: "#2563EB" }}>
+          <span style={{ ...styles.comparativoValue, color: "var(--action)" }}>
             {formatCurrency(dados.valorMesAtual)}
           </span>
           <span style={styles.comparativoMes}>
@@ -363,7 +363,7 @@ const styles = {
   projecaoMeses: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
   },
   projecaoVazio: {
     textAlign: "center",

@@ -11,7 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import { doc, deleteDoc, runTransaction } from "firebase/firestore";
 import { NATUREZAS_DESPESA } from "../config/constants"; // mapeia código → rótulo (fallback seguro abaixo)
 
-const PRIMARY = "#2563EB";
+const PRIMARY = "var(--action)";
 const ACCENT = "#3B82F6";
 const WHITE = "#fff";
 const ERROR = "#EF4444";

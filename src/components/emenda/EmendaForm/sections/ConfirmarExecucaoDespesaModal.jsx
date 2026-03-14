@@ -219,7 +219,7 @@ const styles = {
     margin: "0 0 16px 0",
     fontSize: "16px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
   },
   infoRow: {
     display: "flex",
@@ -239,7 +239,7 @@ const styles = {
   valorDestaque: {
     fontSize: "18px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
   },
   divider: {
     height: "1px",

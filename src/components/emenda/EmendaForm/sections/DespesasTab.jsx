@@ -424,7 +424,7 @@ const styles = {
   headerTitle: {
     fontSize: "20px",
     fontWeight: "bold",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 4px 0",
   },
   headerSubtitle: {

@@ -105,7 +105,7 @@ const NaturezaCard = ({
       backgroundColor: "#f59e0b",
       color: "#fff",
       padding: "2px 8px",
-      fontSize: "10px",
+      fontSize: "11px",
       fontWeight: 600,
       borderBottomLeftRadius: "6px",
     },
@@ -162,7 +162,7 @@ const NaturezaCard = ({
       textAlign: "right",
     },
     metricaLabel: {
-      fontSize: "10px",
+      fontSize: "11px",
       color: isDark ? "var(--theme-text-secondary)" : "var(--gray-400, #94A3B8)",
       display: "block",
     },
@@ -213,7 +213,7 @@ const NaturezaCard = ({
       gap: "4px",
     },
     btnPrimario: {
-      backgroundColor: "var(--primary, #2563EB)",
+      backgroundColor: "var(--primary, var(--action))",
       color: "var(--white, #ffffff)",
     },
     btnSecundario: {
@@ -292,7 +292,7 @@ const NaturezaCard = ({
     statusBadge: {
       padding: "2px 6px",
       borderRadius: "var(--border-radius-sm, 4px)",
-      fontSize: "10px",
+      fontSize: "11px",
       fontWeight: "var(--font-weight-semibold, 600)",
       textTransform: "uppercase",
     },
@@ -302,7 +302,7 @@ const NaturezaCard = ({
     },
     statusEmpenhado: {
       backgroundColor: isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.1)",
-      color: "var(--primary, #2563EB)",
+      color: "var(--primary, var(--action))",
     },
     statusLiquidado: {
       backgroundColor: isDark ? "rgba(139, 92, 246, 0.1)" : "rgba(139, 92, 246, 0.1)",

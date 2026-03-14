@@ -15,7 +15,7 @@ export const emendaDetailStyles = {
   loadingSpinner: {
     width: "50px",
     height: "50px",
-    border: "4px solid #f3f3f3",
+    border: "4px solid var(--gray-100)",
     borderTop: "4px solid #3B82F6",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
@@ -24,7 +24,7 @@ export const emendaDetailStyles = {
   loadingText: {
     marginTop: "16px",
     fontSize: "16px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
   },
 
   errorContainer: {
@@ -51,7 +51,7 @@ export const emendaDetailStyles = {
 
   errorMessage: {
     fontSize: "16px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     margin: "0 0 24px 0",
   },
 
@@ -73,7 +73,7 @@ export const emendaDetailStyles = {
     maxWidth: "1400px",
     margin: "0 auto",
     padding: "20px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     minHeight: "100vh",
   },
 
@@ -102,13 +102,13 @@ export const emendaDetailStyles = {
   headerTitle: {
     fontSize: "24px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 8px 0",
   },
 
   headerSubtitle: {
     fontSize: "14px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     margin: "0 0 12px 0",
   },
 
@@ -121,7 +121,7 @@ export const emendaDetailStyles = {
 
   metaItem: {
     fontSize: "13px",
-    color: "#495057",
+    color: "var(--theme-text)",
     display: "flex",
     alignItems: "center",
     gap: "4px",
@@ -160,7 +160,7 @@ export const emendaDetailStyles = {
   btnSecondary: {
     padding: "10px 20px",
     backgroundColor: "white",
-    color: "#495057",
+    color: "var(--theme-text)",
     border: "1px solid #dee2e6",
     borderRadius: "6px",
     fontSize: "14px",
@@ -216,12 +216,12 @@ export const emendaDetailStyles = {
   kpiValue: {
     fontSize: "20px",
     fontWeight: "700",
-    color: "#2563EB",
+    color: "var(--action)",
   },
 
   kpiLabel: {
     fontSize: "12px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
 
@@ -235,8 +235,8 @@ export const emendaDetailStyles = {
 
   tabsHeader: {
     display: "flex",
-    borderBottom: "1px solid #e9ecef",
-    backgroundColor: "#f8f9fa",
+    borderBottom: "1px solid var(--theme-border)",
+    backgroundColor: "var(--theme-surface-secondary)",
     overflowX: "auto",
   },
 
@@ -246,7 +246,7 @@ export const emendaDetailStyles = {
     border: "none",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     cursor: "pointer",
     transition: "all 0.2s",
     borderBottom: "3px solid transparent",
@@ -277,15 +277,15 @@ export const emendaDetailStyles = {
 
   chartCard: {
     padding: "20px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   chartTitle: {
     fontSize: "16px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 16px 0",
     textAlign: "center",
   },
@@ -298,16 +298,16 @@ export const emendaDetailStyles = {
   },
 
   detalheCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
     padding: "16px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   detalheTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -325,28 +325,28 @@ export const emendaDetailStyles = {
 
   detalheLabel: {
     fontSize: "13px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     fontWeight: "500",
   },
 
   detalheValue: {
     fontSize: "13px",
-    color: "#495057",
+    color: "var(--theme-text)",
     fontWeight: "600",
   },
 
   // ==================== AÇÕES RÁPIDAS ====================
   acoesRapidas: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
     padding: "16px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   acoesTitle: {
     fontSize: "14px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: "0 0 12px 0",
   },
 
@@ -363,7 +363,7 @@ export const emendaDetailStyles = {
     borderRadius: "6px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#495057",
+    color: "var(--theme-text)",
     cursor: "pointer",
     transition: "all 0.2s",
     textAlign: "center",
@@ -385,7 +385,7 @@ export const emendaDetailStyles = {
   despesasTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 
@@ -406,7 +406,7 @@ export const emendaDetailStyles = {
 
   emptyText: {
     fontSize: "16px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     margin: "0 0 24px 0",
   },
 
@@ -415,7 +415,7 @@ export const emendaDetailStyles = {
     backgroundColor: "white",
     borderRadius: "8px",
     padding: "24px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
   },
 
   formHeader: {
@@ -424,13 +424,13 @@ export const emendaDetailStyles = {
     alignItems: "center",
     marginBottom: "24px",
     paddingBottom: "16px",
-    borderBottom: "1px solid #e9ecef",
+    borderBottom: "1px solid var(--theme-border)",
   },
 
   formTitle: {
     fontSize: "18px",
     fontWeight: "600",
-    color: "#2563EB",
+    color: "var(--action)",
     margin: 0,
   },
 
@@ -460,7 +460,7 @@ export const emendaDetailStyles = {
   formLabel: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#495057",
+    color: "var(--theme-text)",
   },
 
   formInput: {
@@ -477,37 +477,37 @@ export const emendaDetailStyles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "16px",
-    backgroundColor: "#e8f5e8",
+    backgroundColor: "var(--success-bg)",
     borderRadius: "8px",
-    border: "1px solid #d4edda",
+    border: "1px solid var(--success-light)",
   },
 
   saldoLabel: {
     fontSize: "14px",
     fontWeight: "500",
-    color: "#155724",
+    color: "var(--success-fg)",
   },
 
   saldoValue: {
     fontSize: "18px",
     fontWeight: "700",
-    color: "#28a745",
+    color: "var(--success)",
   },
 
   formNote: {
     padding: "16px",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "var(--theme-surface-secondary)",
     borderRadius: "8px",
-    border: "1px solid #e9ecef",
+    border: "1px solid var(--theme-border)",
     fontSize: "13px",
-    color: "#6c757d",
+    color: "var(--theme-text-secondary)",
     lineHeight: 1.4,
   },
 };
 
 // ==================== CORES DO TEMA ====================
 export const THEME_COLORS = {
-  PRIMARY: "#2563EB",
+  PRIMARY: "var(--action)",
   ACCENT: "#3B82F6",
   SUCCESS: "#10B981",
   WARNING: "#F59E0B",

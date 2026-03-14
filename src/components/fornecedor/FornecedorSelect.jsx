@@ -152,7 +152,7 @@ const FornecedorSelect = ({
       backgroundColor: isDark ? "var(--theme-surface)" : "var(--theme-surface, #ffffff)",
       border: `1px solid ${
         aberto
-          ? "var(--primary, #2563EB)"
+          ? "var(--primary, var(--action))"
           : isDark
             ? "var(--theme-border)"
             : "var(--theme-border, #E2E8F0)"
@@ -304,7 +304,7 @@ const FornecedorSelect = ({
       gap: "6px",
       fontSize: "var(--font-size-sm, 14px)",
       fontWeight: "var(--font-weight-medium, 500)",
-      color: "var(--primary, #2563EB)",
+      color: "var(--primary, var(--action))",
       backgroundColor: isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)",
       border: "none",
       borderRadius: "var(--border-radius, 6px)",
@@ -463,7 +463,7 @@ const FornecedorSelect = ({
                   {fornecedor.id === value && (
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: 18, color: "var(--primary, #2563EB)" }}
+                      style={{ fontSize: 18, color: "var(--primary, var(--action))" }}
                     >
                       check
                     </span>

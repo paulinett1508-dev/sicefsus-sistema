@@ -334,13 +334,13 @@ const FornecedorForm = ({
                   padding: "10px",
                   fontSize: "13px",
                   fontWeight: 600,
-                  border: `2px solid ${tipoPessoa === "PJ" ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
+                  border: `2px solid ${tipoPessoa === "PJ" ? "var(--primary, var(--action))" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
                   borderRadius: "6px",
                   backgroundColor: tipoPessoa === "PJ"
                     ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
                     : isDark ? "var(--theme-surface-secondary)" : "#ffffff",
                   color: tipoPessoa === "PJ"
-                    ? "var(--primary, #2563EB)"
+                    ? "var(--primary, var(--action))"
                     : isDark ? "var(--theme-text-secondary)" : "#64748B",
                   cursor: "pointer",
                   display: "flex",
@@ -361,13 +361,13 @@ const FornecedorForm = ({
                   padding: "10px",
                   fontSize: "13px",
                   fontWeight: 600,
-                  border: `2px solid ${tipoPessoa === "PF" ? "var(--primary, #2563EB)" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
+                  border: `2px solid ${tipoPessoa === "PF" ? "var(--primary, var(--action))" : isDark ? "var(--theme-border)" : "#E2E8F0"}`,
                   borderRadius: "6px",
                   backgroundColor: tipoPessoa === "PF"
                     ? isDark ? "rgba(37, 99, 235, 0.1)" : "rgba(37, 99, 235, 0.05)"
                     : isDark ? "var(--theme-surface-secondary)" : "#ffffff",
                   color: tipoPessoa === "PF"
-                    ? "var(--primary, #2563EB)"
+                    ? "var(--primary, var(--action))"
                     : isDark ? "var(--theme-text-secondary)" : "#64748B",
                   cursor: "pointer",
                   display: "flex",
