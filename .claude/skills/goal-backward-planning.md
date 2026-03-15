@@ -1,3 +1,8 @@
+---
+name: goal-backward-planning
+description: "Planejamento estruturado a partir do resultado esperado"
+---
+
 # Goal-Backward Planning
 
 Metodologia de planejamento estruturado a partir do resultado esperado.

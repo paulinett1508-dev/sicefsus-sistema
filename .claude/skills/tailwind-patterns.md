@@ -1,3 +1,8 @@
+---
+name: tailwind-patterns
+description: "Padrões e boas práticas para Tailwind CSS"
+---
+
 # Tailwind CSS Patterns
 
 Padroes e boas praticas para Tailwind CSS.

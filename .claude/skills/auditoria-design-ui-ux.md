@@ -1,3 +1,8 @@
+---
+name: auditoria-design-ui-ux
+description: "Avalia aspectos visuais, acessibilidade e consistência de design"
+---
+
 # Skill: Auditoria de Design e UI/UX
 
 ## Quando Usar

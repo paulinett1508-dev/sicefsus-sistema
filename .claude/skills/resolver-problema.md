@@ -1,3 +1,8 @@
+---
+name: resolver-problema
+description: "Diagnóstico guiado com 5 Whys e anti-patterns"
+---
+
 # Skill: Resolver Problema (Diagnóstico Guiado)
 
 ## Quando Usar

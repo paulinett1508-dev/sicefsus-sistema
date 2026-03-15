@@ -1,3 +1,8 @@
+---
+name: pre-implementation
+description: "5 perguntas essenciais antes de escrever código novo"
+---
+
 # Pre-Implementation — 5 Perguntas Antes de Codar
 
 Checklist essencial antes de escrever codigo novo.

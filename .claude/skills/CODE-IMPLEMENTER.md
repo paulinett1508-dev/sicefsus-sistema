@@ -1,3 +1,8 @@
+---
+name: code-implementer
+description: "Implementa SPEC aprovada com código limpo seguindo padrões do projeto"
+---
+
 # CODE Implementer Skill
 
 ## Session Management

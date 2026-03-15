@@ -1,3 +1,8 @@
+---
+name: auditoria-sistema
+description: "Análise holística do projeto: estrutura, código morto, inconsistências"
+---
+
 # Skill: Auditoria Completa do Sistema
 
 ## Quando Usar

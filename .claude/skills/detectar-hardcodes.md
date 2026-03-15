@@ -1,3 +1,8 @@
+---
+name: detectar-hardcodes
+description: "Identifica valores hardcoded que deveriam ser configuráveis"
+---
+
 # Skill: Detectar Valores Hardcoded
 
 ## Quando Usar

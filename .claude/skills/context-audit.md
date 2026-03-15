@@ -1,3 +1,8 @@
+---
+name: context-audit
+description: "Diagnostica e reduz consumo de tokens auto-carregados"
+---
+
 # Context Audit — Auditoria de Tokens
 
 Framework para diagnosticar e reduzir consumo de tokens automaticamente

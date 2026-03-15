@@ -1,3 +1,8 @@
+---
+name: code-inspector-sparc
+description: "Auditoria de código usando metodologia SPARC"
+---
+
 # Code Inspector — Auditoria SPARC
 
 Agent de auditoria de codigo usando metodologia SPARC:
