@@ -1,3 +1,8 @@
+---
+name: gerenciar-ambientes-firebase
+description: "Verifica, compara e gerencia configurações Firebase dev/prod"
+---
+
 # Skill: Gerenciar Ambientes Firebase
 
 ## Quando Usar

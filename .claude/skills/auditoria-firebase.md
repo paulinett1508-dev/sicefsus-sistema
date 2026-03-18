@@ -1,3 +1,8 @@
+---
+name: auditoria-firebase
+description: "Analisa interações com Firebase, performance, segurança e vazamentos"
+---
+
 # Skill: Auditoria de Firebase
 
 ## Quando Usar

@@ -1,3 +1,8 @@
+---
+name: spec-generator
+description: "Transforma PRD aprovado em especificação técnica detalhada"
+---
+
 # SPEC Generator Skill
 
 ## Session Management

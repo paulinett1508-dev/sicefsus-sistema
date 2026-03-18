@@ -1,3 +1,8 @@
+---
+name: anti-patterns-checker
+description: "Valida código e arquitetura contra 5 anti-patterns críticos"
+---
+
 # Anti-Patterns Checker Skill
 
 ## Purpose

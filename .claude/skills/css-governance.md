@@ -1,3 +1,8 @@
+---
+name: css-governance
+description: "Checkpoint anti-Frankenstein CSS antes de abrir PR"
+---
+
 # CSS Governance — Checkpoint Anti-Frankenstein
 
 Checklist para evitar CSS Frankenstein antes de abrir PR com mudancas de estilo.

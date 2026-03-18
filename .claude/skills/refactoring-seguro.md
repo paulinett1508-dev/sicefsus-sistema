@@ -1,3 +1,8 @@
+---
+name: refactoring-seguro
+description: "Guia de refatoração incremental em 7 fases sem quebrar funcionalidade"
+---
+
 # Refactoring Seguro — Decomposicao Incremental
 
 Guia para refatorar codigo de forma incremental sem quebrar o que funciona.

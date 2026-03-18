@@ -1,3 +1,8 @@
+---
+name: detector-bugs-react-async
+description: "Detecta bugs em hooks React, lifecycle e operações assíncronas"
+---
+
 # Skill: Detector de Bugs React e Async
 
 ## Quando Usar

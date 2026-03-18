@@ -1,3 +1,8 @@
+---
+name: debugging-sistematico
+description: "Processo metódico em 4 fases para investigar e corrigir bugs"
+---
+
 # Debugging Sistematico — 4 Fases
 
 Processo metodico para investigar e corrigir bugs.

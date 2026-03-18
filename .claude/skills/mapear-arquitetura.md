@@ -1,3 +1,8 @@
+---
+name: mapear-arquitetura
+description: "Documenta estrutura do projeto, dependências e fluxos de dados"
+---
+
 # Skill: Mapeamento de Arquitetura
 
 ## Quando Usar

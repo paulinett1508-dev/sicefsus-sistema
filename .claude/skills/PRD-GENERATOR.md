@@ -1,3 +1,8 @@
+---
+name: prd-generator
+description: "Pesquisa codebase e gera Product Requirements Document (PRD)"
+---
+
 # PRD Generator Skill
 
 ## Session Management

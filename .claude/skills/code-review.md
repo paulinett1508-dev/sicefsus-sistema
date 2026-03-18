@@ -1,3 +1,8 @@
+---
+name: code-review
+description: "Revisão de código com prefixos BLOCKER/SUGESTAO/NITPICK"
+---
+
 # Skill: Code Review
 
 ## Quando Usar

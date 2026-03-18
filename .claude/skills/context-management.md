@@ -1,3 +1,8 @@
+---
+name: context-management
+description: "Estratégias para manter qualidade durante sessões longas"
+---
+
 # Context Management — Gestao de Contexto AI
 
 Estrategias para manter qualidade de resposta durante sessoes longas,

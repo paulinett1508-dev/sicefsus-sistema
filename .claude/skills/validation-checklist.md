@@ -1,3 +1,8 @@
+---
+name: validation-checklist
+description: "Checklist de validação pré-deploy"
+---
+
 # Validation Checklist — Pre-Deploy
 
 Checklist de validacao antes de deploy ou entrega.

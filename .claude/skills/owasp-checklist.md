@@ -1,3 +1,8 @@
+---
+name: owasp-checklist
+description: "Referência OWASP Top 10 2021 para segurança de aplicações web"
+---
+
 # OWASP Checklist — Seguranca de Aplicacoes Web
 
 Referencia baseada no OWASP Top 10 2021.

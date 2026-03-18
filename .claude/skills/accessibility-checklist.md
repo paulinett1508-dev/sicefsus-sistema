@@ -1,3 +1,8 @@
+---
+name: accessibility-checklist
+description: "Checklist de acessibilidade WCAG 2.1 AA para interfaces web"
+---
+
 # Accessibility Checklist — WCAG 2.1 AA
 
 Checklist de acessibilidade para interfaces web.

@@ -1,3 +1,8 @@
+---
+name: react-performance
+description: "58 regras de otimização React priorizadas por impacto"
+---
+
 # React Performance — Guia de Otimizacao
 
 58 regras em 8 categorias, priorizadas por impacto.
