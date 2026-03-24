@@ -1,12 +1,39 @@
 # Tarefas Pendentes para Proxima Sessao
 
-## Atualizado em: 2026-03-13
+## Atualizado em: 2026-03-24
 
 ---
 
 ## Sem pendencias ativas
 
-Todas as tarefas foram resolvidas na sessao de 13/03/2026.
+Todas as tarefas foram resolvidas na sessao de 24/03/2026.
+
+---
+
+## Sessao 24/03/2026 - Concluido
+
+Auditoria completa do modulo de relatorios (4 rodadas: firebase, design/ui-ux, bugs-react-async, sistema).
+Total: 13 bugs/problemas corrigidos.
+
+| Tarefa | Commits |
+|--------|---------|
+| fix(P2 firebase): filtro de status para emendas inativas + indexes compostos | `eaf4437` (sessao anterior) |
+| fix(design): 8 correcoes UI/UX (focus-visible, touch targets, reduced-motion, etc.) | sessao anterior |
+| fix(async): 5 correcoes bugs React/async (Math.max spread, Set sem filter(Boolean), etc.) | sessao anterior |
+| fix(relatorios): filtro de data em despesas detalhadas esvaziava PDF (bug cascade) | `75bdf67` |
+| fix(relatorios): consolidado-mensal nao filtrava por mes/ano selecionado | `7aaa2f8` |
+| fix(relatorios): assinatura RelatorioPrestacao sobrepunha conteudo (posicao fixa) | `7aaa2f8` |
+| fix(relatorios): acento ausente no rodape RelatorioExecucao | `7aaa2f8` |
+| chore(relatorios): remover codigo morto (filtro UF, campo status) | `88f7e67` |
+| chore(relatorios): padronizar DESPESA_STATUS nos geradores PDF | `88f7e67` |
+| docs: corrigir CLAUDE.md (RelatoriosConfig -> RelatoriosCards) | `88f7e67` |
+
+### Detalhes do bug principal corrigido
+Relatorio Despesas Detalhadas: ao aplicar filtro de data, tela mostrava dados
+mas PDF exibia apenas cabecalhos. Causa: cascade emendas->despesas ocorria
+APOS filtro temporal, eliminando despesas cujas emendas nao tinham data no
+periodo. Fix: separar cascade (usa emendas sem filtro temporal) do filtro
+de data em despesas (independente, hierarquia alinhada com PDFs).
 
 ---
 
@@ -23,7 +50,7 @@ Todas as tarefas foram resolvidas na sessao de 13/03/2026.
 | Dashboard: Proximos 30 Dias unificado no Acompanhamento de Prazos | `243c838` |
 | Copyright dinamico com `new Date().getFullYear()` | `cc5dced` |
 | Login: botao mostrar/ocultar senha | `d9372b2` |
-| Auditoria de calculos: 11 bugs P0 corrigidos (parseFloat → parseValorMonetario) | `0a13e5c` |
+| Auditoria de calculos: 11 bugs P0 corrigidos (parseFloat -> parseValorMonetario) | `0a13e5c` |
 | Auditoria de calculos: 6 bugs P1 corrigidos (saldo, filtro UF, status) | `d24d98f` |
 | Auditoria de calculos: 6 P2 corrigidos (constantes DESPESA_STATUS, formatarMoedaBRL) | `eaf4437` |
 
@@ -50,7 +77,8 @@ Todas as tarefas foram resolvidas na sessao de 13/03/2026.
 - CRUD, lookup CNPJ/CPF, CEP auto-fill, integracao com despesas, FornecedorSelect
 
 ### Relatorios
-- PDF (5 tipos), filtros, exportacao Excel, cabecalho continuacao
+- PDF (5 tipos): filtro de data, filtro de mes/ano (consolidado), assinatura prestacao
+- Verificar que PDFs nao ficam com apenas cabecalhos ao filtrar por data
 
 ### Permissoes
 - Admin: acesso total | Gestor: municipio + CRUD | Operador: municipio + sem exclusao
@@ -59,6 +87,7 @@ Todas as tarefas foram resolvidas na sessao de 13/03/2026.
 
 ## Historico Resumido
 
+- **24/03/2026**: Auditoria completa modulo relatorios — 13 bugs/problemas corrigidos
 - **13/03/2026**: CPF fornecedores, CEP auto-fill, dashboard evoluido, auditoria 23 bugs corrigidos
 - **08/03/2026**: Auditoria seguranca (21 vulns), integracao agnostic-core, /security-review
 - **19/01/2026**: Toggle senha login, logo login, testes PDF pendentes
