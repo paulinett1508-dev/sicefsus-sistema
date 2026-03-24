@@ -221,7 +221,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     this.doc.setFont("helvetica", "normal");
     this.doc.setFontSize(7);
-    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
 
     const declaracao = "Declaro(amos), para os devidos fins de prestação de contas, que as despesas acima relacionadas " +
       "foram realizadas em conformidade com a legislação vigente, em especial a Lei Complementar nº 141/2012, " +
