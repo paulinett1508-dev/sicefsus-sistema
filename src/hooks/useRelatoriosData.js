@@ -4,10 +4,11 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { parseFirestoreTimestamp, parseValorMonetario } from "../utils/formatters";
 
-export function useRelatoriosData(usuario) {
+// enabled: lazy loading — só carrega quando o usuário selecionar um relatório
+export function useRelatoriosData(usuario, enabled = false) {
   const [emendas, setEmendas] = useState([]);
   const [despesas, setDespesas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const userRole = usuario?.role || usuario?.tipo;
@@ -15,6 +16,15 @@ export function useRelatoriosData(usuario) {
   const userUf = usuario?.uf;
 
   useEffect(() => {
+    // Não carrega até o usuário selecionar um tipo de relatório
+    if (!enabled) {
+      setEmendas([]);
+      setDespesas([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     let mounted = true;
 
     async function loadData() {
@@ -38,18 +48,26 @@ export function useRelatoriosData(usuario) {
           return;
         }
 
-        // Construir query para emendas baseado no perfil do usuário
+        // Construir queries (emendas + despesas) antes de disparar em paralelo
         // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf para operadores/gestores
         let emendasRef = collection(db, "emendas");
+        let despesasRef = collection(db, "despesas");
+
         if (!isAdmin) {
-          emendasRef = query(
-            emendasRef,
+          const filtroLocalizacao = [
             where("municipio", "==", userMunicipio),
             where("uf", "==", userUf),
-          );
+          ];
+          emendasRef = query(emendasRef, ...filtroLocalizacao);
+          despesasRef = query(despesasRef, ...filtroLocalizacao);
         }
 
-        const emendasSnapshot = await getDocs(emendasRef);
+        // Disparar as duas queries em paralelo — reduz latência de T(e)+T(d) para max(T(e),T(d))
+        const [emendasSnapshot, despesasSnapshot] = await Promise.all([
+          getDocs(emendasRef),
+          getDocs(despesasRef),
+        ]);
+
         const emendasData = emendasSnapshot.docs.map((doc) => {
           const data = doc.data();
           const valorOriginal = data.valor || data.valorRecurso || data.valorTotal || 0;
@@ -60,18 +78,6 @@ export function useRelatoriosData(usuario) {
           };
         });
 
-        // Carregar despesas com filtro por município/UF se não for admin
-        // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf
-        let despesasRef = collection(db, "despesas");
-        if (!isAdmin) {
-          despesasRef = query(
-            despesasRef,
-            where("municipio", "==", userMunicipio),
-            where("uf", "==", userUf),
-          );
-        }
-
-        const despesasSnapshot = await getDocs(despesasRef);
         let despesasData = despesasSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -103,7 +109,7 @@ export function useRelatoriosData(usuario) {
     loadData();
 
     return () => { mounted = false; };
-  }, [userRole, userMunicipio, userUf]);
+  }, [enabled, userRole, userMunicipio, userUf]);
 
   // ✅ ATUALIZADO: Função para aplicar filtros aos dados
   const aplicarFiltros = (filtros) => {

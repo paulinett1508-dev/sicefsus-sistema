@@ -57,7 +57,8 @@ export default function Relatorios({ usuario }) {
     aplicarFiltros,
     parlamentares,
     ufs,
-  } = useRelatoriosData(usuario);
+  // Lazy: só carrega dados do Firestore quando o usuário seleciona um relatório
+  } = useRelatoriosData(usuario, selectedReport !== null);
 
   // Handlers
   const handleFiltroChange = (e) => {
