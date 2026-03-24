@@ -309,7 +309,7 @@ export class BaseRelatorio {
     tags.forEach((tag) => {
       this.doc.setFont("helvetica", "bold");
       this.doc.setFontSize(7);
-      this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_500);
       this.doc.text(`${tag.label}: `, margins.left + 5, yPosition + 1);
 
       const labelWidth = this.doc.getTextWidth(`${tag.label}: `);
@@ -350,7 +350,7 @@ export class BaseRelatorio {
       .join(", ");
     const municipios = [...new Set(parlamentar.emendas.map(e => e.municipio).filter(Boolean))].join(", ");
 
-    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
     const infoLeft = [];
