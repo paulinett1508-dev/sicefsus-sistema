@@ -172,14 +172,6 @@ export default function RelatoriosFiltros({
         )}
       </h3>
 
-      {/* Indicador de inteligência ativa */}
-      {autoFilled.size > 0 && (
-        <div className="relatorios-smart-hint">
-          <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 6 }}>auto_awesome</span>
-          Filtros inteligentes: campos relacionados foram preenchidos automaticamente.
-        </div>
-      )}
-
       <div className="relatorios-filters-grid">
         {/* Filtro de Mês/Ano (para relatório consolidado mensal) */}
         {selectedReport.campos.includes("mes") && (
