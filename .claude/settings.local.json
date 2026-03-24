@@ -131,7 +131,9 @@
       "Bash(xargs -I {} sh -c 'echo \"\"\"\"{}:\"\"\"\"; wc -l {}')",
       "Bash(timeout 10 npx vite --host 0.0.0.0 --port 5173 2>&1 || true)",
       "Bash(npx vite:*)",
-      "WebFetch(domain:91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev)"
+      "WebFetch(domain:91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev)",
+      "Bash(fuser -k 5173/tcp)",
+      "Bash(fuser 5173/tcp)"
     ]
   },
   "enableAllProjectMcpServers": true,
