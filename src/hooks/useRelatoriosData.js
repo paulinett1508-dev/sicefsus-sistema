@@ -111,42 +111,29 @@ export function useRelatoriosData(usuario, enabled = false) {
     return () => { mounted = false; };
   }, [enabled, userRole, userMunicipio, userUf]);
 
-  // ✅ ATUALIZADO: Função para aplicar filtros aos dados
+  // Função para aplicar filtros aos dados
   const aplicarFiltros = (filtros) => {
-    // Excluir emendas inativas — não devem aparecer em relatórios
+    // Base: excluir emendas inativas
     let emendasFiltradas = emendas.filter(
       (e) => (e.status || "").toLowerCase() !== "inativa",
     );
     let despesasFiltradas = [...despesas];
 
-    // Filtro por período (suporta Firestore Timestamps)
-    if (filtros.dataInicio) {
-      const tsInicio = new Date(filtros.dataInicio).getTime();
-      emendasFiltradas = emendasFiltradas.filter((e) => {
-        const ts = parseFirestoreTimestamp(e.dataAprovacao) || parseFirestoreTimestamp(e.dataOb) || parseFirestoreTimestamp(e.criadaEm);
-        return ts !== null && ts >= tsInicio;
-      });
-      despesasFiltradas = despesasFiltradas.filter((d) => {
-        const ts = parseFirestoreTimestamp(d.data) || parseFirestoreTimestamp(d.dataEmpenho) || parseFirestoreTimestamp(d.criadaEm);
-        return ts !== null && ts >= tsInicio;
-      });
-    }
+    // Pré-calcular limites de data uma única vez
+    const tsInicio = filtros.dataInicio
+      ? new Date(filtros.dataInicio).getTime()
+      : null;
+    const tsFim = (() => {
+      if (!filtros.dataFim) return null;
+      const d = new Date(filtros.dataFim);
+      d.setHours(23, 59, 59, 999);
+      return d.getTime();
+    })();
 
-    if (filtros.dataFim) {
-      const dataFim = new Date(filtros.dataFim);
-      dataFim.setHours(23, 59, 59, 999);
-      const tsFim = dataFim.getTime();
-      emendasFiltradas = emendasFiltradas.filter((e) => {
-        const ts = parseFirestoreTimestamp(e.dataAprovacao) || parseFirestoreTimestamp(e.dataOb) || parseFirestoreTimestamp(e.criadaEm);
-        return ts !== null && ts <= tsFim;
-      });
-      despesasFiltradas = despesasFiltradas.filter((d) => {
-        const ts = parseFirestoreTimestamp(d.data) || parseFirestoreTimestamp(d.dataEmpenho) || parseFirestoreTimestamp(d.criadaEm);
-        return ts !== null && ts <= tsFim;
-      });
-    }
+    // ── PASSO 1: Filtros NÃO-temporais em emendas ──────────────────────────
+    // O cascade (passo 2) usa essas emendas, garantindo que despesas de emendas
+    // fora do período não sejam eliminadas inadvertidamente.
 
-    // Filtro por parlamentar
     if (filtros.parlamentar) {
       emendasFiltradas = emendasFiltradas.filter((e) =>
         (e.autor || e.parlamentar)
@@ -155,32 +142,78 @@ export function useRelatoriosData(usuario, enabled = false) {
       );
     }
 
-    // ✅ NOVO: Filtro por emenda específica
     if (filtros.emenda) {
-      emendasFiltradas = emendasFiltradas.filter(
-        (e) => e.id === filtros.emenda,
-      );
+      emendasFiltradas = emendasFiltradas.filter((e) => e.id === filtros.emenda);
     }
 
-    // Filtro por município
     if (filtros.municipio) {
       emendasFiltradas = emendasFiltradas.filter((e) =>
         e.municipio?.toLowerCase().includes(filtros.municipio.toLowerCase()),
       );
     }
 
-    // Filtro por UF
     if (filtros.uf) {
       emendasFiltradas = emendasFiltradas.filter((e) => e.uf === filtros.uf);
     }
 
-    // Filtrar despesas baseado nas emendas filtradas
+    // ── PASSO 2: CASCADE com emendas sem filtro temporal ───────────────────
+    // Restringe despesas às emendas permitidas pelos filtros não-temporais.
+    // Não usa emendasFiltradas com data para não eliminar despesas cujas
+    // emendas foram criadas fora do período pesquisado.
     const emendasIds = new Set(emendasFiltradas.map((e) => e.id));
     despesasFiltradas = despesasFiltradas.filter((d) =>
       emendasIds.has(d.emendaId),
     );
 
-    // ✅ NOVO: Filtro por fornecedor
+    // ── PASSO 3: Filtro temporal em emendas (para relatórios de emenda) ────
+    if (tsInicio !== null) {
+      emendasFiltradas = emendasFiltradas.filter((e) => {
+        const ts =
+          parseFirestoreTimestamp(e.dataAprovacao) ||
+          parseFirestoreTimestamp(e.dataOb) ||
+          parseFirestoreTimestamp(e.criadaEm);
+        return ts !== null && ts >= tsInicio;
+      });
+    }
+
+    if (tsFim !== null) {
+      emendasFiltradas = emendasFiltradas.filter((e) => {
+        const ts =
+          parseFirestoreTimestamp(e.dataAprovacao) ||
+          parseFirestoreTimestamp(e.dataOb) ||
+          parseFirestoreTimestamp(e.criadaEm);
+        return ts !== null && ts <= tsFim;
+      });
+    }
+
+    // ── PASSO 4: Filtro temporal em despesas (independente das emendas) ────
+    // Hierarquia alinhada com os geradores de PDF:
+    // dataPagamento > dataLiquidacao > dataEmpenho > data > criadaEm
+    if (tsInicio !== null) {
+      despesasFiltradas = despesasFiltradas.filter((d) => {
+        const ts =
+          parseFirestoreTimestamp(d.dataPagamento) ||
+          parseFirestoreTimestamp(d.dataLiquidacao) ||
+          parseFirestoreTimestamp(d.dataEmpenho) ||
+          parseFirestoreTimestamp(d.data) ||
+          parseFirestoreTimestamp(d.criadaEm);
+        return ts !== null && ts >= tsInicio;
+      });
+    }
+
+    if (tsFim !== null) {
+      despesasFiltradas = despesasFiltradas.filter((d) => {
+        const ts =
+          parseFirestoreTimestamp(d.dataPagamento) ||
+          parseFirestoreTimestamp(d.dataLiquidacao) ||
+          parseFirestoreTimestamp(d.dataEmpenho) ||
+          parseFirestoreTimestamp(d.data) ||
+          parseFirestoreTimestamp(d.criadaEm);
+        return ts !== null && ts <= tsFim;
+      });
+    }
+
+    // ── PASSO 5: Filtro por fornecedor em despesas ─────────────────────────
     if (filtros.fornecedor) {
       despesasFiltradas = despesasFiltradas.filter((d) => {
         const fornecedor = (d.fornecedor || "").toLowerCase();
