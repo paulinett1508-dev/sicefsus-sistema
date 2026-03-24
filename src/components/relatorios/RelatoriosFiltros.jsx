@@ -38,7 +38,7 @@ export default function RelatoriosFiltros({
                   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
                   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
                 ].map((nome, idx) => (
-                  <option key={idx + 1} value={idx + 1}>{nome}</option>
+                  <option key={nome} value={idx + 1}>{nome}</option>
                 ))}
               </select>
               <input

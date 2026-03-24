@@ -163,6 +163,8 @@ export default function Relatorios({ usuario }) {
         0,
       ),
     };
+  // aplicarFiltros fecha sobre emendas e despesas — listá-los aqui é equivalente
+  // a listar aplicarFiltros, sem precisar de useCallback no hook
   }, [filtros, emendas, despesas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loading state

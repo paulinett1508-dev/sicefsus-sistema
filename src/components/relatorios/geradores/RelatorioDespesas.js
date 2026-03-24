@@ -24,7 +24,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
     const valorPlanejado = despesasPlanejadas.reduce((sum, d) => sum + (d.valor || 0), 0);
 
-    const fornecedores = new Set(this.despesas.map(d => d.fornecedor)).size;
+    const fornecedores = new Set(this.despesas.map(d => d.fornecedor).filter(Boolean)).size;
 
     const kpis = [
       { label: "Total Despesas", value: totalDespesas.toString() },
@@ -42,7 +42,7 @@ export class RelatorioDespesas extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
     
     const mediaValor = totalDespesas > 0 ? (valorExecutado + valorPlanejado) / totalDespesas : 0;
-    const maiorDespesa = Math.max(...this.despesas.map(d => d.valor || 0), 0);
+    const maiorDespesa = this.despesas.reduce((max, d) => Math.max(max, d.valor || 0), 0);
     
     const resumoItems = [
       `Despesas Executadas: ${despesasExecutadas.length}`,
