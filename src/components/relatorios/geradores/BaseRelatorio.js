@@ -248,9 +248,9 @@ export class BaseRelatorio {
       return `Periodo: ${inicio} a ${fim}`;
     }
 
-    // Fallback para mês/ano
-    const mes = filtros.mes || new Date().getMonth() + 1;
-    const ano = filtros.ano || new Date().getFullYear();
+    // Fallback para mês/ano — coerce explicitamente para number (onChange retorna string)
+    const mes = Number(filtros.mes) || new Date().getMonth() + 1;
+    const ano = Number(filtros.ano) || new Date().getFullYear();
     const nomeMes = new Date(ano, mes - 1).toLocaleDateString("pt-BR", { month: "long" });
     return `${nomeMes} ${ano}`;
   }

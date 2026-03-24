@@ -2,27 +2,7 @@
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import { parseFirestoreTimestamp } from "../utils/formatters";
-
-// Função para parsear valores monetários brasileiros
-function parseValorMonetario(valor) {
-  if (valor === null || valor === undefined || valor === "") return 0;
-  if (typeof valor === "number") return valor;
-
-  // Remove R$, espaços e caracteres especiais
-  let valorLimpo = String(valor)
-    .replace(/R\$\s*/gi, "")
-    .replace(/\s/g, "")
-    .trim();
-
-  // Formato brasileiro: 1.234.567,89 -> 1234567.89
-  if (valorLimpo.includes(",")) {
-    valorLimpo = valorLimpo.replace(/\./g, "").replace(",", ".");
-  }
-
-  const resultado = parseFloat(valorLimpo);
-  return isNaN(resultado) ? 0 : resultado;
-}
+import { parseFirestoreTimestamp, parseValorMonetario } from "../utils/formatters";
 
 export function useRelatoriosData(usuario) {
   const [emendas, setEmendas] = useState([]);
@@ -35,9 +15,13 @@ export function useRelatoriosData(usuario) {
   const userUf = usuario?.uf;
 
   useEffect(() => {
+    let mounted = true;
+
     async function loadData() {
-      setLoading(true);
-      setError(null);
+      if (mounted) {
+        setLoading(true);
+        setError(null);
+      }
 
       try {
         // 🔒 SEGURANÇA: Operador/Gestor SEM localização válida não pode ver NADA
@@ -45,11 +29,12 @@ export function useRelatoriosData(usuario) {
         const temLocalizacaoValida = userMunicipio && userUf;
 
         if (!isAdmin && !temLocalizacaoValida) {
-          console.warn("⚠️ useRelatoriosData - Usuário sem localização válida, bloqueando acesso");
-          setEmendas([]);
-          setDespesas([]);
-          setError("Seu cadastro não possui município/UF definido. Contate o administrador.");
-          setLoading(false);
+          if (mounted) {
+            setEmendas([]);
+            setDespesas([]);
+            setError("Seu cadastro não possui município/UF definido. Contate o administrador.");
+            setLoading(false);
+          }
           return;
         }
 
@@ -57,7 +42,6 @@ export function useRelatoriosData(usuario) {
         // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf para operadores/gestores
         let emendasRef = collection(db, "emendas");
         if (!isAdmin) {
-          // Operador/Gestor SEMPRE filtra por localização
           emendasRef = query(
             emendasRef,
             where("municipio", "==", userMunicipio),
@@ -68,24 +52,18 @@ export function useRelatoriosData(usuario) {
         const emendasSnapshot = await getDocs(emendasRef);
         const emendasData = emendasSnapshot.docs.map((doc) => {
           const data = doc.data();
-          // Normalizar valor da emenda
           const valorOriginal = data.valor || data.valorRecurso || data.valorTotal || 0;
-          const valorNormalizado = parseValorMonetario(valorOriginal);
-
           return {
             id: doc.id,
             ...data,
-            valorTotal: valorNormalizado,
+            valorTotal: parseValorMonetario(valorOriginal),
           };
         });
-
-        setEmendas(emendasData);
 
         // Carregar despesas com filtro por município/UF se não for admin
         // 🔒 IMPORTANTE: Firestore Rules exigem filtro por municipio E uf
         let despesasRef = collection(db, "despesas");
         if (!isAdmin) {
-          // Operador/Gestor SEMPRE filtra por localização
           despesasRef = query(
             despesasRef,
             where("municipio", "==", userMunicipio),
@@ -111,15 +89,20 @@ export function useRelatoriosData(usuario) {
           );
         }
 
-        setDespesas(despesasData);
+        if (mounted) {
+          setEmendas(emendasData);
+          setDespesas(despesasData);
+        }
       } catch (error) {
-        setError(error.message);
+        if (mounted) setError(error.message);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
 
     loadData();
+
+    return () => { mounted = false; };
   }, [userRole, userMunicipio, userUf]);
 
   // ✅ ATUALIZADO: Função para aplicar filtros aos dados

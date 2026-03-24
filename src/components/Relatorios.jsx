@@ -145,7 +145,6 @@ export default function Relatorios({ usuario }) {
       // Mostrar modal de sucesso
       setShowSuccessModal(true);
     } catch (error) {
-      console.error("Erro ao gerar relatório:", error);
       toast.error(`Erro ao gerar relatório: ${error.message}`);
     } finally {
       setGenerating(false);
