@@ -23,7 +23,7 @@ function ModalSucesso({ isOpen, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relatorios-modal-icon">
-          <span className="material-symbols-outlined" style={{ fontSize: 64, color: "#10B981" }}>check_circle</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 64, color: "var(--success)" }}>check_circle</span>
         </div>
         <h2 className="relatorios-modal-title">
           Relatório gerado com sucesso!
@@ -31,7 +31,7 @@ function ModalSucesso({ isOpen, onClose }) {
         <p className="relatorios-modal-message">
           O download do PDF foi iniciado automaticamente.
         </p>
-        <button className="relatorios-modal-button" onClick={onClose}>
+        <button type="button" className="relatorios-modal-button" onClick={onClose}>
           OK
         </button>
       </div>
@@ -203,7 +203,7 @@ export default function Relatorios({ usuario }) {
         <div className="relatorios-config">
           {/* Header da Configuração */}
           <div className="relatorios-config-header">
-            <button className="relatorios-back-btn" onClick={handleVoltar}>
+            <button type="button" className="relatorios-back-btn" onClick={handleVoltar}>
               <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_back</span>
               Voltar
             </button>
@@ -225,6 +225,7 @@ export default function Relatorios({ usuario }) {
           {/* Botões de Ação */}
           <div className="relatorios-actions">
             <button
+              type="button"
               className="relatorios-generate-btn"
               onClick={handleGerarRelatorio}
               disabled={generating}

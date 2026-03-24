@@ -2,13 +2,13 @@
 // ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
 
 export const COLORS = {
-  PRIMARY: "var(--action)",
-  ACCENT: "#3B82F6",
-  SUCCESS: "#10B981",
-  WARNING: "#F59E0B",
-  ERROR: "#EF4444",
-  WHITE: "#fff",
-  GRAY: "#f8f9fa",
+  PRIMARY: "var(--primary)",
+  ACCENT: "var(--primary-light)",
+  SUCCESS: "var(--success)",
+  WARNING: "var(--warning)",
+  ERROR: "var(--error)",
+  WHITE: "var(--white)",
+  GRAY: "var(--gray-50)",
 };
 
 // Cores RGB para uso em PDF (jsPDF) - Design System Moderno

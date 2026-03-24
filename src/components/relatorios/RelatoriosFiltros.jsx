@@ -49,9 +49,8 @@ export default function RelatoriosFiltros({
                 onChange={onFiltroChange}
                 min="2020"
                 max="2099"
-                className="relatorios-date-input"
+                className="relatorios-date-input relatorios-year-input"
                 aria-label="Ano de referência"
-                style={{ width: 80 }}
               />
             </div>
           </div>
@@ -210,7 +209,7 @@ export default function RelatoriosFiltros({
 
       {/* Botão Limpar */}
       <div className="relatorios-filter-actions">
-        <button className="relatorios-clear-btn" onClick={onLimparFiltros}>
+        <button type="button" className="relatorios-clear-btn" onClick={onLimparFiltros}>
           Limpar Filtros
         </button>
       </div>
