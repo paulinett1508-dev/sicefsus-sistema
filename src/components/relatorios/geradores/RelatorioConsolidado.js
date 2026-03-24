@@ -11,26 +11,25 @@ export class RelatorioConsolidado extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    // HEADER com subtítulo do período
     this.addHeader("Relatório Consolidado Mensal", this.getSubtituloPeriodo(filtros));
-
     let yPosition = 58;
 
-    // Usar métodos utilitários da BaseRelatorio
+    // Filtros aplicados
+    yPosition = this.addFiltrosAplicados(filtros, yPosition);
+
+    // KPIs
     const { valorTotal, valorExecutado, saldoDisponivel, percentualGeral, totalEmendas, totalDespesas } = this.calcularMetricas();
     const despesasExecutadas = this.getDespesasExecutadas();
 
-    const kpis = [
+    yPosition = addKPICards(this.doc, [
       { label: "Emendas Ativas", value: totalEmendas.toString() },
       { label: "Valor Total", value: this.formatCurrency(valorTotal) },
       { label: "Executado", value: this.formatCurrency(valorExecutado), trend: `${percentualGeral.toFixed(1)}%` },
       { label: "Saldo", value: this.formatCurrency(saldoDisponivel) },
-    ];
+    ], yPosition);
 
-    yPosition = addKPICards(this.doc, kpis, yPosition);
-
+    // Resumo
     yPosition = addSectionTitle(this.doc, "Resumo Consolidado", yPosition);
-
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
@@ -38,54 +37,67 @@ export class RelatorioConsolidado extends BaseRelatorio {
     const fornecedoresUnicos = new Set(despesasExecutadas.map(d => d.fornecedor).filter(Boolean)).size;
     const parlamentaresUnicos = this.getParlamentares().length;
 
-    const resumoItems = [
+    [
       `Emendas Cadastradas: ${totalEmendas}`,
       `Parlamentares com Emendas: ${parlamentaresUnicos}`,
       `Total de Despesas Executadas: ${totalDespesas}`,
       `Fornecedores Distintos: ${fornecedoresUnicos}`,
       `Média de Execução por Emenda: ${this.formatCurrency(totalEmendas > 0 ? valorExecutado / totalEmendas : 0)}`,
-    ];
-
-    resumoItems.forEach((item, i) => {
+    ].forEach((item, i) => {
       this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
     });
-    yPosition += (resumoItems.length * 4) + 6;
+    yPosition += 26;
 
+    // Distribuição por tipo
+    yPosition = this.addDistribuicaoPorTipo(yPosition, despesasExecutadas);
+
+    // Top 10 emendas
+    yPosition = this.addTop10Emendas(yPosition);
+
+    // Top 5 fornecedores
+    yPosition = this.addTopFornecedores(yPosition);
+
+    // Detalhamento: agrupado por parlamentar ou único
+    if (filtros.parlamentar || filtros.emenda) {
+      yPosition = this.addDetalhamentoUnico(yPosition, despesasExecutadas);
+    } else {
+      yPosition = this.addDetalhamentoPorParlamentar(yPosition, despesasExecutadas);
+    }
+
+    // Assinaturas + rodapé
+    this.addBlocoAssinaturas(yPosition);
+    this.addFooterTodasPaginas();
+  }
+
+  addDistribuicaoPorTipo(yPosition, despesasExecutadas) {
     yPosition = addSectionTitle(this.doc, "Distribuição por Tipo de Emenda", yPosition);
 
     const porTipo = {};
     this.emendas.forEach((emenda) => {
       const tipo = emenda.tipo || "Não definido";
-      if (!porTipo[tipo]) {
-        porTipo[tipo] = { quantidade: 0, valorTotal: 0, valorExecutado: 0 };
-      }
-
-      // Usa valorTotal já normalizado pelo hook
+      if (!porTipo[tipo]) porTipo[tipo] = { quantidade: 0, valorTotal: 0, valorExecutado: 0 };
       porTipo[tipo].quantidade++;
       porTipo[tipo].valorTotal += emenda.valorTotal || 0;
-
-      const despesasEmenda = despesasExecutadas.filter((d) => d.emendaId === emenda.id);
-      porTipo[tipo].valorExecutado += despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
+      porTipo[tipo].valorExecutado += despesasExecutadas
+        .filter(d => d.emendaId === emenda.id)
+        .reduce((sum, d) => sum + (d.valor || 0), 0);
     });
 
-    const tabelaTipos = Object.entries(porTipo)
+    const tabela = Object.entries(porTipo)
       .sort(([, a], [, b]) => b.valorExecutado - a.valorExecutado)
       .map(([tipo, dados]) => [
-        tipo,
-        dados.quantidade.toString(),
-        this.formatCurrency(dados.valorTotal),
+        tipo, dados.quantidade.toString(), this.formatCurrency(dados.valorTotal),
         this.formatCurrency(dados.valorExecutado),
         `${dados.valorTotal > 0 ? ((dados.valorExecutado / dados.valorTotal) * 100).toFixed(0) : 0}%`,
       ]);
 
-    if (tabelaTipos.length > 0) {
+    if (tabela.length > 0) {
       try {
-        const modernStyles = getModernTableStyles();
         this.createTable({
           startY: yPosition,
           head: [["Tipo", "Emendas", "Valor Total", "Executado", "%"]],
-          body: tabelaTipos,
-          ...modernStyles,
+          body: tabela,
+          ...getModernTableStyles(),
           columnStyles: {
             0: { cellWidth: 'auto', halign: "left" },
             1: { cellWidth: 18, halign: "right" },
@@ -99,32 +111,30 @@ export class RelatorioConsolidado extends BaseRelatorio {
         this.addWarning(`Erro ao criar tabela de tipos: ${error.message}`);
       }
     }
+    return yPosition;
+  }
 
+  addTop10Emendas(yPosition) {
     yPosition = this.checkNewPage(yPosition, 60);
     yPosition = addSectionTitle(this.doc, "Top 10 Emendas por Execução", yPosition);
 
-    // Usar método utilitário, ordenado por valor executado, top 10
-    const emendasComExecucao = this.calcularExecucaoPorEmenda()
+    const top10 = this.calcularExecucaoPorEmenda()
       .sort((a, b) => b.valorExecutado - a.valorExecutado)
       .slice(0, 10);
 
-    const tabelaTop10 = emendasComExecucao.map((e, idx) => [
-      `${idx + 1}`,
-      e.numero || "-",
-      e.parlamentar || "-",
-      this.formatCurrency(e.valorTotal),
-      this.formatCurrency(e.valorExecutado),
+    const tabela = top10.map((e, idx) => [
+      `${idx + 1}`, e.numero || "-", e.parlamentar || "-",
+      this.formatCurrency(e.valorTotal), this.formatCurrency(e.valorExecutado),
       `${e.percentual.toFixed(0)}%`,
     ]);
 
-    if (tabelaTop10.length > 0) {
+    if (tabela.length > 0) {
       try {
-        const modernStyles = getModernTableStyles();
         this.createTable({
           startY: yPosition,
           head: [["#", "Emenda", "Parlamentar", "Total", "Executado", "%"]],
-          body: tabelaTop10,
-          ...modernStyles,
+          body: tabela,
+          ...getModernTableStyles(),
           columnStyles: {
             0: { cellWidth: 14, halign: "center" },
             1: { cellWidth: 22, halign: "left" },
@@ -139,31 +149,27 @@ export class RelatorioConsolidado extends BaseRelatorio {
         this.addWarning(`Erro ao criar tabela Top 10: ${error.message}`);
       }
     }
+    return yPosition;
+  }
 
+  addTopFornecedores(yPosition) {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Top 5 Fornecedores", yPosition);
 
-    // Usar método utilitário para agregação por fornecedor
-    const porFornecedor = this.calcularPorFornecedor(true);
-
-    const tabelaFornecedores = Object.entries(porFornecedor)
+    const tabelaFornecedores = Object.entries(this.calcularPorFornecedor(true))
       .sort(([, a], [, b]) => b.valor - a.valor)
       .slice(0, 5)
       .map(([fornecedor, dados], idx) => [
-        `${idx + 1}`,
-        fornecedor.length > 40 ? fornecedor.substring(0, 37) + "..." : fornecedor,
-        dados.quantidade.toString(),
-        this.formatCurrency(dados.valor),
+        `${idx + 1}`, fornecedor, dados.quantidade.toString(), this.formatCurrency(dados.valor),
       ]);
 
     if (tabelaFornecedores.length > 0) {
       try {
-        const modernStyles = getModernTableStyles();
         this.createTable({
           startY: yPosition,
           head: [["#", "Fornecedor", "Despesas", "Valor Total"]],
           body: tabelaFornecedores,
-          ...modernStyles,
+          ...getModernTableStyles(),
           columnStyles: {
             0: { cellWidth: 14, halign: "center" },
             1: { cellWidth: 'auto', halign: "left" },
@@ -176,99 +182,117 @@ export class RelatorioConsolidado extends BaseRelatorio {
         this.addWarning(`Erro ao criar tabela de fornecedores: ${error.message}`);
       }
     }
+    return yPosition;
+  }
 
-    // DETALHAMENTO DAS DESPESAS POR EMENDA
+  addDetalhamentoUnico(yPosition, despesasExecutadas) {
     yPosition = this.checkNewPage(yPosition, 60);
     yPosition = addSectionTitle(this.doc, "Detalhamento das Despesas Executadas", yPosition);
 
-    // Usar método utilitário para obter emendas com execução
-    const emendasDetalhadas = this.calcularExecucaoPorEmenda();
-    const emendasComDespesas = emendasDetalhadas.filter(e => e.despesasCount > 0);
+    const emendasCalc = this.calcularExecucaoPorEmenda();
+    yPosition = this.renderDespesasPorEmenda(emendasCalc, despesasExecutadas, yPosition);
 
-    if (emendasComDespesas.length > 0) {
-      for (const emenda of emendasComDespesas) {
-        yPosition = this.checkNewPage(yPosition, 40);
+    return yPosition;
+  }
 
-        // Cabeçalho da emenda
-        this.doc.setFontSize(8);
-        this.doc.setFont("helvetica", "bold");
-        this.doc.setTextColor(...PDF_COLORS.SLATE_700);
-        this.doc.text(`Emenda: ${emenda.numero || emenda.id}`, 15, yPosition);
+  addDetalhamentoPorParlamentar(yPosition, despesasExecutadas) {
+    yPosition = this.checkNewPage(yPosition, 60);
+    yPosition = addSectionTitle(this.doc, "Despesas Executadas por Parlamentar", yPosition);
 
-        this.doc.setFontSize(7);
-        this.doc.setFont("helvetica", "normal");
-        this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-        this.doc.text(`Parlamentar: ${emenda.parlamentar} | Executado: ${this.formatCurrency(emenda.valorExecutado)} de ${this.formatCurrency(emenda.valorTotal)} (${emenda.percentual.toFixed(0)}%)`, 15, yPosition + 4);
-        yPosition += 10;
+    const parlamentares = this.agruparPorParlamentar();
 
-        // Despesas desta emenda
-        const despesasEmenda = despesasExecutadas
-          .filter(d => d.emendaId === emenda.id)
-          .sort((a, b) => {
-            const dataA = this.parseData(a.dataPagamento || a.dataLiquidacao || a.dataEmpenho);
-            const dataB = this.parseData(b.dataPagamento || b.dataLiquidacao || b.dataEmpenho);
-            return dataB - dataA;
-          });
+    for (const parlamentar of parlamentares) {
+      if (parlamentar.despesas.length === 0) continue;
 
-        const tabelaDespesasEmenda = despesasEmenda.map(d => {
-          // Data: usa dataPagamento, dataLiquidacao ou dataEmpenho (nessa ordem)
-          const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
-          const dataFormatada = this.formatarData(dataRaw);
+      yPosition = this.checkNewPage(yPosition, 40);
+      yPosition = this.addParlamentarHeader(parlamentar, yPosition);
 
-          // Descrição: usa discriminacao (campo real) ou descricao como fallback
-          const descricao = d.discriminacao || d.descricao || "-";
-          const descricaoTruncada = descricao.length > 28 ? descricao.substring(0, 25) + "..." : descricao;
+      // Emendas e despesas do parlamentar
+      const emendasCalc = parlamentar.emendas.map((emenda) => {
+        const valorEmenda = emenda.valorTotal || 0;
+        const despesasEmenda = despesasExecutadas.filter(d => d.emendaId === emenda.id);
+        const valorExec = despesasEmenda.reduce((sum, d) => sum + (d.valor || 0), 0);
+        return {
+          ...emenda,
+          parlamentar: emenda.autor || emenda.parlamentar || "-",
+          valorTotal: valorEmenda,
+          valorExecutado: valorExec,
+          saldo: valorEmenda - valorExec,
+          percentual: valorEmenda > 0 ? (valorExec / valorEmenda) * 100 : 0,
+          despesasCount: despesasEmenda.length,
+        };
+      });
 
-          return [
-            dataFormatada,
-            descricaoTruncada,
-            d.fornecedor?.length > 22 ? d.fornecedor.substring(0, 19) + "..." : (d.fornecedor || "-"),
-            this.formatCurrency(d.valor || 0),
-          ];
-        });
+      yPosition = this.renderDespesasPorEmenda(emendasCalc, despesasExecutadas, yPosition);
+    }
 
-        if (tabelaDespesasEmenda.length > 0) {
-          try {
-            const modernStyles = getModernTableStyles();
-            this.createTable({
-              startY: yPosition,
-              head: [["Data", "Descrição", "Fornecedor", "Valor"]],
-              body: tabelaDespesasEmenda,
-              ...modernStyles,
-              styles: {
-                ...modernStyles.styles,
-                fontSize: 6,
-              },
-              headStyles: {
-                ...modernStyles.headStyles,
-                fontSize: 6,
-              },
-              columnStyles: {
-                0: { cellWidth: 18, halign: "center" },
-                1: { cellWidth: 'auto', halign: "left" },
-                2: { cellWidth: 50, halign: "left" },
-                3: { cellWidth: 28, halign: "right" },
-              },
-            });
-            yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 8;
-          } catch (error) {
-            this.addWarning(`Erro ao criar tabela de despesas da emenda ${emenda.numero}: ${error.message}`);
-          }
-        }
-      }
-    } else {
+    return yPosition;
+  }
+
+  renderDespesasPorEmenda(emendasCalc, despesasExecutadas, yPosition) {
+    const emendasComDespesas = emendasCalc.filter(e => e.despesasCount > 0);
+
+    if (emendasComDespesas.length === 0) {
       this.doc.setFontSize(7);
       this.doc.setFont("helvetica", "italic");
       this.doc.setTextColor(...PDF_COLORS.SLATE_400);
       this.doc.text("Nenhuma despesa executada no período.", 15, yPosition);
-      yPosition += 8;
+      return yPosition + 8;
     }
 
-    this.doc.setTextColor(...PDF_COLORS.SLATE_400);
-    this.doc.setFontSize(6);
-    this.doc.setFont("helvetica", "italic");
-    this.doc.text("* Valores consolidados. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+    for (const emenda of emendasComDespesas) {
+      yPosition = this.checkNewPage(yPosition, 40);
 
-    this.addFooterTodasPaginas();
+      this.doc.setFontSize(8);
+      this.doc.setFont("helvetica", "bold");
+      this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+      this.doc.text(`Emenda: ${emenda.numero || emenda.id} — ${emenda.parlamentar}`, 15, yPosition);
+
+      this.doc.setFontSize(7);
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+      this.doc.text(`Executado: ${this.formatCurrency(emenda.valorExecutado)} de ${this.formatCurrency(emenda.valorTotal)} (${emenda.percentual.toFixed(0)}%)`, 15, yPosition + 4);
+      yPosition += 10;
+
+      const despesasEmenda = despesasExecutadas
+        .filter(d => d.emendaId === emenda.id)
+        .sort((a, b) => {
+          const dataA = this.parseData(a.dataPagamento || a.dataLiquidacao || a.dataEmpenho);
+          const dataB = this.parseData(b.dataPagamento || b.dataLiquidacao || b.dataEmpenho);
+          return dataB - dataA;
+        });
+
+      const tabela = despesasEmenda.map(d => [
+        this.formatarData(d.dataPagamento || d.dataLiquidacao || d.dataEmpenho),
+        d.discriminacao || d.descricao || "-",
+        d.fornecedor || "-",
+        this.formatCurrency(d.valor || 0),
+      ]);
+
+      if (tabela.length > 0) {
+        try {
+          const modernStyles = getModernTableStyles();
+          this.createTable({
+            startY: yPosition,
+            head: [["Data", "Descrição", "Fornecedor", "Valor"]],
+            body: tabela,
+            ...modernStyles,
+            styles: { ...modernStyles.styles, fontSize: 6 },
+            headStyles: { ...modernStyles.headStyles, fontSize: 6 },
+            columnStyles: {
+              0: { cellWidth: 18, halign: "center" },
+              1: { cellWidth: 'auto', halign: "left" },
+              2: { cellWidth: 50, halign: "left" },
+              3: { cellWidth: 28, halign: "right" },
+            },
+          });
+          yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 8;
+        } catch (error) {
+          this.addWarning(`Erro tabela despesas emenda ${emenda.numero}: ${error.message}`);
+        }
+      }
+    }
+
+    return yPosition;
   }
 }

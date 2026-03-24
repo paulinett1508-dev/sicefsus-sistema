@@ -10,6 +10,7 @@ import {
   getLogoBase64,
   gerarNomeArquivo,
 } from "../../../utils/pdfHelpers";
+import { PDF_COLORS } from "../../../utils/relatoriosConstants";
 import { parseFirestoreTimestamp } from "../../../utils/formatters";
 import { DESPESA_STATUS } from "../../../config/constants";
 
@@ -259,6 +260,246 @@ export class BaseRelatorio {
       this.doc.setPage(i);
       addFooter(this.doc, i, this.usuario, totalPages);
     }
+  }
+
+  // ========== MÉTODOS COMPARTILHADOS DE PDF ==========
+
+  /**
+   * Adiciona bloco visual com filtros ativos no topo do relatório
+   */
+  addFiltrosAplicados(filtros, yPosition) {
+    const tags = [];
+
+    if (filtros.parlamentar) {
+      tags.push({ label: "Parlamentar", value: filtros.parlamentar });
+    }
+    if (filtros.emenda) {
+      const emenda = this.emendas.find(e => e.id === filtros.emenda);
+      if (emenda) {
+        const parlamentar = emenda.autor || emenda.parlamentar || "";
+        const desc = [emenda.numero || emenda.numeroEmenda, parlamentar, emenda.municipio]
+          .filter(Boolean).join(" - ");
+        tags.push({ label: "Emenda", value: desc });
+      }
+    }
+    if (filtros.municipio) {
+      tags.push({ label: "Município", value: filtros.municipio });
+    }
+    if (filtros.fornecedor) {
+      tags.push({ label: "Fornecedor", value: filtros.fornecedor });
+    }
+
+    if (tags.length === 0) return yPosition;
+
+    const margins = { left: 15, right: 15 };
+    const boxHeight = 6 + (tags.length * 5);
+
+    this.doc.setFillColor(...PDF_COLORS.SLATE_50);
+    this.doc.roundedRect(margins.left, yPosition - 2, this.pageWidth - margins.left - margins.right, boxHeight, 1.5, 1.5, "F");
+    this.doc.setDrawColor(...PDF_COLORS.SLATE_200);
+    this.doc.setLineWidth(0.2);
+    this.doc.roundedRect(margins.left, yPosition - 2, this.pageWidth - margins.left - margins.right, boxHeight, 1.5, 1.5, "S");
+
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text("Filtros Aplicados:", margins.left + 3, yPosition + 2);
+    yPosition += 5;
+
+    tags.forEach((tag) => {
+      this.doc.setFont("helvetica", "bold");
+      this.doc.setFontSize(7);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+      this.doc.text(`${tag.label}: `, margins.left + 5, yPosition + 1);
+
+      const labelWidth = this.doc.getTextWidth(`${tag.label}: `);
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+      this.doc.text(tag.value, margins.left + 5 + labelWidth, yPosition + 1);
+      yPosition += 4;
+    });
+
+    return yPosition + 6;
+  }
+
+  /**
+   * Cabeçalho visual de seção de parlamentar com barra accent
+   * @param {Object} parlamentar - { nome, emendas: [], despesas: [], valorTotal }
+   */
+  addParlamentarHeader(parlamentar, yPosition) {
+    const margins = { left: 15, right: 15 };
+    const contentWidth = this.pageWidth - margins.left - margins.right;
+
+    this.doc.setFillColor(...PDF_COLORS.SLATE_100);
+    this.doc.roundedRect(margins.left, yPosition - 1, contentWidth, 18, 1.5, 1.5, "F");
+
+    // Barra lateral accent
+    this.doc.setFillColor(...PDF_COLORS.ACCENT);
+    this.doc.rect(margins.left, yPosition - 1, 2, 18, "F");
+
+    // Nome do parlamentar
+    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+    this.doc.setFontSize(9);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text(parlamentar.nome, margins.left + 6, yPosition + 5);
+
+    // Emendas e municípios
+    const emendasNums = parlamentar.emendas
+      .map(e => e.numero || e.numeroEmenda)
+      .filter(Boolean)
+      .join(", ");
+    const municipios = [...new Set(parlamentar.emendas.map(e => e.municipio).filter(Boolean))].join(", ");
+
+    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "normal");
+    const infoLeft = [];
+    if (emendasNums) infoLeft.push(`Emendas: ${emendasNums}`);
+    if (municipios) infoLeft.push(`Município(s): ${municipios}`);
+    this.doc.text(infoLeft.join("  |  "), margins.left + 6, yPosition + 11);
+
+    // Totalizador (direita)
+    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+    this.doc.setFontSize(8);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text(
+      `${parlamentar.despesas.length} despesas — ${this.formatCurrency(parlamentar.valorTotal)}`,
+      this.pageWidth - margins.right - 3, yPosition + 8,
+      { align: "right" }
+    );
+
+    return yPosition + 22;
+  }
+
+  /**
+   * Agrupa emendas e despesas por parlamentar
+   * @returns {Array} Lista ordenada de { nome, emendas, despesas, valorTotal }
+   */
+  agruparPorParlamentar() {
+    const parlamentarMap = new Map();
+
+    this.emendas.forEach((emenda) => {
+      const nome = emenda.autor || emenda.parlamentar || "Não identificado";
+      if (!parlamentarMap.has(nome)) {
+        parlamentarMap.set(nome, { emendas: [], despesas: [] });
+      }
+      parlamentarMap.get(nome).emendas.push(emenda);
+    });
+
+    const emendaIdToParlamentar = new Map();
+    this.emendas.forEach((emenda) => {
+      emendaIdToParlamentar.set(emenda.id, emenda.autor || emenda.parlamentar || "Não identificado");
+    });
+
+    const despesasExecutadas = this.getDespesasExecutadas();
+    despesasExecutadas.forEach((d) => {
+      const nome = emendaIdToParlamentar.get(d.emendaId) || "Não identificado";
+      if (!parlamentarMap.has(nome)) {
+        parlamentarMap.set(nome, { emendas: [], despesas: [] });
+      }
+      parlamentarMap.get(nome).despesas.push(d);
+    });
+
+    return [...parlamentarMap.entries()]
+      .map(([nome, dados]) => ({
+        nome,
+        ...dados,
+        valorTotal: dados.despesas.reduce((sum, d) => sum + (d.valor || 0), 0),
+      }))
+      .sort((a, b) => b.valorTotal - a.valorTotal);
+  }
+
+  /**
+   * Bloco formal de encerramento com declaração de conformidade e assinaturas
+   * Baseado no padrão de prestação de contas do SUS (LC 141/2012, Portaria GM/MS 828/2020)
+   */
+  addBlocoAssinaturas(yPosition) {
+    const margins = { left: 15, right: 15 };
+    const contentWidth = this.pageWidth - margins.left - margins.right;
+
+    yPosition = this.checkNewPage(yPosition, 120);
+
+    // Linha separadora
+    this.doc.setDrawColor(...PDF_COLORS.SLATE_300);
+    this.doc.setLineWidth(0.5);
+    this.doc.line(margins.left, yPosition, this.pageWidth - margins.right, yPosition);
+    yPosition += 8;
+
+    // Declaração de conformidade
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.setFontSize(8);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text("DECLARAÇÃO DE CONFORMIDADE", margins.left, yPosition);
+    yPosition += 6;
+
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(7);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+
+    const declaracao = "Declaro(amos), para os devidos fins de prestação de contas, que os valores acima relacionados " +
+      "foram realizados em conformidade com a legislação vigente, em especial a Lei Complementar nº 141/2012, " +
+      "a Portaria GM/MS nº 828/2020 e demais normas aplicáveis ao financiamento e à transferência de recursos " +
+      "do Sistema Único de Saúde (SUS), estando os documentos fiscais comprobatórios arquivados e disponíveis " +
+      "para verificação pelos órgãos de controle interno e externo.";
+
+    const linhasDeclaracao = this.doc.splitTextToSize(declaracao, contentWidth);
+    this.doc.text(linhasDeclaracao, margins.left, yPosition);
+    yPosition += (linhasDeclaracao.length * 3.5) + 8;
+
+    // Local e data
+    const municipio = this.usuario?.municipio || "________________";
+    const uf = this.usuario?.uf || "__";
+    const dataAtual = new Date().toLocaleDateString("pt-BR", {
+      day: "2-digit", month: "long", year: "numeric",
+    });
+
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.text(`${municipio} - ${uf}, ${dataAtual}.`, margins.left, yPosition);
+    yPosition += 14;
+
+    // Assinaturas (3 colunas)
+    const colWidth = contentWidth / 3;
+    const lineLength = colWidth - 10;
+
+    const assinaturas = [
+      { cargo: "Gestor(a) Municipal de Saúde", sub: "Secretário(a) Municipal de Saúde" },
+      { cargo: "Ordenador(a) de Despesas", sub: "Responsável pela Execução Financeira" },
+      { cargo: "Contador(a) / Responsável Técnico", sub: "CRC nº _______________" },
+    ];
+
+    assinaturas.forEach((assinatura, idx) => {
+      const colX = margins.left + (idx * colWidth);
+      const centerX = colX + colWidth / 2;
+
+      this.doc.setDrawColor(...PDF_COLORS.SLATE_400);
+      this.doc.setLineWidth(0.3);
+      this.doc.line(centerX - lineLength / 2, yPosition, centerX + lineLength / 2, yPosition);
+
+      this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+      this.doc.setFontSize(7);
+      this.doc.setFont("helvetica", "bold");
+      this.doc.text(assinatura.cargo, centerX, yPosition + 4, { align: "center" });
+
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setFontSize(6);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+      this.doc.text(assinatura.sub, centerX, yPosition + 8, { align: "center" });
+    });
+
+    yPosition += 16;
+
+    this.doc.setTextColor(...PDF_COLORS.SLATE_400);
+    this.doc.setFontSize(6);
+    this.doc.setFont("helvetica", "italic");
+    this.doc.text(
+      "Documento gerado eletronicamente pelo SICEFSUS - Sistema de Controle de Execuções Financeiras do SUS.",
+      this.pageWidth / 2, yPosition, { align: "center" }
+    );
+    this.doc.text(
+      "A autenticidade deste relatório pode ser verificada junto ao órgão emissor.",
+      this.pageWidth / 2, yPosition + 3.5, { align: "center" }
+    );
   }
 
   async gerar() {
