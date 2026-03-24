@@ -202,12 +202,16 @@ export class RelatorioPrestacao extends BaseRelatorio {
     totais.forEach((item, i) => {
       this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
     });
+    yPosition += (totais.length * 4) + 10;
+
+    // Assinatura: garante que não sobrepõe o conteúdo acima
+    yPosition = this.checkNewPage(yPosition, 30);
+    const assinaturaY = yPosition + 4;
 
     this.doc.setTextColor(...PDF_COLORS.SLATE_700);
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
-    
-    const assinaturaY = this.pageHeight - 45;
+
     this.doc.text("_____________________________________", 105, assinaturaY, { align: "center" });
     this.doc.text("Responsável pela Prestação de Contas", 105, assinaturaY + 5, { align: "center" });
     this.doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 105, assinaturaY + 10, { align: "center" });

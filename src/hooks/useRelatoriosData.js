@@ -112,7 +112,8 @@ export function useRelatoriosData(usuario, enabled = false) {
   }, [enabled, userRole, userMunicipio, userUf]);
 
   // Função para aplicar filtros aos dados
-  const aplicarFiltros = (filtros) => {
+  // opcoes.usarMesAno: true para relatórios que usam mes/ano em vez de período (ex: consolidado-mensal)
+  const aplicarFiltros = (filtros, { usarMesAno = false } = {}) => {
     // Base: excluir emendas inativas
     let emendasFiltradas = emendas.filter(
       (e) => (e.status || "").toLowerCase() !== "inativa",
@@ -120,15 +121,28 @@ export function useRelatoriosData(usuario, enabled = false) {
     let despesasFiltradas = [...despesas];
 
     // Pré-calcular limites de data uma única vez
-    const tsInicio = filtros.dataInicio
+    let tsInicio = filtros.dataInicio
       ? new Date(filtros.dataInicio).getTime()
       : null;
-    const tsFim = (() => {
-      if (!filtros.dataFim) return null;
+    let tsFim = null;
+    if (filtros.dataFim) {
       const d = new Date(filtros.dataFim);
       d.setHours(23, 59, 59, 999);
-      return d.getTime();
-    })();
+      tsFim = d.getTime();
+    }
+
+    // Se o relatório usa mês/ano (ex: consolidado-mensal) e não há período explícito,
+    // derivar tsInicio e tsFim do primeiro ao último dia do mês selecionado
+    if (usarMesAno && tsInicio === null && tsFim === null) {
+      const mes = Number(filtros.mes);
+      const ano = Number(filtros.ano);
+      if (mes && ano) {
+        tsInicio = new Date(ano, mes - 1, 1).getTime();
+        const fimMes = new Date(ano, mes, 0); // dia 0 do mês seguinte = último dia do mês
+        fimMes.setHours(23, 59, 59, 999);
+        tsFim = fimMes.getTime();
+      }
+    }
 
     // ── PASSO 1: Filtros NÃO-temporais em emendas ──────────────────────────
     // O cascade (passo 2) usa essas emendas, garantindo que despesas de emendas

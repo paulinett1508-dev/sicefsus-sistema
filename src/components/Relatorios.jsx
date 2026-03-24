@@ -86,7 +86,9 @@ export default function Relatorios({ usuario }) {
     setGenerating(true);
 
     try {
-      const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
+      const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros, {
+        usarMesAno: selectedReport.campos.includes("mes"),
+      });
 
       let gerador;
       switch (selectedReport.id) {
@@ -154,7 +156,8 @@ export default function Relatorios({ usuario }) {
 
   // Calcular preview dos dados (memoizado para evitar recálculo a cada render)
   const previewData = useMemo(() => {
-    const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
+    const usarMesAno = selectedReport?.campos?.includes("mes") ?? false;
+    const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros, { usarMesAno });
     return {
       totalEmendas: emendasFiltradas.length,
       totalDespesas: despesasFiltradas.length,
@@ -165,7 +168,7 @@ export default function Relatorios({ usuario }) {
     };
   // aplicarFiltros fecha sobre emendas e despesas — listá-los aqui é equivalente
   // a listar aplicarFiltros, sem precisar de useCallback no hook
-  }, [filtros, emendas, despesas]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [filtros, emendas, despesas, selectedReport]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loading state
   if (loading) {

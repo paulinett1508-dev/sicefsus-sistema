@@ -42,7 +42,7 @@ export class RelatorioExecucao extends BaseRelatorio {
       `Total de Despesas Executadas: ${totalDespesas}`,
       `Valor Total Alocado: ${this.formatCurrency(valorTotal)}`,
       `Valor Executado: ${this.formatCurrency(valorExecutado)} (${percentualGeral.toFixed(1)}%)`,
-      `Saldo Disponivel: ${this.formatCurrency(saldoDisponivel)}`,
+      `Saldo Disponível: ${this.formatCurrency(saldoDisponivel)}`,
     ];
     
     resumoItems.forEach((item, i) => {
@@ -226,7 +226,7 @@ export class RelatorioExecucao extends BaseRelatorio {
     this.doc.setTextColor(...PDF_COLORS.SLATE_400);
     this.doc.setFontSize(6);
     this.doc.setFont("helvetica", "italic");
-    this.doc.text("* Valores atualizados. Relatorio gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
+    this.doc.text("* Valores atualizados. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
     this.addFooter();
   }
