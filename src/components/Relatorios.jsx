@@ -178,8 +178,9 @@ export default function Relatorios({ usuario }) {
   // Error state
   if (error) {
     return (
-      <div className="relatorios-loading">
-        <p style={{ color: "var(--error)" }}>Erro ao carregar dados: {error}</p>
+      <div className="relatorios-error">
+        <span className="material-symbols-outlined" style={{ fontSize: 40 }}>error</span>
+        <p>Erro ao carregar dados: {error}</p>
       </div>
     );
   }

@@ -185,26 +185,33 @@ export default function RelatoriosFiltros({
       {/* Preview dos dados filtrados */}
       <div className="relatorios-preview">
         <h4 className="relatorios-preview-title">Prévia dos Dados</h4>
-        <div className="relatorios-preview-stats">
-          <div className="relatorios-preview-stat">
-            <span className="relatorios-preview-label">Emendas:</span>
-            <span className="relatorios-preview-value">
-              {previewData.totalEmendas}
-            </span>
+        {previewData.totalEmendas === 0 ? (
+          <p style={{ color: "var(--theme-text-secondary)", fontSize: 14, margin: 0 }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 6 }}>search_off</span>
+            Nenhuma emenda encontrada com os filtros selecionados.
+          </p>
+        ) : (
+          <div className="relatorios-preview-stats">
+            <div className="relatorios-preview-stat">
+              <span className="relatorios-preview-label">Emendas:</span>
+              <span className="relatorios-preview-value">
+                {previewData.totalEmendas}
+              </span>
+            </div>
+            <div className="relatorios-preview-stat">
+              <span className="relatorios-preview-label">Despesas:</span>
+              <span className="relatorios-preview-value">
+                {previewData.totalDespesas}
+              </span>
+            </div>
+            <div className="relatorios-preview-stat">
+              <span className="relatorios-preview-label">Valor Total:</span>
+              <span className="relatorios-preview-value">
+                {formatCurrency(previewData.valorTotal)}
+              </span>
+            </div>
           </div>
-          <div className="relatorios-preview-stat">
-            <span className="relatorios-preview-label">Despesas:</span>
-            <span className="relatorios-preview-value">
-              {previewData.totalDespesas}
-            </span>
-          </div>
-          <div className="relatorios-preview-stat">
-            <span className="relatorios-preview-label">Valor Total:</span>
-            <span className="relatorios-preview-value">
-              {formatCurrency(previewData.valorTotal)}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Botão Limpar */}
