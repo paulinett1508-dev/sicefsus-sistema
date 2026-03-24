@@ -1,5 +1,21 @@
-
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "emendas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "municipio", "order": "ASCENDING" },
+        { "fieldPath": "uf", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "despesas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "municipio", "order": "ASCENDING" },
+        { "fieldPath": "uf", "order": "ASCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

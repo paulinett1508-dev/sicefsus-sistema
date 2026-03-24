@@ -113,7 +113,10 @@ export function useRelatoriosData(usuario, enabled = false) {
 
   // ✅ ATUALIZADO: Função para aplicar filtros aos dados
   const aplicarFiltros = (filtros) => {
-    let emendasFiltradas = [...emendas];
+    // Excluir emendas inativas — não devem aparecer em relatórios
+    let emendasFiltradas = emendas.filter(
+      (e) => (e.status || "").toLowerCase() !== "inativa",
+    );
     let despesasFiltradas = [...despesas];
 
     // Filtro por período (suporta Firestore Timestamps)
