@@ -44,6 +44,8 @@ export default function Relatorios({ usuario }) {
   const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
   const [generating, setGenerating] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  // Rastreia campos que foram preenchidos automaticamente pela inteligência de filtros
+  const [autoFilled, setAutoFilled] = useState(new Set());
 
   // Toast para notificações
   const toast = useToast();
@@ -59,14 +61,183 @@ export default function Relatorios({ usuario }) {
   // Lazy: só carrega dados do Firestore quando o usuário seleciona um relatório
   } = useRelatoriosData(usuario, selectedReport !== null);
 
-  // Handlers
+  // ── Inteligência de Filtros ─────────────────────────────────────────────
+  // Calcula opções disponíveis para cada filtro com base nos demais filtros ativos
+  const smartOptions = useMemo(() => {
+    let availableEmendas = emendas.filter(
+      (e) => (e.status || "").toLowerCase() !== "inativa",
+    );
+
+    // Filtrar emendas por parlamentar (se não foi auto-preenchido)
+    if (filtros.parlamentar && !autoFilled.has("parlamentar")) {
+      availableEmendas = availableEmendas.filter((e) =>
+        (e.autor || e.parlamentar)
+          ?.toLowerCase()
+          .includes(filtros.parlamentar.toLowerCase()),
+      );
+    }
+
+    // Filtrar emendas por município (se não foi auto-preenchido)
+    if (filtros.municipio && !autoFilled.has("municipio")) {
+      availableEmendas = availableEmendas.filter((e) =>
+        e.municipio?.toLowerCase().includes(filtros.municipio.toLowerCase()),
+      );
+    }
+
+    // Filtrar emendas por fornecedor: só mostra emendas que têm despesas daquele fornecedor
+    if (filtros.fornecedor) {
+      const fornLower = filtros.fornecedor.toLowerCase();
+      const emendaIdsComFornecedor = new Set(
+        despesas
+          .filter(
+            (d) =>
+              (d.fornecedor || "").toLowerCase().includes(fornLower) ||
+              (d.cnpjFornecedor || "").toLowerCase().includes(fornLower),
+          )
+          .map((d) => d.emendaId),
+      );
+      availableEmendas = availableEmendas.filter((e) =>
+        emendaIdsComFornecedor.has(e.id),
+      );
+    }
+
+    // Derivar opções disponíveis a partir das emendas filtradas
+    const emendaIds = new Set(availableEmendas.map((e) => e.id));
+    const availableDespesas = despesas.filter((d) => emendaIds.has(d.emendaId));
+
+    return {
+      emendas: availableEmendas,
+      parlamentares: [
+        ...new Set(
+          availableEmendas
+            .map((e) => e.autor || e.parlamentar)
+            .filter(Boolean),
+        ),
+      ].sort(),
+      municipios: [
+        ...new Set(availableEmendas.map((e) => e.municipio).filter(Boolean)),
+      ].sort(),
+      fornecedores: [
+        ...new Set(availableDespesas.map((d) => d.fornecedor).filter(Boolean)),
+      ].sort(),
+    };
+  }, [emendas, despesas, filtros.parlamentar, filtros.municipio, filtros.fornecedor, autoFilled]);
+
+  // Handler com inteligência de filtros
   const handleFiltroChange = (e) => {
     const { name, value } = e.target;
+
+    // ── Emenda selecionada: auto-preenche parlamentar, município e desativa período
+    if (name === "emenda" && value) {
+      const emenda = emendas.find((em) => em.id === value);
+      if (emenda) {
+        setFiltros((prev) => ({
+          ...prev,
+          emenda: value,
+          parlamentar: emenda.autor || emenda.parlamentar || "",
+          municipio: emenda.municipio || "",
+          dataInicio: "",
+          dataFim: "",
+        }));
+        setAutoFilled(new Set(["parlamentar", "municipio", "periodo"]));
+        return;
+      }
+    }
+
+    // ── Emenda desmarcada: limpa campos auto-preenchidos
+    if (name === "emenda" && !value) {
+      setFiltros((prev) => {
+        const next = { ...prev, emenda: "" };
+        if (autoFilled.has("parlamentar")) next.parlamentar = "";
+        if (autoFilled.has("municipio")) next.municipio = "";
+        return next;
+      });
+      setAutoFilled(new Set());
+      return;
+    }
+
+    // ── Fornecedor selecionado: se todas as emendas filtradas têm o mesmo
+    //    parlamentar/município, auto-preenche
+    if (name === "fornecedor" && value) {
+      const fornLower = value.toLowerCase();
+      const emendaIdsComFornecedor = new Set(
+        despesas
+          .filter(
+            (d) =>
+              (d.fornecedor || "").toLowerCase().includes(fornLower) ||
+              (d.cnpjFornecedor || "").toLowerCase().includes(fornLower),
+          )
+          .map((d) => d.emendaId),
+      );
+      const emendasDoFornecedor = emendas.filter((e) =>
+        emendaIdsComFornecedor.has(e.id),
+      );
+
+      const newAutoFilled = new Set();
+      const next = { ...filtros, fornecedor: value };
+
+      // Se todas as emendas do fornecedor são do mesmo parlamentar, auto-preenche
+      const parlUnicos = [
+        ...new Set(
+          emendasDoFornecedor
+            .map((e) => e.autor || e.parlamentar)
+            .filter(Boolean),
+        ),
+      ];
+      if (parlUnicos.length === 1 && !filtros.parlamentar) {
+        next.parlamentar = parlUnicos[0];
+        newAutoFilled.add("parlamentar");
+      }
+
+      // Se todas as emendas do fornecedor são do mesmo município, auto-preenche
+      const munUnicos = [
+        ...new Set(
+          emendasDoFornecedor.map((e) => e.municipio).filter(Boolean),
+        ),
+      ];
+      if (munUnicos.length === 1 && !filtros.municipio) {
+        next.municipio = munUnicos[0];
+        newAutoFilled.add("municipio");
+      }
+
+      // Se só tem uma emenda, auto-seleciona
+      if (emendasDoFornecedor.length === 1 && !filtros.emenda) {
+        next.emenda = emendasDoFornecedor[0].id;
+        newAutoFilled.add("emenda");
+      }
+
+      setFiltros(next);
+      if (newAutoFilled.size > 0) setAutoFilled(newAutoFilled);
+      return;
+    }
+
+    // ── Fornecedor desmarcado: limpa auto-preenchidos por ele
+    if (name === "fornecedor" && !value) {
+      setFiltros((prev) => {
+        const next = { ...prev, fornecedor: "" };
+        if (autoFilled.has("parlamentar")) next.parlamentar = "";
+        if (autoFilled.has("municipio")) next.municipio = "";
+        if (autoFilled.has("emenda")) next.emenda = "";
+        return next;
+      });
+      setAutoFilled(new Set());
+      return;
+    }
+
+    // ── Alteração genérica: se o campo era auto-preenchido, remove o tracking
     setFiltros((prev) => ({ ...prev, [name]: value }));
+    if (autoFilled.has(name)) {
+      setAutoFilled((prev) => {
+        const next = new Set(prev);
+        next.delete(name);
+        return next;
+      });
+    }
   };
 
   const handleLimparFiltros = () => {
     setFiltros(FILTROS_INICIAIS);
+    setAutoFilled(new Set());
   };
 
   const handleSelecionarRelatorio = (tipo) => {
@@ -222,8 +393,12 @@ export default function Relatorios({ usuario }) {
             filtros={filtros}
             onFiltroChange={handleFiltroChange}
             onLimparFiltros={handleLimparFiltros}
-            parlamentares={parlamentares}
-            emendas={emendas}
+            parlamentares={smartOptions.parlamentares}
+            emendas={smartOptions.emendas}
+            totalEmendas={emendas.filter(e => (e.status || "").toLowerCase() !== "inativa").length}
+            municipios={smartOptions.municipios}
+            fornecedores={smartOptions.fornecedores}
+            autoFilled={autoFilled}
             previewData={previewData}
           />
 

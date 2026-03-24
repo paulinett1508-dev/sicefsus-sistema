@@ -110,6 +110,21 @@ function SearchableSelect({ id, name, value, onChange, placeholder, options, cla
   );
 }
 
+/**
+ * Badge visual para campos preenchidos automaticamente pela inteligência de filtros
+ */
+function AutoFilledBadge() {
+  return (
+    <span
+      className="relatorios-autofilled-badge"
+      title="Preenchido automaticamente com base nos outros filtros"
+    >
+      <span className="material-symbols-outlined" style={{ fontSize: 12, verticalAlign: "middle", marginRight: 2 }}>auto_awesome</span>
+      auto
+    </span>
+  );
+}
+
 export default function RelatoriosFiltros({
   selectedReport,
   filtros,
@@ -117,9 +132,15 @@ export default function RelatoriosFiltros({
   onLimparFiltros,
   parlamentares,
   emendas = [],
+  totalEmendas = 0,
+  municipios = [],
+  fornecedores = [],
+  autoFilled = new Set(),
   previewData,
 }) {
-  // Opções formatadas para o SearchableSelect
+  const periodoDesativado = autoFilled.has("periodo");
+
+  // Opções formatadas para os SearchableSelects
   const parlamentarOptions = parlamentares.map((p) => ({ value: p, label: p }));
 
   const emendaOptions = emendas.map((emenda) => ({
@@ -127,11 +148,37 @@ export default function RelatoriosFiltros({
     label: `${emenda.numero || emenda.numeroEmenda || "S/N"} - ${emenda.parlamentar || emenda.autor || "?"} - ${emenda.municipio || "?"}`,
   }));
 
+  const municipioOptions = municipios.map((m) => ({ value: m, label: m }));
+
+  const fornecedorOptions = fornecedores.map((f) => ({ value: f, label: f }));
+
+  // Contagem de filtros ativos (para feedback visual)
+  const filtrosAtivos = [
+    filtros.parlamentar,
+    filtros.emenda,
+    filtros.municipio,
+    filtros.fornecedor,
+    filtros.dataInicio || filtros.dataFim,
+  ].filter(Boolean).length;
+
   return (
     <div className="relatorios-filters">
       <h3 className="relatorios-filters-title">
         Configure os Filtros do Relatório
+        {filtrosAtivos > 0 && (
+          <span className="relatorios-filters-count">
+            {filtrosAtivos} filtro{filtrosAtivos > 1 ? "s" : ""} ativo{filtrosAtivos > 1 ? "s" : ""}
+          </span>
+        )}
       </h3>
+
+      {/* Indicador de inteligência ativa */}
+      {autoFilled.size > 0 && (
+        <div className="relatorios-smart-hint">
+          <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle", marginRight: 6 }}>auto_awesome</span>
+          Filtros inteligentes: campos relacionados foram preenchidos automaticamente.
+        </div>
+      )}
 
       <div className="relatorios-filters-grid">
         {/* Filtro de Mês/Ano (para relatório consolidado mensal) */}
@@ -171,8 +218,15 @@ export default function RelatoriosFiltros({
 
         {/* Filtro de Período */}
         {selectedReport.campos.includes("periodo") && (
-          <div className="relatorios-filter-group relatorios-filter-group--periodo">
-            <label className="relatorios-filter-label" id="label-periodo">Período</label>
+          <div className={`relatorios-filter-group relatorios-filter-group--periodo ${periodoDesativado ? "relatorios-filter-group--disabled" : ""}`}>
+            <label className="relatorios-filter-label" id="label-periodo">
+              Período
+              {periodoDesativado && (
+                <span className="relatorios-filter-hint">
+                  (desativado — emenda específica selecionada)
+                </span>
+              )}
+            </label>
             <div className="relatorios-date-group" role="group" aria-labelledby="label-periodo">
               <input
                 type="date"
@@ -182,6 +236,7 @@ export default function RelatoriosFiltros({
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
                 aria-label="Data de início do período"
+                disabled={periodoDesativado}
               />
               <span className="relatorios-date-separator">até</span>
               <input
@@ -192,15 +247,19 @@ export default function RelatoriosFiltros({
                 onChange={onFiltroChange}
                 className="relatorios-date-input"
                 aria-label="Data de fim do período"
+                disabled={periodoDesativado}
               />
             </div>
           </div>
         )}
 
-        {/* Filtro de Parlamentar — com busca */}
+        {/* Filtro de Parlamentar — com busca + auto-fill */}
         {selectedReport.campos.includes("parlamentar") && (
-          <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Parlamentar</label>
+          <div className={`relatorios-filter-group ${autoFilled.has("parlamentar") ? "relatorios-filter-group--autofilled" : ""}`}>
+            <label className="relatorios-filter-label">
+              Parlamentar
+              {autoFilled.has("parlamentar") && <AutoFilledBadge />}
+            </label>
             <SearchableSelect
               id="parlamentar"
               name="parlamentar"
@@ -212,10 +271,18 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* Filtro de Emenda — com busca */}
+        {/* Filtro de Emenda — com busca (opções filtradas por outros filtros) */}
         {selectedReport.campos.includes("emenda") && (
-          <div className="relatorios-filter-group">
-            <label className="relatorios-filter-label">Emenda Específica</label>
+          <div className={`relatorios-filter-group ${autoFilled.has("emenda") ? "relatorios-filter-group--autofilled" : ""}`}>
+            <label className="relatorios-filter-label">
+              Emenda Específica
+              {autoFilled.has("emenda") && <AutoFilledBadge />}
+              {emendaOptions.length < totalEmendas && !filtros.emenda && (
+                <span className="relatorios-filter-hint">
+                  ({emendaOptions.length} de {totalEmendas} disponíveis)
+                </span>
+              )}
+            </label>
             <SearchableSelect
               id="emenda"
               name="emenda"
@@ -227,34 +294,42 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* Filtro de Município */}
+        {/* Filtro de Município — agora com SearchableSelect */}
         {selectedReport.campos.includes("municipio") && (
-          <div className="relatorios-filter-group">
-            <label htmlFor="municipio" className="relatorios-filter-label">Município</label>
-            <input
-              type="text"
+          <div className={`relatorios-filter-group ${autoFilled.has("municipio") ? "relatorios-filter-group--autofilled" : ""}`}>
+            <label className="relatorios-filter-label">
+              Município
+              {autoFilled.has("municipio") && <AutoFilledBadge />}
+            </label>
+            <SearchableSelect
               id="municipio"
               name="municipio"
               value={filtros.municipio}
               onChange={onFiltroChange}
-              placeholder="Digite o município"
-              className="relatorios-input"
+              placeholder="Todos os municípios"
+              options={municipioOptions}
             />
           </div>
         )}
 
-        {/* Filtro de Fornecedor (para relatório de despesas) */}
+        {/* Filtro de Fornecedor — agora com SearchableSelect */}
         {selectedReport.campos.includes("fornecedor") && (
           <div className="relatorios-filter-group">
-            <label htmlFor="fornecedor" className="relatorios-filter-label">Fornecedor</label>
-            <input
-              type="text"
+            <label className="relatorios-filter-label">
+              Fornecedor
+              {fornecedorOptions.length > 0 && !filtros.fornecedor && (
+                <span className="relatorios-filter-hint">
+                  ({fornecedorOptions.length} disponíveis)
+                </span>
+              )}
+            </label>
+            <SearchableSelect
               id="fornecedor"
               name="fornecedor"
               value={filtros.fornecedor || ""}
               onChange={onFiltroChange}
-              placeholder="Nome ou CNPJ do fornecedor"
-              className="relatorios-input"
+              placeholder="Todos os fornecedores"
+              options={fornecedorOptions}
             />
           </div>
         )}
