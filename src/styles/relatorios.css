@@ -270,6 +270,125 @@
   font-size: 14px;
 }
 
+/* Searchable Select */
+.relatorios-searchable {
+  position: relative;
+}
+
+.relatorios-searchable-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: var(--theme-surface);
+  color: var(--theme-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  min-height: 42px;
+}
+
+.relatorios-searchable-trigger:hover {
+  border-color: var(--primary);
+}
+
+.relatorios-searchable-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relatorios-searchable-placeholder {
+  color: var(--theme-text-secondary);
+  flex: 1;
+}
+
+.relatorios-searchable-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--theme-border);
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.relatorios-searchable-clear:hover {
+  background: var(--error, #ef4444);
+  color: white;
+}
+
+.relatorios-searchable-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.relatorios-searchable-input {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid var(--theme-border);
+  font-size: 14px;
+  background: transparent;
+  color: var(--theme-text);
+  outline: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.relatorios-searchable-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  max-height: 220px;
+}
+
+.relatorios-searchable-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--theme-text);
+  transition: background 0.15s;
+}
+
+.relatorios-searchable-option:hover {
+  background: var(--theme-hover, #f1f5f9);
+}
+
+.relatorios-searchable-option--active {
+  background: var(--primary-light, #e0f2fe);
+  font-weight: 500;
+}
+
+.relatorios-searchable-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--theme-text-secondary);
+  font-size: 13px;
+  font-style: italic;
+}
+
 /* Preview Section */
 .relatorios-preview {
   background-color: var(--theme-surface);

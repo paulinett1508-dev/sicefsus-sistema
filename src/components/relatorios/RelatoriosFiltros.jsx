@@ -1,8 +1,114 @@
 // src/components/relatorios/RelatoriosFiltros.jsx
-// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e parlamentar
-import React from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { formatCurrency } from "../../utils/pdfHelpers";
 import "../../styles/relatorios.css";
+
+/**
+ * Dropdown com busca por digitação — substitui select nativo
+ */
+function SearchableSelect({ id, name, value, onChange, placeholder, options, className }) {
+  const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  // Label visível do valor selecionado
+  const selectedLabel = value
+    ? (options.find(o => o.value === value)?.label || "")
+    : "";
+
+  // Fechar ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filtered = search
+    ? options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()))
+    : options;
+
+  const handleSelect = useCallback((optValue) => {
+    onChange({ target: { name, value: optValue } });
+    setIsOpen(false);
+    setSearch("");
+  }, [name, onChange]);
+
+  const handleClear = useCallback((e) => {
+    e.stopPropagation();
+    onChange({ target: { name, value: "" } });
+    setSearch("");
+  }, [name, onChange]);
+
+  return (
+    <div className="relatorios-searchable" ref={containerRef}>
+      <div
+        className={`relatorios-searchable-trigger ${className || ""}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {value ? (
+          <span className="relatorios-searchable-value">
+            {selectedLabel}
+            <button
+              type="button"
+              className="relatorios-searchable-clear"
+              onClick={handleClear}
+              aria-label="Limpar seleção"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>close</span>
+            </button>
+          </span>
+        ) : (
+          <span className="relatorios-searchable-placeholder">{placeholder}</span>
+        )}
+        <span className="material-symbols-outlined" style={{ fontSize: 16, color: "var(--theme-text-secondary)" }}>
+          {isOpen ? "expand_less" : "expand_more"}
+        </span>
+      </div>
+
+      {isOpen && (
+        <div className="relatorios-searchable-dropdown">
+          <input
+            type="text"
+            className="relatorios-searchable-input"
+            placeholder="Digite para buscar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+          />
+          <ul className="relatorios-searchable-list">
+            <li
+              className={`relatorios-searchable-option ${!value ? "relatorios-searchable-option--active" : ""}`}
+              onClick={() => handleSelect("")}
+            >
+              {placeholder}
+            </li>
+            {filtered.length > 0 ? (
+              filtered.map((o) => (
+                <li
+                  key={o.value}
+                  className={`relatorios-searchable-option ${value === o.value ? "relatorios-searchable-option--active" : ""}`}
+                  onClick={() => handleSelect(o.value)}
+                >
+                  {o.label}
+                </li>
+              ))
+            ) : (
+              <li className="relatorios-searchable-empty">Nenhum resultado</li>
+            )}
+          </ul>
+        </div>
+      )}
+
+      {/* Hidden input para manter compatibilidade com formulário */}
+      <input type="hidden" id={id} name={name} value={value} />
+    </div>
+  );
+}
 
 export default function RelatoriosFiltros({
   selectedReport,
@@ -13,6 +119,14 @@ export default function RelatoriosFiltros({
   emendas = [],
   previewData,
 }) {
+  // Opções formatadas para o SearchableSelect
+  const parlamentarOptions = parlamentares.map((p) => ({ value: p, label: p }));
+
+  const emendaOptions = emendas.map((emenda) => ({
+    value: emenda.id,
+    label: `${emenda.numero || emenda.numeroEmenda || "S/N"} - ${emenda.parlamentar || emenda.autor || "?"} - ${emenda.municipio || "?"}`,
+  }));
+
   return (
     <div className="relatorios-filters">
       <h3 className="relatorios-filters-title">
@@ -83,46 +197,33 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-        {/* Filtro de Parlamentar */}
+        {/* Filtro de Parlamentar — com busca */}
         {selectedReport.campos.includes("parlamentar") && (
           <div className="relatorios-filter-group">
-            <label htmlFor="parlamentar" className="relatorios-filter-label">Parlamentar</label>
-            <select
+            <label className="relatorios-filter-label">Parlamentar</label>
+            <SearchableSelect
               id="parlamentar"
               name="parlamentar"
               value={filtros.parlamentar}
               onChange={onFiltroChange}
-              className="relatorios-select"
-            >
-              <option value="">Todos</option>
-              {parlamentares.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
+              placeholder="Todos"
+              options={parlamentarOptions}
+            />
           </div>
         )}
 
-        {/* Filtro de Emenda */}
+        {/* Filtro de Emenda — com busca */}
         {selectedReport.campos.includes("emenda") && (
           <div className="relatorios-filter-group">
-            <label htmlFor="emenda" className="relatorios-filter-label">Emenda Específica</label>
-            <select
+            <label className="relatorios-filter-label">Emenda Específica</label>
+            <SearchableSelect
               id="emenda"
               name="emenda"
               value={filtros.emenda}
               onChange={onFiltroChange}
-              className="relatorios-select"
-            >
-              <option value="">Todas as emendas</option>
-              {emendas.map((emenda) => (
-                <option key={emenda.id} value={emenda.id}>
-                  {emenda.numero || emenda.numeroEmenda} -{" "}
-                  {emenda.parlamentar || emenda.autor} - {emenda.municipio}
-                </option>
-              ))}
-            </select>
+              placeholder="Todas as emendas"
+              options={emendaOptions}
+            />
           </div>
         )}
 
