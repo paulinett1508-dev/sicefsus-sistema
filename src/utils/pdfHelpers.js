@@ -132,25 +132,37 @@ export const addHeader = (doc, titulo, logoBase64, subtitulo = null, opcoes = {}
   }
 };
 
-// Header para continuação de páginas
+// Header para continuação de páginas — versão completa
 export const addHeaderContinuacao = (doc, titulo) => {
   const pageWidth = doc.internal.pageSize.width;
   const margins = { left: 15, right: 15 };
 
   // Linha accent no topo
   doc.setFillColor(...PDF_COLORS.ACCENT);
-  doc.rect(0, 0, pageWidth, 1.5, "F");
+  doc.rect(0, 0, pageWidth, 2, "F");
 
-  // Título compacto
+  // SICEFSUS (esquerda)
+  doc.setTextColor(...PDF_COLORS.SLATE_900);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("SICEFSUS", margins.left, 10);
+
+  // Nome do relatório (centro)
   doc.setTextColor(...PDF_COLORS.SLATE_700);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text(titulo, margins.left, 12);
+  doc.text(titulo, pageWidth / 2, 10, { align: "center" });
 
-  // Indicador de continuação
+  // Indicador de continuação (direita)
   doc.setTextColor(...PDF_COLORS.SLATE_400);
   doc.setFontSize(8);
-  doc.text("(continuação)", margins.left + doc.getTextWidth(titulo) + 3, 12);
+  doc.setFont("helvetica", "italic");
+  doc.text("continuação", pageWidth - margins.right, 10, { align: "right" });
+
+  // Linha separadora
+  doc.setDrawColor(...PDF_COLORS.SLATE_200);
+  doc.setLineWidth(0.3);
+  doc.line(margins.left, 14, pageWidth - margins.right, 14);
 };
 
 // Adicionar rodapé moderno aos PDFs
