@@ -10,6 +10,7 @@ import {
   getLogoBase64,
   gerarNomeArquivo,
 } from "../../../utils/pdfHelpers";
+import { parseFirestoreTimestamp } from "../../../utils/formatters";
 
 export class BaseRelatorio {
   constructor(tipoRelatorio, emendasFiltradas, despesasFiltradas, usuario) {
@@ -137,26 +138,7 @@ export class BaseRelatorio {
    * Suporta: string "2025-09-24", Timestamp Firestore (JS SDK e Admin SDK), ISO string
    */
   parseData(dataRaw) {
-    if (!dataRaw) return 0;
-
-    // Timestamp do Firestore - JS SDK com método toDate()
-    if (typeof dataRaw.toDate === "function") {
-      return dataRaw.toDate().getTime();
-    }
-
-    // Timestamp do Firestore - JS SDK {seconds: number}
-    if (dataRaw.seconds !== undefined) {
-      return dataRaw.seconds * 1000;
-    }
-
-    // Timestamp do Firestore - Admin SDK {_seconds: number}
-    if (dataRaw._seconds !== undefined) {
-      return dataRaw._seconds * 1000;
-    }
-
-    // String ou Date
-    const parsed = new Date(dataRaw).getTime();
-    return isNaN(parsed) ? 0 : parsed;
+    return parseFirestoreTimestamp(dataRaw) ?? 0;
   }
 
   /**
@@ -164,30 +146,9 @@ export class BaseRelatorio {
    * Suporta: string "2025-09-24", Timestamp Firestore (JS SDK e Admin SDK), ISO string
    */
   formatarData(dataRaw) {
-    if (!dataRaw) return "-";
-
-    let date;
-
-    // Timestamp do Firestore - JS SDK com método toDate()
-    if (typeof dataRaw.toDate === "function") {
-      date = dataRaw.toDate();
-    }
-    // Timestamp do Firestore - JS SDK {seconds: number}
-    else if (dataRaw.seconds !== undefined) {
-      date = new Date(dataRaw.seconds * 1000);
-    }
-    // Timestamp do Firestore - Admin SDK {_seconds: number}
-    else if (dataRaw._seconds !== undefined) {
-      date = new Date(dataRaw._seconds * 1000);
-    }
-    // String ou Date
-    else {
-      date = new Date(dataRaw);
-    }
-
-    if (isNaN(date.getTime())) return "-";
-
-    return date.toLocaleDateString("pt-BR");
+    const ts = parseFirestoreTimestamp(dataRaw);
+    if (ts === null) return "-";
+    return new Date(ts).toLocaleDateString("pt-BR");
   }
 
   // ========== MÉTODOS UTILITÁRIOS COMUNS ==========

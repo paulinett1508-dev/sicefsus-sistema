@@ -1,25 +1,25 @@
 // src/hooks/useRelatoriosData.js
-// ✅ ATUALIZADO 04/11/2025: Adicionados filtros por emenda e fornecedor
 import { useState, useEffect } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { parseFirestoreTimestamp } from "../utils/formatters";
 
 // Função para parsear valores monetários brasileiros
 function parseValorMonetario(valor) {
   if (valor === null || valor === undefined || valor === "") return 0;
   if (typeof valor === "number") return valor;
-  
+
   // Remove R$, espaços e caracteres especiais
   let valorLimpo = String(valor)
     .replace(/R\$\s*/gi, "")
     .replace(/\s/g, "")
     .trim();
-  
+
   // Formato brasileiro: 1.234.567,89 -> 1234567.89
   if (valorLimpo.includes(",")) {
     valorLimpo = valorLimpo.replace(/\./g, "").replace(",", ".");
   }
-  
+
   const resultado = parseFloat(valorLimpo);
   return isNaN(resultado) ? 0 : resultado;
 }
@@ -127,29 +127,30 @@ export function useRelatoriosData(usuario) {
     let emendasFiltradas = [...emendas];
     let despesasFiltradas = [...despesas];
 
-    // Filtro por período
+    // Filtro por período (suporta Firestore Timestamps)
     if (filtros.dataInicio) {
-      const dataInicio = new Date(filtros.dataInicio);
+      const tsInicio = new Date(filtros.dataInicio).getTime();
       emendasFiltradas = emendasFiltradas.filter((e) => {
-        const dataEmenda = e.dataAprovacao || e.dataOb || e.criadaEm;
-        return dataEmenda && new Date(dataEmenda) >= dataInicio;
+        const ts = parseFirestoreTimestamp(e.dataAprovacao) || parseFirestoreTimestamp(e.dataOb) || parseFirestoreTimestamp(e.criadaEm);
+        return ts !== null && ts >= tsInicio;
       });
       despesasFiltradas = despesasFiltradas.filter((d) => {
-        const dataDespesa = d.data || d.dataEmpenho || d.criadaEm;
-        return dataDespesa && new Date(dataDespesa) >= dataInicio;
+        const ts = parseFirestoreTimestamp(d.data) || parseFirestoreTimestamp(d.dataEmpenho) || parseFirestoreTimestamp(d.criadaEm);
+        return ts !== null && ts >= tsInicio;
       });
     }
 
     if (filtros.dataFim) {
       const dataFim = new Date(filtros.dataFim);
-      dataFim.setHours(23, 59, 59);
+      dataFim.setHours(23, 59, 59, 999);
+      const tsFim = dataFim.getTime();
       emendasFiltradas = emendasFiltradas.filter((e) => {
-        const dataEmenda = e.dataAprovacao || e.dataOb || e.criadaEm;
-        return dataEmenda && new Date(dataEmenda) <= dataFim;
+        const ts = parseFirestoreTimestamp(e.dataAprovacao) || parseFirestoreTimestamp(e.dataOb) || parseFirestoreTimestamp(e.criadaEm);
+        return ts !== null && ts <= tsFim;
       });
       despesasFiltradas = despesasFiltradas.filter((d) => {
-        const dataDespesa = d.data || d.dataEmpenho || d.criadaEm;
-        return dataDespesa && new Date(dataDespesa) <= dataFim;
+        const ts = parseFirestoreTimestamp(d.data) || parseFirestoreTimestamp(d.dataEmpenho) || parseFirestoreTimestamp(d.criadaEm);
+        return ts !== null && ts <= tsFim;
       });
     }
 

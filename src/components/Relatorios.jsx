@@ -1,5 +1,5 @@
 // src/components/Relatorios.jsx
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRelatoriosData } from "../hooks/useRelatoriosData";
 import { useToast } from "./Toast";
 import RelatoriosCards from "./relatorios/RelatoriosCards";
@@ -152,8 +152,8 @@ export default function Relatorios({ usuario }) {
     }
   };
 
-  // Calcular preview dos dados
-  const getPreviewData = () => {
+  // Calcular preview dos dados (memoizado para evitar recálculo a cada render)
+  const previewData = useMemo(() => {
     const { emendasFiltradas, despesasFiltradas } = aplicarFiltros(filtros);
     return {
       totalEmendas: emendasFiltradas.length,
@@ -163,7 +163,7 @@ export default function Relatorios({ usuario }) {
         0,
       ),
     };
-  };
+  }, [filtros, emendas, despesas]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loading state
   if (loading) {
@@ -220,7 +220,7 @@ export default function Relatorios({ usuario }) {
             parlamentares={parlamentares}
             ufs={ufs}
             emendas={emendas}
-            previewData={getPreviewData()}
+            previewData={previewData}
           />
 
           {/* Botões de Ação */}

@@ -197,6 +197,20 @@ export const formatarMoedaBRL = (valor, decimais = 2) => {
   });
 };
 
+/**
+ * Converte diferentes formatos de data/Timestamp Firestore para milissegundos
+ * Suporta: string, Date, Firestore Timestamp (JS SDK e Admin SDK)
+ * @returns {number|null} milissegundos ou null se inválido
+ */
+export function parseFirestoreTimestamp(dataRaw) {
+  if (!dataRaw) return null;
+  if (typeof dataRaw.toDate === "function") return dataRaw.toDate().getTime();
+  if (dataRaw.seconds !== undefined) return dataRaw.seconds * 1000;
+  if (dataRaw._seconds !== undefined) return dataRaw._seconds * 1000;
+  const parsed = new Date(dataRaw).getTime();
+  return isNaN(parsed) ? null : parsed;
+}
+
 // Export default para compatibilidade
 export default {
   formatarMoeda,

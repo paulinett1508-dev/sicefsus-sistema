@@ -93,7 +93,7 @@ export const TIPOS_RELATORIOS = [
     descricao: "Resumo mensal com principais indicadores",
     icone: "trending_up",
     cor: COLORS.ERROR,
-    campos: ["mes", "ano", "parlamentar"],
+    campos: ["mes", "ano", "parlamentar", "emenda"],
   },
 ];
 

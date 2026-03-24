@@ -21,9 +21,44 @@ export default function RelatoriosFiltros({
       </h3>
 
       <div className="relatorios-filters-grid">
+        {/* Filtro de Mês/Ano (para relatório consolidado mensal) */}
+        {selectedReport.campos.includes("mes") && (
+          <div className="relatorios-filter-group">
+            <label className="relatorios-filter-label" id="label-mes-ano">Mês / Ano</label>
+            <div className="relatorios-date-group" role="group" aria-labelledby="label-mes-ano">
+              <select
+                id="mes"
+                name="mes"
+                value={filtros.mes}
+                onChange={onFiltroChange}
+                className="relatorios-select"
+                aria-label="Mês de referência"
+              >
+                {[
+                  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+                  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+                ].map((nome, idx) => (
+                  <option key={idx + 1} value={idx + 1}>{nome}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                id="ano"
+                name="ano"
+                value={filtros.ano}
+                onChange={onFiltroChange}
+                min="2020"
+                max="2099"
+                className="relatorios-date-input"
+                aria-label="Ano de referência"
+                style={{ width: 80 }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Filtro de Período */}
-        {(selectedReport.campos.includes("periodo") ||
-          selectedReport.campos.includes("mes")) && (
+        {selectedReport.campos.includes("periodo") && (
           <div className="relatorios-filter-group">
             <label className="relatorios-filter-label" id="label-periodo">Período</label>
             <div className="relatorios-date-group" role="group" aria-labelledby="label-periodo">
@@ -49,6 +84,7 @@ export default function RelatoriosFiltros({
             </div>
           </div>
         )}
+
 
         {/* Filtro de Parlamentar */}
         {selectedReport.campos.includes("parlamentar") && (
