@@ -20,7 +20,6 @@ export class BaseRelatorio {
     this.despesas = despesasFiltradas;
     this.usuario = usuario;
     this.doc = new jsPDF();
-    this.pageNum = 1;
     this.logoBase64 = null;
     this.warnings = []; // Armazena avisos de erros durante a geração
     this.tituloRelatorio = null; // Armazena título para cabeçalhos de continuação
@@ -78,14 +77,9 @@ export class BaseRelatorio {
     addHeaderContinuacao(this.doc, this.tituloRelatorio || "Relatório");
   }
 
-  addFooter() {
-    addFooter(this.doc, this.pageNum, this.usuario);
-  }
-
   checkNewPage(yPosition, minSpace = 40) {
     if (yPosition + minSpace > this.pageHeight - this.margins.bottom) {
       this.doc.addPage();
-      this.pageNum++;
       this.addHeaderContinuacao(); // Adiciona cabeçalho na nova página
       return 20; // Retorna nova posição Y após o cabeçalho de continuação
     }
@@ -114,7 +108,6 @@ export class BaseRelatorio {
         // Adiciona cabeçalho de continuação em páginas após a primeira
         if (!isFirstPage) {
           self.addHeaderContinuacao();
-          self.pageNum++;
         }
         isFirstPage = false;
 

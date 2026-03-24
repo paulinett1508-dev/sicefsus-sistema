@@ -83,7 +83,6 @@ export default function RelatoriosFiltros({
           </div>
         )}
 
-
         {/* Filtro de Parlamentar */}
         {selectedReport.campos.includes("parlamentar") && (
           <div className="relatorios-filter-group">
