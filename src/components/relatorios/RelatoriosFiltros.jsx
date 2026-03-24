@@ -10,8 +10,7 @@ export default function RelatoriosFiltros({
   onFiltroChange,
   onLimparFiltros,
   parlamentares,
-  ufs,
-  emendas = [], // ✅ NOVO: Lista de emendas para filtro
+  emendas = [],
   previewData,
 }) {
   return (
@@ -141,27 +140,6 @@ export default function RelatoriosFiltros({
               placeholder="Digite o município"
               className="relatorios-input"
             />
-          </div>
-        )}
-
-        {/* Filtro de UF */}
-        {selectedReport.campos.includes("uf") && (
-          <div className="relatorios-filter-group">
-            <label htmlFor="uf" className="relatorios-filter-label">UF</label>
-            <select
-              id="uf"
-              name="uf"
-              value={filtros.uf}
-              onChange={onFiltroChange}
-              className="relatorios-select"
-            >
-              <option value="">Todas</option>
-              {ufs.map((uf) => (
-                <option key={uf} value={uf}>
-                  {uf}
-                </option>
-              ))}
-            </select>
           </div>
         )}
 

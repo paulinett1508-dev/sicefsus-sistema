@@ -11,6 +11,7 @@ import {
   gerarNomeArquivo,
 } from "../../../utils/pdfHelpers";
 import { parseFirestoreTimestamp } from "../../../utils/formatters";
+import { DESPESA_STATUS } from "../../../config/constants";
 
 export class BaseRelatorio {
   constructor(tipoRelatorio, emendasFiltradas, despesasFiltradas, usuario) {
@@ -154,10 +155,10 @@ export class BaseRelatorio {
   // ========== MÉTODOS UTILITÁRIOS COMUNS ==========
 
   /**
-   * Retorna apenas despesas executadas (status !== "PLANEJADA")
+   * Retorna apenas despesas executadas (status !== PLANEJADA)
    */
   getDespesasExecutadas() {
-    return this.despesas.filter(d => d.status !== "PLANEJADA");
+    return this.despesas.filter(d => d.status !== DESPESA_STATUS.PLANEJADA);
   }
 
   /**

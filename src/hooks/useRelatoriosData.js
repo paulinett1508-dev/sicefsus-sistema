@@ -166,10 +166,6 @@ export function useRelatoriosData(usuario, enabled = false) {
       );
     }
 
-    if (filtros.uf) {
-      emendasFiltradas = emendasFiltradas.filter((e) => e.uf === filtros.uf);
-    }
-
     // ── PASSO 2: CASCADE com emendas sem filtro temporal ───────────────────
     // Restringe despesas às emendas permitidas pelos filtros não-temporais.
     // Não usa emendasFiltradas com data para não eliminar despesas cujas
@@ -244,7 +240,6 @@ export function useRelatoriosData(usuario, enabled = false) {
   const parlamentares = [
     ...new Set(emendas.map((e) => e.autor || e.parlamentar).filter(Boolean)),
   ].sort();
-  const ufs = [...new Set(emendas.map((e) => e.uf).filter(Boolean))].sort();
 
   return {
     emendas,
@@ -253,6 +248,5 @@ export function useRelatoriosData(usuario, enabled = false) {
     error,
     aplicarFiltros,
     parlamentares,
-    ufs,
   };
 }

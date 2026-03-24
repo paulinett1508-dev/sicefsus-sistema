@@ -290,7 +290,7 @@ src/
 │   │
 │   └── relatorios/
 │       ├── geradores/               # Geradores de PDF
-│       ├── RelatoriosConfig.jsx
+│       ├── RelatoriosCards.jsx
 │       └── RelatoriosFiltros.jsx
 │
 ├── context/

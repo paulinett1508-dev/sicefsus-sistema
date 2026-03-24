@@ -103,10 +103,8 @@ export const FILTROS_INICIAIS = {
   parlamentar: "",
   emenda: "",
   municipio: "",
-  uf: "",
   fornecedor: "",
-  status: "todos",
-  // Campos para relatórios mensais (Prestação, Analítico, Despesas, Consolidado)
+  // Campos para relatórios mensais (ex: consolidado-mensal)
   mes: new Date().getMonth() + 1,
   ano: new Date().getFullYear(),
 };

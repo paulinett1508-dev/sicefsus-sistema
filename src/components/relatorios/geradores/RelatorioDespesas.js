@@ -6,6 +6,7 @@ import {
   addSectionTitle,
   getModernTableStyles,
 } from "../../../utils/pdfHelpers";
+import { DESPESA_STATUS } from "../../../config/constants";
 
 export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
@@ -18,7 +19,7 @@ export class RelatorioDespesas extends BaseRelatorio {
 
     // Usar métodos utilitários da BaseRelatorio
     const despesasExecutadas = this.getDespesasExecutadas();
-    const despesasPlanejadas = this.despesas.filter(d => d.status === "PLANEJADA");
+    const despesasPlanejadas = this.despesas.filter(d => d.status === DESPESA_STATUS.PLANEJADA);
     const totalDespesas = this.despesas.length;
 
     const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
