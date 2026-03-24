@@ -269,6 +269,6 @@ export class RelatorioConsolidado extends BaseRelatorio {
     this.doc.setFont("helvetica", "italic");
     this.doc.text("* Valores consolidados. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
-    this.addFooter();
+    this.addFooterTodasPaginas();
   }
 }

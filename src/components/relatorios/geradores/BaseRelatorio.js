@@ -256,6 +256,18 @@ export class BaseRelatorio {
     return `${nomeMes} ${ano}`;
   }
 
+  /**
+   * Adiciona rodapé com número de página em TODAS as páginas do documento.
+   * Deve ser chamado como última etapa antes de salvar.
+   */
+  addFooterTodasPaginas() {
+    const totalPages = this.doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      this.doc.setPage(i);
+      addFooter(this.doc, i, this.usuario, totalPages);
+    }
+  }
+
   async gerar() {
     await this.inicializar();
     // Método a ser implementado pelas subclasses

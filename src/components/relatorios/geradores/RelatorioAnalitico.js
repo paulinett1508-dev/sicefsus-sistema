@@ -270,6 +270,6 @@ export class RelatorioAnalitico extends BaseRelatorio {
     this.doc.setFont("helvetica", "italic");
     this.doc.text("* Análise detalhada por parlamentar. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
-    this.addFooter();
+    this.addFooterTodasPaginas();
   }
 }

@@ -228,6 +228,6 @@ export class RelatorioExecucao extends BaseRelatorio {
     this.doc.setFont("helvetica", "italic");
     this.doc.text("* Valores atualizados. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
 
-    this.addFooter();
+    this.addFooterTodasPaginas();
   }
 }

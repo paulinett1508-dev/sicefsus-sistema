@@ -178,7 +178,7 @@ export const addFooter = (doc, pageNum, usuario, totalPages = null) => {
   doc.text(`Gerado: ${dataHora}`, margins.left, pageHeight - 8);
 
   // Número da página
-  const pageText = totalPages ? `${pageNum} / ${totalPages}` : `${pageNum}`;
+  const pageText = totalPages ? `Página ${pageNum} de ${totalPages}` : `Página ${pageNum}`;
   doc.text(pageText, pageWidth - margins.right, pageHeight - 8, { align: "right" });
 
   // Usuário (centro)

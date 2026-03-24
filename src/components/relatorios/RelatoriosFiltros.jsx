@@ -57,7 +57,7 @@ export default function RelatoriosFiltros({
 
         {/* Filtro de Período */}
         {selectedReport.campos.includes("periodo") && (
-          <div className="relatorios-filter-group">
+          <div className="relatorios-filter-group relatorios-filter-group--periodo">
             <label className="relatorios-filter-label" id="label-periodo">Período</label>
             <div className="relatorios-date-group" role="group" aria-labelledby="label-periodo">
               <input

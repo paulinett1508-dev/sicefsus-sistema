@@ -114,14 +114,13 @@ export class RelatorioDespesas extends BaseRelatorio {
       const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
       const dataFormatada = this.formatarData(dataRaw);
 
-      // Descrição: usa discriminacao (campo real) ou descricao como fallback
+      // Descrição e fornecedor sem truncamento — autoTable faz quebra de linha
       const descricao = d.discriminacao || d.descricao || "-";
-      const descricaoTruncada = descricao.length > 25 ? descricao.substring(0, 22) + "..." : descricao;
 
       return [
         dataFormatada,
-        descricaoTruncada,
-        d.fornecedor?.length > 20 ? d.fornecedor.substring(0, 17) + "..." : (d.fornecedor || "-"),
+        descricao,
+        d.fornecedor || "-",
         emenda?.numero || "-",
         this.formatCurrency(d.valor || 0),
         d.status || "-",
@@ -162,7 +161,7 @@ export class RelatorioDespesas extends BaseRelatorio {
       .slice(0, 5)
       .map(([fornecedor, dados], idx) => [
         `${idx + 1}`,
-        fornecedor.length > 40 ? fornecedor.substring(0, 37) + "..." : fornecedor,
+        fornecedor,
         dados.quantidade.toString(),
         this.formatCurrency(dados.valor),
       ]);
@@ -188,11 +187,111 @@ export class RelatorioDespesas extends BaseRelatorio {
       }
     }
 
+    // Bloco de encerramento profissional com assinaturas
+    this.addBlocoAssinaturas(yPosition);
+
+    // Rodapé em TODAS as páginas com número de página
+    this.addFooterTodasPaginas();
+  }
+
+  /**
+   * Adiciona bloco formal de encerramento com assinaturas
+   * Baseado no padrão de prestação de contas do SUS (Portaria GM/MS)
+   */
+  addBlocoAssinaturas(yPosition) {
+    const margins = { left: 15, right: 15 };
+    const pageWidth = this.pageWidth;
+    const contentWidth = pageWidth - margins.left - margins.right;
+
+    // Garantir espaço suficiente (nova página se necessário)
+    yPosition = this.checkNewPage(yPosition, 120);
+
+    // Linha separadora
+    this.doc.setDrawColor(...PDF_COLORS.SLATE_300);
+    this.doc.setLineWidth(0.5);
+    this.doc.line(margins.left, yPosition, pageWidth - margins.right, yPosition);
+    yPosition += 8;
+
+    // Declaração de conformidade
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.setFontSize(8);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text("DECLARAÇÃO DE CONFORMIDADE", margins.left, yPosition);
+    yPosition += 6;
+
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setFontSize(7);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+
+    const declaracao = "Declaro(amos), para os devidos fins de prestação de contas, que as despesas acima relacionadas " +
+      "foram realizadas em conformidade com a legislação vigente, em especial a Lei Complementar nº 141/2012, " +
+      "a Portaria GM/MS nº 828/2020 e demais normas aplicáveis ao financiamento e à transferência de recursos " +
+      "do Sistema Único de Saúde (SUS), estando os documentos fiscais comprobatórios arquivados e disponíveis " +
+      "para verificação pelos órgãos de controle interno e externo.";
+
+    const linhasDeclaracao = this.doc.splitTextToSize(declaracao, contentWidth);
+    this.doc.text(linhasDeclaracao, margins.left, yPosition);
+    yPosition += (linhasDeclaracao.length * 3.5) + 8;
+
+    // Local e data
+    const municipio = this.usuario?.municipio || "________________";
+    const uf = this.usuario?.uf || "__";
+    const dataAtual = new Date().toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.text(`${municipio} - ${uf}, ${dataAtual}.`, margins.left, yPosition);
+    yPosition += 14;
+
+    // Assinaturas (3 colunas)
+    const colWidth = contentWidth / 3;
+    const lineLength = colWidth - 10;
+
+    const assinaturas = [
+      { cargo: "Gestor(a) Municipal de Saúde", sub: "Secretário(a) Municipal de Saúde" },
+      { cargo: "Ordenador(a) de Despesas", sub: "Responsável pela Execução Financeira" },
+      { cargo: "Contador(a) / Responsável Técnico", sub: "CRC nº _______________" },
+    ];
+
+    assinaturas.forEach((assinatura, idx) => {
+      const colX = margins.left + (idx * colWidth);
+      const centerX = colX + colWidth / 2;
+
+      // Linha de assinatura
+      this.doc.setDrawColor(...PDF_COLORS.SLATE_400);
+      this.doc.setLineWidth(0.3);
+      this.doc.line(centerX - lineLength / 2, yPosition, centerX + lineLength / 2, yPosition);
+
+      // Cargo
+      this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+      this.doc.setFontSize(7);
+      this.doc.setFont("helvetica", "bold");
+      this.doc.text(assinatura.cargo, centerX, yPosition + 4, { align: "center" });
+
+      // Subtítulo
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setFontSize(6);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+      this.doc.text(assinatura.sub, centerX, yPosition + 8, { align: "center" });
+    });
+
+    yPosition += 16;
+
+    // Nota legal
     this.doc.setTextColor(...PDF_COLORS.SLATE_400);
     this.doc.setFontSize(6);
     this.doc.setFont("helvetica", "italic");
-    this.doc.text("* Listagem completa de despesas. Relatório gerado automaticamente pelo SICEFSUS.", 15, this.pageHeight - 25);
-
-    this.addFooter();
+    this.doc.text(
+      "Documento gerado eletronicamente pelo SICEFSUS - Sistema de Controle de Execuções Financeiras do SUS.",
+      pageWidth / 2, yPosition, { align: "center" }
+    );
+    this.doc.text(
+      "A autenticidade deste relatório pode ser verificada junto ao órgão emissor.",
+      pageWidth / 2, yPosition + 3.5, { align: "center" }
+    );
   }
 }
