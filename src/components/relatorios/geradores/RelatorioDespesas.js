@@ -12,60 +12,160 @@ export class RelatorioDespesas extends BaseRelatorio {
   async gerar(filtros) {
     await this.inicializar();
 
-    // HEADER com subtítulo do período
-    this.addHeader("Relatório de Despesas", this.getSubtituloPeriodo(filtros));
+    // Subtítulo com período + filtros ativos
+    const subtitulo = this.buildSubtitulo(filtros);
+    this.addHeader("Relatório de Despesas Detalhadas", subtitulo);
 
     let yPosition = 58;
 
-    // Usar métodos utilitários da BaseRelatorio
+    // Bloco de filtros aplicados (abaixo do header)
+    yPosition = this.addFiltrosAplicados(filtros, yPosition);
+
+    // KPIs gerais
     const despesasExecutadas = this.getDespesasExecutadas();
     const despesasPlanejadas = this.despesas.filter(d => d.status === DESPESA_STATUS.PLANEJADA);
     const totalDespesas = this.despesas.length;
-
     const valorExecutado = despesasExecutadas.reduce((sum, d) => sum + (d.valor || 0), 0);
     const valorPlanejado = despesasPlanejadas.reduce((sum, d) => sum + (d.valor || 0), 0);
-
-    const fornecedores = new Set(this.despesas.map(d => d.fornecedor).filter(Boolean)).size;
+    const fornecedoresUnicos = new Set(this.despesas.map(d => d.fornecedor).filter(Boolean)).size;
 
     const kpis = [
       { label: "Total Despesas", value: totalDespesas.toString() },
       { label: "Valor Executado", value: this.formatCurrency(valorExecutado) },
       { label: "Planejado", value: this.formatCurrency(valorPlanejado) },
-      { label: "Fornecedores", value: fornecedores.toString() },
+      { label: "Fornecedores", value: fornecedoresUnicos.toString() },
     ];
 
     yPosition = addKPICards(this.doc, kpis, yPosition);
 
+    // Resumo geral
     yPosition = addSectionTitle(this.doc, "Resumo das Despesas", yPosition);
-    
     this.doc.setFontSize(7);
     this.doc.setFont("helvetica", "normal");
     this.doc.setTextColor(...PDF_COLORS.SLATE_500);
-    
+
     const mediaValor = totalDespesas > 0 ? (valorExecutado + valorPlanejado) / totalDespesas : 0;
     const maiorDespesa = this.despesas.reduce((max, d) => Math.max(max, d.valor || 0), 0);
-    
+
     const resumoItems = [
       `Despesas Executadas: ${despesasExecutadas.length}`,
       `Despesas Planejadas: ${despesasPlanejadas.length}`,
       `Valor Médio por Despesa: ${this.formatCurrency(mediaValor)}`,
       `Maior Despesa: ${this.formatCurrency(isNaN(maiorDespesa) ? 0 : maiorDespesa)}`,
-      `Fornecedores Distintos: ${fornecedores}`,
+      `Fornecedores Distintos: ${fornecedoresUnicos}`,
     ];
-    
+
     resumoItems.forEach((item, i) => {
       this.doc.text(`- ${item}`, 15, yPosition + (i * 4));
     });
     yPosition += (resumoItems.length * 4) + 6;
 
+    // Tabela por status
+    yPosition = this.addTabelaStatus(yPosition);
+
+    // LISTAGEM DETALHADA — decisão por filtro
+    const temFiltroParlamentar = !!filtros.parlamentar;
+    const temFiltroEmenda = !!filtros.emenda;
+
+    if (temFiltroParlamentar || temFiltroEmenda) {
+      // Filtro específico: tabela única com todas despesas
+      yPosition = this.addListagemUnica(yPosition);
+    } else {
+      // Sem filtro de parlamentar: agrupar por parlamentar → emendas → despesas
+      yPosition = this.addListagemPorParlamentar(yPosition);
+    }
+
+    // Top 5 Fornecedores
+    yPosition = this.addTopFornecedores(yPosition);
+
+    // Bloco de encerramento profissional com assinaturas
+    this.addBlocoAssinaturas(yPosition);
+
+    // Rodapé em TODAS as páginas com número de página
+    this.addFooterTodasPaginas();
+  }
+
+  // =============================================
+  // SUBTÍTULO E FILTROS
+  // =============================================
+
+  buildSubtitulo(filtros) {
+    const partes = [];
+    const periodo = this.getSubtituloPeriodo(filtros);
+    if (periodo) partes.push(periodo);
+    return partes.join(" | ") || null;
+  }
+
+  addFiltrosAplicados(filtros, yPosition) {
+    const tags = [];
+
+    if (filtros.parlamentar) {
+      tags.push({ label: "Parlamentar", value: filtros.parlamentar });
+    }
+    if (filtros.emenda) {
+      const emenda = this.emendas.find(e => e.id === filtros.emenda);
+      if (emenda) {
+        const parlamentar = emenda.autor || emenda.parlamentar || "";
+        const desc = [emenda.numero || emenda.numeroEmenda, parlamentar, emenda.municipio]
+          .filter(Boolean).join(" - ");
+        tags.push({ label: "Emenda", value: desc });
+      }
+    }
+    if (filtros.municipio) {
+      tags.push({ label: "Município", value: filtros.municipio });
+    }
+    if (filtros.fornecedor) {
+      tags.push({ label: "Fornecedor", value: filtros.fornecedor });
+    }
+
+    if (tags.length === 0) return yPosition;
+
+    const margins = { left: 15, right: 15 };
+
+    // Fundo cinza claro para o bloco de filtros
+    const boxHeight = 6 + (tags.length * 5);
+    this.doc.setFillColor(...PDF_COLORS.SLATE_50);
+    this.doc.roundedRect(margins.left, yPosition - 2, this.pageWidth - margins.left - margins.right, boxHeight, 1.5, 1.5, "F");
+    this.doc.setDrawColor(...PDF_COLORS.SLATE_200);
+    this.doc.setLineWidth(0.2);
+    this.doc.roundedRect(margins.left, yPosition - 2, this.pageWidth - margins.left - margins.right, boxHeight, 1.5, 1.5, "S");
+
+    // Título "Filtros Aplicados"
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text("Filtros Aplicados:", margins.left + 3, yPosition + 2);
+    yPosition += 5;
+
+    // Cada filtro
+    tags.forEach((tag) => {
+      this.doc.setFont("helvetica", "bold");
+      this.doc.setFontSize(7);
+      this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+      this.doc.text(`${tag.label}: `, margins.left + 5, yPosition + 1);
+
+      const labelWidth = this.doc.getTextWidth(`${tag.label}: `);
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+      this.doc.text(tag.value, margins.left + 5 + labelWidth, yPosition + 1);
+      yPosition += 4;
+    });
+
+    return yPosition + 6;
+  }
+
+  // =============================================
+  // TABELA POR STATUS
+  // =============================================
+
+  addTabelaStatus(yPosition) {
     yPosition = addSectionTitle(this.doc, "Despesas por Status", yPosition);
 
     const porStatus = {};
+    const totalDespesas = this.despesas.length;
     this.despesas.forEach((d) => {
       const status = d.status || "Não definido";
-      if (!porStatus[status]) {
-        porStatus[status] = { quantidade: 0, valor: 0 };
-      }
+      if (!porStatus[status]) porStatus[status] = { quantidade: 0, valor: 0 };
       porStatus[status].quantidade++;
       porStatus[status].valor += d.valor || 0;
     });
@@ -100,21 +200,149 @@ export class RelatorioDespesas extends BaseRelatorio {
       }
     }
 
+    return yPosition;
+  }
+
+  // =============================================
+  // LISTAGEM ÚNICA (com filtro específico)
+  // =============================================
+
+  addListagemUnica(yPosition) {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Listagem Detalhada", yPosition);
 
-    // Valores já normalizados pelo hook
     const despesasOrdenadas = [...this.despesas]
       .sort((a, b) => (b.valor || 0) - (a.valor || 0));
 
-    const tabelaDespesas = despesasOrdenadas.map((d) => {
-      const emenda = this.emendas.find(e => e.id === d.emendaId);
+    const tabelaDespesas = this.buildTabelaDespesas(despesasOrdenadas);
 
-      // Data: usa dataPagamento, dataLiquidacao ou dataEmpenho (nessa ordem)
+    if (tabelaDespesas.length > 0) {
+      yPosition = this.renderTabelaDespesas(tabelaDespesas, yPosition);
+    }
+
+    return yPosition;
+  }
+
+  // =============================================
+  // LISTAGEM AGRUPADA POR PARLAMENTAR
+  // =============================================
+
+  addListagemPorParlamentar(yPosition) {
+    yPosition = this.checkNewPage(yPosition, 50);
+    yPosition = addSectionTitle(this.doc, "Despesas Detalhadas por Parlamentar", yPosition);
+
+    // Agrupar emendas por parlamentar
+    const parlamentarMap = new Map();
+    this.emendas.forEach((emenda) => {
+      const nome = emenda.autor || emenda.parlamentar || "Não identificado";
+      if (!parlamentarMap.has(nome)) {
+        parlamentarMap.set(nome, { emendas: [], despesas: [] });
+      }
+      parlamentarMap.get(nome).emendas.push(emenda);
+    });
+
+    // Vincular despesas a cada parlamentar via emendaId
+    const emendaIdToParlamentar = new Map();
+    this.emendas.forEach((emenda) => {
+      const nome = emenda.autor || emenda.parlamentar || "Não identificado";
+      emendaIdToParlamentar.set(emenda.id, nome);
+    });
+
+    this.despesas.forEach((d) => {
+      const nome = emendaIdToParlamentar.get(d.emendaId) || "Não identificado";
+      if (!parlamentarMap.has(nome)) {
+        parlamentarMap.set(nome, { emendas: [], despesas: [] });
+      }
+      parlamentarMap.get(nome).despesas.push(d);
+    });
+
+    // Ordenar parlamentares por valor total executado (desc)
+    const parlamentaresOrdenados = [...parlamentarMap.entries()]
+      .map(([nome, dados]) => {
+        const valorTotal = dados.despesas.reduce((sum, d) => sum + (d.valor || 0), 0);
+        return { nome, ...dados, valorTotal };
+      })
+      .sort((a, b) => b.valorTotal - a.valorTotal);
+
+    parlamentaresOrdenados.forEach((parlamentar) => {
+      if (parlamentar.despesas.length === 0) return;
+
+      yPosition = this.checkNewPage(yPosition, 40);
+
+      // Cabeçalho do parlamentar
+      yPosition = this.addParlamentarHeader(parlamentar, yPosition);
+
+      // Tabela de despesas do parlamentar
+      const despesasOrdenadas = [...parlamentar.despesas]
+        .sort((a, b) => (b.valor || 0) - (a.valor || 0));
+
+      const tabelaDespesas = this.buildTabelaDespesas(despesasOrdenadas);
+
+      if (tabelaDespesas.length > 0) {
+        yPosition = this.renderTabelaDespesas(tabelaDespesas, yPosition);
+      }
+    });
+
+    return yPosition;
+  }
+
+  addParlamentarHeader(parlamentar, yPosition) {
+    const margins = { left: 15, right: 15 };
+    const contentWidth = this.pageWidth - margins.left - margins.right;
+
+    // Fundo com cor accent para seção do parlamentar
+    this.doc.setFillColor(...PDF_COLORS.SLATE_100);
+    this.doc.roundedRect(margins.left, yPosition - 1, contentWidth, 18, 1.5, 1.5, "F");
+
+    // Barra lateral accent
+    this.doc.setFillColor(...PDF_COLORS.ACCENT);
+    this.doc.rect(margins.left, yPosition - 1, 2, 18, "F");
+
+    // Nome do parlamentar
+    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+    this.doc.setFontSize(9);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text(parlamentar.nome, margins.left + 6, yPosition + 5);
+
+    // Emendas e valores (linha de detalhe)
+    const emendasNums = parlamentar.emendas
+      .map(e => e.numero || e.numeroEmenda)
+      .filter(Boolean)
+      .join(", ");
+
+    const municipios = [...new Set(parlamentar.emendas.map(e => e.municipio).filter(Boolean))].join(", ");
+
+    this.doc.setTextColor(...PDF_COLORS.SLATE_600);
+    this.doc.setFontSize(7);
+    this.doc.setFont("helvetica", "normal");
+
+    const infoLeft = [];
+    if (emendasNums) infoLeft.push(`Emendas: ${emendasNums}`);
+    if (municipios) infoLeft.push(`Município(s): ${municipios}`);
+    this.doc.text(infoLeft.join("  |  "), margins.left + 6, yPosition + 11);
+
+    // Totalizador (direita)
+    this.doc.setTextColor(...PDF_COLORS.SLATE_900);
+    this.doc.setFontSize(8);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.text(
+      `${parlamentar.despesas.length} despesas — ${this.formatCurrency(parlamentar.valorTotal)}`,
+      this.pageWidth - margins.right - 3, yPosition + 8,
+      { align: "right" }
+    );
+
+    return yPosition + 22;
+  }
+
+  // =============================================
+  // HELPERS COMPARTILHADOS
+  // =============================================
+
+  buildTabelaDespesas(despesas) {
+    return despesas.map((d) => {
+      const emenda = this.emendas.find(e => e.id === d.emendaId);
       const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
       const dataFormatada = this.formatarData(dataRaw);
-
-      // Descrição e fornecedor sem truncamento — autoTable faz quebra de linha
       const descricao = d.discriminacao || d.descricao || "-";
 
       return [
@@ -126,34 +354,40 @@ export class RelatorioDespesas extends BaseRelatorio {
         d.status || "-",
       ];
     });
+  }
 
-    if (tabelaDespesas.length > 0) {
-      try {
-        const modernStyles = getModernTableStyles();
-        this.createTable({
-          startY: yPosition,
-          head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
-          body: tabelaDespesas,
-          ...modernStyles,
-          columnStyles: {
-            0: { cellWidth: 20, halign: "center" },
-            1: { cellWidth: 'auto', halign: "left" },
-            2: { cellWidth: 38, halign: "left" },
-            3: { cellWidth: 22, halign: "left" },
-            4: { cellWidth: 28, halign: "right" },
-            5: { cellWidth: 26, halign: "center" },
-          },
-        });
-        yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
-      } catch (error) {
-        this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
-      }
+  renderTabelaDespesas(tabelaDespesas, yPosition) {
+    try {
+      const modernStyles = getModernTableStyles();
+      this.createTable({
+        startY: yPosition,
+        head: [["Data", "Descrição", "Fornecedor", "Emenda", "Valor", "Status"]],
+        body: tabelaDespesas,
+        ...modernStyles,
+        columnStyles: {
+          0: { cellWidth: 20, halign: "center" },
+          1: { cellWidth: 'auto', halign: "left" },
+          2: { cellWidth: 38, halign: "left" },
+          3: { cellWidth: 22, halign: "left" },
+          4: { cellWidth: 28, halign: "right" },
+          5: { cellWidth: 26, halign: "center" },
+        },
+      });
+      yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;
+    } catch (error) {
+      this.addWarning(`Erro ao criar tabela de despesas: ${error.message}`);
     }
+    return yPosition;
+  }
 
+  // =============================================
+  // TOP FORNECEDORES
+  // =============================================
+
+  addTopFornecedores(yPosition) {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Top 5 Fornecedores", yPosition);
 
-    // Usar método utilitário para agregação por fornecedor
     const porFornecedor = this.calcularPorFornecedor(true);
 
     const tabelaFornecedores = Object.entries(porFornecedor)
@@ -187,23 +421,18 @@ export class RelatorioDespesas extends BaseRelatorio {
       }
     }
 
-    // Bloco de encerramento profissional com assinaturas
-    this.addBlocoAssinaturas(yPosition);
-
-    // Rodapé em TODAS as páginas com número de página
-    this.addFooterTodasPaginas();
+    return yPosition;
   }
 
-  /**
-   * Adiciona bloco formal de encerramento com assinaturas
-   * Baseado no padrão de prestação de contas do SUS (Portaria GM/MS)
-   */
+  // =============================================
+  // BLOCO DE ASSINATURAS
+  // =============================================
+
   addBlocoAssinaturas(yPosition) {
     const margins = { left: 15, right: 15 };
     const pageWidth = this.pageWidth;
     const contentWidth = pageWidth - margins.left - margins.right;
 
-    // Garantir espaço suficiente (nova página se necessário)
     yPosition = this.checkNewPage(yPosition, 120);
 
     // Linha separadora
@@ -261,18 +490,15 @@ export class RelatorioDespesas extends BaseRelatorio {
       const colX = margins.left + (idx * colWidth);
       const centerX = colX + colWidth / 2;
 
-      // Linha de assinatura
       this.doc.setDrawColor(...PDF_COLORS.SLATE_400);
       this.doc.setLineWidth(0.3);
       this.doc.line(centerX - lineLength / 2, yPosition, centerX + lineLength / 2, yPosition);
 
-      // Cargo
       this.doc.setTextColor(...PDF_COLORS.SLATE_700);
       this.doc.setFontSize(7);
       this.doc.setFont("helvetica", "bold");
       this.doc.text(assinatura.cargo, centerX, yPosition + 4, { align: "center" });
 
-      // Subtítulo
       this.doc.setFont("helvetica", "normal");
       this.doc.setFontSize(6);
       this.doc.setTextColor(...PDF_COLORS.SLATE_500);
