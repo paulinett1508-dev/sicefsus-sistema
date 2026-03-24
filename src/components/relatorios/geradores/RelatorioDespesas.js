@@ -115,11 +115,7 @@ export class RelatorioDespesas extends BaseRelatorio {
   addListagemUnica(yPosition) {
     yPosition = this.checkNewPage(yPosition, 50);
     yPosition = addSectionTitle(this.doc, "Listagem Detalhada", yPosition);
-
-    const tabelaDespesas = this.buildTabelaDespesasDetalhadas(this.despesas);
-    if (tabelaDespesas.length > 0) {
-      yPosition = this.renderTabelaDespesasDetalhadas(tabelaDespesas, yPosition);
-    }
+    yPosition = this.renderDespesasAgrupadasPorNatureza(this.despesas, yPosition);
     return yPosition;
   }
 
@@ -134,8 +130,19 @@ export class RelatorioDespesas extends BaseRelatorio {
 
       yPosition = this.checkNewPage(yPosition, 40);
       yPosition = this.addParlamentarHeader(parlamentar, yPosition);
+      yPosition = this.renderDespesasAgrupadasPorNatureza(parlamentar.despesas, yPosition);
+    }
+    return yPosition;
+  }
 
-      const tabelaDespesas = this.buildTabelaDespesasDetalhadas(parlamentar.despesas);
+  renderDespesasAgrupadasPorNatureza(despesas, yPosition) {
+    const grupos = this.agruparPorNatureza(despesas);
+
+    for (const [natureza, despesasGrupo] of grupos) {
+      yPosition = this.checkNewPage(yPosition, 30);
+      yPosition = this.renderNaturezaHeader(natureza, despesasGrupo, yPosition);
+
+      const tabelaDespesas = this.buildTabelaDespesasDetalhadas(despesasGrupo);
       if (tabelaDespesas.length > 0) {
         yPosition = this.renderTabelaDespesasDetalhadas(tabelaDespesas, yPosition);
       }
@@ -149,10 +156,11 @@ export class RelatorioDespesas extends BaseRelatorio {
       .map((d) => {
         const emenda = this.emendas.find(e => e.id === d.emendaId);
         const dataRaw = d.dataPagamento || d.dataLiquidacao || d.dataEmpenho;
+        const fornecedorCell = this.formatFornecedorComCnpj(d);
         return [
           this.formatarData(dataRaw),
           d.discriminacao || d.descricao || "-",
-          d.fornecedor || "-",
+          fornecedorCell,
           emenda?.numero || "-",
           this.formatCurrency(d.valor || 0),
           d.status || "-",
@@ -170,10 +178,10 @@ export class RelatorioDespesas extends BaseRelatorio {
         columnStyles: {
           0: { cellWidth: 20, halign: "center" },
           1: { cellWidth: 'auto', halign: "left" },
-          2: { cellWidth: 38, halign: "left" },
+          2: { cellWidth: 40, halign: "left" },
           3: { cellWidth: 22, halign: "left" },
           4: { cellWidth: 28, halign: "right" },
-          5: { cellWidth: 26, halign: "center" },
+          5: { cellWidth: 22, halign: "center" },
         },
       });
       yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 10;

@@ -502,6 +502,63 @@ export class BaseRelatorio {
     );
   }
 
+  // ========== MÉTODOS COMPARTILHADOS: NATUREZA + CNPJ ==========
+
+  /**
+   * Agrupa despesas por naturezaDespesa
+   * @returns {Array} Pares [natureza, despesas[]] ordenados por valor total desc
+   */
+  agruparPorNatureza(despesas) {
+    const grupos = {};
+    for (const d of despesas) {
+      const natureza = d.naturezaDespesa || "Sem natureza definida";
+      if (!grupos[natureza]) grupos[natureza] = [];
+      grupos[natureza].push(d);
+    }
+    return Object.entries(grupos).sort(([, a], [, b]) => {
+      const totalA = a.reduce((s, d) => s + (d.valor || 0), 0);
+      const totalB = b.reduce((s, d) => s + (d.valor || 0), 0);
+      return totalB - totalA;
+    });
+  }
+
+  /**
+   * Renderiza cabeçalho de natureza com nome, contagem e total
+   * @returns {number} Nova posição Y
+   */
+  renderNaturezaHeader(natureza, despesas, yPosition) {
+    const totalGrupo = despesas.reduce((s, d) => s + (d.valor || 0), 0);
+    this.doc.setFontSize(8);
+    this.doc.setFont("helvetica", "bold");
+    this.doc.setTextColor(...PDF_COLORS.SLATE_700);
+    this.doc.text(`${natureza}`, 15, yPosition);
+    this.doc.setFont("helvetica", "normal");
+    this.doc.setTextColor(...PDF_COLORS.SLATE_500);
+    this.doc.text(
+      `${despesas.length} despesa${despesas.length > 1 ? "s" : ""} | ${this.formatCurrency(totalGrupo)}`,
+      this.doc.internal.pageSize.getWidth() - 15,
+      yPosition,
+      { align: "right" },
+    );
+    yPosition += 2;
+    this.doc.setDrawColor(...PDF_COLORS.SLATE_300);
+    this.doc.setLineWidth(0.3);
+    this.doc.line(15, yPosition, this.doc.internal.pageSize.getWidth() - 15, yPosition);
+    return yPosition + 3;
+  }
+
+  /**
+   * Formata fornecedor com CNPJ na segunda linha
+   * @returns {string} "Nome do Fornecedor\nCNPJ"
+   */
+  formatFornecedorComCnpj(d) {
+    let cell = d.fornecedor || "-";
+    if (d.cnpjFornecedor) {
+      cell += `\n${d.cnpjFornecedor}`;
+    }
+    return cell;
+  }
+
   async gerar() {
     await this.inicializar();
     // Método a ser implementado pelas subclasses

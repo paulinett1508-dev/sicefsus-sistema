@@ -197,35 +197,43 @@ export class RelatorioPrestacao extends BaseRelatorio {
           return dataB - dataA;
         });
 
-      const tabela = despesasEmenda.map(d => [
-        this.formatarData(d.dataPagamento || d.dataLiquidacao || d.dataEmpenho),
-        d.discriminacao || d.descricao || "-",
-        d.fornecedor || "-",
-        d.numeroNota || "-",
-        this.formatCurrency(d.valor || 0),
-      ]);
+      // Agrupar por natureza de despesa
+      const grupos = this.agruparPorNatureza(despesasEmenda);
 
-      if (tabela.length > 0) {
-        try {
-          const modernStyles = getModernTableStyles();
-          this.createTable({
-            startY: yPosition,
-            head: [["Data", "Descrição", "Fornecedor", "Nota Fiscal", "Valor"]],
-            body: tabela,
-            ...modernStyles,
-            styles: { ...modernStyles.styles, fontSize: 6 },
-            headStyles: { ...modernStyles.headStyles, fontSize: 6 },
-            columnStyles: {
-              0: { cellWidth: 18, halign: "center" },
-              1: { cellWidth: 'auto', halign: "left" },
-              2: { cellWidth: 45, halign: "left" },
-              3: { cellWidth: 22, halign: "center" },
-              4: { cellWidth: 26, halign: "right" },
-            },
-          });
-          yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 8;
-        } catch (error) {
-          this.addWarning(`Erro tabela despesas emenda ${emenda.numero}: ${error.message}`);
+      for (const [natureza, despesasGrupo] of grupos) {
+        yPosition = this.checkNewPage(yPosition, 30);
+        yPosition = this.renderNaturezaHeader(natureza, despesasGrupo, yPosition);
+
+        const tabela = despesasGrupo.map(d => [
+          this.formatarData(d.dataPagamento || d.dataLiquidacao || d.dataEmpenho),
+          d.discriminacao || d.descricao || "-",
+          this.formatFornecedorComCnpj(d),
+          d.numeroNota || "-",
+          this.formatCurrency(d.valor || 0),
+        ]);
+
+        if (tabela.length > 0) {
+          try {
+            const modernStyles = getModernTableStyles();
+            this.createTable({
+              startY: yPosition,
+              head: [["Data", "Descrição", "Fornecedor", "Nota Fiscal", "Valor"]],
+              body: tabela,
+              ...modernStyles,
+              styles: { ...modernStyles.styles, fontSize: 6 },
+              headStyles: { ...modernStyles.headStyles, fontSize: 6 },
+              columnStyles: {
+                0: { cellWidth: 18, halign: "center" },
+                1: { cellWidth: 'auto', halign: "left" },
+                2: { cellWidth: 45, halign: "left" },
+                3: { cellWidth: 22, halign: "center" },
+                4: { cellWidth: 26, halign: "right" },
+              },
+            });
+            yPosition = (this.doc.lastAutoTable?.finalY ?? yPosition) + 8;
+          } catch (error) {
+            this.addWarning(`Erro tabela despesas emenda ${emenda.numero}: ${error.message}`);
+          }
         }
       }
     }
