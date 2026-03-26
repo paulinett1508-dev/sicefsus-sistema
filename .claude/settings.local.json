@@ -133,7 +133,8 @@
       "Bash(npx vite:*)",
       "WebFetch(domain:91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev)",
       "Bash(fuser -k 5173/tcp)",
-      "Bash(fuser 5173/tcp)"
+      "Bash(fuser 5173/tcp)",
+      "Bash(pip install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
