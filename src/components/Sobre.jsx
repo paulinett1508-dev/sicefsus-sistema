@@ -190,6 +190,30 @@ const Sobre = () => {
               </div>
             </div>
           </div>
+
+          {/* LGPD e Privacidade */}
+          <div className="sobre-card">
+            <h2>
+              <span className="material-symbols-outlined" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 8 }}>shield</span>
+              LGPD e Privacidade
+            </h2>
+            <div className="lgpd-info">
+              <p>
+                O SICEFSUS trata dados em conformidade com a <strong>Lei 13.709/2018 (LGPD)</strong>,
+                fundamentado no Art. 7º, III — execucao de politicas publicas.
+              </p>
+              <ul className="lgpd-list">
+                <li>Coletamos apenas dados necessarios para a gestao orcamentaria</li>
+                <li>Nao comercializamos ou compartilhamos dados sem base legal</li>
+                <li>Logs de auditoria imutaveis garantem rastreabilidade</li>
+                <li>Voce pode solicitar acesso, correcao ou exclusao dos seus dados</li>
+              </ul>
+              <p className="lgpd-contact">
+                <span className="material-symbols-outlined" style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}>mail</span>
+                Duvidas sobre privacidade? Contate o administrador do sistema.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -465,6 +489,41 @@ const Sobre = () => {
         .whatsapp-link:hover {
           color: var(--success-dark);
           text-decoration: underline;
+        }
+
+        .lgpd-info p {
+          font-size: 0.9rem;
+          color: var(--theme-text-secondary);
+          margin-bottom: 12px;
+          line-height: 1.6;
+        }
+
+        .lgpd-list {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 16px 0;
+        }
+
+        .lgpd-list li {
+          font-size: 0.85rem;
+          color: var(--theme-text-secondary);
+          padding: 6px 0 6px 20px;
+          position: relative;
+        }
+
+        .lgpd-list li::before {
+          content: '✓';
+          position: absolute;
+          left: 0;
+          color: var(--success);
+          font-weight: bold;
+        }
+
+        .lgpd-contact {
+          font-size: 0.8rem;
+          color: var(--theme-text-muted);
+          padding-top: 12px;
+          border-top: 1px solid var(--theme-border);
         }
 
         /* Responsive */

@@ -408,6 +408,69 @@
       line-height: 1.6;
     }
 
+    /* ────────── LGPD ────────── */
+    .lgpd-bg { background: var(--white); }
+    .lgpd-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .lgpd-card {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .lgpd-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .lgpd-icon .material-symbols-outlined { font-size: 20px; }
+    .lgpd-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+    .lgpd-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .lgpd-laws {
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(37,99,235,.04);
+      border-radius: 10px;
+      border: 1px solid rgba(37,99,235,.1);
+    }
+    .lgpd-laws-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--action);
+      margin-bottom: 10px;
+    }
+    .lgpd-laws-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .lgpd-law {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--white);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
     /* ────────── PROFILES ────────── */
     .profiles-bg { background: var(--bg); }
     .profiles-grid {
@@ -1142,6 +1205,7 @@
     @media (max-width: 900px) {
       .modules-grid { grid-template-columns: repeat(2, 1fr); }
       .security-grid { grid-template-columns: repeat(2, 1fr); }
+      .lgpd-grid { grid-template-columns: repeat(2, 1fr); }
       .profiles-grid { grid-template-columns: 1fr; }
       .cover-title { font-size: 32px; }
       .cover-section { padding: 40px 24px; min-height: auto; }
@@ -1156,6 +1220,7 @@
     @media (max-width: 600px) {
       .modules-grid { grid-template-columns: 1fr; }
       .security-grid { grid-template-columns: 1fr; }
+      .lgpd-grid { grid-template-columns: 1fr; }
       .flow-steps { flex-wrap: wrap; justify-content: center; gap: 24px; }
       .flow-step::before, .flow-step::after { display: none; }
       .cover-title { font-size: 26px; letter-spacing: -.01em; }
@@ -1377,6 +1442,51 @@
           <div class="security-desc">Validação contra XSS e injeção de código em todos os campos. Senhas criptografadas. Conformidade com boas práticas de desenvolvimento seguro.</div>
         </div>
 
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ LGPD ═══════════════════════ -->
+  <div class="lgpd-bg">
+    <section class="fade-in">
+      <div class="section-label">Conformidade</div>
+      <h2 class="section-title">LGPD e Protecao de Dados</h2>
+      <p class="section-subtitle">Tratamento de dados em conformidade com a legislacao brasileira</p>
+
+      <div class="lgpd-grid">
+        <div class="lgpd-card">
+          <div class="lgpd-icon"><span class="material-symbols-outlined">gavel</span></div>
+          <div class="lgpd-title">Base Legal</div>
+          <div class="lgpd-desc">Tratamento fundamentado no Art. 7, III da LGPD — execucao de politicas publicas pela administracao publica, e Art. 23 — tratamento pelo Poder Publico.</div>
+        </div>
+
+        <div class="lgpd-card">
+          <div class="lgpd-icon"><span class="material-symbols-outlined">folder_limited</span></div>
+          <div class="lgpd-title">Dados Coletados</div>
+          <div class="lgpd-desc">Apenas dados necessarios: identificacao do usuario, municipio/UF, e registros de operacoes. Nao coletamos dados de saude de pacientes ou informacoes bancarias.</div>
+        </div>
+
+        <div class="lgpd-card">
+          <div class="lgpd-icon"><span class="material-symbols-outlined">share</span></div>
+          <div class="lgpd-title">Compartilhamento</div>
+          <div class="lgpd-desc">Dados compartilhados apenas com orgaos de controle (TCU, TCE, CGU) mediante requisicao formal. Nao comercializamos dados.</div>
+        </div>
+
+        <div class="lgpd-card">
+          <div class="lgpd-icon"><span class="material-symbols-outlined">person_raised_hand</span></div>
+          <div class="lgpd-title">Direitos do Titular</div>
+          <div class="lgpd-desc">Conforme Art. 18 da LGPD: acesso, correcao, anonimizacao e exclusao de dados. Solicitacoes via administrador do sistema.</div>
+        </div>
+      </div>
+
+      <div class="lgpd-laws">
+        <div class="lgpd-laws-title">Legislacao Aplicavel</div>
+        <div class="lgpd-laws-list">
+          <span class="lgpd-law">Lei 13.709/2018 (LGPD)</span>
+          <span class="lgpd-law">Lei 12.527/2011 (LAI)</span>
+          <span class="lgpd-law">Lei 4.320/1964</span>
+          <span class="lgpd-law">Decreto 10.540/2020 (SIAFIC)</span>
+        </div>
       </div>
     </section>
   </div>
