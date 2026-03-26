@@ -705,95 +705,454 @@
       transform: translateY(0);
     }
 
-    /* ────────── PRINT STYLES ────────── */
+    /* ────────── PRINT-ONLY ELEMENTS (hidden on screen) ────────── */
+    .print-cover-meta,
+    .print-toc,
+    .print-running-footer { display: none; }
+
+    /* ────────── PRINT STYLES — DOCUMENTO FORMAL ────────── */
     @media print {
-      @page { size: A4; margin: 1.2cm; }
-      body { font-size: 10pt; line-height: 1.4; }
+      @page {
+        size: A4;
+        margin: 2cm 2.5cm;
+      }
+
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
 
-      /* Ocultar elementos nao-imprimiveis */
-      .print-btn, .topnav, .system-cta-wrap { display: none !important; }
-      .header-bar { position: static; box-shadow: none; padding: 10px 24px; }
-
-      /* Capa compacta — sem quebra de pagina */
-      .cover-section {
-        min-height: auto;
-        padding: 36px 32px;
-        page-break-after: auto;
+      body {
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        font-size: 11pt;
+        line-height: 1.55;
+        color: #1a1a1a;
+        background: white !important;
+        counter-reset: doc-section;
       }
-      .cover-title { font-size: 48px; margin-bottom: 12px; }
-      .cover-subtitle { font-size: 15px; margin-bottom: 20px; }
-      .cover-badges { gap: 6px; }
-      .cover-badge { font-size: 10px; padding: 4px 10px; }
 
-      /* Secoes mais compactas */
-      section { padding: 24px 24px; }
-      .section-title { font-size: 24px; margin-bottom: 4px; }
-      .section-subtitle { font-size: 13px; margin-bottom: 24px; }
-      .section-label { font-size: 10px; margin-bottom: 6px; }
+      /* ── Ocultar elementos web ── */
+      .print-btn,
+      .topnav,
+      .system-cta-wrap,
+      .header-bar { display: none !important; }
 
-      /* O que e — mais enxuto */
-      .what-item { padding: 14px 0; }
-      .what-text { font-size: 14px; }
-      .what-num { width: 28px; height: 28px; font-size: 11px; }
+      /* ── Animações off ── */
+      .fade-in { opacity: 1 !important; transform: none !important; transition: none !important; }
 
-      /* Modulos em grid compacto */
-      .modules-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .module-card { padding: 16px 14px; }
-      .module-card:hover { box-shadow: none; transform: none; }
-      .module-icon { width: 32px; height: 32px; margin-bottom: 8px; }
-      .module-icon svg { width: 16px; height: 16px; }
-      .module-name { font-size: 12px; margin-bottom: 4px; }
-      .module-desc { font-size: 11px; line-height: 1.4; }
+      /* ── Rodapé fixo (repete em cada página no Chrome) ── */
+      .print-running-footer {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 8pt;
+        color: #999;
+        padding: 6px 0;
+        border-top: 1px solid #ddd;
+      }
 
-      /* Stack table compacta */
-      .stack-table tbody td { padding: 8px 14px; font-size: 11px; }
-      .stack-table thead th { padding: 8px 14px; font-size: 10px; }
-      .stack-note { font-size: 11px; padding: 8px 14px; margin-top: 10px; }
+      /* ══════════ CAPA FORMAL ══════════ */
+      .cover-section {
+        background: white !important;
+        color: #1A3A4A !important;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        page-break-after: always;
+        position: relative;
+      }
+      .cover-section::before,
+      .cover-section::after { display: none !important; }
 
-      /* Seguranca 2x2 */
-      .security-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .security-card { padding: 14px; }
-      .security-icon { width: 28px; height: 28px; margin-bottom: 8px; }
-      .security-icon svg { width: 14px; height: 14px; }
-      .security-name { font-size: 12px; margin-bottom: 4px; }
-      .security-desc { font-size: 11px; }
+      .cover-inner {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-      /* Perfis compactos */
-      .profiles-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .profile-header { padding: 12px 16px; }
-      .profile-role { font-size: 10px; }
-      .profile-title { font-size: 16px; }
-      .profile-body { padding: 14px 16px; }
-      .profile-item { font-size: 11px; margin-bottom: 6px; gap: 6px; }
-      .profile-item .check { width: 14px; height: 14px; font-size: 8px; }
+      .cover-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: 42pt;
+        color: #1A3A4A !important;
+        letter-spacing: .08em;
+        margin-bottom: 12px;
+      }
+      .cover-divider {
+        width: 80px;
+        height: 2px;
+        background: #1A3A4A !important;
+        margin: 16px auto;
+      }
+      .cover-subtitle {
+        font-size: 14pt;
+        color: #333 !important;
+        font-weight: 400;
+        margin-bottom: 32px;
+      }
 
-      /* Relatorios compactos */
-      .report-item { padding: 14px; gap: 12px; }
-      .report-badge { width: 28px; height: 28px; font-size: 11px; }
-      .report-name { font-size: 13px; margin-bottom: 2px; }
-      .report-desc { font-size: 11px; margin-bottom: 6px; }
-      .filter-tag { font-size: 10px; padding: 3px 8px; }
+      /* Badges → lista simples de texto */
+      .cover-badges {
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 0;
+      }
+      .cover-badge {
+        background: none !important;
+        border: none !important;
+        color: #555 !important;
+        font-size: 10pt;
+        padding: 2px 0;
+        backdrop-filter: none !important;
+      }
 
-      /* Fluxo compacto */
-      .flow-circle { width: 36px; height: 36px; font-size: 13px; }
-      .flow-label { font-size: 11px; }
+      /* Metadados formais da capa */
+      .print-cover-meta {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 48px;
+        padding-top: 32px;
+        border-top: 1px solid #ccc;
+        gap: 6px;
+      }
+      .print-doc-label {
+        font-size: 10pt;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: #1A3A4A;
+      }
+      .print-doc-subtitle {
+        font-size: 11pt;
+        color: #555;
+        font-style: italic;
+      }
+      .print-doc-date {
+        font-size: 10pt;
+        color: #777;
+        margin-top: 4px;
+      }
+      .print-doc-version {
+        font-size: 9pt;
+        color: #999;
+      }
 
-      /* Footer compacto */
-      .site-footer { padding: 16px 24px; }
-      .footer-brand { font-size: 14px; }
-      .footer-center, .footer-right { font-size: 11px; }
+      /* ══════════ SUMÁRIO ══════════ */
+      .print-toc {
+        display: block !important;
+        page-break-after: always;
+        padding: 48px 0 0 0;
+      }
+      .print-toc h2 {
+        font-family: 'Inter', sans-serif;
+        font-size: 18pt;
+        font-weight: 700;
+        color: #1A3A4A;
+        margin-bottom: 24px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #1A3A4A;
+      }
+      .print-toc ol {
+        list-style: none;
+        counter-reset: toc-item;
+        padding: 0;
+      }
+      .print-toc li {
+        counter-increment: toc-item;
+        font-size: 12pt;
+        color: #333;
+        padding: 10px 0;
+        border-bottom: 1px dotted #ccc;
+      }
+      .print-toc li::before {
+        content: counter(toc-item) ".  ";
+        font-weight: 700;
+        color: #1A3A4A;
+        min-width: 28px;
+        display: inline-block;
+      }
 
-      /* Animacoes desligadas */
-      .fade-in { opacity: 1; transform: none; }
+      /* ══════════ SEÇÕES — ESTILO DOCUMENTO ══════════ */
 
-      /* Evitar quebras ruins */
-      .module-card, .security-card, .profile-card, .report-item {
+      /* Remover todos os backgrounds coloridos */
+      .what-bg, .modules-bg, .stack-bg, .security-bg,
+      .profiles-bg, .reports-bg, .flow-bg {
+        background: white !important;
+      }
+
+      section {
+        padding: 20px 0 !important;
+      }
+
+      /* Labels web → escondidos */
+      .section-label { display: none !important; }
+
+      /* Títulos com numeração automática */
+      .section-title {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 16pt !important;
+        font-weight: 700 !important;
+        color: #1A3A4A !important;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 6px;
+        margin-bottom: 12px !important;
+        letter-spacing: 0 !important;
+      }
+      .section-title::before {
+        counter-increment: doc-section;
+        content: counter(doc-section) ". ";
+      }
+
+      .section-subtitle {
+        font-size: 10.5pt !important;
+        color: #555 !important;
+        font-style: italic;
+        margin-bottom: 16px !important;
+      }
+
+      /* ── O que é ── */
+      .what-item {
+        padding: 10px 0 !important;
+        border-bottom: none;
+      }
+      .what-num {
+        width: 24px !important;
+        height: 24px !important;
+        font-size: 10px !important;
+        background: #1A3A4A !important;
+        color: white !important;
+        flex-shrink: 0;
+      }
+      .what-text {
+        font-size: 10.5pt !important;
+        color: #333 !important;
+      }
+
+      /* ── Módulos: grid → lista linear ── */
+      .modules-grid {
+        display: block !important;
+      }
+      .module-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+        background: none !important;
+        border: none !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        border-radius: 0 !important;
+        padding: 12px 0 !important;
+        box-shadow: none !important;
         page-break-inside: avoid;
       }
+      .module-card:last-child { border-bottom: none !important; }
+      .module-card:hover { box-shadow: none !important; transform: none !important; }
+      .module-icon { display: none !important; }
+      .module-name {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #1A3A4A !important;
+        margin-bottom: 2px !important;
+      }
+      .module-desc {
+        font-size: 10pt !important;
+        color: #444 !important;
+        line-height: 1.45 !important;
+      }
+
+      /* ── Stack table: strip cores ── */
+      .stack-table-wrap {
+        border-radius: 0 !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+      }
+      .stack-table thead tr { background: #f5f5f5 !important; }
+      .stack-table thead th {
+        color: #333 !important;
+        font-size: 10pt !important;
+        padding: 8px 14px !important;
+      }
+      .stack-table tbody td {
+        font-size: 10pt !important;
+        padding: 8px 14px !important;
+        border-top: 1px solid #e0e0e0 !important;
+      }
+      .stack-table tbody tr:nth-child(even) { background: #fafafa !important; }
+      .stack-note {
+        font-size: 9.5pt !important;
+        color: #666 !important;
+        background: none !important;
+        border: none !important;
+        padding: 8px 0 !important;
+        margin-top: 8px !important;
+      }
+
+      /* ── Segurança: grid → lista linear ── */
+      .security-grid {
+        display: block !important;
+      }
+      .security-card {
+        background: none !important;
+        border: none !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        border-radius: 0 !important;
+        padding: 12px 0 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      .security-card:last-child { border-bottom: none !important; }
+      .security-icon { display: none !important; }
+      .security-name {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #1A3A4A !important;
+        margin-bottom: 3px !important;
+      }
+      .security-desc {
+        font-size: 10pt !important;
+        color: #444 !important;
+        line-height: 1.45 !important;
+      }
+
+      /* ── Perfis: cards monocromáticos ── */
+      .profiles-grid {
+        display: block !important;
+      }
+      .profile-card {
+        border: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        margin-bottom: 16px !important;
+        box-shadow: none !important;
+        overflow: hidden;
+        page-break-inside: avoid;
+      }
+      .profile-header,
+      .profile-header.navy,
+      .profile-header.action,
+      .profile-header.green {
+        background: #f5f5f5 !important;
+        padding: 10px 16px !important;
+      }
+      .profile-role {
+        font-size: 8pt !important;
+        color: #666 !important;
+        opacity: 1 !important;
+      }
+      .profile-title {
+        font-size: 13pt !important;
+        color: #1A3A4A !important;
+      }
+      .profile-body { padding: 12px 16px !important; }
+      .profile-item {
+        font-size: 10pt !important;
+        color: #333 !important;
+        margin-bottom: 5px !important;
+        gap: 6px !important;
+      }
+      .profile-item .check {
+        width: 14px !important;
+        height: 14px !important;
+        font-size: 8px !important;
+        background: #1A3A4A !important;
+      }
+
+      /* ── Relatórios: lista limpa ── */
+      .reports-list { gap: 0 !important; }
+      .report-item {
+        background: none !important;
+        border: none !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        border-radius: 0 !important;
+        padding: 12px 0 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      .report-item:last-child { border-bottom: none !important; }
+      .report-badge { display: none !important; }
+      .report-name {
+        font-size: 11pt !important;
+        font-weight: 700 !important;
+        color: #1A3A4A !important;
+        margin-bottom: 2px !important;
+      }
+      .report-desc {
+        font-size: 10pt !important;
+        color: #444 !important;
+        margin-bottom: 6px !important;
+      }
+      .filter-tag {
+        border: 1px solid #999 !important;
+        background: none !important;
+        border-radius: 2px !important;
+        color: #555 !important;
+        font-size: 8.5pt !important;
+        padding: 2px 6px !important;
+      }
+
+      /* ── Fluxo: horizontal → vertical ── */
+      .flow-steps {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+      .flow-step {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 12px !important;
+        text-align: left !important;
+        padding: 6px 0 !important;
+      }
+      .flow-step::before,
+      .flow-step::after { display: none !important; }
+      .flow-circle {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 11px !important;
+        background: #1A3A4A !important;
+        color: white !important;
+        flex-shrink: 0;
+      }
+      .flow-label {
+        font-size: 10.5pt !important;
+        color: #333 !important;
+      }
+
+      /* ── Footer ── */
+      .site-footer {
+        background: white !important;
+        color: #555 !important;
+        border-top: 1px solid #ccc;
+        padding: 12px 0 !important;
+        text-align: center;
+        margin-top: 24px;
+      }
+      .footer-brand {
+        color: #1A3A4A !important;
+        font-size: 11pt !important;
+      }
+      .footer-center {
+        color: #555 !important;
+        font-size: 9.5pt !important;
+      }
+      .footer-right {
+        color: #777 !important;
+        font-size: 9pt !important;
+      }
+
+      /* ── Page breaks ── */
+      .module-card, .security-card, .profile-card, .report-item, .flow-step {
+        page-break-inside: avoid;
+      }
+      .profiles-bg { page-break-before: always; }
     }
 
     /* ────────── RESPONSIVE ────────── */
@@ -875,7 +1234,28 @@
         <span class="cover-badge">Dados em Tempo Real</span>
         <span class="cover-badge">Transparência Garantida</span>
       </div>
+      <!-- Print-only: metadados formais da capa -->
+      <div class="print-cover-meta">
+        <div class="print-doc-label">DOCUMENTO TÉCNICO</div>
+        <div class="print-doc-subtitle">Apresentação Institucional</div>
+        <div class="print-doc-date">Gerado em <span class="gen-date">—</span></div>
+        <div class="print-doc-version">Versão 2.0</div>
+      </div>
     </div>
+  </div>
+
+  <!-- Print-only: Sumário -->
+  <div class="print-toc">
+    <h2>Sumário</h2>
+    <ol>
+      <li>Visão Geral — O que é o sistema</li>
+      <li>Módulos do sistema</li>
+      <li>Stack tecnológica</li>
+      <li>Segurança — Proteção em camadas</li>
+      <li>Perfis de acesso</li>
+      <li>Relatórios em PDF</li>
+      <li>Fluxo operacional</li>
+    </ol>
   </div>
 
   <!-- ═══════════════════════ O QUE É ═══════════════════════ -->
@@ -1247,12 +1627,20 @@
   </footer>
 
   <!-- ═══════════════════════ PRINT BUTTON ═══════════════════════ -->
+  <!-- Print-only: rodapé fixo que repete em cada página -->
+  <div class="print-running-footer">
+    SICEFSUS — Documento Técnico Institucional
+  </div>
+
   <button class="print-btn" onclick="window.print()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8"/>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
     </svg>
-    Imprimir / Salvar PDF
+    Salvar como PDF
   </button>
 
   <script>
