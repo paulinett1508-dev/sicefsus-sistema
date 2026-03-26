@@ -1,618 +1,414 @@
-# SICEFSUS - Design System v2.0
+# SICEFSUS — Design System v3.0
 
-## STATUS: ATUALIZADO EM 27/12/2025
-
-**Design System atualizado com nova paleta moderna baseada em Tailwind CSS.**
+## Atualizado em: 26/03/2026
 
 ---
 
-## 1. Sistema ATUAL (theme.css v2.0)
+## REGRA FUNDAMENTAL
 
-### Paleta de Cores NOVA
-
-```css
-:root {
-  /* Cores Principais (Modernas) */
-  --primary: #2563EB;       /* Azul vibrante */
-  --primary-light: #3B82F6;
-  --primary-dark: #1D4ED8;
-
-  --accent: #2563EB;        /* Mesmo que primary */
-  --accent-light: #60A5FA;
-  --accent-dark: #1D4ED8;
-
-  --secondary: #64748B;     /* Slate para elementos secundarios */
-
-  /* Status (Tailwind Colors) */
-  --success: #10B981;       /* Emerald */
-  --warning: #F59E0B;       /* Amber */
-  --error: #EF4444;         /* Red */
-  --info: #0EA5E9;          /* Sky */
-
-  /* Neutros (Slate Palette) */
-  --white: #ffffff;
-  --black: #000000;
-  --gray-50: #F8FAFC;
-  --gray-100: #F1F5F9;
-  --gray-200: #E2E8F0;
-  --gray-300: #CBD5E1;
-  --gray-400: #94A3B8;
-  --gray-500: #64748B;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1E293B;
-  --gray-900: #0F172A;
-
-  /* Tema */
-  --theme-bg: #F8FAFC;
-  --theme-surface: #ffffff;
-  --theme-text: #334155;
-  --theme-border: #E2E8F0;
-}
-```
-
-### Tipografia NOVA
-
-```css
-:root {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-
-  --font-size-xs: 0.75rem;   /* 12px */
-  --font-size-sm: 0.875rem;  /* 14px */
-  --font-size-base: 1rem;    /* 16px */
-  --font-size-lg: 1.125rem;  /* 18px */
-  --font-size-xl: 1.25rem;   /* 20px */
-  --font-size-2xl: 1.5rem;   /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-}
-```
-
-### Espacamentos Atuais
-
-```css
-:root {
-  --space-1: 0.25rem;   /* 4px */
-  --space-2: 0.5rem;    /* 8px */
-  --space-3: 0.75rem;   /* 12px */
-  --space-4: 1rem;      /* 16px */
-  --space-5: 1.25rem;   /* 20px */
-  --space-6: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-10: 2.5rem;   /* 40px */
-  --space-12: 3rem;     /* 48px */
-}
-```
-
-### Border Radius
-
-```css
-:root {
-  --border-radius-sm: 4px;
-  --border-radius: 6px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  --border-radius-full: 9999px;
-}
-```
-
-### Sombras
-
-```css
-:root {
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.25);
-}
-```
+> **A paleta do SICEFSUS e azul marinho e seus tons. Nao usar verde, laranja ou outras cores de destaque fora da escala azul. Cores de status (success, warning, error) sao excecoes restritas a indicadores semanticos — nunca para identidade visual, decoracao ou destaque.**
 
 ---
 
-## 2. Proposta de Design (Tailwind-based)
+## 1. Paleta de Cores
 
-O template HTML fornecido usa Tailwind CSS com a seguinte configuracao:
+### Identidade (Azul Marinho)
 
-### Paleta Proposta
+| Token | Hex | Uso |
+|-------|-----|-----|
+| `--navy` | `#1A3A4A` | Headers, sidebar, backgrounds escuros |
+| `--navy-dark` | `#0F2634` | Backgrounds muito escuros, footer |
+| `--navy-deep` | `#0D2B38` | Gradientes hero/cover |
 
-```javascript
-colors: {
-  primary: "#2563EB",          // Azul mais moderno
-  "primary-hover": "#1D4ED8",
-  "background-light": "#F8FAFC",
-  "background-dark": "#0F172A",
-  "surface-light": "#FFFFFF",
-  "surface-dark": "#1E293B",
-  "sidebar-dark": "#0F172A",
-  "text-light": "#334155",
-  "text-dark": "#F1F5F9",
-  "success": "#10B981",        // Verde emerald
-  "warning": "#F59E0B",        // Amber
-  "danger": "#EF4444",         // Vermelho moderno
-}
+### Acao (Azul Vibrante)
+
+| Token | Hex | Uso |
+|-------|-----|-----|
+| `--action` | `#2563EB` | Botoes primarios, CTAs, links ativos |
+| `--action-light` | `#3B82F6` | Hover de botoes, badges de destaque |
+| `--action-dark` | `#1D4ED8` | Active state, pressed |
+| `--action-bg` | `#DBEAFE` | Background suave de destaque |
+
+### Accent (Azul Claro)
+
+| Token | Hex | Uso |
+|-------|-----|-----|
+| `--accent` | `#60A5FA` | Destaques sutis, gradientes de texto no hero |
+| `--accent-light` | `#93C5FD` | Bordas hover, decoracao suave |
+| `--accent-bg` | `#EFF6FF` | Background de checkmarks, highlights |
+
+### Neutros (Escala Slate)
+
+| Token | Hex | Uso |
+|-------|-----|-----|
+| `--gray-50` | `#F8FAFC` | Background de paginas |
+| `--gray-100` | `#F1F5F9` | Background de tabelas alternadas |
+| `--gray-200` | `#E2E8F0` | Bordas padrao |
+| `--gray-300` | `#CBD5E1` | Dividers, separadores |
+| `--gray-400` | `#94A3B8` | Texto muted/desabilitado |
+| `--gray-500` | `#64748B` | Texto secundario |
+| `--gray-600` | `#475569` | Texto de corpo |
+| `--gray-700` | `#334155` | Texto principal |
+| `--gray-800` | `#1E293B` | Texto bold |
+| `--gray-900` | `#0F172A` | Preto suave |
+
+### Status (APENAS para indicadores semanticos)
+
+| Token | Hex | Uso RESTRITO |
+|-------|-----|-------------|
+| `--success` | `#10B981` | Badges "ativo", "aprovado", check icons |
+| `--warning` | `#F59E0B` | Badges "pendente", alertas |
+| `--error` | `#EF4444` | Badges "erro", botoes de exclusao |
+| `--info` | `#0EA5E9` | Badges informativos |
+
+**PROIBIDO:** Usar cores de status como accent, decoracao, bordas de secoes, dividers, gradientes ou elementos de identidade visual.
+
+---
+
+## 2. Tipografia
+
+### Fonte
+
+```
+Font family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif
+Import: https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap
 ```
 
-### Tipografia Proposta
+### Escala de Tamanhos
+
+| Token | Valor | Px | Uso |
+|-------|-------|-----|-----|
+| `--font-size-xs` | `0.75rem` | 12px | Labels auxiliares, footnotes |
+| `--font-size-sm` | `0.875rem` | 14px | Corpo de tabelas, labels de form |
+| `--font-size-base` | `1rem` | 16px | Texto padrao |
+| `--font-size-lg` | `1.125rem` | 18px | Subtitulos |
+| `--font-size-xl` | `1.25rem` | 20px | Titulos de secao |
+| `--font-size-2xl` | `1.5rem` | 24px | Titulos de pagina |
+| `--font-size-3xl` | `1.875rem` | 30px | Headings grandes |
+| `--font-size-4xl` | `2.25rem` | 36px | Hero headlines |
+
+### Pesos
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--font-weight-light` | 300 | Subtitulos de hero, texto decorativo |
+| `--font-weight-normal` | 400 | Corpo de texto |
+| `--font-weight-medium` | 500 | Labels, badges, destaque leve |
+| `--font-weight-semibold` | 600 | Headers de tabela, subtitulos |
+| `--font-weight-bold` | 700 | Titulos |
+| `--font-weight-extrabold` | 800 | Hero titles, logo text |
+
+### Alturas de Linha
+
+| Contexto | Valor |
+|----------|-------|
+| Titulos compactos | 1.15–1.25 |
+| Corpo de texto | 1.5 |
+| Texto com espaco | 1.6–1.75 |
+
+### Letter Spacing
+
+| Contexto | Valor |
+|----------|-------|
+| Headlines grandes | `-0.02em` a `-0.01em` |
+| Texto normal | `0` |
+| Labels uppercase | `0.04em` a `0.12em` |
+| Logo/brand text | `0.04em` a `0.08em` |
+
+---
+
+## 3. Layouts Padrao
+
+### Container
+
+```
+Max width: 1200px
+Padding lateral: 48px (desktop), 24px (tablet), 16-20px (mobile)
+Centralizado: margin: 0 auto
+```
+
+### Sidebar + Content
+
+```
+Sidebar: 220px (aberta), 64px (colapsada)
+Content: flex: 1, overflow auto
+Header fixo: height 60px
+```
+
+### Grid de Cards
 
 ```css
-font-family: 'Inter', sans-serif;
+/* 2 colunas desktop, 1 coluna mobile */
+display: grid;
+grid-template-columns: repeat(2, 1fr);  /* ou repeat(3, 1fr) para 3 cols */
+gap: 20px–24px;
+
+@media (max-width: 768px) { grid-template-columns: 1fr; }
 ```
 
-### Comparacao de Cores
+### Breakpoints
 
-| Elemento | Atual | Proposto | Diferenca |
-|----------|-------|----------|-----------|
-| Primary | #154360 | #2563EB | Mais vibrante |
-| Success | #27AE60 | #10B981 | Mais moderno (Emerald) |
-| Warning | #F39C12 | #F59E0B | Similar (Amber) |
-| Error | #E74C3C | #EF4444 | Mais brilhante |
-| Background | #f4f6f8 | #F8FAFC | Quase igual |
-| Text | #212529 | #334155 | Mais suave |
+| Nome | Valor | Uso |
+|------|-------|-----|
+| Mobile | `max-width: 480px` | Telefones |
+| Tablet | `max-width: 768px` | Tablets portrait |
+| Desktop | `> 768px` | Desktop padrao |
 
----
+### Header/Topbar Fixo (paginas publicas)
 
-## 3. Inventario de Estilos no Codigo
-
-### Arquivos CSS (9 arquivos)
-
-| Arquivo | Linhas | Funcao |
-|---------|--------|--------|
-| `theme.css` | 565 | Design system principal |
-| `App.css` | 454 | Estilos globais |
-| `dashboard.css` | ~100 | Dashboard especifico |
-| `adminStyles.css` | ~110 | Painel admin |
-| `relatorios.css` | ~400 | Modulo relatorios |
-| `modalExclusao.css` | ~220 | Modal de exclusao |
-| `ModalNovaNatureza.css` | ~50 | Modal natureza |
-| `shared-styles.css` | ~30 | Estilos compartilhados dev |
-| `FerramentasDev.module.css` | ~20 | CSS Module dev |
-
-### Estilos Inline (3538 ocorrencias em 138 arquivos)
-
-A maioria dos componentes usa `const styles = {...}` para estilos inline.
-Isso dificulta a padronizacao mas oferece isolamento.
-
-### Cores Hardcoded Mais Usadas
-
-| Cor | Ocorrencias | Uso |
-|-----|-------------|-----|
-| #154360 | 50+ | Primary (headers, botoes) |
-| #4A90E2 | 40+ | Accent (links, destaques) |
-| #27AE60 | 30+ | Success |
-| #E74C3C | 30+ | Error/Danger |
-| #f4f6f8 | 25+ | Background |
-| #6c757d | 20+ | Secondary/Muted |
-| #fff / #ffffff | 100+ | White |
-
----
-
-## 4. Problemas Identificados
-
-### 4.1 Cores Duplicadas (Mesma funcao, valores diferentes)
-
-```
-Success:
-  - #27AE60 (theme.css)
-  - #28a745 (App.css btn-success)
-  - #2ecc71 (alguns componentes)
-
-Error:
-  - #E74C3C (theme.css)
-  - #dc3545 (App.css btn-danger)
-  - #c0392b (algumas variacoes)
-
-Primary:
-  - #154360 (theme.css)
-  - #007bff (adminStyles.css)
+```css
+position: sticky;
+top: 0;
+z-index: 50–100;
+background: var(--navy);
+padding: 10px–14px 48px;
+box-shadow: 0 2px 12px rgba(0,0,0,.25);
 ```
 
-### 4.2 Variaveis CSS Definidas mas Nao Usadas
+### Hero/Cover Section
 
-O `theme.css` define variaveis CSS, mas muitos componentes usam valores hardcoded:
-
-```jsx
-// Componente usando hardcoded (MAU)
-backgroundColor: "#154360"
-
-// Deveria usar variavel (BOM)
-backgroundColor: "var(--primary)"
+```css
+background: var(--navy);  /* ou gradiente navy */
+min-height: 280px;
+padding: 48px;
+text-align: center;
+color: white;
+/* Elementos decorativos: gradientes radiais com rgba azul, linhas sutis */
 ```
-
-### 4.3 Bordas Inconsistentes
-
-```
-border-radius encontrados:
-- 4px, 6px, 8px, 10px, 12px, 16px, 20px, 50%
-- Recomendado: usar apenas escala definida
-```
-
----
-
-## 5. Recomendacoes de Migracao
-
-### FASE 1: Padronizacao Interna (SEGURO)
-
-**Nao altera visual, apenas organiza codigo:**
-
-1. Substituir cores hardcoded por variaveis CSS existentes
-2. Unificar valores duplicados (ex: todos os success usarem #27AE60)
-3. Documentar padroes no CLAUDE.md
-
-### FASE 2: Atualizacao Incremental (MODERADO)
-
-**Pode alterar visual levemente:**
-
-1. Atualizar fonte para Inter (mais moderna)
-2. Ajustar border-radius para escala consistente
-3. Atualizar sombras para mais suaves
-
-### FASE 3: Redesign Completo (ALTO RISCO)
-
-**Altera visual significativamente:**
-
-1. Migrar paleta de cores para Tailwind
-2. Adicionar dark mode
-3. Redesenhar componentes
-
----
-
-## 6. Template de Componente Padronizado
-
-Baseado no template HTML fornecido, aqui esta o padrao para novos componentes:
 
 ### Card Padrao
 
-```jsx
-const CardStyles = {
-  container: {
-    backgroundColor: 'var(--theme-surface)',
-    borderRadius: 'var(--border-radius-lg)',
-    padding: 'var(--space-5)',
-    boxShadow: 'var(--shadow-sm)',
-    border: '1px solid var(--theme-border-light)',
-    transition: 'all 0.2s ease',
-  },
-  containerHover: {
-    borderColor: 'var(--accent)',
-  }
-};
-```
-
-### Tabela Padrao
-
-```jsx
-const TableStyles = {
-  header: {
-    backgroundColor: 'var(--gray-50)',
-    fontSize: 'var(--font-size-xs)',
-    fontWeight: 'var(--font-weight-semibold)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    padding: 'var(--space-3) var(--space-4)',
-    color: 'var(--gray-500)',
-  },
-  cell: {
-    padding: 'var(--space-2) var(--space-4)',
-    fontSize: 'var(--font-size-sm)',
-    borderBottom: '1px solid var(--theme-border-light)',
-  },
-  rowHover: {
-    backgroundColor: 'var(--gray-50)',
-    borderLeft: '2px solid var(--accent)',
-  }
-};
-```
-
-### Botao Padrao
-
-```jsx
-const ButtonStyles = {
-  primary: {
-    backgroundColor: 'var(--accent)',
-    color: 'var(--white)',
-    padding: 'var(--space-2) var(--space-4)',
-    borderRadius: 'var(--border-radius)',
-    fontSize: 'var(--font-size-sm)',
-    fontWeight: 'var(--font-weight-medium)',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 'var(--space-2)',
-  },
-  primaryHover: {
-    backgroundColor: 'var(--accent-dark)',
-    transform: 'translateY(-1px)',
-    boxShadow: 'var(--shadow-md)',
-  }
-};
-```
-
----
-
-## 7. Checklist de Seguranca para Alteracoes CSS
-
-Antes de qualquer alteracao de estilo:
-
-- [ ] Backup do arquivo original
-- [ ] Testar em DEV primeiro
-- [ ] Verificar em Chrome, Firefox, Safari
-- [ ] Testar responsividade (mobile, tablet, desktop)
-- [ ] Verificar acessibilidade (contraste, tamanho de fonte)
-- [ ] Testar como Admin e Operador
-- [ ] Validar formularios funcionando
-- [ ] Confirmar modais abrindo/fechando
-- [ ] Verificar tabelas com dados reais
-- [ ] Testar em conexao lenta
-
----
-
-## 8. Arquivos Criticos - NAO MODIFICAR SEM BACKUP
-
-| Arquivo | Risco | Motivo |
-|---------|-------|--------|
-| `theme.css` | ALTO | Base de todo sistema |
-| `App.css` | ALTO | Estilos globais |
-| `Sidebar.jsx` | MEDIO | Navegacao principal |
-| `Dashboard.jsx` | MEDIO | Tela inicial |
-| `Login.jsx` | MEDIO | Entrada do sistema |
-| `EmendaForm/` | ALTO | Formularios complexos |
-
----
-
-## 9. Mapeamento: Template HTML -> Sistema Atual
-
-### Cores do Template Tailwind
-
-| Tailwind Class | Hex | Variavel CSS Atual |
-|----------------|-----|-------------------|
-| `bg-primary` | #2563EB | `--accent` (similar: #4A90E2) |
-| `text-slate-800` | #1E293B | `--gray-800` (similar: #212529) |
-| `text-slate-500` | #64748B | `--gray-500` (similar: #6c757d) |
-| `bg-slate-50` | #F8FAFC | `--gray-50` (similar: #f8f9fa) |
-| `border-slate-200` | #E2E8F0 | `--gray-200` (similar: #dee2e6) |
-| `text-emerald-600` | #059669 | `--success` (similar: #27AE60) |
-| `text-red-600` | #DC2626 | `--error` (similar: #E74C3C) |
-| `text-orange-600` | #EA580C | `--warning` (similar: #F39C12) |
-
-### Componentes do Template
-
-| Template | Componente Atual | Status |
-|----------|-----------------|--------|
-| Sidebar | `Sidebar.jsx` | Existente, diferente |
-| Header | Inline em `App.jsx` | Existente |
-| Cards de estatistica | `Dashboard.jsx` | Existente, diferente |
-| Tabela de emendas | `EmendasTable.jsx` | Existente, diferente |
-| Paginacao | `Pagination.jsx` | Existente |
-| Drawer de filtros | `EmendasFilters.jsx` | Existente, diferente |
-
----
-
-## 10. Proximos Passos Recomendados
-
-### Imediato (Sem risco)
-
-1. Usar este documento como referencia
-2. Criar variaveis CSS para cores ainda hardcoded
-3. Documentar padroes para novos desenvolvedores
-
-### Curto prazo (Baixo risco)
-
-1. Unificar cores duplicadas
-2. Padronizar border-radius
-3. Atualizar fonte para Inter
-
-### Medio prazo (Avaliar necessidade)
-
-1. Migrar estilos inline para CSS Modules
-2. Implementar design do template HTML gradualmente
-3. Considerar dark mode
-
----
-
-## 11. Oportunidades de Refatoracao SEGURA
-
-### Analise de Cores Hardcoded vs CSS Variables
-
-| Cor | Valor | Hardcoded | Usando var() | Oportunidade |
-|-----|-------|-----------|--------------|--------------|
-| Primary | #154360 | 157 ocorrencias | 33 ocorrencias | **124 substituicoes possiveis** |
-| Accent | #4A90E2 | 42 ocorrencias | 20 ocorrencias | **22 substituicoes possiveis** |
-| Success | #27AE60 | 34 ocorrencias | 17 ocorrencias | **17 substituicoes possiveis** |
-| Error | #E74C3C | 35 ocorrencias | 15 ocorrencias | **20 substituicoes possiveis** |
-| Background | #f4f6f8 | 8 ocorrencias | 0 ocorrencias | **8 substituicoes possiveis** |
-
-**Total: ~191 substituicoes que NAO alteram visual**
-
-### Arquivos com Mais Hardcodes (Prioridade para Refatoracao)
-
-| Arquivo | Primary | Accent | Success | Error | Total |
-|---------|---------|--------|---------|-------|-------|
-| `emendaDetailStyles.js` | 8 | 7 | 3 | 2 | 20 |
-| `VisualizacaoEmendaDespesas.jsx` | 8 | 7 | 3 | 2 | 20 |
-| `DashboardAlertasDetalhados.jsx` | 2 | 0 | 3 | 9 | 14 |
-| `adminStyles.css` | 12 | 0 | 0 | 0 | 12 |
-| `Sobre.jsx` | 8 | 0 | 0 | 0 | 8 |
-| `Emendas.jsx` | 6 | 1 | 0 | 0 | 7 |
-| `printUtils.js` | 6 | 0 | 0 | 1 | 7 |
-| `SaldoNaturezaWidget.jsx` | 6 | 0 | 0 | 0 | 6 |
-
-### Exemplo de Substituicao Segura
-
-```jsx
-// ANTES (hardcoded)
-const styles = {
-  header: {
-    backgroundColor: '#154360',
-    color: '#ffffff'
-  },
-  button: {
-    backgroundColor: '#4A90E2'
-  },
-  successBadge: {
-    backgroundColor: '#27AE60'
-  },
-  errorBadge: {
-    backgroundColor: '#E74C3C'
-  }
-};
-
-// DEPOIS (usando variaveis - MESMO VISUAL)
-const styles = {
-  header: {
-    backgroundColor: 'var(--primary)',
-    color: 'var(--white)'
-  },
-  button: {
-    backgroundColor: 'var(--accent)'
-  },
-  successBadge: {
-    backgroundColor: 'var(--success)'
-  },
-  errorBadge: {
-    backgroundColor: 'var(--error)'
-  }
-};
-```
-
-### Beneficios da Substituicao
-
-1. **Zero impacto visual** - As variaveis tem os mesmos valores
-2. **Manutencao facilitada** - Mudar uma variavel atualiza todo sistema
-3. **Preparacao para dark mode** - Variaveis podem ser sobrescritas
-4. **Consistencia garantida** - Evita cores ligeiramente diferentes
-5. **Facilita futuras alteracoes** - Um lugar para mudar
-
-### Procedimento de Substituicao Segura
-
-1. Selecionar UM arquivo por vez
-2. Fazer backup do arquivo
-3. Substituir hardcodes por variaveis
-4. Testar visualmente no navegador
-5. Confirmar que nada mudou
-6. Commitar alteracao
-7. Repetir para proximo arquivo
-
----
-
-## 12. Historico de Alteracoes
-
-### v2.0 - 27/12/2025 (Transformacao Visual)
-
-**Alteracoes Realizadas:**
-
-| Arquivo | Alteracao |
-|---------|-----------|
-| `theme.css` | Nova paleta de cores, fonte Inter, sombras suaves |
-| `index.html` | Preconnect para fonts.googleapis.com, theme-color atualizado |
-
-**Mapeamento de Cores (Antigo -> Novo):**
-
-| Variavel | Valor Antigo | Valor Novo |
-|----------|--------------|------------|
-| --primary | #154360 | #2563EB |
-| --accent | #4A90E2 | #2563EB |
-| --success | #27AE60 | #10B981 |
-| --warning | #F39C12 | #F59E0B |
-| --error | #E74C3C | #EF4444 |
-| --info | #17a2b8 | #0EA5E9 |
-| --theme-bg | #f4f6f8 | #F8FAFC |
-| --theme-text | #212529 | #334155 |
-| --font-family | Segoe UI | Inter |
-
-**Novas Classes Adicionadas:**
-
-- `.card-hover` - Cards com efeito hover
-- `.badge-*` - Badges modernos (blue, green, red, orange, gray)
-- `.status-dot-*` - Indicadores de status
-- `.table-compact` - Tabelas compactas estilo template
-- `.input-modern` - Inputs com estilo moderno
-- `.avatar-*` - Avatares circulares
-- `.progress-bar-*` - Barras de progresso
-- `.chip` - Tags/chips
-- `.divider` - Divisores
-
-**Para Reverter (se necessario):**
-
-Restaurar valores antigos em theme.css:
 ```css
---primary: #154360;
---accent: #4A90E2;
---success: #27AE60;
---warning: #F39C12;
---error: #E74C3C;
---info: #17a2b8;
---theme-bg: #f4f6f8;
---theme-text: #212529;
---font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+background: white;
+border-radius: 12px;  /* --border-radius-lg */
+box-shadow: 0 4px 24px rgba(15,40,48,.12);
+padding: 24px;
+border: 1px solid var(--gray-200);
+```
+
+### Footer (paginas publicas)
+
+```css
+background: var(--navy-dark);  /* #0D2B38 ou #0F2634 */
+padding: 36px 48px 28px;
+text-align: center;
+/* Sempre incluir: nome do sistema, descricao, copyright, ano */
 ```
 
 ---
 
-## 13. Acessibilidade (WCAG AA)
+## 4. Componentes Padrao
 
-> Regras de acessibilidade para sistema governo/saude. Baseado em WCAG 2.1 AA
-> e boas praticas para aplicacoes de setor publico.
+### Botao Primario
 
-### Contraste de Cores
+```css
+background: var(--action);       /* #2563EB */
+color: white;
+padding: 12px 24px;
+border-radius: 8px;
+font-size: 14px;
+font-weight: 600;
+transition: all 0.2s ease;
+/* Hover: translateY(-1px), shadow-md */
+/* Active: action-dark */
+```
 
-| Elemento | Ratio Minimo | Nota |
-|----------|-------------|------|
-| Texto normal (< 18px) | 4.5:1 | Contra background |
-| Texto grande (>= 18px bold ou >= 24px) | 3:1 | Contra background |
-| Elementos graficos (icones, bordas) | 3:1 | Contra background adjacente |
-| Componentes interativos (botoes, inputs) | 3:1 | Estado default e hover |
+### Badge/Tag
 
-**Verificacao rapida:** Cores do design system v2.0 no background branco:
-- `--primary (#2563EB)` sobre branco: 4.6:1 (passa AA)
-- `--success (#10B981)` sobre branco: 3.1:1 (passa AA para texto grande, usar `--success-dark` para texto pequeno)
-- `--error (#EF4444)` sobre branco: 3.9:1 (usar `--error-dark` para texto pequeno)
-- `--warning (#F59E0B)` sobre branco: 2.1:1 (usar APENAS como background com texto escuro)
+```css
+font-size: 11px;
+font-weight: 600;
+letter-spacing: 0.04em–0.12em;
+text-transform: uppercase;
+padding: 5px 14px;
+border-radius: 100px;
+/* Background: rgba de azul ou neutro, nunca verde/laranja */
+```
 
-### Alvos de Toque
+### Tabela
 
-- Tamanho minimo: **44x44px** para elementos clicaveis (botoes, links, checkboxes)
-- Espacamento minimo entre alvos: **8px**
-- Excecao: links inline em texto corrido podem ser menores
+```css
+border-collapse: collapse;
+border-radius: 12px;
+box-shadow: var(--shadow);
+/* Header: background gray-50, font-size xs, weight semibold, uppercase */
+/* Cells: padding 12px, border-bottom gray-200 */
+/* Hover row: background gray-50 */
+```
 
-### Tipografia Legivel
+### Modal
 
-- Corpo de texto: **minimo 16px** (`--font-size-base`)
-- Dados em tabelas: **minimo 14px** (`--font-size-sm`)
-- Labels de formulario: **minimo 14px** com `font-weight: medium`
-- Nunca usar abaixo de **12px** (`--font-size-xs`) exceto para informacao auxiliar
+```css
+z-index: 1050;
+backdrop: rgba(0,0,0,.5) blur(12px);
+border-radius: 12px;
+box-shadow: 0 20px 60px rgba(0,0,0,.3);
+/* Header: gradiente action -> action-dark, branco */
+```
 
-### Indicadores Visuais
+### Input/Form
 
-- **Cor nunca como unico indicador**: sempre acompanhar com icone ou texto
-  - Bom: `check_circle` verde + "Aprovado"
-  - Ruim: apenas bolinha verde sem texto
-- **Focus visible**: todos elementos interativos devem ter `outline` visivel ao navegar por teclado
-- **Estados de erro**: usar icone `error` + mensagem de texto + borda vermelha (3 indicadores)
-
-### Formularios
-
-- Todo input deve ter `<label>` associado (visivel, nao apenas `aria-label`)
-- Mensagens de erro devem aparecer proximo ao campo, nao apenas no topo
-- Campos obrigatorios marcados com `*` E com `aria-required="true"`
-- Agrupar campos relacionados com `<fieldset>` e `<legend>` quando aplicavel
-
-### Navegacao por Teclado
-
-- Ordem de tab logica (seguir fluxo visual da pagina)
-- Modais devem prender foco (focus trap) enquanto abertos
-- `Escape` deve fechar modais e dropdowns
-- Skip links para conteudo principal (util quando escalar para muitos usuarios)
+```css
+padding: 12px 16px;
+border: 2px solid var(--gray-200);
+border-radius: 8px;
+font-size: 14px;
+/* Focus: border action, shadow 0 0 0 3px rgba(37,99,235,.15) */
+```
 
 ---
 
-**Documento gerado em:** 27/12/2025
-**Versao:** 2.1 (acessibilidade WCAG AA adicionada em 03/03/2026)
-**Autor:** Claude Code Audit
+## 5. Icones
+
+```
+Biblioteca: Material Symbols Outlined
+Import: Google Fonts (Material+Symbols+Outlined)
+```
+
+### Tamanhos
+
+| Contexto | Font-size |
+|----------|-----------|
+| Inline com texto | 14–16px |
+| Em titulos | 18–24px |
+| Empty states | 48px |
+
+### Padrao de Uso
+
+```jsx
+<span
+  className="material-symbols-outlined"
+  style={{ fontSize: 14, verticalAlign: "middle", marginRight: 4 }}
+>
+  icon_name
+</span>
+```
+
+---
+
+## 6. Espacamentos
+
+| Token | Valor | Px |
+|-------|-------|-----|
+| `--space-1` | `0.25rem` | 4px |
+| `--space-2` | `0.5rem` | 8px |
+| `--space-3` | `0.75rem` | 12px |
+| `--space-4` | `1rem` | 16px |
+| `--space-5` | `1.25rem` | 20px |
+| `--space-6` | `1.5rem` | 24px |
+| `--space-8` | `2rem` | 32px |
+| `--space-10` | `2.5rem` | 40px |
+| `--space-12` | `3rem` | 48px |
+
+---
+
+## 7. Sombras
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--shadow-sm` | `0 1px 3px rgba(0,0,0,.1)` | Elementos sutis |
+| `--shadow` | `0 2px 8px rgba(0,0,0,.1)` | Cards, containers |
+| `--shadow-md` | `0 4px 12px rgba(0,0,0,.15)` | Hover elevado |
+| `--shadow-lg` | `0 8px 24px rgba(0,0,0,.2)` | Modais, dropdowns |
+
+---
+
+## 8. Border Radius
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--border-radius-sm` | 4px | Badges, inputs pequenos |
+| `--border-radius` | 6–8px | Botoes, inputs |
+| `--border-radius-lg` | 12px | Cards, modais |
+| `--border-radius-xl` | 16px | Containers grandes |
+| `--border-radius-full` | 9999px | Pills, avatares |
+
+---
+
+## 9. Z-Index
+
+| Camada | Valor |
+|--------|-------|
+| Dropdown | 1000 |
+| Sticky header | 1020 |
+| Fixed header | 1030 |
+| Modal backdrop | 1040 |
+| Modal | 1050 |
+| Popover | 1060 |
+| Toast | 9999 |
+
+---
+
+## 10. Paginas Publicas (Apresentacoes)
+
+As paginas em `public/apresentacoes/` sao HTML standalone (sem React). Regras especificas:
+
+### Variaveis CSS Locais
+
+```css
+:root {
+  --navy:         #1A3A4A;
+  --navy-dark:    #0F2634;
+  --action:       #2563EB;
+  --action-light: #DBEAFE;
+  --accent:       #60A5FA;
+  --bg:           #F8FAFC;
+  --text:         #0F172A;
+  --muted:        #475569;
+  --border:       #E2E8F0;
+  --border-light: #F1F5F9;
+}
+```
+
+### Header Bar
+
+- Fonte: 13px, weight 600, uppercase, letter-spacing .08em
+- Cor: rgba(255,255,255,.85)
+- Padding compacto: 10px vertical
+- Sticky top: 0
+
+### Hero/Cover
+
+- Background: gradiente de tons navy
+- Titulo: 38px (desktop), 26px (mobile), weight 700
+- Eyebrow: 11px, uppercase, letter-spacing .18em, cor accent/action
+- Subtitulo: 16px, weight 300, cor rgba branco 65%
+- Badges: background rgba branco 8%, borda rgba branco 15%
+
+### Footer
+
+- Background: navy-dark
+- Centralizado, empilhado
+- Incluir: nome, descricao, divider, copyright, link
+
+---
+
+## 11. Arquivos CSS do Projeto
+
+| Arquivo | Funcao |
+|---------|--------|
+| `src/styles/theme.css` | Design system principal, CSS variables |
+| `src/App.css` | Estilos globais, tabelas, formularios |
+| `src/styles/dashboard.css` | Dashboard, cards de resumo |
+| `src/styles/adminStyles.css` | Painel admin, modais |
+| `src/styles/relatorios.css` | Relatorios, filtros |
+| `src/styles/modalExclusao.css` | Modal de exclusao |
+
+---
+
+## 12. Checklist para Novos Componentes
+
+- [ ] Usa apenas cores da paleta azul (navy/action/accent/neutros)
+- [ ] Cores de status apenas para indicadores semanticos
+- [ ] Fonte Inter com peso e tamanho da escala
+- [ ] Border-radius da escala (4, 6, 8, 12, 16px)
+- [ ] Sombras da escala (sm, default, md, lg)
+- [ ] Responsivo nos 3 breakpoints (480, 768, desktop)
+- [ ] Icones Material Symbols Outlined
+- [ ] Alvos de toque minimo 44x44px
+
+---
+
+**Versao:** 3.0
+**Data:** 26/03/2026
+**Regra de ouro:** Azul marinho e seus tons. Sempre.
