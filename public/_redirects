@@ -1,2 +1,7 @@
 
+/apresentacoes/index.html        /apresentacoes/index.html        200
+/apresentacoes/institucional.html  /apresentacoes/institucional.html  200
+/apresentacoes/marketing.html    /apresentacoes/marketing.html    200
+/apresentacoes                   /apresentacoes/index.html        200
+/apresentacoes/                  /apresentacoes/index.html        200
 /*    /index.html   200

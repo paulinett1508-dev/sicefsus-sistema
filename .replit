@@ -17,6 +17,26 @@ deploymentTarget = "static"
 publicDir = "dist"
 
 [[deployment.rewrites]]
+from = "/apresentacoes/index.html"
+to = "/apresentacoes/index.html"
+
+[[deployment.rewrites]]
+from = "/apresentacoes/institucional.html"
+to = "/apresentacoes/institucional.html"
+
+[[deployment.rewrites]]
+from = "/apresentacoes/marketing.html"
+to = "/apresentacoes/marketing.html"
+
+[[deployment.rewrites]]
+from = "/apresentacoes"
+to = "/apresentacoes/index.html"
+
+[[deployment.rewrites]]
+from = "/apresentacoes/"
+to = "/apresentacoes/index.html"
+
+[[deployment.rewrites]]
 from = "/*"
 to = "/index.html"
 
