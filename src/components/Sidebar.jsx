@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import GlobalSearch from "./GlobalSearch";
-import logoSicefsusLight from "../images/logo-sicefsus-ver-modoclaro.png";
-import logoSicefsusDark from "../images/logo-sicefsus-ver-mododark.png";
 import { useVersion } from "../hooks/useVersion";
 import { useTheme } from "../context/ThemeContext";
 
@@ -35,8 +33,6 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
   const { version } = useVersion();
   const { isDark } = useTheme();
   const env = getEnvironment();
-  // Sidebar escura em ambos os modos, então sempre usa logo para fundo escuro
-  const logoSicefsus = logoSicefsusDark;
 
   // Notificar o pai quando o collapsed muda
   const handleToggle = () => {
@@ -140,12 +136,13 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
           onClick={() => onNavigate("/dashboard")}
           aria-label="Ir para Dashboard"
         >
-          <img
-            src={logoSicefsus}
-            alt="SICEFSUS"
-            style={collapsed ? styles.logoImageCollapsed : styles.logoImage}
-          />
-          {!collapsed && <span style={styles.logoText}>SICEFSUS</span>}
+          {collapsed ? (
+            <span style={styles.logoTextCollapsed}>S</span>
+          ) : (
+            <span style={styles.logoText}>
+              SICEF<span style={styles.logoAccent}>SUS</span>
+            </span>
+          )}
         </button>
         
         {/* Botão Toggle Sidebar */}
@@ -460,23 +457,21 @@ const styles = {
     color: "var(--theme-sidebar-text)",
   },
 
-  logoImage: {
-    width: 36,
-    height: 36,
-    objectFit: "contain",
-  },
-
-  logoImageCollapsed: {
-    width: 32,
-    height: 32,
-    objectFit: "contain",
-  },
-
   logoText: {
     fontWeight: 700,
     fontSize: 20,
-    letterSpacing: "-0.5px",
+    letterSpacing: "0.04em",
     color: "var(--theme-sidebar-text)",
+  },
+
+  logoTextCollapsed: {
+    fontWeight: 700,
+    fontSize: 24,
+    color: "#3b82f6",
+  },
+
+  logoAccent: {
+    color: "#3b82f6",
   },
 
   searchContainer: {
