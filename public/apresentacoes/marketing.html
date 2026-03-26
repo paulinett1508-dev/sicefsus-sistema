@@ -91,11 +91,14 @@
     .topstrip-link {
       color: rgba(255,255,255,.45);
       text-decoration: none;
-      padding: 4px 10px;
+      padding: 10px 14px;
       border-radius: 100px;
       border: 1px solid transparent;
       transition: all .2s;
       font-weight: 500;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
     }
     .topstrip-link:hover { color: white; border-color: rgba(255,255,255,.15); }
     .topstrip-link.active { color: white; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
@@ -107,6 +110,8 @@
       align-items: center;
       gap: 5px;
       transition: opacity .2s;
+      min-height: 44px;
+      padding: 8px 12px;
     }
     .topstrip-cta:hover { opacity: .8; }
 
@@ -150,6 +155,10 @@
       text-decoration: none;
       letter-spacing: .04em;
       transition: color .2s;
+      padding: 10px 4px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
     }
     .nav-links a:hover { color: white; }
 
@@ -306,7 +315,7 @@
     }
     .counter-item { padding: 8px; }
     .counter-value {
-      font-size: 52px;
+      font-size: clamp(32px, 7vw, 52px);
       font-weight: 800;
       background: linear-gradient(135deg, var(--blue-mid), var(--purple));
       -webkit-background-clip: text;
@@ -317,7 +326,7 @@
       margin-bottom: 4px;
     }
     .counter-suffix {
-      font-size: 52px;
+      font-size: clamp(32px, 7vw, 52px);
       font-weight: 800;
       background: linear-gradient(135deg, var(--blue-mid), var(--purple));
       -webkit-background-clip: text;
@@ -716,12 +725,87 @@
       transform: translateY(0);
     }
 
+    /* ──────────────────── HAMBURGER MENU ──────────────────── */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      min-height: 44px;
+      min-width: 44px;
+      align-items: center;
+      justify-content: center;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: white;
+      border-radius: 2px;
+      transition: transform .3s, opacity .3s;
+      margin: 5px 0;
+    }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15,30,64,.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 20px;
+      font-weight: 600;
+      color: rgba(255,255,255,.8);
+      text-decoration: none;
+      padding: 16px 32px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      border-radius: 12px;
+      transition: background .2s, color .2s;
+    }
+    .mobile-menu a:hover { background: rgba(255,255,255,.08); color: white; }
+    .mobile-menu-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      padding: 10px;
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* ──────────────────── RESPONSIVE ──────────────────── */
     @media (max-width: 960px) {
       .problem-grid, .solution-grid, .benefits-grid, .features-grid { grid-template-columns: 1fr 1fr; }
       .counters-grid { grid-template-columns: repeat(2, 1fr); }
       .comparison-table { font-size: 13px; }
       .navbar { padding: 16px 24px; }
+      .navbar.scrolled { padding: 12px 24px; }
+      .topstrip { padding: 8px 24px; }
+      .counters-section { padding: 48px 24px; }
     }
     @media (max-width: 640px) {
       .problem-grid, .solution-grid, .benefits-grid, .features-grid { grid-template-columns: 1fr; }
@@ -729,11 +813,22 @@
       .comparison-table thead tr th:first-child { display: none; }
       .comparison-table tbody td:first-child { display: none; }
       .comparison-table { display: block; overflow-x: auto; }
-      .section-wrap { padding: 64px 24px; }
-      .solution-wrap { padding: 64px 24px; }
-      .cta-section { padding: 64px 24px; }
-      .site-footer { padding: 24px; flex-direction: column; text-align: center; }
+      .section-wrap { padding: 56px 20px; }
+      .solution-wrap { padding: 56px 20px; }
+      .cta-section { padding: 56px 20px; }
+      .site-footer { padding: 24px 20px; flex-direction: column; text-align: center; }
       .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .topstrip { padding: 6px 16px; flex-direction: column; align-items: stretch; gap: 4px; }
+      .topstrip-links { flex-wrap: wrap; justify-content: center; }
+      .topstrip-link { font-size: 12px; padding: 8px 10px; }
+      .topstrip-cta { justify-content: center; }
+      .navbar { padding: 14px 20px; }
+      .navbar.scrolled { padding: 10px 20px; }
+      .hero { padding: 100px 20px 64px; }
+      .hero-blob { display: none; }
+      .counters-section { padding: 40px 20px; }
+      .cta-title { font-size: clamp(24px, 5vw, 36px); }
     }
   </style>
 </head>
@@ -763,7 +858,19 @@
       <li><a href="#funcionalidades">Funcionalidades</a></li>
       <li><a href="#comparativo">Comparativo</a></li>
     </ul>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true" role="dialog" aria-label="Menu de navegação">
+    <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Fechar menu">&times;</button>
+    <a href="#problema">O Problema</a>
+    <a href="#solucao">A Solução</a>
+    <a href="#funcionalidades">Funcionalidades</a>
+    <a href="#comparativo">Comparativo</a>
+  </div>
 
   <!-- ═══════════ HERO ═══════════ -->
   <section class="hero">
@@ -1118,6 +1225,60 @@
         if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
       });
     });
+
+    // ── Hamburger menu mobile
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+    if (hamburgerBtn && mobileMenu && mobileMenuClose) {
+      const openMenu = () => {
+        mobileMenu.classList.add('open');
+        mobileMenu.setAttribute('aria-hidden', 'false');
+        hamburgerBtn.classList.add('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        mobileMenuClose.focus();
+      };
+
+      const closeMenu = () => {
+        mobileMenu.classList.remove('open');
+        mobileMenu.setAttribute('aria-hidden', 'true');
+        hamburgerBtn.classList.remove('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        hamburgerBtn.focus();
+      };
+
+      hamburgerBtn.addEventListener('click', openMenu);
+      mobileMenuClose.addEventListener('click', closeMenu);
+
+      // Escape key closes menu
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenu.classList.contains('open')) closeMenu();
+      });
+
+      // Focus trap inside mobile menu
+      mobileMenu.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const focusable = mobileMenu.querySelectorAll('button, a[href]');
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          closeMenu();
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) {
+            e.preventDefault();
+            setTimeout(() => target.scrollIntoView({ behavior: 'smooth' }), 100);
+          }
+        });
+      });
+    }
 
     // ── Ano no footer
     document.getElementById('footer-year').textContent =

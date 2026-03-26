@@ -29,6 +29,7 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
@@ -46,6 +47,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
       position: sticky;
       top: 0;
       z-index: 100;
@@ -80,7 +83,7 @@
       text-align: right;
     }
     .header-bar .doc-label {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: .12em;
       text-transform: uppercase;
@@ -190,7 +193,7 @@
       padding: 0 48px;
     }
     .section-label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: .14em;
       text-transform: uppercase;
@@ -299,12 +302,16 @@
 
     /* ────────── STACK ────────── */
     .stack-bg { background: var(--white); }
+    .stack-table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
     .stack-table {
       width: 100%;
       border-collapse: collapse;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
+      min-width: 420px;
     }
     .stack-table thead tr {
       background: var(--navy);
@@ -312,7 +319,7 @@
     .stack-table thead th {
       padding: 14px 24px;
       text-align: left;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -405,7 +412,7 @@
     .profile-header.action { background: var(--action); }
     .profile-header.green  { background: var(--green); }
     .profile-role {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -497,9 +504,9 @@
       flex-wrap: wrap;
     }
     .filter-tag {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 500;
-      padding: 3px 10px;
+      padding: 5px 12px;
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 100px;
@@ -605,20 +612,23 @@
       gap: 8px;
     }
     .topnav-link {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
       color: rgba(255,255,255,.55);
       text-decoration: none;
-      padding: 6px 14px;
+      padding: 10px 16px;
       border-radius: 100px;
       border: 1px solid transparent;
       transition: all .2s;
       letter-spacing: .02em;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
     }
     .topnav-link:hover { color: white; border-color: rgba(255,255,255,.2); }
     .topnav-link.active { color: white; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); }
     .topnav-cta {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--green);
       text-decoration: none;
@@ -626,6 +636,8 @@
       align-items: center;
       gap: 5px;
       transition: opacity .2s;
+      min-height: 44px;
+      padding: 8px 12px;
     }
     .topnav-cta:hover { opacity: .8; }
     .topnav-cta svg { width: 13px; height: 13px; }
@@ -734,17 +746,40 @@
       .security-grid { grid-template-columns: repeat(2, 1fr); }
       .profiles-grid { grid-template-columns: 1fr; }
       .cover-title { font-size: 52px; }
+      .cover-section { padding: 56px 24px; }
       section { padding: 48px 24px; }
+      section.full-bleed .section-inner { padding: 0 24px; }
       .header-bar { padding: 12px 24px; }
+      .header-bar .logo-sub { display: none; }
+      .topnav { padding: 10px 24px; }
+      .system-cta-wrap { padding: 48px 24px; }
       .site-footer { padding: 24px; flex-direction: column; text-align: center; }
+      .what-text { font-size: 17px; }
     }
     @media (max-width: 600px) {
       .modules-grid { grid-template-columns: 1fr; }
       .security-grid { grid-template-columns: 1fr; }
       .flow-steps { flex-wrap: wrap; justify-content: center; gap: 24px; }
       .flow-step::before, .flow-step::after { display: none; }
-      .cover-title { font-size: 40px; }
+      .cover-title { font-size: 36px; letter-spacing: .06em; }
+      .cover-subtitle { font-size: 16px; }
+      .cover-section { padding: 48px 20px; min-height: auto; }
+      .cover-badge { font-size: 11px; padding: 5px 12px; }
       .stack-table { font-size: 12px; }
+      .stack-table tbody td { padding: 12px 14px; }
+      .stack-table thead th { padding: 10px 14px; }
+      .topnav { padding: 8px 16px; flex-direction: column; align-items: stretch; }
+      .topnav-links { flex-wrap: wrap; justify-content: center; gap: 4px; }
+      .topnav-link { font-size: 12px; padding: 8px 12px; }
+      .topnav-cta { justify-content: center; }
+      .header-bar { padding: 10px 16px; }
+      .header-bar .logo-mark { font-size: 18px; }
+      .header-bar .logo-sep { display: none; }
+      .header-bar .header-right { display: none; }
+      .system-cta-wrap { padding: 40px 20px; }
+      .system-cta-title { font-size: 24px; }
+      .print-btn { bottom: 16px; right: 16px; padding: 12px 18px; font-size: 13px; }
+      section { padding: 40px 20px; }
     }
   </style>
 </head>
@@ -898,6 +933,7 @@
       <div class="section-label">Tecnologia</div>
       <h2 class="section-title">Stack tecnológica</h2>
       <p class="section-subtitle">Tecnologias modernas, amplamente adotadas e com suporte de longo prazo</p>
+      <div class="stack-table-wrap">
       <table class="stack-table">
         <thead>
           <tr>
@@ -914,6 +950,7 @@
           <tr><td>Deploy e Hospedagem</td><td>Replit — SPA estático, HTTPS automático</td></tr>
         </tbody>
       </table>
+      </div>
       <p class="stack-note">
         <strong>Infraestrutura gerenciada pelo Google Cloud Platform</strong> — disponibilidade 99,9%, backups automáticos e escalabilidade sob demanda.
       </p>

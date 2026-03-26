@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { height: 100%; }
+    html { height: 100%; scroll-behavior: smooth; }
     body {
       font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       background: #F0F4F8;
@@ -57,6 +57,8 @@
       align-items: center;
       gap: 6px;
       transition: opacity .2s;
+      min-height: 44px;
+      padding: 8px 12px;
     }
     .topbar-cta:hover { opacity: .8; }
 
@@ -144,11 +146,11 @@
     .card-icon svg  { width: 24px; height: 24px; }
     .card-tag {
       display: inline-block;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
-      padding: 4px 12px;
+      padding: 5px 14px;
       border-radius: 100px;
     }
     .card-tag.inst { background: rgba(26,58,74,.08); color: #1A3A4A; }
@@ -225,12 +227,32 @@
     }
     .cards-wrap { animation: fadeUp .6s .2s ease both; }
 
-    @media (max-width: 640px) {
-      .cards-wrap { grid-template-columns: 1fr; margin-top: -32px; }
-      .topbar { padding: 14px 20px; }
+    /* ── TABLET ── */
+    @media (max-width: 768px) {
+      .topbar { padding: 14px 24px; gap: 12px; flex-wrap: wrap; }
+      .topbar-logo img { height: 32px; }
+      .topbar-name { font-size: 12px; max-width: 180px; }
+      .topbar-cta { min-height: 44px; padding: 10px 16px; }
       .hero { padding: 60px 24px 80px; }
-      .hero-title { font-size: 26px; }
-      .footer { flex-direction: column; text-align: center; padding: 20px; }
+      .hero-title { font-size: 28px; }
+      .hero-sub { font-size: 15px; }
+      .cards-wrap { gap: 16px; padding: 0 20px 60px; }
+      .card-header { padding: 24px 20px 20px; }
+      .card-features { padding: 0 20px 20px; }
+      .card-footer { padding: 16px 20px; }
+      .footer { padding: 20px 24px; flex-wrap: wrap; }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 480px) {
+      .cards-wrap { grid-template-columns: 1fr; margin-top: -32px; }
+      .topbar { padding: 12px 16px; }
+      .topbar-name { display: none; }
+      .hero { padding: 48px 20px 72px; }
+      .hero-logo { height: 56px; margin-bottom: 20px; }
+      .hero-title { font-size: 24px; }
+      .hero-sub { font-size: 14px; }
+      .footer { flex-direction: column; text-align: center; padding: 20px 16px; gap: 8px; }
     }
   </style>
 </head>
