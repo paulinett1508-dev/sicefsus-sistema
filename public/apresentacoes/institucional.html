@@ -595,67 +595,21 @@
     /* ────────── FOOTER ────────── */
     .site-footer {
       background: var(--navy);
-      padding: 40px 48px;
-      padding-bottom: 88px; /* Espaço para o botão PDF flutuante */
+      padding: 24px 48px;
+      padding-bottom: 80px; /* Espaço para o botão PDF flutuante */
+      text-align: center;
     }
-    .footer-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 32px;
-      align-items: start;
-    }
-    .footer-brand {
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-      font-size: 18px;
-      color: white;
-      font-weight: 700;
-      letter-spacing: .04em;
-      margin-bottom: 8px;
-    }
-    .footer-brand span { color: var(--action); }
-    .footer-desc {
+    .footer-content {
       font-size: 13px;
-      color: rgba(255,255,255,.4);
-      line-height: 1.6;
+      color: rgba(255,255,255,.45);
     }
-    .footer-title {
-      font-size: 12px;
-      font-weight: 600;
+    .footer-content a {
       color: rgba(255,255,255,.6);
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      margin-bottom: 12px;
-    }
-    .footer-support {
-      font-size: 14px;
-      color: rgba(255,255,255,.7);
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
-    .footer-support-sub {
-      font-size: 12px;
-      color: rgba(255,255,255,.35);
-      margin-bottom: 10px;
-    }
-    .footer-whatsapp {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      color: #25d366;
       text-decoration: none;
-      font-weight: 500;
       transition: color .2s;
     }
-    .footer-whatsapp:hover { color: #20bf5a; }
-    .footer-whatsapp .material-symbols-outlined { font-size: 16px; }
-    .footer-copy {
-      font-size: 12px;
-      color: rgba(255,255,255,.3);
-      text-align: right;
-    }
+    .footer-content a:hover { color: white; }
+    .footer-sep { margin: 0 8px; opacity: .4; }
 
     /* ────────── SISTEMA CTA SECTION ────────── */
     .system-cta-wrap {
@@ -1196,9 +1150,7 @@
       .header-bar { padding: 12px 24px; }
       .header-bar .logo-sub { display: none; }
       .system-cta-wrap { padding: 48px 24px; }
-      .site-footer { padding: 32px 24px; padding-bottom: 80px; }
-      .footer-inner { grid-template-columns: 1fr; text-align: center; gap: 24px; }
-      .footer-copy { text-align: center; }
+      .site-footer { padding: 20px 24px; padding-bottom: 76px; }
       .what-text { font-size: 17px; }
     }
     @media (max-width: 600px) {
@@ -1634,26 +1586,12 @@
 
   <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
   <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-col">
-        <div class="footer-brand">SICEF<span>SUS</span></div>
-        <p class="footer-desc">Sistema de Controle de Execucao Financeira do SUS</p>
-      </div>
-      <div class="footer-col">
-        <div class="footer-title">Suporte Tecnico</div>
-        <div class="footer-support">Araujo Informatica e Solucoes Cloud</div>
-        <div class="footer-support-sub">Especialistas em solucoes para o setor publico</div>
-        <a href="https://wa.me/5589944452244" target="_blank" class="footer-whatsapp">
-          <span class="material-symbols-outlined">phone</span>
-          +55 89 9444-5244
-        </a>
-      </div>
-      <div class="footer-col">
-        <div class="footer-copy">
-          © <span class="footer-year"></span><br>
-          <span style="opacity:.6;">Gerado em <span class="gen-date">—</span></span>
-        </div>
-      </div>
+    <div class="footer-content">
+      © <span class="footer-year"></span> SICEFSUS. Todos os direitos reservados.
+      <span class="footer-sep">·</span>
+      Desenvolvido por <a href="https://wa.me/5589944452244" target="_blank">Araujo Informatica</a>
+      <span class="footer-sep">·</span>
+      <a href="https://wa.me/5589944452244" target="_blank">(89) 9444-5244</a>
     </div>
   </footer>
 
