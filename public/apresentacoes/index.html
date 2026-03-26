@@ -145,22 +145,6 @@
       border-radius: 8px;
       backdrop-filter: blur(8px);
     }
-    .hero-logo-wrap {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hero-logo-wrap img {
-      height: 160px;
-      width: auto;
-      filter: brightness(0) invert(1) drop-shadow(0 8px 32px rgba(37,99,235,.45));
-      animation: floatLogo 4s ease-in-out infinite;
-    }
-    @keyframes floatLogo {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
 
     /* CARDS */
     .cards-wrap {
@@ -291,7 +275,6 @@
       .hero-text { display: flex; flex-direction: column; align-items: center; }
       .hero-sub { max-width: 100%; }
       .hero-title { font-size: 30px; }
-      .hero-logo-wrap img { height: 110px; }
       .hero-sub { font-size: 15px; }
       .cards-wrap { gap: 16px; padding: 0 20px 60px; }
       .card-header { padding: 12px 20px 12px; }
@@ -307,7 +290,6 @@
       .topbar-name { display: none; }
       .hero { padding: 32px 20px 52px; }
       .hero-title { font-size: 26px; }
-      .hero-logo-wrap img { height: 90px; }
       .hero-sub { font-size: 14px; }
       .footer { flex-direction: column; text-align: center; padding: 20px 16px; gap: 8px; }
     }
@@ -335,9 +317,6 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Selecione uma apresentação abaixo
         </div>
-      </div>
-      <div class="hero-logo-wrap">
-        <img src="logo-claro.png" alt="SICEFSUS" />
       </div>
     </div>
   </div>

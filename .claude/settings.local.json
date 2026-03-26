@@ -134,7 +134,17 @@
       "WebFetch(domain:91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev)",
       "Bash(fuser -k 5173/tcp)",
       "Bash(fuser 5173/tcp)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(sed -n '55,70p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '130,145p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '195,210p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '415,430p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '582,600p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '1218,1240p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '1240,1250p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '1317,1330p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '1347,1360p' /home/runner/workspace/public/apresentacoes/institucional.html)",
+      "Bash(sed -n '1400,1415p' /home/runner/workspace/public/apresentacoes/institucional.html)"
     ]
   },
   "enableAllProjectMcpServers": true,

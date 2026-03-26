@@ -10,7 +10,7 @@
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     :root {
       --navy:     #1A3A4A;
@@ -60,9 +60,9 @@
       gap: 14px;
     }
     .header-bar .logo-mark {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      font-weight: 400;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
       letter-spacing: .04em;
       color: white;
     }
@@ -136,10 +136,10 @@
       z-index: 1;
     }
     .cover-title {
-      font-family: 'DM Serif Display', serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       font-size: 72px;
-      font-weight: 400;
-      letter-spacing: .12em;
+      font-weight: 800;
+      letter-spacing: .06em;
       color: white;
       line-height: 1;
       margin-bottom: 20px;
@@ -201,9 +201,9 @@
       margin-bottom: 12px;
     }
     .section-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 36px;
-      font-weight: 400;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 34px;
+      font-weight: 700;
       color: var(--navy);
       line-height: 1.2;
       margin-bottom: 8px;
@@ -420,9 +420,9 @@
       margin-bottom: 4px;
     }
     .profile-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 22px;
-      font-weight: 400;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
     }
     .profile-body { padding: 24px; }
     .profile-item {
@@ -587,46 +587,14 @@
       gap: 12px;
     }
     .footer-brand {
-      font-family: 'DM Serif Display', serif;
-      font-size: 18px;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 16px;
       color: white;
-      font-weight: 400;
-      letter-spacing: .06em;
+      font-weight: 700;
+      letter-spacing: .04em;
     }
     .footer-center { text-align: center; font-size: 13px; }
     .footer-right  { text-align: right; font-size: 13px; }
-
-    /* ────────── TOPNAV ────────── */
-    .topnav {
-      background: #0F2830;
-      padding: 12px 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .topnav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .topnav-link {
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255,255,255,.55);
-      text-decoration: none;
-      padding: 10px 16px;
-      border-radius: 100px;
-      border: 1px solid transparent;
-      transition: all .2s;
-      letter-spacing: .02em;
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-    }
-    .topnav-link:hover { color: white; border-color: rgba(255,255,255,.2); }
-    .topnav-link.active { color: white; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); }
 
     /* ────────── SISTEMA CTA SECTION ────────── */
     .system-cta-wrap {
@@ -635,9 +603,9 @@
       text-align: center;
     }
     .system-cta-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 30px;
-      font-weight: 400;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      font-size: 28px;
+      font-weight: 700;
       color: white;
       margin-bottom: 12px;
     }
@@ -733,7 +701,6 @@
 
       /* ── Ocultar elementos web ── */
       .print-btn,
-      .topnav,
       .system-cta-wrap,
       .header-bar { display: none !important; }
 
@@ -778,10 +745,11 @@
       }
 
       .cover-title {
-        font-family: 'DM Serif Display', serif;
+        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
         font-size: 42pt;
+        font-weight: 800;
         color: #1A3A4A !important;
-        letter-spacing: .08em;
+        letter-spacing: .04em;
         margin-bottom: 12px;
       }
       .cover-divider {
@@ -1166,7 +1134,6 @@
       section.full-bleed .section-inner { padding: 0 24px; }
       .header-bar { padding: 12px 24px; }
       .header-bar .logo-sub { display: none; }
-      .topnav { padding: 10px 24px; }
       .system-cta-wrap { padding: 48px 24px; }
       .site-footer { padding: 24px; flex-direction: column; text-align: center; }
       .what-text { font-size: 17px; }
@@ -1183,9 +1150,6 @@
       .stack-table { font-size: 12px; }
       .stack-table tbody td { padding: 12px 14px; }
       .stack-table thead th { padding: 10px 14px; }
-      .topnav { padding: 8px 16px; flex-direction: column; align-items: stretch; }
-      .topnav-links { flex-wrap: wrap; justify-content: center; gap: 4px; }
-      .topnav-link { font-size: 12px; padding: 8px 12px; }
       .header-bar { padding: 10px 16px; }
       .header-bar .logo-mark { font-size: 18px; }
       .header-bar .logo-sep { display: none; }
@@ -1198,15 +1162,6 @@
   </style>
 </head>
 <body>
-
-  <!-- ═══════════════════════ TOPNAV ═══════════════════════ -->
-  <div class="topnav">
-    <div class="topnav-links">
-      <a href="./index.html" class="topnav-link">← Apresentações</a>
-      <a href="./institucional.html" class="topnav-link active">Institucional</a>
-      <a href="./marketing.html" class="topnav-link">Marketing</a>
-    </div>
-  </div>
 
   <!-- ═══════════════════════ HEADER BAR ═══════════════════════ -->
   <header class="header-bar">
@@ -1354,36 +1309,6 @@
         </div>
 
       </div>
-    </section>
-  </div>
-
-  <!-- ═══════════════════════ STACK ═══════════════════════ -->
-  <div class="stack-bg">
-    <section class="fade-in">
-      <div class="section-label">Tecnologia</div>
-      <h2 class="section-title">Stack tecnológica</h2>
-      <p class="section-subtitle">Tecnologias modernas, amplamente adotadas e com suporte de longo prazo</p>
-      <div class="stack-table-wrap">
-      <table class="stack-table">
-        <thead>
-          <tr>
-            <th>Componente</th>
-            <th>Tecnologia utilizada</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Interface (Frontend)</td><td>React 18.2 + Vite 5.0</td></tr>
-          <tr><td>Banco de Dados</td><td>Firebase Firestore — NoSQL, Google Cloud</td></tr>
-          <tr><td>Autenticação</td><td>Firebase Authentication — email e senha</td></tr>
-          <tr><td>Geração de Relatórios PDF</td><td>jsPDF 4.2 + AutoTable 5.0</td></tr>
-          <tr><td>Gráficos e Dashboards</td><td>Recharts 3.0</td></tr>
-          <tr><td>Deploy e Hospedagem</td><td>Replit — SPA estático, HTTPS automático</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <p class="stack-note">
-        <strong>Infraestrutura gerenciada pelo Google Cloud Platform</strong> — disponibilidade 99,9%, backups automáticos e escalabilidade sob demanda.
-      </p>
     </section>
   </div>
 
@@ -1607,22 +1532,51 @@
     </section>
   </div>
 
+  <!-- ═══════════════════════ STACK ═══════════════════════ -->
+  <div class="stack-bg">
+    <section class="fade-in">
+      <div class="section-label">Tecnologia</div>
+      <h2 class="section-title">Stack tecnológica</h2>
+      <p class="section-subtitle">Tecnologias modernas, amplamente adotadas e com suporte de longo prazo</p>
+      <div class="stack-table-wrap">
+      <table class="stack-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Tecnologia utilizada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Interface (Frontend)</td><td>React 18.2 + Vite 5.0</td></tr>
+          <tr><td>Banco de Dados</td><td>Firebase Firestore — NoSQL, Google Cloud</td></tr>
+          <tr><td>Autenticação</td><td>Firebase Authentication — email e senha</td></tr>
+          <tr><td>Geração de Relatórios PDF</td><td>jsPDF 4.2 + AutoTable 5.0</td></tr>
+          <tr><td>Gráficos e Dashboards</td><td>Recharts 3.0</td></tr>
+          <tr><td>Deploy e Hospedagem</td><td>Replit — SPA estático, HTTPS automático</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="stack-note">
+        <strong>Infraestrutura gerenciada pelo Google Cloud Platform</strong> — disponibilidade 99,9%, backups automáticos e escalabilidade sob demanda.
+      </p>
+    </section>
+  </div>
+
   <!-- ═══════════════════════ SISTEMA CTA ═══════════════════════ -->
   <div class="system-cta-wrap">
-    <h2 class="system-cta-title">Quer ver o sistema funcionando?</h2>
-    <p class="system-cta-sub">Acesse a plataforma em produção — dados reais, em tempo real.</p>
-    <a href="https://sicefsus.replit.app" target="_blank" class="system-cta-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-      Acessar sicefsus.replit.app
-    </a>
+    <h2 class="system-cta-title">Transparência, controle e rastreabilidade — do início ao fim.</h2>
+    <p class="system-cta-sub">SICEFSUS: a gestão de emendas parlamentares de saúde que o serviço público merece.</p>
   </div>
 
   <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
   <footer class="site-footer">
     <div class="footer-brand">SICEFSUS</div>
-    <div class="footer-center">Sistema de Gestão de Emendas Parlamentares de Saúde</div>
+    <div class="footer-center">
+      Sistema de Gestão de Emendas Parlamentares de Saúde<br>
+      <span style="font-size:12px;opacity:.6;">Desenvolvido por <strong>Araujo Informática e Soluções Cloud</strong> &nbsp;·&nbsp; +55 89 9444-5244</span>
+    </div>
     <div class="footer-right">
-      Versão 2.0 &nbsp;·&nbsp; Gerado em <span class="gen-date">—</span>
+      © <span class="footer-year"></span> &nbsp;·&nbsp; Gerado em <span class="gen-date">—</span>
     </div>
   </footer>
 
@@ -1647,6 +1601,7 @@
     // Data atual
     const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
     document.querySelectorAll('.gen-date').forEach(el => el.textContent = dateStr);
+    document.querySelectorAll('.footer-year').forEach(el => el.textContent = new Date().getFullYear());
 
     // Animação de entrada (fade-in ao rolar)
     const observer = new IntersectionObserver(entries => {
