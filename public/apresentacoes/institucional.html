@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SICEFSUS — Apresentação Institucional</title>
+  <meta name="description" content="Conheça o SICEFSUS: sistema completo de gestão de emendas parlamentares de saúde — módulos, stack, segurança e relatórios." />
+  <meta property="og:title" content="SICEFSUS — Apresentação Institucional" />
+  <meta property="og:description" content="Sistema de Gestão de Emendas Parlamentares de Saúde: rastreabilidade total, relatórios em PDF, 3 perfis de acesso e segurança em camadas." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:     #1A3A4A;
+      --navy-dark:#0F2634;
+      --action:   #2563EB;
+      --action-light: #DBEAFE;
+      --green:    #10B981;
+      --green-light: #ECFDF5;
+      --amber:    #F59E0B;
+      --bg:       #F8FAFC;
+      --white:    #FFFFFF;
+      --text:     #0F172A;
+      --muted:    #475569;
+      --border:   #E2E8F0;
+      --border-light: #F1F5F9;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* ────────── HEADER BAR ────────── */
+    .header-bar {
+      background: var(--navy);
+      color: white;
+      padding: 14px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.25);
+    }
+    .header-bar .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-bar .logo-mark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: .04em;
+      color: white;
+    }
+    .header-bar .logo-sep {
+      width: 1px;
+      height: 28px;
+      background: rgba(255,255,255,.25);
+    }
+    .header-bar .logo-sub {
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,.7);
+      letter-spacing: .02em;
+      max-width: 260px;
+      line-height: 1.4;
+    }
+    .header-bar .header-right {
+      text-align: right;
+    }
+    .header-bar .doc-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+    .header-bar .doc-date {
+      font-size: 12px;
+      color: rgba(255,255,255,.6);
+      margin-top: 2px;
+    }
+
+    /* ────────── CAPA ────────── */
+    .cover-section {
+      background: var(--navy);
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(
+          135deg,
+          transparent,
+          transparent 40px,
+          rgba(255,255,255,.025) 40px,
+          rgba(255,255,255,.025) 41px
+        );
+    }
+    .cover-section::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,.15) 0%, transparent 70%);
+    }
+    .cover-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .cover-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 72px;
+      font-weight: 400;
+      letter-spacing: .12em;
+      color: white;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+    .cover-divider {
+      width: 64px;
+      height: 3px;
+      background: var(--green);
+      margin: 0 auto 24px;
+      border-radius: 2px;
+    }
+    .cover-subtitle {
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(255,255,255,.8);
+      letter-spacing: .02em;
+      margin-bottom: 40px;
+      max-width: 520px;
+    }
+    .cover-badges {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cover-badge {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      color: rgba(255,255,255,.85);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: 100px;
+      letter-spacing: .04em;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ────────── SEÇÕES ────────── */
+    section {
+      padding: 72px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    section.full-bleed {
+      max-width: 100%;
+      padding: 72px 0;
+    }
+    section.full-bleed .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--action);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 48px;
+    }
+
+    /* ────────── WHAT SECTION ────────── */
+    .what-bg { background: var(--white); }
+    .what-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .what-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .what-item:last-child { border-bottom: none; }
+    .what-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      background: var(--navy);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .what-text {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .what-text strong {
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    /* ────────── MODULES ────────── */
+    .modules-bg { background: var(--bg); }
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .module-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .module-card:hover {
+      box-shadow: 0 8px 32px rgba(26,58,74,.1);
+      transform: translateY(-2px);
+    }
+    .module-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .module-icon svg { width: 22px; height: 22px; }
+    .module-icon.navy    { background: rgba(26,58,74,.1);   color: var(--navy);   }
+    .module-icon.action  { background: rgba(37,99,235,.1);  color: var(--action); }
+    .module-icon.green   { background: rgba(16,185,129,.1); color: var(--green);  }
+    .module-icon.amber   { background: rgba(245,158,11,.1); color: var(--amber);  }
+    .module-icon.purple  { background: rgba(124,58,237,.1); color: #7C3AED;       }
+    .module-icon.teal    { background: rgba(20,184,166,.1); color: #14B8A6;       }
+    .module-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .module-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ────────── STACK ────────── */
+    .stack-bg { background: var(--white); }
+    .stack-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .stack-table thead tr {
+      background: var(--navy);
+    }
+    .stack-table thead th {
+      padding: 14px 24px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.7);
+    }
+    .stack-table tbody tr {
+      border-bottom: 1px solid var(--border-light);
+    }
+    .stack-table tbody tr:last-child { border-bottom: none; }
+    .stack-table tbody tr:nth-child(even) { background: var(--bg); }
+    .stack-table tbody td {
+      padding: 16px 24px;
+      font-size: 14px;
+    }
+    .stack-table tbody td:first-child {
+      font-weight: 500;
+      color: var(--muted);
+      width: 35%;
+    }
+    .stack-table tbody td:last-child {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .stack-note {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 14px 20px;
+      background: var(--bg);
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* ────────── SECURITY ────────── */
+    .security-bg { background: #EFF6FF; }
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .security-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 20px;
+    }
+    .security-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--action-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      color: var(--action);
+    }
+    .security-icon svg { width: 20px; height: 20px; }
+    .security-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .security-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ────────── PROFILES ────────── */
+    .profiles-bg { background: var(--bg); }
+    .profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .profile-card {
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .profile-header {
+      padding: 20px 24px;
+      color: white;
+    }
+    .profile-header.navy   { background: var(--navy); }
+    .profile-header.action { background: var(--action); }
+    .profile-header.green  { background: var(--green); }
+    .profile-role {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      opacity: .7;
+      margin-bottom: 4px;
+    }
+    .profile-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      font-weight: 400;
+    }
+    .profile-body { padding: 24px; }
+    .profile-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .profile-item:last-child { margin-bottom: 0; }
+    .profile-item .check {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .profile-item .check.yes { background: var(--green-light); color: var(--green); }
+    .profile-item .check.no  { background: #FEE2E2; color: #EF4444; }
+
+    /* ────────── REPORTS ────────── */
+    .reports-bg { background: var(--white); }
+    .reports-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .report-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 24px;
+      background: var(--bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: border-color .2s;
+    }
+    .report-item:hover { border-color: var(--action); }
+    .report-badge {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      margin-top: 2px;
+    }
+    .report-badge.c1 { background: var(--navy); }
+    .report-badge.c2 { background: var(--action); }
+    .report-badge.c3 { background: var(--green); }
+    .report-badge.c4 { background: var(--amber); }
+    .report-badge.c5 { background: #7C3AED; }
+    .report-content { flex: 1; }
+    .report-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .report-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .report-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--muted);
+    }
+
+    /* ────────── FLOW ────────── */
+    .flow-bg { background: var(--bg); }
+    .flow-steps {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 24px;
+      right: -1px;
+      width: 50%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .flow-step:not(:first-child)::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: -1px;
+      width: 50%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .flow-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .flow-step:nth-child(1) .flow-circle { background: var(--navy); }
+    .flow-step:nth-child(2) .flow-circle { background: var(--action); }
+    .flow-step:nth-child(3) .flow-circle { background: #7C3AED; }
+    .flow-step:nth-child(4) .flow-circle { background: var(--amber); }
+    .flow-step:nth-child(5) .flow-circle { background: var(--green); }
+    .flow-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ────────── FOOTER ────────── */
+    .site-footer {
+      background: var(--navy);
+      color: rgba(255,255,255,.6);
+      padding: 32px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 18px;
+      color: white;
+      font-weight: 400;
+      letter-spacing: .06em;
+    }
+    .footer-center { text-align: center; font-size: 13px; }
+    .footer-right  { text-align: right; font-size: 13px; }
+
+    /* ────────── TOPNAV ────────── */
+    .topnav {
+      background: #0F2830;
+      padding: 12px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .topnav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topnav-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 100px;
+      border: 1px solid transparent;
+      transition: all .2s;
+      letter-spacing: .02em;
+    }
+    .topnav-link:hover { color: white; border-color: rgba(255,255,255,.2); }
+    .topnav-link.active { color: white; background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.15); }
+    .topnav-cta {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: opacity .2s;
+    }
+    .topnav-cta:hover { opacity: .8; }
+    .topnav-cta svg { width: 13px; height: 13px; }
+
+    /* ────────── SISTEMA CTA SECTION ────────── */
+    .system-cta-wrap {
+      background: linear-gradient(135deg, #1A3A4A 0%, #0F2830 100%);
+      padding: 64px 48px;
+      text-align: center;
+    }
+    .system-cta-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      font-weight: 400;
+      color: white;
+      margin-bottom: 12px;
+    }
+    .system-cta-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+    .system-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #10B981;
+      color: #0F2830;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 36px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .system-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(16,185,129,.35);
+    }
+    .system-cta-btn svg { width: 16px; height: 16px; }
+
+    /* ────────── PRINT BUTTON ────────── */
+    .print-btn {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--action);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      padding: 14px 24px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(37,99,235,.4);
+      transition: transform .15s, box-shadow .15s;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .print-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(37,99,235,.5);
+    }
+    .print-btn svg { width: 16px; height: 16px; }
+
+    /* ────────── ANIMATIONS ────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ────────── PRINT STYLES ────────── */
+    @media print {
+      .print-btn    { display: none !important; }
+      .topnav       { display: none !important; }
+      .system-cta-wrap { display: none !important; }
+      .header-bar   { position: static; box-shadow: none; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .cover-section { page-break-after: always; min-height: auto; padding: 60px 40px; }
+      section { padding: 40px 32px; }
+      .modules-grid { grid-template-columns: repeat(3, 1fr); }
+      .profiles-grid { grid-template-columns: repeat(3, 1fr); }
+      .security-grid { grid-template-columns: repeat(2, 1fr); page-break-before: always; }
+      .module-card:hover { box-shadow: none; transform: none; }
+      .fade-in { opacity: 1; transform: none; }
+      @page { size: A4; margin: 1.5cm; }
+      body { font-size: 11pt; }
+    }
+
+    /* ────────── RESPONSIVE ────────── */
+    @media (max-width: 900px) {
+      .modules-grid { grid-template-columns: repeat(2, 1fr); }
+      .security-grid { grid-template-columns: repeat(2, 1fr); }
+      .profiles-grid { grid-template-columns: 1fr; }
+      .cover-title { font-size: 52px; }
+      section { padding: 48px 24px; }
+      .header-bar { padding: 12px 24px; }
+      .site-footer { padding: 24px; flex-direction: column; text-align: center; }
+    }
+    @media (max-width: 600px) {
+      .modules-grid { grid-template-columns: 1fr; }
+      .security-grid { grid-template-columns: 1fr; }
+      .flow-steps { flex-wrap: wrap; justify-content: center; gap: 24px; }
+      .flow-step::before, .flow-step::after { display: none; }
+      .cover-title { font-size: 40px; }
+      .stack-table { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════ TOPNAV ═══════════════════════ -->
+  <div class="topnav">
+    <div class="topnav-links">
+      <a href="./index.html" class="topnav-link">← Central de apresentações</a>
+      <a href="./institucional.html" class="topnav-link active">Institucional</a>
+      <a href="./marketing.html" class="topnav-link">Marketing</a>
+    </div>
+    <a href="https://sicefsus.replit.app" target="_blank" class="topnav-cta">
+      Acessar o sistema
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+
+  <!-- ═══════════════════════ HEADER BAR ═══════════════════════ -->
+  <header class="header-bar">
+    <div class="logo">
+      <img src="./logo-dark.png" alt="SICEFSUS" style="height:36px;width:auto;filter:brightness(0) invert(1);" />
+      <div class="logo-sep"></div>
+      <span class="logo-sub">Sistema de Controle de Execução Financeira do SUS</span>
+    </div>
+    <div class="header-right">
+      <div class="doc-label">Documento Técnico</div>
+      <div class="doc-date gen-date">—</div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════ CAPA ═══════════════════════ -->
+  <div class="cover-section">
+    <div class="cover-inner">
+      <img src="./logo-dark.png" alt="SICEFSUS" style="height:96px;width:auto;filter:brightness(0) invert(1);margin:0 auto 24px;display:block;" />
+      <h1 class="cover-title">SICEFSUS</h1>
+      <div class="cover-divider"></div>
+      <p class="cover-subtitle">Sistema de Gestão de Emendas Parlamentares de Saúde</p>
+      <div class="cover-badges">
+        <span class="cover-badge">Rastreabilidade Total</span>
+        <span class="cover-badge">Relatórios em 1 Clique</span>
+        <span class="cover-badge">Acesso de Qualquer Lugar</span>
+        <span class="cover-badge">Dados em Tempo Real</span>
+        <span class="cover-badge">Transparência Garantida</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ O QUE É ═══════════════════════ -->
+  <div class="what-bg">
+    <section class="fade-in">
+      <div class="section-label">Visão Geral</div>
+      <h2 class="section-title">O que é o sistema</h2>
+      <div class="what-list">
+        <div class="what-item">
+          <div class="what-num">1</div>
+          <p class="what-text"><strong>Centraliza</strong> toda a gestão de emendas parlamentares de saúde em um único sistema — sem planilhas, sem papéis, sem informações espalhadas.</p>
+        </div>
+        <div class="what-item">
+          <div class="what-num">2</div>
+          <p class="what-text"><strong>Controla o ciclo completo:</strong> do recebimento dos recursos à prestação de contas, com cada etapa registrada e auditável.</p>
+        </div>
+        <div class="what-item">
+          <div class="what-num">3</div>
+          <p class="what-text"><strong>Garante rastreabilidade total</strong> de cada centavo investido na saúde pública — quem fez o quê, quando e por quê.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ MÓDULOS ═══════════════════════ -->
+  <div class="modules-bg">
+    <section class="fade-in">
+      <div class="section-label">Funcionalidades</div>
+      <h2 class="section-title">Módulos do sistema</h2>
+      <p class="section-subtitle">Seis módulos integrados cobrindo todo o ciclo orçamentário</p>
+      <div class="modules-grid">
+
+        <div class="module-card">
+          <div class="module-icon navy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </div>
+          <div class="module-name">Dashboard &amp; Alertas</div>
+          <div class="module-desc">Visão em tempo real da execução orçamentária. Alerta sobre emendas próximas ao vencimento, sem execução ou com risco de perda de recursos.</div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon action">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="module-name">Emendas Parlamentares</div>
+          <div class="module-desc">Cadastro e gestão completa das emendas. Controla valor total, alocado e executado. Histórico de todas as alterações registrado automaticamente.</div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div class="module-name">Envelopes Orçamentários</div>
+          <div class="module-desc">Divide o orçamento de cada emenda por categoria de despesa — material, serviços, contratos. Cada envelope tem saldo próprio e independente.</div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="module-name">Controle de Despesas</div>
+          <div class="module-desc">Registra despesas planejadas e executadas. Acompanha 5 estados de pagamento: pendente → empenhado → liquidado → pago, com rastreio de cada etapa.</div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="module-name">Relatórios em PDF</div>
+          <div class="module-desc">5 modelos de relatório profissional: Execução Orçamentária, Prestação de Contas, Analítico por Parlamentar, Despesas Detalhado e Consolidado Mensal.</div>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="module-name">Administração de Usuários</div>
+          <div class="module-desc">Cria e gerencia usuários com 3 perfis de acesso distintos. Log completo de auditoria registra todas as ações realizadas no sistema.</div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ STACK ═══════════════════════ -->
+  <div class="stack-bg">
+    <section class="fade-in">
+      <div class="section-label">Tecnologia</div>
+      <h2 class="section-title">Stack tecnológica</h2>
+      <p class="section-subtitle">Tecnologias modernas, amplamente adotadas e com suporte de longo prazo</p>
+      <table class="stack-table">
+        <thead>
+          <tr>
+            <th>Componente</th>
+            <th>Tecnologia utilizada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Interface (Frontend)</td><td>React 18.2 + Vite 5.0</td></tr>
+          <tr><td>Banco de Dados</td><td>Firebase Firestore — NoSQL, Google Cloud</td></tr>
+          <tr><td>Autenticação</td><td>Firebase Authentication — email e senha</td></tr>
+          <tr><td>Geração de Relatórios PDF</td><td>jsPDF 4.2 + AutoTable 5.0</td></tr>
+          <tr><td>Gráficos e Dashboards</td><td>Recharts 3.0</td></tr>
+          <tr><td>Deploy e Hospedagem</td><td>Replit — SPA estático, HTTPS automático</td></tr>
+        </tbody>
+      </table>
+      <p class="stack-note">
+        <strong>Infraestrutura gerenciada pelo Google Cloud Platform</strong> — disponibilidade 99,9%, backups automáticos e escalabilidade sob demanda.
+      </p>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ SEGURANÇA ═══════════════════════ -->
+  <div class="security-bg">
+    <section class="fade-in">
+      <div class="section-label">Segurança</div>
+      <h2 class="section-title">Proteção em camadas</h2>
+      <p class="section-subtitle">Múltiplas barreiras de segurança — do banco de dados à interface</p>
+      <div class="security-grid">
+
+        <div class="security-card">
+          <div class="security-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="security-name">Controle de Acesso por Perfil</div>
+          <div class="security-desc">3 perfis distintos — Admin, Gestor e Operador. Cada usuário acessa apenas os dados do seu município e das suas responsabilidades.</div>
+        </div>
+
+        <div class="security-card">
+          <div class="security-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <div class="security-name">Logs Imutáveis de Auditoria</div>
+          <div class="security-desc">Toda ação é registrada com usuário, data, hora e o que foi alterado (antes e depois). Registros não podem ser editados nem deletados — jamais.</div>
+        </div>
+
+        <div class="security-card">
+          <div class="security-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <div class="security-name">Validação Geográfica</div>
+          <div class="security-desc">Operadores e gestores visualizam apenas dados do seu município e UF. O filtro é aplicado automaticamente em todas as consultas ao banco.</div>
+        </div>
+
+        <div class="security-card">
+          <div class="security-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <div class="security-name">Proteção de Dados</div>
+          <div class="security-desc">Validação contra XSS e injeção de código em todos os campos. Senhas criptografadas. Conformidade com boas práticas de desenvolvimento seguro.</div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ PERFIS ═══════════════════════ -->
+  <div class="profiles-bg">
+    <section class="fade-in">
+      <div class="section-label">Usuários</div>
+      <h2 class="section-title">Perfis de acesso</h2>
+      <p class="section-subtitle">Cada perfil tem permissões ajustadas à sua função</p>
+      <div class="profiles-grid">
+
+        <div class="profile-card">
+          <div class="profile-header navy">
+            <div class="profile-role">Perfil</div>
+            <div class="profile-title">Administrador</div>
+          </div>
+          <div class="profile-body">
+            <div class="profile-item"><span class="check yes">✓</span> Acesso total ao sistema</div>
+            <div class="profile-item"><span class="check yes">✓</span> Gerenciar todos os usuários</div>
+            <div class="profile-item"><span class="check yes">✓</span> Ver logs de auditoria completos</div>
+            <div class="profile-item"><span class="check yes">✓</span> Criar, editar e excluir emendas</div>
+            <div class="profile-item"><span class="check yes">✓</span> Criar, editar e excluir despesas</div>
+            <div class="profile-item"><span class="check yes">✓</span> Gerar todos os relatórios</div>
+          </div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-header action">
+            <div class="profile-role">Perfil</div>
+            <div class="profile-title">Gestor</div>
+          </div>
+          <div class="profile-body">
+            <div class="profile-item"><span class="check yes">✓</span> Acesso completo ao seu município</div>
+            <div class="profile-item"><span class="check yes">✓</span> Criar e editar emendas</div>
+            <div class="profile-item"><span class="check yes">✓</span> Criar envelopes orçamentários</div>
+            <div class="profile-item"><span class="check yes">✓</span> Criar e executar despesas</div>
+            <div class="profile-item"><span class="check yes">✓</span> Ver logs do município</div>
+            <div class="profile-item"><span class="check yes">✓</span> Gerar relatórios</div>
+          </div>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-header green">
+            <div class="profile-role">Perfil</div>
+            <div class="profile-title">Operador</div>
+          </div>
+          <div class="profile-body">
+            <div class="profile-item"><span class="check yes">✓</span> Acesso ao seu município</div>
+            <div class="profile-item"><span class="check yes">✓</span> Registrar despesas</div>
+            <div class="profile-item"><span class="check yes">✓</span> Executar e acompanhar pagamentos</div>
+            <div class="profile-item"><span class="check yes">✓</span> Consultar emendas</div>
+            <div class="profile-item"><span class="check no">✗</span> Não cria nem edita emendas</div>
+            <div class="profile-item"><span class="check no">✗</span> Não gerencia usuários</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ RELATÓRIOS ═══════════════════════ -->
+  <div class="reports-bg">
+    <section class="fade-in">
+      <div class="section-label">Relatórios</div>
+      <h2 class="section-title">5 modelos de relatório em PDF</h2>
+      <p class="section-subtitle">Gerados com um clique, prontos para prestação de contas</p>
+      <div class="reports-list">
+
+        <div class="report-item">
+          <div class="report-badge c1">1</div>
+          <div class="report-content">
+            <div class="report-name">Execução Orçamentária</div>
+            <div class="report-desc">Demonstrativo completo da execução financeira das emendas — valores totais, executados, saldos e percentuais por emenda.</div>
+            <div class="report-filters">
+              <span class="filter-tag">Período</span>
+              <span class="filter-tag">Parlamentar</span>
+              <span class="filter-tag">Emenda</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-badge c2">2</div>
+          <div class="report-content">
+            <div class="report-name">Prestação de Contas</div>
+            <div class="report-desc">Documento formal para prestação de contas aos órgãos fiscalizadores, com todas as despesas e justificativas.</div>
+            <div class="report-filters">
+              <span class="filter-tag">Período</span>
+              <span class="filter-tag">Município</span>
+              <span class="filter-tag">Emenda</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-badge c3">3</div>
+          <div class="report-content">
+            <div class="report-name">Analítico por Parlamentar</div>
+            <div class="report-desc">Análise detalhada das emendas por autor, com execução, saldos e ranking de performance de cada parlamentar.</div>
+            <div class="report-filters">
+              <span class="filter-tag">Parlamentar</span>
+              <span class="filter-tag">Período</span>
+              <span class="filter-tag">Emenda</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-badge c4">4</div>
+          <div class="report-content">
+            <div class="report-name">Despesas Detalhado</div>
+            <div class="report-desc">Listagem completa de todas as despesas realizadas, com notas fiscais, fornecedores, status de pagamento e justificativas.</div>
+            <div class="report-filters">
+              <span class="filter-tag">Período</span>
+              <span class="filter-tag">Município</span>
+              <span class="filter-tag">Parlamentar</span>
+              <span class="filter-tag">Emenda</span>
+              <span class="filter-tag">Fornecedor</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-item">
+          <div class="report-badge c5">5</div>
+          <div class="report-content">
+            <div class="report-name">Consolidado Mensal</div>
+            <div class="report-desc">Resumo mensalizado com os principais indicadores de execução — ideal para acompanhamento periódico da gestão.</div>
+            <div class="report-filters">
+              <span class="filter-tag">Mês/Ano</span>
+              <span class="filter-tag">Parlamentar</span>
+              <span class="filter-tag">Emenda</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ FLUXO ═══════════════════════ -->
+  <div class="flow-bg">
+    <section class="fade-in">
+      <div class="section-label">Processo</div>
+      <h2 class="section-title">Fluxo operacional</h2>
+      <p class="section-subtitle">Do recebimento dos recursos até a prestação de contas — tudo no sistema</p>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-circle">1</div>
+          <div class="flow-label">Recebimento<br>de Recursos</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-circle">2</div>
+          <div class="flow-label">Alocação em<br>Envelopes</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-circle">3</div>
+          <div class="flow-label">Registro de<br>Despesas</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-circle">4</div>
+          <div class="flow-label">Execução e<br>Pagamento</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-circle">5</div>
+          <div class="flow-label">Prestação<br>de Contas</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ SISTEMA CTA ═══════════════════════ -->
+  <div class="system-cta-wrap">
+    <h2 class="system-cta-title">Quer ver o sistema funcionando?</h2>
+    <p class="system-cta-sub">Acesse a plataforma em produção — dados reais, em tempo real.</p>
+    <a href="https://sicefsus.replit.app" target="_blank" class="system-cta-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Acessar sicefsus.replit.app
+    </a>
+  </div>
+
+  <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-brand">SICEFSUS</div>
+    <div class="footer-center">Sistema de Gestão de Emendas Parlamentares de Saúde</div>
+    <div class="footer-right">
+      Versão 2.0 &nbsp;·&nbsp; Gerado em <span class="gen-date">—</span>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════ PRINT BUTTON ═══════════════════════ -->
+  <button class="print-btn" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Imprimir / Salvar PDF
+  </button>
+
+  <script>
+    // Data atual
+    const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    document.querySelectorAll('.gen-date').forEach(el => el.textContent = dateStr);
+
+    // Animação de entrada (fade-in ao rolar)
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

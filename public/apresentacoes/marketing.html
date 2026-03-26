@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SICEFSUS — Chega de planilhas. Gerencie com inteligência.</title>
+  <meta name="description" content="SICEFSUS: rastreabilidade total, relatórios em 1 clique e segurança real para gestão de emendas parlamentares de saúde." />
+  <meta property="og:title" content="SICEFSUS — Chega de planilhas. Gerencie com inteligência." />
+  <meta property="og:description" content="Veja como o SICEFSUS resolve os 4 maiores problemas da gestão por planilhas — rastreabilidade, acesso, relatórios e segurança." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:       #0F1E40;
+      --blue:       #2563EB;
+      --blue-mid:   #1E3A8A;
+      --purple:     #7C3AED;
+      --purple-light: #EDE9FE;
+      --green:      #10B981;
+      --green-light:#ECFDF5;
+      --red:        #EF4444;
+      --red-light:  #FEF2F2;
+      --amber:      #F59E0B;
+      --white:      #FFFFFF;
+      --off-white:  #F8FAFC;
+      --gray-100:   #F3F4F6;
+      --gray-200:   #E5E7EB;
+      --gray-400:   #9CA3AF;
+      --gray-600:   #4B5563;
+      --gray-800:   #1F2937;
+      --gray-900:   #111827;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Sora', 'Inter', system-ui, sans-serif;
+      background: var(--white);
+      color: var(--gray-900);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ──────────────────── KEYFRAMES ──────────────────── */
+    @keyframes gradShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,99,235,.4); }
+      50%       { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(37,99,235,0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ──────────────────── TOPSTRIP ──────────────────── */
+    .topstrip {
+      background: #0A1525;
+      padding: 9px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+    }
+    .topstrip-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topstrip-link {
+      color: rgba(255,255,255,.45);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 100px;
+      border: 1px solid transparent;
+      transition: all .2s;
+      font-weight: 500;
+    }
+    .topstrip-link:hover { color: white; border-color: rgba(255,255,255,.15); }
+    .topstrip-link.active { color: white; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); }
+    .topstrip-cta {
+      color: #10B981;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: opacity .2s;
+    }
+    .topstrip-cta:hover { opacity: .8; }
+
+    /* ──────────────────── NAVBAR ──────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background .3s, box-shadow .3s, padding .3s;
+    }
+    .navbar.scrolled {
+      background: rgba(15,30,64,.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 24px rgba(0,0,0,.3);
+      padding: 14px 48px;
+    }
+    .nav-brand {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      color: white;
+      text-decoration: none;
+    }
+    .nav-brand span { color: var(--green); }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      letter-spacing: .04em;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: white; }
+
+    /* ──────────────────── HERO ──────────────────── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--blue-mid) 45%, var(--purple) 100%);
+      background-size: 200% 200%;
+      animation: gradShift 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(37,99,235,.25) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(124,58,237,.2) 0%, transparent 60%),
+        repeating-linear-gradient(45deg, transparent, transparent 60px, rgba(255,255,255,.012) 60px, rgba(255,255,255,.012) 61px);
+    }
+    /* Decorative blobs */
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: .35;
+      animation: float 8s ease-in-out infinite;
+    }
+    .hero-blob.b1 { width: 400px; height: 400px; background: var(--blue); top: -100px; right: -80px; animation-delay: 0s; }
+    .hero-blob.b2 { width: 300px; height: 300px; background: var(--purple); bottom: -80px; left: -60px; animation-delay: 3s; }
+    .hero-blob.b3 { width: 200px; height: 200px; background: var(--green); bottom: 20%; right: 10%; animation-delay: 5s; }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.3);
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      animation: fadeIn .8s ease both;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+    .hero-headline {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      color: white;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+      margin-bottom: 24px;
+      animation: fadeUp .9s .2s ease both;
+    }
+    .hero-headline em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--green), #34D399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 18px;
+      font-weight: 300;
+      color: rgba(255,255,255,.72);
+      line-height: 1.7;
+      max-width: 580px;
+      margin: 0 auto 44px;
+      animation: fadeUp .9s .35s ease both;
+    }
+    .hero-ctas {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp .9s .5s ease both;
+    }
+    .btn-primary {
+      background: var(--green);
+      color: var(--navy);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(16,185,129,.4);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,.1);
+      color: white;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 16px 32px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+      transition: background .2s, border-color .2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.18);
+      border-color: rgba(255,255,255,.4);
+    }
+
+    /* ──────────────────── COUNTERS ──────────────────── */
+    .counters-section {
+      background: var(--white);
+      padding: 64px 48px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .counters-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .counter-item { padding: 8px; }
+    .counter-value {
+      font-size: 52px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--blue-mid), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .counter-suffix {
+      font-size: 52px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--blue-mid), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .counter-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-600);
+      margin-top: 8px;
+    }
+
+    /* ──────────────────── SEÇÃO GENÉRICA ──────────────────── */
+    .section-wrap {
+      padding: 96px 48px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .tag-red    { background: var(--red-light);    color: var(--red);    }
+    .tag-green  { background: var(--green-light);  color: var(--green);  }
+    .tag-blue   { background: rgba(37,99,235,.08); color: var(--blue);   }
+    .tag-purple { background: var(--purple-light); color: var(--purple); }
+    .tag-amber  { background: rgba(245,158,11,.1); color: var(--amber);  }
+
+    .section-heading {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      color: var(--gray-900);
+      letter-spacing: -.02em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .section-heading .accent { color: var(--blue); }
+    .section-intro {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--gray-600);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ──────────────────── PROBLEMA ──────────────────── */
+    .problem-bg { background: var(--gray-100); }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .problem-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px;
+      border: 1px solid var(--gray-200);
+      border-left: 4px solid var(--red);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .problem-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(239,68,68,.1);
+    }
+    .problem-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .problem-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 10px;
+    }
+    .problem-desc {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* ──────────────────── SOLUÇÃO ──────────────────── */
+    .solution-wrap {
+      background: linear-gradient(135deg, var(--navy) 0%, #1E1B4B 100%);
+      padding: 96px 48px;
+    }
+    .solution-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .solution-heading {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      color: white;
+      letter-spacing: -.02em;
+      margin-bottom: 12px;
+    }
+    .solution-intro {
+      font-size: 17px;
+      color: rgba(255,255,255,.55);
+      margin-bottom: 56px;
+      font-weight: 300;
+    }
+    .solution-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .solution-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 32px;
+      transition: background .2s, border-color .2s;
+    }
+    .solution-card:hover {
+      background: rgba(255,255,255,.1);
+      border-color: rgba(16,185,129,.4);
+    }
+    .solution-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+    .solution-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 10px;
+    }
+    .solution-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,.6);
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* ──────────────────── BENEFÍCIOS ──────────────────── */
+    .benefits-bg { background: var(--white); }
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .benefit-card {
+      padding: 36px 28px;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .benefit-card.card-a { background: var(--off-white); border: 1px solid var(--gray-200); }
+    .benefit-card.card-b { background: linear-gradient(135deg, #EFF6FF, #DBEAFE); border: 1px solid #BFDBFE; }
+    .benefit-card.card-c { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); border: 1px solid #A7F3D0; }
+    .benefit-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .benefit-icon-wrap.ic-a { background: var(--gray-900); }
+    .benefit-icon-wrap.ic-b { background: var(--blue); }
+    .benefit-icon-wrap.ic-c { background: var(--green); }
+    .benefit-icon-wrap svg { width: 24px; height: 24px; color: white; }
+    .benefit-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 16px;
+    }
+    .benefit-list { list-style: none; }
+    .benefit-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--gray-600);
+      margin-bottom: 10px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+    .benefit-list li::before {
+      content: '→';
+      flex-shrink: 0;
+      font-size: 13px;
+      color: var(--blue);
+      font-weight: 700;
+      margin-top: 1px;
+    }
+
+    /* ──────────────────── FEATURES ──────────────────── */
+    .features-bg { background: var(--gray-100); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 24px;
+      border: 2px solid transparent;
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+      cursor: default;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.08);
+    }
+    .feature-card:nth-child(1):hover { border-color: var(--blue); }
+    .feature-card:nth-child(2):hover { border-color: var(--green); }
+    .feature-card:nth-child(3):hover { border-color: var(--purple); }
+    .feature-card:nth-child(4):hover { border-color: var(--amber); }
+    .feature-card:nth-child(5):hover { border-color: var(--red); }
+    .feature-card:nth-child(6):hover { border-color: #14B8A6; }
+    .feature-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+    }
+    .dot-blue   { background: var(--blue); }
+    .dot-green  { background: var(--green); }
+    .dot-purple { background: var(--purple); }
+    .dot-amber  { background: var(--amber); }
+    .dot-red    { background: var(--red); }
+    .dot-teal   { background: #14B8A6; }
+    .feature-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 10px;
+    }
+    .feature-desc {
+      font-size: 13.5px;
+      color: var(--gray-600);
+      line-height: 1.65;
+      font-weight: 400;
+    }
+
+    /* ──────────────────── COMPARATIVO ──────────────────── */
+    .comparison-bg { background: var(--white); }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+      box-shadow: 0 4px 32px rgba(0,0,0,.06);
+    }
+    .comparison-table thead tr th {
+      padding: 24px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+    }
+    .comparison-table thead tr th:first-child {
+      background: var(--gray-100);
+      color: var(--gray-600);
+      font-size: 13px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-align: left;
+      width: 30%;
+    }
+    .th-before {
+      background: #FEE2E2;
+      color: #B91C1C;
+    }
+    .th-after {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+    .comparison-table tbody tr {
+      border-top: 1px solid var(--gray-200);
+    }
+    .comparison-table tbody tr:nth-child(even) {
+      background: var(--off-white);
+    }
+    .comparison-table tbody td {
+      padding: 18px 28px;
+      font-size: 14px;
+    }
+    .comparison-table tbody td:first-child {
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    .comparison-table tbody td:not(:first-child) {
+      text-align: center;
+      color: var(--gray-600);
+    }
+    .comp-bad  { color: #B91C1C !important; font-weight: 500; }
+    .comp-good { color: #065F46 !important; font-weight: 500; }
+
+    /* ──────────────────── CTA FINAL ──────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--navy) 0%, #1E1B4B 60%, var(--navy) 100%);
+      padding: 96px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(37,99,235,.2) 0%, transparent 70%);
+    }
+    .cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+    .cta-headline {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      color: white;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      margin-bottom: 20px;
+    }
+    .cta-sub {
+      font-size: 17px;
+      color: rgba(255,255,255,.6);
+      margin-bottom: 44px;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--green);
+      color: var(--navy);
+      font-family: 'Sora', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 20px 44px;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      animation: pulse 2.5s ease-in-out infinite;
+      letter-spacing: .02em;
+    }
+    .cta-note {
+      margin-top: 28px;
+      font-size: 13px;
+      color: rgba(255,255,255,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* ──────────────────── FOOTER ──────────────────── */
+    .site-footer {
+      background: var(--gray-900);
+      padding: 40px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-brand {
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: .04em;
+    }
+    .footer-brand span { color: var(--green); }
+    .footer-tagline {
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+    .footer-year {
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+
+    /* ──────────────────── ANIMATION TRIGGER ──────────────────── */
+    .aos {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+    .aos.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ──────────────────── RESPONSIVE ──────────────────── */
+    @media (max-width: 960px) {
+      .problem-grid, .solution-grid, .benefits-grid, .features-grid { grid-template-columns: 1fr 1fr; }
+      .counters-grid { grid-template-columns: repeat(2, 1fr); }
+      .comparison-table { font-size: 13px; }
+      .navbar { padding: 16px 24px; }
+    }
+    @media (max-width: 640px) {
+      .problem-grid, .solution-grid, .benefits-grid, .features-grid { grid-template-columns: 1fr; }
+      .counters-grid { grid-template-columns: repeat(2, 1fr); }
+      .comparison-table thead tr th:first-child { display: none; }
+      .comparison-table tbody td:first-child { display: none; }
+      .comparison-table { display: block; overflow-x: auto; }
+      .section-wrap { padding: 64px 24px; }
+      .solution-wrap { padding: 64px 24px; }
+      .cta-section { padding: 64px 24px; }
+      .site-footer { padding: 24px; flex-direction: column; text-align: center; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════ TOPSTRIP ═══════════ -->
+  <div class="topstrip">
+    <div class="topstrip-links">
+      <a href="./index.html" class="topstrip-link">← Central de apresentações</a>
+      <a href="./institucional.html" class="topstrip-link">Institucional</a>
+      <a href="./marketing.html" class="topstrip-link active">Marketing</a>
+    </div>
+    <a href="https://sicefsus.replit.app" target="_blank" class="topstrip-cta">
+      Acessar o sistema
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+
+  <!-- ═══════════ NAVBAR ═══════════ -->
+  <nav class="navbar" id="navbar">
+    <a href="./index.html" class="nav-brand" style="display:flex;align-items:center;gap:10px;">
+      <img src="./logo-dark.png" alt="SICEFSUS" style="height:32px;width:auto;filter:brightness(0) invert(1);" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="#problema">O Problema</a></li>
+      <li><a href="#solucao">A Solução</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#comparativo">Comparativo</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══════════ HERO ═══════════ -->
+  <section class="hero">
+    <div class="hero-blob b1"></div>
+    <div class="hero-blob b2"></div>
+    <div class="hero-blob b3"></div>
+    <div class="hero-inner">
+      <img src="./logo-dark.png" alt="SICEFSUS" style="height:72px;width:auto;filter:brightness(0) invert(1);margin:0 auto 24px;display:block;opacity:.92;" />
+      <div class="hero-eyebrow">Gestão Pública de Saúde</div>
+      <h1 class="hero-headline">
+        Chega de planilhas.<br><em>Gerencie com inteligência.</em>
+      </h1>
+      <p class="hero-sub">
+        SICEFSUS centraliza toda a gestão de emendas parlamentares de saúde em um único sistema — com rastreabilidade total, segurança real e transparência para gestores e órgãos fiscalizadores.
+      </p>
+      <div class="hero-ctas">
+        <a href="#comparativo" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Ver comparativo
+        </a>
+        <a href="#funcionalidades" class="btn-secondary">
+          Conhecer o sistema
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CONTADORES ═══════════ -->
+  <div class="counters-section">
+    <div class="counters-grid">
+      <div class="counter-item">
+        <div><span class="counter-value" data-target="6">0</span></div>
+        <div class="counter-label">Módulos integrados</div>
+      </div>
+      <div class="counter-item">
+        <div><span class="counter-value" data-target="3">0</span></div>
+        <div class="counter-label">Perfis de acesso</div>
+      </div>
+      <div class="counter-item">
+        <div><span class="counter-value" data-target="5">0</span></div>
+        <div class="counter-label">Tipos de relatório PDF</div>
+      </div>
+      <div class="counter-item">
+        <div><span class="counter-value" data-target="100">0</span><span class="counter-suffix">%</span></div>
+        <div class="counter-label">Auditado e rastreável</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PROBLEMA ═══════════ -->
+  <div class="problem-bg" id="problema">
+    <div class="section-wrap aos">
+      <span class="section-tag tag-red">O problema</span>
+      <h2 class="section-heading">Por que planilhas <span class="accent" style="color:var(--red)">não funcionam</span></h2>
+      <p class="section-intro">Gestores de saúde do Brasil inteiro enfrentam os mesmos problemas. E todos têm o mesmo nome: planilha.</p>
+      <div class="problem-grid">
+
+        <div class="problem-card">
+          <div class="problem-icon">📋</div>
+          <div class="problem-title">Zero rastreabilidade</div>
+          <div class="problem-desc">Quem editou? Quando? O quê mudou? Planilhas não respondem essas perguntas. Em uma auditoria, essa lacuna pode comprometer toda a prestação de contas.</div>
+        </div>
+
+        <div class="problem-card">
+          <div class="problem-icon">🔓</div>
+          <div class="problem-title">Sem controle de acesso</div>
+          <div class="problem-desc">Qualquer um com o arquivo pode alterar, deletar ou copiar dados sensíveis. Não há como restringir quem vê o quê — muito menos registrar o acesso.</div>
+        </div>
+
+        <div class="problem-card">
+          <div class="problem-icon">⏳</div>
+          <div class="problem-title">Análises que demoram horas</div>
+          <div class="problem-desc">Consolidar dados de múltiplas planilhas para gerar um relatório pode levar dias. Decisões são atrasadas. Prazos são perdidos. Recursos, perdidos junto.</div>
+        </div>
+
+        <div class="problem-card">
+          <div class="problem-icon">🧩</div>
+          <div class="problem-title">Informações isoladas e duplicadas</div>
+          <div class="problem-desc">Cada técnico mantém a sua própria versão. Não há uma fonte de verdade. Quando os números divergem, ninguém sabe qual está correto.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SOLUÇÃO ═══════════ -->
+  <div class="solution-wrap" id="solucao">
+    <div class="solution-inner">
+      <div class="aos">
+        <span class="section-tag tag-green">A solução</span>
+        <h2 class="solution-heading">SICEFSUS resolve cada um.</h2>
+        <p class="solution-intro">Quatro problemas reais. Quatro respostas concretas.</p>
+      </div>
+      <div class="solution-grid aos">
+
+        <div class="solution-card">
+          <div class="solution-icon">✅</div>
+          <div class="solution-title">Rastreabilidade total e imutável</div>
+          <div class="solution-desc">Cada ação no sistema gera um registro permanente: usuário, data, hora e o que foi alterado (antes e depois). Logs que não podem ser apagados — jamais.</div>
+        </div>
+
+        <div class="solution-card">
+          <div class="solution-icon">🔐</div>
+          <div class="solution-title">Controle de acesso por perfil</div>
+          <div class="solution-desc">3 perfis com permissões distintas — Admin, Gestor e Operador. Cada usuário acessa apenas os dados do seu município e da sua função. Nada a mais.</div>
+        </div>
+
+        <div class="solution-card">
+          <div class="solution-icon">⚡</div>
+          <div class="solution-title">Relatórios em segundos</div>
+          <div class="solution-desc">5 modelos de relatório profissional em PDF gerados com um clique. Execução orçamentária, prestação de contas, consolidado mensal — prontos na hora.</div>
+        </div>
+
+        <div class="solution-card">
+          <div class="solution-icon">🎯</div>
+          <div class="solution-title">Uma única fonte de verdade</div>
+          <div class="solution-desc">Todos os dados em um único sistema em nuvem. Toda a equipe trabalhando com as mesmas informações, em tempo real, sem versões conflitantes.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ BENEFÍCIOS ═══════════ -->
+  <div class="benefits-bg">
+    <div class="section-wrap aos">
+      <span class="section-tag tag-blue">Benefícios</span>
+      <h2 class="section-heading">O que você <span class="accent">ganha</span></h2>
+      <p class="section-intro">Resultados concretos que mudam a forma de gerir recursos públicos de saúde.</p>
+      <div class="benefits-grid">
+
+        <div class="benefit-card card-a">
+          <div class="benefit-icon-wrap ic-a">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <div class="benefit-title">Transparência</div>
+          <ul class="benefit-list">
+            <li>Rastreabilidade completa de todas as ações</li>
+            <li>Histórico de alterações com dados antes/depois</li>
+            <li>Relatórios prontos para fiscalização</li>
+            <li>Conformidade com órgãos de controle</li>
+          </ul>
+        </div>
+
+        <div class="benefit-card card-b">
+          <div class="benefit-icon-wrap ic-b">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
+          <div class="benefit-title">Eficiência</div>
+          <ul class="benefit-list">
+            <li>Relatórios em PDF em um único clique</li>
+            <li>Dashboard com indicadores em tempo real</li>
+            <li>Alertas automáticos de emendas críticas</li>
+            <li>Fim das planilhas paralelas e retrabalho</li>
+          </ul>
+        </div>
+
+        <div class="benefit-card card-c">
+          <div class="benefit-icon-wrap ic-c">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="benefit-title">Segurança</div>
+          <ul class="benefit-list">
+            <li>Autenticação via Firebase Authentication</li>
+            <li>Filtros geográficos automáticos por município</li>
+            <li>Logs imutáveis — ninguém apaga o rastro</li>
+            <li>Proteção contra XSS e injeção de dados</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FUNCIONALIDADES ═══════════ -->
+  <div class="features-bg" id="funcionalidades">
+    <div class="section-wrap aos">
+      <span class="section-tag tag-purple">Funcionalidades</span>
+      <h2 class="section-heading">Tudo que você <span class="accent">precisa</span></h2>
+      <p class="section-intro">Seis módulos integrados, projetados para o ciclo completo de gestão orçamentária.</p>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-dot dot-blue"></div>
+          <div class="feature-name">Dashboard Inteligente</div>
+          <div class="feature-desc">Painel com visão em tempo real — emendas críticas, alertas de vencimento, rankings de execução e indicadores financeiros atualizados automaticamente.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-dot dot-green"></div>
+          <div class="feature-name">Gestão de Emendas</div>
+          <div class="feature-desc">Cadastro, acompanhamento e histórico completo de cada emenda. Valor total, alocado, executado e saldo disponível — tudo calculado automaticamente.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-dot dot-purple"></div>
+          <div class="feature-name">Envelopes Orçamentários</div>
+          <div class="feature-desc">Divide o orçamento em categorias independentes — material, serviços, contratos. Cada categoria com saldo próprio e validação automática de limite.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-dot dot-amber"></div>
+          <div class="feature-name">Controle de Despesas</div>
+          <div class="feature-desc">Registro de despesas com 5 estados de pagamento: pendente → empenhado → liquidado → pago. Cada transição é auditada e rastreada.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-dot dot-red"></div>
+          <div class="feature-name">Relatórios PDF</div>
+          <div class="feature-desc">5 tipos: Execução Orçamentária, Prestação de Contas, Analítico por Parlamentar, Despesas Detalhado e Consolidado Mensal. Gerados em segundos.</div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-dot dot-teal"></div>
+          <div class="feature-name">Auditoria Completa</div>
+          <div class="feature-desc">Log imutável de toda e qualquer ação no sistema — quem fez, quando, o quê, e qual foi o dado anterior. Transparência total para fiscalizações.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ COMPARATIVO ═══════════ -->
+  <div class="comparison-bg" id="comparativo">
+    <div class="section-wrap aos">
+      <span class="section-tag tag-amber">Antes vs. Depois</span>
+      <h2 class="section-heading">Planilha <span class="accent" style="color:var(--red)">versus</span> SICEFSUS</h2>
+      <p class="section-intro">Uma comparação direta, sem rodeios.</p>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th class="th-before">❌ &nbsp;Planilha Excel</th>
+            <th class="th-after">✅ &nbsp;SICEFSUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Rastreabilidade</td>
+            <td class="comp-bad">Nenhuma — quem editou o quê?</td>
+            <td class="comp-good">Log completo, imutável, por usuário</td>
+          </tr>
+          <tr>
+            <td>Controle de acesso</td>
+            <td class="comp-bad">Qualquer um com o arquivo acessa</td>
+            <td class="comp-good">3 perfis, filtrado por município/UF</td>
+          </tr>
+          <tr>
+            <td>Geração de relatórios</td>
+            <td class="comp-bad">Horas de trabalho manual</td>
+            <td class="comp-good">5 modelos prontos em segundos</td>
+          </tr>
+          <tr>
+            <td>Segurança dos dados</td>
+            <td class="comp-bad">Arquivo pode ser copiado ou deletado</td>
+            <td class="comp-good">Firebase Auth + regras de segurança</td>
+          </tr>
+          <tr>
+            <td>Alertas de vencimento</td>
+            <td class="comp-bad">Sem alertas — depende de memória</td>
+            <td class="comp-good">Alertas automáticos no dashboard</td>
+          </tr>
+          <tr>
+            <td>Fonte dos dados</td>
+            <td class="comp-bad">Múltiplas versões e conflitos</td>
+            <td class="comp-good">Uma única fonte em nuvem, em tempo real</td>
+          </tr>
+          <tr>
+            <td>Prestação de contas</td>
+            <td class="comp-bad">Processo demorado e sujeito a erros</td>
+            <td class="comp-good">Relatório formal pronto com um clique</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ CTA FINAL ═══════════ -->
+  <div class="cta-section">
+    <div class="cta-inner aos">
+      <h2 class="cta-headline">Sua gestão merece mais<br>do que uma planilha.</h2>
+      <p class="cta-sub">SICEFSUS está em produção, em uso real, com segurança e rastreabilidade comprovadas. O próximo passo é o seu.</p>
+      <a href="https://sicefsus.replit.app" target="_blank" class="cta-btn">
+        Conhecer o sistema
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <div class="cta-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Infraestrutura Google Cloud · HTTPS · Logs imutáveis
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="site-footer">
+    <div class="footer-brand" style="display:flex;align-items:center;gap:10px;">
+      <img src="./logo-claro.png" alt="SICEFSUS" style="height:32px;width:auto;filter:brightness(0) invert(1);" />
+      SICEF<span>SUS</span>
+    </div>
+    <div class="footer-tagline">Sistema de Gestão de Emendas Parlamentares de Saúde</div>
+    <div class="footer-year" id="footer-year">—</div>
+  </footer>
+
+  <script>
+    // ── Navbar ao scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ── Contadores animados
+    function animateCounter(el, target, duration) {
+      const start = performance.now();
+      const update = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(eased * target);
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target;
+      };
+      requestAnimationFrame(update);
+    }
+
+    const counterObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting && !e.target.dataset.animated) {
+          e.target.dataset.animated = '1';
+          const target = parseInt(e.target.dataset.target, 10);
+          animateCounter(e.target, target, target >= 100 ? 1800 : 900);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.counter-value').forEach(el => counterObs.observe(el));
+
+    // ── Fade-in ao rolar
+    const aos = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.aos').forEach(el => aos.observe(el));
+
+    // ── Scroll suave para âncoras
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      });
+    });
+
+    // ── Ano no footer
+    document.getElementById('footer-year').textContent =
+      '© ' + new Date().getFullYear() + ' SICEFSUS';
+  </script>
+</body>
+</html>
