@@ -93,15 +93,15 @@
     .nav-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0;
       text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: .03em;
     }
-    .nav-brand img {
-      height: 30px;
-      width: auto;
-      filter: brightness(0) invert(1);
-      opacity: .9;
-    }
+    .nav-brand span { color: var(--emerald); }
     .nav-links {
       display: flex;
       gap: 4px;
@@ -124,13 +124,13 @@
 
     /* ──────────────────── HERO ──────────────────── */
     .hero {
-      min-height: 100vh;
+      min-height: auto;
       background: var(--base);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 140px 24px 100px;
+      padding: 120px 24px 72px;
       position: relative;
       overflow: hidden;
     }
@@ -182,14 +182,6 @@
       z-index: 1;
       max-width: 780px;
     }
-    .hero-logo {
-      height: 64px;
-      width: auto;
-      filter: brightness(0) invert(1);
-      opacity: .85;
-      margin-bottom: 32px;
-      animation: fadeIn .8s ease both;
-    }
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
@@ -203,7 +195,7 @@
       border: 1px solid rgba(16,185,129,.2);
       padding: 6px 18px;
       border-radius: 100px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       animation: fadeIn .8s .1s ease both;
     }
     .hero-eyebrow::before {
@@ -220,7 +212,7 @@
       color: var(--white);
       line-height: 1.12;
       letter-spacing: -.01em;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
       animation: fadeUp .9s .2s ease both;
     }
     .hero-headline em {
@@ -233,7 +225,7 @@
       color: rgba(255,255,255,.52);
       line-height: 1.75;
       max-width: 540px;
-      margin: 0 auto 48px;
+      margin: 0 auto 36px;
       animation: fadeUp .9s .35s ease both;
     }
     .hero-ctas {
@@ -264,31 +256,10 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 24px rgba(16,185,129,.3);
     }
-    .btn-secondary {
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.8);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 15px 30px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.1);
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: background .25s, border-color .25s;
-    }
-    .btn-secondary:hover {
-      background: rgba(255,255,255,.1);
-      border-color: rgba(255,255,255,.2);
-    }
-
     /* ──────────────────── COUNTERS ──────────────────── */
     .counters-section {
       background: var(--deep);
-      padding: 56px 48px;
+      padding: 40px 48px;
       border-top: 1px solid rgba(255,255,255,.05);
     }
     .counters-grid {
@@ -325,7 +296,7 @@
 
     /* ──────────────────── SECTION COMMON ──────────────────── */
     .section-wrap {
-      padding: 100px 48px;
+      padding: 64px 48px;
       max-width: 1060px;
       margin: 0 auto;
     }
@@ -361,7 +332,7 @@
       color: var(--slate-500);
       max-width: 520px;
       line-height: 1.75;
-      margin-bottom: 56px;
+      margin-bottom: 36px;
     }
 
     /* ──────────────────── PROBLEM ──────────────────── */
@@ -369,12 +340,12 @@
     .problem-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 12px;
     }
     .problem-card {
       background: var(--white);
       border-radius: 14px;
-      padding: 32px;
+      padding: 24px;
       border: 1px solid var(--slate-100);
       border-left: 3px solid var(--warm-red);
       transition: transform .25s, box-shadow .25s;
@@ -405,7 +376,7 @@
     /* ──────────────────── SOLUTION ──────────────────── */
     .solution-wrap {
       background: var(--base);
-      padding: 100px 48px;
+      padding: 64px 48px;
       position: relative;
       overflow: hidden;
     }
@@ -434,19 +405,19 @@
     .solution-intro {
       font-size: 16px;
       color: rgba(255,255,255,.4);
-      margin-bottom: 56px;
+      margin-bottom: 36px;
       font-weight: 300;
     }
     .solution-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 12px;
     }
     .solution-card {
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.07);
       border-radius: 14px;
-      padding: 32px;
+      padding: 24px;
       transition: background .25s, border-color .25s;
     }
     .solution-card:hover {
@@ -476,11 +447,11 @@
     .benefits-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 14px;
     }
     .benefit-card {
-      padding: 36px 28px;
-      border-radius: 16px;
+      padding: 28px 24px;
+      border-radius: 14px;
       position: relative;
       overflow: hidden;
     }
@@ -488,13 +459,13 @@
     .benefit-card.card-b { background: linear-gradient(160deg, rgba(30,77,94,.06) 0%, rgba(42,97,114,.04) 100%); border: 1px solid rgba(30,77,94,.12); }
     .benefit-card.card-c { background: linear-gradient(160deg, rgba(16,185,129,.05) 0%, rgba(52,211,153,.03) 100%); border: 1px solid rgba(16,185,129,.15); }
     .benefit-icon-wrap {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .benefit-icon-wrap.ic-a { background: var(--base); }
     .benefit-icon-wrap.ic-b { background: var(--teal-mid); }
@@ -533,12 +504,12 @@
     .features-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      gap: 12px;
     }
     .feature-card {
       background: var(--white);
       border-radius: 14px;
-      padding: 28px 24px;
+      padding: 22px 20px;
       border: 1px solid var(--slate-100);
       transition: border-color .25s, box-shadow .25s, transform .25s;
       cursor: default;
@@ -552,7 +523,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
     .dot-blue   { background: var(--teal-mid); }
     .dot-green  { background: var(--emerald); }
@@ -630,7 +601,7 @@
     /* ──────────────────── CTA FINAL ──────────────────── */
     .cta-section {
       background: var(--base);
-      padding: 100px 48px;
+      padding: 64px 48px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -828,7 +799,7 @@
       .comparison-table { font-size: 13px; }
       .navbar { padding: 16px 24px; }
       .navbar.scrolled { padding: 12px 24px; }
-      .counters-section { padding: 48px 24px; }
+      .counters-section { padding: 32px 24px; }
     }
     @media (max-width: 640px) {
       .problem-grid, .solution-grid, .benefits-grid, .features-grid { grid-template-columns: 1fr; }
@@ -836,16 +807,16 @@
       .comparison-table thead tr th:first-child { display: none; }
       .comparison-table tbody td:first-child { display: none; }
       .comparison-table { display: block; overflow-x: auto; }
-      .section-wrap { padding: 64px 20px; }
-      .solution-wrap { padding: 64px 20px; }
-      .cta-section { padding: 64px 20px; }
+      .section-wrap { padding: 48px 20px; }
+      .solution-wrap { padding: 48px 20px; }
+      .cta-section { padding: 48px 20px; }
       .site-footer { padding: 24px 20px; flex-direction: column; text-align: center; }
       .nav-links { display: none; }
       .hamburger { display: flex; }
       .navbar { padding: 14px 20px; }
       .navbar.scrolled { padding: 10px 20px; }
-      .hero { padding: 120px 20px 80px; }
-      .counters-section { padding: 40px 20px; }
+      .hero { padding: 100px 20px 56px; }
+      .counters-section { padding: 28px 20px; }
     }
   </style>
 </head>
@@ -853,9 +824,7 @@
 
   <!-- ═══════════ NAVBAR ═══════════ -->
   <nav class="navbar" id="navbar">
-    <a href="./index.html" class="nav-brand">
-      <img src="./logo-claro.png" alt="SICEFSUS" />
-    </a>
+    <a href="./index.html" class="nav-brand">SICEF<span>SUS</span></a>
     <ul class="nav-links">
       <li><a href="#problema">O Problema</a></li>
       <li><a href="#solucao">A Solucao</a></li>
@@ -881,7 +850,6 @@
     <div class="hero-grid-bg"></div>
     <div class="hero-top-fade"></div>
     <div class="hero-inner">
-      <img src="./logo-claro.png" alt="SICEFSUS" class="hero-logo" />
       <div class="hero-eyebrow">Gestao Publica de Saude</div>
       <h1 class="hero-headline">
         Chega de planilhas.<br><em>Gerencie com inteligencia.</em>
@@ -896,10 +864,6 @@
         <a href="#comparativo" class="btn-primary">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Ver comparativo
-        </a>
-        <a href="#funcionalidades" class="btn-secondary">
-          Conhecer o sistema
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </a>
       </div>
     </div>
