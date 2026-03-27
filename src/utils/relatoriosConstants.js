@@ -81,7 +81,7 @@ export const TIPOS_RELATORIOS = [
   },
   {
     id: "despesas-detalhado",
-    titulo: "Despesas Detalhado",
+    titulo: "Despesas Detalhadas",
     descricao: "Listagem de despesas realizadas com filtros avançados",
     icone: "payments",
     cor: COLORS.WARNING,
