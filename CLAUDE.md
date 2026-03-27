@@ -911,6 +911,7 @@ Conteudo do agnostic-core (paulinett1508-dev/agnostic-core) foi integrado direta
 | `detector-bugs-react-async` | Identificar bugs em hooks, async/await, Firebase |
 | `mapear-arquitetura` | Documentar estrutura, dependencias, fluxos de dados |
 | `resolver-problema` | Diagnosticar bugs com 5 Whys + anti-patterns |
+| `revisao-texto-ptbr` | Revisar textos em portugues BR — ortografia, concordancia, acentuacao, consistencia factual |
 
 **Skills do agnostic-core (integradas 12/03/2026):**
 
