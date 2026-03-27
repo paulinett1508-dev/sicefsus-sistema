@@ -164,7 +164,7 @@ const Administracao = () => {
       if (import.meta.env.DEV) console.log("📋 Carregando logs de auditoria...");
       const logsData = await auditService.getLogs({ limit: 50 });
       setLogs(logsData);
-      console.log(`✅ ${logsData.length} logs carregados`);
+      if (import.meta.env.DEV) console.log(`✅ ${logsData.length} logs carregados`);
     } catch (error) {
       // Erro de permissão é esperado - coleção logs pode não ter regras
       if (error.code === 'permission-denied') {
@@ -183,7 +183,7 @@ const Administracao = () => {
 
   // 🎯 HANDLERS DE USUÁRIOS
   const handleNovoUsuario = () => {
-    console.log("🆕 Abrindo modal de novo usuário");
+    if (import.meta.env.DEV) console.log("🆕 Abrindo modal de novo usuário");
     setEditingUser(null);
     setFormData({
       nome: "",
@@ -199,7 +199,7 @@ const Administracao = () => {
   };
 
   const handleEditarUsuario = (usuario) => {
-    console.log("✏️ Editando usuário:", usuario);
+    if (import.meta.env.DEV) console.log("✏️ Editando usuário:", usuario);
     setEditingUser(usuario);
     setFormData({
       nome: usuario.nome || "",
@@ -257,7 +257,7 @@ const Administracao = () => {
           editingUser.email,
         );
 
-        console.log("✅ Resultado da atualização:", resultado);
+        if (import.meta.env.DEV) console.log("✅ Resultado da atualização:", resultado);
 
         showToast({
           tipo: "success",
@@ -310,7 +310,7 @@ const Administracao = () => {
   // ✅ CORREÇÃO CRÍTICA: Função de exclusão sem CORS
   const deleteUserLocal = async (userId) => {
     try {
-      console.log("🗑️ Excluindo usuário do Firestore:", userId);
+      if (import.meta.env.DEV) console.log("🗑️ Excluindo usuário do Firestore:", userId);
 
       // 1. Deletar documento do usuário no Firestore
       await deleteDoc(doc(db, "usuarios", userId));
@@ -344,7 +344,7 @@ const Administracao = () => {
         console.warn("⚠️ Erro no log de auditoria:", auditError);
       }
 
-      console.log("✅ Usuário removido do Firestore com sucesso");
+      if (import.meta.env.DEV) console.log("✅ Usuário removido do Firestore com sucesso");
 
       return {
         success: true,
@@ -362,8 +362,10 @@ const Administracao = () => {
   };
 
   const handleDelete = async (usuario) => {
-    console.log("🗑️ === EXCLUSÃO COM BYPASS CORS ===");
-    console.log("🗑️ Dados do usuário:", usuario);
+    if (import.meta.env.DEV) {
+      console.log("🗑️ === EXCLUSÃO COM BYPASS CORS ===");
+      console.log("🗑️ Dados do usuário:", usuario);
+    }
 
     // Validações básicas
     if (!usuario?.id) {
