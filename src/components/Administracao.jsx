@@ -168,7 +168,7 @@ const Administracao = () => {
     } catch (error) {
       // Erro de permissão é esperado - coleção logs pode não ter regras
       if (error.code === 'permission-denied') {
-        console.warn("⚠️ Sem permissão para ler logs - funcionalidade desabilitada");
+        if (import.meta.env.DEV) console.warn("⚠️ Sem permissão para ler logs - funcionalidade desabilitada");
         setLogs([]);
       } else {
         console.error("❌ Erro ao carregar logs:", error);
@@ -341,7 +341,7 @@ const Administracao = () => {
           },
         });
       } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
+        if (import.meta.env.DEV) console.warn("⚠️ Erro no log de auditoria:", auditError);
       }
 
       if (import.meta.env.DEV) console.log("✅ Usuário removido do Firestore com sucesso");
@@ -452,12 +452,12 @@ const Administracao = () => {
 
         try {
           setLoading(true);
-          console.log("🔥 Executando exclusão com bypass CORS...");
+          if (import.meta.env.DEV) console.log("🔥 Executando exclusão com bypass CORS...");
 
           // ✅ CORREÇÃO: Usar função local ao invés de Cloud Function
           const resultado = await deleteUserLocal(usuario.id);
 
-          console.log("📊 Resultado:", resultado);
+          if (import.meta.env.DEV) console.log("📊 Resultado:", resultado);
 
           showToast({
             tipo: "success",
@@ -480,7 +480,7 @@ const Administracao = () => {
         }
       },
       onCancel: () => {
-        console.log("❌ Exclusão cancelada");
+        if (import.meta.env.DEV) console.log("❌ Exclusão cancelada");
         setConfirmationModal({ isOpen: false });
       },
     });
@@ -489,7 +489,7 @@ const Administracao = () => {
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       `🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`,
     );
 
@@ -530,9 +530,9 @@ const Administracao = () => {
             targetUserNome: usuario.nome,
           },
         });
-        console.log("📝 Audit log registrado com sucesso");
+        if (import.meta.env.DEV) console.log("📝 Audit log registrado com sucesso");
       } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
+        if (import.meta.env.DEV) console.warn("⚠️ Erro no log de auditoria:", auditError);
       }
 
       showToast({
@@ -608,7 +608,7 @@ const Administracao = () => {
   // 🎯 USE EFFECT: Carregamento inicial
   useEffect(() => {
     const loadData = async () => {
-      console.log("🚀 Iniciando carregamento de dados...");
+      if (import.meta.env.DEV) console.log("🚀 Iniciando carregamento de dados...");
       try {
         await carregarUsuarios();
         await carregarLogs();
@@ -678,7 +678,7 @@ const Administracao = () => {
 
       {/* Tabs de navegação */}
       {(() => {
-        console.log("🎬 Administracao.jsx - ANTES DE RENDERIZAR AdminTabs:", {
+        if (import.meta.env.DEV) console.log("🎬 Administracao.jsx - ANTES DE RENDERIZAR AdminTabs:", {
           activeTab,
           usuariosCount: usuarios.length,
           logsCount: logs.length,
