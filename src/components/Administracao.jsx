@@ -46,7 +46,7 @@ const Administracao = () => {
 
     // ✅ PRIORIZAR O VALOR DO CONTEXTO
     if (isSuperAdminFromContext !== undefined) {
-      console.log("🔐 SuperAdmin Check (do contexto):", {
+      if (import.meta.env.DEV) console.log("🔐 SuperAdmin Check (do contexto):", {
         isSuperAdmin: isSuperAdminFromContext,
         email: currentUser.email
       });
@@ -55,7 +55,7 @@ const Administracao = () => {
 
     // ✅ FALLBACK: CALCULAR LOCALMENTE
     const result = currentUser.tipo === "admin" && currentUser.superAdmin === true;
-    console.log("🔐 SuperAdmin Check (calculado):", {
+    if (import.meta.env.DEV) console.log("🔐 SuperAdmin Check (calculado):", {
       tipo: currentUser.tipo,
       superAdmin: currentUser.superAdmin,
       isSuperAdmin: result,
@@ -119,7 +119,7 @@ const Administracao = () => {
   const carregarUsuarios = async () => {
     try {
       setLoading(true);
-      console.log("📋 Carregando usuários...");
+      if (import.meta.env.DEV) console.log("📋 Carregando usuários...");
 
       const usuariosRef = collection(db, "usuarios");
       const snapshot = await getDocs(usuariosRef);
@@ -145,7 +145,7 @@ const Administracao = () => {
       });
 
       setUsuarios(usuariosData);
-      console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
+      if (import.meta.env.DEV) console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
     } catch (error) {
       console.error("❌ Erro ao carregar usuários:", error);
       showToast({
@@ -161,14 +161,14 @@ const Administracao = () => {
   // 📋 FUNÇÃO: Carregar logs
   const carregarLogs = async () => {
     try {
-      console.log("📋 Carregando logs de auditoria...");
+      if (import.meta.env.DEV) console.log("📋 Carregando logs de auditoria...");
       const logsData = await auditService.getLogs({ limit: 50 });
       setLogs(logsData);
-      console.log(`✅ ${logsData.length} logs carregados`);
+      if (import.meta.env.DEV) console.log(`✅ ${logsData.length} logs carregados`);
     } catch (error) {
       // Erro de permissão é esperado - coleção logs pode não ter regras
       if (error.code === 'permission-denied') {
-        console.warn("⚠️ Sem permissão para ler logs - funcionalidade desabilitada");
+        if (import.meta.env.DEV) console.warn("⚠️ Sem permissão para ler logs - funcionalidade desabilitada");
         setLogs([]);
       } else {
         console.error("❌ Erro ao carregar logs:", error);
@@ -183,7 +183,7 @@ const Administracao = () => {
 
   // 🎯 HANDLERS DE USUÁRIOS
   const handleNovoUsuario = () => {
-    console.log("🆕 Abrindo modal de novo usuário");
+    if (import.meta.env.DEV) console.log("🆕 Abrindo modal de novo usuário");
     setEditingUser(null);
     setFormData({
       nome: "",
@@ -199,7 +199,7 @@ const Administracao = () => {
   };
 
   const handleEditarUsuario = (usuario) => {
-    console.log("✏️ Editando usuário:", usuario);
+    if (import.meta.env.DEV) console.log("✏️ Editando usuário:", usuario);
     setEditingUser(usuario);
     setFormData({
       nome: usuario.nome || "",
@@ -218,9 +218,22 @@ const Administracao = () => {
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
 
+    // Validacao basica do formulario
+    if (!formData.nome?.trim()) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Nome é obrigatório" });
+      return;
+    }
+    if (!formData.email?.trim() || !formData.email.includes("@")) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Email inválido" });
+      return;
+    }
+    if (formData.role !== "admin" && !formData.municipio?.trim()) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Município é obrigatório para não-admins" });
+      return;
+    }
+
     try {
       setSaving(true);
-      console.log("💾 Salvando usuário:", formData);
 
       if (editingUser) {
         // 🔧 CORREÇÃO: Usar formData.tipo ao invés de role
@@ -244,7 +257,7 @@ const Administracao = () => {
           editingUser.email,
         );
 
-        console.log("✅ Resultado da atualização:", resultado);
+        if (import.meta.env.DEV) console.log("✅ Resultado da atualização:", resultado);
 
         showToast({
           tipo: "success",
@@ -252,6 +265,13 @@ const Administracao = () => {
           mensagem: `Usuário atualizado para ${tipoUsuario === "gestor" ? "Gestor" : tipoUsuario}!`,
         });
       } else {
+        // Pedir senha do admin para reautenticacao (necessaria para criar usuario)
+        const adminPassword = window.prompt("Para criar usuário, confirme sua senha de admin:");
+        if (!adminPassword) {
+          setSaving(false);
+          return;
+        }
+
         const resultado = await userService.createUser({
           email: formData.email,
           nome: formData.nome,
@@ -261,7 +281,7 @@ const Administracao = () => {
           status: formData.status,
           departamento: formData.departamento,
           telefone: formData.telefone,
-        });
+        }, { adminPassword });
 
         if (resultado.success) {
           showToast({
@@ -290,7 +310,7 @@ const Administracao = () => {
   // ✅ CORREÇÃO CRÍTICA: Função de exclusão sem CORS
   const deleteUserLocal = async (userId) => {
     try {
-      console.log("🗑️ Excluindo usuário do Firestore:", userId);
+      if (import.meta.env.DEV) console.log("🗑️ Excluindo usuário do Firestore:", userId);
 
       // 1. Deletar documento do usuário no Firestore
       await deleteDoc(doc(db, "usuarios", userId));
@@ -321,10 +341,10 @@ const Administracao = () => {
           },
         });
       } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
+        if (import.meta.env.DEV) console.warn("⚠️ Erro no log de auditoria:", auditError);
       }
 
-      console.log("✅ Usuário removido do Firestore com sucesso");
+      if (import.meta.env.DEV) console.log("✅ Usuário removido do Firestore com sucesso");
 
       return {
         success: true,
@@ -342,8 +362,10 @@ const Administracao = () => {
   };
 
   const handleDelete = async (usuario) => {
-    console.log("🗑️ === EXCLUSÃO COM BYPASS CORS ===");
-    console.log("🗑️ Dados do usuário:", usuario);
+    if (import.meta.env.DEV) {
+      console.log("🗑️ === EXCLUSÃO COM BYPASS CORS ===");
+      console.log("🗑️ Dados do usuário:", usuario);
+    }
 
     // Validações básicas
     if (!usuario?.id) {
@@ -430,12 +452,12 @@ const Administracao = () => {
 
         try {
           setLoading(true);
-          console.log("🔥 Executando exclusão com bypass CORS...");
+          if (import.meta.env.DEV) console.log("🔥 Executando exclusão com bypass CORS...");
 
           // ✅ CORREÇÃO: Usar função local ao invés de Cloud Function
           const resultado = await deleteUserLocal(usuario.id);
 
-          console.log("📊 Resultado:", resultado);
+          if (import.meta.env.DEV) console.log("📊 Resultado:", resultado);
 
           showToast({
             tipo: "success",
@@ -458,7 +480,7 @@ const Administracao = () => {
         }
       },
       onCancel: () => {
-        console.log("❌ Exclusão cancelada");
+        if (import.meta.env.DEV) console.log("❌ Exclusão cancelada");
         setConfirmationModal({ isOpen: false });
       },
     });
@@ -467,7 +489,7 @@ const Administracao = () => {
   const handleToggleStatus = async (usuario) => {
     const novoStatus = usuario.status === "ativo" ? "inativo" : "ativo";
 
-    console.log(
+    if (import.meta.env.DEV) console.log(
       `🔄 Alterando status do usuário ${usuario.nome} para: ${novoStatus}`,
     );
 
@@ -508,9 +530,9 @@ const Administracao = () => {
             targetUserNome: usuario.nome,
           },
         });
-        console.log("📝 Audit log registrado com sucesso");
+        if (import.meta.env.DEV) console.log("📝 Audit log registrado com sucesso");
       } catch (auditError) {
-        console.warn("⚠️ Erro no log de auditoria:", auditError);
+        if (import.meta.env.DEV) console.warn("⚠️ Erro no log de auditoria:", auditError);
       }
 
       showToast({
@@ -586,7 +608,7 @@ const Administracao = () => {
   // 🎯 USE EFFECT: Carregamento inicial
   useEffect(() => {
     const loadData = async () => {
-      console.log("🚀 Iniciando carregamento de dados...");
+      if (import.meta.env.DEV) console.log("🚀 Iniciando carregamento de dados...");
       try {
         await carregarUsuarios();
         await carregarLogs();
@@ -656,7 +678,7 @@ const Administracao = () => {
 
       {/* Tabs de navegação */}
       {(() => {
-        console.log("🎬 Administracao.jsx - ANTES DE RENDERIZAR AdminTabs:", {
+        if (import.meta.env.DEV) console.log("🎬 Administracao.jsx - ANTES DE RENDERIZAR AdminTabs:", {
           activeTab,
           usuariosCount: usuarios.length,
           logsCount: logs.length,

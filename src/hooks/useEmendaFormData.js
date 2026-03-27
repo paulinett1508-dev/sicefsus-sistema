@@ -19,7 +19,6 @@ export const useEmendaFormData = () => {
 
   // ✅ ESTADOS PRINCIPAIS
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -113,7 +112,7 @@ export const useEmendaFormData = () => {
     hoje.setHours(0, 0, 0, 0);
 
     // ✅ LOGS OTIMIZADOS: Menos verbose
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.DEV) {
       console.log("🔍 Validação executada - campos:", {
         objeto: formData.objeto?.length || 0,
         autor: formData.autor?.length || 0,
@@ -381,7 +380,11 @@ export const useEmendaFormData = () => {
     modalMessage +=
       "\n⚠️ Preencha os campos em vermelho e tente novamente.\n\n✅ Sistema com melhorias aplicadas.";
 
-    alert(modalMessage);
+    setToast({
+      show: true,
+      message: modalMessage,
+      type: "error",
+    });
   }, []);
 
   // ✅ LIMPEZA DE ERRO DE CAMPO ESPECÍFICO
@@ -398,28 +401,23 @@ export const useEmendaFormData = () => {
     (e) => {
       const { name, value } = e.target;
 
-      console.log("📝 useEmendaFormData.handleInputChange executado:", {
-        field: name,
-        value: value,
-        valueType: typeof value,
-      });
-
-      // ✅ ATUALIZAR O ESTADO DO FORMULÁRIO
+      // Atualizar o estado do formulario
       setFormData((prev) => ({
         ...prev,
         [name]: value,
       }));
 
-      // Limpar erro do campo se existir
-      if (fieldErrors[name]) {
-        setFieldErrors((prev) => {
+      // Limpar erro do campo se existir (pattern funcional - sem dependencia externa)
+      setFieldErrors((prev) => {
+        if (prev[name]) {
           const newErrors = { ...prev };
           delete newErrors[name];
           return newErrors;
-        });
-      }
+        }
+        return prev;
+      });
     },
-    [fieldErrors],
+    [],
   );
 
   const toggleSection = useCallback((section) => {
@@ -565,7 +563,7 @@ export const useEmendaFormData = () => {
       const userUf = user?.uf?.trim();
 
       if (userMunicipio && userUf) {
-        console.log(`✅ ${user?.tipo?.toUpperCase()}: Preenchendo UF e Município automaticamente:`, {
+        if (import.meta.env.DEV) console.log(`✅ ${user?.tipo?.toUpperCase()}: Preenchendo UF e Município automaticamente:`, {
           municipio: userMunicipio,
           uf: userUf,
         });
@@ -711,7 +709,7 @@ export const useEmendaFormData = () => {
             .replace(/,/g, ".")
         ) || 0;
 
-        console.log("💰 Valor convertido:", {
+        if (import.meta.env.DEV) console.log("💰 Valor convertido:", {
           original: formData.valor,
           convertido: valorNumerico,
           tipo: typeof valorNumerico
@@ -763,18 +761,20 @@ export const useEmendaFormData = () => {
           atualizadoPor: user.uid || user.email,
         };
 
-        console.log("💾 Dados COMPLETOS que serão salvos no Firebase:", dadosParaSalvar);
-        console.log("🔍 Campos críticos:", {
-          numero: dadosParaSalvar.numero,
-          autor: dadosParaSalvar.autor,
-          cnpjBeneficiario: dadosParaSalvar.cnpjBeneficiario,
-          municipio: dadosParaSalvar.municipio,
-          uf: dadosParaSalvar.uf,
-          valorRecurso: dadosParaSalvar.valorRecurso,
-        });
+        if (import.meta.env.DEV) {
+          console.log("💾 Dados COMPLETOS que serão salvos no Firebase:", dadosParaSalvar);
+          console.log("🔍 Campos críticos:", {
+            numero: dadosParaSalvar.numero,
+            autor: dadosParaSalvar.autor,
+            cnpjBeneficiario: dadosParaSalvar.cnpjBeneficiario,
+            municipio: dadosParaSalvar.municipio,
+            uf: dadosParaSalvar.uf,
+            valorRecurso: dadosParaSalvar.valorRecurso,
+          });
+        }
 
         // 🔬 DIAGNÓSTICO DO CNPJ
-        console.log("🔬 DIAGNÓSTICO PRÉ-LIMPEZA:", {
+        if (import.meta.env.DEV) console.log("🔬 DIAGNÓSTICO PRÉ-LIMPEZA:", {
           beneficiario_RAW: formData.beneficiario,
           cnpjBeneficiario_RAW: formData.cnpjBeneficiario,
           beneficiario_TYPE: typeof formData.beneficiario,
@@ -786,7 +786,7 @@ export const useEmendaFormData = () => {
         dadosParaSalvar.cnpjBeneficiario = cnpjLimpo;
         dadosParaSalvar.beneficiario = cnpjLimpo; // Garantir que ambos fiquem limpos
 
-        console.log("🔬 DIAGNÓSTICO PÓS-LIMPEZA:", {
+        if (import.meta.env.DEV) console.log("🔬 DIAGNÓSTICO PÓS-LIMPEZA:", {
           beneficiario_CLEAN: dadosParaSalvar.beneficiario,
           cnpjBeneficiario_CLEAN: dadosParaSalvar.cnpjBeneficiario,
           beneficiario_LENGTH: dadosParaSalvar.beneficiario?.length,
@@ -794,7 +794,7 @@ export const useEmendaFormData = () => {
         });
 
         // ✅ VALIDAÇÃO FINAL: Confirmar que valorRecurso é number
-        console.log("💰 Validação final valorRecurso:", {
+        if (import.meta.env.DEV) console.log("💰 Validação final valorRecurso:", {
           valor: dadosParaSalvar.valorRecurso,
           tipo: typeof dadosParaSalvar.valorRecurso,
           isNumber: typeof dadosParaSalvar.valorRecurso === 'number'
@@ -917,7 +917,7 @@ export const useEmendaFormData = () => {
               document.body.removeChild(modalOverlay);
               // ✅ NAVEGAR PARA A EMENDA COM ABA DE EXECUÇÃO ATIVA
               // Usa navigate() do React Router para navegação SPA
-              console.log(`🎯 GESTOR: Navegando para primeira despesa da emenda ${emendaId}`);
+              if (import.meta.env.DEV) console.log(`🎯 GESTOR: Navegando para primeira despesa da emenda ${emendaId}`);
               navigate(`/emendas/${emendaId}?tab=execucao`, { 
                 state: { criarPrimeiraDespesa: true } 
               });
@@ -977,7 +977,7 @@ export const useEmendaFormData = () => {
     formData,
     setFormData,
     loading,
-    saving,
+    saving: salvando,
     error,
     setError,
     isReady,

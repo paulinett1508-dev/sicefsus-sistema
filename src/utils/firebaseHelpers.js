@@ -9,13 +9,13 @@ import { db } from '../firebase/firebaseConfig';
 export const clearFirestoreCache = async () => {
   try {
     await clearIndexedDbPersistence(db);
-    console.log('✅ Cache do Firestore limpo com sucesso');
+    if (import.meta.env.DEV) console.log('✅ Cache do Firestore limpo com sucesso');
     return true;
   } catch (error) {
     console.error('❌ Erro ao limpar cache:', error);
     // Se falhar, recarregar a página pode ajudar
     if (error.code === 'failed-precondition') {
-      console.warn('⚠️ Feche todas as abas do app e tente novamente');
+      if (import.meta.env.DEV) console.warn('⚠️ Feche todas as abas do app e tente novamente');
     }
     return false;
   }

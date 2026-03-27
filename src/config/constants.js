@@ -160,3 +160,20 @@ export const getValorEmenda = (emenda, parse) => {
   }
   return 0;
 };
+
+// ========================================
+// 👤 ROLES DE USUÁRIO (lista simples)
+// ========================================
+export const USER_ROLES = ["admin", "gestor", "operador"];
+
+// ========================================
+// 📏 LIMITES DE VALIDAÇÃO
+// ========================================
+export const VALIDATION_LIMITS = {
+  MUNICIPIO_MIN: 2,
+  MUNICIPIO_MAX: 100,
+  NOME_MIN: 2,
+  NOME_MAX: 100,
+  SENHA_MAX: 50,
+  VENCIMENTO_WARNING_DAYS: 30,
+};

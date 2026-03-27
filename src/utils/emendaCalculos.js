@@ -30,7 +30,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
   const { silent = false } = options;
 
   try {
-    if (!silent) {
+    if (!silent && import.meta.env.DEV) {
       console.log(`🔄 Recalculando emenda ${emendaId}...`);
     }
 
@@ -106,7 +106,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
     };
 
     // 🔍 DEBUG: Log completo antes de salvar
-    if (!silent) {
+    if (!silent && import.meta.env.DEV) {
       console.log(`🔍 DEBUG - Valores calculados ANTES de salvar:`, {
         emendaId,
         valorTotal,
@@ -149,12 +149,12 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
         }
         // Aguarda 500ms antes de tentar novamente
         await new Promise(resolve => setTimeout(resolve, 500));
-        console.warn(`⚠️ Tentativa ${tentativas} de salvar recálculo...`);
+        if (import.meta.env.DEV) console.warn(`⚠️ Tentativa ${tentativas} de salvar recálculo...`);
       }
     }
 
     // 🔍 DEBUG: Confirmar salvamento
-    if (!silent) {
+    if (!silent && import.meta.env.DEV) {
       console.log(`✅ Valores SALVOS no Firebase:`, {
         valorExecutado: valoresCalculados.valorExecutado,
         saldoNaoExecutado: valoresCalculados.saldoNaoExecutado,
@@ -165,7 +165,7 @@ export const recalcularSaldoEmenda = async (emendaId, options = {}) => {
       });
     }
 
-    if (!silent) {
+    if (!silent && import.meta.env.DEV) {
       console.log(`✅ Emenda ${emendaId} recalculada:`, {
         valorTotal,
         despesas: despesas.length,
@@ -226,7 +226,7 @@ export const obterEmendaAtualizada = async (emendaId) => {
  * @returns {Promise<object>} Resultado do recálculo em lote
  */
 export const recalcularEmendasEmLote = async (emendaIds) => {
-  console.log(`🔄 Recalculando ${emendaIds.length} emendas em lote...`);
+  if (import.meta.env.DEV) console.log(`🔄 Recalculando ${emendaIds.length} emendas em lote...`);
 
   const resultados = {
     sucesso: 0,
@@ -248,6 +248,6 @@ export const recalcularEmendasEmLote = async (emendaIds) => {
     }
   }
 
-  console.log(`✅ Recálculo em lote finalizado:`, resultados);
+  if (import.meta.env.DEV) console.log(`✅ Recálculo em lote finalizado:`, resultados);
   return resultados;
 };

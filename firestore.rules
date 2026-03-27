@@ -27,12 +27,15 @@ service cloud.firestore {
     }
 
     function getUserData() {
-      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+      return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data
+        : {};
     }
 
     function matchesUserLocation(data) {
       let userData = getUserData();
-      return data.municipio == userData.municipio &&
+      return userData.keys().hasAll(['municipio', 'uf']) &&
+             data.municipio == userData.municipio &&
              data.uf == userData.uf;
     }
 

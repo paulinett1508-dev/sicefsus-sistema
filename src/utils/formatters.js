@@ -41,6 +41,7 @@ export const formatarMoedaInput = (valor) => {
 
   // Remove tudo que não é número
   let numero = valor.replace(/\D/g, "");
+  if (numero.length > 15) numero = numero.slice(0, 15); // Prevenir overflow
 
   if (numero.length === 0) return "";
 

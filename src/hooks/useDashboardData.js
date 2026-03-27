@@ -11,34 +11,12 @@ import { db } from "../firebase/firebaseConfig";
 import { parseValorMonetario } from "../utils/formatters";
 import { DESPESA_STATUS } from "../config/constants";
 
-// ✅ CACHE GLOBAL com TTL de 5 minutos
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutos em ms
-const dashboardCache = {
-  data: null,
-  timestamp: null,
-  userKey: null,
-};
+// Cache TTL de 5 minutos
+const CACHE_TTL = 5 * 60 * 1000;
 
 const getCacheKey = (user, permissions) => {
   return `${user?.email}_${permissions?.acessoTotal ? 'admin' : user?.municipio}_${user?.uf}`;
 };
-
-const isCacheValid = (cacheKey) => {
-  if (!dashboardCache.data || dashboardCache.userKey !== cacheKey) {
-    return false;
-  }
-  const now = Date.now();
-  const elapsed = now - dashboardCache.timestamp;
-  return elapsed < CACHE_TTL;
-};
-
-const setCache = (data, cacheKey) => {
-  dashboardCache.data = data;
-  dashboardCache.timestamp = Date.now();
-  dashboardCache.userKey = cacheKey;
-};
-
-const getCache = () => dashboardCache.data;
 
 const useDashboardData = (user, permissions) => {
   const [emendas, setEmendas] = useState([]);
@@ -46,6 +24,21 @@ const useDashboardData = (user, permissions) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isMountedRef = useRef(true);
+
+  // Cache por instancia do hook (evita race conditions entre componentes)
+  const cacheRef = useRef({ data: null, timestamp: null, userKey: null });
+
+  const isCacheValid = (cacheKey) => {
+    const cache = cacheRef.current;
+    if (!cache.data || cache.userKey !== cacheKey) return false;
+    return (Date.now() - cache.timestamp) < CACHE_TTL;
+  };
+
+  const setCache = (data, cacheKey) => {
+    cacheRef.current = { data, timestamp: Date.now(), userKey: cacheKey };
+  };
+
+  const getCache = () => cacheRef.current.data;
 
   // Cleanup para evitar setState após desmontagem
   useEffect(() => {
@@ -58,7 +51,7 @@ const useDashboardData = (user, permissions) => {
   // 🔧 ADMIN: Carrega todos os dados (PRESERVADO - funciona 100%)
   const carregarDadosAdmin = async () => {
     try {
-      console.log("🔓 ADMIN: Carregando TODOS os dados do sistema");
+      if (import.meta.env.DEV) console.log("🔓 ADMIN: Carregando TODOS os dados do sistema");
 
       const emendasRef = collection(db, "emendas");
       const emendasSnapshot = await getDocs(emendasRef);
@@ -74,7 +67,7 @@ const useDashboardData = (user, permissions) => {
         despesasData.push({ id: doc.id, ...doc.data() });
       });
 
-      console.log(
+      if (import.meta.env.DEV) console.log(
         `✅ ADMIN carregou: ${emendasData.length} emendas, ${despesasData.length} despesas`,
       );
       return { emendasData, despesasData };
@@ -91,18 +84,20 @@ const useDashboardData = (user, permissions) => {
 
       // ✅ VALIDAÇÃO: Município vazio = sem dados
       if (!userMunicipio || userMunicipio === "") {
-        console.warn("⚠️ Operador sem município definido, retornando dados vazios");
+        if (import.meta.env.DEV) console.warn("⚠️ Operador sem município definido, retornando dados vazios");
         return { emendasData: [], despesasData: [] };
       }
       const userUf = user?.uf?.trim();
 
-      console.log("🔐 OPERADOR/GESTOR: Aplicando filtros geográficos");
-      console.log("👤 Dados do usuário:", {
-        email: user?.email,
-        municipio: userMunicipio,
-        uf: userUf,
-        tipo: user?.tipo,
-      });
+      if (import.meta.env.DEV) {
+        console.log("🔐 OPERADOR/GESTOR: Aplicando filtros geográficos");
+        console.log("👤 Dados do usuário:", {
+          email: user?.email,
+          municipio: userMunicipio,
+          uf: userUf,
+          tipo: user?.tipo,
+        });
+      }
 
       if (!userMunicipio) {
         throw new Error("❌ Operador deve ter município definido");
@@ -123,7 +118,7 @@ const useDashboardData = (user, permissions) => {
         emendasData.push({ id: doc.id, ...doc.data() });
       });
 
-      console.log(
+      if (import.meta.env.DEV) console.log(
         `✅ OPERADOR/GESTOR encontrou: ${emendasData.length} emendas para ${userMunicipio}/${userUf}`,
       );
 
@@ -149,7 +144,7 @@ const useDashboardData = (user, permissions) => {
         }
       }
 
-      console.log(`✅ OPERADOR/GESTOR carregou: ${despesasData.length} despesas (via emendaId)`);
+      if (import.meta.env.DEV) console.log(`✅ OPERADOR/GESTOR carregou: ${despesasData.length} despesas (via emendaId)`);
       return { emendasData, despesasData };
     } catch (error) {
       console.error("❌ Erro operador/gestor:", error);
@@ -168,8 +163,8 @@ const useDashboardData = (user, permissions) => {
 
       // ✅ PERFORMANCE: Verificar cache antes de buscar do Firestore
       if (isCacheValid(cacheKey)) {
-        console.log("⚡ Dados carregados do cache (válido por mais",
-          Math.round((CACHE_TTL - (Date.now() - dashboardCache.timestamp)) / 1000),
+        if (import.meta.env.DEV) console.log("⚡ Dados carregados do cache (válido por mais",
+          Math.round((CACHE_TTL - (Date.now() - cacheRef.current.timestamp)) / 1000),
           "segundos)");
         const cachedData = getCache();
         if (!isMountedRef.current) return;
@@ -179,7 +174,7 @@ const useDashboardData = (user, permissions) => {
         return;
       }
 
-      console.log("🔄 Carregando dados do Firestore:", {
+      if (import.meta.env.DEV) console.log("🔄 Carregando dados do Firestore:", {
         userEmail: user?.email,
         userTipo: user?.tipo,
         acessoTotal: permissions?.acessoTotal,
@@ -271,7 +266,7 @@ const useDashboardData = (user, permissions) => {
         despesas: resultado.despesasData,
       }, cacheKey);
       
-      console.log("💾 Dados salvos no cache (válido por 5 minutos)");
+      if (import.meta.env.DEV) console.log("💾 Dados salvos no cache (válido por 5 minutos)");
     } catch (error) {
       console.error("❌ Erro ao carregar dados:", error);
       if (isMountedRef.current) {

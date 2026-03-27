@@ -39,10 +39,12 @@ import UpdateNotification from "./components/UpdateNotification";
 import SystemStatusBar from "./components/SystemStatusBar";
 import ThemeToggleButton from "./components/ThemeToggleButton";
 
-console.log(`🔥 Firebase [${import.meta.env.MODE?.toUpperCase() || 'DEV'}]:`, {
-  project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  ready: !!import.meta.env.VITE_FIREBASE_API_KEY,
-});
+if (import.meta.env.DEV) {
+  console.log(`🔥 Firebase [${import.meta.env.MODE?.toUpperCase() || 'DEV'}]:`, {
+    project: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    ready: !!import.meta.env.VITE_FIREBASE_API_KEY,
+  });
+}
 
 // Sistema inteligente de controle de logs
 import { configureConsole } from "./utils/DisableConsole";
@@ -231,10 +233,10 @@ function AppContent() {
 
   const handleLoginSuccess = useCallback(
     (dadosUsuario) => {
-      console.log("✅ handleLoginSuccess chamado:", dadosUsuario);
+      if (import.meta.env.DEV) console.log("✅ handleLoginSuccess chamado:", dadosUsuario);
 
       if (dadosUsuario && dadosUsuario.uid) {
-        console.log(
+        if (import.meta.env.DEV) console.log(
           "📋 Definindo usuário com dados completos do Login.jsx:",
           dadosUsuario,
         );
@@ -244,7 +246,7 @@ function AppContent() {
         return;
       }
 
-      console.log("📋 Login sem dados - deixar onAuthStateChanged carregar");
+      if (import.meta.env.DEV) console.log("📋 Login sem dados - deixar onAuthStateChanged carregar");
       setShowLogin(false);
       setAuthError(null);
       navigate("/dashboard");

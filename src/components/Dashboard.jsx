@@ -3,7 +3,7 @@
 // ✅ Preserva CronogramaWidget existente
 // ✅ Remove redundâncias do MetricsGrid
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import usePermissions from "../hooks/usePermissions";
 import useDashboardData from "../hooks/useDashboardData";
@@ -152,27 +152,33 @@ const Dashboard = ({ usuario }) => {
 
   // ==================== CÁLCULOS PARA INSIGHTS ====================
 
-  const taxaExecucao =
+  const taxaExecucao = useMemo(() =>
     stats.valorTotalEmendas > 0
       ? ((stats.valorExecutado / stats.valorTotalEmendas) * 100).toFixed(1)
-      : 0;
+      : 0,
+    [stats.valorTotalEmendas, stats.valorExecutado]
+  );
 
-  const emendasCriticas = emendas.filter((e) => {
+  const emendasCriticas = useMemo(() => {
     const hoje = new Date();
-    const validade = e.dataValidade ? new Date(e.dataValidade) : null;
-    const diasRestantes = validade
-      ? Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24))
-      : 0;
-    return (
-      diasRestantes > 0 && diasRestantes <= 30 && e.percentualExecutado < 80
-    );
-  }).length;
+    return emendas.filter((e) => {
+      const validade = e.dataValidade ? new Date(e.dataValidade) : null;
+      const diasRestantes = validade
+        ? Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24))
+        : 0;
+      return (
+        diasRestantes > 0 && diasRestantes <= 30 && e.percentualExecutado < 80
+      );
+    }).length;
+  }, [emendas]);
 
-  const emendasVencidas = emendas.filter((e) => {
+  const emendasVencidas = useMemo(() => {
     const hoje = new Date();
-    const validade = e.dataValidade ? new Date(e.dataValidade) : null;
-    return validade && validade < hoje && e.percentualExecutado < 100;
-  }).length;
+    return emendas.filter((e) => {
+      const validade = e.dataValidade ? new Date(e.dataValidade) : null;
+      return validade && validade < hoje && e.percentualExecutado < 100;
+    }).length;
+  }, [emendas]);
 
   // ==================== RENDER PRINCIPAL ====================
 

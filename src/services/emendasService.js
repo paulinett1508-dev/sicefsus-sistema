@@ -5,28 +5,33 @@ import { query, collection, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
 export const carregarEmendasPorPermissao = async (userRole, userMunicipio, userUf) => {
-  try {
-    console.log("🔍 Carregando emendas com filtro por município...");
+  // Validacao de inputs
+  if (!userRole || typeof userRole !== "string") {
+    throw new Error("userRole e obrigatorio");
+  }
 
+  const rolesValidos = ["admin", "gestor", "operador", "user"];
+  if (!rolesValidos.includes(userRole)) {
+    throw new Error(`userRole invalido: ${userRole}`);
+  }
+
+  if (userRole !== "admin" && !userMunicipio?.trim()) {
+    throw new Error("Configuração de usuário incompleta. Entre em contato com o administrador.");
+  }
+
+  try {
     let q;
 
     if (userRole === "admin") {
-      console.log("👑 Usuário ADMIN - carregando todas as emendas");
       q = query(collection(db, "emendas"));
     } else if (
-      (userRole === "operador" || userRole === "user") &&
+      (userRole === "operador" || userRole === "user" || userRole === "gestor") &&
       userMunicipio
     ) {
-      console.log(
-        `🏘️ Usuário ${userRole.toUpperCase()} - carregando emendas do município: ${userMunicipio}`,
-      );
       const filters = [where("municipio", "==", userMunicipio)];
       if (userUf) filters.push(where("uf", "==", userUf));
       q = query(collection(db, "emendas"), ...filters);
     } else {
-      console.warn(
-        "⚠️ Usuário sem permissões definidas ou município não informado",
-      );
       throw new Error(
         "Configuração de usuário incompleta. Entre em contato com o administrador.",
       );
@@ -42,13 +47,9 @@ export const carregarEmendasPorPermissao = async (userRole, userMunicipio, userU
       });
     });
 
-    console.log(
-      `✅ Emendas carregadas para ${userRole} (${userMunicipio}):`,
-      emendasData.length,
-    );
     return emendasData;
   } catch (error) {
-    console.error("❌ Erro ao carregar emendas:", error);
+    console.error("Erro ao carregar emendas:", error.message);
     throw error;
   }
 };
