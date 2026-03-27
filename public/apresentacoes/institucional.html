@@ -409,58 +409,68 @@
     }
 
     /* ────────── LGPD ────────── */
-    .lgpd-bg { background: var(--white); }
+    .lgpd-bg { background: var(--bg); }
+    .lgpd-section { padding: 48px 48px 40px; }
+    .lgpd-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .lgpd-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .lgpd-header p {
+      font-size: 13px;
+      color: var(--muted);
+    }
     .lgpd-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
     }
     .lgpd-card {
-      background: var(--bg);
-      border-radius: 12px;
-      padding: 24px;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 16px;
       border: 1px solid var(--border);
     }
-    .lgpd-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: var(--navy);
-      color: white;
+    .lgpd-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .lgpd-card-header .material-symbols-outlined {
+      font-size: 16px;
+      color: var(--action);
+    }
+    .lgpd-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .lgpd-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .lgpd-footer {
+      margin-top: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
-    }
-    .lgpd-icon .material-symbols-outlined { font-size: 20px; }
-    .lgpd-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--navy);
-      margin-bottom: 8px;
-    }
-    .lgpd-desc {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .lgpd-laws {
-      margin-top: 24px;
-      padding: 20px;
-      background: rgba(37,99,235,.04);
-      border-radius: 10px;
-      border: 1px solid rgba(37,99,235,.1);
-    }
-    .lgpd-laws-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--action);
-      margin-bottom: 10px;
-    }
-    .lgpd-laws-list {
-      display: flex;
+      gap: 24px;
       flex-wrap: wrap;
-      gap: 8px;
+    }
+    .lgpd-law {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--white);
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
     }
     .lgpd-law {
       font-size: 12px;
@@ -754,7 +764,8 @@
     /* ────────── PRINT-ONLY ELEMENTS (hidden on screen) ────────── */
     .print-cover-meta,
     .print-toc,
-    .print-running-footer { display: none; }
+    .print-running-footer,
+    .print-closure { display: none; }
 
     /* ────────── PRINT STYLES — DOCUMENTO FORMAL ────────── */
     @media print {
@@ -820,41 +831,56 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        max-width: 480px;
+      }
+
+      .cover-eyebrow {
+        font-size: 8pt !important;
+        letter-spacing: .15em;
+        text-transform: uppercase;
+        color: #666 !important;
+        margin-bottom: 24px;
       }
 
       .cover-title {
         font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-        font-size: 42pt;
-        font-weight: 800;
+        font-size: 18pt;
+        font-weight: 600;
         color: #1A3A4A !important;
-        letter-spacing: .04em;
-        margin-bottom: 12px;
+        letter-spacing: 0;
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      .cover-title em {
+        font-style: normal;
+        font-weight: 600;
       }
       .cover-divider {
-        width: 80px;
-        height: 2px;
-        background: #1A3A4A !important;
+        width: 40px;
+        height: 1px;
+        background: #999 !important;
         margin: 16px auto;
       }
       .cover-subtitle {
-        font-size: 14pt;
-        color: #333 !important;
+        font-size: 10pt;
+        color: #555 !important;
         font-weight: 400;
-        margin-bottom: 32px;
+        margin-bottom: 40px;
+        line-height: 1.5;
       }
 
       /* Badges → lista simples de texto */
       .cover-badges {
         flex-direction: column;
-        gap: 4px;
+        gap: 3px;
         margin-top: 0;
       }
       .cover-badge {
         background: none !important;
         border: none !important;
-        color: #555 !important;
-        font-size: 10pt;
-        padding: 2px 0;
+        color: #777 !important;
+        font-size: 8pt;
+        padding: 1px 0;
         backdrop-filter: none !important;
       }
 
@@ -863,31 +889,31 @@
         display: flex !important;
         flex-direction: column;
         align-items: center;
-        margin-top: 48px;
-        padding-top: 32px;
-        border-top: 1px solid #ccc;
-        gap: 6px;
+        margin-top: 60px;
+        padding-top: 24px;
+        border-top: 1px solid #ddd;
+        gap: 4px;
       }
       .print-doc-label {
-        font-size: 10pt;
-        font-weight: 700;
-        letter-spacing: .2em;
+        font-size: 8pt;
+        font-weight: 600;
+        letter-spacing: .15em;
         text-transform: uppercase;
-        color: #1A3A4A;
+        color: #666;
       }
       .print-doc-subtitle {
-        font-size: 11pt;
-        color: #555;
-        font-style: italic;
+        font-size: 9pt;
+        color: #777;
+        font-style: normal;
       }
       .print-doc-date {
-        font-size: 10pt;
-        color: #777;
-        margin-top: 4px;
+        font-size: 8pt;
+        color: #888;
+        margin-top: 8px;
       }
       .print-doc-version {
-        font-size: 9pt;
-        color: #999;
+        font-size: 7pt;
+        color: #aaa;
       }
 
       /* ══════════ SUMÁRIO ══════════ */
@@ -1172,30 +1198,145 @@
         color: #333 !important;
       }
 
+      /* ── LGPD: estilo documento ── */
+      .lgpd-bg {
+        background: white !important;
+      }
+      .lgpd-section {
+        padding: 24px 0 !important;
+      }
+      .lgpd-header {
+        text-align: left !important;
+        margin-bottom: 16px !important;
+      }
+      .lgpd-header h3 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 16pt !important;
+        font-weight: 700 !important;
+        color: #1A3A4A !important;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 6px;
+        margin-bottom: 4px !important;
+      }
+      .lgpd-header h3::before {
+        counter-increment: doc-section;
+        content: counter(doc-section) ". ";
+      }
+      .lgpd-header p {
+        font-size: 9pt !important;
+        color: #666 !important;
+        font-style: italic;
+      }
+      .lgpd-grid {
+        display: block !important;
+      }
+      .lgpd-card {
+        background: none !important;
+        border: none !important;
+        border-bottom: 1px solid #e8e8e8 !important;
+        border-radius: 0 !important;
+        padding: 10px 0 !important;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .lgpd-card:last-child { border-bottom: none !important; }
+      .lgpd-card-header {
+        flex-shrink: 0;
+        margin-bottom: 0 !important;
+      }
+      .lgpd-card-header .material-symbols-outlined {
+        display: none !important;
+      }
+      .lgpd-title {
+        font-size: 10pt !important;
+        font-weight: 600 !important;
+        color: #1A3A4A !important;
+        min-width: 100px;
+      }
+      .lgpd-title::after {
+        content: ":";
+      }
+      .lgpd-desc {
+        font-size: 9.5pt !important;
+        color: #444 !important;
+        line-height: 1.45 !important;
+      }
+      .lgpd-footer {
+        margin-top: 12px !important;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        justify-content: flex-start !important;
+        gap: 16px !important;
+      }
+      .lgpd-law {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+        font-size: 8pt !important;
+        color: #666 !important;
+      }
+
+      /* ── Encerramento formal ── */
+      .system-cta-wrap {
+        background: white !important;
+        padding: 32px 0 !important;
+        text-align: center;
+        border-top: 1px solid #ccc;
+        margin-top: 24px;
+      }
+      .system-cta-title {
+        font-size: 11pt !important;
+        font-weight: 600 !important;
+        color: #1A3A4A !important;
+        margin-bottom: 8px !important;
+      }
+      .system-cta-sub {
+        font-size: 9pt !important;
+        color: #555 !important;
+        font-style: italic;
+      }
+      .print-closure {
+        display: block !important;
+        margin-top: 32px;
+        text-align: center;
+      }
+      .print-closure-line {
+        width: 200px;
+        height: 1px;
+        background: #ccc;
+        margin: 0 auto 8px;
+      }
+      .print-closure-text {
+        font-size: 8pt;
+        color: #888;
+        font-style: italic;
+      }
+
       /* ── Footer ── */
       .site-footer {
         background: white !important;
         color: #555 !important;
         border-top: 1px solid #ccc;
-        padding: 12px 0 !important;
+        padding: 16px 0 !important;
         text-align: center;
-        margin-top: 24px;
+        margin-top: 16px;
       }
-      .footer-brand {
-        color: #1A3A4A !important;
-        font-size: 11pt !important;
+      .footer-content {
+        font-size: 8pt !important;
+        color: #888 !important;
       }
-      .footer-center {
-        color: #555 !important;
-        font-size: 9.5pt !important;
+      .footer-content a {
+        color: #666 !important;
+        text-decoration: none !important;
       }
-      .footer-right {
-        color: #777 !important;
-        font-size: 9pt !important;
+      .footer-sep {
+        color: #ccc !important;
       }
 
       /* ── Page breaks ── */
-      .module-card, .security-card, .profile-card, .report-item, .flow-step {
+      .module-card, .security-card, .profile-card, .report-item, .flow-step, .lgpd-card {
         page-break-inside: avoid;
       }
       .profiles-bg { page-break-before: always; }
@@ -1291,6 +1432,7 @@
       <li>Perfis de acesso</li>
       <li>Relatórios em PDF</li>
       <li>Fluxo operacional</li>
+      <li>Conformidade LGPD</li>
     </ol>
   </div>
 
@@ -1442,51 +1584,6 @@
           <div class="security-desc">Validação contra XSS e injeção de código em todos os campos. Senhas criptografadas. Conformidade com boas práticas de desenvolvimento seguro.</div>
         </div>
 
-      </div>
-    </section>
-  </div>
-
-  <!-- ═══════════════════════ LGPD ═══════════════════════ -->
-  <div class="lgpd-bg">
-    <section class="fade-in">
-      <div class="section-label">Conformidade</div>
-      <h2 class="section-title">LGPD e Protecao de Dados</h2>
-      <p class="section-subtitle">Tratamento de dados em conformidade com a legislacao brasileira</p>
-
-      <div class="lgpd-grid">
-        <div class="lgpd-card">
-          <div class="lgpd-icon"><span class="material-symbols-outlined">gavel</span></div>
-          <div class="lgpd-title">Base Legal</div>
-          <div class="lgpd-desc">Tratamento fundamentado no Art. 7, III da LGPD — execucao de politicas publicas pela administracao publica, e Art. 23 — tratamento pelo Poder Publico.</div>
-        </div>
-
-        <div class="lgpd-card">
-          <div class="lgpd-icon"><span class="material-symbols-outlined">folder_limited</span></div>
-          <div class="lgpd-title">Dados Coletados</div>
-          <div class="lgpd-desc">Apenas dados necessarios: identificacao do usuario, municipio/UF, e registros de operacoes. Nao coletamos dados de saude de pacientes ou informacoes bancarias.</div>
-        </div>
-
-        <div class="lgpd-card">
-          <div class="lgpd-icon"><span class="material-symbols-outlined">share</span></div>
-          <div class="lgpd-title">Compartilhamento</div>
-          <div class="lgpd-desc">Dados compartilhados apenas com orgaos de controle (TCU, TCE, CGU) mediante requisicao formal. Nao comercializamos dados.</div>
-        </div>
-
-        <div class="lgpd-card">
-          <div class="lgpd-icon"><span class="material-symbols-outlined">person_raised_hand</span></div>
-          <div class="lgpd-title">Direitos do Titular</div>
-          <div class="lgpd-desc">Conforme Art. 18 da LGPD: acesso, correcao, anonimizacao e exclusao de dados. Solicitacoes via administrador do sistema.</div>
-        </div>
-      </div>
-
-      <div class="lgpd-laws">
-        <div class="lgpd-laws-title">Legislacao Aplicavel</div>
-        <div class="lgpd-laws-list">
-          <span class="lgpd-law">Lei 13.709/2018 (LGPD)</span>
-          <span class="lgpd-law">Lei 12.527/2011 (LAI)</span>
-          <span class="lgpd-law">Lei 4.320/1964</span>
-          <span class="lgpd-law">Decreto 10.540/2020 (SIAFIC)</span>
-        </div>
       </div>
     </section>
   </div>
@@ -1688,10 +1785,61 @@
     </section>
   </div>
 
-  <!-- ═══════════════════════ SISTEMA CTA ═══════════════════════ -->
+  <!-- ═══════════════════════ LGPD ═══════════════════════ -->
+  <div class="lgpd-bg">
+    <section class="lgpd-section fade-in">
+      <div class="lgpd-header">
+        <h3>Conformidade LGPD</h3>
+        <p>Tratamento de dados conforme Lei 13.709/2018</p>
+      </div>
+      <div class="lgpd-grid">
+        <div class="lgpd-card">
+          <div class="lgpd-card-header">
+            <span class="material-symbols-outlined">gavel</span>
+            <span class="lgpd-title">Base Legal</span>
+          </div>
+          <div class="lgpd-desc">Art. 7º, III e Art. 23 — execucao de politicas publicas</div>
+        </div>
+        <div class="lgpd-card">
+          <div class="lgpd-card-header">
+            <span class="material-symbols-outlined">folder_limited</span>
+            <span class="lgpd-title">Dados Coletados</span>
+          </div>
+          <div class="lgpd-desc">Apenas dados funcionais: usuario, municipio/UF e logs</div>
+        </div>
+        <div class="lgpd-card">
+          <div class="lgpd-card-header">
+            <span class="material-symbols-outlined">share</span>
+            <span class="lgpd-title">Compartilhamento</span>
+          </div>
+          <div class="lgpd-desc">Somente orgaos de controle mediante requisicao formal</div>
+        </div>
+        <div class="lgpd-card">
+          <div class="lgpd-card-header">
+            <span class="material-symbols-outlined">person_raised_hand</span>
+            <span class="lgpd-title">Direitos</span>
+          </div>
+          <div class="lgpd-desc">Acesso, correcao e exclusao conforme Art. 18</div>
+        </div>
+      </div>
+      <div class="lgpd-footer">
+        <span class="lgpd-law">Lei 13.709/2018 (LGPD)</span>
+        <span class="lgpd-law">Lei 12.527/2011 (LAI)</span>
+        <span class="lgpd-law">Lei 4.320/1964</span>
+        <span class="lgpd-law">Decreto 10.540/2020</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ ENCERRAMENTO ═══════════════════════ -->
   <div class="system-cta-wrap">
-    <h2 class="system-cta-title">Transparência, controle e rastreabilidade — do início ao fim.</h2>
-    <p class="system-cta-sub">SICEFSUS: a gestão de emendas parlamentares de saúde que o serviço público merece.</p>
+    <h2 class="system-cta-title">Transparencia, controle e rastreabilidade — do inicio ao fim.</h2>
+    <p class="system-cta-sub">A gestao de emendas parlamentares de saude que o servico publico merece.</p>
+    <!-- Print-only: encerramento formal do documento -->
+    <div class="print-closure">
+      <div class="print-closure-line"></div>
+      <div class="print-closure-text">Fim do documento</div>
+    </div>
   </div>
 
   <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
