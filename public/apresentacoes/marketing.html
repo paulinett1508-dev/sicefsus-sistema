@@ -912,6 +912,91 @@
       font-size: 14px;
     }
 
+    /* ──────────────────── CLOSING SECTION ──────────────────── */
+    .closing-section {
+      background: linear-gradient(180deg, var(--base) 0%, var(--deep) 100%);
+      padding: 72px 48px 56px;
+      text-align: center;
+      position: relative;
+    }
+    .closing-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+    }
+    .closing-inner {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .closing-headline {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 12px;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+    .closing-headline em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--primary-soft), var(--primary-mid));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .closing-sub {
+      font-size: 16px;
+      color: rgba(255,255,255,.55);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+    .closing-divider {
+      width: 40px;
+      height: 2px;
+      background: var(--primary);
+      margin: 0 auto 32px;
+      border-radius: 1px;
+    }
+    .closing-tagline {
+      font-size: 13px;
+      color: rgba(255,255,255,.4);
+      margin-bottom: 24px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .back-to-top-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50px;
+      color: rgba(255,255,255,.6);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .3s ease;
+      text-decoration: none;
+    }
+    .back-to-top-btn:hover {
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.25);
+      color: rgba(255,255,255,.85);
+      transform: translateY(-2px);
+    }
+    .back-to-top-btn .material-symbols-outlined {
+      font-size: 16px;
+      transition: transform .3s ease;
+    }
+    .back-to-top-btn:hover .material-symbols-outlined {
+      transform: translateY(-2px);
+    }
+
     /* ──────────────────── FOOTER ──────────────────── */
     .site-footer {
       background: var(--deep);
@@ -1062,6 +1147,9 @@
       .section-wrap { padding: 48px 20px; }
       .solution-wrap { padding: 48px 20px; }
       .cta-section { padding: 48px 20px; }
+      .closing-section { padding: 56px 20px 48px; }
+      .closing-headline { font-size: 22px; }
+      .closing-sub { font-size: 14px; }
       .site-footer { padding: 20px; }
       .nav-links { display: none; }
       .hamburger { display: flex; }
@@ -1101,7 +1189,7 @@
   </div>
 
   <!-- ═══════════ HERO ═══════════ -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="hero-grid-bg"></div>
     <div class="hero-top-fade"></div>
     <div class="hero-inner">
@@ -1401,6 +1489,24 @@
       </table>
     </div>
   </div>
+
+  <!-- ═══════════ CLOSING ═══════════ -->
+  <section class="closing-section">
+    <div class="closing-inner">
+      <h2 class="closing-headline">
+        Transparencia, controle e <em>rastreabilidade</em>
+      </h2>
+      <p class="closing-sub">
+        A gestao de emendas parlamentares de saude que o servico publico merece.
+      </p>
+      <div class="closing-divider"></div>
+      <p class="closing-tagline">Do planejamento a prestacao de contas</p>
+      <a href="#hero" class="back-to-top-btn">
+        <span class="material-symbols-outlined">arrow_upward</span>
+        Voltar ao inicio
+      </a>
+    </div>
+  </section>
 
   <!-- ═══════════ FOOTER ═══════════ -->
   <footer class="site-footer">
