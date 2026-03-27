@@ -147,7 +147,9 @@
       "Bash(sed -n '1400,1415p' /home/runner/workspace/public/apresentacoes/institucional.html)",
       "WebFetch(domain:sicefsus.replit.app)",
       "Bash(replit --help)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(for file:*)",
+      "Bash(do echo:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
