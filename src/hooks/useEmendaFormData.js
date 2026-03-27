@@ -19,7 +19,6 @@ export const useEmendaFormData = () => {
 
   // ✅ ESTADOS PRINCIPAIS
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -381,7 +380,11 @@ export const useEmendaFormData = () => {
     modalMessage +=
       "\n⚠️ Preencha os campos em vermelho e tente novamente.\n\n✅ Sistema com melhorias aplicadas.";
 
-    alert(modalMessage);
+    setToast({
+      show: true,
+      message: modalMessage,
+      type: "error",
+    });
   }, []);
 
   // ✅ LIMPEZA DE ERRO DE CAMPO ESPECÍFICO
@@ -398,28 +401,23 @@ export const useEmendaFormData = () => {
     (e) => {
       const { name, value } = e.target;
 
-      console.log("📝 useEmendaFormData.handleInputChange executado:", {
-        field: name,
-        value: value,
-        valueType: typeof value,
-      });
-
-      // ✅ ATUALIZAR O ESTADO DO FORMULÁRIO
+      // Atualizar o estado do formulario
       setFormData((prev) => ({
         ...prev,
         [name]: value,
       }));
 
-      // Limpar erro do campo se existir
-      if (fieldErrors[name]) {
-        setFieldErrors((prev) => {
+      // Limpar erro do campo se existir (pattern funcional - sem dependencia externa)
+      setFieldErrors((prev) => {
+        if (prev[name]) {
           const newErrors = { ...prev };
           delete newErrors[name];
           return newErrors;
-        });
-      }
+        }
+        return prev;
+      });
     },
-    [fieldErrors],
+    [],
   );
 
   const toggleSection = useCallback((section) => {
@@ -977,7 +975,7 @@ export const useEmendaFormData = () => {
     formData,
     setFormData,
     loading,
-    saving,
+    saving: salvando,
     error,
     setError,
     isReady,

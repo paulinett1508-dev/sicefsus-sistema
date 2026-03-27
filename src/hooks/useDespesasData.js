@@ -5,7 +5,7 @@
 // ✅ Tratamento de erros centralizado
 // ✅ CORREÇÃO P2: Filtro geográfico via query Firestore (consistente com useDashboardData)
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   collection,
   getDocs,
@@ -21,6 +21,7 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
   const [emendas, setEmendas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isMountedRef = useRef(true);
 
   const userRole = usuario?.tipo || "operador";
   const userMunicipio = usuario?.municipio?.trim();
@@ -126,9 +127,13 @@ export function useDespesasData(usuario, emendaIdFiltro = null) {
     }
   }, [emendaIdFiltro, userRole, userMunicipio, userUf]);
 
-  // 🔄 Auto-carregar na montagem
+  // Auto-carregar na montagem com cleanup
   useEffect(() => {
+    isMountedRef.current = true;
     carregarDados();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [carregarDados]);
 
   return {

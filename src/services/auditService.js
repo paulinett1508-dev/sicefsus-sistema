@@ -20,7 +20,7 @@ class AuditService {
     this.collectionName = "logs";
     // Log de inicialização apenas uma vez por sessão
     if (!sessionStorage.getItem('audit_service_logged')) {
-      console.log('🔒 AuditService inicializado');
+      if (import.meta.env.DEV) console.log('🔒 AuditService inicializado');
       sessionStorage.setItem('audit_service_logged', 'true');
     }
   }
@@ -85,38 +85,6 @@ class AuditService {
         dataBefore: dataBefore || null,
         dataAfter: dataAfter || null,
 
-        // Metadados adicionais
-        metadata: {
-          ...metadata,
-          userAgent: navigator?.userAgent || "N/A",
-          timestamp: new Date().toISOString(),
-        },
-
-        // Recursos relacionados (opcional)
-        relatedResources: relatedResources || {},
-
-        // Status da operação
-        success: true,
-        
-        // Timestamp do servidor (mais confiável)
-        timestamp: serverTimestamp(),
-
-        // Dados da ação
-        action,
-        resourceType,
-        resourceId,
-
-        // Dados do usuário
-        userId: user.uid || "unknown",
-        userEmail: user.email,
-        userRole: user.tipo || "unknown",
-        userMunicipio: user.municipio || null,
-        userUf: user.uf || null,
-
-        // Dados da operação
-        dataBefore,
-        dataAfter,
-
         // Status da operação
         success: true,
         errorMessage: null,
@@ -142,7 +110,7 @@ class AuditService {
         logEntry,
       );
 
-      console.log("📋 Audit log registrado com sucesso:", {
+      if (import.meta.env.DEV) console.log("📋 Audit log registrado com sucesso:", {
         logId: docRef.id,
         action,
         resourceType,
@@ -217,7 +185,7 @@ class AuditService {
         logEntry,
       );
 
-      console.log("📋 Audit error log registrado:", {
+      if (import.meta.env.DEV) console.log("📋 Audit error log registrado:", {
         logId: docRef.id,
         action,
         error: error.message,
@@ -247,7 +215,7 @@ class AuditService {
     onlyErrors = false,
   } = {}) {
     try {
-      console.log("📊 Buscando logs de auditoria:", {
+      if (import.meta.env.DEV) console.log("📊 Buscando logs de auditoria:", {
         userId,
         resourceType,
         action,
@@ -297,7 +265,7 @@ class AuditService {
         });
       });
 
-      console.log(`✅ ${logs.length} logs carregados`);
+      if (import.meta.env.DEV) console.log(`✅ ${logs.length} logs carregados`);
       return logs;
     } catch (error) {
       console.error("❌ Erro ao buscar logs:", error);
@@ -312,7 +280,7 @@ class AuditService {
    */
   async getStats(days = 30) {
     try {
-      console.log(`📈 Gerando estatísticas dos últimos ${days} dias`);
+      if (import.meta.env.DEV) console.log(`📈 Gerando estatísticas dos últimos ${days} dias`);
 
       const logs = await this.getLogs({ limit: 1000 });
 
@@ -355,7 +323,7 @@ class AuditService {
         generatedAt: new Date().toISOString(),
       };
 
-      console.log("✅ Estatísticas geradas:", {
+      if (import.meta.env.DEV) console.log("✅ Estatísticas geradas:", {
         totalActions: stats.totalActions,
         successRate: `${((stats.successRate.success / stats.successRate.total) * 100).toFixed(1)}%`,
       });
@@ -439,7 +407,7 @@ class AuditService {
         },
       });
 
-      console.log("✅ AuditService teste realizado com sucesso:", testLog);
+      if (import.meta.env.DEV) console.log("✅ AuditService teste realizado com sucesso:", testLog);
       return true;
     } catch (error) {
       console.error("❌ Erro no teste do AuditService:", error);

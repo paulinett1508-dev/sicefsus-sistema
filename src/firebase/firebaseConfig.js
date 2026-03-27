@@ -31,7 +31,7 @@ if (import.meta.env.DEV) {
   // Log de ambiente apenas uma vez por sessão
   if (!sessionStorage.getItem("firebase_env_logged")) {
     console.log("🔥 Firebase Environment:", {
-      projectId: currentEnv,
+      projectId: currentEnv ? "configured" : "missing",
       environment: currentEnvironment.toUpperCase(),
       isProduction,
       isDevelopment,

@@ -33,7 +33,7 @@ export default function Login({ onLoginSuccess }) {
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   useEffect(() => {
-    const emailSalvo = localStorage.getItem("sicefsus_email");
+    const emailSalvo = sessionStorage.getItem("sicefsus_email");
     if (emailSalvo) {
       setEmail(emailSalvo);
       setLembrarEmail(true);
@@ -105,9 +105,9 @@ export default function Login({ onLoginSuccess }) {
       onLoginSuccess(dadosUsuario);
 
       if (lembrarEmail) {
-        localStorage.setItem("sicefsus_email", email);
+        sessionStorage.setItem("sicefsus_email", email);
       } else {
-        localStorage.removeItem("sicefsus_email");
+        sessionStorage.removeItem("sicefsus_email");
       }
     } catch (err) {
       let mensagemErro = "Erro inesperado no login";

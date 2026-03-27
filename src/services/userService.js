@@ -71,25 +71,17 @@ const getAuthToken = async () => {
 
 // 🚨 CORREÇÃO 2: FUNÇÃO DE CRIAÇÃO SEM CLOUD FUNCTION
 export const createUser = async (userData, options = {}) => {
-  console.log("👤 === CRIAÇÃO DE USUÁRIO (SEM CLOUD FUNCTION) ===");
-  console.log("📊 Dados:", userData);
-
-  // ✅ IR DIRETO PARA FALLBACK (sem tentar Cloud Function)
-  console.log("🔥 Usando método direto (Cloud Function desabilitada)");
-  return await createUserDirect(userData, options.navigate, options.showToast);
+  return await createUserDirect(userData, options.navigate, options.showToast, options.adminPassword);
 };
 
 // 🚨 CORREÇÃO 3: FUNÇÃO DE EXCLUSÃO SEM CLOUD FUNCTION
 export const deleteUserById = async (userId, userUid) => {
-  console.log("🗑️ === EXCLUSÃO DE USUÁRIO (SEM CLOUD FUNCTION) ===");
-  console.log("📊 Dados:", { userId, userUid });
-
-  // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
-  console.log("🔥 Usando exclusão direta (Cloud Function desabilitada)");
+  if (import.meta.env.DEV) {
+    console.log("🗑️ Exclusao de usuario:", userId);
+  }
 
   try {
     await deleteDoc(doc(db, "usuarios", userId));
-    console.log("✅ Usuário excluído do Firestore");
 
     return {
       success: true,
@@ -104,9 +96,7 @@ export const deleteUserById = async (userId, userUid) => {
 };
 
 // 🚨 CORREÇÃO 4: NOVA FUNÇÃO DE CRIAÇÃO SEM DESLOGAR ADMIN
-export const createUserDirect = async (userData, navigate, showToast) => {
-  console.log("🔥 [DIRETO] Criando usuário sem deslogar admin...");
-
+export const createUserDirect = async (userData, navigate, showToast, adminPassword = null) => {
   // Salvar credenciais do admin atual
   const adminUser = auth.currentUser;
   const adminEmail = adminUser?.email;
@@ -115,11 +105,9 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     throw new Error("Admin não está logado");
   }
 
-  // Pedir senha do admin para reautenticação (não armazenada)
-  const adminPassword = prompt("Para criar usuário, confirme sua senha de admin:");
-
+  // Senha deve ser passada pelo componente (via modal), nao via prompt()
   if (!adminPassword) {
-    throw new Error("Senha do admin necessária para criar usuário");
+    throw new Error("Senha do admin necessária para criar usuário. Passe via parâmetro adminPassword.");
   }
 
   // Reautenticar admin antes de prosseguir (valida credenciais)
@@ -137,25 +125,19 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     const randomBytes = crypto.getRandomValues(new Uint8Array(16));
     const senhaTemporaria = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
 
-    // 🚨 CORREÇÃO CRÍTICA: Usar instância secundária para não deslogar admin
-    console.log("🔄 Criando usuário em instância secundária...");
+    // Usar instancia secundaria para nao deslogar admin
     userCredential = await createUserWithEmailAndPassword(
       secondaryAuth,
       userData.email.trim(),
       senhaTemporaria,
     );
 
-    console.log("✅ Usuário criado no Auth:", userCredential.user.uid);
-
-    // 🔄 IMPORTANTE: Deslogar da instância secundária imediatamente
+    // Deslogar da instancia secundaria imediatamente
     await signOut(secondaryAuth);
-    console.log("✅ Deslogado da instância secundária");
 
-    // 🔄 VERIFICAR SE ADMIN AINDA ESTÁ LOGADO NA PRINCIPAL
+    // Verificar se admin ainda esta logado na principal
     if (!auth.currentUser || auth.currentUser.email !== adminEmail) {
-      console.log("🔄 Admin foi deslogado, religando...");
       await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-      console.log("✅ Admin religado com sucesso");
     }
 
     // 💾 Salvar no Firestore (agora o admin está logado)
@@ -185,15 +167,14 @@ export const createUserDirect = async (userData, navigate, showToast) => {
     };
 
     await setDoc(doc(db, "usuarios", userCredential.user.uid), userDoc);
-    console.log("✅ Dados salvos no Firestore");
 
-    // 📧 TENTAR ENVIAR EMAIL (não travar se falhar)
+    // Tentar enviar email de reset (nao travar se falhar)
     try {
-      // Usar instância secundária para enviar email sem afetar admin
       await sendPasswordResetEmail(secondaryAuth, userData.email.trim());
-      console.log("✅ Email de configuração enviado");
     } catch (emailError) {
-      console.warn("⚠️ Erro ao enviar email:", emailError.message);
+      if (import.meta.env.DEV) {
+        console.warn("Erro ao enviar email:", emailError.message);
+      }
     }
 
     return {
@@ -209,19 +190,14 @@ export const createUserDirect = async (userData, navigate, showToast) => {
       },
     };
   } catch (error) {
-    console.error("❌ Erro na criação direta:", error);
-
-    // 🧹 LIMPEZA EM CASO DE ERRO
+    // Limpeza em caso de erro
     try {
       await signOut(secondaryAuth);
-
-      // Tentar relogar admin se foi deslogado
       if (!auth.currentUser && adminEmail && adminPassword) {
         await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-        console.log("🔄 Admin religado após erro");
       }
     } catch (cleanupError) {
-      console.error("❌ Erro na limpeza:", cleanupError);
+      console.error("Erro na limpeza apos falha de criacao:", cleanupError.message);
     }
 
     throw {
@@ -233,9 +209,8 @@ export const createUserDirect = async (userData, navigate, showToast) => {
 };
 
 // 🎯 FUNÇÃO ORIGINAL MANTIDA (fallback)
-export const createUserInFirebase = async (userData, navigate, showToast) => {
-  console.log("⚠️ Usando função original (pode deslogar admin)");
-  return await createUserDirect(userData, navigate, showToast);
+export const createUserInFirebase = async (userData, navigate, showToast, adminPassword = null) => {
+  return await createUserDirect(userData, navigate, showToast, adminPassword);
 };
 
 // 🎯 FUNÇÃO: Mensagens de erro
@@ -271,10 +246,9 @@ export const checkAuthState = () => {
 export const logoutUser = async () => {
   try {
     await signOut(auth);
-    console.log("✅ Logout realizado com sucesso");
     return { sucesso: true };
   } catch (error) {
-    console.error("❌ Erro no logout:", error);
+    console.error("Erro no logout:", error.message);
     throw error;
   }
 };
@@ -282,11 +256,6 @@ export const logoutUser = async () => {
 // 🚨 CORREÇÃO 5: UPDATE SEM CLOUD FUNCTION
 export const updateUser = async (userId, userData, originalEmail) => {
   try {
-    console.log(
-      "✏️ Atualizando usuário (sem Cloud Function):",
-      userId,
-      userData,
-    );
 
     // ✅ IR DIRETO PARA FIRESTORE (sem tentar Cloud Function)
     const userRef = doc(db, "usuarios", userId);
@@ -315,21 +284,15 @@ export const updateUser = async (userId, userData, originalEmail) => {
       dataAtualizacao: serverTimestamp(),
     };
 
-    console.log("💾 Dados que serão salvos:", updateData);
-
     await updateDoc(userRef, updateData);
-    console.log("✅ Usuário atualizado no Firestore com tipo:", tipoUsuario);
 
-    const resultado = {
+    return {
       success: true,
       method: "firestore_direct",
       message: "Usuário atualizado com sucesso!",
       userData: updateData,
       userId: userId,
     };
-
-    console.log("📤 Retornando resultado:", resultado);
-    return resultado;
   } catch (error) {
     console.error("❌ Erro ao atualizar usuário:", error);
     throw new Error("Erro ao atualizar usuário: " + error.message);

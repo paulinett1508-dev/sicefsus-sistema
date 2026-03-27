@@ -79,20 +79,27 @@ export const criarNatureza = async (dados, usuario) => {
     await recalcularAlocacaoEmenda(emendaId);
 
     // Log de auditoria
-    await auditService.logAction({
-      action: "CREATE_NATUREZA",
-      resourceType: "natureza",
-      resourceId: docRef.id,
-      dataAfter: naturezaData,
-      userId: usuario?.uid,
-      userEmail: usuario?.email,
-      metadata: {
-        emendaId,
-        valorAlocado: naturezaData.valorAlocado,
-      },
-    });
+    if (usuario?.email) {
+      await auditService.logAction({
+        action: "CREATE_NATUREZA",
+        resourceType: "natureza",
+        resourceId: docRef.id,
+        dataAfter: naturezaData,
+        user: {
+          uid: usuario.uid || null,
+          email: usuario.email,
+          tipo: usuario.tipo || "operador",
+          municipio: usuario.municipio || null,
+          uf: usuario.uf || null,
+        },
+        metadata: {
+          emendaId,
+          valorAlocado: naturezaData.valorAlocado,
+        },
+      });
+    }
 
-    console.log(`✅ Natureza criada: ${docRef.id}`);
+    if (import.meta.env.DEV) console.log(`✅ Natureza criada: ${docRef.id}`);
     return docRef.id;
   } catch (error) {
     console.error("❌ Erro ao criar natureza:", error);
@@ -174,17 +181,24 @@ export const atualizarNatureza = async (naturezaId, dados, usuario) => {
     await recalcularAlocacaoEmenda(naturezaAtual.emendaId);
 
     // Log de auditoria
-    await auditService.logAction({
-      action: "UPDATE_NATUREZA",
-      resourceType: "natureza",
-      resourceId: naturezaId,
-      dataBefore: naturezaAtual,
-      dataAfter: dadosAtualizados,
-      userId: usuario?.uid,
-      userEmail: usuario?.email,
-    });
+    if (usuario?.email) {
+      await auditService.logAction({
+        action: "UPDATE_NATUREZA",
+        resourceType: "natureza",
+        resourceId: naturezaId,
+        dataBefore: naturezaAtual,
+        dataAfter: dadosAtualizados,
+        user: {
+          uid: usuario.uid || null,
+          email: usuario.email,
+          tipo: usuario.tipo || "operador",
+          municipio: usuario.municipio || null,
+          uf: usuario.uf || null,
+        },
+      });
+    }
 
-    console.log(`✅ Natureza atualizada: ${naturezaId}`);
+    if (import.meta.env.DEV) console.log(`✅ Natureza atualizada: ${naturezaId}`);
   } catch (error) {
     console.error("❌ Erro ao atualizar natureza:", error);
     throw error;
@@ -275,7 +289,7 @@ export const excluirNatureza = async (naturezaId, usuario, forcarExclusao = fals
       },
     });
 
-    console.log(`✅ Natureza encerrada: ${naturezaId}`);
+    if (import.meta.env.DEV) console.log(`✅ Natureza encerrada: ${naturezaId}`);
   } catch (error) {
     console.error("❌ Erro ao excluir natureza:", error);
     throw error;
@@ -376,7 +390,7 @@ export const listarDespesasNatureza = async (naturezaId, forceServer = true) => 
       return dataB - dataA;
     });
 
-    console.log(`📥 Despesas carregadas para natureza ${naturezaId}:`, despesas.length, forceServer ? "(do servidor)" : "(cache)");
+    if (import.meta.env.DEV) console.log(`📥 Despesas carregadas para natureza ${naturezaId}:`, despesas.length, forceServer ? "(do servidor)" : "(cache)");
     return despesas;
   } catch (error) {
     console.error("Erro ao listar despesas da natureza:", error);

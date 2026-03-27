@@ -46,7 +46,7 @@ const Administracao = () => {
 
     // ✅ PRIORIZAR O VALOR DO CONTEXTO
     if (isSuperAdminFromContext !== undefined) {
-      console.log("🔐 SuperAdmin Check (do contexto):", {
+      if (import.meta.env.DEV) console.log("🔐 SuperAdmin Check (do contexto):", {
         isSuperAdmin: isSuperAdminFromContext,
         email: currentUser.email
       });
@@ -55,7 +55,7 @@ const Administracao = () => {
 
     // ✅ FALLBACK: CALCULAR LOCALMENTE
     const result = currentUser.tipo === "admin" && currentUser.superAdmin === true;
-    console.log("🔐 SuperAdmin Check (calculado):", {
+    if (import.meta.env.DEV) console.log("🔐 SuperAdmin Check (calculado):", {
       tipo: currentUser.tipo,
       superAdmin: currentUser.superAdmin,
       isSuperAdmin: result,
@@ -119,7 +119,7 @@ const Administracao = () => {
   const carregarUsuarios = async () => {
     try {
       setLoading(true);
-      console.log("📋 Carregando usuários...");
+      if (import.meta.env.DEV) console.log("📋 Carregando usuários...");
 
       const usuariosRef = collection(db, "usuarios");
       const snapshot = await getDocs(usuariosRef);
@@ -145,7 +145,7 @@ const Administracao = () => {
       });
 
       setUsuarios(usuariosData);
-      console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
+      if (import.meta.env.DEV) console.log(`✅ ${usuariosData.length} usuários carregados com sucesso`);
     } catch (error) {
       console.error("❌ Erro ao carregar usuários:", error);
       showToast({
@@ -161,7 +161,7 @@ const Administracao = () => {
   // 📋 FUNÇÃO: Carregar logs
   const carregarLogs = async () => {
     try {
-      console.log("📋 Carregando logs de auditoria...");
+      if (import.meta.env.DEV) console.log("📋 Carregando logs de auditoria...");
       const logsData = await auditService.getLogs({ limit: 50 });
       setLogs(logsData);
       console.log(`✅ ${logsData.length} logs carregados`);
@@ -218,9 +218,22 @@ const Administracao = () => {
   const handleSalvarUsuario = async (e) => {
     e.preventDefault();
 
+    // Validacao basica do formulario
+    if (!formData.nome?.trim()) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Nome é obrigatório" });
+      return;
+    }
+    if (!formData.email?.trim() || !formData.email.includes("@")) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Email inválido" });
+      return;
+    }
+    if (formData.role !== "admin" && !formData.municipio?.trim()) {
+      showToast({ tipo: "error", titulo: "Erro", mensagem: "Município é obrigatório para não-admins" });
+      return;
+    }
+
     try {
       setSaving(true);
-      console.log("💾 Salvando usuário:", formData);
 
       if (editingUser) {
         // 🔧 CORREÇÃO: Usar formData.tipo ao invés de role
@@ -252,6 +265,13 @@ const Administracao = () => {
           mensagem: `Usuário atualizado para ${tipoUsuario === "gestor" ? "Gestor" : tipoUsuario}!`,
         });
       } else {
+        // Pedir senha do admin para reautenticacao (necessaria para criar usuario)
+        const adminPassword = window.prompt("Para criar usuário, confirme sua senha de admin:");
+        if (!adminPassword) {
+          setSaving(false);
+          return;
+        }
+
         const resultado = await userService.createUser({
           email: formData.email,
           nome: formData.nome,
@@ -261,7 +281,7 @@ const Administracao = () => {
           status: formData.status,
           departamento: formData.departamento,
           telefone: formData.telefone,
-        });
+        }, { adminPassword });
 
         if (resultado.success) {
           showToast({

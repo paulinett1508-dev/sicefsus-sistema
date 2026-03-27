@@ -155,6 +155,8 @@ export default function Sidebar({ onNavigate, activePath, usuario, onLogout, onT
           onMouseEnter={() => setToggleHovered(true)}
           onMouseLeave={() => setToggleHovered(false)}
           title={collapsed ? "Expandir menu" : "Retrair menu"}
+          aria-label={collapsed ? "Expandir menu" : "Retrair menu"}
+          aria-expanded={!collapsed}
         >
           <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
             {collapsed ? 'chevron_right' : 'chevron_left'}

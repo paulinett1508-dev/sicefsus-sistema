@@ -145,7 +145,7 @@ const useEmendaDespesa = (usuario = null, options = {}) => {
         despesasRejeitadas: despesasPorStatus.rejeitada || 0,
       };
     },
-    [metricas], // Adicionado metricas como dependência, embora possa ser estável
+    [], // Funcao pura de calculo - sem dependencias externas
   );
 
   // ✅ FUNÇÃO: Carregar emenda específica (ESTÁVEL)
