@@ -86,6 +86,15 @@ Se aparecer `devConnected: true` e `prodConnected: true`, esta tudo OK.
 
 ---
 
+## Auditoria de Interface — Protocolo Menos é Mais
+
+Antes de revisar qualquer frontend, carregar:
+
+@https://raw.githubusercontent.com/paulinett1508-dev/agnostic-core/main/skills/ux-ui/navegacao-sem-redundancia.md
+@https://raw.githubusercontent.com/paulinett1508-dev/agnostic-core/main/skills/frontend/menos-e-mais.md
+
+Aplicar sempre que: componente novo, PR de frontend, reclamação de "tela poluída".
+
 ## StatusLine (Barra de Status)
 
 O projeto possui um statusline customizado que exibe informacoes uteis durante a sessao.
