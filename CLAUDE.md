@@ -41,6 +41,49 @@ O Replit faz proxy automatico das portas internas para a URL publica:
 - `[deployment]` — deploy estatico, serve `dist/` com SPA rewrite (`/* → /index.html`)
 - `[nix]` — pacotes do sistema: firebase-tools, lsof, psmisc, nano, tree, openssh
 
+### Acesso SSH Direto ao Replit
+
+Permite executar comandos remotamente no Replit a partir da maquina local (Windows).
+
+**Chave SSH:** `C:\Users\pmiranda\.ssh\replit` (ja configurada)
+
+**Comando de conexao:**
+```bash
+ssh -i /c/Users/pmiranda/.ssh/replit -p 22 \
+  91331338-5ea0-4039-8bb8-abc10e5bcddb@91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev
+```
+
+**Executar comando remoto (sem abrir shell interativo):**
+```bash
+ssh -i /c/Users/pmiranda/.ssh/replit -p 22 \
+  91331338-5ea0-4039-8bb8-abc10e5bcddb@91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev \
+  "cd /home/runner/workspace && <comando>"
+```
+
+**Casos de uso:**
+- Sync git: `git fetch origin && git reset --hard origin/main`
+- Verificar estado: `git log --oneline -5 && git status`
+- Reiniciar servidor: `pkill -f vite; npm run dev &`
+
+**Atalho configurado em `~/.ssh/config_new`** (o `config` original e bloqueado por politica de TI):
+```
+Host replit-sicefsus
+    HostName 91331338-5ea0-4039-8bb8-abc10e5bcddb-00-1rdw2huxzbjmc.worf.replit.dev
+    User 91331338-5ea0-4039-8bb8-abc10e5bcddb
+    IdentityFile ~/.ssh/replit
+    Port 22
+```
+Usar sempre com `-F` apontando para o arquivo correto:
+```bash
+# Replit
+ssh -F /c/Users/pmiranda/.ssh/config_new replit-sicefsus "cd /home/runner/workspace && <comando>"
+
+# VPS
+ssh -F /c/Users/pmiranda/.ssh/config_new vps
+```
+
+> **Por que `-F`?** O `~/.ssh/config` original ficou em branco por politica de TI (bloqueado para escrita/exclusao). Os atalhos (`Host vps`, `Host replit-sicefsus`) estao em `~/.ssh/config_new`. Sem `-F`, nenhum atalho SSH funciona.
+
 ### Troubleshooting
 - **"Port 5173 already in use"**: Processo anterior nao foi encerrado. Rodar `kill $(lsof -t -i:5173)` e reiniciar.
 - **App nao carrega**: Verificar se o Vite esta rodando com `lsof -i :5173`. Se nao, `npm run dev`.

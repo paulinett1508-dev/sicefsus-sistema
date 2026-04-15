@@ -149,7 +149,11 @@
       "Bash(replit --help)",
       "Bash(git status:*)",
       "Bash(for file:*)",
-      "Bash(do echo:*)"
+      "Bash(do echo:*)",
+      "Bash(ssh:*)",
+      "Read(//c/Users/pmiranda/.claude/projects/C--PROJETOS-sicefsus-sistema/memory//**)",
+      "Read(//c/Users/pmiranda/.claude/projects/C--PROJETOS-sicefsus-sistema/memory/**)",
+      "Bash(powershell.exe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
