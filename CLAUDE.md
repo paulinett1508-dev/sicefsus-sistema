@@ -8,6 +8,60 @@ Sistema brasileiro para gerenciamento de emendas parlamentares e despesas de sau
 - **Usuarios:** Admin (ve tudo), Gestor (municipio), Operador (municipio)
 - **Design System:** v2.0 (Inter font, Tailwind-based colors)
 
+---
+
+## Orquestração do Fluxo de Trabalho
+
+Como o agente deve operar antes de qualquer detalhe de infraestrutura.
+
+### 1. Modo de Planejamento (padrão)
+
+- Plan mode é o **padrão** para qualquer tarefa não trivial — 3+ etapas, decisão arquitetural ou impacto em múltiplos módulos.
+- Especificação detalhada antecipada > código apressado: reduz ambiguidade e retrabalho.
+- Plan mode também serve para **verificação**, não só construção (auditar antes de afirmar que algo funciona).
+- Se a execução desviar da rota: **PARE e replaneje** imediatamente, não tente "consertar no caminho".
+- Skills de apoio: `.claude/skills/workflow-goal-backward-planning/`, `.claude/skills/audit-pre-implementation/`, `.claude/skills/PRD-GENERATOR.md`, `.claude/skills/SPEC-GENERATOR.md`.
+
+### 2. Estratégia de Subagentes
+
+- Use subagentes **liberalmente** para preservar a janela de contexto principal.
+- Descarregue para subagentes: pesquisa de código, leitura de logs, exploração de árvores de arquivos, análise paralela.
+- **Uma tarefa por subagente**, com prompt auto-contido (descrição, contexto, escopo, formato de retorno).
+- Prefira paralelismo a execução sequencial quando as tarefas forem independentes.
+- Em problemas complexos: jogue mais compute via subagentes antes de travar o contexto principal.
+- Skills de apoio: `.claude/skills/context-management.md`, `.claude/skills/context-audit.md`.
+
+### 3. Verificação Antes de Concluir
+
+- **Nunca** marque tarefa como `done` sem prova: diff, log, teste passando, screenshot ou execução demonstrada.
+- Checagem mental obrigatória antes de entregar: *"um senior engineer aprovaria esse diff em code review?"*
+- Vale para features, refactors e fixes — não apenas para Bug Fix Protocol.
+- Se você **não pode** verificar (ex.: UI sem dev server disponível, infra fora do escopo): **declare explicitamente** em vez de fingir sucesso.
+- Skills de apoio: `.claude/skills/audit-senior-verification-protocol/`, `.claude/skills/audit-validation-checklist/`, `.claude/skills/audit-post-implementation-conformity/`.
+
+### 4. Exigência de Elegância (balanceada)
+
+- Mudanças que tocam **3+ arquivos**: pause e pergunte *"existe forma mais elegante?"*
+- Se a solução parece hack ou paliativo: *"sabendo tudo o que sei agora, qual é a implementação elegante?"* — e re-implemente.
+- **Exceção:** correções óbvias e simples não merecem over-engineering. Não procure elegância onde ela não agrega.
+- Skills de apoio: `.claude/skills/audit-refactoring/`, `.claude/skills/audit-refactor-monolith/`.
+
+### 5. Correção de Bugs Autônoma
+
+- Recebeu bug report → **conserte**. Não peça instruções passo-a-passo ao usuário.
+- Persiga logs, mensagens de erro e testes falhando até a **causa raiz** (não corrija sintomas).
+- Zero context-switch para o usuário: descubra, repare e demonstre — só depois pergunte.
+- Skills de apoio: `.claude/skills/audit-systematic-debugging/`, `.claude/skills/debugging-sistematico.md`.
+
+### 6. Loop de Auto-aperfeiçoamento
+
+- Após **qualquer correção do usuário** (ele apontou erro, retrabalho ou má interpretação): registre o padrão em `tasks/lessons.md`.
+- Escreva regras **concretas e acionáveis** que previnam o mesmo erro — não bullets genéricos.
+- Revise `tasks/lessons.md` no **início de cada sessão** do projeto, antes de começar a executar.
+- Skill de apoio: `.claude/skills/workflow-auto-learning-lessons/`.
+
+---
+
 ## Ambiente Replit (Infraestrutura)
 
 O sistema roda **exclusivamente no Replit**.
@@ -1108,20 +1162,44 @@ Resultado da auditoria completa:
 
 ## Uso de Subagents
 
-- Use subagents para pesquisa, exploração e análise paralela — mantém o contexto principal limpo
-- Offload investigação de codebase, leitura de logs e tarefas independentes para subagents
-- Uma tarefa por subagent para execução focada; prefira paralelismo a execução sequencial
-- Para problemas complexos: jogue mais compute via subagents antes de travar o contexto principal
+→ Conteúdo movido para **"Orquestração do Fluxo de Trabalho" §2 — Estratégia de Subagentes** (topo do arquivo).
+Skills de apoio: `.claude/skills/context-management.md`, `.claude/skills/context-audit.md`.
 
 ## Verificação antes de Concluir
 
-- Nunca marque tarefa como concluída sem provar que funciona (diff, log, teste, screenshot)
-- Checagem mental obrigatória: *"Um senior engineer aprovaria esse diff?"*
-- Aplica-se a features e refactors — não apenas ao Bug Fix Protocol
-- Se algo parece incerto: demonstre a correção, não apenas afirme
+→ Conteúdo movido para **"Orquestração do Fluxo de Trabalho" §3 — Verificação Antes de Concluir** (topo do arquivo).
+Skills de apoio: `.claude/skills/audit-senior-verification-protocol/`, `.claude/skills/audit-validation-checklist/`, `.claude/skills/audit-post-implementation-conformity/`.
 
 ## Elegância (features não-triviais)
 
-- Para mudanças que tocam 3+ arquivos: pause e pergunte "há solução mais elegante?"
-- Se a solução parece hack: "sabendo tudo o que sei agora, qual é a implementação elegante?"
-- **Exceção obrigatória:** fixes simples e óbvios — não over-engenheirar, não buscar elegância onde ela não agrega
+→ Conteúdo movido para **"Orquestração do Fluxo de Trabalho" §4 — Exigência de Elegância (balanceada)** (topo do arquivo).
+Skills de apoio: `.claude/skills/audit-refactoring/`, `.claude/skills/audit-refactor-monolith/`.
+
+---
+
+## Gerenciamento de Tarefas
+
+Fluxo operacional para qualquer trabalho não trivial neste repositório. Usa dois arquivos vivos em `tasks/` (criados se ainda não existirem).
+
+- **Plano primeiro** em `tasks/todo.md` com itens `[ ]` granulares antes de iniciar a execução.
+- **Verifique o plano** comigo (ou com você mesmo, em plan mode) antes de tocar em código.
+- **Marque `[x]`** conforme avança — um item por vez, completando antes de passar para o próximo.
+- **Resumo de alto nível** em cada etapa concluída (1–2 linhas no item ou no rodapé do dia).
+- **Seção "Revisão"** no fim de `tasks/todo.md` ao terminar a tarefa: o que mudou, decisões tomadas, próximos passos.
+- **Atualize `tasks/lessons.md`** após cada correção do usuário (ver §6 da Orquestração).
+
+> Os esqueletos `tasks/todo.md` e `tasks/lessons.md` ficam vazios por padrão e são preenchidos sessão a sessão. Skill de apoio: `.claude/skills/workflow-auto-learning-lessons/`.
+
+---
+
+## Princípios Básicos
+
+Cinco regras inegociáveis que governam toda mudança neste repositório. Reforçam — e não substituem — `## Regras de Desenvolvimento` (SEMPRE/NUNCA).
+
+- **Simplicidade primeiro** — impacto mínimo no codebase. A solução mais simples que resolve o problema vence.
+- **Sem paliativos** — atacar causas raiz, no nível de um dev sênior. Sintoma corrigido sem entender a causa volta amanhã.
+- **Impacto mínimo** — toque só no necessário; sem efeitos colaterais. Refactor de oportunidade fica para outra PR.
+- **Sem over-engineering** — nada de features, abstrações ou error handling que a tarefa não pediu. Três linhas similares são melhores que uma abstração prematura.
+- **Honestidade técnica** — se não pode verificar, **declare**; nunca finja sucesso. "Não testei a UI porque não há dev server" > "tudo funcionando".
+
+Skills de apoio: `.claude/skills/workflow-sais-principle/` (Princípio S.A.I.S. — Mudança Cirúrgica), `.claude/skills/audit-pre-implementation/` (5 perguntas antes de codar — YAGNI, DRY, SRP).
